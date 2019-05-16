@@ -1,6 +1,8 @@
-use_frameworks!
+platform :ios, '10.0'
 
 target 'STBaseProject_Example' do
+  use_frameworks!
+
   pod 'STBaseProject', :path => '../'
 
 end

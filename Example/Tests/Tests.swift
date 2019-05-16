@@ -1,5 +1,4 @@
 import XCTest
-import STBaseProject
 
 class Tests: XCTestCase {
     

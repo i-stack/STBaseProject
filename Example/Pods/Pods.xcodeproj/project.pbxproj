@@ -6,14 +6,22 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		FA602033D106BECDB303A623114783DB /* STBaseProject */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = D926068DDE0B16650CAA2885D5880967 /* Build configuration list for PBXAggregateTarget "STBaseProject" */;
+			buildPhases = (
+			);
+			dependencies = (
+			);
+			name = STBaseProject;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		105245B15FD717931316EE2606267778 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB4607EFCA7C5F75397649E792E2AFCB /* Foundation.framework */; };
-		6CBB64E9EDF2D80E0D9F4BEF2FFD5B08 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB4607EFCA7C5F75397649E792E2AFCB /* Foundation.framework */; };
-		6ECC86609199991C65A84118484C5DE1 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3F97E935D55CC08C5C7B026E8ECA239E /* Pods-STBaseProject_Example-dummy.m */; };
-		71F7C8C352301BD6027550A7C73C70E6 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D7BFA96E86CC8ED3E7E0F20206B240D /* STBaseProject-dummy.m */; };
-		B6E14A7B742EF27614A5DD8A99904EC9 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C30C30934919B6C32E31944D185422E /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		B8D8AF573D997F208A2C1A6A3B8111C7 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = CF7F9335FDF65FF28B9DDF4E2B0F9A05 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E0E5A0F42CA23308E339F5BBA8A91406 /* ReplaceMe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 568A94C2359809D00775A7B4C530A617 /* ReplaceMe.swift */; };
+		6ECC86609199991C65A84118484C5DE1 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 2309378D113EE1DD3BDD560C86BEBB81 /* Pods-STBaseProject_Example-dummy.m */; };
+		B6E14A7B742EF27614A5DD8A99904EC9 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 2667DF6F9B060EA7DCE83AE04FFA0AFC /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,40 +35,24 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		04B2B8485DA9D9A5022C149BA8BF46C5 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
-		055007AE05D2DDADDFA72237918213B9 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		0AFF24C7B32B1D7E23AB158942005B4A /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
-		0D7BFA96E86CC8ED3E7E0F20206B240D /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
-		0DF3F143E4B3402964F9BD575D54EA8E /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
-		3C30C30934919B6C32E31944D185422E /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
-		3DD9A3EDF5C8402938D3C1E796591B33 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
-		3F97E935D55CC08C5C7B026E8ECA239E /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
-		4CA1AD766BB0295ACECC5A92FD374F54 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
-		568A94C2359809D00775A7B4C530A617 /* ReplaceMe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ReplaceMe.swift; path = STBaseProject/Classes/ReplaceMe.swift; sourceTree = "<group>"; };
-		640D8DC6BBB592A6D41BCDE6595B7B3E /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		70E8DD950C6C381A78AE6D5676B7E205 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
-		776BED061AAE486CC72E861BEF31B0AE /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		81BDF312B3C1427351675375397D9FC4 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = STBaseProject.framework; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		9904E674698876E981393AC77813015F /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		058041DEF61CA1A8D3C67617B6AD3F1F /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		1325F494AC98574BE4933E8FDBE6A297 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		2309378D113EE1DD3BDD560C86BEBB81 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
+		2492D5B0393AFAB4076A9E09AE290045 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
+		2667DF6F9B060EA7DCE83AE04FFA0AFC /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
+		3BBA302E5536A4E1EA356F829E43C9CC /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
+		565EF5950506138BEBB37E389A6D14AB /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
+		6032224C1CADD563649570AF3E8AA957 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		649B2B1BE3CCD6F88D1F054B974596C6 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
 		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		B61694B61F3A770511F3CB5698A67A58 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
-		B8377F5BCF9B810895A19BE4E641CA88 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
+		C7FF55EBD2B92466A760129503466E01 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
 		CB4607EFCA7C5F75397649E792E2AFCB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		CF7F9335FDF65FF28B9DDF4E2B0F9A05 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
-		D02D9AD2703656DDBFD511CC28802C09 /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_STBaseProject_Example.framework; path = "Pods-STBaseProject_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D5745EDDDA1FFFA8F8A623C34C69B8A8 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
-		FA914AB0B517D9FA62499831C4C97BE0 /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
+		D2A98B252B8010B7F96A7AA5CF209428 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		D69062FF008307557954B3BE0ECDCBBA /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_STBaseProject_Example.framework; path = "Pods-STBaseProject_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F60E3E5F4D5C2C86567220E05650C283 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8114074170408CFEA384CF0121633374 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				6CBB64E9EDF2D80E0D9F4BEF2FFD5B08 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9160259F9B152E97CF5D903556C5D586 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -72,30 +64,46 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1F0B3C37D4B3752B83A074676EAF5397 /* Development Pods */ = {
+		315C6C26C31E5ADAA5B1E082ADD4E7BA /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				7AE073E3EE05152E605257E9B521A6D0 /* STBaseProject */,
-			);
-			name = "Development Pods";
-			sourceTree = "<group>";
-		};
-		4EE57474D3EC2590C9D5366837847CDF /* Pod */ = {
-			isa = PBXGroup;
-			children = (
-				B61694B61F3A770511F3CB5698A67A58 /* LICENSE */,
-				D5745EDDDA1FFFA8F8A623C34C69B8A8 /* README.md */,
-				776BED061AAE486CC72E861BEF31B0AE /* STBaseProject.podspec */,
+				C7FF55EBD2B92466A760129503466E01 /* LICENSE */,
+				D2A98B252B8010B7F96A7AA5CF209428 /* README.md */,
+				6032224C1CADD563649570AF3E8AA957 /* STBaseProject.podspec */,
 			);
 			name = Pod;
 			sourceTree = "<group>";
 		};
-		7AE073E3EE05152E605257E9B521A6D0 /* STBaseProject */ = {
+		536DEEE6A59AD8EB833DED3FC3584712 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				568A94C2359809D00775A7B4C530A617 /* ReplaceMe.swift */,
-				4EE57474D3EC2590C9D5366837847CDF /* Pod */,
-				E945CBB1A8DDAE27DB8B64E05808502E /* Support Files */,
+				3BBA302E5536A4E1EA356F829E43C9CC /* STBaseProject.xcconfig */,
+			);
+			name = "Support Files";
+			path = "Example/Pods/Target Support Files/STBaseProject";
+			sourceTree = "<group>";
+		};
+		6043FE8D7E776F5FDD3638F7C51333A3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D69062FF008307557954B3BE0ECDCBBA /* Pods_STBaseProject_Example.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		81DD415686EED8A7CFCCCA74D12080ED /* Development Pods */ = {
+			isa = PBXGroup;
+			children = (
+				8C158E74137D9E81ECED535D24F52DB7 /* STBaseProject */,
+			);
+			name = "Development Pods";
+			sourceTree = "<group>";
+		};
+		8C158E74137D9E81ECED535D24F52DB7 /* STBaseProject */ = {
+			isa = PBXGroup;
+			children = (
+				315C6C26C31E5ADAA5B1E082ADD4E7BA /* Pod */,
+				536DEEE6A59AD8EB833DED3FC3584712 /* Support Files */,
 			);
 			name = STBaseProject;
 			path = ../..;
@@ -109,32 +117,23 @@
 			name = iOS;
 			sourceTree = "<group>";
 		};
+		9BE7D5001F69529ECAC97F5660DFE1E2 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				E292F0AF85BA723A5A05BE2F54582198 /* Pods-STBaseProject_Example */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
 		CF1408CF629C7361332E53B88F7BD30C = {
 			isa = PBXGroup;
 			children = (
 				9D940727FF8FB9C785EB98E56350EF41 /* Podfile */,
-				1F0B3C37D4B3752B83A074676EAF5397 /* Development Pods */,
+				81DD415686EED8A7CFCCCA74D12080ED /* Development Pods */,
 				D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */,
-				DA17E5DB32EFED6E985E78010CCAD359 /* Products */,
-				FA1962022B7A032DCC25CDCD397FD81F /* Targets Support Files */,
+				6043FE8D7E776F5FDD3638F7C51333A3 /* Products */,
+				9BE7D5001F69529ECAC97F5660DFE1E2 /* Targets Support Files */,
 			);
-			sourceTree = "<group>";
-		};
-		D17874414B289596CBD8F70746CCF32A /* Pods-STBaseProject_Example */ = {
-			isa = PBXGroup;
-			children = (
-				4CA1AD766BB0295ACECC5A92FD374F54 /* Pods-STBaseProject_Example.modulemap */,
-				640D8DC6BBB592A6D41BCDE6595B7B3E /* Pods-STBaseProject_Example-acknowledgements.markdown */,
-				055007AE05D2DDADDFA72237918213B9 /* Pods-STBaseProject_Example-acknowledgements.plist */,
-				3F97E935D55CC08C5C7B026E8ECA239E /* Pods-STBaseProject_Example-dummy.m */,
-				3DD9A3EDF5C8402938D3C1E796591B33 /* Pods-STBaseProject_Example-frameworks.sh */,
-				04B2B8485DA9D9A5022C149BA8BF46C5 /* Pods-STBaseProject_Example-Info.plist */,
-				3C30C30934919B6C32E31944D185422E /* Pods-STBaseProject_Example-umbrella.h */,
-				9904E674698876E981393AC77813015F /* Pods-STBaseProject_Example.debug.xcconfig */,
-				70E8DD950C6C381A78AE6D5676B7E205 /* Pods-STBaseProject_Example.release.xcconfig */,
-			);
-			name = "Pods-STBaseProject_Example";
-			path = "Target Support Files/Pods-STBaseProject_Example";
 			sourceTree = "<group>";
 		};
 		D210D550F4EA176C3123ED886F8F87F5 /* Frameworks */ = {
@@ -145,48 +144,25 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		DA17E5DB32EFED6E985E78010CCAD359 /* Products */ = {
+		E292F0AF85BA723A5A05BE2F54582198 /* Pods-STBaseProject_Example */ = {
 			isa = PBXGroup;
 			children = (
-				D02D9AD2703656DDBFD511CC28802C09 /* Pods_STBaseProject_Example.framework */,
-				81BDF312B3C1427351675375397D9FC4 /* STBaseProject.framework */,
+				649B2B1BE3CCD6F88D1F054B974596C6 /* Pods-STBaseProject_Example.modulemap */,
+				F60E3E5F4D5C2C86567220E05650C283 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
+				058041DEF61CA1A8D3C67617B6AD3F1F /* Pods-STBaseProject_Example-acknowledgements.plist */,
+				2309378D113EE1DD3BDD560C86BEBB81 /* Pods-STBaseProject_Example-dummy.m */,
+				565EF5950506138BEBB37E389A6D14AB /* Pods-STBaseProject_Example-Info.plist */,
+				2667DF6F9B060EA7DCE83AE04FFA0AFC /* Pods-STBaseProject_Example-umbrella.h */,
+				1325F494AC98574BE4933E8FDBE6A297 /* Pods-STBaseProject_Example.debug.xcconfig */,
+				2492D5B0393AFAB4076A9E09AE290045 /* Pods-STBaseProject_Example.release.xcconfig */,
 			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		E945CBB1A8DDAE27DB8B64E05808502E /* Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				0DF3F143E4B3402964F9BD575D54EA8E /* STBaseProject.modulemap */,
-				FA914AB0B517D9FA62499831C4C97BE0 /* STBaseProject.xcconfig */,
-				0D7BFA96E86CC8ED3E7E0F20206B240D /* STBaseProject-dummy.m */,
-				B8377F5BCF9B810895A19BE4E641CA88 /* STBaseProject-Info.plist */,
-				0AFF24C7B32B1D7E23AB158942005B4A /* STBaseProject-prefix.pch */,
-				CF7F9335FDF65FF28B9DDF4E2B0F9A05 /* STBaseProject-umbrella.h */,
-			);
-			name = "Support Files";
-			path = "Example/Pods/Target Support Files/STBaseProject";
-			sourceTree = "<group>";
-		};
-		FA1962022B7A032DCC25CDCD397FD81F /* Targets Support Files */ = {
-			isa = PBXGroup;
-			children = (
-				D17874414B289596CBD8F70746CCF32A /* Pods-STBaseProject_Example */,
-			);
-			name = "Targets Support Files";
+			name = "Pods-STBaseProject_Example";
+			path = "Target Support Files/Pods-STBaseProject_Example";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		17776379419F8BF868F505DB8557839F /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				B8D8AF573D997F208A2C1A6A3B8111C7 /* STBaseProject-umbrella.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7DBE7303521AF0AFC6D54DCE9D71F833 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -214,25 +190,7 @@
 			);
 			name = "Pods-STBaseProject_Example";
 			productName = "Pods-STBaseProject_Example";
-			productReference = D02D9AD2703656DDBFD511CC28802C09 /* Pods_STBaseProject_Example.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		FA602033D106BECDB303A623114783DB /* STBaseProject */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D926068DDE0B16650CAA2885D5880967 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
-			buildPhases = (
-				17776379419F8BF868F505DB8557839F /* Headers */,
-				DA7A0095CABEF3783022DDDA0E2FD3FA /* Sources */,
-				8114074170408CFEA384CF0121633374 /* Frameworks */,
-				65B6D0A6599708417400AF073B994295 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = STBaseProject;
-			productName = STBaseProject;
-			productReference = 81BDF312B3C1427351675375397D9FC4 /* STBaseProject.framework */;
+			productReference = D69062FF008307557954B3BE0ECDCBBA /* Pods_STBaseProject_Example.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -252,7 +210,7 @@
 				en,
 			);
 			mainGroup = CF1408CF629C7361332E53B88F7BD30C;
-			productRefGroup = DA17E5DB32EFED6E985E78010CCAD359 /* Products */;
+			productRefGroup = 6043FE8D7E776F5FDD3638F7C51333A3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -270,13 +228,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		65B6D0A6599708417400AF073B994295 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -285,15 +236,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6ECC86609199991C65A84118484C5DE1 /* Pods-STBaseProject_Example-dummy.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		DA7A0095CABEF3783022DDDA0E2FD3FA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E0E5A0F42CA23308E339F5BBA8A91406 /* ReplaceMe.swift in Sources */,
-				71F7C8C352301BD6027550A7C73C70E6 /* STBaseProject-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -309,6 +251,20 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		23B6DCBED83C7E08478B1AC3A9A007A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3BBA302E5536A4E1EA356F829E43C9CC /* STBaseProject.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		3048B0C5C704DFFF688DA57F5380ED58 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -368,37 +324,6 @@
 				SYMROOT = "${SRCROOT}/../build";
 			};
 			name = Release;
-		};
-		3A26F29CECDDB88FCE4D852A1B2C3253 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = FA914AB0B517D9FA62499831C4C97BE0 /* STBaseProject.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/STBaseProject/STBaseProject-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/STBaseProject/STBaseProject-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = "Target Support Files/STBaseProject/STBaseProject.modulemap";
-				PRODUCT_MODULE_NAME = STBaseProject;
-				PRODUCT_NAME = STBaseProject;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
 		};
 		5B0C8287D755FD95091CF35D87FB8B2D /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -466,7 +391,7 @@
 		};
 		62D112A7B0F55CD010B5868C5CF48A11 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9904E674698876E981393AC77813015F /* Pods-STBaseProject_Example.debug.xcconfig */;
+			baseConfigurationReference = 1325F494AC98574BE4933E8FDBE6A297 /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -498,41 +423,22 @@
 			};
 			name = Debug;
 		};
-		A8C38DDB2903AD23AB00C62A6BF6D03B /* Release */ = {
+		E4C612F0B8BFE7787C416B1FD3AF74F3 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FA914AB0B517D9FA62499831C4C97BE0 /* STBaseProject.xcconfig */;
+			baseConfigurationReference = 3BBA302E5536A4E1EA356F829E43C9CC /* STBaseProject.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
-				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GCC_PREFIX_HEADER = "Target Support Files/STBaseProject/STBaseProject-prefix.pch";
-				INFOPLIST_FILE = "Target Support Files/STBaseProject/STBaseProject-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				MODULEMAP_FILE = "Target Support Files/STBaseProject/STBaseProject.modulemap";
-				PRODUCT_MODULE_NAME = STBaseProject;
-				PRODUCT_NAME = STBaseProject;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
-				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
-			name = Release;
+			name = Debug;
 		};
 		F488725FBFB7EB26A6DA02D15FAA51C2 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 70E8DD950C6C381A78AE6D5676B7E205 /* Pods-STBaseProject_Example.release.xcconfig */;
+			baseConfigurationReference = 2492D5B0393AFAB4076A9E09AE290045 /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -586,11 +492,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D926068DDE0B16650CAA2885D5880967 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
+		D926068DDE0B16650CAA2885D5880967 /* Build configuration list for PBXAggregateTarget "STBaseProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3A26F29CECDDB88FCE4D852A1B2C3253 /* Debug */,
-				A8C38DDB2903AD23AB00C62A6BF6D03B /* Release */,
+				E4C612F0B8BFE7787C416B1FD3AF74F3 /* Debug */,
+				23B6DCBED83C7E08478B1AC3A9A007A7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
