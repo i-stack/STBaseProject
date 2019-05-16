@@ -8,9 +8,9 @@
 
 import UIKit
 
-class STScreenShot: NSObject {
+open class STScreenShot: NSObject {
     
-    class func st_dataWithScreenshotInPNGFormat() -> Data {
+    class open func st_dataWithScreenshotInPNGFormat() -> Data {
         var imageSize: CGSize = CGSize.zero
         let orientation = UIApplication.shared.statusBarOrientation
         if orientation.isPortrait == true {
@@ -48,12 +48,12 @@ class STScreenShot: NSObject {
      *
      *  @return UIImage *
      */
-    class func st_imageWithScreenshot() -> UIImage {
+    class open func st_imageWithScreenshot() -> UIImage {
         let imageData = self.st_dataWithScreenshotInPNGFormat()
         return UIImage.init(data: imageData) ?? UIImage()
     }
     
-    class func st_showScreenshotImage() -> UIImageView {
+    class open func st_showScreenshotImage() -> UIImageView {
         let image = self.st_imageWithScreenshot()
         let imgvPhoto: UIImageView = UIImageView.init(image: image)
         imgvPhoto.frame = CGRect.init(x: UIScreen.main.bounds.size.width / 2.0, y: UIScreen.main.bounds.size.height / 2.0, width: UIScreen.main.bounds.size.width / 2.0, height: UIScreen.main.bounds.size.height / 2.0)

@@ -9,7 +9,7 @@
 import UIKit
 import Contacts
 
-class STContractManager: NSObject {
+open class STContractManager: NSObject {
     
     var localizedCollection: UILocalizedIndexedCollation!
     
@@ -21,29 +21,29 @@ class STContractManager: NSObject {
     /**
      *  获取联系人
      */
-    func loadContactsData(complection: @escaping(Result<[STContractMessage], Error>) -> Void) {
+    open func st_loadContactsData(complection: @escaping(Result<[STContractMessage], Error>) -> Void) {
         let status = CNContactStore.authorizationStatus(for: .contacts)
         if status == .authorized {
-            let contractData = self.beginLoadContractData()
+            let contractData = self.st_beginLoadContractData()
             DispatchQueue.main.async {
                 complection(.success(contractData))
             }
         } else if status == .notDetermined {
             CNContactStore().requestAccess(for: .contacts) { (result, error) in
                 if result == true {
-                    let contractData = self.beginLoadContractData()
+                    let contractData = self.st_beginLoadContractData()
                     DispatchQueue.main.async {
                         complection(.success(contractData))
                     }
                 } else {
-                    self.authorizationFailed()
+                    self.st_authorizationFailed()
                     DispatchQueue.main.async {
                         complection(.failure(NSError.init(domain: "authorization Failed", code: 0, userInfo: [:])))
                     }
                 }
             }
         } else {
-            self.authorizationFailed()
+            self.st_authorizationFailed()
             DispatchQueue.main.async {
                 complection(.failure(NSError.init(domain: "authorization Failed", code: 0, userInfo: [:])))
             }
@@ -53,11 +53,11 @@ class STContractManager: NSObject {
     /**
      *  获取分组联系人
      */
-    func loadSortContactsData(complection: @escaping(Result<([[STContractMessage]], [String]), Error>) -> Void) {
-        self.loadContactsData { (result) in
+    open func st_loadSortContactsData(complection: @escaping(Result<([[STContractMessage]], [String]), Error>) -> Void) {
+        self.st_loadContactsData { (result) in
             switch result {
             case .success(let contractData):
-                let sortContractData = self.sortContract(contractData: contractData)
+                let sortContractData = self.st_sortContract(contractData: contractData)
                 DispatchQueue.main.async {
                     complection(.success(sortContractData))
                 }
@@ -71,7 +71,7 @@ class STContractManager: NSObject {
         }
     }
     
-    private func beginLoadContractData() -> [STContractMessage] {
+    private func st_beginLoadContractData() -> [STContractMessage] {
         
         var contractList: [STContractMessage] = [STContractMessage]()
         
@@ -182,7 +182,7 @@ class STContractManager: NSObject {
         return contractList
     }
 
-    func sortContract(contractData: [STContractMessage]) -> ([[STContractMessage]], [String]) {
+    func st_sortContract(contractData: [STContractMessage]) -> ([[STContractMessage]], [String]) {
         var sectionTitleArray: [String] = [String]()
         var dataArray: [[STContractMessage]] = [[STContractMessage]]()
         if contractData.count > 0 {
@@ -225,7 +225,7 @@ class STContractManager: NSObject {
         return (dataArray, sectionTitleArray)
     }
     
-    func authorizationFailed() -> Void {
+    func st_authorizationFailed() -> Void {
         let alert: UIAlertController = UIAlertController.init(title: "温馨提示", message: "请在iPhone的“设置-隐私-通讯录”选项中，允许访问您的通讯录", preferredStyle: UIAlertController.Style.alert)
         let action: UIAlertAction = UIAlertAction.init(title: "OK", style: UIAlertAction.Style.cancel) { (action) in}
         alert.addAction(action)

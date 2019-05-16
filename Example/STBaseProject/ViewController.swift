@@ -9,11 +9,11 @@
 import UIKit
 import STBaseProject
 
-class ViewController: STBaseViewController {
+class ViewController: STBaseOpenSystemOperationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.st_openPhotoLibrary()
     }
 
     override func didReceiveMemoryWarning() {

@@ -42,14 +42,14 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
         self.hidesBottomBarWhenPushed = true
-        self.view.backgroundColor = self.bgColor()
+        self.view.backgroundColor = self.st_bgColor()
         self.automaticallyAdjustsScrollViewInsets = false
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
 
-        self.addNotification()
-        self.navigationBarView()
+        self.st_addNotification()
+        self.st_navigationBarView()
     }
     
     override open func viewWillAppear(_ animated: Bool) {
@@ -85,7 +85,7 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         return true
     }
     
-    private func navigationBarView() -> Void {
+    private func st_navigationBarView() -> Void {
         self.topBgView = UIView.init()
         self.topBgView.isHidden = true
         self.topBgView.translatesAutoresizingMaskIntoConstraints = false
@@ -99,10 +99,10 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         
         self.leftBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.leftBtn.isHidden = true
-        self.leftBtn.setImage(UIImage.init(named: "back_arrow"), for: UIControl.State.normal)
-        self.leftBtn.setImage(UIImage.init(named: "back_arrow"), for: UIControl.State.highlighted)
+        self.leftBtn.setImage(UIImage.init(named: "st_back_arrow"), for: UIControl.State.normal)
+        self.leftBtn.setImage(UIImage.init(named: "st_back_arrow"), for: UIControl.State.highlighted)
         self.leftBtn.translatesAutoresizingMaskIntoConstraints = false
-        self.leftBtn.addTarget(self, action: #selector(leftBarBtnClick), for: UIControl.Event.touchUpInside)
+        self.leftBtn.addTarget(self, action: #selector(st_leftBarBtnClick), for: UIControl.Event.touchUpInside)
         self.topBgView.addSubview(self.leftBtn)
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.leftBtn!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
@@ -114,8 +114,8 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         self.rightBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.rightBtn.isHidden = true
         self.rightBtn.translatesAutoresizingMaskIntoConstraints = false
-        self.rightBtn.setTitleColor(self.titleColor(), for: UIControl.State.normal)
-        self.rightBtn.addTarget(self, action: #selector(rightBarBtnClick), for: UIControl.Event.touchUpInside)
+        self.rightBtn.setTitleColor(self.st_titleColor(), for: UIControl.State.normal)
+        self.rightBtn.addTarget(self, action: #selector(st_rightBarBtnClick), for: UIControl.Event.touchUpInside)
         self.topBgView.addSubview(self.rightBtn)
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.rightBtn!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
@@ -127,9 +127,9 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         self.rightTitleBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.rightTitleBtn.translatesAutoresizingMaskIntoConstraints = false
         self.rightTitleBtn.contentHorizontalAlignment = UIControl.ContentHorizontalAlignment.right
-        self.rightTitleBtn.setTitleColor(self.titleColor(), for: UIControl.State.normal)
+        self.rightTitleBtn.setTitleColor(self.st_titleColor(), for: UIControl.State.normal)
         self.rightTitleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        self.rightTitleBtn.addTarget(self, action: #selector(rightBarBtnClick), for: UIControl.Event.touchUpInside)
+        self.rightTitleBtn.addTarget(self, action: #selector(st_rightBarBtnClick), for: UIControl.Event.touchUpInside)
         self.topBgView.addSubview(self.rightTitleBtn)
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.rightTitleBtn!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
@@ -139,7 +139,7 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
             ])
         
         self.titleLabel = UILabel.init()
-        self.titleLabel.textColor = self.titleColor()
+        self.titleLabel.textColor = self.st_titleColor()
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
         self.titleLabel.textAlignment = NSTextAlignment.center
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -150,10 +150,10 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
             NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.leftBtn, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: 5),
             NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: titleHeight)
             ])
-        self.showNavBtnType(type: .onlyShowTitle)
+        self.st_showNavBtnType(type: .onlyShowTitle)
     }
     
-    public func showNavBtnType(type: STNavBtnShowType) -> Void {
+    public func st_showNavBtnType(type: STNavBtnShowType) -> Void {
         switch type {
         case .showLeftBtn:
             self.leftBtn.isHidden = false
@@ -185,7 +185,7 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
 
 // Navigation bar click event
 extension STBaseViewController {
-    @objc open func leftBarBtnClick() -> Void {
+    @objc open func st_leftBarBtnClick() -> Void {
         if self.navigationController?.viewControllers.count ?? 0 > 1 {
             self.navigationController?.popViewController(animated: true)
         } else {
@@ -195,17 +195,73 @@ extension STBaseViewController {
         }
     }
     
-    @objc open func rightBarBtnClick() -> Void {
+    @objc open func st_rightBarBtnClick() -> Void {
         
     }
 }
 
 extension STBaseViewController {
-    func titleColor() -> UIColor {
+    open func st_showError(message: String) -> Void {
+        self.st_showError(message: message, title: "提示")
+    }
+    
+    open func st_showError(message: String, title: String) -> Void {
+        let alert = UIAlertController.init(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
+        let action: UIAlertAction = UIAlertAction.init(title: "我知道了", style: UIAlertAction.Style.cancel) { (action) in}
+        alert.addAction(action)
+        self.present(alert, animated: true) {}
+    }
+    
+    /// 延时操作器
+    open func st_performTaskWithTimeInterval(timeInterval: Double, complection: @escaping(Result<Bool, Error>) -> Void) {
+        let delayTime = DispatchTime.now() + timeInterval
+        DispatchQueue.main.asyncAfter(deadline: delayTime){
+            complection(.success(true))
+        }
+    }
+    
+    open func st_imageIsEmpty(image: UIImage) -> Bool {
+        var cgImageIsEmpty: Bool = false
+        if let _: CGImage = image.cgImage {
+            cgImageIsEmpty = false
+        } else {
+            cgImageIsEmpty = true
+        }
+        
+        var ciImageIsEmpty: Bool = false
+        if let _: CIImage = image.ciImage {
+            ciImageIsEmpty = false
+        } else {
+            ciImageIsEmpty = true
+        }
+        if cgImageIsEmpty == true, ciImageIsEmpty == true {
+            return true
+        }
+        return false
+    }
+    
+    open func st_stringToDouble(string: String) -> Double {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale.current
+        formatter.decimalSeparator = "."
+        if let result = formatter.number(from: string) {
+            return result.doubleValue
+        } else {
+            formatter.decimalSeparator = ","
+            if let result = formatter.number(from: string) {
+                return result.doubleValue
+            }
+        }
+        return 0
+    }
+}
+
+extension STBaseViewController {
+    func st_titleColor() -> UIColor {
         return UIColor.init(red: 80, green: 81, blue: 96, alpha: 1)
     }
     
-    func bgColor() -> UIColor {
+    func st_bgColor() -> UIColor {
         return UIColor.init(red: 237, green: 237, blue: 237, alpha: 1)
     }
 }

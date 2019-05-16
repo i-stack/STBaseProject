@@ -11,13 +11,13 @@ import Photos
 import AVFoundation
 import AssetsLibrary
 
-enum STOpenSourceType {
+public enum STOpenSourceType {
     case photoLibrary
     case camera
     case unknown
 }
 
-enum STOpenSourceError: LocalizedError {
+public enum STOpenSourceError: LocalizedError {
     
     case openSourceOK
     case openCameraError
@@ -38,20 +38,20 @@ enum STOpenSourceError: LocalizedError {
     }
 }
 
-typealias STImagePickerResult = (_ originalImage: UIImage, _ editedImage: UIImage, _ result: Bool, _ error: STOpenSourceError) -> Void
+public typealias STImagePickerResult = (_ originalImage: UIImage, _ editedImage: UIImage, _ result: Bool, _ error: STOpenSourceError) -> Void
 
-class STBaseOpenSystemOperationController: STBaseViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+open class STBaseOpenSystemOperationController: STBaseViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
-    var customImageSize: CGSize?
-    var picker: UIImagePickerController!
+    open var customImageSize: CGSize?
+    open var picker: UIImagePickerController!
     var imagePickerResult: STImagePickerResult?
 
-    override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
-        self.imagePickerViewController()
+        self.st_imagePickerViewController()
     }
 
-    func imagePickerViewController() -> Void {
+    func st_imagePickerViewController() -> Void {
         guard self.picker != nil else {
             self.picker = UIImagePickerController()
             self.picker.delegate = self
@@ -60,7 +60,7 @@ class STBaseOpenSystemOperationController: STBaseViewController, UIImagePickerCo
         }
     }
     
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+    open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true) {
             DispatchQueue.main.async {
                 if let complection = self.imagePickerResult {
@@ -70,7 +70,7 @@ class STBaseOpenSystemOperationController: STBaseViewController, UIImagePickerCo
         }
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let originalImage: UIImage = info[UIImagePickerController.InfoKey.originalImage] as! UIImage
         let editedImage: UIImage = info[UIImagePickerController.InfoKey.editedImage] as! UIImage
         picker.dismiss(animated: true) {
@@ -89,7 +89,7 @@ class STBaseOpenSystemOperationController: STBaseViewController, UIImagePickerCo
 }
 
 extension STBaseOpenSystemOperationController {
-    func openPhotoLibrary() -> Void {
+    open func st_openPhotoLibrary() -> Void {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.photoLibrary) == true {
             picker.sourceType = UIImagePickerController.SourceType.photoLibrary
             self.present(picker, animated: true) {}
@@ -102,7 +102,7 @@ extension STBaseOpenSystemOperationController {
         }
     }
 
-    func openCamera() -> Void {
+    open func st_openCamera() -> Void {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) == true {
             picker.sourceType = UIImagePickerController.SourceType.camera
             self.present(picker, animated: true) {}
@@ -115,21 +115,21 @@ extension STBaseOpenSystemOperationController {
         }
     }
 
-    func openSystemOperation(openSourceType: STOpenSourceType, complection: @escaping(STImagePickerResult)) -> Void {
+    open func st_openSystemOperation(openSourceType: STOpenSourceType, complection: @escaping(STImagePickerResult)) -> Void {
         self.imagePickerResult = complection
         switch openSourceType {
         case .photoLibrary:
-            self.openPhotoLibrary()
+            self.st_openPhotoLibrary()
             break
         case .camera:
-            self.openCamera()
+            self.st_openCamera()
             break
         default:
             break
         }
     }
     
-    func isAvailablePhoto() -> Bool {
+    open func st_isAvailablePhoto() -> Bool {
         let authorStatus: PHAuthorizationStatus = PHPhotoLibrary.authorizationStatus()
         if authorStatus == .denied {
             return false
@@ -137,12 +137,12 @@ extension STBaseOpenSystemOperationController {
         return true
     }
     
-    func isAvailableCamera() -> Bool {
+    open func st_isAvailableCamera() -> Bool {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) == true {
             let mediaType = AVMediaType.video
             let authorizationStatus: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: mediaType)
             if authorizationStatus == .restricted || authorizationStatus == .denied {
-                self.authorizationFailed()
+                self.st_authorizationFailed()
                 return false
             }
             return true
@@ -154,67 +154,11 @@ extension STBaseOpenSystemOperationController {
 }
 
 extension STBaseOpenSystemOperationController {
-    func authorizationFailed() -> Void {
+    open func st_authorizationFailed() -> Void {
         DispatchQueue.main.async {
             let tipMessage: String = "请到手机系统的\n【设置】->【隐私】->【相册】\n" + "开启相机的访问权限"
-            self.showError(message: tipMessage, title: "相册读取权限未开启")
+            self.st_showError(message: tipMessage, title: "相册读取权限未开启")
         }
-    }
-}
-
-extension STBaseOpenSystemOperationController {
-    func showError(message: String) -> Void {
-        self.showError(message: message, title: "提示")
-    }
-    
-    func showError(message: String, title: String) -> Void {
-        let alert = UIAlertController.init(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
-        let action: UIAlertAction = UIAlertAction.init(title: "我知道了", style: UIAlertAction.Style.cancel) { (action) in}
-        alert.addAction(action)
-        self.present(alert, animated: true) {}
-    }
-    
-    /// 延时操作器
-    func performTaskWithTimeInterval(timeInterval: Double, complection: @escaping(Result<Bool, Error>) -> Void) {
-        let delayTime = DispatchTime.now() + timeInterval
-        DispatchQueue.main.asyncAfter(deadline: delayTime){
-            complection(.success(true))
-        }
-    }
-    
-    func imageIsEmpty(image: UIImage) -> Bool {
-        var cgImageIsEmpty: Bool = false
-        if let _: CGImage = image.cgImage {
-            cgImageIsEmpty = false
-        } else {
-            cgImageIsEmpty = true
-        }
-        
-        var ciImageIsEmpty: Bool = false
-        if let _: CIImage = image.ciImage {
-            ciImageIsEmpty = false
-        } else {
-            ciImageIsEmpty = true
-        }
-        if cgImageIsEmpty == true, ciImageIsEmpty == true {
-            return true
-        }
-        return false
-    }
-    
-    func stringToDouble(string: String) -> Double {
-        let formatter = NumberFormatter()
-        formatter.locale = Locale.current
-        formatter.decimalSeparator = "."
-        if let result = formatter.number(from: string) {
-            return result.doubleValue
-        } else {
-            formatter.decimalSeparator = ","
-            if let result = formatter.number(from: string) {
-                return result.doubleValue
-            }
-        }
-        return 0
     }
 }
 

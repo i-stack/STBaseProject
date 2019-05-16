@@ -8,16 +8,16 @@
 
 import UIKit
 
-enum STScanType {
+public enum STScanType {
     case STScanTypeQrCode
     case STScanTypeBarCode
     case STScanTypeAll
 }
 
-class STScanView: UIView {
+open class STScanView: UIView {
 
-    var needStop: Bool?
-    var scanType: STScanType?
+    open var needStop: Bool?
+    open var scanType: STScanType?
     var heightScale: CGFloat = 0.0
     var lineImageView: UIImageView?
     let leftDistance: CGFloat = 60.0
@@ -29,7 +29,7 @@ class STScanView: UIView {
         needStop = false
     }
     
-    override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         let Left: CGFloat = leftDistance / heightScale
         let sizeRetangle = CGSize.init(width: self.frame.size.width - Left * 2, height: self.frame.size.width - Left * 2)
@@ -40,11 +40,11 @@ class STScanView: UIView {
         }
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configScanType(scanType: STScanType) -> Void {
+    open func st_configScanType(scanType: STScanType) -> Void {
         if (scanType == .STScanTypeBarCode) {
             self.heightScale = 3.0
             self.lineImageView?.alpha = 0
@@ -52,14 +52,14 @@ class STScanView: UIView {
             self.heightScale = 1.0
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                 self.needStop = false
-                self.startAnimating()
+                self.st_startAnimating()
             })
         }
         self.setNeedsDisplay()
         self.setNeedsLayout()
     }
     
-    @objc func startAnimating() -> Void {
+    @objc open func st_startAnimating() -> Void {
         if self.needStop == true {
             return
         }
@@ -79,21 +79,21 @@ class STScanView: UIView {
             }) { (state) in
                 newLineImageView.alpha = 0
                 newLineImageView.frame = initFrame
-                self.perform(#selector(self.startAnimating), with: nil, afterDelay: 0.3)
+                self.perform(#selector(self.st_startAnimating), with: nil, afterDelay: 0.3)
             }
         }
     }
     
-    func stopAnimating() -> Void {
+    open func st_stopAnimating() -> Void {
         self.needStop = false
     }
     
-    override func draw(_ rect: CGRect) {
+    override open func draw(_ rect: CGRect) {
         super.draw(rect)
-        self.drawScanRect()
+        self.st_drawScanRect()
     }
     
-    func drawScanRect() -> Void {
+    func st_drawScanRect() -> Void {
         
         let left = leftDistance / self.heightScale
         let sizeRetangle = CGSize.init(width: self.frame.size.width - left * 2,

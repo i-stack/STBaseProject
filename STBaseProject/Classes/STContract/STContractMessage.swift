@@ -8,21 +8,21 @@
 
 import UIKit
 
-class STContractMessage: NSObject {
+open class STContractMessage: NSObject {
     
-    var note: String? // 备注
-    var phone: String? // 电话
-    var email: String? // email
-    var address: String? // 地址
-    var service: String? // 即时通讯(IM)
-    var birthday: String? // 生日
-    var jobTitle: String? // 职位
-    var nickName: String? // 昵称
-    var department: String? // 部门
-    var contractName: String? // 姓名
-    var organization: String? // 公司（组织）
+    open var note: String? // 备注
+    open var phone: String? // 电话
+    open var email: String? // email
+    open var address: String? // 地址
+    open var service: String? // 即时通讯(IM)
+    open var birthday: String? // 生日
+    open var jobTitle: String? // 职位
+    open var nickName: String? // 昵称
+    open var department: String? // 部门
+    open var contractName: String? // 姓名
+    open var organization: String? // 公司（组织）
 
-    @objc var name: String {
+    @objc open var name: String {
         get {
             var newName: String = ""
             if let contract = contractName, contract.count > 0 {
@@ -34,9 +34,5 @@ class STContractMessage: NSObject {
             }
             return newName
         }
-    }
-    
-    override init() {
-        super.init()
     }
 }
