@@ -53,6 +53,14 @@
           "STBaseProject/Assets/default_subspec/*.png"
         ]
       }
+    },
+    {
+      "name": "STContract",
+      "source_files": "STBaseProject/Classes/STCommonClass/STContract/*"
+    },
+    {
+      "name": "STScreenshot",
+      "source_files": "STBaseProject/Classes/STCommonClass/STScreenshot/*"
     }
   ]
 }
