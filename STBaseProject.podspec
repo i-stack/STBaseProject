@@ -29,36 +29,40 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '10.0'
 
-  s.source_files = 'STBaseProject/Classes/**/*'
+s.source_files = 'STBaseProject/Classes/**/*'
 
   s.default_subspec = 'STBaseViewController'
   s.subspec 'STBaseViewController' do |ss|
-    ss.source_files = [
-      'STBaseProject/Classes/STBaseViewController/*',
-      'STBaseProject/Classes/STCommonClass/*.STSwiftConstants.swift'
-    ]
-    ss.resource_bundles = {
-      'STBaseProject' => ['STBaseProject/Assets/default_subspec/*.png']
-    }
+      ss.source_files = 'STBaseProject/Classes/STBaseViewController/*.swift'
+      ss.resource_bundles = {
+        'STBaseProject' => ['STBaseProject/Assets/default_subspec/*.png']
+      }
   end
 
   s.subspec 'STContract' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STCommonClass/STContract/*'
+    ss.source_files = 'STBaseProject/Classes/STContract/*.swift'
   end
 
   s.subspec 'STScreenshot' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STCommonClass/STScreenshot/*'
+    ss.source_files = 'STBaseProject/Classes/STScreenshot/*.swift'
+  end
+
+  s.subspec 'STScanner' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STScanner/*.swift'
+    ss.resource_bundles = {
+      'STBaseProject' => ['STBaseProject/Assets/STScanner/*.png']
+    }
   end
 
 #s.resource_bundles = {
 #   'STBaseProject' => ['STBaseProject/Assets/*.png']
 # }
 
-#s.public_header_files = 'Pod/Classes/**/*'
+  s.public_header_files = 'Pod/Classes/**/*'
 
 
 
-  s.frameworks = 'UIKit', 'Twitter', 'MobileCoreServices', 'Security', 'QuartzCore', 'SystemConfiguration', 'JavaScriptCore', 'WebKit', 'CoreMedia', 'CoreTelephony', 'CoreLocation', 'CoreMotion', 'AdSupport', 'CFNetwork', 'MessageUI', 'AVFoundation', 'SafariServices', 'StoreKit', 'CoreGraphics'
+#s.frameworks = 'UIKit', 'Twitter', 'MobileCoreServices', 'Security', 'QuartzCore', 'SystemConfiguration', 'JavaScriptCore', 'WebKit', 'CoreMedia', 'CoreTelephony', 'CoreLocation', 'CoreMotion', 'CFNetwork', 'MessageUI', 'AVFoundation', 'SafariServices', 'StoreKit', 'CoreGraphics'
 
 
 

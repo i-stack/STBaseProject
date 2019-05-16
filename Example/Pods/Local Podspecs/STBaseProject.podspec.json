@@ -20,34 +20,11 @@
   },
   "source_files": "STBaseProject/Classes/**/*",
   "default_subspecs": "STBaseViewController",
-  "frameworks": [
-    "UIKit",
-    "Twitter",
-    "MobileCoreServices",
-    "Security",
-    "QuartzCore",
-    "SystemConfiguration",
-    "JavaScriptCore",
-    "WebKit",
-    "CoreMedia",
-    "CoreTelephony",
-    "CoreLocation",
-    "CoreMotion",
-    "AdSupport",
-    "CFNetwork",
-    "MessageUI",
-    "AVFoundation",
-    "SafariServices",
-    "StoreKit",
-    "CoreGraphics"
-  ],
+  "public_header_files": "Pod/Classes/**/*",
   "subspecs": [
     {
       "name": "STBaseViewController",
-      "source_files": [
-        "STBaseProject/Classes/STBaseViewController/*",
-        "STBaseProject/Classes/STCommonClass/*.STSwiftConstants.swift"
-      ],
+      "source_files": "STBaseProject/Classes/STBaseViewController/*.swift",
       "resource_bundles": {
         "STBaseProject": [
           "STBaseProject/Assets/default_subspec/*.png"
@@ -56,11 +33,20 @@
     },
     {
       "name": "STContract",
-      "source_files": "STBaseProject/Classes/STCommonClass/STContract/*"
+      "source_files": "STBaseProject/Classes/STContract/*.swift"
     },
     {
       "name": "STScreenshot",
-      "source_files": "STBaseProject/Classes/STCommonClass/STScreenshot/*"
+      "source_files": "STBaseProject/Classes/STScreenshot/*.swift"
+    },
+    {
+      "name": "STScanner",
+      "source_files": "STBaseProject/Classes/STScanner/*.swift",
+      "resource_bundles": {
+        "STBaseProject": [
+          "STBaseProject/Assets/STScanner/*.png"
+        ]
+      }
     }
   ]
 }

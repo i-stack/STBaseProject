@@ -3,10 +3,13 @@
 //  STBaseProject
 //
 //  Created by song on 2018/4/28.
-//  Copyright © 2019 Tron. All rights reserved.
+//  Copyright © 2018 song. All rights reserved.
 //
 
 import UIKit
+import Photos
+import AVFoundation
+import AssetsLibrary
 
 enum STOpenSourceType {
     case photoLibrary
@@ -125,4 +128,93 @@ extension STBaseOpenSystemOperationController {
             break
         }
     }
+    
+    func isAvailablePhoto() -> Bool {
+        let authorStatus: PHAuthorizationStatus = PHPhotoLibrary.authorizationStatus()
+        if authorStatus == .denied {
+            return false
+        }
+        return true
+    }
+    
+    func isAvailableCamera() -> Bool {
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) == true {
+            let mediaType = AVMediaType.video
+            let authorizationStatus: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: mediaType)
+            if authorizationStatus == .restricted || authorizationStatus == .denied {
+                self.authorizationFailed()
+                return false
+            }
+            return true
+        } else {
+            // 相机硬件不可用【一般是模拟器】
+            return false
+        }
+    }
 }
+
+extension STBaseOpenSystemOperationController {
+    func authorizationFailed() -> Void {
+        DispatchQueue.main.async {
+            let tipMessage: String = "请到手机系统的\n【设置】->【隐私】->【相册】\n" + "开启相机的访问权限"
+            self.showError(message: tipMessage, title: "相册读取权限未开启")
+        }
+    }
+}
+
+extension STBaseOpenSystemOperationController {
+    func showError(message: String) -> Void {
+        self.showError(message: message, title: "提示")
+    }
+    
+    func showError(message: String, title: String) -> Void {
+        let alert = UIAlertController.init(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
+        let action: UIAlertAction = UIAlertAction.init(title: "我知道了", style: UIAlertAction.Style.cancel) { (action) in}
+        alert.addAction(action)
+        self.present(alert, animated: true) {}
+    }
+    
+    /// 延时操作器
+    func performTaskWithTimeInterval(timeInterval: Double, complection: @escaping(Result<Bool, Error>) -> Void) {
+        let delayTime = DispatchTime.now() + timeInterval
+        DispatchQueue.main.asyncAfter(deadline: delayTime){
+            complection(.success(true))
+        }
+    }
+    
+    func imageIsEmpty(image: UIImage) -> Bool {
+        var cgImageIsEmpty: Bool = false
+        if let _: CGImage = image.cgImage {
+            cgImageIsEmpty = false
+        } else {
+            cgImageIsEmpty = true
+        }
+        
+        var ciImageIsEmpty: Bool = false
+        if let _: CIImage = image.ciImage {
+            ciImageIsEmpty = false
+        } else {
+            ciImageIsEmpty = true
+        }
+        if cgImageIsEmpty == true, ciImageIsEmpty == true {
+            return true
+        }
+        return false
+    }
+    
+    func stringToDouble(string: String) -> Double {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale.current
+        formatter.decimalSeparator = "."
+        if let result = formatter.number(from: string) {
+            return result.doubleValue
+        } else {
+            formatter.decimalSeparator = ","
+            if let result = formatter.number(from: string) {
+                return result.doubleValue
+            }
+        }
+        return 0
+    }
+}
+

@@ -8,7 +8,7 @@
 
 import UIKit
 
-enum TRXNavBtnShowType {
+public enum STNavBtnShowType {
     case showLeftBtn        // 显示左侧按钮和title
     case showRightBtn       // 显示右侧按钮和title
     case showBothBtn        // 显示左侧、右侧按钮和title
@@ -16,30 +16,30 @@ enum TRXNavBtnShowType {
     case none               // 默认什么都不显示
 }
 
-class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
+open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
 
-    var topBgView: UIView!
-    var leftBtn: UIButton!
-    var rightBtn: UIButton!
-    var titleLabel: UILabel!
-    var rightTitleBtn: UIButton!
+    open var topBgView: UIView!
+    open var leftBtn: UIButton!
+    open var rightBtn: UIButton!
+    open var titleLabel: UILabel!
+    open var rightTitleBtn: UIButton!
     
-    var space: CGFloat = 0
-    var width: CGFloat = 44
-    var height: CGFloat = 44
-    var leftSpace: CGFloat = 37
-    var rightSpace: CGFloat = 14
-    var titleHeight: CGFloat = 44
+    open var space: CGFloat = 0
+    open var width: CGFloat = 44
+    open var height: CGFloat = 44
+    open var leftSpace: CGFloat = 37
+    open var rightSpace: CGFloat = 14
+    open var titleHeight: CGFloat = 44
     
-    var noDataView: UIView?
-    var networkNotReachView: UIView?
+    open var noDataView: UIView?
+    open var networkNotReachView: UIView?
     
     deinit {
         NotificationCenter.default.removeObserver(self)
         print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
 
-    override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         self.hidesBottomBarWhenPushed = true
         self.view.backgroundColor = self.bgColor()
@@ -52,15 +52,15 @@ class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         self.navigationBarView()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
+    override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
     }
     
-    override func viewDidAppear(_ animated: Bool) {
+    override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if let nav = self.navigationController {
             if nav.viewControllers.count <= 1 {
@@ -69,7 +69,7 @@ class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    open func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         if let nav = self.navigationController {
             if nav.viewControllers.count <= 1 {
                 return false
@@ -78,14 +78,14 @@ class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         return true
     }
 
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer.isKind(of: UIPanGestureRecognizer.self) == true && otherGestureRecognizer.isKind(of: UIScreenEdgePanGestureRecognizer.self) == true {
             return true
         }
         return true
     }
     
-    func navigationBarView() -> Void {
+    private func navigationBarView() -> Void {
         self.topBgView = UIView.init()
         self.topBgView.isHidden = true
         self.topBgView.translatesAutoresizingMaskIntoConstraints = false
@@ -153,7 +153,7 @@ class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         self.showNavBtnType(type: .onlyShowTitle)
     }
     
-    func showNavBtnType(type: TRXNavBtnShowType) -> Void {
+    public func showNavBtnType(type: STNavBtnShowType) -> Void {
         switch type {
         case .showLeftBtn:
             self.leftBtn.isHidden = false
@@ -185,7 +185,7 @@ class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
 
 // Navigation bar click event
 extension STBaseViewController {
-    @objc func leftBarBtnClick() -> Void {
+    @objc open func leftBarBtnClick() -> Void {
         if self.navigationController?.viewControllers.count ?? 0 > 1 {
             self.navigationController?.popViewController(animated: true)
         } else {
@@ -195,7 +195,7 @@ extension STBaseViewController {
         }
     }
     
-    @objc func rightBarBtnClick() -> Void {
+    @objc open func rightBarBtnClick() -> Void {
         
     }
 }

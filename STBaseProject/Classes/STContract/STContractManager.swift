@@ -3,7 +3,7 @@
 //  STBaseProject
 //
 //  Created by song on 2018/7/24.
-//  Copyright © 2019 song. All rights reserved.
+//  Copyright © 2018 song. All rights reserved.
 //
 
 import UIKit
