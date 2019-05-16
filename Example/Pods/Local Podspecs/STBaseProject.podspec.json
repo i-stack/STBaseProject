@@ -1,8 +1,8 @@
 {
   "name": "STBaseProject",
   "version": "0.1.0",
-  "summary": "A short description of STBaseProject.",
-  "description": "TODO: Add long description of the pod here.",
+  "summary": "Collect common classes in the development process.",
+  "description": "Collect common classes in the development process. Can custom.",
   "homepage": "https://github.com/songMW/STBaseProject",
   "license": {
     "type": "MIT",
@@ -16,7 +16,43 @@
     "tag": "0.1.0"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "10.0"
   },
-  "source_files": "STBaseProject/Classes/**/*"
+  "source_files": "STBaseProject/Classes/**/*",
+  "default_subspecs": "STBaseViewController",
+  "frameworks": [
+    "UIKit",
+    "Twitter",
+    "MobileCoreServices",
+    "Security",
+    "QuartzCore",
+    "SystemConfiguration",
+    "JavaScriptCore",
+    "WebKit",
+    "CoreMedia",
+    "CoreTelephony",
+    "CoreLocation",
+    "CoreMotion",
+    "AdSupport",
+    "CFNetwork",
+    "MessageUI",
+    "AVFoundation",
+    "SafariServices",
+    "StoreKit",
+    "CoreGraphics"
+  ],
+  "subspecs": [
+    {
+      "name": "STBaseViewController",
+      "source_files": [
+        "STBaseProject/Classes/STBaseViewController/*",
+        "STBaseProject/Classes/STCommonClass/*.STSwiftConstants.swift"
+      ],
+      "resource_bundles": {
+        "STBaseProject": [
+          "STBaseProject/Assets/default_subspec/*.png"
+        ]
+      }
+    }
+  ]
 }
