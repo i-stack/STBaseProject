@@ -30,8 +30,8 @@
 /* Begin PBXFileReference section */
 		0527130535D9B00C23149A00 /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		446826C3C0555726F3F40A4F /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.release.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
-		46F4B810C03B6FDB22573EC0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		5C633CDC446F4649338CD32C /* STBaseProject.podspec */ = {isa = PBXFileReference; includeInIndex = 1; name = STBaseProject.podspec; path = ../STBaseProject.podspec; sourceTree = "<group>"; };
+		46F4B810C03B6FDB22573EC0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		5C633CDC446F4649338CD32C /* STBaseProject.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = STBaseProject.podspec; path = ../STBaseProject.podspec; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* STBaseProject_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = STBaseProject_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -44,7 +44,7 @@
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		7562864E16E0E45E68939586 /* Pods-STBaseProject_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Tests.release.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Tests/Pods-STBaseProject_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BCBDD6C1F1A3F9746985EE4C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		BCBDD6C1F1A3F9746985EE4C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		D39D8AFC82CB37AB8D99B8AB /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		DB68A0A8CFEDFE29C7826E05 /* Pods-STBaseProject_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Tests.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Tests/Pods-STBaseProject_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -156,7 +156,6 @@
 				DB68A0A8CFEDFE29C7826E05 /* Pods-STBaseProject_Tests.debug.xcconfig */,
 				7562864E16E0E45E68939586 /* Pods-STBaseProject_Tests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -208,12 +207,14 @@
 		607FACC81AFB9204008FA782 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				CLASSPREFIX = ST;
 				LastSwiftUpdateCheck = 0830;
 				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = CocoaPods;
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = 736VAMJ43C;
 						LastSwiftMigration = 0900;
 					};
 					607FACE41AFB9204008FA782 = {
@@ -228,6 +229,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -505,7 +507,9 @@
 			baseConfigurationReference = D39D8AFC82CB37AB8D99B8AB /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 736VAMJ43C;
 				INFOPLIST_FILE = STBaseProject/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
@@ -520,7 +524,9 @@
 			baseConfigurationReference = 446826C3C0555726F3F40A4F /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 736VAMJ43C;
 				INFOPLIST_FILE = STBaseProject/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";

@@ -1,0 +1,6 @@
+framework module STBaseProject {
+  umbrella header "STBaseProject-umbrella.h"
+
+  export *
+  module * { export * }
+}

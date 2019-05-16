@@ -3,9 +3,4 @@ use_frameworks!
 target 'STBaseProject_Example' do
   pod 'STBaseProject', :path => '../'
 
-  target 'STBaseProject_Tests' do
-    inherit! :search_paths
-
-    pod 'FBSnapshotTestCase' , '~> 2.1.4'
-  end
 end
