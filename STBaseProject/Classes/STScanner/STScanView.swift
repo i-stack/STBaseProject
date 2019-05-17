@@ -16,17 +16,21 @@ public enum STScanType {
 
 open class STScanView: UIView {
 
+    open var tipTitle: UILabel?  // 扫码区域下方提示文字
+    open var photoBtn: UIButton? // 相册按钮
+    
     open var needStop: Bool?
     open var scanType: STScanType?
+    
     var heightScale: CGFloat = 0.0
     var lineImageView: UIImageView?
     let leftDistance: CGFloat = 60.0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        needStop = false
         self.backgroundColor = UIColor.clear
         self.lineImageView = UIImageView.init(image: UIImage.init(named: "scan_blue_line"))
-        needStop = false
     }
     
     override open func layoutSubviews() {
@@ -98,42 +102,45 @@ open class STScanView: UIView {
         let left = leftDistance / self.heightScale
         let sizeRetangle = CGSize.init(width: self.frame.size.width - left * 2,
                                        height: self.frame.size.width - left * 2)
-        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / (2.0 * self.heightScale)
+        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / (2.0 * self.heightScale) - ST_NavHeight
         let YMaxRetangle = YMinRetangle + sizeRetangle.height / self.heightScale
         let XRetangleRight = self.frame.size.width - left
         
         let context: CGContext = UIGraphicsGetCurrentContext()!
         //非扫码区域半透明
         //设置非识别区域颜色
-//        context.setFillColor(red: 0, green: 0, blue: 0, alpha: 0.6)
-    
+        context.setFillColor(red: 0, green: 0, blue: 0, alpha: 0.6)
+
         //扫码区域上面填充
-        var rect: CGRect = CGRect.init(x: 0, y: 0, width: self.frame.size.width, height: YMinRetangle)
+        var rect: CGRect = CGRect.init(x: 0,
+                                       y: 0,
+                                       width: self.frame.size.width,
+                                       height: YMinRetangle)
         context.fill(rect)
-        
+
         //扫码区域左边填充
         rect = CGRect.init(x: 0,
                            y: YMinRetangle,
                            width: left,
                            height: sizeRetangle.height / self.heightScale)
         context.fill(rect)
-        
+
         //扫码区域右边填充
         rect = CGRect.init(x: XRetangleRight,
                            y: YMinRetangle,
                            width: left,
                            height: sizeRetangle.height / self.heightScale)
-        context.fill(rect);
-        
+        context.fill(rect)
+
         //扫码区域下面填充
         rect = CGRect.init(x: 0,
-                           y: YMinRetangle,
+                           y: YMinRetangle + sizeRetangle.height / self.heightScale,
                            width: self.frame.size.width,
-                           height: self.frame.size.height - YMaxRetangle)
+                           height: self.frame.size.height - (YMinRetangle + sizeRetangle.height / self.heightScale))
 
-        context.fill(rect);
-        context.strokePath();
-        
+        context.fill(rect)
+        context.strokePath()
+
         //中间画矩形(正方形)
         context.setStrokeColor(UIColor.init(red: 255, green: 255, blue: 255, alpha: 1).cgColor)
         context.setLineWidth(1)
@@ -149,7 +156,7 @@ open class STScanView: UIView {
         let hAngle: CGFloat = 15.0
         
         //4个角的 线的宽度
-        let linewidthAngle: CGFloat = 4.0// 经验参数：6和4
+        let linewidthAngle: CGFloat = 4.0
         
         //画扫码矩形以及周边半透明黑色坐标参数
         let diffAngle: CGFloat = linewidthAngle / 3.0
@@ -157,7 +164,7 @@ open class STScanView: UIView {
         context.setStrokeColor(UIColor.init(red: 0.110, green: 0.659, blue: 0.894, alpha: 1).cgColor)
         context.setFillColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
 
-        context.setLineWidth(linewidthAngle);
+        context.setLineWidth(linewidthAngle)
     
         let leftX: CGFloat = left - diffAngle
         let topY: CGFloat = YMinRetangle - diffAngle
@@ -195,7 +202,42 @@ open class STScanView: UIView {
         //右下角垂直线
         context.move(to: CGPoint.init(x: rightX, y: bottomY+linewidthAngle / 2.0))
         context.addLine(to: CGPoint.init(x: rightX, y: bottomY - hAngle))
-        
         context.strokePath()
+        
+        self.st_drawTitle(orginY: YMinRetangle + sizeRetangle.height / self.heightScale + 15)
+    }
+}
+
+extension STScanView {
+
+    func st_drawTitle(orginY: CGFloat) -> Void {
+        guard self.tipTitle != nil else {
+            self.tipTitle = UILabel.init(frame: CGRect.init(x: 0, y: orginY, width: self.frame.size.width, height: 50))
+            self.tipTitle?.numberOfLines = 0
+            self.tipTitle?.layer.zPosition = 1
+            self.tipTitle?.textAlignment = .center
+            self.tipTitle?.textColor = UIColor.white
+            self.tipTitle?.text = "将二维码/条形码放入框内,即可自动扫描"
+            self.tipTitle?.font = UIFont.systemFont(ofSize: 13)
+            self.addSubview(self.tipTitle!)
+            self.bringSubviewToFront(self.tipTitle!)
+            return
+        }
+    }
+}
+
+extension STScanView {
+    func st_bundlePathURL() -> URL {
+        
+//        NSBundle *bundle = [NSBundle bundleForClass:[MYSomeClass class]];
+//        NSURL *bundleURL = [bundle URLForResource:@"MyLibrary" withExtension:@"bundle"];
+//        NSBundle *resourceBundle = [NSBundle bundleWithURL: bundleURL];
+//        UIImage *img = [UIImage imageNamed:icon inBundle:bundle compatibleWithTraitCollection:nil];
+        
+        
+        
+        
+        let path: String = Bundle.main.path(forResource: "STScanResource", ofType: "bundle") ?? ""
+        return URL.init(fileURLWithPath: path)
     }
 }

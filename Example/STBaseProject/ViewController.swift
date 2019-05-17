@@ -24,6 +24,18 @@ class ViewController: STBaseOpenSystemOperationController {
         super.didReceiveMemoryWarning()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.testScanner()
+    }
+    
+    func testScanner() -> Void {
+        let scannerVC = STScanViewController.init(qrType: .STScanTypeQrCode) { (result) in
+            print(result)
+        }
+        self.navigationController?.pushViewController(scannerVC, animated: true)
+    }
+    
     func testScreenShot() -> Void {
         NotificationCenter.default.addObserver(self, selector: #selector(userDidTakeScreenshot(note:)), name: UIApplication.userDidTakeScreenshotNotification, object: nil)
     }

@@ -15,20 +15,12 @@ public typealias ScanFinishBlock = (_ result: String) -> Void
 
 open class STScanViewController: STBaseOpenSystemOperationController {
     
-    var tipTitle: UILabel?  // 扫码区域下方提示文字
-    var toolsView: UIView?  // 底部显示的功能项 -box
-    var photoBtn: UIButton? // 相册按钮
-    var flashBtn: UIButton? // 闪光灯按钮
-    
-    var appName: String?
     var delayQRAction: Bool = false
     var delayBarAction: Bool = false
-    open var scanFinishBlock: ScanFinishBlock?
+    var scanFinishBlock: ScanFinishBlock?
 
     var scanRect: CGRect?
     var scanType: STScanType?
-    var scanTypeQrBtn: UIButton?   // 修改扫码类型按钮
-    var scanTypeBarBtn: UIButton?  // 修改扫码类型按钮
     var scanRectView: STScanView?
     
     var device: AVCaptureDevice?
@@ -36,16 +28,12 @@ open class STScanViewController: STBaseOpenSystemOperationController {
     var input: AVCaptureDeviceInput?
     var output: AVCaptureMetadataOutput?
     var preview: AVCaptureVideoPreviewLayer?
-
+    
     override open func viewDidLoad() {
         super.viewDidLoad()
-        self.view.backgroundColor = UIColor.black
-        self.appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+        self.st_showNavBtnType(type: .showBothBtn)
         self.st_scanDevice()
-        self.st_drawTitle()
         self.st_drawScanView()
-        self.st_initScanType()
-        self.st_switchBarView(type: self.scanType ?? .STScanTypeQrCode)
     }
     
     override open func viewWillAppear(_ animated: Bool) {
@@ -53,7 +41,6 @@ open class STScanViewController: STBaseOpenSystemOperationController {
         if let newSession = self.session {
             newSession.startRunning()
         }
-        self.navigationController?.setNavigationBarHidden(false, animated: true)
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
@@ -66,17 +53,18 @@ open class STScanViewController: STBaseOpenSystemOperationController {
         }
     }
     
-    open func st_scanFinishCallback(block: @escaping ScanFinishBlock) -> Void {
-        self.scanFinishBlock = block
-    }
-
     /**
      初始化二维码扫描控制器
      @param type 扫码类型
      */
-    open func initWithQrType(type: STScanType, onFinish: @escaping(ScanFinishBlock)) -> Void {
+    convenience public init(qrType type: STScanType, onFinish: @escaping(ScanFinishBlock)) {
+        self.init()
         self.scanType = type
         self.scanFinishBlock = onFinish
+    }
+
+    public func st_scanFinishCallback(block: @escaping ScanFinishBlock) -> Void {
+        self.scanFinishBlock = block
     }
     
     /**
@@ -85,7 +73,6 @@ open class STScanViewController: STBaseOpenSystemOperationController {
      @param onFinish 识别结果回调
      */
     class open func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(Result<String, Error>) -> Void) {
-        
         if STScanViewController().st_stringToDouble(string: UIDevice.current.systemVersion) < 8.0 {
             STScanViewController().st_showError(message: "只支持iOS8.0以上系统")
             return
@@ -353,81 +340,19 @@ extension STScanViewController {
     }
 }
 
-/// 修改扫码类型 【二维码  || 条形码】
 extension STScanViewController {
-    @objc func st_qrBtnClicked(sender: UIButton) -> Void {
-        self.scanTypeBarBtn?.isSelected = false
-        self.st_scanBtnCommon(sender: sender, type: .STScanTypeQrCode)
-    }
     
-    @objc func st_barBtnClicked(sender: UIButton) -> Void {
-        self.scanTypeQrBtn?.isSelected = false
-        self.scanRectView?.st_stopAnimating()
-        self.st_scanBtnCommon(sender: sender, type: .STScanTypeBarCode)
-    }
-    
-    func st_scanBtnCommon(sender: UIButton, type: STScanType) -> Void {
-        if sender.isSelected == true {
-            return
-        }
-        if self.delayQRAction == true {
-            return
-        }
-        sender.isSelected = true
-        self.st_changeScanCodeType(type: type)
-        self.st_switchBarView(type: type)
-        self.delayQRAction = true
-        self.st_performTaskWithTimeInterval(timeInterval: 3.0) { (result) in
-            self.delayQRAction = false
-        }
-    }
-    
-    /// 修改扫码类型 【二维码  || 条形码】
-    func st_changeScanCodeType(type: STScanType) -> Void {
-        if let newSession = self.session {
-            newSession.stopRunning()
-            var scanSize = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[1] as! String)
-            if type == .STScanTypeBarCode {
-                self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.ean13,
-                                                    AVMetadataObject.ObjectType.ean8,
-                                                    AVMetadataObject.ObjectType.code128]
-                self.navigationController?.title = "条形码"
-                self.scanRect = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 3)[0] as! String)
-                scanSize = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 3)[1] as! String)
-                self.tipTitle?.text = "将取景框对准条码,即可自动扫描"
-            } else {
-                self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-                self.navigationController?.title = "二维码"
-                self.scanRect = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[0] as! String)
-                scanSize = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[1] as! String)
-                self.tipTitle?.text = "将取景框对准二维码,即可自动扫描"
-            }
-            
-            //设置扫描聚焦区域
-            DispatchQueue.main.async {
-                self.output?.rectOfInterest = self.scanRect ?? CGRect.zero
-                self.scanRectView?.st_configScanType(scanType: type)
-                self.session?.startRunning()
-            }
-            UIView.animate(withDuration: 0.3, animations: {
-                self.tipTitle?.center = CGPoint.init(x: self.view.center.x, y: self.view.center.y + scanSize.height / 2 + 25)
-            })
-        }
-    }
-    
-    func st_switchBarView(type: STScanType) -> Void {
-        if type == .STScanTypeBarCode {
-            
-        }
-    }
-}
-
-extension STScanViewController {
     func st_scanDevice() -> Void {
         if self.st_isAvailableCamera() == true {
             self.device = AVCaptureDevice.default(for: .video)
             self.input = try? AVCaptureDeviceInput.init(device: self.device!)
             self.output = AVCaptureMetadataOutput.init()
+            self.output?.rectOfInterest = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[0] as! String)
+            self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr,
+                                                AVMetadataObject.ObjectType.ean8,
+                                                AVMetadataObject.ObjectType.ean13,
+                                                AVMetadataObject.ObjectType.code128
+                                                ]
             self.output?.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             self.session = AVCaptureSession()
             if let newSession = self.session {
@@ -435,13 +360,11 @@ extension STScanViewController {
                 if let newInput = self.input, newSession.canAddInput(newInput) == true {
                     newSession.addInput(newInput)
                 }
-                
-                if let newOutput = self.output,  newSession.canAddOutput(newOutput) == true {
+                if let newOutput = self.output, newSession.canAddOutput(newOutput) == true {
                     newSession.addOutput(newOutput)
                     newOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
                     newOutput.rectOfInterest = self.scanRect ?? CGRect.zero
                 }
-                
                 self.preview = AVCaptureVideoPreviewLayer.init(session: newSession)
                 if let newPreview = self.preview {
                     newPreview.videoGravity = .resizeAspectFill
@@ -451,143 +374,18 @@ extension STScanViewController {
             }
         }
     }
-    
-    func st_drawTitle() -> Void {
-        guard self.tipTitle != nil else {
-            self.tipTitle = UILabel()
-            self.tipTitle?.bounds = CGRect.init(x: 0, y: 0, width: 300, height: 50)
-            self.tipTitle?.center = CGPoint.init(x: self.view.frame.size.width / 2.0,
-                                                 y: self.view.center.y + self.view.frame.size.width / 2.0 - 35.0)
-            self.tipTitle?.font = UIFont.systemFont(ofSize: 13)
-            self.tipTitle?.textAlignment = .center
-            self.tipTitle?.numberOfLines = 0
-            self.tipTitle?.textColor = UIColor.white
-            self.tipTitle?.layer.zPosition = 1
-            self.view.addSubview(self.tipTitle!)
-            self.view.bringSubviewToFront(self.tipTitle!)
-            return
-        }
-    }
-    
+
     func st_drawScanView() -> Void {
-        self.scanRectView = STScanView.init(frame: self.view.frame)
+        self.scanRectView = STScanView.init(frame: CGRect.init(x: 0, y: ST_NavHeight, width: self.view.bounds.size.width, height: self.view.bounds.size.height))
         self.scanRectView?.st_configScanType(scanType: self.scanType ?? STScanType.STScanTypeQrCode)
         self.view.addSubview(self.scanRectView!)
     }
     
-    func st_initScanType() -> Void {
-        if self.scanType == .STScanTypeAll {
-            self.scanRect = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[0] as! String)
-            self.output?.rectOfInterest = self.scanRect ?? CGRect.zero
-            self.st_drawBottomItems()
-        } else if self.scanType == .STScanTypeQrCode {
-            self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-            self.navigationController?.title = "扫一扫"
-            self.scanRect = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[0] as! String)
-            self.output?.rectOfInterest = self.scanRect ?? CGRect.zero
-            
-            self.tipTitle?.center = CGPoint.init(x: self.view.center.x, y: self.view.center.y + NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[1] as! String).height / 2 + 25)
-        } else if self.scanType == .STScanTypeBarCode {
-            self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.ean13,
-                                                AVMetadataObject.ObjectType.ean8,
-                                                AVMetadataObject.ObjectType.code128]
-            self.navigationController?.title = "条形码"
-            self.scanRect = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 3)[0] as! String)
-            self.output?.rectOfInterest = self.scanRect ?? CGRect.zero
-            self.scanRectView?.st_configScanType(scanType: .STScanTypeBarCode)
-            self.tipTitle?.text = "将取景框对准条码,即可自动扫描"
-            self.tipTitle?.center = CGPoint.init(x: self.view.center.x, y: self.view.center.y + NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 3)[1] as! String).height / 2 + 25)
-        }
-    }
-    
-    func st_bundlePathURL() -> URL {
-        let path: String = Bundle.main.path(forResource: "STScanResource", ofType: "bundle") ?? ""
-        return URL.init(fileURLWithPath: path)
-    }
-    
-    func st_drawBottomItems() -> Void {
-        
-        if (self.toolsView != nil) {
-            return
-        }
-        self.toolsView = UIView.init(frame: CGRect.init(x: 0,
-                                                        y: self.view.frame.maxY - 64.0,
-                                                        width: self.view.frame.width,
-                                                        height: 64))
-        self.toolsView?.backgroundColor = UIColor.init(red: 0.212,
-                                                       green: 0.208,
-                                                       blue: 0.231,
-                                                       alpha: 1.00)
-        
-        let size = CGSize.init(width: UIScreen.main.bounds.size.width / 2.0,
-                               height: 64.0)
-        self.scanTypeQrBtn = UIButton.init(type: UIButton.ButtonType.custom)
-        self.scanTypeQrBtn?.frame = CGRect.init(x: 0,
-                                                y: 0,
-                                                width: size.width,
-                                                height: size.height)
-        self.scanTypeQrBtn?.setTitle("", for: UIControl.State.normal)
-        self.scanTypeQrBtn?.setTitleColor(UIColor.white, for: UIControl.State.normal)
-        self.scanTypeQrBtn?.setTitleColor(UIColor.init(red: 0.165,
-                                                       green: 0.663,
-                                                       blue: 0.886,
-                                                       alpha: 1.00),
-                                          for: UIControl.State.selected)
-        
-        let qrPath: String = self.st_bundlePathURL().appendingPathComponent("scan_qr_select").absoluteString
-        let qrImage: UIImage = UIImage.init(contentsOfFile: qrPath) ?? UIImage()
-        self.scanTypeQrBtn?.setImage(qrImage, for: UIControl.State.normal)
-        self.scanTypeQrBtn?.isSelected = true
-        self.scanTypeQrBtn?.imageEdgeInsets = UIEdgeInsets.init(top: 0,
-                                                                left: 0,
-                                                                bottom: 0,
-                                                                right: 15)
-        self.scanTypeQrBtn?.titleEdgeInsets = UIEdgeInsets.init(top: 0,
-                                                                left: 0,
-                                                                bottom: 0,
-                                                                right: 0)
-        self.scanTypeQrBtn?.addTarget(self,
-                                      action: #selector(st_qrBtnClicked(sender:)),
-                                      for: UIControl.Event.touchUpInside)
-        
-        self.scanTypeBarBtn = UIButton.init(type: UIButton.ButtonType.custom)
-        self.scanTypeBarBtn?.frame = CGRect.init(x: size.width,
-                                                 y: 0,
-                                                 width: size.width,
-                                                 height: size.height)
-        self.scanTypeBarBtn?.setTitle("", for: UIControl.State.normal)
-        self.scanTypeBarBtn?.setTitleColor(UIColor.white, for: UIControl.State.normal)
-        self.scanTypeBarBtn?.setTitleColor(UIColor.init(red: 0.165,
-                                                        green: 0.663,
-                                                        blue: 0.886,
-                                                        alpha: 1.00),
-                                           for: UIControl.State.selected)
-        
-        let barPath: String = self.st_bundlePathURL().appendingPathComponent("scan_bar_normal").absoluteString
-        let barImage: UIImage = UIImage.init(contentsOfFile: barPath) ?? UIImage()
-        self.scanTypeBarBtn?.setImage(barImage, for: UIControl.State.normal)
-        self.scanTypeBarBtn?.isSelected = false
-        self.scanTypeBarBtn?.imageEdgeInsets = UIEdgeInsets.init(top: 0,
-                                                                 left: 0,
-                                                                 bottom: 0,
-                                                                 right: 15)
-        self.scanTypeBarBtn?.titleEdgeInsets = UIEdgeInsets.init(top: 0,
-                                                                 left: 0,
-                                                                 bottom: 0,
-                                                                 right: 0)
-        self.scanTypeBarBtn?.addTarget(self,
-                                       action: #selector(st_barBtnClicked(sender:)),
-                                       for: UIControl.Event.touchUpInside)
-        self.toolsView?.addSubview(self.scanTypeQrBtn!)
-        self.toolsView?.addSubview(self.scanTypeBarBtn!)
-        self.view.addSubview(self.toolsView!)
-    }
-    
     func st_scanRectWithScale(scale: CGFloat) -> NSArray {
         let windowSize = UIScreen.main.bounds.size
-        let Left = 60.0 / scale
-        let scanSize = CGSize.init(width: self.view.frame.size.width - Left * 2.0,
-                                   height: (self.view.frame.size.width - Left * 2.0) / scale)
+        let left = 60.0 / scale
+        let scanSize = CGSize.init(width: self.view.frame.size.width - left * 2.0,
+                                   height: (self.view.frame.size.width - left * 2.0) / scale)
         var scanRect = CGRect.init(x: (windowSize.width - scanSize.width) / 2.0,
                                    y: (windowSize.height - scanSize.height) / 2.0,
                                    width: scanSize.width,

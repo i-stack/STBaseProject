@@ -19,17 +19,20 @@
     "ios": "10.0"
   },
   "source_files": "STBaseProject/Classes/**/*",
+  "resource_bundles": {
+    "STBaseProject": [
+      "STBaseProject/Assets/*.bundle"
+    ]
+  },
   "default_subspecs": "STBase",
   "public_header_files": "Pod/Classes/**/*",
   "subspecs": [
     {
       "name": "STBase",
-      "source_files": "STBaseProject/Classes/STBase/STBaseViewController/*.swift",
-      "resource_bundles": {
-        "STBaseProject": [
-          "STBaseProject/Assets/default_subspec/*.png"
-        ]
-      }
+      "source_files": [
+        "STBaseProject/Classes/STBase/STBaseViewController/*.swift",
+        "STBaseProject/Classes/STBase/STUtils/*.swift"
+      ]
     },
     {
       "name": "STContract",
@@ -42,13 +45,8 @@
     {
       "name": "STScanner",
       "source_files": "STBaseProject/Classes/STScanner/*.swift",
-      "resource_bundles": {
-        "STBaseProject": [
-          "STBaseProject/Assets/STScanner/*.png"
-        ]
-      },
       "dependencies": {
-        "STBase": [
+        "STBaseProject/STBase": [
 
         ]
       }

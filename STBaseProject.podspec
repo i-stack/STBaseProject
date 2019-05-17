@@ -10,13 +10,6 @@ Pod::Spec.new do |s|
   s.name             = 'STBaseProject'
   s.version          = '0.1.0'
   s.summary          = 'Collect common classes in the development process.'
-
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
-
   s.description      = <<-DESC
       Collect common classes in the development process. Can custom.
                        DESC
@@ -31,12 +24,13 @@ Pod::Spec.new do |s|
 
   s.source_files = 'STBaseProject/Classes/**/*'
 
-  s.default_subspec = 'STBase'
+  s.resource_bundles = {
+    'STBaseProject' => ['STBaseProject/Assets/*.bundle']
+  }
+  
+  s.default_subspecs = 'STBase'
   s.subspec 'STBase' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STBase/STBaseViewController/*.swift'
-    ss.resource_bundles = {
-      'STBaseProject' => ['STBaseProject/Assets/default_subspec/*.png']
-    }
+    ss.source_files = ['STBaseProject/Classes/STBase/STBaseViewController/*.swift', 'STBaseProject/Classes/STBase/STUtils/*.swift']
   end
 
   s.subspec 'STContract' do |ss|
@@ -47,28 +41,12 @@ Pod::Spec.new do |s|
     ss.source_files = 'STBaseProject/Classes/STScreenshot/*.swift'
   end
 
-  s.subspec 'STScanner' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STScanner/*.swift'
-    ss.resource_bundles = {
-      'STBaseProject' => ['STBaseProject/Assets/STScanner/*.png']
-    }
-    ss.dependency 'STBase'
+  s.subspec 'STScanner' do |scanner|
+    scanner.source_files = 'STBaseProject/Classes/STScanner/*.swift'
+    scanner.dependency 'STBaseProject/STBase'
   end
 
-#s.resource_bundles = {
-#   'STBaseProject' => ['STBaseProject/Assets/*.png']
-# }
-
   s.public_header_files = 'Pod/Classes/**/*'
-
-
-
-#s.frameworks = 'UIKit', 'Twitter', 'MobileCoreServices', 'Security', 'QuartzCore', 'SystemConfiguration', 'JavaScriptCore', 'WebKit', 'CoreMedia', 'CoreTelephony', 'CoreLocation', 'CoreMotion', 'CFNetwork', 'MessageUI', 'AVFoundation', 'SafariServices', 'StoreKit', 'CoreGraphics'
-
-
-
-
-
 
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
