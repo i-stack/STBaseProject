@@ -81,7 +81,7 @@ open class STScanViewController: STBaseOpenSystemOperationController {
             return
         }
         
-        if STScanViewController().st_imageIsEmpty(image: image) != true {
+        if STScanViewController().st_imageIsEmpty(image: image) == true {
             DispatchQueue.main.async {
                 onFinish(.failure(NSError.init(domain: "image is empty", code: 0, userInfo: [:])))
             }
@@ -357,12 +357,6 @@ extension STScanViewController {
             self.device = AVCaptureDevice.default(for: .video)
             self.input = try? AVCaptureDeviceInput.init(device: self.device!)
             self.output = AVCaptureMetadataOutput.init()
-            self.output?.rectOfInterest = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[0] as! String)
-            self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr,
-                                                AVMetadataObject.ObjectType.ean8,
-                                                AVMetadataObject.ObjectType.ean13,
-                                                AVMetadataObject.ObjectType.code128
-                                                ]
             self.output?.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             self.session = AVCaptureSession()
             if let newSession = self.session {
@@ -382,6 +376,8 @@ extension STScanViewController {
                     self.view.layer.insertSublayer(newPreview, at: 0)
                 }
             }
+            self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
+            self.output?.rectOfInterest = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[0] as! String)
         }
     }
 

@@ -226,7 +226,7 @@ extension STScanView {
             self.tipTitle?.layer.zPosition = 1
             self.tipTitle?.textAlignment = .center
             self.tipTitle?.textColor = UIColor.white
-            self.tipTitle?.text = "将二维码/条形码放入框内,即可自动扫描"
+            self.tipTitle?.text = "将二维码放入框内,即可自动扫描"
             self.tipTitle?.font = UIFont.systemFont(ofSize: 13)
             self.addSubview(self.tipTitle!)
             self.bringSubviewToFront(self.tipTitle!)
