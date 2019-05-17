@@ -31,9 +31,10 @@ open class STScanViewController: STBaseOpenSystemOperationController {
     
     override open func viewDidLoad() {
         super.viewDidLoad()
-        self.st_showNavBtnType(type: .showBothBtn)
         self.st_scanDevice()
         self.st_drawScanView()
+        self.st_navigationBar()
+        self.view.bringSubviewToFront(self.topBgView)
     }
     
     override open func viewWillAppear(_ animated: Bool) {
@@ -74,7 +75,16 @@ open class STScanViewController: STBaseOpenSystemOperationController {
      */
     class open func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(Result<String, Error>) -> Void) {
         if STScanViewController().st_stringToDouble(string: UIDevice.current.systemVersion) < 8.0 {
-            STScanViewController().st_showError(message: "只支持iOS8.0以上系统")
+            DispatchQueue.main.async {
+                onFinish(.failure(NSError.init(domain: "Only supports iOS 8.0 system or higher", code: 0, userInfo: [:])))
+            }
+            return
+        }
+        
+        if STScanViewController().st_imageIsEmpty(image: image) != true {
+            DispatchQueue.main.async {
+                onFinish(.failure(NSError.init(domain: "image is empty", code: 0, userInfo: [:])))
+            }
             return
         }
         
@@ -85,9 +95,13 @@ open class STScanViewController: STBaseOpenSystemOperationController {
         if features.count >= 1 {
             let feature: CIQRCodeFeature = features[0] as! CIQRCodeFeature
             let scanResult = feature.messageString
-            onFinish(.success(scanResult ?? ""))
+            DispatchQueue.main.async {
+                onFinish(.success(scanResult ?? ""))
+            }
         } else {
-            onFinish(.failure(NSError.init(domain: "scan_error", code: 0, userInfo: [:])))
+            DispatchQueue.main.async {
+                onFinish(.failure(NSError.init(domain: "scan_error", code: 0, userInfo: [:])))
+            }
         }
     }
     
@@ -277,22 +291,32 @@ open class STScanViewController: STBaseOpenSystemOperationController {
         if image == nil {
             image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
         }
-        STScanViewController.st_recognizeQrCodeImage(image: image ?? UIImage()) { [weak self] (result) in
-            guard let strongSelf = self else {
-                return
-            }
-            switch (result) {
-            case .success(let str):
-                strongSelf.st_renderUrlStr(url: str)
-                break
-            case .failure(_):
-                break
-            }
-        }
+        self.detailSelectPhoto(image: image ?? UIImage())
     }
     
     override open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
+    }
+    
+    override open func st_rightBarBtnClick() {
+        self.st_openSystemOperation(openSourceType: .photoLibrary) {[weak self] (originImage, eidtedImage, result, error) in
+            guard let strongSelf = self else { return }
+            strongSelf.detailSelectPhoto(image: originImage)
+        }
+    }
+    
+    func detailSelectPhoto(image: UIImage) -> Void {
+        STScanViewController.st_recognizeQrCodeImage(image: image, onFinish: { [weak self] (result) in
+            guard let strongSelf = self else { return }
+            switch result {
+            case .success(let str):
+                strongSelf.st_renderUrlStr(url: str)
+                break
+            case .failure(_):
+                strongSelf.st_renderUrlStr(url: "")
+                break
+            }
+        })
     }
 }
 
@@ -319,28 +343,14 @@ extension STScanViewController {
             nav.popViewController(animated: true)
         }
     }
-    
-    // 打开相册
-    open func st_openPhoto() -> Void {
-        if self.st_isAvailablePhoto() == true {
-            self.st_openPhotoLibrary()
-        } else {
-            self.st_authorizationFailed()
-        }
-    }
-    
-    open func st_openFlash(sender: UIButton) -> Void {
-        sender.isSelected = !sender.isSelected
-        if let newDevice = self.device, newDevice.hasTorch == true, newDevice.hasFlash == true, let newInput = self.input {
-            let torch: AVCaptureDevice.TorchMode = newInput.device.torchMode
-            try? newInput.device.lockForConfiguration()
-            newInput.device.torchMode = torch
-            newInput.device.unlockForConfiguration()
-        }
-    }
 }
 
 extension STScanViewController {
+    func st_navigationBar() -> Void {
+        self.titleLabel.text = "二维码/条形码"
+        self.st_showNavBtnType(type: .showBothBtn)
+        self.rightBtn.setTitle("相册", for: UIControl.State.normal)
+    }
     
     func st_scanDevice() -> Void {
         if self.st_isAvailableCamera() == true {
@@ -376,7 +386,7 @@ extension STScanViewController {
     }
 
     func st_drawScanView() -> Void {
-        self.scanRectView = STScanView.init(frame: CGRect.init(x: 0, y: ST_NavHeight, width: self.view.bounds.size.width, height: self.view.bounds.size.height))
+        self.scanRectView = STScanView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height))
         self.scanRectView?.st_configScanType(scanType: self.scanType ?? STScanType.STScanTypeQrCode)
         self.view.addSubview(self.scanRectView!)
     }

@@ -25,8 +25,10 @@ Pod::Spec.new do |s|
   s.source_files = 'STBaseProject/Classes/**/*'
 
   s.resource_bundles = {
-    'STBaseProject' => ['STBaseProject/Assets/*.bundle']
+    #'STBaseProject' => ['STBaseProject/Assets/*.bundle']
   }
+  
+  s.resources = ['STBaseProject/Assets/*']
   
   s.default_subspecs = 'STBase'
   s.subspec 'STBase' do |ss|

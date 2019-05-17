@@ -89,7 +89,7 @@ open class STBaseOpenSystemOperationController: STBaseViewController, UIImagePic
 }
 
 extension STBaseOpenSystemOperationController {
-    open func st_openPhotoLibrary() -> Void {
+    private func st_openPhotoLibrary() -> Void {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.photoLibrary) == true {
             picker.sourceType = UIImagePickerController.SourceType.photoLibrary
             self.present(picker, animated: true) {}
@@ -102,7 +102,7 @@ extension STBaseOpenSystemOperationController {
         }
     }
 
-    open func st_openCamera() -> Void {
+    private func st_openCamera() -> Void {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) == true {
             picker.sourceType = UIImagePickerController.SourceType.camera
             self.present(picker, animated: true) {}

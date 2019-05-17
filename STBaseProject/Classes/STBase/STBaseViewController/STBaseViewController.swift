@@ -99,8 +99,8 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         
         self.leftBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.leftBtn.isHidden = true
-        self.leftBtn.setImage(UIImage.init(named: "st_back_arrow"), for: UIControl.State.normal)
-        self.leftBtn.setImage(UIImage.init(named: "st_back_arrow"), for: UIControl.State.highlighted)
+        self.leftBtn.setImage(self.st_backArrowImage(), for: UIControl.State.normal)
+        self.leftBtn.setImage(self.st_backArrowImageHighlighted(), for: UIControl.State.highlighted)
         self.leftBtn.translatesAutoresizingMaskIntoConstraints = false
         self.leftBtn.addTarget(self, action: #selector(st_leftBarBtnClick), for: UIControl.Event.touchUpInside)
         self.topBgView.addSubview(self.leftBtn)
@@ -263,5 +263,17 @@ extension STBaseViewController {
     
     func st_bgColor() -> UIColor {
         return UIColor.init(red: 237, green: 237, blue: 237, alpha: 1)
+    }
+    
+    func st_backArrowImage() -> UIImage {
+        let bundle: Bundle = STBundle.st_baseResourceBundle()
+        let image = UIImage.init(named: "st_white_back_arrow", in: bundle, compatibleWith: UITraitCollection()) ?? UIImage()
+        return image
+    }
+    
+    func st_backArrowImageHighlighted() -> UIImage {
+        let bundle: Bundle = STBundle.st_baseResourceBundle()
+        let image = UIImage.init(named: "st_back_arrow", in: bundle, compatibleWith: UITraitCollection()) ?? UIImage()
+        return image
     }
 }

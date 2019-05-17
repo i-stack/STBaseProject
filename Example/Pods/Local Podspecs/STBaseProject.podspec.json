@@ -20,10 +20,10 @@
   },
   "source_files": "STBaseProject/Classes/**/*",
   "resource_bundles": {
-    "STBaseProject": [
-      "STBaseProject/Assets/*.bundle"
-    ]
   },
+  "resources": [
+    "STBaseProject/Assets/*"
+  ],
   "default_subspecs": "STBase",
   "public_header_files": "Pod/Classes/**/*",
   "subspecs": [

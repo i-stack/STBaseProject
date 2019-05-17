@@ -16,30 +16,36 @@ public enum STScanType {
 
 open class STScanView: UIView {
 
-    open var tipTitle: UILabel?  // 扫码区域下方提示文字
-    open var photoBtn: UIButton? // 相册按钮
-    
     open var needStop: Bool?
+    open var tipTitle: UILabel?
     open var scanType: STScanType?
     
     var heightScale: CGFloat = 0.0
     var lineImageView: UIImageView?
     let leftDistance: CGFloat = 60.0
     
+    deinit {
+        
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         needStop = false
         self.backgroundColor = UIColor.clear
-        self.lineImageView = UIImageView.init(image: UIImage.init(named: "scan_blue_line"))
+        self.lineImageView = UIImageView.init(image: self.st_scanBlueLineImage())
     }
     
     override open func layoutSubviews() {
         super.layoutSubviews()
-        let Left: CGFloat = leftDistance / heightScale
-        let sizeRetangle = CGSize.init(width: self.frame.size.width - Left * 2, height: self.frame.size.width - Left * 2)
+        let left: CGFloat = leftDistance / heightScale
+        let sizeRetangle = CGSize.init(width: self.frame.size.width - left * 2,
+                                       height: self.frame.size.width - left * 2)
         let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / CGFloat(2 * self.heightScale)
         if let newLineImageView = lineImageView {
-            newLineImageView.frame = CGRect.init(x: Left, y: YMinRetangle + 2, width: sizeRetangle.width - 4, height: 5)
+            newLineImageView.frame = CGRect.init(x: left,
+                                                 y: YMinRetangle + 2,
+                                                 width: sizeRetangle.width - 4,
+                                                 height: 5)
             self.addSubview(newLineImageView)
         }
     }
@@ -69,15 +75,18 @@ open class STScanView: UIView {
         }
         
         let Left: CGFloat = leftDistance / heightScale
-        let sizeRetangle = CGSize.init(width: self.frame.size.width - Left * 2, height: (self.frame.size.width - Left * 2) / self.heightScale)
-        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height/2.0;
+        let sizeRetangle = CGSize.init(width: self.frame.size.width - Left * 2,
+                                       height: (self.frame.size.width - Left * 2) / self.heightScale)
+        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / 2.0
         let YMaxRetangle = YMinRetangle + sizeRetangle.height
-        let initFrame = CGRect.init(x: Left, y: YMinRetangle + 2, width: sizeRetangle.width - 4, height: 5)
+        let initFrame = CGRect.init(x: Left,
+                                    y: YMinRetangle + 2,
+                                    width: sizeRetangle.width - 4,
+                                    height: 5)
         
         if let newLineImageView = self.lineImageView {
             newLineImageView.frame = initFrame
             newLineImageView.alpha = 1
-
             UIView.animate(withDuration: 1.5, animations: {
                 newLineImageView.frame = CGRect.init(x: initFrame.origin.x, y: YMaxRetangle - 2, width: initFrame.size.width, height: initFrame.size.height)
             }) { (state) in
@@ -102,7 +111,7 @@ open class STScanView: UIView {
         let left = leftDistance / self.heightScale
         let sizeRetangle = CGSize.init(width: self.frame.size.width - left * 2,
                                        height: self.frame.size.width - left * 2)
-        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / (2.0 * self.heightScale) - ST_NavHeight
+        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / (2.0 * self.heightScale)
         let YMaxRetangle = YMinRetangle + sizeRetangle.height / self.heightScale
         let XRetangleRight = self.frame.size.width - left
         
@@ -227,17 +236,9 @@ extension STScanView {
 }
 
 extension STScanView {
-    func st_bundlePathURL() -> URL {
-        
-//        NSBundle *bundle = [NSBundle bundleForClass:[MYSomeClass class]];
-//        NSURL *bundleURL = [bundle URLForResource:@"MyLibrary" withExtension:@"bundle"];
-//        NSBundle *resourceBundle = [NSBundle bundleWithURL: bundleURL];
-//        UIImage *img = [UIImage imageNamed:icon inBundle:bundle compatibleWithTraitCollection:nil];
-        
-        
-        
-        
-        let path: String = Bundle.main.path(forResource: "STScanResource", ofType: "bundle") ?? ""
-        return URL.init(fileURLWithPath: path)
+    func st_scanBlueLineImage() -> UIImage {
+        let bundle: Bundle = STBundle.st_scanResourceBundle()
+        let image = UIImage.init(named: "st_scan_blue_line", in: bundle, compatibleWith: UITraitCollection()) ?? UIImage()
+        return image
     }
 }
