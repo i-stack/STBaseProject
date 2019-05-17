@@ -19,12 +19,12 @@
     "ios": "10.0"
   },
   "source_files": "STBaseProject/Classes/**/*",
-  "default_subspecs": "STBaseViewController",
+  "default_subspecs": "STBase",
   "public_header_files": "Pod/Classes/**/*",
   "subspecs": [
     {
-      "name": "STBaseViewController",
-      "source_files": "STBaseProject/Classes/STBaseViewController/*.swift",
+      "name": "STBase",
+      "source_files": "STBaseProject/Classes/STBase/STBaseViewController/*.swift",
       "resource_bundles": {
         "STBaseProject": [
           "STBaseProject/Assets/default_subspec/*.png"
@@ -45,6 +45,11 @@
       "resource_bundles": {
         "STBaseProject": [
           "STBaseProject/Assets/STScanner/*.png"
+        ]
+      },
+      "dependencies": {
+        "STBase": [
+
         ]
       }
     }

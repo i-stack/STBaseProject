@@ -29,14 +29,14 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '10.0'
 
-s.source_files = 'STBaseProject/Classes/**/*'
+  s.source_files = 'STBaseProject/Classes/**/*'
 
-  s.default_subspec = 'STBaseViewController'
-  s.subspec 'STBaseViewController' do |ss|
-      ss.source_files = 'STBaseProject/Classes/STBaseViewController/*.swift'
-      ss.resource_bundles = {
-        'STBaseProject' => ['STBaseProject/Assets/default_subspec/*.png']
-      }
+  s.default_subspec = 'STBase'
+  s.subspec 'STBase' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STBase/STBaseViewController/*.swift'
+    ss.resource_bundles = {
+      'STBaseProject' => ['STBaseProject/Assets/default_subspec/*.png']
+    }
   end
 
   s.subspec 'STContract' do |ss|
@@ -52,6 +52,7 @@ s.source_files = 'STBaseProject/Classes/**/*'
     ss.resource_bundles = {
       'STBaseProject' => ['STBaseProject/Assets/STScanner/*.png']
     }
+    ss.dependency 'STBase'
   end
 
 #s.resource_bundles = {

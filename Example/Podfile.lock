@@ -1,7 +1,7 @@
 PODS:
   - STBaseProject (0.1.0):
-    - STBaseProject/STBaseViewController (= 0.1.0)
-  - STBaseProject/STBaseViewController (0.1.0)
+    - STBaseProject/STBase (= 0.1.0)
+  - STBaseProject/STBase (0.1.0)
 
 DEPENDENCIES:
   - STBaseProject (from `../`)
@@ -11,7 +11,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: 58f5441a40bb7083acd693629d87cf103d918fbc
+  STBaseProject: 5a18d970774f2ee41cba013ac569c3df987270a9
 
 PODFILE CHECKSUM: c14bbda732a2737762e62bf8bb19fef1fcb4c150
 

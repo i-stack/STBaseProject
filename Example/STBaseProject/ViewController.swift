@@ -10,15 +10,29 @@ import UIKit
 import STBaseProject
 
 class ViewController: STBaseOpenSystemOperationController {
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.st_openPhotoLibrary()
+        self.testScreenShot()
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    }
+    
+    func testScreenShot() -> Void {
+        NotificationCenter.default.addObserver(self, selector: #selector(userDidTakeScreenshot(note:)), name: UIApplication.userDidTakeScreenshotNotification, object: nil)
+    }
+    
+    
+    @objc func userDidTakeScreenshot(note: NSNotification) -> Void {
+        print("warning ======  userDidTakeScreenshot")
+        // call st_showScreenshotImage(rect: CGRect) class method can return UIImageView
+        // call st_imageWithScreenshot() class method can return UIImage
     }
 
 }

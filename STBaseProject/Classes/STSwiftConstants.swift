@@ -41,7 +41,7 @@ struct STNotificationName {
 }
 
 class STUIConstants: NSObject {
-    class func handleFloat(float: CGFloat) -> CGFloat {
+    class func st_handleFloat(float: CGFloat) -> CGFloat {
         if ST_IsIPhone5 {
             return float * 0.8
         } else if ST_IsIPhonePlus {
@@ -55,7 +55,7 @@ class STUIConstants: NSObject {
         }
     }
     
-    class func adaptIPhone5(a: CGFloat) -> CGFloat {
+    class func st_adaptIPhone5(a: CGFloat) -> CGFloat {
         if UIScreen.main.bounds.size.height < 667 {
             return a * 0.8
         } else {
@@ -63,7 +63,7 @@ class STUIConstants: NSObject {
         }
     }
     
-    class func adaptIPhonePlus(a: CGFloat) -> CGFloat {
+    class func st_adaptIPhonePlus(a: CGFloat) -> CGFloat {
         if UIScreen.main.bounds.size.height < 667 {
             return a * 0.8
         } else if UIScreen.main.bounds.size.height == 667 {
@@ -73,14 +73,14 @@ class STUIConstants: NSObject {
         }
     }
     
-    class func adaptSafeTop(a: CGFloat) -> CGFloat {
+    class func st_adaptSafeTop(a: CGFloat) -> CGFloat {
         if  UIScreen.main.bounds.size.height == 812 || UIScreen.main.bounds.size.height == 896 {
             return a + 24
         }
         return a
     }
     
-    class func adaptSafeBottom(a: CGFloat) -> CGFloat {
+    class func st_adaptSafeBottom(a: CGFloat) -> CGFloat {
         if  UIScreen.main.bounds.size.height == 812 || UIScreen.main.bounds.size.height == 896 {
             return a + 34
         }
