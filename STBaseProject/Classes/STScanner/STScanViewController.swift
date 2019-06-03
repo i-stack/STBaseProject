@@ -347,7 +347,7 @@ extension STScanViewController {
 
 extension STScanViewController {
     func st_navigationBar() -> Void {
-        self.titleLabel.text = "二维码/条形码"
+        self.titleLabel.text = "二维码"
         self.st_showNavBtnType(type: .showBothBtn)
         self.rightBtn.setTitle("相册", for: UIControl.State.normal)
     }
