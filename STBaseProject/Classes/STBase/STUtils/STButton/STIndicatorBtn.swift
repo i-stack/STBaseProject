@@ -19,7 +19,7 @@ open class STIndicatorBtn: STBtn {
     public var st_indicatorIsAnimating: Bool = false
 
     @IBInspectable
-    let activityIndicatorColor: UIColor = .lightGray
+    let activityIndicatorColor: UIColor = .gray
     
     deinit {
         self.hiddenSpinning()
