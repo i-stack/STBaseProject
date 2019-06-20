@@ -31,7 +31,7 @@
       "name": "STBase",
       "source_files": [
         "STBaseProject/Classes/STBase/STBaseViewController/*.swift",
-        "STBaseProject/Classes/STBase/STUtils/*.swift"
+        "STBaseProject/Classes/STBase/STUtils/*/*.swift"
       ]
     },
     {

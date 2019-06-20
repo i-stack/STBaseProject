@@ -17,7 +17,7 @@ class ViewController: STBaseOpenSystemOperationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.testScreenShot()
+        self.testIndicatorBtn()
     }
 
     override func didReceiveMemoryWarning() {
@@ -26,7 +26,7 @@ class ViewController: STBaseOpenSystemOperationController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.testScanner()
+//        self.testScanner()
     }
     
     func testScanner() -> Void {
@@ -45,6 +45,27 @@ class ViewController: STBaseOpenSystemOperationController {
         print("warning ======  userDidTakeScreenshot")
         // call st_showScreenshotImage(rect: CGRect) class method can return UIImageView
         // call st_imageWithScreenshot() class method can return UIImage
+    }
+    
+    func testIndicatorBtn() -> Void {
+        let btn = STIndicatorBtn()
+        btn.cornerRadius = 4
+        btn.frame = CGRect.init(x: 0, y: 200, width: self.view.bounds.width, height: 40)
+        btn.setTitle("loading", for: UIControl.State.normal)
+        btn.addTarget(self, action: #selector(btnClick), for: UIControl.Event.touchUpInside)
+        btn.backgroundColor = UIColor.green
+        self.view.addSubview(btn)
+        btn.tag = 100
+    }
+    
+    @objc func btnClick() -> Void {
+        let btn: STIndicatorBtn = self.view.viewWithTag(100) as! STIndicatorBtn
+        if btn.st_indicatorIsAnimating {
+            btn.st_indicatorStopAnimating()
+        } else {
+            btn.st_indicatorStartAnimating()
+        }
+//        btn.st_indicatorStartAnimating()
     }
 
 }

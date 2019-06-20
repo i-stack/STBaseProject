@@ -26,11 +26,11 @@ extension UIImage {
      *  return scale image
      */
     public func st_scaleImageWithSize(showImageSize: CGSize) -> UIImage {
-        if __CGSizeEqualToSize(size, self.size) {
+        if __CGSizeEqualToSize(showImageSize, self.size) {
             return self
         }
-        UIGraphicsBeginImageContextWithOptions(size, true, UIScreen.main.scale)
-        self.draw(in: CGRect.init(x: 0, y: 0, width: size.width, height: size.height))
+        UIGraphicsBeginImageContextWithOptions(showImageSize, true, UIScreen.main.scale)
+        self.draw(in: CGRect.init(x: 0, y: 0, width: showImageSize.width, height: showImageSize.height))
         let newImage: UIImage = UIGraphicsGetImageFromCurrentImageContext() ?? self
         UIGraphicsEndImageContext()
         return newImage
@@ -47,7 +47,7 @@ extension UIImage {
      *      }
      *  }
      *
-     *  return scale image
+     *  return circle image
      */
     public func st_imageWithCircle() -> UIImage {
         if __CGSizeEqualToSize(CGSize.zero, self.size) {
