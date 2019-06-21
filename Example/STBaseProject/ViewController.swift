@@ -17,6 +17,7 @@ class ViewController: STBaseOpenSystemOperationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.st_showNavBtnType(type: .none)
         self.testIndicatorBtn()
     }
 

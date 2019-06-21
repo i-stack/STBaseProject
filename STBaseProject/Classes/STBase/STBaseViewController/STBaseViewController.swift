@@ -34,6 +34,9 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
     open var noDataView: UIView?
     open var networkNotReachView: UIView?
     
+    open var titleLabelAttributeLeft: NSLayoutConstraint?
+    open var titleLabelAttributeRight: NSLayoutConstraint?
+
     deinit {
         NotificationCenter.default.removeObserver(self)
         print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
@@ -42,22 +45,12 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
         self.hidesBottomBarWhenPushed = true
-        self.view.backgroundColor = self.st_bgColor()
         self.automaticallyAdjustsScrollViewInsets = false
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
 
-        self.st_addNotification()
         self.st_navigationBarView()
-    }
-    
-    override open func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-    
-    override open func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
     }
     
     override open func viewDidAppear(_ animated: Bool) {
@@ -78,7 +71,7 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         return true
     }
 
-    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer.isKind(of: UIPanGestureRecognizer.self) == true && otherGestureRecognizer.isKind(of: UIScreenEdgePanGestureRecognizer.self) == true {
             return true
         }
@@ -144,10 +137,14 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         self.titleLabel.textAlignment = NSTextAlignment.center
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.topBgView.addSubview(self.titleLabel)
+        
+        self.titleLabelAttributeLeft = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.leftBtn, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: 5)
+        self.titleLabelAttributeRight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.rightBtn, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: -5 + rightSpace)
+
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.rightBtn, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: -5 + rightSpace),
-            NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.leftBtn, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: 5),
+            self.titleLabelAttributeLeft!,
+            self.titleLabelAttributeRight!,
             NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: titleHeight)
             ])
         self.st_showNavBtnType(type: .onlyShowTitle)
