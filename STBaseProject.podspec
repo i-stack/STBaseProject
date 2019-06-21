@@ -32,7 +32,7 @@ Pod::Spec.new do |s|
   
   s.default_subspecs = 'STBase'
   s.subspec 'STBase' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STBase/STBaseViewController/*.swift', 'STBaseProject/Classes/STBase/STUtils/**/*.swift']
+    ss.source_files = ['STBaseProject/Classes/STBase/STBaseViewController/*.swift', 'STBaseProject/Classes/STBase/STUtils/**/*']
   end
 
   s.subspec 'STContract' do |ss|
