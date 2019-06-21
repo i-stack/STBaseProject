@@ -132,7 +132,7 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
             ])
         
         self.titleLabel = UILabel.init()
-        self.titleLabel.textColor = self.st_titleColor()
+//        self.titleLabel.textColor = self.st_titleColor()
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
         self.titleLabel.textAlignment = NSTextAlignment.center
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -257,17 +257,17 @@ extension STBaseViewController {
     func st_titleColor() -> UIColor {
         return UIColor.init(red: 80, green: 81, blue: 96, alpha: 1)
     }
-    
+
     func st_bgColor() -> UIColor {
         return UIColor.init(red: 237, green: 237, blue: 237, alpha: 1)
     }
-    
+
     func st_backArrowImage() -> UIImage {
         let bundle: Bundle = STBundle.st_baseResourceBundle()
         let image = UIImage.init(named: "st_white_back_arrow", in: bundle, compatibleWith: UITraitCollection()) ?? UIImage()
         return image
     }
-    
+
     func st_backArrowImageHighlighted() -> UIImage {
         let bundle: Bundle = STBundle.st_baseResourceBundle()
         let image = UIImage.init(named: "st_back_arrow", in: bundle, compatibleWith: UITraitCollection()) ?? UIImage()
