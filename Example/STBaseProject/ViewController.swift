@@ -60,12 +60,17 @@ class ViewController: STBaseOpenSystemOperationController {
     
     @objc func btnClick() -> Void {
         let btn: STIndicatorBtn = self.view.viewWithTag(100) as! STIndicatorBtn
-        if btn.st_indicatorIsAnimating {
+        btn.st_space = 10
+        btn.st_newBtnTitle = "hello world"
+//        if btn.st_indicatorIsAnimating {
+//            btn.st_indicatorStopAnimating()
+//        } else {
+//            btn.st_indicatorStartAnimating()
+//        }
+        btn.st_indicatorStartAnimating()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
             btn.st_indicatorStopAnimating()
-        } else {
-            btn.st_indicatorStartAnimating()
         }
-//        btn.st_indicatorStartAnimating()
     }
 
 }

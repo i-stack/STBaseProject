@@ -11,11 +11,11 @@ import UIKit
 open class STIndicatorBtn: STBtn {
     
     private var originalButtonText: String?
-    private var newBtnTitleLabel: UILabel!
+    private var newBtnTitleLabel: UILabel?
     private var activityIndicator: UIActivityIndicatorView!
     
-    public var st_space: CGFloat = 10.0
-    public var st_newButtonText: String = "loading..."
+    public var st_space: CGFloat = 0.0
+    public var st_newBtnTitle: String = ""
     public var st_indicatorIsAnimating: Bool = false
 
     @IBInspectable
@@ -34,22 +34,22 @@ open class STIndicatorBtn: STBtn {
     }
     
     public func st_indicatorStartAnimating() -> Void {
-        if (activityIndicator == nil) {
+        if st_indicatorIsAnimating == true {
+            return
+        }
+        st_indicatorIsAnimating = true
+        
+        if activityIndicator == nil {
             activityIndicator = createActivityIndicator()
         }
         
-        if newBtnTitleLabel == nil, st_newButtonText.count > 0 {
+        if st_newBtnTitle.count > 0, newBtnTitleLabel == nil {
             newBtnTitleLabel = self.createNewBtnTitleLabel()
-        }
-        
-        if st_indicatorIsAnimating == true {
-            return
         }
         
         originalButtonText = self.titleLabel?.text
         self.setTitle("", for: .normal)
-        newBtnTitleLabel.text = st_newButtonText
-        st_indicatorIsAnimating = true
+        newBtnTitleLabel?.text = st_newBtnTitle
         self.showSpinning()
     }
     
@@ -58,25 +58,27 @@ open class STIndicatorBtn: STBtn {
             return
         }
         st_indicatorIsAnimating = false
-        self.setTitle(originalButtonText, for: .normal)
-        newBtnTitleLabel.text = ""
+
         self.hiddenSpinning()
     }
 
     private func showSpinning() {
         DispatchQueue.main.async {
-            self.addSubview(self.activityIndicator)
+            self.isUserInteractionEnabled = false
             self.centerActivityIndicatorInButton()
             self.activityIndicator.startAnimating()
-            self.isUserInteractionEnabled = false
         }
     }
     
     private func hiddenSpinning() {
         DispatchQueue.main.async {
+            self.newBtnTitleLabel?.text = ""
+            self.setTitle(self.originalButtonText, for: .normal)
+
+            self.isUserInteractionEnabled = true
             self.activityIndicator.stopAnimating()
             self.activityIndicator.removeFromSuperview()
-            self.isUserInteractionEnabled = true
+            self.newBtnTitleLabel?.removeFromSuperview()
         }
     }
     
@@ -90,14 +92,18 @@ open class STIndicatorBtn: STBtn {
     
     private func createNewBtnTitleLabel() -> UILabel {
         let label = UILabel()
-        label.backgroundColor = UIColor.clear
         label.font = self.titleLabel?.font
+        label.backgroundColor = UIColor.clear
+        label.isUserInteractionEnabled = true
         label.textColor = self.titleLabel?.textColor
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }
     
     private func centerActivityIndicatorInButton() {
+        if activityIndicator.superview == nil {
+            self.addSubview(self.activityIndicator)
+        }
         self.addConstraints([NSLayoutConstraint(item: activityIndicator!,
                                                 attribute: .centerY,
                                                 relatedBy: .equal,
@@ -114,37 +120,38 @@ open class STIndicatorBtn: STBtn {
                                                 constant: -st_space * 2)
             ])
         
-        if st_newButtonText.count > 0 {
-            self.addSubview(newBtnTitleLabel)
-            self.addConstraints([NSLayoutConstraint(item: newBtnTitleLabel!,
-                                                    attribute: .centerY,
-                                                    relatedBy: .equal,
-                                                    toItem: self,
-                                                    attribute: .centerY,
-                                                    multiplier: 1,
-                                                    constant: 0),
-                                 NSLayoutConstraint(item: newBtnTitleLabel!,
-                                                    attribute: .right,
-                                                    relatedBy: .equal,
-                                                    toItem: self,
-                                                    attribute: .right,
-                                                    multiplier: 1,
-                                                    constant: 0),
-                                 NSLayoutConstraint(item: newBtnTitleLabel!,
-                                                    attribute: .left,
-                                                    relatedBy: .equal,
-                                                    toItem: activityIndicator,
-                                                    attribute: .right,
-                                                    multiplier: 1,
-                                                    constant: st_space),
-                                 NSLayoutConstraint(item: newBtnTitleLabel!,
-                                                    attribute: .height,
-                                                    relatedBy: .equal,
-                                                    toItem: nil,
-                                                    attribute: .notAnAttribute,
-                                                    multiplier: 1,
-                                                    constant: self.titleLabel?.frame.size.height ?? 25)
-                ])
+        guard let btnTitleLabel = newBtnTitleLabel, st_newBtnTitle.count > 0 else { return }
+        if btnTitleLabel.superview == nil {
+            self.addSubview(btnTitleLabel)
         }
+        self.addConstraints([NSLayoutConstraint(item: btnTitleLabel,
+                                                attribute: .centerY,
+                                                relatedBy: .equal,
+                                                toItem: self,
+                                                attribute: .centerY,
+                                                multiplier: 1,
+                                                constant: 0),
+                             NSLayoutConstraint(item: btnTitleLabel,
+                                                attribute: .right,
+                                                relatedBy: .equal,
+                                                toItem: self,
+                                                attribute: .right,
+                                                multiplier: 1,
+                                                constant: 0),
+                             NSLayoutConstraint(item: btnTitleLabel,
+                                                attribute: .left,
+                                                relatedBy: .equal,
+                                                toItem: activityIndicator,
+                                                attribute: .right,
+                                                multiplier: 1,
+                                                constant: st_space < 10 ? 10 : st_space),
+                             NSLayoutConstraint(item: btnTitleLabel,
+                                                attribute: .height,
+                                                relatedBy: .equal,
+                                                toItem: nil,
+                                                attribute: .notAnAttribute,
+                                                multiplier: 1,
+                                                constant: self.titleLabel?.frame.size.height ?? 25)
+            ])
     }
 }
