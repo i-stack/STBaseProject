@@ -30,12 +30,28 @@
     {
       "name": "STBase",
       "source_files": [
-        "STBaseProject/Classes/STBase/STBaseViewController/*.swift"
+        "STBaseProject/Classes/STBase/**/*.swift"
       ]
     },
     {
-      "name": "STUtils",
-      "source_files": "STBaseProject/Classes/STUtils/**/*"
+      "name": "STBundle",
+      "source_files": "STBaseProject/Classes/STBundle/*.swift"
+    },
+    {
+      "name": "STButton",
+      "source_files": "STBaseProject/Classes/STButton/*.swift"
+    },
+    {
+      "name": "STData",
+      "source_files": "STBaseProject/Classes/STData/*.swift"
+    },
+    {
+      "name": "STImageView",
+      "source_files": "STBaseProject/Classes/STImageView/*.swift"
+    },
+    {
+      "name": "STString",
+      "source_files": "STBaseProject/Classes/STString/*.swift"
     },
     {
       "name": "STContract",

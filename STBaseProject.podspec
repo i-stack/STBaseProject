@@ -32,11 +32,27 @@ Pod::Spec.new do |s|
   
   s.default_subspecs = 'STBase'
   s.subspec 'STBase' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STBase/STBaseViewController/*.swift']
+    ss.source_files = ['STBaseProject/Classes/STBase/**/*.swift']
   end
 
-  s.subspec 'STUtils' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STUtils/**/*'
+  s.subspec 'STBundle' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STBundle/*.swift'
+  end
+  
+  s.subspec 'STButton' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STButton/*.swift'
+  end
+  
+  s.subspec 'STData' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STData/*.swift'
+  end
+  
+  s.subspec 'STImageView' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STImageView/*.swift'
+  end
+  
+  s.subspec 'STString' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STString/*.swift'
   end
   
   s.subspec 'STContract' do |ss|
