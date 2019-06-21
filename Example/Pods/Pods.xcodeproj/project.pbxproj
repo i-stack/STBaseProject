@@ -11,18 +11,18 @@
 		000000000390 /* STBaseNotifactionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000E0 /* STBaseNotifactionViewController.swift */; };
 		0000000003A0 /* STBaseOpenSystemOperationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000F0 /* STBaseOpenSystemOperationController.swift */; };
 		0000000003B0 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000100 /* STBaseViewController.swift */; };
-		0000000003C0 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000130 /* STBundle.swift */; };
-		0000000003D0 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000150 /* STBtn.swift */; };
-		0000000003E0 /* STIndicatorBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000160 /* STIndicatorBtn.swift */; };
-		0000000003F0 /* STImageContentType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000180 /* STImageContentType.swift */; };
-		000000000400 /* UIImage+STScaleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001A0 /* UIImage+STScaleImage.swift */; };
-		000000000410 /* UIImageView+STImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001C0 /* UIImageView+STImageView.swift */; };
-		000000000420 /* STSwiftConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001D0 /* STSwiftConstants.swift */; };
-		000000000430 /* STContractManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001F0 /* STContractManager.swift */; };
-		000000000440 /* STContractMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000200 /* STContractMessage.swift */; };
-		000000000450 /* STScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000220 /* STScanView.swift */; };
-		000000000460 /* STScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000230 /* STScanViewController.swift */; };
-		000000000470 /* STScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000250 /* STScreenshot.swift */; };
+		0000000003C0 /* STContractManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000120 /* STContractManager.swift */; };
+		0000000003D0 /* STContractMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000130 /* STContractMessage.swift */; };
+		0000000003E0 /* STScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000150 /* STScanView.swift */; };
+		0000000003F0 /* STScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000160 /* STScanViewController.swift */; };
+		000000000400 /* STScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000180 /* STScreenshot.swift */; };
+		000000000410 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001B0 /* STBundle.swift */; };
+		000000000420 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001D0 /* STBtn.swift */; };
+		000000000430 /* STIndicatorBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001E0 /* STIndicatorBtn.swift */; };
+		000000000440 /* STImageContentType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000200 /* STImageContentType.swift */; };
+		000000000450 /* UIImage+STScaleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000220 /* UIImage+STScaleImage.swift */; };
+		000000000460 /* UIImageView+STImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000240 /* UIImageView+STImageView.swift */; };
+		000000000470 /* STSwiftConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000250 /* STSwiftConstants.swift */; };
 		000000000480 /* STBaseResource.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 000000000270 /* STBaseResource.bundle */; };
 		000000000490 /* STScanResource.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 000000000280 /* STScanResource.bundle */; };
 		0000000004E0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0000000004D0 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -47,18 +47,18 @@
 		0000000000E0 /* STBaseNotifactionViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseNotifactionViewController.swift; sourceTree = "<group>"; };
 		0000000000F0 /* STBaseOpenSystemOperationController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseOpenSystemOperationController.swift; sourceTree = "<group>"; };
 		000000000100 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewController.swift; sourceTree = "<group>"; };
-		000000000130 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBundle.swift; sourceTree = "<group>"; };
-		000000000150 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBtn.swift; sourceTree = "<group>"; };
-		000000000160 /* STIndicatorBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STIndicatorBtn.swift; sourceTree = "<group>"; };
-		000000000180 /* STImageContentType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STImageContentType.swift; sourceTree = "<group>"; };
-		0000000001A0 /* UIImage+STScaleImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIImage+STScaleImage.swift"; sourceTree = "<group>"; };
-		0000000001C0 /* UIImageView+STImageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIImageView+STImageView.swift"; sourceTree = "<group>"; };
-		0000000001D0 /* STSwiftConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STSwiftConstants.swift; sourceTree = "<group>"; };
-		0000000001F0 /* STContractManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STContractManager.swift; sourceTree = "<group>"; };
-		000000000200 /* STContractMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STContractMessage.swift; sourceTree = "<group>"; };
-		000000000220 /* STScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScanView.swift; sourceTree = "<group>"; };
-		000000000230 /* STScanViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScanViewController.swift; sourceTree = "<group>"; };
-		000000000250 /* STScreenshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScreenshot.swift; sourceTree = "<group>"; };
+		000000000120 /* STContractManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STContractManager.swift; sourceTree = "<group>"; };
+		000000000130 /* STContractMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STContractMessage.swift; sourceTree = "<group>"; };
+		000000000150 /* STScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScanView.swift; sourceTree = "<group>"; };
+		000000000160 /* STScanViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScanViewController.swift; sourceTree = "<group>"; };
+		000000000180 /* STScreenshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScreenshot.swift; sourceTree = "<group>"; };
+		0000000001B0 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBundle.swift; sourceTree = "<group>"; };
+		0000000001D0 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBtn.swift; sourceTree = "<group>"; };
+		0000000001E0 /* STIndicatorBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STIndicatorBtn.swift; sourceTree = "<group>"; };
+		000000000200 /* STImageContentType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STImageContentType.swift; sourceTree = "<group>"; };
+		000000000220 /* UIImage+STScaleImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIImage+STScaleImage.swift"; sourceTree = "<group>"; };
+		000000000240 /* UIImageView+STImageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIImageView+STImageView.swift"; sourceTree = "<group>"; };
+		000000000250 /* STSwiftConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STSwiftConstants.swift; sourceTree = "<group>"; };
 		000000000270 /* STBaseResource.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = STBaseResource.bundle; path = STBaseProject/Assets/STBaseResource.bundle; sourceTree = "<group>"; };
 		000000000280 /* STScanResource.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = STScanResource.bundle; path = STBaseProject/Assets/STScanResource.bundle; sourceTree = "<group>"; };
 		0000000002A0 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
@@ -154,9 +154,10 @@
 				000000000290 /* Pod */,
 				000000000260 /* Resources */,
 				0000000000C0 /* STBase */,
-				0000000001E0 /* STContract */,
-				000000000210 /* STScanner */,
-				000000000240 /* STScreenshot */,
+				000000000110 /* STContract */,
+				000000000140 /* STScanner */,
+				000000000170 /* STScreenshot */,
+				000000000190 /* STUtils */,
 				0000000004A0 /* Support Files */,
 			);
 			name = STBaseProject;
@@ -167,7 +168,6 @@
 			isa = PBXGroup;
 			children = (
 				0000000000D0 /* STBaseViewController */,
-				000000000110 /* STUtils */,
 			);
 			name = STBase;
 			path = STBaseProject/Classes/STBase;
@@ -184,93 +184,93 @@
 			path = STBaseViewController;
 			sourceTree = "<group>";
 		};
-		000000000110 /* STUtils */ = {
+		000000000110 /* STContract */ = {
 			isa = PBXGroup;
 			children = (
-				0000000001D0 /* STSwiftConstants.swift */,
-				000000000120 /* STBundle */,
-				000000000140 /* STButton */,
-				000000000170 /* STData */,
-				000000000190 /* STImage */,
-				0000000001B0 /* STImageView */,
-			);
-			name = STUtils;
-			path = STUtils;
-			sourceTree = "<group>";
-		};
-		000000000120 /* STBundle */ = {
-			isa = PBXGroup;
-			children = (
-				000000000130 /* STBundle.swift */,
-			);
-			name = STBundle;
-			path = STBundle;
-			sourceTree = "<group>";
-		};
-		000000000140 /* STButton */ = {
-			isa = PBXGroup;
-			children = (
-				000000000150 /* STBtn.swift */,
-				000000000160 /* STIndicatorBtn.swift */,
-			);
-			name = STButton;
-			path = STButton;
-			sourceTree = "<group>";
-		};
-		000000000170 /* STData */ = {
-			isa = PBXGroup;
-			children = (
-				000000000180 /* STImageContentType.swift */,
-			);
-			name = STData;
-			path = STData;
-			sourceTree = "<group>";
-		};
-		000000000190 /* STImage */ = {
-			isa = PBXGroup;
-			children = (
-				0000000001A0 /* UIImage+STScaleImage.swift */,
-			);
-			name = STImage;
-			path = STImage;
-			sourceTree = "<group>";
-		};
-		0000000001B0 /* STImageView */ = {
-			isa = PBXGroup;
-			children = (
-				0000000001C0 /* UIImageView+STImageView.swift */,
-			);
-			name = STImageView;
-			path = STImageView;
-			sourceTree = "<group>";
-		};
-		0000000001E0 /* STContract */ = {
-			isa = PBXGroup;
-			children = (
-				0000000001F0 /* STContractManager.swift */,
-				000000000200 /* STContractMessage.swift */,
+				000000000120 /* STContractManager.swift */,
+				000000000130 /* STContractMessage.swift */,
 			);
 			name = STContract;
 			path = STBaseProject/Classes/STContract;
 			sourceTree = "<group>";
 		};
-		000000000210 /* STScanner */ = {
+		000000000140 /* STScanner */ = {
 			isa = PBXGroup;
 			children = (
-				000000000220 /* STScanView.swift */,
-				000000000230 /* STScanViewController.swift */,
+				000000000150 /* STScanView.swift */,
+				000000000160 /* STScanViewController.swift */,
 			);
 			name = STScanner;
 			path = STBaseProject/Classes/STScanner;
 			sourceTree = "<group>";
 		};
-		000000000240 /* STScreenshot */ = {
+		000000000170 /* STScreenshot */ = {
 			isa = PBXGroup;
 			children = (
-				000000000250 /* STScreenshot.swift */,
+				000000000180 /* STScreenshot.swift */,
 			);
 			name = STScreenshot;
 			path = STBaseProject/Classes/STScreenshot;
+			sourceTree = "<group>";
+		};
+		000000000190 /* STUtils */ = {
+			isa = PBXGroup;
+			children = (
+				000000000250 /* STSwiftConstants.swift */,
+				0000000001A0 /* STBundle */,
+				0000000001C0 /* STButton */,
+				0000000001F0 /* STData */,
+				000000000210 /* STImage */,
+				000000000230 /* STImageView */,
+			);
+			name = STUtils;
+			path = STBaseProject/Classes/STUtils;
+			sourceTree = "<group>";
+		};
+		0000000001A0 /* STBundle */ = {
+			isa = PBXGroup;
+			children = (
+				0000000001B0 /* STBundle.swift */,
+			);
+			name = STBundle;
+			path = STBundle;
+			sourceTree = "<group>";
+		};
+		0000000001C0 /* STButton */ = {
+			isa = PBXGroup;
+			children = (
+				0000000001D0 /* STBtn.swift */,
+				0000000001E0 /* STIndicatorBtn.swift */,
+			);
+			name = STButton;
+			path = STButton;
+			sourceTree = "<group>";
+		};
+		0000000001F0 /* STData */ = {
+			isa = PBXGroup;
+			children = (
+				000000000200 /* STImageContentType.swift */,
+			);
+			name = STData;
+			path = STData;
+			sourceTree = "<group>";
+		};
+		000000000210 /* STImage */ = {
+			isa = PBXGroup;
+			children = (
+				000000000220 /* UIImage+STScaleImage.swift */,
+			);
+			name = STImage;
+			path = STImage;
+			sourceTree = "<group>";
+		};
+		000000000230 /* STImageView */ = {
+			isa = PBXGroup;
+			children = (
+				000000000240 /* UIImageView+STImageView.swift */,
+			);
+			name = STImageView;
+			path = STImageView;
 			sourceTree = "<group>";
 		};
 		000000000260 /* Resources */ = {
@@ -445,18 +445,18 @@
 				0000000003A0 /* STBaseOpenSystemOperationController.swift in Sources */,
 				000000000520 /* STBaseProject-dummy.m in Sources */,
 				0000000003B0 /* STBaseViewController.swift in Sources */,
-				0000000003D0 /* STBtn.swift in Sources */,
-				0000000003C0 /* STBundle.swift in Sources */,
-				000000000430 /* STContractManager.swift in Sources */,
-				000000000440 /* STContractMessage.swift in Sources */,
-				0000000003F0 /* STImageContentType.swift in Sources */,
-				0000000003E0 /* STIndicatorBtn.swift in Sources */,
-				000000000450 /* STScanView.swift in Sources */,
-				000000000460 /* STScanViewController.swift in Sources */,
-				000000000470 /* STScreenshot.swift in Sources */,
-				000000000420 /* STSwiftConstants.swift in Sources */,
-				000000000400 /* UIImage+STScaleImage.swift in Sources */,
-				000000000410 /* UIImageView+STImageView.swift in Sources */,
+				000000000420 /* STBtn.swift in Sources */,
+				000000000410 /* STBundle.swift in Sources */,
+				0000000003C0 /* STContractManager.swift in Sources */,
+				0000000003D0 /* STContractMessage.swift in Sources */,
+				000000000440 /* STImageContentType.swift in Sources */,
+				000000000430 /* STIndicatorBtn.swift in Sources */,
+				0000000003E0 /* STScanView.swift in Sources */,
+				0000000003F0 /* STScanViewController.swift in Sources */,
+				000000000400 /* STScreenshot.swift in Sources */,
+				000000000470 /* STSwiftConstants.swift in Sources */,
+				000000000450 /* UIImage+STScaleImage.swift in Sources */,
+				000000000460 /* UIImageView+STImageView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

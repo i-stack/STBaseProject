@@ -35,11 +35,11 @@
     },
     {
       "name": "STUtils",
-      "source_files": "STBaseProject/Classes/STBase/STUtils/*.swift"
+      "source_files": "STBaseProject/Classes/STUtils/**/*"
     },
     {
       "name": "STContract",
-      "source_files": "STBaseProject/Classes/STContract/**/*"
+      "source_files": "STBaseProject/Classes/STContract/*.swift"
     },
     {
       "name": "STScreenshot",

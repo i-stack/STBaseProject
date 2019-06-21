@@ -36,7 +36,7 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'STUtils' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STBase/STUtils/**/*'
+    ss.source_files = 'STBaseProject/Classes/STUtils/**/*'
   end
   
   s.subspec 'STContract' do |ss|
