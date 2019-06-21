@@ -151,7 +151,7 @@
 			children = (
 				000000000270 /* Pod */,
 				000000000240 /* Resources */,
-				0000000000C0 /* STBaseClass */,
+				0000000000C0 /* STBase */,
 				000000000120 /* STBundle */,
 				000000000140 /* STButton */,
 				000000000170 /* STContract */,
@@ -165,14 +165,14 @@
 			path = ../..;
 			sourceTree = "<group>";
 		};
-		0000000000C0 /* STBaseClass */ = {
+		0000000000C0 /* STBase */ = {
 			isa = PBXGroup;
 			children = (
 				0000000000D0 /* STBaseConstants */,
 				0000000000F0 /* STBaseViewController */,
 			);
-			name = STBaseClass;
-			path = STBaseProject/Classes/STBaseClass;
+			name = STBase;
+			path = STBaseProject/Classes/STBase;
 			sourceTree = "<group>";
 		};
 		0000000000D0 /* STBaseConstants */ = {
