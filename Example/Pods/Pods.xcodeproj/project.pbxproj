@@ -7,36 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		000000000360 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000350 /* Foundation.framework */; };
-		000000000370 /* STBaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000E0 /* STBaseConstants.swift */; };
-		000000000380 /* STBaseOpenSystemOperationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000100 /* STBaseOpenSystemOperationController.swift */; };
-		000000000390 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000110 /* STBaseViewController.swift */; };
-		0000000003A0 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000130 /* STBundle.swift */; };
-		0000000003B0 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000150 /* STBtn.swift */; };
-		0000000003C0 /* STIndicatorBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000160 /* STIndicatorBtn.swift */; };
-		0000000003D0 /* STContractManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000180 /* STContractManager.swift */; };
-		0000000003E0 /* STContractMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000190 /* STContractMessage.swift */; };
-		0000000003F0 /* STImageContentType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001B0 /* STImageContentType.swift */; };
-		000000000400 /* UIImage+STScaleImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001D0 /* UIImage+STScaleImage.swift */; };
-		000000000410 /* UIImageView+STImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001E0 /* UIImageView+STImageView.swift */; };
-		000000000420 /* STScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000200 /* STScanView.swift */; };
-		000000000430 /* STScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000210 /* STScanViewController.swift */; };
-		000000000440 /* STScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000230 /* STScreenshot.swift */; };
-		000000000450 /* STBaseResource.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 000000000250 /* STBaseResource.bundle */; };
-		000000000460 /* STScanResource.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 000000000260 /* STScanResource.bundle */; };
-		0000000004B0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0000000004A0 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		0000000004F0 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 0000000004E0 /* STBaseProject-dummy.m */; };
-		000000000590 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000350 /* Foundation.framework */; };
-		000000000600 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0000000005F0 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		000000000650 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 000000000640 /* Pods-STBaseProject_Example-dummy.m */; };
+		000000000240 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000230 /* Foundation.framework */; };
+		000000000250 /* STBaseResource.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 000000000130 /* STBaseResource.bundle */; };
+		000000000260 /* STScanResource.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 000000000140 /* STScanResource.bundle */; };
+		000000000270 /* STBaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000E0 /* STBaseConstants.swift */; };
+		000000000280 /* STBaseOpenSystemOperationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000100 /* STBaseOpenSystemOperationController.swift */; };
+		000000000290 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000110 /* STBaseViewController.swift */; };
+		0000000002E0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0000000002D0 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		000000000320 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 000000000310 /* STBaseProject-dummy.m */; };
+		0000000003C0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000230 /* Foundation.framework */; };
+		000000000430 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 000000000420 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		000000000480 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 000000000470 /* Pods-STBaseProject_Example-dummy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		000000000660 /* PBXContainerItemProxy */ = {
+		000000000490 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 000000000000 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 0000000002B0;
+			remoteGlobalIDString = 000000000190;
 			remoteInfo = STBaseProject;
 		};
 /* End PBXContainerItemProxy section */
@@ -46,56 +35,45 @@
 		0000000000E0 /* STBaseConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseConstants.swift; sourceTree = "<group>"; };
 		000000000100 /* STBaseOpenSystemOperationController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseOpenSystemOperationController.swift; sourceTree = "<group>"; };
 		000000000110 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewController.swift; sourceTree = "<group>"; };
-		000000000130 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBundle.swift; sourceTree = "<group>"; };
-		000000000150 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBtn.swift; sourceTree = "<group>"; };
-		000000000160 /* STIndicatorBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STIndicatorBtn.swift; sourceTree = "<group>"; };
-		000000000180 /* STContractManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STContractManager.swift; sourceTree = "<group>"; };
-		000000000190 /* STContractMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STContractMessage.swift; sourceTree = "<group>"; };
-		0000000001B0 /* STImageContentType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STImageContentType.swift; sourceTree = "<group>"; };
-		0000000001D0 /* UIImage+STScaleImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIImage+STScaleImage.swift"; sourceTree = "<group>"; };
-		0000000001E0 /* UIImageView+STImageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = "UIImageView+STImageView.swift"; sourceTree = "<group>"; };
-		000000000200 /* STScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScanView.swift; sourceTree = "<group>"; };
-		000000000210 /* STScanViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScanViewController.swift; sourceTree = "<group>"; };
-		000000000230 /* STScreenshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STScreenshot.swift; sourceTree = "<group>"; };
-		000000000250 /* STBaseResource.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = STBaseResource.bundle; path = STBaseProject/Assets/STBaseResource.bundle; sourceTree = "<group>"; };
-		000000000260 /* STScanResource.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = STScanResource.bundle; path = STBaseProject/Assets/STScanResource.bundle; sourceTree = "<group>"; };
-		000000000280 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
-		000000000290 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
-		0000000002A0 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		0000000002F0 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = STBaseProject.framework; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		000000000350 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		000000000480 /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
-		000000000490 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
-		0000000004A0 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
-		0000000004C0 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
-		0000000004D0 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
-		0000000004E0 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
-		000000000540 /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_STBaseProject_Example.framework; path = "Pods-STBaseProject_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0000000005B0 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
-		0000000005C0 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		0000000005D0 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
-		0000000005E0 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
-		0000000005F0 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
-		000000000610 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
-		000000000620 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		000000000630 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		000000000640 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
+		000000000130 /* STBaseResource.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = STBaseResource.bundle; path = STBaseProject/Assets/STBaseResource.bundle; sourceTree = "<group>"; };
+		000000000140 /* STScanResource.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = STScanResource.bundle; path = STBaseProject/Assets/STScanResource.bundle; sourceTree = "<group>"; };
+		000000000160 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		000000000170 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		000000000180 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		0000000001D0 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = STBaseProject.framework; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000230 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		0000000002B0 /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
+		0000000002C0 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
+		0000000002D0 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
+		0000000002F0 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
+		000000000300 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
+		000000000310 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
+		000000000370 /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_STBaseProject_Example.framework; path = "Pods-STBaseProject_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0000000003E0 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
+		0000000003F0 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		000000000400 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
+		000000000410 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
+		000000000420 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
+		000000000440 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
+		000000000450 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		000000000460 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
+		000000000470 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		000000000320 /* Frameworks */ = {
+		000000000200 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000360 /* Foundation.framework in Frameworks */,
+				000000000240 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		000000000570 /* Frameworks */ = {
+		0000000003A0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000590 /* Foundation.framework in Frameworks */,
+				0000000003C0 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,8 +94,8 @@
 		000000000020 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				000000000540 /* Pods_STBaseProject_Example.framework */,
-				0000000002F0 /* STBaseProject.framework */,
+				000000000370 /* Pods_STBaseProject_Example.framework */,
+				0000000001D0 /* STBaseProject.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,7 +103,7 @@
 		000000000060 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				000000000340 /* iOS */,
+				000000000220 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -133,7 +111,7 @@
 		000000000070 /* Targets Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				0000000005A0 /* Pods-STBaseProject_Example */,
+				0000000003D0 /* Pods-STBaseProject_Example */,
 			);
 			name = "Targets Support Files";
 			sourceTree = "<group>";
@@ -149,17 +127,10 @@
 		0000000000A0 /* STBaseProject */ = {
 			isa = PBXGroup;
 			children = (
-				000000000270 /* Pod */,
-				000000000240 /* Resources */,
+				000000000150 /* Pod */,
+				000000000120 /* Resources */,
 				0000000000C0 /* STBase */,
-				000000000120 /* STBundle */,
-				000000000140 /* STButton */,
-				000000000170 /* STContract */,
-				0000000001A0 /* STData */,
-				0000000001C0 /* STImageView */,
-				0000000001F0 /* STScanner */,
-				000000000220 /* STScreenshot */,
-				000000000470 /* Support Files */,
+				0000000002A0 /* Support Files */,
 			);
 			name = STBaseProject;
 			path = ../..;
@@ -172,7 +143,6 @@
 				0000000000F0 /* STBaseViewController */,
 			);
 			name = STBase;
-			path = STBaseProject/Classes/STBase;
 			sourceTree = "<group>";
 		};
 		0000000000D0 /* STBaseConstants */ = {
@@ -181,7 +151,7 @@
 				0000000000E0 /* STBaseConstants.swift */,
 			);
 			name = STBaseConstants;
-			path = STBaseConstants;
+			path = STBaseProject/Classes/STBase/STBaseConstants;
 			sourceTree = "<group>";
 		};
 		0000000000F0 /* STBaseViewController */ = {
@@ -191,129 +161,62 @@
 				000000000110 /* STBaseViewController.swift */,
 			);
 			name = STBaseViewController;
-			path = STBaseViewController;
+			path = STBaseProject/Classes/STBase/STBaseViewController;
 			sourceTree = "<group>";
 		};
-		000000000120 /* STBundle */ = {
+		000000000120 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				000000000130 /* STBundle.swift */,
-			);
-			name = STBundle;
-			path = STBaseProject/Classes/STBundle;
-			sourceTree = "<group>";
-		};
-		000000000140 /* STButton */ = {
-			isa = PBXGroup;
-			children = (
-				000000000150 /* STBtn.swift */,
-				000000000160 /* STIndicatorBtn.swift */,
-			);
-			name = STButton;
-			path = STBaseProject/Classes/STButton;
-			sourceTree = "<group>";
-		};
-		000000000170 /* STContract */ = {
-			isa = PBXGroup;
-			children = (
-				000000000180 /* STContractManager.swift */,
-				000000000190 /* STContractMessage.swift */,
-			);
-			name = STContract;
-			path = STBaseProject/Classes/STContract;
-			sourceTree = "<group>";
-		};
-		0000000001A0 /* STData */ = {
-			isa = PBXGroup;
-			children = (
-				0000000001B0 /* STImageContentType.swift */,
-			);
-			name = STData;
-			path = STBaseProject/Classes/STData;
-			sourceTree = "<group>";
-		};
-		0000000001C0 /* STImageView */ = {
-			isa = PBXGroup;
-			children = (
-				0000000001D0 /* UIImage+STScaleImage.swift */,
-				0000000001E0 /* UIImageView+STImageView.swift */,
-			);
-			name = STImageView;
-			path = STBaseProject/Classes/STImageView;
-			sourceTree = "<group>";
-		};
-		0000000001F0 /* STScanner */ = {
-			isa = PBXGroup;
-			children = (
-				000000000200 /* STScanView.swift */,
-				000000000210 /* STScanViewController.swift */,
-			);
-			name = STScanner;
-			path = STBaseProject/Classes/STScanner;
-			sourceTree = "<group>";
-		};
-		000000000220 /* STScreenshot */ = {
-			isa = PBXGroup;
-			children = (
-				000000000230 /* STScreenshot.swift */,
-			);
-			name = STScreenshot;
-			path = STBaseProject/Classes/STScreenshot;
-			sourceTree = "<group>";
-		};
-		000000000240 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				000000000250 /* STBaseResource.bundle */,
-				000000000260 /* STScanResource.bundle */,
+				000000000130 /* STBaseResource.bundle */,
+				000000000140 /* STScanResource.bundle */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		000000000270 /* Pod */ = {
+		000000000150 /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				000000000280 /* LICENSE */,
-				000000000290 /* README.md */,
-				0000000002A0 /* STBaseProject.podspec */,
+				000000000160 /* LICENSE */,
+				000000000170 /* README.md */,
+				000000000180 /* STBaseProject.podspec */,
 			);
 			name = Pod;
 			sourceTree = "<group>";
 		};
-		000000000340 /* iOS */ = {
+		000000000220 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				000000000350 /* Foundation.framework */,
+				000000000230 /* Foundation.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		000000000470 /* Support Files */ = {
+		0000000002A0 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				000000000490 /* STBaseProject.modulemap */,
-				000000000480 /* STBaseProject.xcconfig */,
-				0000000004E0 /* STBaseProject-dummy.m */,
-				0000000004C0 /* STBaseProject-Info.plist */,
-				0000000004D0 /* STBaseProject-prefix.pch */,
-				0000000004A0 /* STBaseProject-umbrella.h */,
+				0000000002C0 /* STBaseProject.modulemap */,
+				0000000002B0 /* STBaseProject.xcconfig */,
+				000000000310 /* STBaseProject-dummy.m */,
+				0000000002F0 /* STBaseProject-Info.plist */,
+				000000000300 /* STBaseProject-prefix.pch */,
+				0000000002D0 /* STBaseProject-umbrella.h */,
 			);
 			name = "Support Files";
 			path = "Example/Pods/Target Support Files/STBaseProject";
 			sourceTree = "<group>";
 		};
-		0000000005A0 /* Pods-STBaseProject_Example */ = {
+		0000000003D0 /* Pods-STBaseProject_Example */ = {
 			isa = PBXGroup;
 			children = (
-				0000000005E0 /* Pods-STBaseProject_Example.modulemap */,
-				000000000630 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
-				000000000620 /* Pods-STBaseProject_Example-acknowledgements.plist */,
-				000000000640 /* Pods-STBaseProject_Example-dummy.m */,
-				000000000610 /* Pods-STBaseProject_Example-frameworks.sh */,
-				0000000005D0 /* Pods-STBaseProject_Example-Info.plist */,
-				0000000005F0 /* Pods-STBaseProject_Example-umbrella.h */,
-				0000000005C0 /* Pods-STBaseProject_Example.debug.xcconfig */,
-				0000000005B0 /* Pods-STBaseProject_Example.release.xcconfig */,
+				000000000410 /* Pods-STBaseProject_Example.modulemap */,
+				000000000460 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
+				000000000450 /* Pods-STBaseProject_Example-acknowledgements.plist */,
+				000000000470 /* Pods-STBaseProject_Example-dummy.m */,
+				000000000440 /* Pods-STBaseProject_Example-frameworks.sh */,
+				000000000400 /* Pods-STBaseProject_Example-Info.plist */,
+				000000000420 /* Pods-STBaseProject_Example-umbrella.h */,
+				0000000003F0 /* Pods-STBaseProject_Example.debug.xcconfig */,
+				0000000003E0 /* Pods-STBaseProject_Example.release.xcconfig */,
 			);
 			name = "Pods-STBaseProject_Example";
 			path = "Target Support Files/Pods-STBaseProject_Example";
@@ -322,33 +225,33 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		000000000300 /* Headers */ = {
+		0000000001E0 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0000000004B0 /* STBaseProject-umbrella.h in Headers */,
+				0000000002E0 /* STBaseProject-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		000000000550 /* Headers */ = {
+		000000000380 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000600 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
+				000000000430 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		0000000002B0 /* STBaseProject */ = {
+		000000000190 /* STBaseProject */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0000000002C0 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
+			buildConfigurationList = 0000000001A0 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
 			buildPhases = (
-				000000000300 /* Headers */,
-				000000000310 /* Sources */,
-				000000000320 /* Frameworks */,
-				000000000330 /* Resources */,
+				0000000001E0 /* Headers */,
+				0000000001F0 /* Sources */,
+				000000000200 /* Frameworks */,
+				000000000210 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -356,26 +259,26 @@
 			);
 			name = STBaseProject;
 			productName = STBaseProject;
-			productReference = 0000000002F0 /* STBaseProject.framework */;
+			productReference = 0000000001D0 /* STBaseProject.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		000000000500 /* Pods-STBaseProject_Example */ = {
+		000000000330 /* Pods-STBaseProject_Example */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 000000000510 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
+			buildConfigurationList = 000000000340 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
 			buildPhases = (
-				000000000550 /* Headers */,
-				000000000560 /* Sources */,
-				000000000570 /* Frameworks */,
-				000000000580 /* Resources */,
+				000000000380 /* Headers */,
+				000000000390 /* Sources */,
+				0000000003A0 /* Frameworks */,
+				0000000003B0 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				000000000670 /* PBXTargetDependency */,
+				0000000004A0 /* PBXTargetDependency */,
 			);
 			name = "Pods-STBaseProject_Example";
 			productName = "Pods-STBaseProject_Example";
-			productReference = 000000000540 /* Pods_STBaseProject_Example.framework */;
+			productReference = 000000000370 /* Pods_STBaseProject_Example.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -399,23 +302,23 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				000000000500 /* Pods-STBaseProject_Example */,
-				0000000002B0 /* STBaseProject */,
+				000000000330 /* Pods-STBaseProject_Example */,
+				000000000190 /* STBaseProject */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		000000000330 /* Resources */ = {
+		000000000210 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000450 /* STBaseResource.bundle in Resources */,
-				000000000460 /* STScanResource.bundle in Resources */,
+				000000000250 /* STBaseResource.bundle in Resources */,
+				000000000260 /* STScanResource.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		000000000580 /* Resources */ = {
+		0000000003B0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -425,44 +328,33 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		000000000310 /* Sources */ = {
+		0000000001F0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000370 /* STBaseConstants.swift in Sources */,
-				000000000380 /* STBaseOpenSystemOperationController.swift in Sources */,
-				0000000004F0 /* STBaseProject-dummy.m in Sources */,
-				000000000390 /* STBaseViewController.swift in Sources */,
-				0000000003B0 /* STBtn.swift in Sources */,
-				0000000003A0 /* STBundle.swift in Sources */,
-				0000000003D0 /* STContractManager.swift in Sources */,
-				0000000003E0 /* STContractMessage.swift in Sources */,
-				0000000003F0 /* STImageContentType.swift in Sources */,
-				0000000003C0 /* STIndicatorBtn.swift in Sources */,
-				000000000420 /* STScanView.swift in Sources */,
-				000000000430 /* STScanViewController.swift in Sources */,
-				000000000440 /* STScreenshot.swift in Sources */,
-				000000000400 /* UIImage+STScaleImage.swift in Sources */,
-				000000000410 /* UIImageView+STImageView.swift in Sources */,
+				000000000270 /* STBaseConstants.swift in Sources */,
+				000000000280 /* STBaseOpenSystemOperationController.swift in Sources */,
+				000000000320 /* STBaseProject-dummy.m in Sources */,
+				000000000290 /* STBaseViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		000000000560 /* Sources */ = {
+		000000000390 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000650 /* Pods-STBaseProject_Example-dummy.m in Sources */,
+				000000000480 /* Pods-STBaseProject_Example-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		000000000670 /* PBXTargetDependency */ = {
+		0000000004A0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = STBaseProject;
-			target = 0000000002B0 /* STBaseProject */;
-			targetProxy = 000000000660 /* PBXContainerItemProxy */;
+			target = 000000000190 /* STBaseProject */;
+			targetProxy = 000000000490 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -591,9 +483,9 @@
 			};
 			name = Release;
 		};
-		0000000002D0 /* Release */ = {
+		0000000001B0 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 000000000480 /* STBaseProject.xcconfig */;
+			baseConfigurationReference = 0000000002B0 /* STBaseProject.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -624,9 +516,9 @@
 			};
 			name = Release;
 		};
-		0000000002E0 /* Debug */ = {
+		0000000001C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 000000000480 /* STBaseProject.xcconfig */;
+			baseConfigurationReference = 0000000002B0 /* STBaseProject.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -656,9 +548,9 @@
 			};
 			name = Debug;
 		};
-		000000000520 /* Release */ = {
+		000000000350 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0000000005B0 /* Pods-STBaseProject_Example.release.xcconfig */;
+			baseConfigurationReference = 0000000003E0 /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -691,9 +583,9 @@
 			};
 			name = Release;
 		};
-		000000000530 /* Debug */ = {
+		000000000360 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0000000005C0 /* Pods-STBaseProject_Example.debug.xcconfig */;
+			baseConfigurationReference = 0000000003F0 /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -737,20 +629,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0000000002C0 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
+		0000000001A0 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0000000002E0 /* Debug */,
-				0000000002D0 /* Release */,
+				0000000001C0 /* Debug */,
+				0000000001B0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		000000000510 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
+		000000000340 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				000000000530 /* Debug */,
-				000000000520 /* Release */,
+				000000000360 /* Debug */,
+				000000000350 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

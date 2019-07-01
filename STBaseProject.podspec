@@ -22,7 +22,7 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '10.0'
 
-  s.source_files = 'STBaseProject/Classes/**/*'
+  #s.source_files = 'STBaseProject/Classes/**/*'
 
   s.resource_bundles = {
     #'STBaseProject' => ['STBaseProject/Assets/*.bundle']
@@ -35,24 +35,16 @@ Pod::Spec.new do |s|
     ss.source_files = ['STBaseProject/Classes/STBase/**/*.swift']
   end
 
-  s.subspec 'STBundle' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STBundle/*.swift'
+  s.subspec 'STObject' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STObject/*.swift'
   end
   
-  s.subspec 'STButton' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STButton/*.swift'
+  s.subspec 'STExtension' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STExtension/*.swift'
   end
   
-  s.subspec 'STData' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STData/*.swift'
-  end
-  
-  s.subspec 'STImageView' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STImageView/*.swift'
-  end
-  
-  s.subspec 'STString' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STString/*.swift'
+  s.subspec 'STUI' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STUI/*.swift'
   end
   
   s.subspec 'STContract' do |ss|

@@ -18,7 +18,6 @@
   "platforms": {
     "ios": "10.0"
   },
-  "source_files": "STBaseProject/Classes/**/*",
   "resource_bundles": {
   },
   "resources": [
@@ -34,24 +33,16 @@
       ]
     },
     {
-      "name": "STBundle",
-      "source_files": "STBaseProject/Classes/STBundle/*.swift"
+      "name": "STObject",
+      "source_files": "STBaseProject/Classes/STObject/*.swift"
     },
     {
-      "name": "STButton",
-      "source_files": "STBaseProject/Classes/STButton/*.swift"
+      "name": "STExtension",
+      "source_files": "STBaseProject/Classes/STExtension/*.swift"
     },
     {
-      "name": "STData",
-      "source_files": "STBaseProject/Classes/STData/*.swift"
-    },
-    {
-      "name": "STImageView",
-      "source_files": "STBaseProject/Classes/STImageView/*.swift"
-    },
-    {
-      "name": "STString",
-      "source_files": "STBaseProject/Classes/STString/*.swift"
+      "name": "STUI",
+      "source_files": "STBaseProject/Classes/STUI/*.swift"
     },
     {
       "name": "STContract",

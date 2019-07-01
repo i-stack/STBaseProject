@@ -11,17 +11,17 @@ import Foundation
 
 open class STBundle: Bundle {
 
-    class open func st_mainBundle() -> Bundle {
+    open class func st_mainBundle() -> Bundle {
         return Bundle.main
     }
     
-    class open func st_scanResourceBundle() -> Bundle {
+    open class func st_scanResourceBundle() -> Bundle {
         let bundle: Bundle = Bundle.init(for: STScanView.self)
         let url: URL = bundle.url(forResource: "STScanResource", withExtension: "bundle") ?? URL.init(fileURLWithPath: "")
         return Bundle.init(url: url) ?? Bundle.main
     }
     
-    class open func st_baseResourceBundle() -> Bundle {
+    open class func st_baseResourceBundle() -> Bundle {
         let bundle: Bundle = Bundle.init(for: STScanView.self)
         let url: URL = bundle.url(forResource: "STBaseResource", withExtension: "bundle") ?? URL.init(fileURLWithPath: "")
         return Bundle.init(url: url) ?? Bundle.main

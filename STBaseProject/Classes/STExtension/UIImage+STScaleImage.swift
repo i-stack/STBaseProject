@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Foundation
 
 extension UIImage {
     
@@ -60,5 +59,30 @@ extension UIImage {
         let image = UIGraphicsGetImageFromCurrentImageContext() ?? self
         UIGraphicsEndImageContext()
         return image
+    }
+    
+    /**
+     *  获取启动图
+     */
+    public func st_launchImage() -> UIImage {
+        var lauchImage: UIImage = UIImage()
+        var viewOrientation: String = ""
+        let viewSize = UIScreen.main.bounds.size
+        let orientation: UIInterfaceOrientation = UIApplication.shared.statusBarOrientation
+        if  orientation == .landscapeLeft ||
+            orientation == .landscapeRight {
+            viewOrientation = "Landscape"
+        } else {
+            viewOrientation = "Portrait"
+        }
+        let imagesDictionary: NSArray = Bundle.main.infoDictionary?["UILaunchImages"] as! NSArray
+        for dict in imagesDictionary {
+            let resultDict: NSDictionary = dict as! NSDictionary
+            let imageSize = NSCoder.cgSize(for: resultDict.value(forKey: "UILaunchImageSize") as! String)
+            if imageSize.equalTo(viewSize), viewOrientation == resultDict.value(forKey: "UILaunchImageOrientation") as! String {
+                lauchImage = UIImage.init(named: resultDict.value(forKey: "UILaunchImageName") as! String) ?? UIImage()
+            }
+        }
+        return lauchImage
     }
 }

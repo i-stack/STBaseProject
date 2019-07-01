@@ -14,8 +14,8 @@ open class STIndicatorBtn: STBtn {
     private var newBtnTitleLabel: UILabel?
     private var activityIndicator: UIActivityIndicatorView!
     
-    public var st_space: CGFloat = 0.0
-    public var st_newBtnTitle: String = ""
+    open var st_space: CGFloat = 0.0
+    open var st_newBtnTitle: String = ""
     public var st_indicatorIsAnimating: Bool = false
 
     @IBInspectable
