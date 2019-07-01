@@ -22,21 +22,35 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '10.0'
 
-  #s.source_files = 'STBaseProject/Classes/**/*'
-
-  s.resource_bundles = {
-    #'STBaseProject' => ['STBaseProject/Assets/*.bundle']
-  }
-  
   s.resources = ['STBaseProject/Assets/*']
   
   s.default_subspecs = 'STBase'
   s.subspec 'STBase' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STBase/**/*.swift']
+    
+    ss.subspec 'STBaseViewController' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBase/STBaseViewController/*.swift']
+    end
+    
+    ss.subspec 'STBaseView' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBase/STBaseView/*.swift']
+    end
+    
+    ss.subspec 'STBaseViewMode' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBase/STBaseViewMode/*.swift']
+    end
+    
+    ss.subspec 'STBaseModel' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBase/STBaseModel/*.swift']
+    end
+    
+    ss.subspec 'STBaseConstants' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBase/STBaseConstants/*.swift']
+    end
+  
   end
 
-  s.subspec 'STObject' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STObject/*.swift'
+  s.subspec 'STCommon' do |ss|
+    ss.source_files = 'STBaseProject/Classes/STCommon/*.swift'
   end
   
   s.subspec 'STExtension' do |ss|
@@ -44,20 +58,23 @@ Pod::Spec.new do |s|
   end
   
   s.subspec 'STUI' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STUI/*.swift'
-  end
-  
-  s.subspec 'STContract' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STContract/*.swift'
-  end
 
-  s.subspec 'STScreenshot' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STScreenshot/*.swift'
-  end
-
-  s.subspec 'STScanner' do |scanner|
-    scanner.source_files = 'STBaseProject/Classes/STScanner/*.swift'
-    scanner.dependency 'STBaseProject/STBase'
+    ss.subspec 'STBtn' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STUI/STBtn/*.swift']
+    end
+    
+    ss.subspec 'STScanner' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STUI/STScanner/*.swift']
+    end
+    
+    ss.subspec 'STContract' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STUI/STContract/*.swift']
+    end
+    
+    ss.subspec 'STScreenshot' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STUI/STScreenshot/*.swift']
+    end
+    
   end
 
   s.public_header_files = 'Pod/Classes/**/*'

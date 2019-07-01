@@ -1,18 +1,40 @@
 PODS:
-  - STBaseProject (0.1.0):
-    - STBaseProject/STBase (= 0.1.0)
-  - STBaseProject/STBase (0.1.0)
+  - STBaseProject/STBase (0.1.0):
+    - STBaseProject/STBase/STBaseConstants (= 0.1.0)
+    - STBaseProject/STBase/STBaseModel (= 0.1.0)
+    - STBaseProject/STBase/STBaseView (= 0.1.0)
+    - STBaseProject/STBase/STBaseViewController (= 0.1.0)
+    - STBaseProject/STBase/STBaseViewMode (= 0.1.0)
+  - STBaseProject/STBase/STBaseConstants (0.1.0)
+  - STBaseProject/STBase/STBaseModel (0.1.0)
+  - STBaseProject/STBase/STBaseView (0.1.0)
+  - STBaseProject/STBase/STBaseViewController (0.1.0)
+  - STBaseProject/STBase/STBaseViewMode (0.1.0)
+  - STBaseProject/STCommon (0.1.0)
+  - STBaseProject/STExtension (0.1.0)
+  - STBaseProject/STUI (0.1.0):
+    - STBaseProject/STUI/STBtn (= 0.1.0)
+    - STBaseProject/STUI/STContract (= 0.1.0)
+    - STBaseProject/STUI/STScanner (= 0.1.0)
+    - STBaseProject/STUI/STScreenshot (= 0.1.0)
+  - STBaseProject/STUI/STBtn (0.1.0)
+  - STBaseProject/STUI/STContract (0.1.0)
+  - STBaseProject/STUI/STScanner (0.1.0)
+  - STBaseProject/STUI/STScreenshot (0.1.0)
 
 DEPENDENCIES:
-  - STBaseProject (from `../`)
+  - STBaseProject/STBase (from `/Users/song/Desktop/GitHub/STBaseProject`)
+  - STBaseProject/STCommon (from `/Users/song/Desktop/GitHub/STBaseProject`)
+  - STBaseProject/STExtension (from `/Users/song/Desktop/GitHub/STBaseProject`)
+  - STBaseProject/STUI (from `/Users/song/Desktop/GitHub/STBaseProject`)
 
 EXTERNAL SOURCES:
   STBaseProject:
-    :path: "../"
+    :path: "/Users/song/Desktop/GitHub/STBaseProject"
 
 SPEC CHECKSUMS:
-  STBaseProject: 7544c6b57e8a5889fe8b5ee0edaaeccb6e40b978
+  STBaseProject: 608491f6c08cb6ab1abacf633f52b6306af89b23
 
-PODFILE CHECKSUM: 54490b6f80b0af661d0bda4e025a163d137df6c1
+PODFILE CHECKSUM: 127ce8494bdc355fe55c202d55bee65c2c5c491a
 
 COCOAPODS: 1.6.1

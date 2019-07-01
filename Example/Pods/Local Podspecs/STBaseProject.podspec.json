@@ -18,8 +18,6 @@
   "platforms": {
     "ios": "10.0"
   },
-  "resource_bundles": {
-  },
   "resources": [
     "STBaseProject/Assets/*"
   ],
@@ -28,13 +26,42 @@
   "subspecs": [
     {
       "name": "STBase",
-      "source_files": [
-        "STBaseProject/Classes/STBase/**/*.swift"
+      "subspecs": [
+        {
+          "name": "STBaseViewController",
+          "source_files": [
+            "STBaseProject/Classes/STBase/STBaseViewController/*.swift"
+          ]
+        },
+        {
+          "name": "STBaseView",
+          "source_files": [
+            "STBaseProject/Classes/STBase/STBaseView/*.swift"
+          ]
+        },
+        {
+          "name": "STBaseViewMode",
+          "source_files": [
+            "STBaseProject/Classes/STBase/STBaseViewMode/*.swift"
+          ]
+        },
+        {
+          "name": "STBaseModel",
+          "source_files": [
+            "STBaseProject/Classes/STBase/STBaseModel/*.swift"
+          ]
+        },
+        {
+          "name": "STBaseConstants",
+          "source_files": [
+            "STBaseProject/Classes/STBase/STBaseConstants/*.swift"
+          ]
+        }
       ]
     },
     {
-      "name": "STObject",
-      "source_files": "STBaseProject/Classes/STObject/*.swift"
+      "name": "STCommon",
+      "source_files": "STBaseProject/Classes/STCommon/*.swift"
     },
     {
       "name": "STExtension",
@@ -42,24 +69,32 @@
     },
     {
       "name": "STUI",
-      "source_files": "STBaseProject/Classes/STUI/*.swift"
-    },
-    {
-      "name": "STContract",
-      "source_files": "STBaseProject/Classes/STContract/*.swift"
-    },
-    {
-      "name": "STScreenshot",
-      "source_files": "STBaseProject/Classes/STScreenshot/*.swift"
-    },
-    {
-      "name": "STScanner",
-      "source_files": "STBaseProject/Classes/STScanner/*.swift",
-      "dependencies": {
-        "STBaseProject/STBase": [
-
-        ]
-      }
+      "subspecs": [
+        {
+          "name": "STBtn",
+          "source_files": [
+            "STBaseProject/Classes/STUI/STBtn/*.swift"
+          ]
+        },
+        {
+          "name": "STScanner",
+          "source_files": [
+            "STBaseProject/Classes/STUI/STScanner/*.swift"
+          ]
+        },
+        {
+          "name": "STContract",
+          "source_files": [
+            "STBaseProject/Classes/STUI/STContract/*.swift"
+          ]
+        },
+        {
+          "name": "STScreenshot",
+          "source_files": [
+            "STBaseProject/Classes/STUI/STScreenshot/*.swift"
+          ]
+        }
+      ]
     }
   ]
 }
