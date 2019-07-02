@@ -21,6 +21,7 @@ public enum STImageFormat {
     case STImageFormatHEIF
 }
 
+//MARK:- ImageFormat
 extension NSData {
     
     public class func st_imageFormatForImageData(data: NSData) -> STImageFormat {

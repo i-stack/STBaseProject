@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'songMW' => 'songshoubing7664@163.com' }
-  s.source           = { :git => 'https://github.com/songMW/STBaseProject.git', :tag => s.version.to_s }
+  s.source           = { :git => 'https://github.com/i-stack/STBaseProject.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '10.0'
 
@@ -51,10 +51,11 @@ Pod::Spec.new do |s|
 
   s.subspec 'STCommon' do |ss|
     ss.source_files = 'STBaseProject/Classes/STCommon/*.swift'
-  end
-  
-  s.subspec 'STExtension' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STExtension/*.swift'
+    
+    ss.subspec 'STExtension' do |sss|
+      sss.source_files = 'STBaseProject/Classes/STCommon/STExtension/*.swift'
+    end
+    
   end
   
   s.subspec 'STUI' do |ss|

@@ -10,8 +10,9 @@ PODS:
   - STBaseProject/STBase/STBaseView (0.1.0)
   - STBaseProject/STBase/STBaseViewController (0.1.0)
   - STBaseProject/STBase/STBaseViewMode (0.1.0)
-  - STBaseProject/STCommon (0.1.0)
-  - STBaseProject/STExtension (0.1.0)
+  - STBaseProject/STCommon (0.1.0):
+    - STBaseProject/STCommon/STExtension (= 0.1.0)
+  - STBaseProject/STCommon/STExtension (0.1.0)
   - STBaseProject/STUI (0.1.0):
     - STBaseProject/STUI/STBtn (= 0.1.0)
     - STBaseProject/STUI/STContract (= 0.1.0)
@@ -25,7 +26,6 @@ PODS:
 DEPENDENCIES:
   - STBaseProject/STBase (from `/Users/song/Desktop/GitHub/STBaseProject`)
   - STBaseProject/STCommon (from `/Users/song/Desktop/GitHub/STBaseProject`)
-  - STBaseProject/STExtension (from `/Users/song/Desktop/GitHub/STBaseProject`)
   - STBaseProject/STUI (from `/Users/song/Desktop/GitHub/STBaseProject`)
 
 EXTERNAL SOURCES:
@@ -33,8 +33,8 @@ EXTERNAL SOURCES:
     :path: "/Users/song/Desktop/GitHub/STBaseProject"
 
 SPEC CHECKSUMS:
-  STBaseProject: 608491f6c08cb6ab1abacf633f52b6306af89b23
+  STBaseProject: bd23fe4138b1ad11853824677767287472dbd026
 
-PODFILE CHECKSUM: 127ce8494bdc355fe55c202d55bee65c2c5c491a
+PODFILE CHECKSUM: 090e9cea29863ea96f0f019e6a0c9bcf43a7baf0
 
 COCOAPODS: 1.6.1

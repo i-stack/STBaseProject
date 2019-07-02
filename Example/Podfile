@@ -10,6 +10,5 @@ target 'STBaseProject_Example' do
   pod 'STBaseProject/STBase', :path => '/Users/song/Desktop/GitHub/STBaseProject'
   pod 'STBaseProject/STUI', :path => '/Users/song/Desktop/GitHub/STBaseProject'
   pod 'STBaseProject/STCommon', :path => '/Users/song/Desktop/GitHub/STBaseProject'
-  pod 'STBaseProject/STExtension', :path => '/Users/song/Desktop/GitHub/STBaseProject'
 
 end

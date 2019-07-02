@@ -12,7 +12,7 @@
     "songMW": "songshoubing7664@163.com"
   },
   "source": {
-    "git": "https://github.com/songMW/STBaseProject.git",
+    "git": "https://github.com/i-stack/STBaseProject.git",
     "tag": "0.1.0"
   },
   "platforms": {
@@ -61,11 +61,13 @@
     },
     {
       "name": "STCommon",
-      "source_files": "STBaseProject/Classes/STCommon/*.swift"
-    },
-    {
-      "name": "STExtension",
-      "source_files": "STBaseProject/Classes/STExtension/*.swift"
+      "source_files": "STBaseProject/Classes/STCommon/*.swift",
+      "subspecs": [
+        {
+          "name": "STExtension",
+          "source_files": "STBaseProject/Classes/STCommon/STExtension/*.swift"
+        }
+      ]
     },
     {
       "name": "STUI",

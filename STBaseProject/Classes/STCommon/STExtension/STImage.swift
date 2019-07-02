@@ -1,5 +1,5 @@
 //
-//  UIImage+STScaleImage.swift
+//  STScaleImage.swift
 //  STBaseProject
 //
 //  Created by song on 2018/11/14.
@@ -7,9 +7,9 @@
 //
 
 import UIKit
+import Photos
 
 extension UIImage {
-    
     /**
      *  @brief 图片缩放
      *  @prama showImageSize == UIImageView.bounds
@@ -61,9 +61,7 @@ extension UIImage {
         return image
     }
     
-    /**
-     *  获取启动图
-     */
+    /**  获取启动图 */
     public func st_launchImage() -> UIImage {
         var lauchImage: UIImage = UIImage()
         var viewOrientation: String = ""
@@ -84,5 +82,55 @@ extension UIImage {
             }
         }
         return lauchImage
+    }
+}
+
+//MARK:- save image to album
+extension UIImage {
+    public func st_imageExist() -> Bool {
+        let cgref: CGImage? = self.cgImage
+        let cim: CIImage? = self.ciImage
+        if let _ = cgref, let _ = cim {
+            return true
+        }
+        return false
+    }
+    
+    public func st_saveImageToAlbum(image: UIImage, resultHandler: @escaping (Result<Data, Error>) -> Void) {
+        if image.st_imageExist() {
+            var imageIds: Array<String> = Array<String>()
+            PHPhotoLibrary.shared().performChanges({
+                let req: PHAssetChangeRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
+                imageIds.append(req.placeholderForCreatedAsset?.localIdentifier ?? "")
+            }) { (sucess, error) in
+                if sucess {
+                    var imageAsset: PHAsset?
+                    let result: PHFetchResult = PHAsset.fetchAssets(withLocalIdentifiers: imageIds, options: PHFetchOptions.init())
+                    result.enumerateObjects({ (obj, idx, stop) in
+                        imageAsset = obj
+                        stop.pointee = true
+                    })
+                    if let newImageAsset = imageAsset {
+                        PHImageManager.default().requestImageData(for: newImageAsset, options: PHImageRequestOptions.init(), resultHandler: { (imageData, dataUTI, orientation, info) in
+                            DispatchQueue.main.async {
+                                resultHandler(.success(imageData ?? Data()))
+                            }
+                        })
+                    } else {
+                        DispatchQueue.main.async {
+                            resultHandler(.failure(NSError.init(domain: "saveImageToAlbum Error", code: 0, userInfo: ["message" : "image is nil"])))
+                        }
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        resultHandler(.failure(error!))
+                    }
+                }
+            }
+        } else {
+            DispatchQueue.main.async {
+                resultHandler(.failure(NSError.init(domain: "saveImageToAlbum Error", code: 0, userInfo: ["message" : "image is nil"])))
+            }
+        }
     }
 }
