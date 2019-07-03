@@ -128,8 +128,8 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.topBgView.addSubview(self.titleLabel)
         
-        self.titleLabelAttributeLeft = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.leftBtn, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: 5)
-        self.titleLabelAttributeRight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.rightBtn, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: -5)
+        self.titleLabelAttributeLeft = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: 5 + width)
+        self.titleLabelAttributeRight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: -5 - rightSpace - width)
 
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
