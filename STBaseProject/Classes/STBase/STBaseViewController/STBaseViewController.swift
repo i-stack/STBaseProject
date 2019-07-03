@@ -22,7 +22,6 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
     open var leftBtn: UIButton!
     open var rightBtn: UIButton!
     open var titleLabel: UILabel!
-    open var rightTitleBtn: UIButton!
     
     open var space: CGFloat = 0
     open var width: CGFloat = 44
@@ -34,8 +33,10 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
     open var noDataView: UIView?
     open var networkNotReachView: UIView?
     
-    open var titleLabelAttributeLeft: NSLayoutConstraint?
-    open var titleLabelAttributeRight: NSLayoutConstraint?
+    open var leftBtnAttributeRight: NSLayoutConstraint!
+    open var titleLabelAttributeLeft: NSLayoutConstraint!
+    open var titleLabelAttributeRight: NSLayoutConstraint!
+    open var rightBtnAttributeLeft: NSLayoutConstraint!
 
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -45,6 +46,7 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
         self.hidesBottomBarWhenPushed = true
+        self.view.backgroundColor = UIColor.white
         self.automaticallyAdjustsScrollViewInsets = false
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
@@ -92,54 +94,45 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         
         self.leftBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.leftBtn.isHidden = true
+        self.leftBtn.backgroundColor = UIColor.gray
         self.leftBtn.setImage(self.st_backArrowImage(), for: UIControl.State.normal)
         self.leftBtn.setImage(self.st_backArrowImageHighlighted(), for: UIControl.State.highlighted)
         self.leftBtn.translatesAutoresizingMaskIntoConstraints = false
         self.leftBtn.addTarget(self, action: #selector(st_leftBarBtnClick), for: UIControl.Event.touchUpInside)
         self.topBgView.addSubview(self.leftBtn)
+        self.leftBtnAttributeRight = NSLayoutConstraint.init(item: self.leftBtn!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: width)
         self.view.addConstraints([
-            NSLayoutConstraint.init(item: self.leftBtn!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.leftBtn!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.leftBtn!, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width),
+            NSLayoutConstraint.init(item: self.leftBtn!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
+            self.leftBtnAttributeRight,
             NSLayoutConstraint.init(item: self.leftBtn!, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: height)
             ])
         
         self.rightBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.rightBtn.isHidden = true
+        self.rightBtn.backgroundColor = UIColor.gray
         self.rightBtn.translatesAutoresizingMaskIntoConstraints = false
         self.rightBtn.setTitleColor(self.st_titleColor(), for: UIControl.State.normal)
         self.rightBtn.addTarget(self, action: #selector(st_rightBarBtnClick), for: UIControl.Event.touchUpInside)
         self.topBgView.addSubview(self.rightBtn)
+        self.rightBtnAttributeLeft = NSLayoutConstraint.init(item: self.rightBtn!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: -rightSpace - width)
         self.view.addConstraints([
+            self.rightBtnAttributeLeft,
             NSLayoutConstraint.init(item: self.rightBtn!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.rightBtn!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: -rightSpace),
-            NSLayoutConstraint.init(item: self.rightBtn!, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width),
             NSLayoutConstraint.init(item: self.rightBtn!, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: height)
             ])
         
-        self.rightTitleBtn = UIButton.init(type: UIButton.ButtonType.custom)
-        self.rightTitleBtn.translatesAutoresizingMaskIntoConstraints = false
-        self.rightTitleBtn.contentHorizontalAlignment = UIControl.ContentHorizontalAlignment.right
-        self.rightTitleBtn.setTitleColor(self.st_titleColor(), for: UIControl.State.normal)
-        self.rightTitleBtn.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        self.rightTitleBtn.addTarget(self, action: #selector(st_rightBarBtnClick), for: UIControl.Event.touchUpInside)
-        self.topBgView.addSubview(self.rightTitleBtn)
-        self.view.addConstraints([
-            NSLayoutConstraint.init(item: self.rightTitleBtn!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.rightTitleBtn!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: -rightSpace),
-            NSLayoutConstraint.init(item: self.rightTitleBtn!, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: height),
-            NSLayoutConstraint.init(item: self.rightTitleBtn!, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width * 2)
-            ])
-        
         self.titleLabel = UILabel.init()
-//        self.titleLabel.textColor = self.st_titleColor()
+        self.titleLabel.backgroundColor = UIColor.black
+        self.titleLabel.textColor = self.st_titleColor()
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
         self.titleLabel.textAlignment = NSTextAlignment.center
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.topBgView.addSubview(self.titleLabel)
         
         self.titleLabelAttributeLeft = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.left, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.leftBtn, attribute: NSLayoutConstraint.Attribute.right, multiplier: 1, constant: 5)
-        self.titleLabelAttributeRight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.rightBtn, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: -5 + rightSpace)
+        self.titleLabelAttributeRight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.right, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.rightBtn, attribute: NSLayoutConstraint.Attribute.left, multiplier: 1, constant: -5)
 
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.titleLabel!, attribute: NSLayoutConstraint.Attribute.bottom, relatedBy: NSLayoutConstraint.Relation.equal, toItem: self.topBgView, attribute: NSLayoutConstraint.Attribute.bottom, multiplier: 1, constant: 0),

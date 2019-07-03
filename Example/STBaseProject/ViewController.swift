@@ -17,8 +17,13 @@ class ViewController: STBaseOpenSystemOperationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.st_showNavBtnType(type: .none)
-        self.testIndicatorBtn()
+        self.st_showNavBtnType(type: .showBothBtn)
+        self.titleLabel.text = "text"
+        self.titleLabel.textAlignment = .center
+        self.rightBtn.setTitle("hello world", for: UIControl.State.normal)
+        self.rightBtnAttributeLeft.constant = -50
+        self.leftBtnAttributeRight.constant = 50
+//        self.testIndicatorBtn()
     }
 
     override func didReceiveMemoryWarning() {
