@@ -94,7 +94,6 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         
         self.leftBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.leftBtn.isHidden = true
-        self.leftBtn.backgroundColor = UIColor.gray
         self.leftBtn.setImage(self.st_backArrowImage(), for: UIControl.State.normal)
         self.leftBtn.setImage(self.st_backArrowImageHighlighted(), for: UIControl.State.highlighted)
         self.leftBtn.translatesAutoresizingMaskIntoConstraints = false
@@ -110,7 +109,6 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
         
         self.rightBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.rightBtn.isHidden = true
-        self.rightBtn.backgroundColor = UIColor.gray
         self.rightBtn.translatesAutoresizingMaskIntoConstraints = false
         self.rightBtn.setTitleColor(self.st_titleColor(), for: UIControl.State.normal)
         self.rightBtn.addTarget(self, action: #selector(st_rightBarBtnClick), for: UIControl.Event.touchUpInside)
@@ -124,7 +122,6 @@ open class STBaseViewController: UIViewController, UIGestureRecognizerDelegate {
             ])
         
         self.titleLabel = UILabel.init()
-        self.titleLabel.backgroundColor = UIColor.black
         self.titleLabel.textColor = self.st_titleColor()
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
         self.titleLabel.textAlignment = NSTextAlignment.center
