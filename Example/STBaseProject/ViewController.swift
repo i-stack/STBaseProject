@@ -23,7 +23,7 @@ class ViewController: STBaseOpenSystemOperationController {
         self.rightBtn.setTitle("hello world", for: UIControl.State.normal)
         self.rightBtnAttributeLeft.constant = -50
         self.titleLabelAttributeLeft.constant = 10
-//        self.testIndicatorBtn()
+        self.testIndicatorBtn()
     }
 
     override func didReceiveMemoryWarning() {
@@ -60,6 +60,7 @@ class ViewController: STBaseOpenSystemOperationController {
         btn.setTitle("loading", for: UIControl.State.normal)
         btn.addTarget(self, action: #selector(btnClick), for: UIControl.Event.touchUpInside)
         btn.backgroundColor = UIColor.green
+        
         self.view.addSubview(btn)
         btn.tag = 100
     }
@@ -67,15 +68,16 @@ class ViewController: STBaseOpenSystemOperationController {
     @objc func btnClick() -> Void {
         let btn: STIndicatorBtn = self.view.viewWithTag(100) as! STIndicatorBtn
         btn.st_space = 10
-        btn.st_newBtnTitle = "hello world"
+        btn.st_newBtnTitle = "Transfer immediately immediately"
 //        if btn.st_indicatorIsAnimating {
 //            btn.st_indicatorStopAnimating()
 //        } else {
 //            btn.st_indicatorStartAnimating()
 //        }
-        btn.st_indicatorStartAnimating()
+//        btn.st_indicatorStartAnimating()
+        btn.st_indicatorStartAnimating(customImage: UIImage.init(named: "Image")!)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
-            btn.st_indicatorStopAnimating()
+            //btn.st_indicatorStopAnimating()
         }
     }
 
