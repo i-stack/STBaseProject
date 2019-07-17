@@ -426,7 +426,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     CATransform3D transform = CATransform3DIdentity;
     transform.m34 = _perspective;
     transform = CATransform3DTranslate(transform, -_viewpointOffset.width, -_viewpointOffset.height, 0.0);
-    
+
     //perform transform
     switch (_type) {
         case iCarouselTypeCustom: {
@@ -460,97 +460,72 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
             }
         }
         case iCarouselTypeCylinder:
-        case iCarouselTypeInvertedCylinder:
-        {
+        case iCarouselTypeInvertedCylinder: {
             CGFloat count = [self circularCarouselItemCount];
             CGFloat spacing = [self valueForOption:iCarouselOptionSpacing withDefault:1.0];
             CGFloat arc = [self valueForOption:iCarouselOptionArc withDefault:M_PI * 2.0];
             CGFloat radius = [self valueForOption:iCarouselOptionRadius withDefault:MAX(0.01, _itemWidth * spacing / 2.0 / tan(arc/2.0/count))];
             CGFloat angle = [self valueForOption:iCarouselOptionAngle withDefault:offset / count * arc];
             
-            if (_type == iCarouselTypeInvertedCylinder)
-            {
+            if (_type == iCarouselTypeInvertedCylinder) {
                 radius = -radius;
                 angle = -angle;
             }
             
-            if (_vertical)
-            {
+            if (_vertical) {
                 transform = CATransform3DTranslate(transform, 0.0, 0.0, -radius);
                 transform = CATransform3DRotate(transform, angle, -1.0, 0.0, 0.0);
                 return CATransform3DTranslate(transform, 0.0, 0.0, radius + 0.01);
-            }
-            else
-            {
+            } else {
                 transform = CATransform3DTranslate(transform, 0.0, 0.0, -radius);
                 transform = CATransform3DRotate(transform, angle, 0.0, 1.0, 0.0);
                 return CATransform3DTranslate(transform, 0.0, 0.0, radius + 0.01);
             }
         }
         case iCarouselTypeWheel:
-        case iCarouselTypeInvertedWheel:
-        {
+        case iCarouselTypeInvertedWheel: {
             CGFloat count = [self circularCarouselItemCount];
             CGFloat spacing = [self valueForOption:iCarouselOptionSpacing withDefault:1.0];
             CGFloat arc = [self valueForOption:iCarouselOptionArc withDefault:M_PI * 2.0];
             CGFloat radius = [self valueForOption:iCarouselOptionRadius withDefault:_itemWidth * spacing * count / arc];
             CGFloat angle = [self valueForOption:iCarouselOptionAngle withDefault:arc / count];
             
-            if (_type == iCarouselTypeInvertedWheel)
-            {
+            if (_type == iCarouselTypeInvertedWheel) {
                 radius = -radius;
                 angle = -angle;
             }
             
-            if (_vertical)
-            {
+            if (_vertical) {
                 transform = CATransform3DTranslate(transform, -radius, 0.0, 0.0);
                 transform = CATransform3DRotate(transform, angle * offset, 0.0, 0.0, 1.0);
                 return CATransform3DTranslate(transform, radius, 0.0, offset * 0.01);
-            }
-            else
-            {
+            } else {
                 transform = CATransform3DTranslate(transform, 0.0, radius, 0.0);
                 transform = CATransform3DRotate(transform, angle * offset, 0.0, 0.0, 1.0);
                 return CATransform3DTranslate(transform, 0.0, -radius, offset * 0.01);
             }
         }
         case iCarouselTypeCoverFlow:
-        case iCarouselTypeCoverFlow2:
-        {
+        case iCarouselTypeCoverFlow2: {
             CGFloat tilt = [self valueForOption:iCarouselOptionTilt withDefault:0.9];
             CGFloat spacing = [self valueForOption:iCarouselOptionSpacing withDefault:0.25];
             CGFloat clampedOffset = MAX(-1.0, MIN(1.0, offset));
             
-            if (_type == iCarouselTypeCoverFlow2)
-            {
-                if (_toggle > 0.0)
-                {
-                    if (offset <= -0.5)
-                    {
+            if (_type == iCarouselTypeCoverFlow2) {
+                if (_toggle > 0.0) {
+                    if (offset <= -0.5) {
                         clampedOffset = -1.0;
-                    }
-                    else if (offset <= 0.5)
-                    {
+                    } else if (offset <= 0.5) {
                         clampedOffset = -_toggle;
-                    }
-                    else if (offset <= 1.5)
-                    {
+                    } else if (offset <= 1.5) {
                         clampedOffset = 1.0 - _toggle;
                     }
-                }
-                else
-                {
-                    if (offset > 0.5)
-                    {
+                } else {
+                    if (offset > 0.5) {
                         clampedOffset = 1.0;
-                    }
-                    else if (offset > -0.5)
-                    {
+                    } else if (offset > -0.5) {
                         clampedOffset = -_toggle;
-                    }
-                    else if (offset > -1.5)
-                    {
+                    } else if (offset > -1.5) {
                         clampedOffset = - 1.0 - _toggle;
                     }
                 }
@@ -559,43 +534,35 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
             CGFloat x = (clampedOffset * 0.5 * tilt + offset * spacing) * _itemWidth;
             CGFloat z = fabs(clampedOffset) * -_itemWidth * 0.5;
             
-            if (_vertical)
-            {
+            if (_vertical) {
                 transform = CATransform3DTranslate(transform, 0.0, x, z);
                 return CATransform3DRotate(transform, -clampedOffset * M_PI_2 * tilt, -1.0, 0.0, 0.0);
-            }
-            else
-            {
+            } else {
                 transform = CATransform3DTranslate(transform, x, 0.0, z);
                 return CATransform3DRotate(transform, -clampedOffset * M_PI_2 * tilt, 0.0, 1.0, 0.0);
             }
         }
         case iCarouselTypeTimeMachine:
-        case iCarouselTypeInvertedTimeMachine:
-        {
+        case iCarouselTypeInvertedTimeMachine: {
+            
             CGFloat tilt = [self valueForOption:iCarouselOptionTilt withDefault:0.3];
             CGFloat spacing = [self valueForOption:iCarouselOptionSpacing withDefault:1.0];
-            
-            if (_type == iCarouselTypeInvertedTimeMachine)
-            {
+            if (_type == iCarouselTypeInvertedTimeMachine) {
                 tilt = -tilt;
                 offset = -offset;
             }
-            
-            if (_vertical)
-            {
-                
+            if (_vertical) {
 #ifdef ICAROUSEL_MACOS
-                
+
                 //invert again
                 tilt = -tilt;
                 offset = -offset;
-                
+
 #endif
+//                return CATransform3DTranslate(transform, 0.0, offset * 80 * tilt, offset * 100 * spacing);
+
                 return CATransform3DTranslate(transform, 0.0, offset * _itemWidth * tilt, offset * _itemWidth * spacing);
-            }
-            else
-            {
+            } else {
                 return CATransform3DTranslate(transform, offset * _itemWidth * tilt, 0.0, offset * _itemWidth * spacing);
             }
         }
@@ -661,22 +628,17 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 {
     //calculate relative position
     CGFloat offset = index - _scrollOffset;
-    if (_wrapEnabled)
-    {
-        if (offset > _numberOfItems/2.0)
-        {
+    if (_wrapEnabled) {
+        if (offset > _numberOfItems / 2.0) {
             offset -= _numberOfItems;
-        }
-        else if (offset < -_numberOfItems/2.0)
-        {
+        } else if (offset < -_numberOfItems / 2.0)  {
             offset += _numberOfItems;
         }
     }
     
 #ifdef ICAROUSEL_MACOS
     
-    if (_vertical)
-    {
+    if (_vertical) {
         //invert transform
         offset = -offset;
     }
@@ -708,10 +670,10 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 #endif
     
     //set view frame
-    frame = view.frame;
-    frame.origin.x = (containerView.bounds.size.width - frame.size.width) / 2.0;
-    frame.origin.y = (containerView.bounds.size.height - frame.size.height) / 2.0;
-    view.frame = frame;
+//    frame = view.frame;
+//    frame.origin.x = (containerView.bounds.size.width - frame.size.width) / 2.0;
+//    frame.origin.y = (containerView.bounds.size.height - frame.size.height) / 2.0;
+//    view.frame = frame;
     [containerView addSubview:view];
     containerView.layer.opacity = 0;
     
@@ -727,7 +689,6 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     view.superview.layer.opacity = [self alphaForItemWithOffset:offset];
     
 #ifdef ICAROUSEL_IOS
-    
     //center view
     view.superview.center = CGPointMake(self.bounds.size.width/2.0 + _contentOffset.width, self.bounds.size.height/2.0 + _contentOffset.height);
     
@@ -735,33 +696,27 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     view.superview.userInteractionEnabled = (!_centerItemWhenSelected || index == self.currentItemIndex);
     
     //account for retina
-    //view.superview.layer.rasterizationScale = [UIScreen mainScreen].scale;
+    view.superview.layer.rasterizationScale = [UIScreen mainScreen].scale;
     
     [view layoutIfNeeded];
     
 #else
-    
-    //center view
-    [view.superview setFrameOrigin:NSMakePoint(self.bounds.size.width/2.0 + _contentOffset.width,
-                                               self.bounds.size.height/2.0 + _contentOffset.height)];
+        //center view
+    [view.superview setFrameOrigin:NSMakePoint(self.bounds.size.width/2.0 + _contentOffset.width, self.bounds.size.height/2.0 + _contentOffset.height)];
     view.superview.layer.anchorPoint = CGPointMake(0.5, 0.5);
     
     //account for retina
     view.superview.layer.rasterizationScale = view.window.screen.backingScaleFactor;
-    
 #endif
     
     //special-case logic for iCarouselTypeCoverFlow2
     CGFloat clampedOffset = MAX(-1.0, MIN(1.0, offset));
-    if (_decelerating || (_scrolling && !_dragging && !_didDrag) || (_autoscroll && !_dragging) ||
-        (!_wrapEnabled && (_scrollOffset < 0 || _scrollOffset >= _numberOfItems - 1)))
-    {
-        if (offset > 0)
-        {
+    if (_decelerating || (_scrolling && !_dragging && !_didDrag) ||
+        (_autoscroll && !_dragging) ||
+        (!_wrapEnabled && (_scrollOffset < 0 || _scrollOffset >= _numberOfItems - 1))) {
+        if (offset > 0) {
             _toggle = (offset <= 0.5)? -clampedOffset: (1.0 - clampedOffset);
-        }
-        else
-        {
+        } else {
             _toggle = (offset > -0.5)? -clampedOffset: (- 1.0 - clampedOffset);
         }
     }
@@ -774,12 +729,9 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     
     //backface culling
     BOOL showBackfaces = view.layer.doubleSided;
-    if (showBackfaces)
-    {
-        switch (_type)
-        {
-            case iCarouselTypeInvertedCylinder:
-            {
+    if (showBackfaces) {
+        switch (_type) {
+            case iCarouselTypeInvertedCylinder: {
                 showBackfaces = NO;
                 break;
             }
@@ -793,8 +745,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
             case iCarouselTypeInvertedWheel:
             case iCarouselTypeLinear:
             case iCarouselTypeTimeMachine:
-            case iCarouselTypeInvertedTimeMachine:
-            {
+            case iCarouselTypeInvertedTimeMachine: {
                 showBackfaces = YES;
                 break;
             }

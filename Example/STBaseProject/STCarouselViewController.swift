@@ -75,55 +75,55 @@ class STCarouselViewController: UIViewController {
     }
 }
 
-extension STCarouselViewController: STCarouselDataSource {
-    func st_numberOfItemsIn(carousel: STCarousel) -> NSInteger {
-        if btnClick {
-            return 1
-        }
-        return items.count
-    }
-    
-    func st_carouselViewForItem(in viewForItemAtIndex: STCarousel, at index: NSInteger) -> UIView {
-        var label: UILabel
-        var itemView: UIImageView
-        
-        if let view = view as? UIImageView {
-            itemView = view
-            label = itemView.viewWithTag(1) as! UILabel
-        } else {
-            itemView = UIImageView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
-            itemView.backgroundColor = UIColor.purple
-            label = UILabel(frame: itemView.bounds)
-            label.backgroundColor = .clear
-            label.textAlignment = .center
-            label.font = label.font.withSize(50)
-            label.tag = 1
-            itemView.addSubview(label)
-        }
-        
-        itemView.frame = CGRect.init(x: 40 + 40 * count, y: 20 * count, width: Int(self.view.bounds.size.width) - 40 * count, height: 188)
-        label.frame = itemView.bounds
-        view?.frame = itemView.frame
-        count += 1
-        label.text = "\(items[index])"
-        
-        return itemView
-    }
-    
-    func st_cardItem(_ cardView: STCarousel, cellForItemAt Index: Int) -> STCardItem {
-        var item: STCardItem!
-        if let image = UIImage(named: "img_0" + "\(Index)") {
-            item = STCardItem(image: image)
-        } else {
-            item = STCardItem(image: UIImage.getImageWithColor(color: UIColor.randomColor))
-        }
-        return item
-    }
-
-    func st_numberOfItems(in cardView: STCarousel) -> Int {
-        return count
-    }
-}
+//extension STCarouselViewController: STCarouselDataSource {
+//    func st_numberOfItemsIn(carousel: STCarousel) -> NSInteger {
+//        if btnClick {
+//            return 1
+//        }
+//        return items.count
+//    }
+//
+//    func st_carouselViewForItem(in viewForItemAtIndex: STCarousel, at index: NSInteger) -> UIView {
+//        var label: UILabel
+//        var itemView: UIImageView
+//
+//        if let view = view as? UIImageView {
+//            itemView = view
+//            label = itemView.viewWithTag(1) as! UILabel
+//        } else {
+//            itemView = UIImageView(frame: CGRect(x: 0, y: 0, width: 200, height: 200))
+//            itemView.backgroundColor = UIColor.purple
+//            label = UILabel(frame: itemView.bounds)
+//            label.backgroundColor = .clear
+//            label.textAlignment = .center
+//            label.font = label.font.withSize(50)
+//            label.tag = 1
+//            itemView.addSubview(label)
+//        }
+//
+//        itemView.frame = CGRect.init(x: 40 + 40 * count, y: 20 * count, width: Int(self.view.bounds.size.width) - 40 * count, height: 188)
+//        label.frame = itemView.bounds
+//        view?.frame = itemView.frame
+//        count += 1
+//        label.text = "\(items[index])"
+//
+//        return itemView
+//    }
+//
+//    func st_cardItem(_ cardView: STCarousel, cellForItemAt Index: Int) -> STCardItem {
+//        var item: STCardItem!
+//        if let image = UIImage(named: "img_0" + "\(Index)") {
+//            item = STCardItem(image: image)
+//        } else {
+//            item = STCardItem(image: UIImage.getImageWithColor(color: UIColor.randomColor))
+//        }
+//        return item
+//    }
+//
+//    func st_numberOfItems(in cardView: STCarousel) -> Int {
+//        return count
+//    }
+//}
 
 extension STCarouselViewController: STCarouselDelegate {
     func st_carouselWillBeginScrollingAnimation(carousel: STCarousel) {
@@ -187,7 +187,7 @@ extension STCarouselViewController: iCarouselDataSource, iCarouselDelegate {
             //don't do anything specific to the index within
             //this `if ... else` statement because the view will be
             //recycled and used with other index values later
-            itemView = UIImageView(frame: CGRect(x: 40, y: 0, width: Int(self.view.bounds.size.width) - 40 * count - 40, height: 188))
+            itemView = UIImageView(frame: CGRect(x: 40, y: 0, width: Int(self.view.bounds.size.width) - 40, height: 188))
 //            itemView.image = UIImage(named: "page.png")
             //itemView.contentMode = .center
             itemView.backgroundColor = UIColor.gray
