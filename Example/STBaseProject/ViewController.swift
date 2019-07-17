@@ -17,69 +17,13 @@ class ViewController: STBaseOpenSystemOperationController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.st_showNavBtnType(type: .onlyShowTitle)
-        self.titleLabel.text = "text"
-        self.titleLabel.textAlignment = .center
-        self.rightBtn.setTitle("hello world", for: UIControl.State.normal)
-        self.rightBtnAttributeLeft.constant = -50
-        self.titleLabelAttributeLeft.constant = 10
-        self.testIndicatorBtn()
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
+        self.st_showNavBtnType(type: .none)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-//        self.testScanner()
+        let carouselVC = STCarouselViewController()
+        self.navigationController?.pushViewController(carouselVC, animated: true)
     }
-    
-    func testScanner() -> Void {
-        let scannerVC = STScanViewController.init(qrType: .STScanTypeQrCode) { (result) in
-            print(result)
-        }
-        self.navigationController?.pushViewController(scannerVC, animated: true)
-    }
-    
-    func testScreenShot() -> Void {
-        NotificationCenter.default.addObserver(self, selector: #selector(userDidTakeScreenshot(note:)), name: UIApplication.userDidTakeScreenshotNotification, object: nil)
-    }
-    
-    
-    @objc func userDidTakeScreenshot(note: NSNotification) -> Void {
-        print("warning ======  userDidTakeScreenshot")
-        // call st_showScreenshotImage(rect: CGRect) class method can return UIImageView
-        // call st_imageWithScreenshot() class method can return UIImage
-    }
-    
-    func testIndicatorBtn() -> Void {
-        let btn = STIndicatorBtn()
-        btn.cornerRadius = 4
-        btn.frame = CGRect.init(x: 0, y: 200, width: self.view.bounds.width, height: 40)
-        btn.setTitle("loading", for: UIControl.State.normal)
-        btn.addTarget(self, action: #selector(btnClick), for: UIControl.Event.touchUpInside)
-        btn.backgroundColor = UIColor.green
-        
-        self.view.addSubview(btn)
-        btn.tag = 100
-    }
-    
-    @objc func btnClick() -> Void {
-        let btn: STIndicatorBtn = self.view.viewWithTag(100) as! STIndicatorBtn
-        btn.st_space = 10
-        btn.st_newBtnTitle = "Transfer immediately immediately"
-//        if btn.st_indicatorIsAnimating {
-//            btn.st_indicatorStopAnimating()
-//        } else {
-//            btn.st_indicatorStartAnimating()
-//        }
-//        btn.st_indicatorStartAnimating()
-        btn.st_indicatorStartAnimating(customImage: UIImage.init(named: "Image")!)
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
-            //btn.st_indicatorStopAnimating()
-        }
-    }
-
 }
 

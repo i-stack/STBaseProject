@@ -7,301 +7,461 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		000000000370 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000360 /* Foundation.framework */; };
-		000000000380 /* STBaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000E0 /* STBaseConstants.swift */; };
-		000000000390 /* STBaseOpenSystemOperationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000100 /* STBaseOpenSystemOperationController.swift */; };
-		0000000003A0 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000110 /* STBaseViewController.swift */; };
-		0000000003B0 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000130 /* STBundle.swift */; };
-		0000000003C0 /* STPasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000140 /* STPasteboard.swift */; };
-		0000000003D0 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000150 /* STPredicateCheck.swift */; };
-		0000000003E0 /* STColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000170 /* STColor.swift */; };
-		0000000003F0 /* STData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000180 /* STData.swift */; };
-		000000000400 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000190 /* STImage.swift */; };
-		000000000410 /* STImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001A0 /* STImageView.swift */; };
-		000000000420 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001B0 /* STString.swift */; };
-		000000000430 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001E0 /* STBtn.swift */; };
-		000000000440 /* STBtnIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000001F0 /* STBtnIndicator.swift */; };
-		000000000450 /* STContractManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000210 /* STContractManager.swift */; };
-		000000000460 /* STContractMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000220 /* STContractMessage.swift */; };
-		000000000470 /* STScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000240 /* STScanView.swift */; };
-		000000000480 /* STScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000250 /* STScanViewController.swift */; };
-		000000000490 /* STScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000270 /* STScreenshot.swift */; };
-		0000000004E0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 0000000004D0 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		000000000520 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 000000000510 /* STBaseProject-dummy.m */; };
-		0000000005C0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 000000000360 /* Foundation.framework */; };
-		000000000630 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 000000000620 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		000000000680 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 000000000670 /* Pods-STBaseProject_Example-dummy.m */; };
+		46EB2E000005B0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005A0 /* Foundation.framework */; };
+		46EB2E000005C0 /* STBaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000100 /* STBaseConstants.swift */; };
+		46EB2E000005D0 /* STBaseOpenSystemOperationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000120 /* STBaseOpenSystemOperationController.swift */; };
+		46EB2E000005E0 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000130 /* STBaseViewController.swift */; };
+		46EB2E000005F0 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000150 /* STBundle.swift */; };
+		46EB2E00000600 /* STPasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* STPasteboard.swift */; };
+		46EB2E00000610 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000170 /* STPredicateCheck.swift */; };
+		46EB2E00000620 /* STColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* STColor.swift */; };
+		46EB2E00000630 /* STData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* STData.swift */; };
+		46EB2E00000640 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* STImage.swift */; };
+		46EB2E00000650 /* STImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STImageView.swift */; };
+		46EB2E00000660 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STString.swift */; };
+		46EB2E00000670 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* STBtn.swift */; };
+		46EB2E00000680 /* STBtnIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* STBtnIndicator.swift */; };
+		46EB2E00000690 /* STContractManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* STContractManager.swift */; };
+		46EB2E000006A0 /* STContractMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STContractMessage.swift */; };
+		46EB2E000006B0 /* STScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STScanView.swift */; };
+		46EB2E000006C0 /* STScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STScanViewController.swift */; };
+		46EB2E000006D0 /* STScreenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STScreenshot.swift */; };
+		46EB2E00000720 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000710 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000760 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000750 /* STBaseProject-dummy.m */; };
+		46EB2E00000800 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005A0 /* Foundation.framework */; };
+		46EB2E00000810 /* Constraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* Constraint.swift */; };
+		46EB2E00000820 /* ConstraintAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* ConstraintAttributes.swift */; };
+		46EB2E00000830 /* ConstraintConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* ConstraintConfig.swift */; };
+		46EB2E00000840 /* ConstraintConstantTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* ConstraintConstantTarget.swift */; };
+		46EB2E00000850 /* ConstraintDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* ConstraintDescription.swift */; };
+		46EB2E00000860 /* ConstraintDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002F0 /* ConstraintDSL.swift */; };
+		46EB2E00000870 /* ConstraintInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000300 /* ConstraintInsets.swift */; };
+		46EB2E00000880 /* ConstraintInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000310 /* ConstraintInsetTarget.swift */; };
+		46EB2E00000890 /* ConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000320 /* ConstraintItem.swift */; };
+		46EB2E000008A0 /* ConstraintLayoutGuide+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000330 /* ConstraintLayoutGuide+Extensions.swift */; };
+		46EB2E000008B0 /* ConstraintLayoutGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000340 /* ConstraintLayoutGuide.swift */; };
+		46EB2E000008C0 /* ConstraintLayoutGuideDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000350 /* ConstraintLayoutGuideDSL.swift */; };
+		46EB2E000008D0 /* ConstraintLayoutSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000360 /* ConstraintLayoutSupport.swift */; };
+		46EB2E000008E0 /* ConstraintLayoutSupportDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000370 /* ConstraintLayoutSupportDSL.swift */; };
+		46EB2E000008F0 /* ConstraintMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000380 /* ConstraintMaker.swift */; };
+		46EB2E00000900 /* ConstraintMakerEditable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* ConstraintMakerEditable.swift */; };
+		46EB2E00000910 /* ConstraintMakerExtendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* ConstraintMakerExtendable.swift */; };
+		46EB2E00000920 /* ConstraintMakerFinalizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003B0 /* ConstraintMakerFinalizable.swift */; };
+		46EB2E00000930 /* ConstraintMakerPriortizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* ConstraintMakerPriortizable.swift */; };
+		46EB2E00000940 /* ConstraintMakerRelatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* ConstraintMakerRelatable.swift */; };
+		46EB2E00000950 /* ConstraintMultiplierTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003E0 /* ConstraintMultiplierTarget.swift */; };
+		46EB2E00000960 /* ConstraintOffsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003F0 /* ConstraintOffsetTarget.swift */; };
+		46EB2E00000970 /* ConstraintPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* ConstraintPriority.swift */; };
+		46EB2E00000980 /* ConstraintPriorityTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000410 /* ConstraintPriorityTarget.swift */; };
+		46EB2E00000990 /* ConstraintRelatableTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000420 /* ConstraintRelatableTarget.swift */; };
+		46EB2E000009A0 /* ConstraintRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000430 /* ConstraintRelation.swift */; };
+		46EB2E000009B0 /* ConstraintView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000440 /* ConstraintView+Extensions.swift */; };
+		46EB2E000009C0 /* ConstraintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000450 /* ConstraintView.swift */; };
+		46EB2E000009D0 /* ConstraintViewDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000460 /* ConstraintViewDSL.swift */; };
+		46EB2E000009E0 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000470 /* Debugging.swift */; };
+		46EB2E000009F0 /* LayoutConstraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000480 /* LayoutConstraint.swift */; };
+		46EB2E00000A00 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000490 /* LayoutConstraintItem.swift */; };
+		46EB2E00000A10 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004A0 /* Typealiases.swift */; };
+		46EB2E00000A20 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004B0 /* UILayoutSupport+Extensions.swift */; };
+		46EB2E00000A70 /* SnapKit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A60 /* SnapKit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000AB0 /* SnapKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AA0 /* SnapKit-dummy.m */; };
+		46EB2E00000B50 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005A0 /* Foundation.framework */; };
+		46EB2E00000BC0 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BB0 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000C10 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C00 /* Pods-STBaseProject_Example-dummy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		000000000690 /* PBXContainerItemProxy */ = {
+		46EB2E00000C20 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 000000000000 /* Project object */;
+			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 0000000002C0;
+			remoteGlobalIDString = 894EA9674D0D5CFEF493FE4E266279C6;
 			remoteInfo = STBaseProject;
+		};
+		46EB2E00000C40 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46EB2E00000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 19622742EBA51E823D6DAE3F8CDBFAD4;
+			remoteInfo = SnapKit;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0000000000B0 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		0000000000E0 /* STBaseConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseConstants.swift; path = STBaseProject/Classes/STBase/STBaseConstants/STBaseConstants.swift; sourceTree = "<group>"; };
-		000000000100 /* STBaseOpenSystemOperationController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseOpenSystemOperationController.swift; path = STBaseProject/Classes/STBase/STBaseViewController/STBaseOpenSystemOperationController.swift; sourceTree = "<group>"; };
-		000000000110 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewController.swift; path = STBaseProject/Classes/STBase/STBaseViewController/STBaseViewController.swift; sourceTree = "<group>"; };
-		000000000130 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBundle.swift; path = STBaseProject/Classes/STCommon/STBundle.swift; sourceTree = "<group>"; };
-		000000000140 /* STPasteboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPasteboard.swift; path = STBaseProject/Classes/STCommon/STPasteboard.swift; sourceTree = "<group>"; };
-		000000000150 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STCommon/STPredicateCheck.swift; sourceTree = "<group>"; };
-		000000000170 /* STColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STColor.swift; path = STBaseProject/Classes/STCommon/STExtension/STColor.swift; sourceTree = "<group>"; };
-		000000000180 /* STData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STData.swift; path = STBaseProject/Classes/STCommon/STExtension/STData.swift; sourceTree = "<group>"; };
-		000000000190 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STCommon/STExtension/STImage.swift; sourceTree = "<group>"; };
-		0000000001A0 /* STImageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImageView.swift; path = STBaseProject/Classes/STCommon/STExtension/STImageView.swift; sourceTree = "<group>"; };
-		0000000001B0 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STString.swift; path = STBaseProject/Classes/STCommon/STExtension/STString.swift; sourceTree = "<group>"; };
-		0000000001E0 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STUI/STBtn/STBtn.swift; sourceTree = "<group>"; };
-		0000000001F0 /* STBtnIndicator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtnIndicator.swift; path = STBaseProject/Classes/STUI/STBtn/STBtnIndicator.swift; sourceTree = "<group>"; };
-		000000000210 /* STContractManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STContractManager.swift; path = STBaseProject/Classes/STUI/STContract/STContractManager.swift; sourceTree = "<group>"; };
-		000000000220 /* STContractMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STContractMessage.swift; path = STBaseProject/Classes/STUI/STContract/STContractMessage.swift; sourceTree = "<group>"; };
-		000000000240 /* STScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScanView.swift; path = STBaseProject/Classes/STUI/STScanner/STScanView.swift; sourceTree = "<group>"; };
-		000000000250 /* STScanViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScanViewController.swift; path = STBaseProject/Classes/STUI/STScanner/STScanViewController.swift; sourceTree = "<group>"; };
-		000000000270 /* STScreenshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScreenshot.swift; path = STBaseProject/Classes/STUI/STScreenshot/STScreenshot.swift; sourceTree = "<group>"; };
-		000000000290 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
-		0000000002A0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
-		0000000002B0 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		000000000300 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = STBaseProject.framework; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		000000000360 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		0000000004B0 /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
-		0000000004C0 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
-		0000000004D0 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
-		0000000004F0 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
-		000000000500 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
-		000000000510 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
-		000000000570 /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_STBaseProject_Example.framework; path = "Pods-STBaseProject_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0000000005E0 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
-		0000000005F0 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		000000000600 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
-		000000000610 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
-		000000000620 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
-		000000000640 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
-		000000000650 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		000000000660 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		000000000670 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
+		46EB2E000000D0 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		46EB2E00000100 /* STBaseConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseConstants.swift; path = STBaseProject/Classes/STBase/STBaseConstants/STBaseConstants.swift; sourceTree = "<group>"; };
+		46EB2E00000120 /* STBaseOpenSystemOperationController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseOpenSystemOperationController.swift; path = STBaseProject/Classes/STBase/STBaseViewController/STBaseOpenSystemOperationController.swift; sourceTree = "<group>"; };
+		46EB2E00000130 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewController.swift; path = STBaseProject/Classes/STBase/STBaseViewController/STBaseViewController.swift; sourceTree = "<group>"; };
+		46EB2E00000150 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBundle.swift; path = STBaseProject/Classes/STCommon/STBundle.swift; sourceTree = "<group>"; };
+		46EB2E00000160 /* STPasteboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPasteboard.swift; path = STBaseProject/Classes/STCommon/STPasteboard.swift; sourceTree = "<group>"; };
+		46EB2E00000170 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STCommon/STPredicateCheck.swift; sourceTree = "<group>"; };
+		46EB2E00000190 /* STColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STColor.swift; path = STBaseProject/Classes/STCommon/STExtension/STColor.swift; sourceTree = "<group>"; };
+		46EB2E000001A0 /* STData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STData.swift; path = STBaseProject/Classes/STCommon/STExtension/STData.swift; sourceTree = "<group>"; };
+		46EB2E000001B0 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STCommon/STExtension/STImage.swift; sourceTree = "<group>"; };
+		46EB2E000001C0 /* STImageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImageView.swift; path = STBaseProject/Classes/STCommon/STExtension/STImageView.swift; sourceTree = "<group>"; };
+		46EB2E000001D0 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STString.swift; path = STBaseProject/Classes/STCommon/STExtension/STString.swift; sourceTree = "<group>"; };
+		46EB2E00000200 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STUI/STBtn/STBtn.swift; sourceTree = "<group>"; };
+		46EB2E00000210 /* STBtnIndicator.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtnIndicator.swift; path = STBaseProject/Classes/STUI/STBtn/STBtnIndicator.swift; sourceTree = "<group>"; };
+		46EB2E00000230 /* STContractManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STContractManager.swift; path = STBaseProject/Classes/STUI/STContract/STContractManager.swift; sourceTree = "<group>"; };
+		46EB2E00000240 /* STContractMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STContractMessage.swift; path = STBaseProject/Classes/STUI/STContract/STContractMessage.swift; sourceTree = "<group>"; };
+		46EB2E00000260 /* STScanView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScanView.swift; path = STBaseProject/Classes/STUI/STScanner/STScanView.swift; sourceTree = "<group>"; };
+		46EB2E00000270 /* STScanViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScanViewController.swift; path = STBaseProject/Classes/STUI/STScanner/STScanViewController.swift; sourceTree = "<group>"; };
+		46EB2E00000290 /* STScreenshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScreenshot.swift; path = STBaseProject/Classes/STUI/STScreenshot/STScreenshot.swift; sourceTree = "<group>"; };
+		46EB2E000002A0 /* Constraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Constraint.swift; path = Source/Constraint.swift; sourceTree = "<group>"; };
+		46EB2E000002B0 /* ConstraintAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintAttributes.swift; path = Source/ConstraintAttributes.swift; sourceTree = "<group>"; };
+		46EB2E000002C0 /* ConstraintConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConfig.swift; path = Source/ConstraintConfig.swift; sourceTree = "<group>"; };
+		46EB2E000002D0 /* ConstraintConstantTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConstantTarget.swift; path = Source/ConstraintConstantTarget.swift; sourceTree = "<group>"; };
+		46EB2E000002E0 /* ConstraintDescription.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDescription.swift; path = Source/ConstraintDescription.swift; sourceTree = "<group>"; };
+		46EB2E000002F0 /* ConstraintDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDSL.swift; path = Source/ConstraintDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000300 /* ConstraintInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsets.swift; path = Source/ConstraintInsets.swift; sourceTree = "<group>"; };
+		46EB2E00000310 /* ConstraintInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsetTarget.swift; path = Source/ConstraintInsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000320 /* ConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintItem.swift; path = Source/ConstraintItem.swift; sourceTree = "<group>"; };
+		46EB2E00000330 /* ConstraintLayoutGuide+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintLayoutGuide+Extensions.swift"; path = "Source/ConstraintLayoutGuide+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000340 /* ConstraintLayoutGuide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuide.swift; path = Source/ConstraintLayoutGuide.swift; sourceTree = "<group>"; };
+		46EB2E00000350 /* ConstraintLayoutGuideDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuideDSL.swift; path = Source/ConstraintLayoutGuideDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000360 /* ConstraintLayoutSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupport.swift; path = Source/ConstraintLayoutSupport.swift; sourceTree = "<group>"; };
+		46EB2E00000370 /* ConstraintLayoutSupportDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupportDSL.swift; path = Source/ConstraintLayoutSupportDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000380 /* ConstraintMaker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMaker.swift; path = Source/ConstraintMaker.swift; sourceTree = "<group>"; };
+		46EB2E00000390 /* ConstraintMakerEditable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerEditable.swift; path = Source/ConstraintMakerEditable.swift; sourceTree = "<group>"; };
+		46EB2E000003A0 /* ConstraintMakerExtendable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerExtendable.swift; path = Source/ConstraintMakerExtendable.swift; sourceTree = "<group>"; };
+		46EB2E000003B0 /* ConstraintMakerFinalizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerFinalizable.swift; path = Source/ConstraintMakerFinalizable.swift; sourceTree = "<group>"; };
+		46EB2E000003C0 /* ConstraintMakerPriortizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerPriortizable.swift; path = Source/ConstraintMakerPriortizable.swift; sourceTree = "<group>"; };
+		46EB2E000003D0 /* ConstraintMakerRelatable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerRelatable.swift; path = Source/ConstraintMakerRelatable.swift; sourceTree = "<group>"; };
+		46EB2E000003E0 /* ConstraintMultiplierTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMultiplierTarget.swift; path = Source/ConstraintMultiplierTarget.swift; sourceTree = "<group>"; };
+		46EB2E000003F0 /* ConstraintOffsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintOffsetTarget.swift; path = Source/ConstraintOffsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000400 /* ConstraintPriority.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriority.swift; path = Source/ConstraintPriority.swift; sourceTree = "<group>"; };
+		46EB2E00000410 /* ConstraintPriorityTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriorityTarget.swift; path = Source/ConstraintPriorityTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000420 /* ConstraintRelatableTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelatableTarget.swift; path = Source/ConstraintRelatableTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000430 /* ConstraintRelation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelation.swift; path = Source/ConstraintRelation.swift; sourceTree = "<group>"; };
+		46EB2E00000440 /* ConstraintView+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintView+Extensions.swift"; path = "Source/ConstraintView+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000450 /* ConstraintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintView.swift; path = Source/ConstraintView.swift; sourceTree = "<group>"; };
+		46EB2E00000460 /* ConstraintViewDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintViewDSL.swift; path = Source/ConstraintViewDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000470 /* Debugging.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Debugging.swift; path = Source/Debugging.swift; sourceTree = "<group>"; };
+		46EB2E00000480 /* LayoutConstraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraint.swift; path = Source/LayoutConstraint.swift; sourceTree = "<group>"; };
+		46EB2E00000490 /* LayoutConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraintItem.swift; path = Source/LayoutConstraintItem.swift; sourceTree = "<group>"; };
+		46EB2E000004A0 /* Typealiases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Typealiases.swift; path = Source/Typealiases.swift; sourceTree = "<group>"; };
+		46EB2E000004B0 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "UILayoutSupport+Extensions.swift"; path = "Source/UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E000004D0 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		46EB2E000004E0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		46EB2E000004F0 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		46EB2E000005A0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E000006F0 /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
+		46EB2E00000700 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
+		46EB2E00000710 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000730 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000740 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E00000750 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000A40 /* SnapKit.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.xcconfig; sourceTree = "<group>"; };
+		46EB2E00000A50 /* SnapKit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SnapKit.modulemap; sourceTree = "<group>"; };
+		46EB2E00000A60 /* SnapKit-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000A80 /* SnapKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SnapKit-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000A90 /* SnapKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E00000AA0 /* SnapKit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SnapKit-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000B70 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00000B80 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00000B90 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000BA0 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
+		46EB2E00000BB0 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000BD0 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
+		46EB2E00000BE0 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		46EB2E00000BF0 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
+		46EB2E00000C00 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
+		8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_STBaseProject_Example.framework; path = "Pods-STBaseProject_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		979486118B3E90C08386079D57962701 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SnapKit.framework; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = STBaseProject.framework; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		000000000330 /* Frameworks */ = {
+		46EB2E00000570 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000370 /* Foundation.framework in Frameworks */,
+				46EB2E000005B0 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0000000005A0 /* Frameworks */ = {
+		46EB2E000007E0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0000000005C0 /* Foundation.framework in Frameworks */,
+				46EB2E00000800 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000B30 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000B50 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		000000000010 = {
+		46EB2E00000010 = {
 			isa = PBXGroup;
 			children = (
-				0000000000B0 /* Podfile */,
-				000000000090 /* Development Pods */,
-				000000000060 /* Frameworks */,
-				000000000020 /* Products */,
-				000000000070 /* Targets Support Files */,
+				46EB2E000000D0 /* Podfile */,
+				46EB2E00000090 /* Development Pods */,
+				46EB2E00000060 /* Frameworks */,
+				46EB2E00000080 /* Pods */,
+				46EB2E00000020 /* Products */,
+				46EB2E00000070 /* Targets Support Files */,
 			);
 			sourceTree = "<group>";
 		};
-		000000000020 /* Products */ = {
+		46EB2E00000020 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				000000000570 /* Pods_STBaseProject_Example.framework */,
-				000000000300 /* STBaseProject.framework */,
+				8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */,
+				979486118B3E90C08386079D57962701 /* SnapKit.framework */,
+				D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		000000000060 /* Frameworks */ = {
+		46EB2E00000060 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				000000000350 /* iOS */,
+				46EB2E00000590 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		000000000070 /* Targets Support Files */ = {
+		46EB2E00000070 /* Targets Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				0000000005D0 /* Pods-STBaseProject_Example */,
+				46EB2E00000B60 /* Pods-STBaseProject_Example */,
 			);
 			name = "Targets Support Files";
 			sourceTree = "<group>";
 		};
-		000000000090 /* Development Pods */ = {
+		46EB2E00000080 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				0000000000A0 /* STBaseProject */,
+				46EB2E000000C0 /* SnapKit */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		46EB2E00000090 /* Development Pods */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E000000B0 /* STBaseProject */,
 			);
 			name = "Development Pods";
 			sourceTree = "<group>";
 		};
-		0000000000A0 /* STBaseProject */ = {
+		46EB2E000000B0 /* STBaseProject */ = {
 			isa = PBXGroup;
 			children = (
-				000000000280 /* Pod */,
-				0000000000C0 /* STBase */,
-				000000000120 /* STCommon */,
-				0000000001C0 /* STUI */,
-				0000000004A0 /* Support Files */,
+				46EB2E000004C0 /* Pod */,
+				46EB2E000000E0 /* STBase */,
+				46EB2E00000140 /* STCommon */,
+				46EB2E000001E0 /* STUI */,
+				46EB2E000006E0 /* Support Files */,
 			);
 			name = STBaseProject;
-			path = /Users/song/Desktop/GitHub/STBaseProject;
-			sourceTree = "<absolute>";
+			path = ../..;
+			sourceTree = "<group>";
 		};
-		0000000000C0 /* STBase */ = {
+		46EB2E000000C0 /* SnapKit */ = {
 			isa = PBXGroup;
 			children = (
-				0000000000D0 /* STBaseConstants */,
-				0000000000F0 /* STBaseViewController */,
+				46EB2E000002A0 /* Constraint.swift */,
+				46EB2E000002B0 /* ConstraintAttributes.swift */,
+				46EB2E000002C0 /* ConstraintConfig.swift */,
+				46EB2E000002D0 /* ConstraintConstantTarget.swift */,
+				46EB2E000002E0 /* ConstraintDescription.swift */,
+				46EB2E000002F0 /* ConstraintDSL.swift */,
+				46EB2E00000300 /* ConstraintInsets.swift */,
+				46EB2E00000310 /* ConstraintInsetTarget.swift */,
+				46EB2E00000320 /* ConstraintItem.swift */,
+				46EB2E00000340 /* ConstraintLayoutGuide.swift */,
+				46EB2E00000330 /* ConstraintLayoutGuide+Extensions.swift */,
+				46EB2E00000350 /* ConstraintLayoutGuideDSL.swift */,
+				46EB2E00000360 /* ConstraintLayoutSupport.swift */,
+				46EB2E00000370 /* ConstraintLayoutSupportDSL.swift */,
+				46EB2E00000380 /* ConstraintMaker.swift */,
+				46EB2E00000390 /* ConstraintMakerEditable.swift */,
+				46EB2E000003A0 /* ConstraintMakerExtendable.swift */,
+				46EB2E000003B0 /* ConstraintMakerFinalizable.swift */,
+				46EB2E000003C0 /* ConstraintMakerPriortizable.swift */,
+				46EB2E000003D0 /* ConstraintMakerRelatable.swift */,
+				46EB2E000003E0 /* ConstraintMultiplierTarget.swift */,
+				46EB2E000003F0 /* ConstraintOffsetTarget.swift */,
+				46EB2E00000400 /* ConstraintPriority.swift */,
+				46EB2E00000410 /* ConstraintPriorityTarget.swift */,
+				46EB2E00000420 /* ConstraintRelatableTarget.swift */,
+				46EB2E00000430 /* ConstraintRelation.swift */,
+				46EB2E00000450 /* ConstraintView.swift */,
+				46EB2E00000440 /* ConstraintView+Extensions.swift */,
+				46EB2E00000460 /* ConstraintViewDSL.swift */,
+				46EB2E00000470 /* Debugging.swift */,
+				46EB2E00000480 /* LayoutConstraint.swift */,
+				46EB2E00000490 /* LayoutConstraintItem.swift */,
+				46EB2E000004A0 /* Typealiases.swift */,
+				46EB2E000004B0 /* UILayoutSupport+Extensions.swift */,
+				46EB2E00000A30 /* Support Files */,
+			);
+			name = SnapKit;
+			path = SnapKit;
+			sourceTree = "<group>";
+		};
+		46EB2E000000E0 /* STBase */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E000000F0 /* STBaseConstants */,
+				46EB2E00000110 /* STBaseViewController */,
 			);
 			name = STBase;
 			sourceTree = "<group>";
 		};
-		0000000000D0 /* STBaseConstants */ = {
+		46EB2E000000F0 /* STBaseConstants */ = {
 			isa = PBXGroup;
 			children = (
-				0000000000E0 /* STBaseConstants.swift */,
+				46EB2E00000100 /* STBaseConstants.swift */,
 			);
 			name = STBaseConstants;
 			sourceTree = "<group>";
 		};
-		0000000000F0 /* STBaseViewController */ = {
+		46EB2E00000110 /* STBaseViewController */ = {
 			isa = PBXGroup;
 			children = (
-				000000000100 /* STBaseOpenSystemOperationController.swift */,
-				000000000110 /* STBaseViewController.swift */,
+				46EB2E00000120 /* STBaseOpenSystemOperationController.swift */,
+				46EB2E00000130 /* STBaseViewController.swift */,
 			);
 			name = STBaseViewController;
 			sourceTree = "<group>";
 		};
-		000000000120 /* STCommon */ = {
+		46EB2E00000140 /* STCommon */ = {
 			isa = PBXGroup;
 			children = (
-				000000000130 /* STBundle.swift */,
-				000000000140 /* STPasteboard.swift */,
-				000000000150 /* STPredicateCheck.swift */,
-				000000000160 /* STExtension */,
+				46EB2E00000150 /* STBundle.swift */,
+				46EB2E00000160 /* STPasteboard.swift */,
+				46EB2E00000170 /* STPredicateCheck.swift */,
+				46EB2E00000180 /* STExtension */,
 			);
 			name = STCommon;
 			sourceTree = "<group>";
 		};
-		000000000160 /* STExtension */ = {
+		46EB2E00000180 /* STExtension */ = {
 			isa = PBXGroup;
 			children = (
-				000000000170 /* STColor.swift */,
-				000000000180 /* STData.swift */,
-				000000000190 /* STImage.swift */,
-				0000000001A0 /* STImageView.swift */,
-				0000000001B0 /* STString.swift */,
+				46EB2E00000190 /* STColor.swift */,
+				46EB2E000001A0 /* STData.swift */,
+				46EB2E000001B0 /* STImage.swift */,
+				46EB2E000001C0 /* STImageView.swift */,
+				46EB2E000001D0 /* STString.swift */,
 			);
 			name = STExtension;
 			sourceTree = "<group>";
 		};
-		0000000001C0 /* STUI */ = {
+		46EB2E000001E0 /* STUI */ = {
 			isa = PBXGroup;
 			children = (
-				0000000001D0 /* STBtn */,
-				000000000200 /* STContract */,
-				000000000230 /* STScanner */,
-				000000000260 /* STScreenshot */,
+				46EB2E000001F0 /* STBtn */,
+				46EB2E00000220 /* STContract */,
+				46EB2E00000250 /* STScanner */,
+				46EB2E00000280 /* STScreenshot */,
 			);
 			name = STUI;
 			sourceTree = "<group>";
 		};
-		0000000001D0 /* STBtn */ = {
+		46EB2E000001F0 /* STBtn */ = {
 			isa = PBXGroup;
 			children = (
-				0000000001E0 /* STBtn.swift */,
-				0000000001F0 /* STBtnIndicator.swift */,
+				46EB2E00000200 /* STBtn.swift */,
+				46EB2E00000210 /* STBtnIndicator.swift */,
 			);
 			name = STBtn;
 			sourceTree = "<group>";
 		};
-		000000000200 /* STContract */ = {
+		46EB2E00000220 /* STContract */ = {
 			isa = PBXGroup;
 			children = (
-				000000000210 /* STContractManager.swift */,
-				000000000220 /* STContractMessage.swift */,
+				46EB2E00000230 /* STContractManager.swift */,
+				46EB2E00000240 /* STContractMessage.swift */,
 			);
 			name = STContract;
 			sourceTree = "<group>";
 		};
-		000000000230 /* STScanner */ = {
+		46EB2E00000250 /* STScanner */ = {
 			isa = PBXGroup;
 			children = (
-				000000000240 /* STScanView.swift */,
-				000000000250 /* STScanViewController.swift */,
+				46EB2E00000260 /* STScanView.swift */,
+				46EB2E00000270 /* STScanViewController.swift */,
 			);
 			name = STScanner;
 			sourceTree = "<group>";
 		};
-		000000000260 /* STScreenshot */ = {
+		46EB2E00000280 /* STScreenshot */ = {
 			isa = PBXGroup;
 			children = (
-				000000000270 /* STScreenshot.swift */,
+				46EB2E00000290 /* STScreenshot.swift */,
 			);
 			name = STScreenshot;
 			sourceTree = "<group>";
 		};
-		000000000280 /* Pod */ = {
+		46EB2E000004C0 /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				000000000290 /* LICENSE */,
-				0000000002A0 /* README.md */,
-				0000000002B0 /* STBaseProject.podspec */,
+				46EB2E000004D0 /* LICENSE */,
+				46EB2E000004E0 /* README.md */,
+				46EB2E000004F0 /* STBaseProject.podspec */,
 			);
 			name = Pod;
 			sourceTree = "<group>";
 		};
-		000000000350 /* iOS */ = {
+		46EB2E00000590 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				000000000360 /* Foundation.framework */,
+				46EB2E000005A0 /* Foundation.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		0000000004A0 /* Support Files */ = {
+		46EB2E000006E0 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				0000000004C0 /* STBaseProject.modulemap */,
-				0000000004B0 /* STBaseProject.xcconfig */,
-				000000000510 /* STBaseProject-dummy.m */,
-				0000000004F0 /* STBaseProject-Info.plist */,
-				000000000500 /* STBaseProject-prefix.pch */,
-				0000000004D0 /* STBaseProject-umbrella.h */,
+				46EB2E00000700 /* STBaseProject.modulemap */,
+				46EB2E000006F0 /* STBaseProject.xcconfig */,
+				46EB2E00000750 /* STBaseProject-dummy.m */,
+				46EB2E00000730 /* STBaseProject-Info.plist */,
+				46EB2E00000740 /* STBaseProject-prefix.pch */,
+				46EB2E00000710 /* STBaseProject-umbrella.h */,
 			);
 			name = "Support Files";
 			path = "Example/Pods/Target Support Files/STBaseProject";
 			sourceTree = "<group>";
 		};
-		0000000005D0 /* Pods-STBaseProject_Example */ = {
+		46EB2E00000A30 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				000000000610 /* Pods-STBaseProject_Example.modulemap */,
-				000000000660 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
-				000000000650 /* Pods-STBaseProject_Example-acknowledgements.plist */,
-				000000000670 /* Pods-STBaseProject_Example-dummy.m */,
-				000000000640 /* Pods-STBaseProject_Example-frameworks.sh */,
-				000000000600 /* Pods-STBaseProject_Example-Info.plist */,
-				000000000620 /* Pods-STBaseProject_Example-umbrella.h */,
-				0000000005F0 /* Pods-STBaseProject_Example.debug.xcconfig */,
-				0000000005E0 /* Pods-STBaseProject_Example.release.xcconfig */,
+				46EB2E00000A50 /* SnapKit.modulemap */,
+				46EB2E00000A40 /* SnapKit.xcconfig */,
+				46EB2E00000AA0 /* SnapKit-dummy.m */,
+				46EB2E00000A80 /* SnapKit-Info.plist */,
+				46EB2E00000A90 /* SnapKit-prefix.pch */,
+				46EB2E00000A60 /* SnapKit-umbrella.h */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/SnapKit";
+			sourceTree = "<group>";
+		};
+		46EB2E00000B60 /* Pods-STBaseProject_Example */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000BA0 /* Pods-STBaseProject_Example.modulemap */,
+				46EB2E00000BF0 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
+				46EB2E00000BE0 /* Pods-STBaseProject_Example-acknowledgements.plist */,
+				46EB2E00000C00 /* Pods-STBaseProject_Example-dummy.m */,
+				46EB2E00000BD0 /* Pods-STBaseProject_Example-frameworks.sh */,
+				46EB2E00000B90 /* Pods-STBaseProject_Example-Info.plist */,
+				46EB2E00000BB0 /* Pods-STBaseProject_Example-umbrella.h */,
+				46EB2E00000B80 /* Pods-STBaseProject_Example.debug.xcconfig */,
+				46EB2E00000B70 /* Pods-STBaseProject_Example.release.xcconfig */,
 			);
 			name = "Pods-STBaseProject_Example";
 			path = "Target Support Files/Pods-STBaseProject_Example";
@@ -310,33 +470,79 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		000000000310 /* Headers */ = {
+		46EB2E00000550 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0000000004E0 /* STBaseProject-umbrella.h in Headers */,
+				46EB2E00000720 /* STBaseProject-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		000000000580 /* Headers */ = {
+		46EB2E000007C0 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000630 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
+				46EB2E00000A70 /* SnapKit-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000B10 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000BC0 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		0000000002C0 /* STBaseProject */ = {
+		19622742EBA51E823D6DAE3F8CDBFAD4 /* SnapKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0000000002D0 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
+			buildConfigurationList = 46EB2E00000780 /* Build configuration list for PBXNativeTarget "SnapKit" */;
 			buildPhases = (
-				000000000310 /* Headers */,
-				000000000320 /* Sources */,
-				000000000330 /* Frameworks */,
-				000000000340 /* Resources */,
+				46EB2E000007C0 /* Headers */,
+				46EB2E000007D0 /* Sources */,
+				46EB2E000007E0 /* Frameworks */,
+				46EB2E000007F0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SnapKit;
+			productName = SnapKit;
+			productReference = 979486118B3E90C08386079D57962701 /* SnapKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		81CE5441F11F92C51AAE7BA692D0FA83 /* Pods-STBaseProject_Example */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46EB2E00000AD0 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
+			buildPhases = (
+				46EB2E00000B10 /* Headers */,
+				46EB2E00000B20 /* Sources */,
+				46EB2E00000B30 /* Frameworks */,
+				46EB2E00000B40 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				46EB2E00000C30 /* PBXTargetDependency */,
+				46EB2E00000C50 /* PBXTargetDependency */,
+			);
+			name = "Pods-STBaseProject_Example";
+			productName = "Pods-STBaseProject_Example";
+			productReference = 8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46EB2E00000510 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
+			buildPhases = (
+				46EB2E00000550 /* Headers */,
+				46EB2E00000560 /* Sources */,
+				46EB2E00000570 /* Frameworks */,
+				46EB2E00000580 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -344,64 +550,53 @@
 			);
 			name = STBaseProject;
 			productName = STBaseProject;
-			productReference = 000000000300 /* STBaseProject.framework */;
-			productType = "com.apple.product-type.framework";
-		};
-		000000000530 /* Pods-STBaseProject_Example */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 000000000540 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
-			buildPhases = (
-				000000000580 /* Headers */,
-				000000000590 /* Sources */,
-				0000000005A0 /* Frameworks */,
-				0000000005B0 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				0000000006A0 /* PBXTargetDependency */,
-			);
-			name = "Pods-STBaseProject_Example";
-			productName = "Pods-STBaseProject_Example";
-			productReference = 000000000570 /* Pods_STBaseProject_Example.framework */;
+			productReference = D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		000000000000 /* Project object */ = {
+		46EB2E00000000 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0930;
-				LastUpgradeCheck = 0930;
+				LastSwiftUpdateCheck = 1100;
+				LastUpgradeCheck = 1100;
 			};
-			buildConfigurationList = 000000000030 /* Build configuration list for PBXProject "Pods" */;
+			buildConfigurationList = 46EB2E00000030 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 000000000010;
-			productRefGroup = 000000000020 /* Products */;
+			mainGroup = 46EB2E00000010;
+			productRefGroup = 46EB2E00000020 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				000000000530 /* Pods-STBaseProject_Example */,
-				0000000002C0 /* STBaseProject */,
+				81CE5441F11F92C51AAE7BA692D0FA83 /* Pods-STBaseProject_Example */,
+				19622742EBA51E823D6DAE3F8CDBFAD4 /* SnapKit */,
+				894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		000000000340 /* Resources */ = {
+		46EB2E00000580 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0000000005B0 /* Resources */ = {
+		46EB2E000007F0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000B40 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -411,53 +606,101 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		000000000320 /* Sources */ = {
+		46EB2E00000560 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000380 /* STBaseConstants.swift in Sources */,
-				000000000390 /* STBaseOpenSystemOperationController.swift in Sources */,
-				000000000520 /* STBaseProject-dummy.m in Sources */,
-				0000000003A0 /* STBaseViewController.swift in Sources */,
-				000000000430 /* STBtn.swift in Sources */,
-				000000000440 /* STBtnIndicator.swift in Sources */,
-				0000000003B0 /* STBundle.swift in Sources */,
-				0000000003E0 /* STColor.swift in Sources */,
-				000000000450 /* STContractManager.swift in Sources */,
-				000000000460 /* STContractMessage.swift in Sources */,
-				0000000003F0 /* STData.swift in Sources */,
-				000000000400 /* STImage.swift in Sources */,
-				000000000410 /* STImageView.swift in Sources */,
-				0000000003C0 /* STPasteboard.swift in Sources */,
-				0000000003D0 /* STPredicateCheck.swift in Sources */,
-				000000000470 /* STScanView.swift in Sources */,
-				000000000480 /* STScanViewController.swift in Sources */,
-				000000000490 /* STScreenshot.swift in Sources */,
-				000000000420 /* STString.swift in Sources */,
+				46EB2E000005C0 /* STBaseConstants.swift in Sources */,
+				46EB2E000005D0 /* STBaseOpenSystemOperationController.swift in Sources */,
+				46EB2E00000760 /* STBaseProject-dummy.m in Sources */,
+				46EB2E000005E0 /* STBaseViewController.swift in Sources */,
+				46EB2E00000670 /* STBtn.swift in Sources */,
+				46EB2E00000680 /* STBtnIndicator.swift in Sources */,
+				46EB2E000005F0 /* STBundle.swift in Sources */,
+				46EB2E00000620 /* STColor.swift in Sources */,
+				46EB2E00000690 /* STContractManager.swift in Sources */,
+				46EB2E000006A0 /* STContractMessage.swift in Sources */,
+				46EB2E00000630 /* STData.swift in Sources */,
+				46EB2E00000640 /* STImage.swift in Sources */,
+				46EB2E00000650 /* STImageView.swift in Sources */,
+				46EB2E00000600 /* STPasteboard.swift in Sources */,
+				46EB2E00000610 /* STPredicateCheck.swift in Sources */,
+				46EB2E000006B0 /* STScanView.swift in Sources */,
+				46EB2E000006C0 /* STScanViewController.swift in Sources */,
+				46EB2E000006D0 /* STScreenshot.swift in Sources */,
+				46EB2E00000660 /* STString.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		000000000590 /* Sources */ = {
+		46EB2E000007D0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				000000000680 /* Pods-STBaseProject_Example-dummy.m in Sources */,
+				46EB2E00000810 /* Constraint.swift in Sources */,
+				46EB2E00000820 /* ConstraintAttributes.swift in Sources */,
+				46EB2E00000830 /* ConstraintConfig.swift in Sources */,
+				46EB2E00000840 /* ConstraintConstantTarget.swift in Sources */,
+				46EB2E00000850 /* ConstraintDescription.swift in Sources */,
+				46EB2E00000860 /* ConstraintDSL.swift in Sources */,
+				46EB2E00000870 /* ConstraintInsets.swift in Sources */,
+				46EB2E00000880 /* ConstraintInsetTarget.swift in Sources */,
+				46EB2E00000890 /* ConstraintItem.swift in Sources */,
+				46EB2E000008A0 /* ConstraintLayoutGuide+Extensions.swift in Sources */,
+				46EB2E000008B0 /* ConstraintLayoutGuide.swift in Sources */,
+				46EB2E000008C0 /* ConstraintLayoutGuideDSL.swift in Sources */,
+				46EB2E000008D0 /* ConstraintLayoutSupport.swift in Sources */,
+				46EB2E000008E0 /* ConstraintLayoutSupportDSL.swift in Sources */,
+				46EB2E000008F0 /* ConstraintMaker.swift in Sources */,
+				46EB2E00000900 /* ConstraintMakerEditable.swift in Sources */,
+				46EB2E00000910 /* ConstraintMakerExtendable.swift in Sources */,
+				46EB2E00000920 /* ConstraintMakerFinalizable.swift in Sources */,
+				46EB2E00000930 /* ConstraintMakerPriortizable.swift in Sources */,
+				46EB2E00000940 /* ConstraintMakerRelatable.swift in Sources */,
+				46EB2E00000950 /* ConstraintMultiplierTarget.swift in Sources */,
+				46EB2E00000960 /* ConstraintOffsetTarget.swift in Sources */,
+				46EB2E00000970 /* ConstraintPriority.swift in Sources */,
+				46EB2E00000980 /* ConstraintPriorityTarget.swift in Sources */,
+				46EB2E00000990 /* ConstraintRelatableTarget.swift in Sources */,
+				46EB2E000009A0 /* ConstraintRelation.swift in Sources */,
+				46EB2E000009B0 /* ConstraintView+Extensions.swift in Sources */,
+				46EB2E000009C0 /* ConstraintView.swift in Sources */,
+				46EB2E000009D0 /* ConstraintViewDSL.swift in Sources */,
+				46EB2E000009E0 /* Debugging.swift in Sources */,
+				46EB2E000009F0 /* LayoutConstraint.swift in Sources */,
+				46EB2E00000A00 /* LayoutConstraintItem.swift in Sources */,
+				46EB2E00000AB0 /* SnapKit-dummy.m in Sources */,
+				46EB2E00000A10 /* Typealiases.swift in Sources */,
+				46EB2E00000A20 /* UILayoutSupport+Extensions.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000B20 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000C10 /* Pods-STBaseProject_Example-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		0000000006A0 /* PBXTargetDependency */ = {
+		46EB2E00000C30 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = STBaseProject;
-			target = 0000000002C0 /* STBaseProject */;
-			targetProxy = 000000000690 /* PBXContainerItemProxy */;
+			target = 894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */;
+			targetProxy = 46EB2E00000C20 /* PBXContainerItemProxy */;
+		};
+		46EB2E00000C50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SnapKit;
+			target = 19622742EBA51E823D6DAE3F8CDBFAD4 /* SnapKit */;
+			targetProxy = 46EB2E00000C40 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		000000000040 /* Debug */ = {
+		46EB2E00000040 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -516,12 +759,12 @@
 				STRIP_INSTALLED_PRODUCT = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
 			};
 			name = Debug;
 		};
-		000000000050 /* Release */ = {
+		46EB2E00000050 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -576,14 +819,14 @@
 				STRIP_INSTALLED_PRODUCT = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
 			};
 			name = Release;
 		};
-		0000000002E0 /* Release */ = {
+		46EB2E00000520 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0000000004B0 /* STBaseProject.xcconfig */;
+			baseConfigurationReference = 46EB2E000006F0 /* STBaseProject.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -614,9 +857,9 @@
 			};
 			name = Release;
 		};
-		0000000002F0 /* Debug */ = {
+		46EB2E00000530 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0000000004B0 /* STBaseProject.xcconfig */;
+			baseConfigurationReference = 46EB2E000006F0 /* STBaseProject.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -646,9 +889,74 @@
 			};
 			name = Debug;
 		};
-		000000000550 /* Release */ = {
+		46EB2E00000790 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0000000005E0 /* Pods-STBaseProject_Example.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00000A40 /* SnapKit.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/SnapKit/SnapKit-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/SnapKit/SnapKit-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/SnapKit/SnapKit.modulemap";
+				PRODUCT_MODULE_NAME = SnapKit;
+				PRODUCT_NAME = SnapKit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		46EB2E000007A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E00000A40 /* SnapKit.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_PREFIX_HEADER = "Target Support Files/SnapKit/SnapKit-prefix.pch";
+				INFOPLIST_FILE = "Target Support Files/SnapKit/SnapKit-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MODULEMAP_FILE = "Target Support Files/SnapKit/SnapKit.modulemap";
+				PRODUCT_MODULE_NAME = SnapKit;
+				PRODUCT_NAME = SnapKit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		46EB2E00000AE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E00000B70 /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -681,9 +989,9 @@
 			};
 			name = Release;
 		};
-		000000000560 /* Debug */ = {
+		46EB2E00000AF0 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0000000005F0 /* Pods-STBaseProject_Example.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00000B80 /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -718,34 +1026,43 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		000000000030 /* Build configuration list for PBXProject "Pods" */ = {
+		46EB2E00000030 /* Build configuration list for PBXProject "Pods" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				000000000040 /* Debug */,
-				000000000050 /* Release */,
+				46EB2E00000040 /* Debug */,
+				46EB2E00000050 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0000000002D0 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
+		46EB2E00000510 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0000000002F0 /* Debug */,
-				0000000002E0 /* Release */,
+				46EB2E00000530 /* Debug */,
+				46EB2E00000520 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		000000000540 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
+		46EB2E00000780 /* Build configuration list for PBXNativeTarget "SnapKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				000000000560 /* Debug */,
-				000000000550 /* Release */,
+				46EB2E000007A0 /* Debug */,
+				46EB2E00000790 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46EB2E00000AD0 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46EB2E00000AF0 /* Debug */,
+				46EB2E00000AE0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 000000000000 /* Project object */;
+	rootObject = 46EB2E00000000 /* Project object */;
 }
