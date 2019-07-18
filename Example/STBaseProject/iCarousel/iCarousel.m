@@ -544,7 +544,6 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
         }
         case iCarouselTypeTimeMachine:
         case iCarouselTypeInvertedTimeMachine: {
-            
             CGFloat tilt = [self valueForOption:iCarouselOptionTilt withDefault:0.3];
             CGFloat spacing = [self valueForOption:iCarouselOptionSpacing withDefault:1.0];
             if (_type == iCarouselTypeInvertedTimeMachine) {
@@ -559,7 +558,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
                 offset = -offset;
 
 #endif
-//                return CATransform3DTranslate(transform, 0.0, offset * 80 * tilt, offset * 100 * spacing);
+                return CATransform3DTranslate(transform, fabs(offset) * 30, offset * 100 * tilt, offset * 50 * spacing);
 
                 return CATransform3DTranslate(transform, 0.0, offset * _itemWidth * tilt, offset * _itemWidth * spacing);
             } else {
@@ -651,8 +650,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 - (UIView *)containView:(UIView *)view
 {
     //set item width
-    if (!_itemWidth)
-    {
+    if (!_itemWidth) {
         _itemWidth = _vertical? view.bounds.size.height: view.bounds.size.width;
     }
     
@@ -690,7 +688,7 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     
 #ifdef ICAROUSEL_IOS
     //center view
-    view.superview.center = CGPointMake(self.bounds.size.width/2.0 + _contentOffset.width, self.bounds.size.height/2.0 + _contentOffset.height);
+    //view.superview.center = CGPointMake(self.bounds.size.width/2.0 + _contentOffset.width, self.bounds.size.height/2.0 + _contentOffset.height);
     
     //enable/disable interaction
     view.superview.userInteractionEnabled = (!_centerItemWhenSelected || index == self.currentItemIndex);
@@ -1050,47 +1048,34 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     [self pushAnimationState:NO];
     
     UIView *view = nil;
-    if (index < 0)
-    {
+    if (index < 0) {
         view = [_dataSource carousel:self placeholderViewAtIndex:(NSInteger)(ceil((CGFloat)_numberOfPlaceholdersToShow/2.0)) + index reusingView:[self dequeuePlaceholderView]];
-    }
-    else if (index >= _numberOfItems)
-    {
+    } else if (index >= _numberOfItems) {
         view = [_dataSource carousel:self placeholderViewAtIndex:_numberOfPlaceholdersToShow/2.0 + index - _numberOfItems reusingView:[self dequeuePlaceholderView]];
-    }
-    else
-    {
+    } else {
         view = [_dataSource carousel:self viewForItemAtIndex:index reusingView:[self dequeueItemView]];
     }
     
-    if (view == nil)
-    {
+    if (view == nil) {
         view = [[UIView alloc] init];
     }
     
     [self setItemView:view forIndex:index];
-    if (containerView)
-    {
+    if (containerView) {
         //get old item view
         UIView *oldItemView = [containerView.subviews lastObject];
-        if (index < 0 || index >= _numberOfItems)
-        {
+        if (index < 0 || index >= _numberOfItems) {
             [self queuePlaceholderView:oldItemView];
-        }
-        else
-        {
+        } else {
             [self queueItemView:oldItemView];
         }
         
         //set container frame
         CGRect frame = containerView.bounds;
-        if(_vertical)
-        {
+        if(_vertical) {
             frame.size.width = view.frame.size.width;
             frame.size.height = MIN(_itemWidth, view.frame.size.height);
-        }
-        else
-        {
+        } else {
             frame.size.width = MIN(_itemWidth, view.frame.size.width);
             frame.size.height = view.frame.size.height;
         }
@@ -1112,13 +1097,12 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
         //switch views
         [oldItemView removeFromSuperview];
         [containerView addSubview:view];
-    }
-    else
-    {
+    } else {
         [_contentView addSubview:[self containView:view]];
+
     }
     view.superview.layer.opacity = 0.0;
-    [self transformItemView:view atIndex:index];
+    //[self transformItemView:view atIndex:index];
     
     [self popAnimationState];
     
