@@ -76,6 +76,10 @@ Pod::Spec.new do |s|
       sss.source_files = ['STBaseProject/Classes/STUI/STScreenshot/*.swift']
     end
     
+    ss.subspec 'STCarousel' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STUI/STCarousel/*.{h,m}']
+    end
+    
   end
 
   s.public_header_files = 'Pod/Classes/**/*'

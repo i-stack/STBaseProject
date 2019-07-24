@@ -14,10 +14,10 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
+		D1021DFE22E06B6300775691 /* STCarouselCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1021DFD22E06B6300775691 /* STCarouselCollectionViewCell.swift */; };
 		D130153422D321BC00D5216C /* STCarouselViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130153322D321BC00D5216C /* STCarouselViewController.swift */; };
 		D130153722D321DF00D5216C /* STCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130153622D321DF00D5216C /* STCarousel.swift */; };
 		D130154022D46FA100D5216C /* STCardItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130153F22D46FA100D5216C /* STCardItem.swift */; };
-		D130156D22DDB2B600D5216C /* iCarousel.m in Sources */ = {isa = PBXBuildFile; fileRef = D130156B22DDB2B600D5216C /* iCarousel.m */; };
 		D130156F22DDD06E00D5216C /* STCarouselTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130156E22DDD06E00D5216C /* STCarouselTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
@@ -35,7 +35,7 @@
 		0527130535D9B00C23149A00 /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		446826C3C0555726F3F40A4F /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.release.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
 		46F4B810C03B6FDB22573EC0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		5C633CDC446F4649338CD32C /* STBaseProject.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = STBaseProject.podspec; path = ../STBaseProject.podspec; sourceTree = "<group>"; };
+		5C633CDC446F4649338CD32C /* STBaseProject.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = STBaseProject.podspec; path = ../STBaseProject.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		607FACD01AFB9204008FA782 /* STBaseProject_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = STBaseProject_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -48,12 +48,11 @@
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCBDD6C1F1A3F9746985EE4C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		D1021DFD22E06B6300775691 /* STCarouselCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCarouselCollectionViewCell.swift; sourceTree = "<group>"; };
 		D130153322D321BC00D5216C /* STCarouselViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCarouselViewController.swift; sourceTree = "<group>"; };
 		D130153622D321DF00D5216C /* STCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCarousel.swift; sourceTree = "<group>"; };
 		D130153F22D46FA100D5216C /* STCardItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCardItem.swift; sourceTree = "<group>"; };
 		D130156922DC92BC00D5216C /* STBaseProject-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-Bridging-Header.h"; sourceTree = "<group>"; };
-		D130156B22DDB2B600D5216C /* iCarousel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iCarousel.m; sourceTree = "<group>"; };
-		D130156C22DDB2B600D5216C /* iCarousel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iCarousel.h; sourceTree = "<group>"; };
 		D130156E22DDD06E00D5216C /* STCarouselTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCarouselTableViewCell.swift; sourceTree = "<group>"; };
 		D39D8AFC82CB37AB8D99B8AB /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -173,6 +172,7 @@
 				D130153622D321DF00D5216C /* STCarousel.swift */,
 				D130153F22D46FA100D5216C /* STCardItem.swift */,
 				D130156E22DDD06E00D5216C /* STCarouselTableViewCell.swift */,
+				D1021DFD22E06B6300775691 /* STCarouselCollectionViewCell.swift */,
 			);
 			name = UIView;
 			sourceTree = "<group>";
@@ -180,7 +180,6 @@
 		D130153822D3231300D5216C /* STCard */ = {
 			isa = PBXGroup;
 			children = (
-				D130156A22DDB2B600D5216C /* iCarousel */,
 				D130153C22D3335E00D5216C /* Model */,
 				D130153922D3232000D5216C /* UIViewController */,
 				D130153522D321CB00D5216C /* UIView */,
@@ -201,15 +200,6 @@
 			children = (
 			);
 			name = Model;
-			sourceTree = "<group>";
-		};
-		D130156A22DDB2B600D5216C /* iCarousel */ = {
-			isa = PBXGroup;
-			children = (
-				D130156C22DDB2B600D5216C /* iCarousel.h */,
-				D130156B22DDB2B600D5216C /* iCarousel.m */,
-			);
-			path = iCarousel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -368,7 +358,7 @@
 				D130154022D46FA100D5216C /* STCardItem.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				D130153422D321BC00D5216C /* STCarouselViewController.swift in Sources */,
-				D130156D22DDB2B600D5216C /* iCarousel.m in Sources */,
+				D1021DFE22E06B6300775691 /* STCarouselCollectionViewCell.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 				D130153722D321DF00D5216C /* STCarousel.swift in Sources */,
 			);

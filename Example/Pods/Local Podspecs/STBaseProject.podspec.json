@@ -95,6 +95,12 @@
           "source_files": [
             "STBaseProject/Classes/STUI/STScreenshot/*.swift"
           ]
+        },
+        {
+          "name": "STCarousel",
+          "source_files": [
+            "STBaseProject/Classes/STUI/STCarousel/*.{h,m}"
+          ]
         }
       ]
     }

@@ -16,10 +16,12 @@ PODS:
   - STBaseProject/STCommon/STExtension (0.1.0)
   - STBaseProject/STUI (0.1.0):
     - STBaseProject/STUI/STBtn (= 0.1.0)
+    - STBaseProject/STUI/STCarousel (= 0.1.0)
     - STBaseProject/STUI/STContract (= 0.1.0)
     - STBaseProject/STUI/STScanner (= 0.1.0)
     - STBaseProject/STUI/STScreenshot (= 0.1.0)
   - STBaseProject/STUI/STBtn (0.1.0)
+  - STBaseProject/STUI/STCarousel (0.1.0)
   - STBaseProject/STUI/STContract (0.1.0)
   - STBaseProject/STUI/STScanner (0.1.0)
   - STBaseProject/STUI/STScreenshot (0.1.0)
@@ -40,7 +42,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
-  STBaseProject: bd23fe4138b1ad11853824677767287472dbd026
+  STBaseProject: 3af9a555e13a437fa461aff03350de14118687e5
 
 PODFILE CHECKSUM: 0e4b2d8b3d2c009179e077a6a5df43773eb7438f
 
