@@ -29,8 +29,9 @@ class STCarouselViewController: UIViewController {
         for i in 0 ... 5 {
             items.append(i)
         }
-        createCollectionView()
         addCardView()
+        createCollectionView()
+//        addCardView()
     }
 
     func addCardView() -> Void {
@@ -40,22 +41,24 @@ class STCarouselViewController: UIViewController {
         carousel.backgroundColor = UIColor.purple
         carousel.isVertical = true
         carousel.type = .invertedTimeMachine
-        self.view.addSubview(carousel)
+//        self.view.addSubview(carousel)
         
         expendBtn = UIButton.init(type: UIButton.ButtonType.custom)
         expendBtn.frame = CGRect.init(x: 10, y: 10, width: 40, height: 40)
         expendBtn.setTitle("展开", for: UIControl.State.normal)
         expendBtn.setTitleColor(UIColor.black, for: UIControl.State.normal)
         expendBtn.addTarget(self, action: #selector(expendBtnClick), for: UIControl.Event.touchUpInside)
-        self.view.addSubview(expendBtn)
+//        self.view.addSubview(expendBtn)
     }
     
     func createCollectionView() -> Void {
         tempItems.append(items[self.currentIndex])
 
         let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout.init()
-        layout.itemSize = CGSize.init(width: self.view.bounds.size.width - 50, height: 188)
+        layout.itemSize = CGSize.init(width: self.view.bounds.size.width, height: 188)
         layout.minimumLineSpacing = 20
+        layout.footerReferenceSize = CGSize.init(width: self.view.bounds.size.width, height: 240)//CGSizeMake(size.width, 100)
+        layout.headerReferenceSize = CGSize.init(width: self.view.bounds.size.width, height: 400)
         
         collectionView = UICollectionView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height - 0), collectionViewLayout: layout)
         collectionView.bounces = false
@@ -64,6 +67,10 @@ class STCarouselViewController: UIViewController {
         collectionView.isPagingEnabled = true
         collectionView.register(STCarouselCollectionViewCell.self, forCellWithReuseIdentifier: "STCarouselCollectionViewCell")
         self.view.addSubview(collectionView)
+        
+        //collectionView.contentInset = UIEdgeInsets(top: 300, left: 0, bottom: 0, right: 0)
+        collectionView.addSubview(carousel)
+        collectionView.addSubview(expendBtn)
     }
     
     @objc func expendBtnClick() -> Void {
@@ -76,7 +83,8 @@ class STCarouselViewController: UIViewController {
             collectionView.isHidden = false
             for index in 0...expendItems.count - 1 {
                 tempItems.append(items[index])
-                collectionView.insertItems(at: [IndexPath.init(row: items.count - 1, section: 0)])
+                collectionView.reloadData()
+//                collectionView.insertItems(at: [IndexPath.init(row: items.count - 1, section: 0)])
             }
 //            UIView.transition(with: self.contentView, duration: 1, options: UIView.AnimationOptions.curveEaseInOut, animations: {
 //            }) { (done) in
@@ -183,4 +191,6 @@ extension STCarouselViewController: UICollectionViewDelegate, UICollectionViewDa
         cell.backgroundColor = UIColor.randomColor
         return cell
     }
+    
+    
 }
