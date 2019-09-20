@@ -9,8 +9,13 @@ target 'STBaseProject_Example' do
   #pod 'STBaseProject', :path => '../'
 
   pod 'STBaseProject/STBase', :path => '../'
-  pod 'STBaseProject/STUI', :path => '../'
+  pod 'STBaseProject/STBtn', :path => '../'
+  pod 'STBaseProject/STScanner', :path => '../'
+  pod 'STBaseProject/STContract', :path => '../'
+  pod 'STBaseProject/STScreenshot', :path => '../'
+  pod 'STBaseProject/STCarousel', :path => '../'
   pod 'STBaseProject/STCommon', :path => '../'
+  #pod 'STBaseProject/STWallet', :path => '../'
 
   pod 'SnapKit'
 end

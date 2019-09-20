@@ -14,97 +14,21 @@ class STCarouselViewController: UIViewController {
 
     var carousel: iCarousel!
     var items: [Int] = []
-    var tempItems: [Int] = []
-
-    var expendBtn: UIButton!
-    var count: NSInteger = 0
-    var btnClick: Bool = false
-    
-    var currentIndex: NSInteger = 0
-    var collectionView: UICollectionView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.white
-        for i in 0 ... 5 {
+        for i in 0 ... 10 {
             items.append(i)
         }
         addCardView()
-        createCollectionView()
-//        addCardView()
     }
 
     func addCardView() -> Void {
-        carousel = iCarousel.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 230))
+        carousel = iCarousel.init(frame: CGRect.init(x: 0, y: 100, width: self.view.bounds.size.width, height: 230))
         carousel.delegate = self
         carousel.dataSource = self
-        carousel.backgroundColor = UIColor.purple
-        carousel.isVertical = true
-        carousel.type = .invertedTimeMachine
-//        self.view.addSubview(carousel)
-        
-        expendBtn = UIButton.init(type: UIButton.ButtonType.custom)
-        expendBtn.frame = CGRect.init(x: 10, y: 10, width: 40, height: 40)
-        expendBtn.setTitle("展开", for: UIControl.State.normal)
-        expendBtn.setTitleColor(UIColor.black, for: UIControl.State.normal)
-        expendBtn.addTarget(self, action: #selector(expendBtnClick), for: UIControl.Event.touchUpInside)
-//        self.view.addSubview(expendBtn)
-    }
-    
-    func createCollectionView() -> Void {
-        tempItems.append(items[self.currentIndex])
-
-        let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout.init()
-        layout.itemSize = CGSize.init(width: self.view.bounds.size.width, height: 188)
-        layout.minimumLineSpacing = 20
-        layout.footerReferenceSize = CGSize.init(width: self.view.bounds.size.width, height: 240)//CGSizeMake(size.width, 100)
-        layout.headerReferenceSize = CGSize.init(width: self.view.bounds.size.width, height: 400)
-        
-        collectionView = UICollectionView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height - 0), collectionViewLayout: layout)
-        collectionView.bounces = false
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.isPagingEnabled = true
-        collectionView.register(STCarouselCollectionViewCell.self, forCellWithReuseIdentifier: "STCarouselCollectionViewCell")
-        self.view.addSubview(collectionView)
-        
-        //collectionView.contentInset = UIEdgeInsets(top: 300, left: 0, bottom: 0, right: 0)
-        collectionView.addSubview(carousel)
-        collectionView.addSubview(expendBtn)
-    }
-    
-    @objc func expendBtnClick() -> Void {
-        btnClick = !btnClick
-//        tempItems.removeAll()
-        if btnClick {
-            var expendItems: Array<Int> = items
-            expendItems.remove(at: Int(self.currentIndex))
-            carousel.isHidden = true
-            collectionView.isHidden = false
-            for index in 0...expendItems.count - 1 {
-                tempItems.append(items[index])
-                collectionView.reloadData()
-//                collectionView.insertItems(at: [IndexPath.init(row: items.count - 1, section: 0)])
-            }
-//            UIView.transition(with: self.contentView, duration: 1, options: UIView.AnimationOptions.curveEaseInOut, animations: {
-//            }) { (done) in
-//
-//
-//            }
-//            scrollView.contentSize = CGSize.init(width: Int(self.view.bounds.size.width), height: 208 * items.count)
-        } else {
-            carousel.isHidden = false
-            tempItems.append(items[self.currentIndex])
-            collectionView.reloadData()
-            collectionView.isHidden = true
-//            for subView in contentView.subviews {
-//                if !subView.isKind(of: iCarousel.self), !subView.isKind(of: UIButton.self) {
-//                    subView.removeFromSuperview()
-//                }
-//            }
-        }
-//        carousel.removeFromSuperview()
-        //addCardView()
+        self.view.addSubview(carousel)
     }
 }
 
@@ -116,7 +40,7 @@ extension STCarouselViewController: iCarouselDataSource, iCarouselDelegate {
             itemView = view
             label = itemView.viewWithTag(1) as! UILabel
         } else {
-            itemView = UIImageView(frame: CGRect(x: 50, y: 0, width: Int(self.view.bounds.size.width) - 50, height: 188))
+            itemView = UIImageView(frame: CGRect(x: 40, y: 0, width: Int(self.view.bounds.size.width) - 40, height: 188))
             itemView.backgroundColor = UIColor.randomColor
             label = UILabel(frame: itemView.bounds)
             label.backgroundColor = .clear
@@ -125,18 +49,11 @@ extension STCarouselViewController: iCarouselDataSource, iCarouselDelegate {
             label.tag = 1
             itemView.addSubview(label)
         }
-        if btnClick {
-            label.text = "\(tempItems[index])"
-        } else {
-            label.text = "\(items[index])"
-        }
+        label.text = "\(items[index])"
         return itemView
     }
     
     func numberOfItems(in carousel: iCarousel) -> Int {
-        if btnClick {
-            return tempItems.count
-        }
         return items.count
     }
 
@@ -151,7 +68,6 @@ extension STCarouselViewController: iCarouselDataSource, iCarouselDelegate {
 
     func carouselDidEndScrollingAnimation(_ carousel: iCarousel) {
         print("current index" + "\(carousel.currentItemIndex)")
-        self.currentIndex = carousel.currentItemIndex
     }
 }
 
@@ -179,18 +95,4 @@ extension UIColor {
             return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
         }
     }
-}
-
-extension STCarouselViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return tempItems.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell: STCarouselCollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: "STCarouselCollectionViewCell", for: indexPath) as! STCarouselCollectionViewCell
-        cell.backgroundColor = UIColor.randomColor
-        return cell
-    }
-    
-    
 }

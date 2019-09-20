@@ -70,36 +70,59 @@
       ]
     },
     {
-      "name": "STUI",
+      "name": "STBtn",
+      "source_files": [
+        "STBaseProject/Classes/STBtn/*.swift"
+      ]
+    },
+    {
+      "name": "STScanner",
+      "source_files": [
+        "STBaseProject/Classes/STScanner/*.swift"
+      ]
+    },
+    {
+      "name": "STContract",
+      "source_files": [
+        "STBaseProject/Classes/STContract/*.swift"
+      ]
+    },
+    {
+      "name": "STScreenshot",
+      "source_files": [
+        "STBaseProject/Classes/STScreenshot/*.swift"
+      ]
+    },
+    {
+      "name": "STCarousel",
+      "source_files": [
+        "STBaseProject/Classes/STCarousel/*.{h,m}"
+      ]
+    },
+    {
+      "name": "STWallet",
+      "dependencies": {
+        "BigInt": [
+
+        ],
+        "CryptoSwift": [
+
+        ],
+        "TrezorCrypto": [
+
+        ]
+      },
       "subspecs": [
         {
-          "name": "STBtn",
+          "name": "TrustCore",
           "source_files": [
-            "STBaseProject/Classes/STUI/STBtn/*.swift"
+            "STBaseProject/Classes/STWallet/TrustCore/*.swift"
           ]
         },
         {
-          "name": "STScanner",
+          "name": "TrustKeystore",
           "source_files": [
-            "STBaseProject/Classes/STUI/STScanner/*.swift"
-          ]
-        },
-        {
-          "name": "STContract",
-          "source_files": [
-            "STBaseProject/Classes/STUI/STContract/*.swift"
-          ]
-        },
-        {
-          "name": "STScreenshot",
-          "source_files": [
-            "STBaseProject/Classes/STUI/STScreenshot/*.swift"
-          ]
-        },
-        {
-          "name": "STCarousel",
-          "source_files": [
-            "STBaseProject/Classes/STUI/STCarousel/*.{h,m}"
+            "STBaseProject/Classes/STWallet/TrustKeystore/*.swift"
           ]
         }
       ]

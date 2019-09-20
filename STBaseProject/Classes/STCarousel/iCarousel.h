@@ -85,14 +85,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, weak_delegate) IBOutlet __nullable id<iCarouselDataSource> dataSource;
 @property (nonatomic, weak_delegate) IBOutlet __nullable id<iCarouselDelegate> delegate;
-@property (nonatomic, assign) iCarouselType type;
 @property (nonatomic, assign) CGFloat perspective;
 @property (nonatomic, assign) CGFloat decelerationRate;
 @property (nonatomic, assign) CGFloat scrollSpeed;
 @property (nonatomic, assign) CGFloat bounceDistance;
 @property (nonatomic, assign, getter = isScrollEnabled) BOOL scrollEnabled;
 @property (nonatomic, assign, getter = isPagingEnabled) BOOL pagingEnabled;
-@property (nonatomic, assign, getter = isVertical) BOOL vertical;
 @property (nonatomic, readonly, getter = isWrapEnabled) BOOL wrapEnabled;
 @property (nonatomic, assign) BOOL bounces;
 @property (nonatomic, assign) CGFloat scrollOffset;
@@ -100,7 +98,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGSize contentOffset;
 @property (nonatomic, assign) CGSize viewpointOffset;
 @property (nonatomic, readonly) NSInteger numberOfItems;
-@property (nonatomic, readonly) NSInteger numberOfPlaceholders;
 @property (nonatomic, assign) NSInteger currentItemIndex;
 @property (nonatomic, strong, readonly) UIView * __nullable currentItemView;
 @property (nonatomic, strong, readonly) NSArray *indexesForVisibleItems;
@@ -130,27 +127,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (CGFloat)offsetForItemAtIndex:(NSInteger)index;
 - (nullable UIView *)itemViewAtPoint:(CGPoint)point;
 
-- (void)removeItemAtIndex:(NSInteger)index animated:(BOOL)animated;
-- (void)insertItemAtIndex:(NSInteger)index animated:(BOOL)animated;
 - (void)reloadItemAtIndex:(NSInteger)index animated:(BOOL)animated;
-
 - (void)reloadData;
 
 @end
-
 
 @protocol iCarouselDataSource <NSObject>
 
 - (NSInteger)numberOfItemsInCarousel:(iCarousel *)carousel;
 - (UIView *)carousel:(iCarousel *)carousel viewForItemAtIndex:(NSInteger)index reusingView:(nullable UIView *)view;
 
-@optional
-
-- (NSInteger)numberOfPlaceholdersInCarousel:(iCarousel *)carousel;
-- (UIView *)carousel:(iCarousel *)carousel placeholderViewAtIndex:(NSInteger)index reusingView:(nullable UIView *)view;
-
 @end
-
 
 @protocol iCarouselDelegate <NSObject>
 @optional

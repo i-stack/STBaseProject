@@ -11,26 +11,24 @@ PODS:
   - STBaseProject/STBase/STBaseView (0.1.0)
   - STBaseProject/STBase/STBaseViewController (0.1.0)
   - STBaseProject/STBase/STBaseViewMode (0.1.0)
+  - STBaseProject/STBtn (0.1.0)
+  - STBaseProject/STCarousel (0.1.0)
   - STBaseProject/STCommon (0.1.0):
     - STBaseProject/STCommon/STExtension (= 0.1.0)
   - STBaseProject/STCommon/STExtension (0.1.0)
-  - STBaseProject/STUI (0.1.0):
-    - STBaseProject/STUI/STBtn (= 0.1.0)
-    - STBaseProject/STUI/STCarousel (= 0.1.0)
-    - STBaseProject/STUI/STContract (= 0.1.0)
-    - STBaseProject/STUI/STScanner (= 0.1.0)
-    - STBaseProject/STUI/STScreenshot (= 0.1.0)
-  - STBaseProject/STUI/STBtn (0.1.0)
-  - STBaseProject/STUI/STCarousel (0.1.0)
-  - STBaseProject/STUI/STContract (0.1.0)
-  - STBaseProject/STUI/STScanner (0.1.0)
-  - STBaseProject/STUI/STScreenshot (0.1.0)
+  - STBaseProject/STContract (0.1.0)
+  - STBaseProject/STScanner (0.1.0)
+  - STBaseProject/STScreenshot (0.1.0)
 
 DEPENDENCIES:
   - SnapKit
   - STBaseProject/STBase (from `../`)
+  - STBaseProject/STBtn (from `../`)
+  - STBaseProject/STCarousel (from `../`)
   - STBaseProject/STCommon (from `../`)
-  - STBaseProject/STUI (from `../`)
+  - STBaseProject/STContract (from `../`)
+  - STBaseProject/STScanner (from `../`)
+  - STBaseProject/STScreenshot (from `../`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -42,8 +40,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
-  STBaseProject: 3af9a555e13a437fa461aff03350de14118687e5
+  STBaseProject: 2afc6c686e704e8ddf1ae8e7d5d9926700dd7c00
 
-PODFILE CHECKSUM: 0e4b2d8b3d2c009179e077a6a5df43773eb7438f
+PODFILE CHECKSUM: 732034a8cb683fb20f38620cbda251611e95f580
 
 COCOAPODS: 1.7.2

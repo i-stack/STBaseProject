@@ -15,6 +15,7 @@
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
 		D1021DFE22E06B6300775691 /* STCarouselCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1021DFD22E06B6300775691 /* STCarouselCollectionViewCell.swift */; };
+		D12B5C2F22EEA18800A17019 /* STWalletLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = D12B5C2E22EEA18800A17019 /* STWalletLayout.swift */; };
 		D130153422D321BC00D5216C /* STCarouselViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130153322D321BC00D5216C /* STCarouselViewController.swift */; };
 		D130153722D321DF00D5216C /* STCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130153622D321DF00D5216C /* STCarousel.swift */; };
 		D130154022D46FA100D5216C /* STCardItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130153F22D46FA100D5216C /* STCardItem.swift */; };
@@ -49,6 +50,7 @@
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BCBDD6C1F1A3F9746985EE4C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		D1021DFD22E06B6300775691 /* STCarouselCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCarouselCollectionViewCell.swift; sourceTree = "<group>"; };
+		D12B5C2E22EEA18800A17019 /* STWalletLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STWalletLayout.swift; sourceTree = "<group>"; };
 		D130153322D321BC00D5216C /* STCarouselViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCarouselViewController.swift; sourceTree = "<group>"; };
 		D130153622D321DF00D5216C /* STCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCarousel.swift; sourceTree = "<group>"; };
 		D130153F22D46FA100D5216C /* STCardItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCardItem.swift; sourceTree = "<group>"; };
@@ -173,6 +175,7 @@
 				D130153F22D46FA100D5216C /* STCardItem.swift */,
 				D130156E22DDD06E00D5216C /* STCarouselTableViewCell.swift */,
 				D1021DFD22E06B6300775691 /* STCarouselCollectionViewCell.swift */,
+				D12B5C2E22EEA18800A17019 /* STWalletLayout.swift */,
 			);
 			name = UIView;
 			sourceTree = "<group>";
@@ -359,6 +362,7 @@
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				D130153422D321BC00D5216C /* STCarouselViewController.swift in Sources */,
 				D1021DFE22E06B6300775691 /* STCarouselCollectionViewCell.swift in Sources */,
+				D12B5C2F22EEA18800A17019 /* STWalletLayout.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 				D130153722D321DF00D5216C /* STCarousel.swift in Sources */,
 			);
