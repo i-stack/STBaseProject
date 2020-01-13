@@ -15,14 +15,15 @@ open class STBaseModel: NSObject {
     }
     
     open override func value(forUndefinedKey key: String) -> Any? {
+        print("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
         return nil
     }
-    
+
     open override class func setValue(_ value: Any?, forUndefinedKey key: String) {
-        
+        print("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
     }
-    
+
     open override func setValue(_ value: Any?, forUndefinedKey key: String) {
-        
+        print("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
     }
 }

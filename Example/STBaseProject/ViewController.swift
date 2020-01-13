@@ -22,6 +22,8 @@ class ViewController: STBaseOpenSystemOperationController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        let model = STBaseModel()
+        model.setValue("hhh", forKey: "jjj")
     }
 }
 

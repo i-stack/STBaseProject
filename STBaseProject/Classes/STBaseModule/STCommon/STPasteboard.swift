@@ -8,7 +8,7 @@
 
 import Foundation
 
-open class STPasteboard: NSObject {
+public class STPasteboard: NSObject {
     
     public class func st_pasteboardWithString(pasteboardString: String) -> Void {
         let pasteboard = UIPasteboard.general
