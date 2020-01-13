@@ -21,58 +21,42 @@
   "resources": [
     "STBaseProject/Assets/*"
   ],
-  "default_subspecs": "STBase",
+  "default_subspecs": "STBaseModule",
   "public_header_files": "Pod/Classes/**/*",
   "subspecs": [
     {
-      "name": "STBase",
+      "name": "STBaseModule",
       "subspecs": [
         {
           "name": "STBaseViewController",
           "source_files": [
-            "STBaseProject/Classes/STBase/STBaseViewController/*.swift"
+            "STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift"
           ]
         },
         {
           "name": "STBaseView",
           "source_files": [
-            "STBaseProject/Classes/STBase/STBaseView/*.swift"
+            "STBaseProject/Classes/STBaseModule/STBaseView/*.swift"
           ]
         },
         {
-          "name": "STBaseViewMode",
+          "name": "STBaseViewModel",
           "source_files": [
-            "STBaseProject/Classes/STBase/STBaseViewMode/*.swift"
+            "STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift"
           ]
         },
         {
           "name": "STBaseModel",
           "source_files": [
-            "STBaseProject/Classes/STBase/STBaseModel/*.swift"
+            "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift"
           ]
         },
         {
-          "name": "STBaseConstants",
+          "name": "STCommon",
           "source_files": [
-            "STBaseProject/Classes/STBase/STBaseConstants/*.swift"
+            "STBaseProject/Classes/STBaseModule/STCommon/*.swift"
           ]
         }
-      ]
-    },
-    {
-      "name": "STCommon",
-      "source_files": "STBaseProject/Classes/STCommon/*.swift",
-      "subspecs": [
-        {
-          "name": "STExtension",
-          "source_files": "STBaseProject/Classes/STCommon/STExtension/*.swift"
-        }
-      ]
-    },
-    {
-      "name": "STBtn",
-      "source_files": [
-        "STBaseProject/Classes/STBtn/*.swift"
       ]
     },
     {
@@ -82,49 +66,9 @@
       ]
     },
     {
-      "name": "STContract",
-      "source_files": [
-        "STBaseProject/Classes/STContract/*.swift"
-      ]
-    },
-    {
       "name": "STScreenshot",
       "source_files": [
         "STBaseProject/Classes/STScreenshot/*.swift"
-      ]
-    },
-    {
-      "name": "STCarousel",
-      "source_files": [
-        "STBaseProject/Classes/STCarousel/*.{h,m}"
-      ]
-    },
-    {
-      "name": "STWallet",
-      "dependencies": {
-        "BigInt": [
-
-        ],
-        "CryptoSwift": [
-
-        ],
-        "TrezorCrypto": [
-
-        ]
-      },
-      "subspecs": [
-        {
-          "name": "TrustCore",
-          "source_files": [
-            "STBaseProject/Classes/STWallet/TrustCore/*.swift"
-          ]
-        },
-        {
-          "name": "TrustKeystore",
-          "source_files": [
-            "STBaseProject/Classes/STWallet/TrustKeystore/*.swift"
-          ]
-        }
       ]
     }
   ]

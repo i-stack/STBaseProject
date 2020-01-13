@@ -22,8 +22,6 @@ class ViewController: STBaseOpenSystemOperationController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        let carouselVC = STCarouselViewController()
-        self.navigationController?.pushViewController(carouselVC, animated: true)
     }
 }
 

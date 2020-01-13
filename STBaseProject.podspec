@@ -24,73 +24,37 @@ Pod::Spec.new do |s|
 
   s.resources = ['STBaseProject/Assets/*']
   
-  s.default_subspecs = 'STBase'
-  s.subspec 'STBase' do |ss|
+  s.default_subspecs = 'STBaseModule'
+  s.subspec 'STBaseModule' do |ss|
     
     ss.subspec 'STBaseViewController' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBase/STBaseViewController/*.swift']
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift']
     end
     
     ss.subspec 'STBaseView' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBase/STBaseView/*.swift']
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseView/*.swift']
     end
     
-    ss.subspec 'STBaseViewMode' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBase/STBaseViewMode/*.swift']
+    ss.subspec 'STBaseViewModel' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift']
     end
     
     ss.subspec 'STBaseModel' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBase/STBaseModel/*.swift']
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseModel/*.swift']
     end
     
-    ss.subspec 'STBaseConstants' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBase/STBaseConstants/*.swift']
+    ss.subspec 'STCommon' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STCommon/*.swift']
     end
   
-  end
-
-  s.subspec 'STCommon' do |ss|
-    ss.source_files = 'STBaseProject/Classes/STCommon/*.swift'
-    
-    ss.subspec 'STExtension' do |sss|
-      sss.source_files = 'STBaseProject/Classes/STCommon/STExtension/*.swift'
-    end
-    
-  end
-  
-  s.subspec 'STBtn' do |ss|
-      ss.source_files = ['STBaseProject/Classes/STBtn/*.swift']
   end
   
   s.subspec 'STScanner' do |ss|
       ss.source_files = ['STBaseProject/Classes/STScanner/*.swift']
   end
-  
-  s.subspec 'STContract' do |ss|
-      ss.source_files = ['STBaseProject/Classes/STContract/*.swift']
-  end
-  
+
   s.subspec 'STScreenshot' do |ss|
       ss.source_files = ['STBaseProject/Classes/STScreenshot/*.swift']
-  end
-  
-  s.subspec 'STCarousel' do |ss|
-      ss.source_files = ['STBaseProject/Classes/STCarousel/*.{h,m}']
-  end
-  
-  s.subspec 'STWallet' do |ss|
-      ss.subspec 'TrustCore' do |sss|
-          sss.source_files = ['STBaseProject/Classes/STWallet/TrustCore/*.swift']
-      end
-      
-      ss.subspec 'TrustKeystore' do |sss|
-          sss.source_files = ['STBaseProject/Classes/STWallet/TrustKeystore/*.swift']
-      end
-      
-      ss.dependency 'BigInt'
-      ss.dependency 'CryptoSwift'
-      ss.dependency 'TrezorCrypto'
-
   end
 
   s.public_header_files = 'Pod/Classes/**/*'

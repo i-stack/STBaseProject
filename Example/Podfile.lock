@@ -1,37 +1,27 @@
 PODS:
-  - SnapKit (5.0.0)
-  - STBaseProject/STBase (0.1.0):
-    - STBaseProject/STBase/STBaseConstants (= 0.1.0)
-    - STBaseProject/STBase/STBaseModel (= 0.1.0)
-    - STBaseProject/STBase/STBaseView (= 0.1.0)
-    - STBaseProject/STBase/STBaseViewController (= 0.1.0)
-    - STBaseProject/STBase/STBaseViewMode (= 0.1.0)
-  - STBaseProject/STBase/STBaseConstants (0.1.0)
-  - STBaseProject/STBase/STBaseModel (0.1.0)
-  - STBaseProject/STBase/STBaseView (0.1.0)
-  - STBaseProject/STBase/STBaseViewController (0.1.0)
-  - STBaseProject/STBase/STBaseViewMode (0.1.0)
-  - STBaseProject/STBtn (0.1.0)
-  - STBaseProject/STCarousel (0.1.0)
-  - STBaseProject/STCommon (0.1.0):
-    - STBaseProject/STCommon/STExtension (= 0.1.0)
-  - STBaseProject/STCommon/STExtension (0.1.0)
-  - STBaseProject/STContract (0.1.0)
+  - SnapKit (5.0.1)
+  - STBaseProject/STBaseModule (0.1.0):
+    - STBaseProject/STBaseModule/STBaseModel (= 0.1.0)
+    - STBaseProject/STBaseModule/STBaseView (= 0.1.0)
+    - STBaseProject/STBaseModule/STBaseViewController (= 0.1.0)
+    - STBaseProject/STBaseModule/STBaseViewModel (= 0.1.0)
+    - STBaseProject/STBaseModule/STCommon (= 0.1.0)
+  - STBaseProject/STBaseModule/STBaseModel (0.1.0)
+  - STBaseProject/STBaseModule/STBaseView (0.1.0)
+  - STBaseProject/STBaseModule/STBaseViewController (0.1.0)
+  - STBaseProject/STBaseModule/STBaseViewModel (0.1.0)
+  - STBaseProject/STBaseModule/STCommon (0.1.0)
   - STBaseProject/STScanner (0.1.0)
   - STBaseProject/STScreenshot (0.1.0)
 
 DEPENDENCIES:
   - SnapKit
-  - STBaseProject/STBase (from `../`)
-  - STBaseProject/STBtn (from `../`)
-  - STBaseProject/STCarousel (from `../`)
-  - STBaseProject/STCommon (from `../`)
-  - STBaseProject/STContract (from `../`)
+  - STBaseProject/STBaseModule (from `../`)
   - STBaseProject/STScanner (from `../`)
   - STBaseProject/STScreenshot (from `../`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - SnapKit
 
 EXTERNAL SOURCES:
@@ -39,9 +29,9 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
-  STBaseProject: 2afc6c686e704e8ddf1ae8e7d5d9926700dd7c00
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  STBaseProject: 542917747b63a8592b65cbf27d3b5421fe999aba
 
-PODFILE CHECKSUM: 732034a8cb683fb20f38620cbda251611e95f580
+PODFILE CHECKSUM: 62e7cc68052c6b779d71e5273cf90cfeaa1fa788
 
-COCOAPODS: 1.7.2
+COCOAPODS: 1.8.4

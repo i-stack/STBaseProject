@@ -9,7 +9,4 @@
 #ifndef STBaseProject_Bridging_Header_h
 #define STBaseProject_Bridging_Header_h
 
-//#import "iCarousel.h"
-//#import "STBaseProject"
-
 #endif /* STBaseProject_Bridging_Header_h */

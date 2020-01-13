@@ -10,7 +10,6 @@
 #endif
 #endif
 
-#import "iCarousel.h"
 
 FOUNDATION_EXPORT double STBaseProjectVersionNumber;
 FOUNDATION_EXPORT const unsigned char STBaseProjectVersionString[];
