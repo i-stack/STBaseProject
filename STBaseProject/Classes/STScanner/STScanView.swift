@@ -237,7 +237,9 @@ extension STScanView {
 
 extension STScanView {
     func st_scanBlueLineImage() -> UIImage {
-        let bundle: Bundle = STBundle.st_scanResourceBundle()
+        let cbundle: Bundle = Bundle.init(for: STScanView.self)
+        let url: URL = cbundle.url(forResource: "STScanResource", withExtension: "bundle") ?? URL.init(fileURLWithPath: "")
+        let bundle: Bundle = Bundle.init(url: url) ?? Bundle.main
         let image = UIImage.init(named: "st_scan_blue_line", in: bundle, compatibleWith: UITraitCollection()) ?? UIImage()
         return image
     }
