@@ -1,5 +1,7 @@
 import XCTest
 
+@testable import STBaseProject_Example
+
 class Tests: XCTestCase {
     
     override func setUp() {
@@ -23,5 +25,4 @@ class Tests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-    
 }
