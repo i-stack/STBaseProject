@@ -16,6 +16,9 @@ public enum STBtnEdgeInsetsStyle {
 }
 
 open class STBtn: UIButton {
+    
+    open var identifier: Any?
+    
     @IBInspectable open var borderWidth: CGFloat {
         set {
             layer.borderWidth = newValue
