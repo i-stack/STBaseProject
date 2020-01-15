@@ -65,21 +65,21 @@ open class STBaseView: UIView {
 }
 
 extension STBaseView: UITableViewDelegate, UITableViewDataSource {
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if let newDelegate = self.delegate {
             return newDelegate.st_numberOfRowsIn(section: section)
         }
         return 0
     }
     
-    public func numberOfSections(in tableView: UITableView) -> Int {
+    open func numberOfSections(in tableView: UITableView) -> Int {
         if let newDelegate = self.delegate {
             return newDelegate.st_numberOfSections()
         }
         return 0
     }
     
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         return UITableViewCell()
     }
 }
