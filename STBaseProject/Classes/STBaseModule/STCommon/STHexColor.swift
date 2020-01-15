@@ -10,6 +10,14 @@ import UIKit
 
 public extension UIColor {
     
+    static func st_color(darkModeName: String, hexString: String) -> UIColor {
+        if #available(iOS 11.0, *) {
+            return UIColor.init(named: darkModeName) ?? UIColor.clear
+        } else {
+            return self.st_color(hexString: hexString, alpha: 1.0)
+        }
+    }
+    
     static func st_color(hexString: String) -> UIColor {
         return self.st_color(hexString: hexString, alpha: 1.0)
     }
