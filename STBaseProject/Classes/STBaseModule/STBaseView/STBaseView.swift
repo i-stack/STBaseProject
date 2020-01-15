@@ -8,15 +8,7 @@
 
 import UIKit
 
-public protocol STBaseViewDelegate: NSObjectProtocol {
-    func st_numberOfSections() -> Int
-    func st_numberOfRowsIn(section: Int) -> Int
-    func st_didSelectRowAt(section: Int, row: Int)
-}
-
 open class STBaseView: UIView {
-
-    open weak var delegate: STBaseViewDelegate?
     
     public var tableView: UITableView?
     public var baseContentView: UIView?
@@ -66,16 +58,10 @@ open class STBaseView: UIView {
 
 extension STBaseView: UITableViewDelegate, UITableViewDataSource {
     open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let newDelegate = self.delegate {
-            return newDelegate.st_numberOfRowsIn(section: section)
-        }
         return 0
     }
     
     open func numberOfSections(in tableView: UITableView) -> Int {
-        if let newDelegate = self.delegate {
-            return newDelegate.st_numberOfSections()
-        }
         return 0
     }
     
