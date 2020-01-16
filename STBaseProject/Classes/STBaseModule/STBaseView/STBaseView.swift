@@ -62,7 +62,7 @@ extension STBaseView: UITableViewDelegate, UITableViewDataSource {
     }
     
     open func numberOfSections(in tableView: UITableView) -> Int {
-        return 0
+        return 1
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
