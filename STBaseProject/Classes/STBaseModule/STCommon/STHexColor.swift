@@ -11,10 +11,18 @@ import UIKit
 public extension UIColor {
     
     static func st_color(darkModeName: String, hexString: String) -> UIColor {
+        return st_color(darkModeName: darkModeName, hexString: hexString, alpha: 1.0)
+    }
+    
+    static func st_color(darkModeName: String, hexString: String, alpha: CGFloat) -> UIColor {
         if #available(iOS 11.0, *) {
-            return UIColor.init(named: darkModeName) ?? UIColor.clear
+            if darkModeName.count > 0 {
+                let color = UIColor.init(named: darkModeName)?.withAlphaComponent(alpha)
+                return color ?? UIColor.clear
+            }
+            return self.st_color(hexString: hexString, alpha: alpha)
         } else {
-            return self.st_color(hexString: hexString, alpha: 1.0)
+            return self.st_color(hexString: hexString, alpha: alpha)
         }
     }
     
@@ -53,22 +61,5 @@ public extension UIColor {
             blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
             alpha: CGFloat(alpha)
         )
-//        let rStart = cString.index(cString.startIndex, offsetBy: 2)
-//        let rString = String(cString[..<rStart])
-//
-//        let gStart = cString.index(cString.startIndex, offsetBy: 4)
-//        let gString = String(cString[rStart..<gStart])
-//
-//        let bStart = cString.index(gString.startIndex, offsetBy: 6)
-//        let bString = String(cString[gStart..<bStart])
-//
-//        var r: UInt32 = 0
-//        var g: UInt32 = 0
-//        var b: UInt32 = 0
-//        Scanner.init(string: rString).scanHexInt32(&r)
-//        Scanner.init(string: gString).scanHexInt32(&g)
-//        Scanner.init(string: bString).scanHexInt32(&b)
-//
-//        return UIColor.init(red: CGFloat(r) / 255.0, green: CGFloat(g) / 255.0, blue: CGFloat(b) / 255.0, alpha: alpha)
     }
 }
