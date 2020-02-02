@@ -87,4 +87,12 @@ open class STTextField: UITextField {
         self.autocorrectionType = UITextAutocorrectionType.no
         self.autocapitalizationType = UITextAutocapitalizationType.none
     }
+    
+    public func configAttributed(textColor: UIColor) -> Void {
+        if let attributedText = self.attributedPlaceholder {
+            let placeholderAttributedString = NSMutableAttributedString(attributedString: attributedText)
+            placeholderAttributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: placeholderAttributedString.length))
+            self.attributedText = attributedText
+        }
+    }
 }
