@@ -92,7 +92,7 @@ open class STTextField: UITextField {
         if let attributedText = self.attributedPlaceholder {
             let placeholderAttributedString = NSMutableAttributedString(attributedString: attributedText)
             placeholderAttributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: placeholderAttributedString.length))
-            self.attributedText = attributedText
+            self.attributedPlaceholder = placeholderAttributedString
         }
     }
 }
