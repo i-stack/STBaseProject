@@ -95,4 +95,12 @@ open class STTextField: UITextField {
             self.attributedPlaceholder = placeholderAttributedString
         }
     }
+    
+    public func configAttributed(text: String, textColor: UIColor) -> Void {
+        if text.count > 0 {
+            let placeholderAttributedString = NSMutableAttributedString(attributedString: NSAttributedString.init(string: text))
+            placeholderAttributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: placeholderAttributedString.length))
+            self.attributedPlaceholder = placeholderAttributedString
+        }
+    }
 }
