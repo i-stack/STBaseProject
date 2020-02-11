@@ -1,9 +1,9 @@
 //
 //  TRXHTTPClient.swift
-//  TronLink
+//  STBaseFramework
 //
 //  Created by Tron on 2018/12/10.
-//  Copyright © 2018年 Tron. All rights reserved.
+//  Copyright © 2018年 ST. All rights reserved.
 //
 
 import UIKit

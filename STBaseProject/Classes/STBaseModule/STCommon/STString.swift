@@ -1,9 +1,9 @@
 //
 //  TRXString.swift
-//  TronLink
+//  STBaseFramework
 //
 //  Created by Tron on 2018/11/23.
-//  Copyright © 2018年 Tron. All rights reserved.
+//  Copyright © 2018年 ST. All rights reserved.
 //
 
 import UIKit

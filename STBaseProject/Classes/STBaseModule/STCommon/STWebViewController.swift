@@ -1,9 +1,9 @@
 //
 //  STWebViewController.swift
-//  TronLink
+//  STBaseFramework
 //
-//  Created by SQLing on 2019/1/28.
-//  Copyright © 2019年 Tron. All rights reserved.
+//  Created by stack on 2019/1/28.
+//  Copyright © 2019年 ST. All rights reserved.
 //
 
 import UIKit
