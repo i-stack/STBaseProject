@@ -10,6 +10,14 @@ import UIKit
 
 public extension UIColor {
     
+    static func st_color(darkModeName: String) -> UIColor {
+        return st_color(darkModeName: darkModeName, hexString: "", alpha: 1.0)
+    }
+    
+    static func st_color(darkModeName: String, alpha: CGFloat) -> UIColor {
+        return st_color(darkModeName: darkModeName, hexString: "", alpha: alpha)
+    }
+    
     static func st_color(darkModeName: String, hexString: String) -> UIColor {
         return st_color(darkModeName: darkModeName, hexString: hexString, alpha: 1.0)
     }
@@ -17,8 +25,13 @@ public extension UIColor {
     static func st_color(darkModeName: String, hexString: String, alpha: CGFloat) -> UIColor {
         if #available(iOS 11.0, *) {
             if darkModeName.count > 0 {
-                let color = UIColor.init(named: darkModeName)?.withAlphaComponent(alpha)
-                return color ?? UIColor.clear
+                if let color = UIColor.init(named: darkModeName) {
+                    if alpha < 1.0 {
+                        return color.withAlphaComponent(alpha)
+                    }
+                    return color
+                }
+                return UIColor.clear
             }
             return self.st_color(hexString: hexString, alpha: alpha)
         } else {
