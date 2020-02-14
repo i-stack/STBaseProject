@@ -12,8 +12,9 @@ open class STVerificationCodeBtn: STBtn {
 
     private var timer: Timer?
     private var originTitle: String?
+    open var titleSuffix: String = ""
     open var timerInterval: Int = 60
-    
+
     deinit {
         self.invalidTimer()
     }
@@ -45,7 +46,7 @@ open class STVerificationCodeBtn: STBtn {
                 self.invalidTimer()
                 self.isUserInteractionEnabled = true
                 if let title = self.originTitle {
-                    self.setTitle(title, for: UIControl.State.normal)
+                    self.setTitle("\(title)\(self.titleSuffix)", for: UIControl.State.normal)
                 } else {
                     self.setTitle("发送验证码", for: UIControl.State.normal)
                 }
