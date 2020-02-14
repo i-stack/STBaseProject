@@ -10,25 +10,20 @@ import UIKit
 import SnapKit
 import STBaseProject
 
-class ViewController: STBaseOpenSystemOperationController {
-    
-    var testView: STTestView?
-    
+class ViewController: STBaseViewController {
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         self.st_showNavBtnType(type: .none)
         
-        self.testView = STTestView()
-        self.view.addSubview(self.testView!)
-        self.testView?.snp.makeConstraints({ (make) in
-            make.top.left.bottom.right.equalTo(0)
-        })
+        let str = "登录表示同意《用户协议》及《隐私协议》"
+        let label = UILabel.init(frame: CGRect.init(x: 0, y: 100, width: 300, height: 50))
+        label.attributedText = str.st_attributed(originStr: str, originStrColor: UIColor.black, originStrFont: UIFont.st_boldSystemFont(ofSize: 14), replaceStrs: ["《用户协议》", "《隐私协议》"], replaceStrColors: [UIColor.blue, UIColor.orange], replaceStrFonts: [UIFont.st_systemFont(ofSize: 11), UIFont.st_systemFont(ofSize: 15)])
+        self.view.addSubview(label)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        let model = STBaseModel()
-        model.setValue("hhh", forKey: "jjj")
     }
 }
 
