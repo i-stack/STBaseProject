@@ -58,4 +58,61 @@ public extension UIImage {
         }
         return imageData
     }
+    
+    func st_imageFormat() -> STImageFormat {
+        let data = st_imageToData()
+        let newData = NSData.init(data: data)
+        if newData.length < 1 {
+            return .STImageFormatUndefined
+        }
+        
+        var c: UInt8?
+        newData.getBytes(&c, length: 1)
+        switch c {
+        case 0xFF:
+            return .STImageFormatJPEG
+        case 0x89:
+            return .STImageFormatPNG
+        case 0x47:
+            return .STImageFormatGIF
+        case 0x49:
+            return .STImageFormatTIFF
+        case 0x4D:
+            return .STImageFormatTIFF
+        case 0x52:
+            if newData.length >= 12 {
+                //RIFF....WEBP
+                if let testString = NSString.init(data: newData.subdata(with: NSRange.init(location: 0, length: 12)), encoding: String.Encoding.ascii.rawValue) {
+                    if testString.hasPrefix("RIFF"), testString.hasPrefix("WEBP") {
+                        return .STImageFormatWebP
+                    }
+                }
+            }
+            break;
+        case 0x00:
+            if newData.length >= 12 {
+                if let testString = NSString.init(data: newData.subdata(with: NSRange.init(location: 4, length: 8)), encoding: String.Encoding.ascii.rawValue) {
+                    //....ftypheic ....ftypheix ....ftyphevc ....ftyphevx
+                    if testString.isEqual(to: "ftypheic") ||
+                        testString.isEqual(to: "ftypheix") ||
+                        testString.isEqual(to: "ftyphevc") ||
+                        testString.isEqual(to: "ftyphevx") {
+                        return .STImageFormatHEIC
+                    }
+                    
+                    //....ftypmif1 ....ftypmsf1
+                    if testString.isEqual(to: "ftypmif1") ||
+                        testString.isEqual(to: "ftypmsf1") {
+                        return .STImageFormatHEIF
+                    }
+                }
+            }
+            break
+        case .none:
+            break
+        case .some(_):
+            break
+        }
+        return .STImageFormatUndefined
+    }
 }
