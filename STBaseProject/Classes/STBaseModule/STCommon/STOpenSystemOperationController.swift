@@ -75,10 +75,12 @@ open class STOpenSystemOperationController: STBaseViewController {
 }
 
 extension STOpenSystemOperationController {
-    private func st_openPhotoLibrary() -> Void {
+    private func st_openPhotoLibrary(presentImagePickerDone: @escaping(Bool) -> Void) {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.photoLibrary) == true {
             picker.sourceType = UIImagePickerController.SourceType.photoLibrary
-            self.present(picker, animated: true) {}
+            self.present(picker, animated: true) {
+                presentImagePickerDone(true)
+            }
         } else {
             DispatchQueue.main.async {
                 if let complection = self.imagePickerResult {
@@ -88,10 +90,12 @@ extension STOpenSystemOperationController {
         }
     }
 
-    private func st_openCamera() -> Void {
+    private func st_openCamera(presentImagePickerDone: @escaping(Bool) -> Void) {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) == true {
             picker.sourceType = UIImagePickerController.SourceType.camera
-            self.present(picker, animated: true) {}
+            self.present(picker, animated: true) {
+                presentImagePickerDone(true)
+            }
         } else {
             DispatchQueue.main.async {
                 if let complection = self.imagePickerResult {
@@ -101,17 +105,17 @@ extension STOpenSystemOperationController {
         }
     }
 
-    open func st_openSystemOperation(openSourceType: STOpenSourceType, complection: @escaping(STImagePickerResult)) -> Void {
+    open func st_openSystemOperation(openSourceType: STOpenSourceType, complection: @escaping(STImagePickerResult), presentImagePickerDone: @escaping(Bool) -> Void) {
         self.imagePickerResult = complection
         switch openSourceType {
         case .photoLibrary:
             if self.st_isAvailablePhoto() {
-                self.st_openPhotoLibrary()
+                self.st_openPhotoLibrary(presentImagePickerDone: presentImagePickerDone)
             }
             break
         case .camera:
             if self.st_isAvailableCamera() {
-                self.st_openCamera()
+                self.st_openCamera(presentImagePickerDone: presentImagePickerDone)
             }
             break
         default:
