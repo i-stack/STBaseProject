@@ -1,6 +1,6 @@
 //
 //  STLanguageManager.swift
-//  STBaseFramework
+//  STBaseProject
 //
 //  Created by stack on 2018/12/10.
 //  Copyright © 2019 ST. All rights reserved.

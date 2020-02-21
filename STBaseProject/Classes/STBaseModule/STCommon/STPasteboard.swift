@@ -2,7 +2,7 @@
 //  STPasteboard.swift
 //  STBaseProject
 //
-//  Created by song on 2017/10/24.
+//  Created by stack on 2017/10/24.
 //  Copyright © 2018年 song. All rights reserved.
 //
 

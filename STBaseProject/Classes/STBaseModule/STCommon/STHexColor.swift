@@ -1,8 +1,8 @@
 //
 //  STHexColor.swift
-//  STBaseFramework
+//  STBaseProject
 //
-//  Created by song on 2019/12/9.
+//  Created by stack on 2019/12/9.
 //  Copyright © 2019 ST. All rights reserved.
 //
 

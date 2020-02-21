@@ -1,8 +1,8 @@
 //
 //  TRXString.swift
-//  STBaseFramework
+//  STBaseProject
 //
-//  Created by Tron on 2018/11/23.
+//  Created by stack on 2018/11/23.
 //  Copyright © 2018年 ST. All rights reserved.
 //
 
@@ -81,54 +81,9 @@ public extension String {
         }
         return 0
     }
-}
-
-public extension String {
-    func st_timeStampToCurrennTime(timeStamp: String) -> String {
-        if timeStamp.count < 1 {
-            return ""
-        }
-        let stamp: Double = timeStamp.doubleValue
-        var timeSta: TimeInterval = TimeInterval(stamp)
-        if timeStamp.count == 13 {
-            timeSta = TimeInterval(timeSta / 1000)
-        }
-        let currentTime = Date().timeIntervalSince1970
-        let reduceTime : TimeInterval = currentTime - timeSta
-        if reduceTime < 60 {
-            return "刚刚"
-        }
-        let mins = Int(reduceTime / 60)
-        if mins < 60 {
-            return "\(mins)分钟前"
-        }
-        let hours = Int(reduceTime / 3600)
-        if hours < 24 {
-            return "\(hours)小时前"
-        }
-        let days = Int(reduceTime / 3600 / 24)
-        if days < 30 {
-            return "\(days)天前"
-        }
-        let date = NSDate(timeIntervalSince1970: timeSta)
-        let dfmatter = DateFormatter()
-        dfmatter.dateFormat="yyyy.MM.dd HH:mm:ss"
-        return dfmatter.string(from: date as Date)
-    }
     
     var doubleValue: Double {
-        let formatter = NumberFormatter()
-        formatter.locale = Locale.current
-        formatter.decimalSeparator = "."
-        if let result = formatter.number(from: self) {
-            return result.doubleValue
-        } else {
-            formatter.decimalSeparator = ","
-            if let result = formatter.number(from: self) {
-                return result.doubleValue
-            }
-        }
-        return 0
+        return st_stringToDouble(string: self)
     }
 }
 
@@ -151,11 +106,9 @@ public extension String {
                 if replaceStrColors.count > i {
                     color = replaceStrColors[i]
                 }
-                
-                str.addAttributes([NSAttributedString.Key.font : font, NSAttributedString.Key.foregroundColor: color], range: NSRange.init(location: location, length: length))
+                str.addAttributes([NSAttributedString.Key.font: font, NSAttributedString.Key.foregroundColor: color], range: NSRange.init(location: location, length: length))
             }
         }
-        
         return str
     }
 }

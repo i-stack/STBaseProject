@@ -1,9 +1,9 @@
 //
 //  STEncrypt.swift
-//  STBaseFramework
+//  STBaseProject
 //
-//  Created by song on 2018/12/22.
-//  Copyright © 2019 wlcy. All rights reserved.
+//  Created by stack on 2018/12/22.
+//  Copyright © 2019 ST. All rights reserved.
 //
 
 import Foundation

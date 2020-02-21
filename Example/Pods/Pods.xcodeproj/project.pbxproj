@@ -7,85 +7,86 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		46EB2E000005E0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005D0 /* Foundation.framework */; };
-		46EB2E000005F0 /* STBaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000100 /* STBaseModel.swift */; };
-		46EB2E00000600 /* STBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000120 /* STBaseView.swift */; };
-		46EB2E00000610 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000140 /* STBaseViewController.swift */; };
-		46EB2E00000620 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* STBaseViewModel.swift */; };
-		46EB2E00000630 /* STOpenSystemOperationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000180 /* STOpenSystemOperationController.swift */; };
-		46EB2E00000640 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* STBtn.swift */; };
-		46EB2E00000650 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* STBundle.swift */; };
-		46EB2E00000660 /* STConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* STConstants.swift */; };
-		46EB2E00000670 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STDeviceInfo.swift */; };
-		46EB2E00000680 /* STEncrypt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STEncrypt.swift */; };
-		46EB2E00000690 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001E0 /* STFontManager.swift */; };
-		46EB2E000006A0 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STHexColor.swift */; };
-		46EB2E000006B0 /* STHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* STHTTPClient.swift */; };
-		46EB2E000006C0 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* STImage.swift */; };
-		46EB2E000006D0 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STLanguageManager.swift */; };
-		46EB2E000006E0 /* STPasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* STPasteboard.swift */; };
-		46EB2E000006F0 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STPredicateCheck.swift */; };
-		46EB2E00000700 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STString.swift */; };
-		46EB2E00000710 /* STTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STTabBarItem.swift */; };
-		46EB2E00000720 /* STTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STTextField.swift */; };
-		46EB2E00000730 /* STTimerTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STTimerTarget.swift */; };
-		46EB2E00000740 /* STVerificationCodeBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STVerificationCodeBtn.swift */; };
-		46EB2E00000750 /* STWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* STWebViewController.swift */; };
-		46EB2E000007A0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000790 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000007E0 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007D0 /* STBaseProject-dummy.m */; };
-		46EB2E00000880 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005D0 /* Foundation.framework */; };
-		46EB2E00000890 /* Constraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* Constraint.swift */; };
-		46EB2E000008A0 /* ConstraintAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* ConstraintAttributes.swift */; };
-		46EB2E000008B0 /* ConstraintConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* ConstraintConfig.swift */; };
-		46EB2E000008C0 /* ConstraintConstantTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* ConstraintConstantTarget.swift */; };
-		46EB2E000008D0 /* ConstraintDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002F0 /* ConstraintDescription.swift */; };
-		46EB2E000008E0 /* ConstraintDirectionalInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000300 /* ConstraintDirectionalInsets.swift */; };
-		46EB2E000008F0 /* ConstraintDirectionalInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000310 /* ConstraintDirectionalInsetTarget.swift */; };
-		46EB2E00000900 /* ConstraintDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000320 /* ConstraintDSL.swift */; };
-		46EB2E00000910 /* ConstraintInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000330 /* ConstraintInsets.swift */; };
-		46EB2E00000920 /* ConstraintInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000340 /* ConstraintInsetTarget.swift */; };
-		46EB2E00000930 /* ConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000350 /* ConstraintItem.swift */; };
-		46EB2E00000940 /* ConstraintLayoutGuide+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000360 /* ConstraintLayoutGuide+Extensions.swift */; };
-		46EB2E00000950 /* ConstraintLayoutGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000370 /* ConstraintLayoutGuide.swift */; };
-		46EB2E00000960 /* ConstraintLayoutGuideDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000380 /* ConstraintLayoutGuideDSL.swift */; };
-		46EB2E00000970 /* ConstraintLayoutSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* ConstraintLayoutSupport.swift */; };
-		46EB2E00000980 /* ConstraintLayoutSupportDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* ConstraintLayoutSupportDSL.swift */; };
-		46EB2E00000990 /* ConstraintMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003B0 /* ConstraintMaker.swift */; };
-		46EB2E000009A0 /* ConstraintMakerEditable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* ConstraintMakerEditable.swift */; };
-		46EB2E000009B0 /* ConstraintMakerExtendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* ConstraintMakerExtendable.swift */; };
-		46EB2E000009C0 /* ConstraintMakerFinalizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003E0 /* ConstraintMakerFinalizable.swift */; };
-		46EB2E000009D0 /* ConstraintMakerPriortizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003F0 /* ConstraintMakerPriortizable.swift */; };
-		46EB2E000009E0 /* ConstraintMakerRelatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* ConstraintMakerRelatable.swift */; };
-		46EB2E000009F0 /* ConstraintMultiplierTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000410 /* ConstraintMultiplierTarget.swift */; };
-		46EB2E00000A00 /* ConstraintOffsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000420 /* ConstraintOffsetTarget.swift */; };
-		46EB2E00000A10 /* ConstraintPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000430 /* ConstraintPriority.swift */; };
-		46EB2E00000A20 /* ConstraintPriorityTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000440 /* ConstraintPriorityTarget.swift */; };
-		46EB2E00000A30 /* ConstraintRelatableTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000450 /* ConstraintRelatableTarget.swift */; };
-		46EB2E00000A40 /* ConstraintRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000460 /* ConstraintRelation.swift */; };
-		46EB2E00000A50 /* ConstraintView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000470 /* ConstraintView+Extensions.swift */; };
-		46EB2E00000A60 /* ConstraintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000480 /* ConstraintView.swift */; };
-		46EB2E00000A70 /* ConstraintViewDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000490 /* ConstraintViewDSL.swift */; };
-		46EB2E00000A80 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004A0 /* Debugging.swift */; };
-		46EB2E00000A90 /* LayoutConstraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004B0 /* LayoutConstraint.swift */; };
-		46EB2E00000AA0 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004C0 /* LayoutConstraintItem.swift */; };
-		46EB2E00000AB0 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004D0 /* Typealiases.swift */; };
-		46EB2E00000AC0 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004E0 /* UILayoutSupport+Extensions.swift */; };
-		46EB2E00000B10 /* SnapKit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B00 /* SnapKit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00000B50 /* SnapKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B40 /* SnapKit-dummy.m */; };
-		46EB2E00000BF0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005D0 /* Foundation.framework */; };
-		46EB2E00000C60 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C50 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00000CB0 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CA0 /* Pods-STBaseProject_Example-dummy.m */; };
+		46EB2E000005F0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005E0 /* Foundation.framework */; };
+		46EB2E00000600 /* STBaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000100 /* STBaseModel.swift */; };
+		46EB2E00000610 /* STBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000120 /* STBaseView.swift */; };
+		46EB2E00000620 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000140 /* STBaseViewController.swift */; };
+		46EB2E00000630 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* STBaseViewModel.swift */; };
+		46EB2E00000640 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000180 /* STBtn.swift */; };
+		46EB2E00000650 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* STBundle.swift */; };
+		46EB2E00000660 /* STConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* STConstants.swift */; };
+		46EB2E00000670 /* STDateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* STDateManager.swift */; };
+		46EB2E00000680 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STDeviceInfo.swift */; };
+		46EB2E00000690 /* STEncrypt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STEncrypt.swift */; };
+		46EB2E000006A0 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001E0 /* STFontManager.swift */; };
+		46EB2E000006B0 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STHexColor.swift */; };
+		46EB2E000006C0 /* STHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* STHTTPClient.swift */; };
+		46EB2E000006D0 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* STImage.swift */; };
+		46EB2E000006E0 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STLanguageManager.swift */; };
+		46EB2E000006F0 /* STOpenSystemOperationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* STOpenSystemOperationController.swift */; };
+		46EB2E00000700 /* STPasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STPasteboard.swift */; };
+		46EB2E00000710 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STPredicateCheck.swift */; };
+		46EB2E00000720 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STString.swift */; };
+		46EB2E00000730 /* STTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STTabBarItem.swift */; };
+		46EB2E00000740 /* STTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STTextField.swift */; };
+		46EB2E00000750 /* STTimerTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STTimerTarget.swift */; };
+		46EB2E00000760 /* STVerificationCodeBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* STVerificationCodeBtn.swift */; };
+		46EB2E00000770 /* STWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* STWebViewController.swift */; };
+		46EB2E000007C0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007B0 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000800 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007F0 /* STBaseProject-dummy.m */; };
+		46EB2E000008A0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005E0 /* Foundation.framework */; };
+		46EB2E000008B0 /* Constraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* Constraint.swift */; };
+		46EB2E000008C0 /* ConstraintAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* ConstraintAttributes.swift */; };
+		46EB2E000008D0 /* ConstraintConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* ConstraintConfig.swift */; };
+		46EB2E000008E0 /* ConstraintConstantTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002F0 /* ConstraintConstantTarget.swift */; };
+		46EB2E000008F0 /* ConstraintDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000300 /* ConstraintDescription.swift */; };
+		46EB2E00000900 /* ConstraintDirectionalInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000310 /* ConstraintDirectionalInsets.swift */; };
+		46EB2E00000910 /* ConstraintDirectionalInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000320 /* ConstraintDirectionalInsetTarget.swift */; };
+		46EB2E00000920 /* ConstraintDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000330 /* ConstraintDSL.swift */; };
+		46EB2E00000930 /* ConstraintInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000340 /* ConstraintInsets.swift */; };
+		46EB2E00000940 /* ConstraintInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000350 /* ConstraintInsetTarget.swift */; };
+		46EB2E00000950 /* ConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000360 /* ConstraintItem.swift */; };
+		46EB2E00000960 /* ConstraintLayoutGuide+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000370 /* ConstraintLayoutGuide+Extensions.swift */; };
+		46EB2E00000970 /* ConstraintLayoutGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000380 /* ConstraintLayoutGuide.swift */; };
+		46EB2E00000980 /* ConstraintLayoutGuideDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* ConstraintLayoutGuideDSL.swift */; };
+		46EB2E00000990 /* ConstraintLayoutSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* ConstraintLayoutSupport.swift */; };
+		46EB2E000009A0 /* ConstraintLayoutSupportDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003B0 /* ConstraintLayoutSupportDSL.swift */; };
+		46EB2E000009B0 /* ConstraintMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* ConstraintMaker.swift */; };
+		46EB2E000009C0 /* ConstraintMakerEditable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* ConstraintMakerEditable.swift */; };
+		46EB2E000009D0 /* ConstraintMakerExtendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003E0 /* ConstraintMakerExtendable.swift */; };
+		46EB2E000009E0 /* ConstraintMakerFinalizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003F0 /* ConstraintMakerFinalizable.swift */; };
+		46EB2E000009F0 /* ConstraintMakerPriortizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* ConstraintMakerPriortizable.swift */; };
+		46EB2E00000A00 /* ConstraintMakerRelatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000410 /* ConstraintMakerRelatable.swift */; };
+		46EB2E00000A10 /* ConstraintMultiplierTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000420 /* ConstraintMultiplierTarget.swift */; };
+		46EB2E00000A20 /* ConstraintOffsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000430 /* ConstraintOffsetTarget.swift */; };
+		46EB2E00000A30 /* ConstraintPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000440 /* ConstraintPriority.swift */; };
+		46EB2E00000A40 /* ConstraintPriorityTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000450 /* ConstraintPriorityTarget.swift */; };
+		46EB2E00000A50 /* ConstraintRelatableTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000460 /* ConstraintRelatableTarget.swift */; };
+		46EB2E00000A60 /* ConstraintRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000470 /* ConstraintRelation.swift */; };
+		46EB2E00000A70 /* ConstraintView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000480 /* ConstraintView+Extensions.swift */; };
+		46EB2E00000A80 /* ConstraintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000490 /* ConstraintView.swift */; };
+		46EB2E00000A90 /* ConstraintViewDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004A0 /* ConstraintViewDSL.swift */; };
+		46EB2E00000AA0 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004B0 /* Debugging.swift */; };
+		46EB2E00000AB0 /* LayoutConstraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004C0 /* LayoutConstraint.swift */; };
+		46EB2E00000AC0 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004D0 /* LayoutConstraintItem.swift */; };
+		46EB2E00000AD0 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004E0 /* Typealiases.swift */; };
+		46EB2E00000AE0 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004F0 /* UILayoutSupport+Extensions.swift */; };
+		46EB2E00000B30 /* SnapKit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B20 /* SnapKit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000B70 /* SnapKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B60 /* SnapKit-dummy.m */; };
+		46EB2E00000C10 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000005E0 /* Foundation.framework */; };
+		46EB2E00000C80 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C70 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000CD0 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CC0 /* Pods-STBaseProject_Example-dummy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		46EB2E00000CC0 /* PBXContainerItemProxy */ = {
+		46EB2E00000CE0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 894EA9674D0D5CFEF493FE4E266279C6;
 			remoteInfo = STBaseProject;
 		};
-		46EB2E00000CE0 /* PBXContainerItemProxy */ = {
+		46EB2E00000D00 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
@@ -95,15 +96,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		46EB2E000000D0 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		46EB2E000000D0 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		46EB2E00000100 /* STBaseModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseModel.swift; path = STBaseProject/Classes/STBaseModule/STBaseModel/STBaseModel.swift; sourceTree = "<group>"; };
 		46EB2E00000120 /* STBaseView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseView.swift; path = STBaseProject/Classes/STBaseModule/STBaseView/STBaseView.swift; sourceTree = "<group>"; };
 		46EB2E00000140 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewController.swift; path = STBaseProject/Classes/STBaseModule/STBaseViewController/STBaseViewController.swift; sourceTree = "<group>"; };
 		46EB2E00000160 /* STBaseViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewModel.swift; path = STBaseProject/Classes/STBaseModule/STBaseViewModel/STBaseViewModel.swift; sourceTree = "<group>"; };
-		46EB2E00000180 /* STOpenSystemOperationController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STOpenSystemOperationController.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STOpenSystemOperationController.swift; sourceTree = "<group>"; };
-		46EB2E00000190 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STBtn.swift; sourceTree = "<group>"; };
-		46EB2E000001A0 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBundle.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STBundle.swift; sourceTree = "<group>"; };
-		46EB2E000001B0 /* STConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STConstants.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STConstants.swift; sourceTree = "<group>"; };
+		46EB2E00000180 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STBtn.swift; sourceTree = "<group>"; };
+		46EB2E00000190 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBundle.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STBundle.swift; sourceTree = "<group>"; };
+		46EB2E000001A0 /* STConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STConstants.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STConstants.swift; sourceTree = "<group>"; };
+		46EB2E000001B0 /* STDateManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDateManager.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STDateManager.swift; sourceTree = "<group>"; };
 		46EB2E000001C0 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceInfo.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STDeviceInfo.swift; sourceTree = "<group>"; };
 		46EB2E000001D0 /* STEncrypt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STEncrypt.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STEncrypt.swift; sourceTree = "<group>"; };
 		46EB2E000001E0 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STFontManager.swift; sourceTree = "<group>"; };
@@ -111,102 +112,103 @@
 		46EB2E00000200 /* STHTTPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHTTPClient.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STHTTPClient.swift; sourceTree = "<group>"; };
 		46EB2E00000210 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STImage.swift; sourceTree = "<group>"; };
 		46EB2E00000220 /* STLanguageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLanguageManager.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STLanguageManager.swift; sourceTree = "<group>"; };
-		46EB2E00000230 /* STPasteboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPasteboard.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPasteboard.swift; sourceTree = "<group>"; };
-		46EB2E00000240 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPredicateCheck.swift; sourceTree = "<group>"; };
-		46EB2E00000250 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STString.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STString.swift; sourceTree = "<group>"; };
-		46EB2E00000260 /* STTabBarItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTabBarItem.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STTabBarItem.swift; sourceTree = "<group>"; };
-		46EB2E00000270 /* STTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTextField.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STTextField.swift; sourceTree = "<group>"; };
-		46EB2E00000280 /* STTimerTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTimerTarget.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STTimerTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000290 /* STVerificationCodeBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STVerificationCodeBtn.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STVerificationCodeBtn.swift; sourceTree = "<group>"; };
-		46EB2E000002A0 /* STWebViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STWebViewController.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STWebViewController.swift; sourceTree = "<group>"; };
-		46EB2E000002B0 /* Constraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Constraint.swift; path = Source/Constraint.swift; sourceTree = "<group>"; };
-		46EB2E000002C0 /* ConstraintAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintAttributes.swift; path = Source/ConstraintAttributes.swift; sourceTree = "<group>"; };
-		46EB2E000002D0 /* ConstraintConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConfig.swift; path = Source/ConstraintConfig.swift; sourceTree = "<group>"; };
-		46EB2E000002E0 /* ConstraintConstantTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConstantTarget.swift; path = Source/ConstraintConstantTarget.swift; sourceTree = "<group>"; };
-		46EB2E000002F0 /* ConstraintDescription.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDescription.swift; path = Source/ConstraintDescription.swift; sourceTree = "<group>"; };
-		46EB2E00000300 /* ConstraintDirectionalInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsets.swift; path = Source/ConstraintDirectionalInsets.swift; sourceTree = "<group>"; };
-		46EB2E00000310 /* ConstraintDirectionalInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsetTarget.swift; path = Source/ConstraintDirectionalInsetTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000320 /* ConstraintDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDSL.swift; path = Source/ConstraintDSL.swift; sourceTree = "<group>"; };
-		46EB2E00000330 /* ConstraintInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsets.swift; path = Source/ConstraintInsets.swift; sourceTree = "<group>"; };
-		46EB2E00000340 /* ConstraintInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsetTarget.swift; path = Source/ConstraintInsetTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000350 /* ConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintItem.swift; path = Source/ConstraintItem.swift; sourceTree = "<group>"; };
-		46EB2E00000360 /* ConstraintLayoutGuide+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintLayoutGuide+Extensions.swift"; path = "Source/ConstraintLayoutGuide+Extensions.swift"; sourceTree = "<group>"; };
-		46EB2E00000370 /* ConstraintLayoutGuide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuide.swift; path = Source/ConstraintLayoutGuide.swift; sourceTree = "<group>"; };
-		46EB2E00000380 /* ConstraintLayoutGuideDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuideDSL.swift; path = Source/ConstraintLayoutGuideDSL.swift; sourceTree = "<group>"; };
-		46EB2E00000390 /* ConstraintLayoutSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupport.swift; path = Source/ConstraintLayoutSupport.swift; sourceTree = "<group>"; };
-		46EB2E000003A0 /* ConstraintLayoutSupportDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupportDSL.swift; path = Source/ConstraintLayoutSupportDSL.swift; sourceTree = "<group>"; };
-		46EB2E000003B0 /* ConstraintMaker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMaker.swift; path = Source/ConstraintMaker.swift; sourceTree = "<group>"; };
-		46EB2E000003C0 /* ConstraintMakerEditable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerEditable.swift; path = Source/ConstraintMakerEditable.swift; sourceTree = "<group>"; };
-		46EB2E000003D0 /* ConstraintMakerExtendable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerExtendable.swift; path = Source/ConstraintMakerExtendable.swift; sourceTree = "<group>"; };
-		46EB2E000003E0 /* ConstraintMakerFinalizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerFinalizable.swift; path = Source/ConstraintMakerFinalizable.swift; sourceTree = "<group>"; };
-		46EB2E000003F0 /* ConstraintMakerPriortizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerPriortizable.swift; path = Source/ConstraintMakerPriortizable.swift; sourceTree = "<group>"; };
-		46EB2E00000400 /* ConstraintMakerRelatable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerRelatable.swift; path = Source/ConstraintMakerRelatable.swift; sourceTree = "<group>"; };
-		46EB2E00000410 /* ConstraintMultiplierTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMultiplierTarget.swift; path = Source/ConstraintMultiplierTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000420 /* ConstraintOffsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintOffsetTarget.swift; path = Source/ConstraintOffsetTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000430 /* ConstraintPriority.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriority.swift; path = Source/ConstraintPriority.swift; sourceTree = "<group>"; };
-		46EB2E00000440 /* ConstraintPriorityTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriorityTarget.swift; path = Source/ConstraintPriorityTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000450 /* ConstraintRelatableTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelatableTarget.swift; path = Source/ConstraintRelatableTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000460 /* ConstraintRelation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelation.swift; path = Source/ConstraintRelation.swift; sourceTree = "<group>"; };
-		46EB2E00000470 /* ConstraintView+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintView+Extensions.swift"; path = "Source/ConstraintView+Extensions.swift"; sourceTree = "<group>"; };
-		46EB2E00000480 /* ConstraintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintView.swift; path = Source/ConstraintView.swift; sourceTree = "<group>"; };
-		46EB2E00000490 /* ConstraintViewDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintViewDSL.swift; path = Source/ConstraintViewDSL.swift; sourceTree = "<group>"; };
-		46EB2E000004A0 /* Debugging.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Debugging.swift; path = Source/Debugging.swift; sourceTree = "<group>"; };
-		46EB2E000004B0 /* LayoutConstraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraint.swift; path = Source/LayoutConstraint.swift; sourceTree = "<group>"; };
-		46EB2E000004C0 /* LayoutConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraintItem.swift; path = Source/LayoutConstraintItem.swift; sourceTree = "<group>"; };
-		46EB2E000004D0 /* Typealiases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Typealiases.swift; path = Source/Typealiases.swift; sourceTree = "<group>"; };
-		46EB2E000004E0 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "UILayoutSupport+Extensions.swift"; path = "Source/UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
-		46EB2E00000500 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		46EB2E00000510 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		46EB2E00000520 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		46EB2E000005D0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		46EB2E00000770 /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
-		46EB2E00000780 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
-		46EB2E00000790 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E000007B0 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
-		46EB2E000007C0 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
-		46EB2E000007D0 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
-		46EB2E00000AE0 /* SnapKit.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.xcconfig; sourceTree = "<group>"; };
-		46EB2E00000AF0 /* SnapKit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SnapKit.modulemap; sourceTree = "<group>"; };
-		46EB2E00000B00 /* SnapKit-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E00000B20 /* SnapKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SnapKit-Info.plist"; sourceTree = "<group>"; };
-		46EB2E00000B30 /* SnapKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-prefix.pch"; sourceTree = "<group>"; };
-		46EB2E00000B40 /* SnapKit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SnapKit-dummy.m"; sourceTree = "<group>"; };
-		46EB2E00000C10 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
-		46EB2E00000C20 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		46EB2E00000C30 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
-		46EB2E00000C40 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
-		46EB2E00000C50 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E00000C70 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
-		46EB2E00000C80 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		46EB2E00000C90 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		46EB2E00000CA0 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
-		8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		979486118B3E90C08386079D57962701 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		46EB2E00000230 /* STOpenSystemOperationController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STOpenSystemOperationController.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STOpenSystemOperationController.swift; sourceTree = "<group>"; };
+		46EB2E00000240 /* STPasteboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPasteboard.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPasteboard.swift; sourceTree = "<group>"; };
+		46EB2E00000250 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPredicateCheck.swift; sourceTree = "<group>"; };
+		46EB2E00000260 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STString.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STString.swift; sourceTree = "<group>"; };
+		46EB2E00000270 /* STTabBarItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTabBarItem.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STTabBarItem.swift; sourceTree = "<group>"; };
+		46EB2E00000280 /* STTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTextField.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STTextField.swift; sourceTree = "<group>"; };
+		46EB2E00000290 /* STTimerTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTimerTarget.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STTimerTarget.swift; sourceTree = "<group>"; };
+		46EB2E000002A0 /* STVerificationCodeBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STVerificationCodeBtn.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STVerificationCodeBtn.swift; sourceTree = "<group>"; };
+		46EB2E000002B0 /* STWebViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STWebViewController.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STWebViewController.swift; sourceTree = "<group>"; };
+		46EB2E000002C0 /* Constraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Constraint.swift; path = Source/Constraint.swift; sourceTree = "<group>"; };
+		46EB2E000002D0 /* ConstraintAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintAttributes.swift; path = Source/ConstraintAttributes.swift; sourceTree = "<group>"; };
+		46EB2E000002E0 /* ConstraintConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConfig.swift; path = Source/ConstraintConfig.swift; sourceTree = "<group>"; };
+		46EB2E000002F0 /* ConstraintConstantTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConstantTarget.swift; path = Source/ConstraintConstantTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000300 /* ConstraintDescription.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDescription.swift; path = Source/ConstraintDescription.swift; sourceTree = "<group>"; };
+		46EB2E00000310 /* ConstraintDirectionalInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsets.swift; path = Source/ConstraintDirectionalInsets.swift; sourceTree = "<group>"; };
+		46EB2E00000320 /* ConstraintDirectionalInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsetTarget.swift; path = Source/ConstraintDirectionalInsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000330 /* ConstraintDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDSL.swift; path = Source/ConstraintDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000340 /* ConstraintInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsets.swift; path = Source/ConstraintInsets.swift; sourceTree = "<group>"; };
+		46EB2E00000350 /* ConstraintInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsetTarget.swift; path = Source/ConstraintInsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000360 /* ConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintItem.swift; path = Source/ConstraintItem.swift; sourceTree = "<group>"; };
+		46EB2E00000370 /* ConstraintLayoutGuide+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintLayoutGuide+Extensions.swift"; path = "Source/ConstraintLayoutGuide+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000380 /* ConstraintLayoutGuide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuide.swift; path = Source/ConstraintLayoutGuide.swift; sourceTree = "<group>"; };
+		46EB2E00000390 /* ConstraintLayoutGuideDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuideDSL.swift; path = Source/ConstraintLayoutGuideDSL.swift; sourceTree = "<group>"; };
+		46EB2E000003A0 /* ConstraintLayoutSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupport.swift; path = Source/ConstraintLayoutSupport.swift; sourceTree = "<group>"; };
+		46EB2E000003B0 /* ConstraintLayoutSupportDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupportDSL.swift; path = Source/ConstraintLayoutSupportDSL.swift; sourceTree = "<group>"; };
+		46EB2E000003C0 /* ConstraintMaker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMaker.swift; path = Source/ConstraintMaker.swift; sourceTree = "<group>"; };
+		46EB2E000003D0 /* ConstraintMakerEditable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerEditable.swift; path = Source/ConstraintMakerEditable.swift; sourceTree = "<group>"; };
+		46EB2E000003E0 /* ConstraintMakerExtendable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerExtendable.swift; path = Source/ConstraintMakerExtendable.swift; sourceTree = "<group>"; };
+		46EB2E000003F0 /* ConstraintMakerFinalizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerFinalizable.swift; path = Source/ConstraintMakerFinalizable.swift; sourceTree = "<group>"; };
+		46EB2E00000400 /* ConstraintMakerPriortizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerPriortizable.swift; path = Source/ConstraintMakerPriortizable.swift; sourceTree = "<group>"; };
+		46EB2E00000410 /* ConstraintMakerRelatable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerRelatable.swift; path = Source/ConstraintMakerRelatable.swift; sourceTree = "<group>"; };
+		46EB2E00000420 /* ConstraintMultiplierTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMultiplierTarget.swift; path = Source/ConstraintMultiplierTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000430 /* ConstraintOffsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintOffsetTarget.swift; path = Source/ConstraintOffsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000440 /* ConstraintPriority.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriority.swift; path = Source/ConstraintPriority.swift; sourceTree = "<group>"; };
+		46EB2E00000450 /* ConstraintPriorityTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriorityTarget.swift; path = Source/ConstraintPriorityTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000460 /* ConstraintRelatableTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelatableTarget.swift; path = Source/ConstraintRelatableTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000470 /* ConstraintRelation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelation.swift; path = Source/ConstraintRelation.swift; sourceTree = "<group>"; };
+		46EB2E00000480 /* ConstraintView+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintView+Extensions.swift"; path = "Source/ConstraintView+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000490 /* ConstraintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintView.swift; path = Source/ConstraintView.swift; sourceTree = "<group>"; };
+		46EB2E000004A0 /* ConstraintViewDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintViewDSL.swift; path = Source/ConstraintViewDSL.swift; sourceTree = "<group>"; };
+		46EB2E000004B0 /* Debugging.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Debugging.swift; path = Source/Debugging.swift; sourceTree = "<group>"; };
+		46EB2E000004C0 /* LayoutConstraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraint.swift; path = Source/LayoutConstraint.swift; sourceTree = "<group>"; };
+		46EB2E000004D0 /* LayoutConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraintItem.swift; path = Source/LayoutConstraintItem.swift; sourceTree = "<group>"; };
+		46EB2E000004E0 /* Typealiases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Typealiases.swift; path = Source/Typealiases.swift; sourceTree = "<group>"; };
+		46EB2E000004F0 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "UILayoutSupport+Extensions.swift"; path = "Source/UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000510 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		46EB2E00000520 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		46EB2E00000530 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		46EB2E000005E0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E00000790 /* STBaseProject.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.xcconfig; sourceTree = "<group>"; };
+		46EB2E000007A0 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
+		46EB2E000007B0 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E000007D0 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
+		46EB2E000007E0 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E000007F0 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000B00 /* SnapKit.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.xcconfig; sourceTree = "<group>"; };
+		46EB2E00000B10 /* SnapKit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SnapKit.modulemap; sourceTree = "<group>"; };
+		46EB2E00000B20 /* SnapKit-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000B40 /* SnapKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SnapKit-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000B50 /* SnapKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E00000B60 /* SnapKit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SnapKit-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000C30 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00000C40 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00000C50 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000C60 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
+		46EB2E00000C70 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000C90 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
+		46EB2E00000CA0 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		46EB2E00000CB0 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
+		46EB2E00000CC0 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
+		8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_STBaseProject_Example.framework; path = "Pods-STBaseProject_Example.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		979486118B3E90C08386079D57962701 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SnapKit.framework; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = STBaseProject.framework; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		46EB2E000005A0 /* Frameworks */ = {
+		46EB2E000005B0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000005E0 /* Foundation.framework in Frameworks */,
+				46EB2E000005F0 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000860 /* Frameworks */ = {
+		46EB2E00000880 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000880 /* Foundation.framework in Frameworks */,
+				46EB2E000008A0 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000BD0 /* Frameworks */ = {
+		46EB2E00000BF0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000BF0 /* Foundation.framework in Frameworks */,
+				46EB2E00000C10 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -238,7 +240,7 @@
 		46EB2E00000060 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000005C0 /* iOS */,
+				46EB2E000005D0 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -246,7 +248,7 @@
 		46EB2E00000070 /* Targets Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000C00 /* Pods-STBaseProject_Example */,
+				46EB2E00000C20 /* Pods-STBaseProject_Example */,
 			);
 			name = "Targets Support Files";
 			sourceTree = "<group>";
@@ -270,9 +272,9 @@
 		46EB2E000000B0 /* STBaseProject */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000004F0 /* Pod */,
+				46EB2E00000500 /* Pod */,
 				46EB2E000000E0 /* STBaseModule */,
-				46EB2E00000760 /* Support Files */,
+				46EB2E00000780 /* Support Files */,
 			);
 			name = STBaseProject;
 			path = ../..;
@@ -281,44 +283,45 @@
 		46EB2E000000C0 /* SnapKit */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000002B0 /* Constraint.swift */,
-				46EB2E000002C0 /* ConstraintAttributes.swift */,
-				46EB2E000002D0 /* ConstraintConfig.swift */,
-				46EB2E000002E0 /* ConstraintConstantTarget.swift */,
-				46EB2E000002F0 /* ConstraintDescription.swift */,
-				46EB2E00000300 /* ConstraintDirectionalInsets.swift */,
-				46EB2E00000310 /* ConstraintDirectionalInsetTarget.swift */,
-				46EB2E00000320 /* ConstraintDSL.swift */,
-				46EB2E00000330 /* ConstraintInsets.swift */,
-				46EB2E00000340 /* ConstraintInsetTarget.swift */,
-				46EB2E00000350 /* ConstraintItem.swift */,
-				46EB2E00000370 /* ConstraintLayoutGuide.swift */,
-				46EB2E00000360 /* ConstraintLayoutGuide+Extensions.swift */,
-				46EB2E00000380 /* ConstraintLayoutGuideDSL.swift */,
-				46EB2E00000390 /* ConstraintLayoutSupport.swift */,
-				46EB2E000003A0 /* ConstraintLayoutSupportDSL.swift */,
-				46EB2E000003B0 /* ConstraintMaker.swift */,
-				46EB2E000003C0 /* ConstraintMakerEditable.swift */,
-				46EB2E000003D0 /* ConstraintMakerExtendable.swift */,
-				46EB2E000003E0 /* ConstraintMakerFinalizable.swift */,
-				46EB2E000003F0 /* ConstraintMakerPriortizable.swift */,
-				46EB2E00000400 /* ConstraintMakerRelatable.swift */,
-				46EB2E00000410 /* ConstraintMultiplierTarget.swift */,
-				46EB2E00000420 /* ConstraintOffsetTarget.swift */,
-				46EB2E00000430 /* ConstraintPriority.swift */,
-				46EB2E00000440 /* ConstraintPriorityTarget.swift */,
-				46EB2E00000450 /* ConstraintRelatableTarget.swift */,
-				46EB2E00000460 /* ConstraintRelation.swift */,
-				46EB2E00000480 /* ConstraintView.swift */,
-				46EB2E00000470 /* ConstraintView+Extensions.swift */,
-				46EB2E00000490 /* ConstraintViewDSL.swift */,
-				46EB2E000004A0 /* Debugging.swift */,
-				46EB2E000004B0 /* LayoutConstraint.swift */,
-				46EB2E000004C0 /* LayoutConstraintItem.swift */,
-				46EB2E000004D0 /* Typealiases.swift */,
-				46EB2E000004E0 /* UILayoutSupport+Extensions.swift */,
-				46EB2E00000AD0 /* Support Files */,
+				46EB2E000002C0 /* Constraint.swift */,
+				46EB2E000002D0 /* ConstraintAttributes.swift */,
+				46EB2E000002E0 /* ConstraintConfig.swift */,
+				46EB2E000002F0 /* ConstraintConstantTarget.swift */,
+				46EB2E00000300 /* ConstraintDescription.swift */,
+				46EB2E00000310 /* ConstraintDirectionalInsets.swift */,
+				46EB2E00000320 /* ConstraintDirectionalInsetTarget.swift */,
+				46EB2E00000330 /* ConstraintDSL.swift */,
+				46EB2E00000340 /* ConstraintInsets.swift */,
+				46EB2E00000350 /* ConstraintInsetTarget.swift */,
+				46EB2E00000360 /* ConstraintItem.swift */,
+				46EB2E00000380 /* ConstraintLayoutGuide.swift */,
+				46EB2E00000370 /* ConstraintLayoutGuide+Extensions.swift */,
+				46EB2E00000390 /* ConstraintLayoutGuideDSL.swift */,
+				46EB2E000003A0 /* ConstraintLayoutSupport.swift */,
+				46EB2E000003B0 /* ConstraintLayoutSupportDSL.swift */,
+				46EB2E000003C0 /* ConstraintMaker.swift */,
+				46EB2E000003D0 /* ConstraintMakerEditable.swift */,
+				46EB2E000003E0 /* ConstraintMakerExtendable.swift */,
+				46EB2E000003F0 /* ConstraintMakerFinalizable.swift */,
+				46EB2E00000400 /* ConstraintMakerPriortizable.swift */,
+				46EB2E00000410 /* ConstraintMakerRelatable.swift */,
+				46EB2E00000420 /* ConstraintMultiplierTarget.swift */,
+				46EB2E00000430 /* ConstraintOffsetTarget.swift */,
+				46EB2E00000440 /* ConstraintPriority.swift */,
+				46EB2E00000450 /* ConstraintPriorityTarget.swift */,
+				46EB2E00000460 /* ConstraintRelatableTarget.swift */,
+				46EB2E00000470 /* ConstraintRelation.swift */,
+				46EB2E00000490 /* ConstraintView.swift */,
+				46EB2E00000480 /* ConstraintView+Extensions.swift */,
+				46EB2E000004A0 /* ConstraintViewDSL.swift */,
+				46EB2E000004B0 /* Debugging.swift */,
+				46EB2E000004C0 /* LayoutConstraint.swift */,
+				46EB2E000004D0 /* LayoutConstraintItem.swift */,
+				46EB2E000004E0 /* Typealiases.swift */,
+				46EB2E000004F0 /* UILayoutSupport+Extensions.swift */,
+				46EB2E00000AF0 /* Support Files */,
 			);
+			name = SnapKit;
 			path = SnapKit;
 			sourceTree = "<group>";
 		};
@@ -369,10 +372,10 @@
 		46EB2E00000170 /* STCommon */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000180 /* STOpenSystemOperationController.swift */,
-				46EB2E00000190 /* STBtn.swift */,
-				46EB2E000001A0 /* STBundle.swift */,
-				46EB2E000001B0 /* STConstants.swift */,
+				46EB2E00000180 /* STBtn.swift */,
+				46EB2E00000190 /* STBundle.swift */,
+				46EB2E000001A0 /* STConstants.swift */,
+				46EB2E000001B0 /* STDateManager.swift */,
 				46EB2E000001C0 /* STDeviceInfo.swift */,
 				46EB2E000001D0 /* STEncrypt.swift */,
 				46EB2E000001E0 /* STFontManager.swift */,
@@ -380,76 +383,77 @@
 				46EB2E00000200 /* STHTTPClient.swift */,
 				46EB2E00000210 /* STImage.swift */,
 				46EB2E00000220 /* STLanguageManager.swift */,
-				46EB2E00000230 /* STPasteboard.swift */,
-				46EB2E00000240 /* STPredicateCheck.swift */,
-				46EB2E00000250 /* STString.swift */,
-				46EB2E00000260 /* STTabBarItem.swift */,
-				46EB2E00000270 /* STTextField.swift */,
-				46EB2E00000280 /* STTimerTarget.swift */,
-				46EB2E00000290 /* STVerificationCodeBtn.swift */,
-				46EB2E000002A0 /* STWebViewController.swift */,
+				46EB2E00000230 /* STOpenSystemOperationController.swift */,
+				46EB2E00000240 /* STPasteboard.swift */,
+				46EB2E00000250 /* STPredicateCheck.swift */,
+				46EB2E00000260 /* STString.swift */,
+				46EB2E00000270 /* STTabBarItem.swift */,
+				46EB2E00000280 /* STTextField.swift */,
+				46EB2E00000290 /* STTimerTarget.swift */,
+				46EB2E000002A0 /* STVerificationCodeBtn.swift */,
+				46EB2E000002B0 /* STWebViewController.swift */,
 			);
 			name = STCommon;
 			sourceTree = "<group>";
 		};
-		46EB2E000004F0 /* Pod */ = {
+		46EB2E00000500 /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000500 /* LICENSE */,
-				46EB2E00000510 /* README.md */,
-				46EB2E00000520 /* STBaseProject.podspec */,
+				46EB2E00000510 /* LICENSE */,
+				46EB2E00000520 /* README.md */,
+				46EB2E00000530 /* STBaseProject.podspec */,
 			);
 			name = Pod;
 			sourceTree = "<group>";
 		};
-		46EB2E000005C0 /* iOS */ = {
+		46EB2E000005D0 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000005D0 /* Foundation.framework */,
+				46EB2E000005E0 /* Foundation.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		46EB2E00000760 /* Support Files */ = {
+		46EB2E00000780 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000780 /* STBaseProject.modulemap */,
-				46EB2E00000770 /* STBaseProject.xcconfig */,
-				46EB2E000007D0 /* STBaseProject-dummy.m */,
-				46EB2E000007B0 /* STBaseProject-Info.plist */,
-				46EB2E000007C0 /* STBaseProject-prefix.pch */,
-				46EB2E00000790 /* STBaseProject-umbrella.h */,
+				46EB2E000007A0 /* STBaseProject.modulemap */,
+				46EB2E00000790 /* STBaseProject.xcconfig */,
+				46EB2E000007F0 /* STBaseProject-dummy.m */,
+				46EB2E000007D0 /* STBaseProject-Info.plist */,
+				46EB2E000007E0 /* STBaseProject-prefix.pch */,
+				46EB2E000007B0 /* STBaseProject-umbrella.h */,
 			);
 			name = "Support Files";
 			path = "Example/Pods/Target Support Files/STBaseProject";
 			sourceTree = "<group>";
 		};
-		46EB2E00000AD0 /* Support Files */ = {
+		46EB2E00000AF0 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000AF0 /* SnapKit.modulemap */,
-				46EB2E00000AE0 /* SnapKit.xcconfig */,
-				46EB2E00000B40 /* SnapKit-dummy.m */,
-				46EB2E00000B20 /* SnapKit-Info.plist */,
-				46EB2E00000B30 /* SnapKit-prefix.pch */,
-				46EB2E00000B00 /* SnapKit-umbrella.h */,
+				46EB2E00000B10 /* SnapKit.modulemap */,
+				46EB2E00000B00 /* SnapKit.xcconfig */,
+				46EB2E00000B60 /* SnapKit-dummy.m */,
+				46EB2E00000B40 /* SnapKit-Info.plist */,
+				46EB2E00000B50 /* SnapKit-prefix.pch */,
+				46EB2E00000B20 /* SnapKit-umbrella.h */,
 			);
 			name = "Support Files";
 			path = "../Target Support Files/SnapKit";
 			sourceTree = "<group>";
 		};
-		46EB2E00000C00 /* Pods-STBaseProject_Example */ = {
+		46EB2E00000C20 /* Pods-STBaseProject_Example */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000C40 /* Pods-STBaseProject_Example.modulemap */,
-				46EB2E00000C90 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
-				46EB2E00000C80 /* Pods-STBaseProject_Example-acknowledgements.plist */,
-				46EB2E00000CA0 /* Pods-STBaseProject_Example-dummy.m */,
-				46EB2E00000C70 /* Pods-STBaseProject_Example-frameworks.sh */,
-				46EB2E00000C30 /* Pods-STBaseProject_Example-Info.plist */,
-				46EB2E00000C50 /* Pods-STBaseProject_Example-umbrella.h */,
-				46EB2E00000C20 /* Pods-STBaseProject_Example.debug.xcconfig */,
-				46EB2E00000C10 /* Pods-STBaseProject_Example.release.xcconfig */,
+				46EB2E00000C60 /* Pods-STBaseProject_Example.modulemap */,
+				46EB2E00000CB0 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
+				46EB2E00000CA0 /* Pods-STBaseProject_Example-acknowledgements.plist */,
+				46EB2E00000CC0 /* Pods-STBaseProject_Example-dummy.m */,
+				46EB2E00000C90 /* Pods-STBaseProject_Example-frameworks.sh */,
+				46EB2E00000C50 /* Pods-STBaseProject_Example-Info.plist */,
+				46EB2E00000C70 /* Pods-STBaseProject_Example-umbrella.h */,
+				46EB2E00000C40 /* Pods-STBaseProject_Example.debug.xcconfig */,
+				46EB2E00000C30 /* Pods-STBaseProject_Example.release.xcconfig */,
 			);
 			name = "Pods-STBaseProject_Example";
 			path = "Target Support Files/Pods-STBaseProject_Example";
@@ -458,27 +462,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		46EB2E00000580 /* Headers */ = {
+		46EB2E00000590 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000007A0 /* STBaseProject-umbrella.h in Headers */,
+				46EB2E000007C0 /* STBaseProject-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000840 /* Headers */ = {
+		46EB2E00000860 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000B10 /* SnapKit-umbrella.h in Headers */,
+				46EB2E00000B30 /* SnapKit-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000BB0 /* Headers */ = {
+		46EB2E00000BD0 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000C60 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
+				46EB2E00000C80 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,12 +491,12 @@
 /* Begin PBXNativeTarget section */
 		19622742EBA51E823D6DAE3F8CDBFAD4 /* SnapKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00000800 /* Build configuration list for PBXNativeTarget "SnapKit" */;
+			buildConfigurationList = 46EB2E00000820 /* Build configuration list for PBXNativeTarget "SnapKit" */;
 			buildPhases = (
-				46EB2E00000840 /* Headers */,
-				46EB2E00000850 /* Sources */,
-				46EB2E00000860 /* Frameworks */,
-				46EB2E00000870 /* Resources */,
+				46EB2E00000860 /* Headers */,
+				46EB2E00000870 /* Sources */,
+				46EB2E00000880 /* Frameworks */,
+				46EB2E00000890 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -505,18 +509,18 @@
 		};
 		81CE5441F11F92C51AAE7BA692D0FA83 /* Pods-STBaseProject_Example */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00000B70 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
+			buildConfigurationList = 46EB2E00000B90 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
 			buildPhases = (
-				46EB2E00000BB0 /* Headers */,
-				46EB2E00000BC0 /* Sources */,
-				46EB2E00000BD0 /* Frameworks */,
-				46EB2E00000BE0 /* Resources */,
+				46EB2E00000BD0 /* Headers */,
+				46EB2E00000BE0 /* Sources */,
+				46EB2E00000BF0 /* Frameworks */,
+				46EB2E00000C00 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				46EB2E00000CD0 /* PBXTargetDependency */,
 				46EB2E00000CF0 /* PBXTargetDependency */,
+				46EB2E00000D10 /* PBXTargetDependency */,
 			);
 			name = "Pods-STBaseProject_Example";
 			productName = "Pods-STBaseProject_Example";
@@ -525,12 +529,12 @@
 		};
 		894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00000540 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
+			buildConfigurationList = 46EB2E00000550 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
 			buildPhases = (
-				46EB2E00000580 /* Headers */,
-				46EB2E00000590 /* Sources */,
-				46EB2E000005A0 /* Frameworks */,
-				46EB2E000005B0 /* Resources */,
+				46EB2E00000590 /* Headers */,
+				46EB2E000005A0 /* Sources */,
+				46EB2E000005B0 /* Frameworks */,
+				46EB2E000005C0 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -571,21 +575,21 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		46EB2E000005B0 /* Resources */ = {
+		46EB2E000005C0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000870 /* Resources */ = {
+		46EB2E00000890 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000BE0 /* Resources */ = {
+		46EB2E00000C00 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -595,103 +599,104 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		46EB2E00000590 /* Sources */ = {
+		46EB2E000005A0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000005F0 /* STBaseModel.swift in Sources */,
-				46EB2E00000630 /* STOpenSystemOperationController.swift in Sources */,
-				46EB2E000007E0 /* STBaseProject-dummy.m in Sources */,
-				46EB2E00000600 /* STBaseView.swift in Sources */,
-				46EB2E00000610 /* STBaseViewController.swift in Sources */,
-				46EB2E00000620 /* STBaseViewModel.swift in Sources */,
+				46EB2E00000600 /* STBaseModel.swift in Sources */,
+				46EB2E00000800 /* STBaseProject-dummy.m in Sources */,
+				46EB2E00000610 /* STBaseView.swift in Sources */,
+				46EB2E00000620 /* STBaseViewController.swift in Sources */,
+				46EB2E00000630 /* STBaseViewModel.swift in Sources */,
 				46EB2E00000640 /* STBtn.swift in Sources */,
 				46EB2E00000650 /* STBundle.swift in Sources */,
 				46EB2E00000660 /* STConstants.swift in Sources */,
-				46EB2E00000670 /* STDeviceInfo.swift in Sources */,
-				46EB2E00000680 /* STEncrypt.swift in Sources */,
-				46EB2E00000690 /* STFontManager.swift in Sources */,
-				46EB2E000006A0 /* STHexColor.swift in Sources */,
-				46EB2E000006B0 /* STHTTPClient.swift in Sources */,
-				46EB2E000006C0 /* STImage.swift in Sources */,
-				46EB2E000006D0 /* STLanguageManager.swift in Sources */,
-				46EB2E000006E0 /* STPasteboard.swift in Sources */,
-				46EB2E000006F0 /* STPredicateCheck.swift in Sources */,
-				46EB2E00000700 /* STString.swift in Sources */,
-				46EB2E00000710 /* STTabBarItem.swift in Sources */,
-				46EB2E00000720 /* STTextField.swift in Sources */,
-				46EB2E00000730 /* STTimerTarget.swift in Sources */,
-				46EB2E00000740 /* STVerificationCodeBtn.swift in Sources */,
-				46EB2E00000750 /* STWebViewController.swift in Sources */,
+				46EB2E00000670 /* STDateManager.swift in Sources */,
+				46EB2E00000680 /* STDeviceInfo.swift in Sources */,
+				46EB2E00000690 /* STEncrypt.swift in Sources */,
+				46EB2E000006A0 /* STFontManager.swift in Sources */,
+				46EB2E000006B0 /* STHexColor.swift in Sources */,
+				46EB2E000006C0 /* STHTTPClient.swift in Sources */,
+				46EB2E000006D0 /* STImage.swift in Sources */,
+				46EB2E000006E0 /* STLanguageManager.swift in Sources */,
+				46EB2E000006F0 /* STOpenSystemOperationController.swift in Sources */,
+				46EB2E00000700 /* STPasteboard.swift in Sources */,
+				46EB2E00000710 /* STPredicateCheck.swift in Sources */,
+				46EB2E00000720 /* STString.swift in Sources */,
+				46EB2E00000730 /* STTabBarItem.swift in Sources */,
+				46EB2E00000740 /* STTextField.swift in Sources */,
+				46EB2E00000750 /* STTimerTarget.swift in Sources */,
+				46EB2E00000760 /* STVerificationCodeBtn.swift in Sources */,
+				46EB2E00000770 /* STWebViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000850 /* Sources */ = {
+		46EB2E00000870 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000890 /* Constraint.swift in Sources */,
-				46EB2E000008A0 /* ConstraintAttributes.swift in Sources */,
-				46EB2E000008B0 /* ConstraintConfig.swift in Sources */,
-				46EB2E000008C0 /* ConstraintConstantTarget.swift in Sources */,
-				46EB2E000008D0 /* ConstraintDescription.swift in Sources */,
-				46EB2E000008E0 /* ConstraintDirectionalInsets.swift in Sources */,
-				46EB2E000008F0 /* ConstraintDirectionalInsetTarget.swift in Sources */,
-				46EB2E00000900 /* ConstraintDSL.swift in Sources */,
-				46EB2E00000910 /* ConstraintInsets.swift in Sources */,
-				46EB2E00000920 /* ConstraintInsetTarget.swift in Sources */,
-				46EB2E00000930 /* ConstraintItem.swift in Sources */,
-				46EB2E00000940 /* ConstraintLayoutGuide+Extensions.swift in Sources */,
-				46EB2E00000950 /* ConstraintLayoutGuide.swift in Sources */,
-				46EB2E00000960 /* ConstraintLayoutGuideDSL.swift in Sources */,
-				46EB2E00000970 /* ConstraintLayoutSupport.swift in Sources */,
-				46EB2E00000980 /* ConstraintLayoutSupportDSL.swift in Sources */,
-				46EB2E00000990 /* ConstraintMaker.swift in Sources */,
-				46EB2E000009A0 /* ConstraintMakerEditable.swift in Sources */,
-				46EB2E000009B0 /* ConstraintMakerExtendable.swift in Sources */,
-				46EB2E000009C0 /* ConstraintMakerFinalizable.swift in Sources */,
-				46EB2E000009D0 /* ConstraintMakerPriortizable.swift in Sources */,
-				46EB2E000009E0 /* ConstraintMakerRelatable.swift in Sources */,
-				46EB2E000009F0 /* ConstraintMultiplierTarget.swift in Sources */,
-				46EB2E00000A00 /* ConstraintOffsetTarget.swift in Sources */,
-				46EB2E00000A10 /* ConstraintPriority.swift in Sources */,
-				46EB2E00000A20 /* ConstraintPriorityTarget.swift in Sources */,
-				46EB2E00000A30 /* ConstraintRelatableTarget.swift in Sources */,
-				46EB2E00000A40 /* ConstraintRelation.swift in Sources */,
-				46EB2E00000A50 /* ConstraintView+Extensions.swift in Sources */,
-				46EB2E00000A60 /* ConstraintView.swift in Sources */,
-				46EB2E00000A70 /* ConstraintViewDSL.swift in Sources */,
-				46EB2E00000A80 /* Debugging.swift in Sources */,
-				46EB2E00000A90 /* LayoutConstraint.swift in Sources */,
-				46EB2E00000AA0 /* LayoutConstraintItem.swift in Sources */,
-				46EB2E00000B50 /* SnapKit-dummy.m in Sources */,
-				46EB2E00000AB0 /* Typealiases.swift in Sources */,
-				46EB2E00000AC0 /* UILayoutSupport+Extensions.swift in Sources */,
+				46EB2E000008B0 /* Constraint.swift in Sources */,
+				46EB2E000008C0 /* ConstraintAttributes.swift in Sources */,
+				46EB2E000008D0 /* ConstraintConfig.swift in Sources */,
+				46EB2E000008E0 /* ConstraintConstantTarget.swift in Sources */,
+				46EB2E000008F0 /* ConstraintDescription.swift in Sources */,
+				46EB2E00000900 /* ConstraintDirectionalInsets.swift in Sources */,
+				46EB2E00000910 /* ConstraintDirectionalInsetTarget.swift in Sources */,
+				46EB2E00000920 /* ConstraintDSL.swift in Sources */,
+				46EB2E00000930 /* ConstraintInsets.swift in Sources */,
+				46EB2E00000940 /* ConstraintInsetTarget.swift in Sources */,
+				46EB2E00000950 /* ConstraintItem.swift in Sources */,
+				46EB2E00000960 /* ConstraintLayoutGuide+Extensions.swift in Sources */,
+				46EB2E00000970 /* ConstraintLayoutGuide.swift in Sources */,
+				46EB2E00000980 /* ConstraintLayoutGuideDSL.swift in Sources */,
+				46EB2E00000990 /* ConstraintLayoutSupport.swift in Sources */,
+				46EB2E000009A0 /* ConstraintLayoutSupportDSL.swift in Sources */,
+				46EB2E000009B0 /* ConstraintMaker.swift in Sources */,
+				46EB2E000009C0 /* ConstraintMakerEditable.swift in Sources */,
+				46EB2E000009D0 /* ConstraintMakerExtendable.swift in Sources */,
+				46EB2E000009E0 /* ConstraintMakerFinalizable.swift in Sources */,
+				46EB2E000009F0 /* ConstraintMakerPriortizable.swift in Sources */,
+				46EB2E00000A00 /* ConstraintMakerRelatable.swift in Sources */,
+				46EB2E00000A10 /* ConstraintMultiplierTarget.swift in Sources */,
+				46EB2E00000A20 /* ConstraintOffsetTarget.swift in Sources */,
+				46EB2E00000A30 /* ConstraintPriority.swift in Sources */,
+				46EB2E00000A40 /* ConstraintPriorityTarget.swift in Sources */,
+				46EB2E00000A50 /* ConstraintRelatableTarget.swift in Sources */,
+				46EB2E00000A60 /* ConstraintRelation.swift in Sources */,
+				46EB2E00000A70 /* ConstraintView+Extensions.swift in Sources */,
+				46EB2E00000A80 /* ConstraintView.swift in Sources */,
+				46EB2E00000A90 /* ConstraintViewDSL.swift in Sources */,
+				46EB2E00000AA0 /* Debugging.swift in Sources */,
+				46EB2E00000AB0 /* LayoutConstraint.swift in Sources */,
+				46EB2E00000AC0 /* LayoutConstraintItem.swift in Sources */,
+				46EB2E00000B70 /* SnapKit-dummy.m in Sources */,
+				46EB2E00000AD0 /* Typealiases.swift in Sources */,
+				46EB2E00000AE0 /* UILayoutSupport+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000BC0 /* Sources */ = {
+		46EB2E00000BE0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000CB0 /* Pods-STBaseProject_Example-dummy.m in Sources */,
+				46EB2E00000CD0 /* Pods-STBaseProject_Example-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		46EB2E00000CD0 /* PBXTargetDependency */ = {
+		46EB2E00000CF0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = STBaseProject;
 			target = 894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */;
-			targetProxy = 46EB2E00000CC0 /* PBXContainerItemProxy */;
+			targetProxy = 46EB2E00000CE0 /* PBXContainerItemProxy */;
 		};
-		46EB2E00000CF0 /* PBXTargetDependency */ = {
+		46EB2E00000D10 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SnapKit;
 			target = 19622742EBA51E823D6DAE3F8CDBFAD4 /* SnapKit */;
-			targetProxy = 46EB2E00000CE0 /* PBXContainerItemProxy */;
+			targetProxy = 46EB2E00000D00 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -813,15 +818,16 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				SYMROOT = "${SRCROOT}/../build";
 			};
 			name = Release;
 		};
-		46EB2E00000550 /* Release */ = {
+		46EB2E00000560 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000770 /* STBaseProject.xcconfig */;
+			baseConfigurationReference = 46EB2E00000790 /* STBaseProject.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -852,9 +858,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00000560 /* Debug */ = {
+		46EB2E00000570 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000770 /* STBaseProject.xcconfig */;
+			baseConfigurationReference = 46EB2E00000790 /* STBaseProject.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -884,9 +890,9 @@
 			};
 			name = Debug;
 		};
-		46EB2E00000810 /* Release */ = {
+		46EB2E00000830 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000AE0 /* SnapKit.xcconfig */;
+			baseConfigurationReference = 46EB2E00000B00 /* SnapKit.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -917,9 +923,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00000820 /* Debug */ = {
+		46EB2E00000840 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000AE0 /* SnapKit.xcconfig */;
+			baseConfigurationReference = 46EB2E00000B00 /* SnapKit.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
@@ -949,9 +955,9 @@
 			};
 			name = Debug;
 		};
-		46EB2E00000B80 /* Release */ = {
+		46EB2E00000BA0 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000C10 /* Pods-STBaseProject_Example.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00000C30 /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -984,9 +990,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00000B90 /* Debug */ = {
+		46EB2E00000BB0 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000C20 /* Pods-STBaseProject_Example.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00000C40 /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1030,29 +1036,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00000540 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
+		46EB2E00000550 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00000560 /* Debug */,
-				46EB2E00000550 /* Release */,
+				46EB2E00000570 /* Debug */,
+				46EB2E00000560 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00000800 /* Build configuration list for PBXNativeTarget "SnapKit" */ = {
+		46EB2E00000820 /* Build configuration list for PBXNativeTarget "SnapKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00000820 /* Debug */,
-				46EB2E00000810 /* Release */,
+				46EB2E00000840 /* Debug */,
+				46EB2E00000830 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00000B70 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
+		46EB2E00000B90 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00000B90 /* Debug */,
-				46EB2E00000B80 /* Release */,
+				46EB2E00000BB0 /* Debug */,
+				46EB2E00000BA0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
