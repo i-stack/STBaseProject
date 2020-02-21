@@ -33,11 +33,7 @@ public extension String {
         if self.count < 1 {
             return ""
         }
-        let stamp: Double = self.doubleValue
-        var timeStamp: TimeInterval = TimeInterval(stamp)
-        if self.count == 13 {
-            timeStamp = TimeInterval(timeStamp / 1000)
-        }
+        let timeStamp: TimeInterval = self.timeStampToSecond()
         let dateFormatter = self.formatter(dateFormat: dateFormat)
         let date = Date.init(timeIntervalSince1970: timeStamp)
         let timeStr = dateFormatter.string(from: date)
