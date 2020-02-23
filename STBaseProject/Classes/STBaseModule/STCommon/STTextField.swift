@@ -18,7 +18,6 @@ open class STTextField: UITextField {
         get {
             return layer.cornerRadius
         }
-        
         set {
             layer.cornerRadius = newValue
             layer.masksToBounds = newValue > 0
@@ -84,6 +83,7 @@ open class STTextField: UITextField {
     }
     
     func configContent() {
+        self.clearButtonMode = .whileEditing
         self.autocorrectionType = UITextAutocorrectionType.no
         self.autocapitalizationType = UITextAutocapitalizationType.none
     }
