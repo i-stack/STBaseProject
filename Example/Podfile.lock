@@ -1,4 +1,5 @@
 PODS:
+  - MBProgressHUD (1.2.0)
   - SnapKit (5.0.1)
   - STBaseProject/STBaseModule (0.1.0):
     - STBaseProject/STBaseModule/STBaseModel (= 0.1.0)
@@ -11,13 +12,17 @@ PODS:
   - STBaseProject/STBaseModule/STBaseViewController (0.1.0)
   - STBaseProject/STBaseModule/STBaseViewModel (0.1.0)
   - STBaseProject/STBaseModule/STCommon (0.1.0)
+  - STBaseProject/STHUD (0.1.0):
+    - MBProgressHUD
 
 DEPENDENCIES:
   - SnapKit
   - STBaseProject/STBaseModule (from `../`)
+  - STBaseProject/STHUD (from `../`)
 
 SPEC REPOS:
   trunk:
+    - MBProgressHUD
     - SnapKit
 
 EXTERNAL SOURCES:
@@ -25,9 +30,10 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  STBaseProject: 542917747b63a8592b65cbf27d3b5421fe999aba
+  STBaseProject: 024c801fdaffd61b8d35032e315a575caab8038d
 
-PODFILE CHECKSUM: 09bb96c883ad9d0d12b47af726793b669d8a46fc
+PODFILE CHECKSUM: 7b32b04eb6e8bdea755173f42ebe62d53a5c7958
 
 COCOAPODS: 1.8.4

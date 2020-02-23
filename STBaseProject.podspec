@@ -49,6 +49,11 @@ Pod::Spec.new do |s|
   
   end
   
+  s.subspec 'STHUD' do |ss|
+      ss.source_files = ['STBaseProject/Classes/STHUD/*.swift']
+      ss.dependency 'MBProgressHUD'
+  end
+  
   s.subspec 'STScanner' do |ss|
       ss.source_files = ['STBaseProject/Classes/STScanner/*.swift']
   end

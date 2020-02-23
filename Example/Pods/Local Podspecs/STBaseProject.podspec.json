@@ -60,6 +60,17 @@
       ]
     },
     {
+      "name": "STHUD",
+      "source_files": [
+        "STBaseProject/Classes/STHUD/*.swift"
+      ],
+      "dependencies": {
+        "MBProgressHUD": [
+
+        ]
+      }
+    },
+    {
       "name": "STScanner",
       "source_files": [
         "STBaseProject/Classes/STScanner/*.swift"
