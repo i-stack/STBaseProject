@@ -8,11 +8,10 @@
 
 import UIKit
 
-
 public struct STDeviceInfo {
     
     /// @param uuid
-    static func uuid() -> String {
+    public static func uuid() -> String {
         return UIDevice.current.identifierForVendor?.uuidString ?? ""
     }
 }
