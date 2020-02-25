@@ -23,7 +23,7 @@ open class STHUD: MBProgressHUD {
     open var detailLabelColor: UIColor?
     open var customBgColor: UIColor?
     open var activityViewColor: UIColor?
-    open var sucessIconImageStr: String?
+    open var successIconImageStr: String?
     open var errorIconImageStr: String?
     open var afterDelay: TimeInterval = 1.5
 
