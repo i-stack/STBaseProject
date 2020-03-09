@@ -12,7 +12,8 @@ open class STVerificationCodeBtn: STBtn {
 
     private var timer: Timer?
     private var originTitle: String?
-    
+    private var tempTimerInterval: Int = 0
+
     /// @param 显示后缀 10s 、10秒
     open var titleSuffix: String = ""
     
@@ -28,6 +29,7 @@ open class STVerificationCodeBtn: STBtn {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        configData()
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -36,10 +38,15 @@ open class STVerificationCodeBtn: STBtn {
     
     override open func awakeFromNib() {
         super.awakeFromNib()
+        configData()
+    }
+    
+    private func configData() -> Void {
+        self.originTitle = self.titleLabel?.text
+        self.tempTimerInterval = self.timerInterval
     }
     
     public func beginTimer() -> Void {
-        self.originTitle = self.titleLabel?.text
         self.timer = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true, block: {[weak self] (resultTimer) in
             guard let strongSelf = self else { return }
             strongSelf.timerSelector()
@@ -49,9 +56,9 @@ open class STVerificationCodeBtn: STBtn {
     @objc private func timerSelector() -> Void {
         DispatchQueue.main.async {
             if self.timerInterval == 0 {
-                self.timerInterval = 60
                 self.invalidTimer()
                 self.isUserInteractionEnabled = true
+                self.timerInterval = self.tempTimerInterval
                 if let title = self.originTitle {
                     self.setTitle(title, for: UIControl.State.normal)
                 } else {
@@ -71,9 +78,4 @@ open class STVerificationCodeBtn: STBtn {
             self.timer = nil
         }
     }
-    
-    private lazy var timerTarger: STTimerTarget = {
-        let timer = STTimerTarget.init(aTarget: self)
-        return timer
-    }()
 }
