@@ -9,33 +9,51 @@
 import UIKit
 import Foundation
 
-struct STFontSize {
-    let bold: CGFloat = 30.0
-    let demiBold: CGFloat = 18.0
-    let regular: CGFloat = 14.0
-    let medium: CGFloat = 11.0
-}
-
-enum STShowDirection {
-    case Left
-    case Right
-    case Top
-    case Bottom
+public enum STScreenSize {
+    case AMXScreenSizeCurrent
+    case AMXScreenSize3p5Inch
+    case AMXScreenSize4Inch
+    case AMXScreenSize4p7Inch
+    case AMXScreenSize5p5Inch
+    case AMXScreenSize7p9Inch
+    case AMXScreenSize9p7Inch
+    case AMXScreenSize12p9Inch
 }
 
 public class STConstants: NSObject {
-    public class func st_handleFloat(float: CGFloat) -> CGFloat {
-        if self.st_isIPhone5() {
-            return float * 0.8
-        } else if self.st_isIPhonePlus() {
-            return float * 1.07
-        } else if self.st_isIPhoneX() {
-            return float * 1.07
-        } else if self.st_isIPhoneXR() || self.st_isIPhoneXMax() {
-            return float * 1.08
-        } else {
-            return float
+    
+    private var benchmarkDesignSize = CGSize.zero
+    public static let shared: STConstants = STConstants()
+
+    /// @param 设计图基准尺寸
+    public func st_configBenchmarkDesign(size: CGSize) -> Void {
+        self.benchmarkDesignSize = size
+    }
+    
+    private class func st_multiplier() -> CGFloat {
+        let size = STConstants.shared.benchmarkDesignSize
+        if size == .zero {
+            return 1.0
         }
+        let min = UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height : UIScreen.main.bounds.width
+        return min / size.width
+    }
+    
+    /// @param 调用此方法前，需调用 st_configBenchmarkDesign 传入基准设计尺寸，配置一次
+    public class func st_handleFloat(float: CGFloat) -> CGFloat {
+        let multiplier = self.st_multiplier()
+        return float * multiplier
+//        if self.st_isIPhone5() {
+//            return float * 0.8
+//        } else if self.st_isIPhonePlus() {
+//            return float * 1.07
+//        } else if self.st_isIPhoneX() {
+//            return float * 1.07
+//        } else if self.st_isIPhoneXR() || self.st_isIPhoneXMax() {
+//            return float * 1.08
+//        } else {
+//            return float
+//        }
     }
     
     public class func st_adaptIPhone5(a: CGFloat) -> CGFloat {

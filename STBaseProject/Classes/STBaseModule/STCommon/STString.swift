@@ -85,6 +85,12 @@ public extension String {
     var doubleValue: Double {
         return st_stringToDouble(string: self)
     }
+    
+    func st_convertToCurrency(style: NumberFormatter.Style) -> String {
+        let number = NSDecimalNumber.init(string: self)
+        let detail = NumberFormatter.localizedString(from: number, number: style)
+        return detail
+    }
 }
 
 public extension String {

@@ -12,7 +12,14 @@ open class STVerificationCodeBtn: STBtn {
 
     private var timer: Timer?
     private var originTitle: String?
+    
+    /// @param 显示后缀 10s 、10秒
     open var titleSuffix: String = ""
+    
+    /// @param 倒计时间隔时间
+    open var interval: TimeInterval = 1
+    
+    /// @param 倒计时结束时间
     open var timerInterval: Int = 60
 
     deinit {
@@ -33,10 +40,10 @@ open class STVerificationCodeBtn: STBtn {
     
     public func beginTimer() -> Void {
         self.originTitle = self.titleLabel?.text
-        self.timer = Timer.init(timeInterval: 1, target: self.timerTarger, selector: #selector(timerSelector), userInfo: nil, repeats: true)
-        if let timer = self.timer {
-            RunLoop.main.add(timer, forMode: RunLoop.Mode.common)
-        }
+        self.timer = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true, block: {[weak self] (resultTimer) in
+            guard let strongSelf = self else { return }
+            strongSelf.timerSelector()
+        })
     }
     
     @objc private func timerSelector() -> Void {
