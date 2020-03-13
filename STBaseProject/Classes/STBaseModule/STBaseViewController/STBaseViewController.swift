@@ -9,11 +9,11 @@
 import UIKit
 
 public enum STNavBtnShowType {
+    case none               // 默认什么都不显示
+    case showBothBtn        // 显示左侧、右侧按钮和title
     case showLeftBtn        // 显示左侧按钮和title
     case showRightBtn       // 显示右侧按钮和title
-    case showBothBtn        // 显示左侧、右侧按钮和title
-    case onlyShowTitle      // 只显示title （title 与左右间距14）
-    case none               // 默认什么都不显示
+    case onlyShowTitle      // 只显示title
 }
 
 open class STBaseViewController: UIViewController {
