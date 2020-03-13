@@ -2,8 +2,8 @@
 //  STScanView.swift
 //  STBaseProject
 //
-//  Created by song on 2018/3/14.
-//  Copyright © 2018 song. All rights reserved.
+//  Created by stack on 2018/3/14.
+//  Copyright © 2018 ST. All rights reserved.
 //
 
 import UIKit

@@ -2,14 +2,12 @@
 //  STScreenShot.swift
 //  STBaseProject
 //
-//  Created by song on 2018/5/6.
-//  Copyright © 2019 song. All rights reserved.
+//  Created by stack on 2018/5/6.
+//  Copyright © 2019 ST. All rights reserved.
 //
 
 import UIKit
-
 /**
- *
  *  NotificationCenter.default.addObserver(self, selector: #selector(userDidTakeScreenshot(note:)), name: UIApplication.userDidTakeScreenshotNotification, object: nil)
  *
  *  @objc func userDidTakeScreenshot(note: NSNotification) -> Void {
@@ -17,7 +15,6 @@ import UIKit
         // call st_showScreenshotImage(rect: CGRect) class method can return UIImageView
         // call st_imageWithScreenshot() class method can return UIImage
     }
- *
  */
 
 open class STScreenShot: NSObject {

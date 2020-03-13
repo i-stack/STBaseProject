@@ -15,12 +15,14 @@ PODS:
   - STBaseProject/STHUD (0.1.0):
     - MBProgressHUD
   - STBaseProject/STScanner (0.1.0)
+  - STBaseProject/STScreenshot (0.1.0)
 
 DEPENDENCIES:
   - SnapKit
   - STBaseProject/STBaseModule (from `../`)
   - STBaseProject/STHUD (from `../`)
   - STBaseProject/STScanner (from `../`)
+  - STBaseProject/STScreenshot (from `../`)
 
 SPEC REPOS:
   trunk:
@@ -36,6 +38,6 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   STBaseProject: 024c801fdaffd61b8d35032e315a575caab8038d
 
-PODFILE CHECKSUM: 3c474f58acc945557956a7625f87cf7ff2dc5992
+PODFILE CHECKSUM: 2b2afe6428f720c40a6aa4e79b848d18d618bd52
 
 COCOAPODS: 1.8.4
