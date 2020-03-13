@@ -23,39 +23,30 @@ open class STBaseViewController: UIViewController {
     open var leftBtn: UIButton!
     open var rightBtn: UIButton!
     open var titleLabel: UILabel!
-    
-    open var width: CGFloat = 44
-    open var height: CGFloat = 44
-    open var leftSpace: CGFloat = 15
-    open var rightSpace: CGFloat = 15
-    open var titleHeight: CGFloat = 44
-    
-    open var navBgViewAttributeHeight: NSLayoutConstraint!
 
+    private var defaultValue: CGFloat = 44
+
+    open var leftBtnAttributeLeft: NSLayoutConstraint!
     open var leftBtnAttributeWidth: NSLayoutConstraint!
     open var leftBtnAttributeHeight: NSLayoutConstraint!
     
-    open var rightBtnAttributeWidth: NSLayoutConstraint!
     open var rightBtnAttributeRight: NSLayoutConstraint!
+    open var rightBtnAttributeWidth: NSLayoutConstraint!
     open var rightBtnAttributeHeight: NSLayoutConstraint!
     
     open var titleLabelAttributeLeft: NSLayoutConstraint!
     open var titleLabelAttributeRight: NSLayoutConstraint!
     open var titleLabelAttributeHeight: NSLayoutConstraint!
 
+    open var navBgViewAttributeHeight: NSLayoutConstraint!
+
     deinit {
-        NotificationCenter.default.removeObserver(self)
         print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
 
     override open func viewDidLoad() {
         super.viewDidLoad()
-        self.hidesBottomBarWhenPushed = true
-        self.view.backgroundColor = UIColor.white
-        self.automaticallyAdjustsScrollViewInsets = false
-        self.navigationController?.setNavigationBarHidden(true, animated: false)
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
-        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        self.st_baseConfig()
         self.st_navigationBarView()
     }
     
@@ -68,6 +59,15 @@ open class STBaseViewController: UIViewController {
         }
     }
     
+    private func st_baseConfig() -> Void {
+        self.hidesBottomBarWhenPushed = true
+        self.view.backgroundColor = UIColor.white
+        self.automaticallyAdjustsScrollViewInsets = false
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+    }
+    
     private func st_navigationBarView() -> Void {
         self.topBgView = UIView.init()
         self.topBgView.isHidden = true
@@ -78,6 +78,12 @@ open class STBaseViewController: UIViewController {
         self.navBgView.isHidden = true
         self.navBgView.translatesAutoresizingMaskIntoConstraints = false
         self.topBgView.addSubview(self.navBgView)
+        
+        self.titleLabel = UILabel.init()
+        self.titleLabel.textAlignment = NSTextAlignment.center
+        self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.navBgView.addSubview(self.titleLabel)
     
         self.leftBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.leftBtn.isHidden = true
@@ -91,17 +97,10 @@ open class STBaseViewController: UIViewController {
         self.rightBtn.addTarget(self, action: #selector(st_rightBarBtnClick), for: UIControl.Event.touchUpInside)
         self.navBgView.addSubview(self.rightBtn)
         
-        self.titleLabel = UILabel.init()
-        self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        self.titleLabel.textAlignment = NSTextAlignment.center
-        self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        self.navBgView.addSubview(self.titleLabel)
-        
         self.st_beginLayoutSubviews()
     }
     
     public func st_showNavBtnType(type: STNavBtnShowType) -> Void {
-
         switch type {
         case .showLeftBtn:
             self.leftBtn.isHidden = false
@@ -151,17 +150,28 @@ open class STBaseViewController: UIViewController {
             self.navBgViewAttributeHeight
         ])
         
-        self.leftBtnAttributeWidth = NSLayoutConstraint.init(item: self.leftBtn!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: width)
-        self.leftBtnAttributeHeight = NSLayoutConstraint.init(item: self.leftBtn!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: height)
+        self.titleLabelAttributeLeft = NSLayoutConstraint.init(item: self.titleLabel!, attribute: .left, relatedBy: .equal, toItem: self.navBgView, attribute: .left, multiplier: 1, constant: 0)
+        self.titleLabelAttributeRight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: .right, relatedBy: .equal, toItem: self.navBgView, attribute: .right, multiplier: 1, constant: 0)
+        self.titleLabelAttributeHeight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: defaultValue)
         self.view.addConstraints([
-            NSLayoutConstraint.init(item: self.leftBtn!, attribute: .left, relatedBy: .equal, toItem: self.navBgView, attribute: .left, multiplier: 1, constant: 0),
+            NSLayoutConstraint.init(item: self.titleLabel!, attribute: .centerY, relatedBy: .equal, toItem: self.navBgView, attribute: .centerY, multiplier: 1, constant: 0),
+            self.titleLabelAttributeLeft,
+            self.titleLabelAttributeRight,
+            self.titleLabelAttributeHeight
+        ])
+        
+        self.leftBtnAttributeLeft = NSLayoutConstraint.init(item: self.leftBtn!, attribute: .left, relatedBy: .equal, toItem: self.navBgView, attribute: .left, multiplier: 1, constant: 0)
+        self.leftBtnAttributeWidth = NSLayoutConstraint.init(item: self.leftBtn!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: defaultValue)
+        self.leftBtnAttributeHeight = NSLayoutConstraint.init(item: self.leftBtn!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: defaultValue)
+        self.view.addConstraints([
             NSLayoutConstraint.init(item: self.leftBtn!, attribute: .centerY, relatedBy: .equal, toItem: self.navBgView, attribute: .centerY, multiplier: 1, constant: 0),
+            self.leftBtnAttributeLeft,
             self.leftBtnAttributeHeight,
             self.leftBtnAttributeWidth
         ])
                 
-        self.rightBtnAttributeWidth = NSLayoutConstraint.init(item: self.rightBtn!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: width)
-        self.rightBtnAttributeHeight = NSLayoutConstraint.init(item: self.rightBtn!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: height)
+        self.rightBtnAttributeWidth = NSLayoutConstraint.init(item: self.rightBtn!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: defaultValue)
+        self.rightBtnAttributeHeight = NSLayoutConstraint.init(item: self.rightBtn!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: defaultValue)
         self.rightBtnAttributeRight = NSLayoutConstraint.init(item: self.rightBtn!, attribute: .right, relatedBy: .equal, toItem: self.navBgView, attribute: .right, multiplier: 1, constant: 0)
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.rightBtn!, attribute: .centerY, relatedBy: .equal, toItem: self.navBgView, attribute: .centerY, multiplier: 1, constant: 0),
@@ -169,31 +179,17 @@ open class STBaseViewController: UIViewController {
             self.rightBtnAttributeHeight,
             self.rightBtnAttributeWidth
         ])
-        
-        self.titleLabelAttributeLeft = NSLayoutConstraint.init(item: self.titleLabel!, attribute: .left, relatedBy: .equal, toItem: self.leftBtn, attribute: .right, multiplier: 1, constant: 0)
-        self.titleLabelAttributeRight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: .right, relatedBy: .equal, toItem: self.rightBtn, attribute: .left, multiplier: 1, constant: 0)
-        self.titleLabelAttributeHeight = NSLayoutConstraint.init(item: self.titleLabel!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: titleHeight)
-        self.view.addConstraints([
-            NSLayoutConstraint.init(item: self.titleLabel!, attribute: .centerY, relatedBy: .equal, toItem: self.navBgView, attribute: .centerY, multiplier: 1, constant: 0),
-            self.titleLabelAttributeLeft,
-            self.titleLabelAttributeRight,
-            self.titleLabelAttributeHeight
-        ])
     }
     
     @objc open func st_leftBarBtnClick() -> Void {
         if self.navigationController?.viewControllers.count ?? 0 > 1 {
             self.navigationController?.popViewController(animated: true)
         } else {
-            self.dismiss(animated: true) {
-                
-            }
+            self.dismiss(animated: true) {}
         }
     }
     
-    @objc open func st_rightBarBtnClick() -> Void {
-        
-    }
+    @objc open func st_rightBarBtnClick() -> Void {}
 }
 
 extension STBaseViewController: UIGestureRecognizerDelegate {

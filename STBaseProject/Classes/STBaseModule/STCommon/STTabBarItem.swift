@@ -10,7 +10,15 @@ import UIKit
 import Foundation
 
 public class STTabBarItem: NSObject {
-    public class func st_setTabBarItem(title: String, titleSize: CGFloat, titleFontName: String, normalImage: String, selectedImage: String, normalTitleColor: UIColor, selectedTitleColor: UIColor, backgroundColor: UIColor) -> UITabBarItem {
+    
+    public class func st_setTabBarItem(title: String,
+                                       titleSize: CGFloat,
+                                       titleFontName: String,
+                                       normalImage: String,
+                                       selectedImage: String,
+                                       normalTitleColor: UIColor,
+                                       selectedTitleColor: UIColor,
+                                       backgroundColor: UIColor) -> UITabBarItem {
         var image: UIImage = UIImage.init()
         if let newImage = UIImage.init(named: normalImage) {
             image = newImage.withRenderingMode(.alwaysOriginal)

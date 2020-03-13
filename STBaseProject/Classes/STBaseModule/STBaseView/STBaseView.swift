@@ -34,7 +34,7 @@ open class STBaseView: UIView {
         self.addSubview(self.tableView ?? UITableView())
     }
     
-    func createScrollView() -> UIScrollView {
+    private func createScrollView() -> UIScrollView {
         let scrollView = UIScrollView()
         scrollView.isPagingEnabled = true
         scrollView.showsVerticalScrollIndicator = false
@@ -42,12 +42,12 @@ open class STBaseView: UIView {
         return scrollView
     }
     
-    func createContentView() -> UIView {
+    private func createContentView() -> UIView {
         let view = UIView()
         return view
     }
     
-    func createTableView(frame: CGRect, style: UITableView.Style) -> UITableView {
+    private func createTableView(frame: CGRect, style: UITableView.Style) -> UITableView {
         let tableView = UITableView.init(frame: frame, style: style)
         tableView.delegate = self
         tableView.dataSource = self

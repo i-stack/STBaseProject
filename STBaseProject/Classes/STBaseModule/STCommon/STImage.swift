@@ -9,14 +9,14 @@
 import UIKit
 
 public enum STImageFormat {
-    case  STImageFormatUndefined
-    case  STImageFormatJPEG
     case  STImageFormatPNG
     case  STImageFormatGIF
+    case  STImageFormatJPEG
     case  STImageFormatTIFF
     case  STImageFormatWebP
     case  STImageFormatHEIC
     case  STImageFormatHEIF
+    case  STImageFormatUndefined
 }
 
 public extension UIImage {
