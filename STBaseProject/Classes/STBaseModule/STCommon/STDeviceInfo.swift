@@ -14,4 +14,8 @@ public struct STDeviceInfo {
     public static func uuid() -> String {
         return UIDevice.current.identifierForVendor?.uuidString ?? ""
     }
+    
+    public static func currentSysVersion() -> String {
+        return UIDevice.current.systemVersion
+    }
 }

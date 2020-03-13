@@ -13,7 +13,7 @@ import AssetsLibrary
 
 public typealias ScanFinishBlock = (_ result: String) -> Void
 
-open class STScanViewController: STBaseOpenSystemOperationController {
+open class STScanViewController: STOpenSystemOperationController {
     
     var delayQRAction: Bool = false
     var delayBarAction: Bool = false
@@ -73,17 +73,17 @@ open class STScanViewController: STBaseOpenSystemOperationController {
      @param image UIImage对象
      @param onFinish 识别结果回调
      */
-    class open func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(Result<String, Error>) -> Void) {
-        if STScanViewController().st_stringToDouble(string: UIDevice.current.systemVersion) < 8.0 {
+    class open func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(String) -> Void, onFailed: @escaping(Error) -> Void) {
+        if STDeviceInfo.currentSysVersion().doubleValue < 8.0 {
             DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "Only supports iOS 8.0 system or higher", code: 0, userInfo: [:])))
+                onFailed(NSError.init(domain: "Only supports iOS 8.0 system or higher", code: 0, userInfo: [:]))
             }
             return
         }
         
-        if STScanViewController().st_imageIsEmpty(image: image) == true {
+        if UIImage.st_imageIsEmpty(image: image) {
             DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "image is empty", code: 0, userInfo: [:])))
+                onFailed(NSError.init(domain: "image is empty", code: 0, userInfo: [:]))
             }
             return
         }
@@ -96,11 +96,11 @@ open class STScanViewController: STBaseOpenSystemOperationController {
             let feature: CIQRCodeFeature = features[0] as! CIQRCodeFeature
             let scanResult = feature.messageString
             DispatchQueue.main.async {
-                onFinish(.success(scanResult ?? ""))
+                onFinish(scanResult ?? "")
             }
         } else {
             DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "scan_error", code: 0, userInfo: [:])))
+                onFailed(NSError.init(domain: "scan error", code: 0, userInfo: [:]))
             }
         }
     }
@@ -111,8 +111,8 @@ open class STScanViewController: STBaseOpenSystemOperationController {
      @param  qrSize   生成图片的大小
      @return onFinish 图片对象回调
      */
-    class open func st_createQRImageWithString(content: String, qrSize: CGSize, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
-        self.st_createQRImageWithString(content: content, qrSize: qrSize, qrColor: UIColor.black, bkColor: UIColor.white, onFinish: onFinish)
+    class open func st_createQRImageWithString(content: String, qrSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
+        self.st_createQRImageWithString(content: content, qrSize: qrSize, qrColor: UIColor.black, bkColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
     }
     
     /**
@@ -123,17 +123,17 @@ open class STScanViewController: STBaseOpenSystemOperationController {
      @param  bkColor 背景色
      @return UIImage图片对象
      */
-    class open func st_createQRImageWithString(content: String, qrSize: CGSize, qrColor: UIColor, bkColor: UIColor, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
+    class open func st_createQRImageWithString(content: String, qrSize: CGSize, qrColor: UIColor, bkColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "content is nil!", code: 0, userInfo: [:])))
+                onFailed(NSError.init(domain: "content is nil", code: 0, userInfo: [:]))
             }
             return
         }
         
         if qrSize == CGSize.zero {
             DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "qrSize is zero!", code: 0, userInfo: [:])))
+                onFailed(NSError.init(domain: "qrSize is zero", code: 0, userInfo: [:]))
             }
             return
         }
@@ -158,7 +158,7 @@ open class STScanViewController: STBaseOpenSystemOperationController {
         let codeImage: UIImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
         UIGraphicsEndImageContext()
         DispatchQueue.main.async {
-            onFinish(.success(codeImage))
+            onFinish(codeImage)
         }
     }
 
@@ -168,8 +168,8 @@ open class STScanViewController: STBaseOpenSystemOperationController {
      @param barSize 生成条码图片的大小
      @return UIImage图片对象
      */
-    class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
-        self.st_createBarCodeImageWithString(content: content, barSize: barSize, barColor: UIColor.black, barBgColor: UIColor.white, onFinish: onFinish)
+    class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
+        self.st_createBarCodeImageWithString(content: content, barSize: barSize, barColor: UIColor.black, barBgColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
     }
     
     /**
@@ -180,17 +180,17 @@ open class STScanViewController: STBaseOpenSystemOperationController {
      @param bkColor 背景颜色
      @return UIImage图片对象
      */
-    class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, barColor: UIColor, barBgColor: UIColor, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
+    class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, barColor: UIColor, barBgColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "content is nil!", code: 0, userInfo: [:])))
+                onFailed(NSError.init(domain: "content is nil", code: 0, userInfo: [:]))
             }
             return
         }
         
         if barSize == CGSize.zero {
             DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "barSize is zero!", code: 0, userInfo: [:])))
+                onFailed(NSError.init(domain: "barSize is zero", code: 0, userInfo: [:]))
             }
             return
         }
@@ -213,7 +213,7 @@ open class STScanViewController: STBaseOpenSystemOperationController {
         let codeImage: UIImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
         UIGraphicsEndImageContext()
         DispatchQueue.main.async {
-            onFinish(.success(codeImage))
+            onFinish(codeImage)
         }
     }
     
@@ -239,7 +239,7 @@ open class STScanViewController: STBaseOpenSystemOperationController {
             return
         }
         
-        if STScanViewController().st_imageIsEmpty(image: waterImage) == true {
+        if UIImage.st_imageIsEmpty(image: waterImage) == true {
             DispatchQueue.main.async {
                 onFinish(.failure(NSError.init(domain: "waterImageSize is nil!", code: 0, userInfo: [:])))
             }
@@ -299,24 +299,22 @@ open class STScanViewController: STBaseOpenSystemOperationController {
     }
     
     override open func st_rightBarBtnClick() {
-        self.st_openSystemOperation(openSourceType: .photoLibrary) {[weak self] (originImage, eidtedImage, result, error) in
+        self.st_openSystemOperation(openSourceType: .photoLibrary, complection: {[weak self] (originImage, eidtedImage, result, error) in
             guard let strongSelf = self else { return }
             strongSelf.detailSelectPhoto(image: originImage)
+        }) { (result) in
+            
         }
     }
     
     func detailSelectPhoto(image: UIImage) -> Void {
-        STScanViewController.st_recognizeQrCodeImage(image: image, onFinish: { [weak self] (result) in
+        STScanViewController.st_recognizeQrCodeImage(image: image, onFinish: {[weak self] (result) in
             guard let strongSelf = self else { return }
-            switch result {
-            case .success(let str):
-                strongSelf.st_renderUrlStr(url: str)
-                break
-            case .failure(_):
-                strongSelf.st_renderUrlStr(url: "")
-                break
-            }
-        })
+            strongSelf.st_renderUrlStr(url: result)
+        }) {[weak self] (error) in
+            guard let strongSelf = self else { return }
+            strongSelf.st_renderUrlStr(url: "")
+        }
     }
 }
 
