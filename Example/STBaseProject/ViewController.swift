@@ -14,6 +14,16 @@ class ViewController: STBaseViewController {
         
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.contryCode()
+    }
+    
+    func contryCode() -> Void {
+        let codeInfo = STISOCountryCodeInfo()
+        codeInfo.st_requestCoutryCode(success: { (model) in
+
+        }) { (error) in
+
+        }
     }
 }
 
