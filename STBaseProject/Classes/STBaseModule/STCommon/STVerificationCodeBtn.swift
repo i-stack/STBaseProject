@@ -29,7 +29,6 @@ open class STVerificationCodeBtn: STBtn {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        configData()
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -38,10 +37,9 @@ open class STVerificationCodeBtn: STBtn {
     
     override open func awakeFromNib() {
         super.awakeFromNib()
-        configData()
     }
     
-    private func configData() -> Void {
+    public func st_configDone() {
         self.originTitle = self.titleLabel?.text
         self.tempTimerInterval = self.timerInterval
     }
