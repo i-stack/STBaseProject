@@ -10,12 +10,32 @@ import UIKit
 
 public struct STDeviceInfo {
     
-    /// @param uuid
+    /// uuid
     public static func uuid() -> String {
         return UIDevice.current.identifierForVendor?.uuidString ?? ""
     }
     
     public static func currentSysVersion() -> String {
         return UIDevice.current.systemVersion
+    }
+    
+    public static func currentAppVersion() -> String {
+        let info = self.appInfo()
+        if let appVersion = info["CFBundleShortVersionString"] as? String {
+            return appVersion
+        }
+        return ""
+    }
+    
+    public static func currentAppName() -> String {
+        let info = self.appInfo()
+        if let appName = info["CFBundleDisplayName"] as? String {
+            return appName
+        }
+        return ""
+    }
+    
+    public static func appInfo() -> Dictionary<String, Any> {
+        return Bundle.main.infoDictionary ?? Dictionary<String, Any>()
     }
 }
