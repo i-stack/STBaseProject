@@ -2,7 +2,7 @@
 //  STFontManager.swift
 //  STBaseProject
 //
-//  Created by stack on 2019/12/10.
+//  Created by stack on 2018/10/10.
 //  Copyright © 2019 ST. All rights reserved.
 //
 
