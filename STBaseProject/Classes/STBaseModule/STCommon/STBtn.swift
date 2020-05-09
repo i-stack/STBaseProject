@@ -2,7 +2,7 @@
 //  STBtn.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/11/14.
+//  Created by stack on 2017/10/14.
 //  Copyright © 2018年 ST. All rights reserved.
 //
 
@@ -103,4 +103,3 @@ open class STBtn: UIButton {
         self.borderColor = borderWidthColor
     }
 }
-
