@@ -32,6 +32,9 @@ public struct STDeviceInfo {
         if let appName = info["CFBundleDisplayName"] as? String {
             return appName
         }
+        if let appName = info["CFBundleName"] as? String {
+            return appName
+        }
         return ""
     }
     
