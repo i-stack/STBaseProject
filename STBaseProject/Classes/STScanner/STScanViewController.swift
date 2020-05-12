@@ -316,6 +316,12 @@ open class STScanViewController: STOpenSystemOperationController {
             strongSelf.st_renderUrlStr(url: "")
         }
     }
+    
+    func st_renderUrlStr(url: String) -> Void {
+        if let newScanFinish = self.scanFinishBlock {
+            newScanFinish(url)
+        }
+    }
 }
 
 extension STScanViewController: AVCaptureMetadataOutputObjectsDelegate {
@@ -327,18 +333,6 @@ extension STScanViewController: AVCaptureMetadataOutputObjectsDelegate {
             newSession.stopRunning()
             let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects.first as! AVMetadataMachineReadableCodeObject
             self.st_renderUrlStr(url: metadataObject.stringValue ?? "")
-        }
-    }
-}
-
-extension STScanViewController {
-    
-    func st_renderUrlStr(url: String) -> Void {
-        if let nav = self.navigationController {
-            if let newScanFinish = self.scanFinishBlock {
-                newScanFinish(url)
-            }
-            nav.popViewController(animated: true)
         }
     }
 }
