@@ -210,8 +210,7 @@ extension STBaseViewController: UIGestureRecognizerDelegate {
     }
 }
 
-extension UIViewController {
-    
+public extension UIViewController {
     /// effect as present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil)
     func setPushAnimatedWithTransition(customSelf: UINavigationController) {
         let animation = CATransition.init()
