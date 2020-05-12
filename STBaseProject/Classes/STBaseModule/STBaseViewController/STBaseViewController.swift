@@ -209,3 +209,16 @@ extension STBaseViewController: UIGestureRecognizerDelegate {
         return true
     }
 }
+
+extension UIViewController {
+    
+    /// effect as present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil)
+    func setPushAnimatedWithTransition(customSelf: UINavigationController) {
+        let animation = CATransition.init()
+        animation.duration = 0.3
+        animation.timingFunction = CAMediaTimingFunction.init(name: CAMediaTimingFunctionName.easeInEaseOut)
+        animation.type = CATransitionType.moveIn
+        animation.subtype = CATransitionSubtype.fromTop
+        customSelf.view.layer.add(animation, forKey: nil)
+    }
+}
