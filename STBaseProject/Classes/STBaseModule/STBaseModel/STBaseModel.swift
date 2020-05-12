@@ -32,18 +32,15 @@ public extension STBaseModel {
     /// json转model
     func st_jsonToModel<T>(_ type: T.Type, value: Any) -> T? where T : Decodable {
         let decoder = JSONDecoder()
+        var jsonData: Any = value
         if let newValue = value as? String {
             if let data = newValue.data(using: .utf8) {
-                do {
-                    if let jsonData = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? Data {
-                        return try? decoder.decode(type, from: jsonData)
-                    }
-                } catch {
-                    
+                if let dict = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) {
+                    jsonData = dict
                 }
             }
         }
-        guard let data = try? JSONSerialization.data(withJSONObject: value) else { return nil }
+        guard let data = try? JSONSerialization.data(withJSONObject: jsonData) else { return nil }
         return try? decoder.decode(type, from: data)
     }
     
