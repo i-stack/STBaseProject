@@ -79,20 +79,20 @@ public extension UIFont {
         var font: UIFont?
         let size = UIFont.st_fontSize(size: ofSize)
         switch weight {
-        case .regular:
-            font = UIFont.init(name: "PingFangSC-Regular", size: size)
-            break
         case .medium:
             font = UIFont.init(name: "PingFangSC-Medium", size: size)
             break
-        case .semibold:
+        case .semibold, .bold:
             font = UIFont.init(name: "PingFangSC-Semibold", size: size)
             break
-        case .bold:
-            font = UIFont.init(name: "PingFangSC-Semibold", size: size)
+        case .light:
+            font = UIFont.init(name: "PingFangSC-Light", size: size)
             break
         case .ultraLight:
             font = UIFont.init(name: "PingFangSC-Ultralight", size: size)
+            break
+        case .regular:
+            font = UIFont.init(name: "PingFangSC-Regular", size: size)
             break
         case .thin:
             font = UIFont.init(name: "PingFangSC-Thin", size: size)
