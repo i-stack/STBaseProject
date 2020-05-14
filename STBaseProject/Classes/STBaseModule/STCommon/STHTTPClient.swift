@@ -54,7 +54,7 @@ public class STHTTPClient: NSObject {
         }
     }
     
-    private func st_encode(urlRequest: URLRequest, with parameters: Dictionary<String, Any>?) throws -> URLRequest {
+    public func st_encode(urlRequest: URLRequest, with parameters: Dictionary<String, Any>?) throws -> URLRequest {
         guard let parameters = parameters else { return urlRequest }
         var request = urlRequest
         if let method = STHTTPMethod(rawValue: request.httpMethod ?? "GET"), st_encodesParametersInURL(with: method) {
