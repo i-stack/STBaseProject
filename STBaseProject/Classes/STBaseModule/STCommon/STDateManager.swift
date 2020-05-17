@@ -54,7 +54,7 @@ public extension String {
     }
     
     /// @param 时间字符串转时间戳
-    func st_timeTotimestamp(dateFormat: String) -> String {
+    func st_timeTotimestamp(dateFormat: String) -> TimeInterval {
         if self.count < 1 {
             return ""
         }
@@ -63,7 +63,7 @@ public extension String {
         if let date = dateFormatter.date(from: self) {
             interval = date.timeIntervalSince1970
         }
-        return String(interval)
+        return interval
     }
     
     /// @param 比较给定Date与当前时间的时间差，返回相差的秒数
