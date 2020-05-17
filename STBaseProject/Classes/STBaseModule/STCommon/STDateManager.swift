@@ -56,7 +56,7 @@ public extension String {
     /// @param 时间字符串转时间戳
     func st_timeTotimestamp(dateFormat: String) -> TimeInterval {
         if self.count < 1 {
-            return ""
+            return 0
         }
         let dateFormatter: DateFormatter = String.self.formatter(dateFormat: dateFormat)
         var interval: TimeInterval = 0
