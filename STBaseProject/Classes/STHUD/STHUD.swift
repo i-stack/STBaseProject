@@ -149,6 +149,7 @@ public extension UIView {
     func hideHUD() -> Void {
         let hud = STHUD.sharedHUD
         hud.hide(animated: true)
+        hud.removeFromSuperview()
     }
 }
 
@@ -172,6 +173,7 @@ public extension UIView {
     }
     
     private func show(text: String, detailText: String, icon: String, offset: CGPoint, afterDelay: TimeInterval, toView: UIView) -> Void {
+        self.hideHUD()
         var view: UIView = UIApplication.shared.windows.last ?? UIView()
         if let spView = toView.superview {
             view = spView
