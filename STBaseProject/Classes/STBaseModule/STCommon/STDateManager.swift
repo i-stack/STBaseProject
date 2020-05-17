@@ -18,7 +18,7 @@ public extension String {
     
     /// @param 当前时间戳
     func st_currentSystemTimestamp(dateFormat: String) -> String {
-        let dateFormatter = self.formatter(dateFormat: dateFormat)
+        let dateFormatter = String.self.formatter(dateFormat: dateFormat)
         let dateStr = dateFormatter.string(from: Date())
         return dateStr
     }
@@ -34,7 +34,7 @@ public extension String {
             return ""
         }
         let timeStamp: TimeInterval = self.timeStampToSecond()
-        let dateFormatter = self.formatter(dateFormat: dateFormat)
+        let dateFormatter = String.self.formatter(dateFormat: dateFormat)
         let date = Date.init(timeIntervalSince1970: timeStamp)
         let timeStr = dateFormatter.string(from: date)
         return timeStr
@@ -58,7 +58,7 @@ public extension String {
         if self.count < 1 {
             return ""
         }
-        let dateFormatter: DateFormatter = self.formatter(dateFormat: dateFormat)
+        let dateFormatter: DateFormatter = String.self.formatter(dateFormat: dateFormat)
         var interval: TimeInterval = 0
         if let date = dateFormatter.date(from: self) {
             interval = date.timeIntervalSince1970
@@ -202,13 +202,14 @@ public extension String {
     }
     
     private func formatter() -> DateFormatter {
-        return formatter(dateFormat: "yyyy-MM-dd HH:mm:ss")
+        return String.formatter(dateFormat: "yyyy-MM-dd HH:mm:ss")
     }
     
-    private func formatter(dateFormat: String) -> DateFormatter {
+    static func formatter(dateFormat: String) -> DateFormatter {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = dateFormat
         dateFormatter.locale = Locale.current
+        dateFormatter.timeZone = TimeZone.current
         return dateFormatter
     }
     
@@ -227,5 +228,47 @@ public extension String {
             compareResult = 2
         }
         return compareResult
+    }
+    
+    func st_year(date: Date) -> Int {
+        let calendar = Calendar.current
+        let year = calendar.component(.year, from: date)
+        return year
+    }
+    
+    func st_month(date: Date) -> Int {
+        let calendar = Calendar.current
+        let month = calendar.component(.year, from: date)
+        return month
+    }
+    
+    func st_day(date: Date) -> Int {
+        let calendar = Calendar.current
+        let day = calendar.component(.day, from: date)
+        return day
+    }
+    
+    func st_hour(date: Date) -> Int {
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: date)
+        return hour
+    }
+    
+    func st_minute(date: Date) -> Int {
+        let calendar = Calendar.current
+        let minute = calendar.component(.minute, from: date)
+        return minute
+    }
+    
+    func st_second(date: Date) -> Int {
+        let calendar = Calendar.current
+        let second = calendar.component(.second, from: date)
+        return second
+    }
+    
+   func st_nanosecond(date: Date) -> Int {
+        let calendar = Calendar.current
+        let nanosecond = calendar.component(.nanosecond, from: date)
+        return nanosecond
     }
 }
