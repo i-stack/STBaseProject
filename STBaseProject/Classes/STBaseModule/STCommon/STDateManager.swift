@@ -230,43 +230,43 @@ public extension String {
         return compareResult
     }
     
-    func st_year(date: Date) -> Int {
+    static func st_year(date: Date) -> Int {
         let calendar = Calendar.current
         let year = calendar.component(.year, from: date)
         return year
     }
     
-    func st_month(date: Date) -> Int {
+    static func st_month(date: Date) -> Int {
         let calendar = Calendar.current
         let month = calendar.component(.year, from: date)
         return month
     }
     
-    func st_day(date: Date) -> Int {
+    static func st_day(date: Date) -> Int {
         let calendar = Calendar.current
         let day = calendar.component(.day, from: date)
         return day
     }
     
-    func st_hour(date: Date) -> Int {
+    static func st_hour(date: Date) -> Int {
         let calendar = Calendar.current
         let hour = calendar.component(.hour, from: date)
         return hour
     }
     
-    func st_minute(date: Date) -> Int {
+    static func st_minute(date: Date) -> Int {
         let calendar = Calendar.current
         let minute = calendar.component(.minute, from: date)
         return minute
     }
     
-    func st_second(date: Date) -> Int {
+    static func st_second(date: Date) -> Int {
         let calendar = Calendar.current
         let second = calendar.component(.second, from: date)
         return second
     }
     
-   func st_nanosecond(date: Date) -> Int {
+    static func st_nanosecond(date: Date) -> Int {
         let calendar = Calendar.current
         let nanosecond = calendar.component(.nanosecond, from: date)
         return nanosecond
