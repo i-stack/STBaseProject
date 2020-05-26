@@ -42,6 +42,12 @@ public extension String {
             } else {
                 cnt = obj
             }
+        } else if let obj = object as? Bool {
+            if obj {
+                cnt = "1"
+            } else {
+                cnt = "0"
+            }
         }
         return cnt
     }
