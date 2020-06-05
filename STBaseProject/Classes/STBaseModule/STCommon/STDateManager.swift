@@ -53,7 +53,7 @@ public extension String {
         return localeDate
     }
     
-    /// @param 时间字符串转时间戳
+    /// @param 时间字符串转时间戳（毫秒）
     func st_timeTotimestamp(dateFormat: String) -> TimeInterval {
         if self.count < 1 {
             return 0
@@ -61,7 +61,7 @@ public extension String {
         let dateFormatter: DateFormatter = String.self.formatter(dateFormat: dateFormat)
         var interval: TimeInterval = 0
         if let date = dateFormatter.date(from: self) {
-            interval = date.timeIntervalSince1970
+            interval = date.timeIntervalSince1970 * 1000
         }
         return interval
     }
