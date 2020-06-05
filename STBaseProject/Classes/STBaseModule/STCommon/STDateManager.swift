@@ -63,10 +63,6 @@ public extension String {
         if let date = dateFormatter.date(from: self) {
             interval = date.timeIntervalSince1970
         }
-        let intervalStr = NSDecimalNumber.init(value: interval).stringValue
-        if intervalStr.count < 13 {
-            interval = interval * 1000
-        }
         return interval
     }
     
