@@ -37,6 +37,11 @@ open class STWebViewController: STBaseViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.configUI()
+        self.configNav()
+    }
+    
+    func configNav() {
+        self.st_showNavBtnType(type: .showLeftBtn)
     }
     
     open override func st_rightBarBtnClick() {
@@ -51,7 +56,7 @@ open class STWebViewController: STBaseViewController {
             NSLayoutConstraint.init(item: self.webView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.webView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0)
         ])
-        if let html = self.htmlString {
+        if let html = self.htmlString, html.count > 0 {
             self.webView.loadHTMLString(html, baseURL: nil)
         } else if let newUrl = self.url {
             self.webView.load(URLRequest.init(url: newUrl))
@@ -70,6 +75,7 @@ open class STWebViewController: STBaseViewController {
         let view = WKWebView()
         view.uiDelegate = self
         view.navigationDelegate = self
+        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
 }
