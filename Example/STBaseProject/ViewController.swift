@@ -28,7 +28,10 @@ class ViewController: STBaseViewController {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        let helpVC = STWebViewController.init(url: "https://www.baidu.com", htmlString: "", title: "帮助与反馈", showProgress: false)
+        var config = STWebConfig()
+        config.url = "https://www.baidu.com"
+        config.titleText = "帮助与反馈"
+        let helpVC = STWebViewController.init(config: config)
         self.navigationController?.pushViewController(helpVC, animated: true)
     }
 }

@@ -10,28 +10,27 @@ import UIKit
 import WebKit
 import JavaScriptCore
 
-open class STWebViewController: STBaseViewController {
+public struct STWebConfig {
+    public var url: String?
+    public var titleText: String?
+    public var htmlString: String?
+    public var backArrowIcon: String?
+    public var showProgress: Bool?
     
-    var url: URL?
-    var titleText: String?
-    var htmlString: String?
-    var showProgress: Bool = true
-    var progress: UIProgressView?
+    public init() {}
+}
+
+open class STWebViewController: STBaseViewController {
     var finishLoad: Bool = false
 
+    var webConfig: STWebConfig?
     var jsContext: JSContext?
+    var progress: UIProgressView?
     var orientationSupport: String?
     
-    public init(url: String?, htmlString: String?, title: String?, showProgress: Bool) {
+    public init(config: STWebConfig) {
         super.init(nibName: nil, bundle: nil)
-        if !(url?.isEmpty ?? true) {
-            let customAllowedSet =  NSCharacterSet(charactersIn:"`%^{}\"[]|\\<> ").inverted
-            let newUrl = url?.addingPercentEncoding(withAllowedCharacters: customAllowedSet)
-            self.url = URL.init(string: newUrl ?? "")
-        }
-        self.htmlString = htmlString
-        self.titleText = title
-        self.showProgress = showProgress
+        self.webConfig = config
     }
     
     open override func viewDidLoad() {
@@ -42,6 +41,10 @@ open class STWebViewController: STBaseViewController {
     
     func configNav() {
         self.st_showNavBtnType(type: .showLeftBtn)
+        self.titleLabel.text = self.webConfig?.titleText
+        if let backArrowIcon = self.webConfig?.backArrowIcon {
+            self.leftBtn.setImage(UIImage.init(named: backArrowIcon), for: .normal)
+        }
     }
     
     open override func st_rightBarBtnClick() {
@@ -56,10 +59,12 @@ open class STWebViewController: STBaseViewController {
             NSLayoutConstraint.init(item: self.webView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.webView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0)
         ])
-        if let html = self.htmlString, html.count > 0 {
+        if let html = self.webConfig?.htmlString, html.count > 0 {
             self.webView.loadHTMLString(html, baseURL: nil)
-        } else if let newUrl = self.url {
-            self.webView.load(URLRequest.init(url: newUrl))
+        } else if let newUrl = self.webConfig?.url, newUrl.count > 0 {
+            if let url = URL.init(string: newUrl) {
+                self.webView.load(URLRequest.init(url: url))
+            }
         }
     }
     
