@@ -22,7 +22,7 @@ open class STWebViewController: STBaseViewController {
     var jsContext: JSContext?
     var orientationSupport: String?
     
-    @objc init(url: String?, htmlString: String?, title: String?, showProgress: Bool) {
+    public init(url: String?, htmlString: String?, title: String?, showProgress: Bool) {
         super.init(nibName: nil, bundle: nil)
         if !(url?.isEmpty ?? true) {
             let customAllowedSet =  NSCharacterSet(charactersIn:"`%^{}\"[]|\\<> ").inverted
