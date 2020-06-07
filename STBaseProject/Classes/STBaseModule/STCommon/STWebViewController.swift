@@ -10,7 +10,7 @@ import UIKit
 import WebKit
 import JavaScriptCore
 
-class STWebViewController: STBaseViewController {
+open class STWebViewController: STBaseViewController {
     
     var url: URL?
     var titleText: String?
@@ -34,12 +34,12 @@ class STWebViewController: STBaseViewController {
         self.showProgress = showProgress
     }
     
-    override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
         self.configUI()
     }
     
-    override func st_rightBarBtnClick() {
+    open override func st_rightBarBtnClick() {
         
     }
     
@@ -47,7 +47,7 @@ class STWebViewController: STBaseViewController {
 
     }
     
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
