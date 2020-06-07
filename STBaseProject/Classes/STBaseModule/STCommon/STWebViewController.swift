@@ -44,7 +44,18 @@ open class STWebViewController: STBaseViewController {
     }
     
     func configUI() -> Void {
-
+        self.view.addSubview(self.webView)
+        self.view.addConstraints([
+            NSLayoutConstraint.init(item: self.webView, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: STConstants.st_navHeight()),
+            NSLayoutConstraint.init(item: self.webView, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0),
+            NSLayoutConstraint.init(item: self.webView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0),
+            NSLayoutConstraint.init(item: self.webView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0)
+        ])
+        if let html = self.htmlString {
+            self.webView.loadHTMLString(html, baseURL: nil)
+        } else if let newUrl = self.url {
+            self.webView.load(URLRequest.init(url: newUrl))
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -53,5 +64,26 @@ open class STWebViewController: STBaseViewController {
     
     deinit {
 
+    }
+    
+    lazy var webView: WKWebView = {
+        let view = WKWebView()
+        view.uiDelegate = self
+        view.navigationDelegate = self
+        return view
+    }()
+}
+
+extension STWebViewController: WKUIDelegate, WKNavigationDelegate {
+    public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        
+    }
+    
+    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        
+    }
+    
+    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        
     }
 }
