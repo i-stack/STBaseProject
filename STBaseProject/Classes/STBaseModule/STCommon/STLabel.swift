@@ -19,12 +19,12 @@ public class STLabel: UILabel {
     
     private var verticalAlignment: STLabelVerticalAlignment?
     
-    init(frame: CGRect, type: STLabelVerticalAlignment) {
+    public init(frame: CGRect, type: STLabelVerticalAlignment) {
         super.init(frame: frame)
         self.verticalAlignment = type
     }
     
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         self.verticalAlignment = STLabelVerticalAlignment.middle
     }
