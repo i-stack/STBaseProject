@@ -48,11 +48,7 @@ public extension STBaseModel {
                     } catch {
                         return nil
                     }
-                } else {
-                    return nil
                 }
-            } else {
-                return nil
             }
         }
         return nil
