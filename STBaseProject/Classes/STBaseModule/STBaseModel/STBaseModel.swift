@@ -31,23 +31,15 @@ open class STBaseModel: NSObject {
 public extension STBaseModel {
     /// json转model
     func st_jsonToModel<T>(_ type: T.Type, value: Any) -> T? where T : Decodable {
-        if JSONSerialization.isValidJSONObject(value) {
-            var jsonData: Any = value
-            if let newValue = value as? String {
-                if let data = newValue.data(using: .utf8) {
-                    do {
-                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers)
-                        jsonData = dict
-                        guard let data = try? JSONSerialization.data(withJSONObject: jsonData) else { return nil }
-                        let decoder = JSONDecoder()
-                        do {
-                            return try decoder.decode(type, from: data)
-                        } catch {
-                            return nil
-                        }
-                    } catch {
-                        return nil
-                    }
+        if let newValue = value as? String {
+            if let data = newValue.data(using: .utf8) {
+                do {
+                    let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers)
+                    let data = try JSONSerialization.data(withJSONObject: dict)
+                    let decoder = JSONDecoder()
+                    return try decoder.decode(type, from: data)
+                } catch {
+                    return nil
                 }
             }
         }
