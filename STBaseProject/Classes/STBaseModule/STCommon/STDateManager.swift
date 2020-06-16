@@ -274,7 +274,7 @@ public extension String {
     
     /// Date 返回星期几
     static func st_weekDay(date: Date) -> String {
-        let weekDays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
+        let weekDays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
         let calendar = NSCalendar.init(calendarIdentifier: .gregorian)
         calendar?.timeZone = TimeZone.current
         let calendarUnit = NSCalendar.Unit.weekday
