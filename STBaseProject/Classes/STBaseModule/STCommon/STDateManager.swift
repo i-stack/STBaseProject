@@ -238,7 +238,7 @@ public extension String {
     
     static func st_month(date: Date) -> Int {
         let calendar = Calendar.current
-        let month = calendar.component(.year, from: date)
+        let month = calendar.component(.month, from: date)
         return month
     }
     
