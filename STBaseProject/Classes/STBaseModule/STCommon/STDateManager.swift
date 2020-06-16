@@ -271,4 +271,19 @@ public extension String {
         let nanosecond = calendar.component(.nanosecond, from: date)
         return nanosecond
     }
+    
+    /// Date 返回星期几
+    static func st_weekDay(date: Date) -> String {
+        let weekDays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"]
+        let calendar = NSCalendar.init(calendarIdentifier: .gregorian)
+        calendar?.timeZone = TimeZone.current
+        let calendarUnit = NSCalendar.Unit.weekday
+        let theComponents = calendar?.components(calendarUnit, from: date)
+        if let weekday = theComponents?.weekday {
+            if weekDays.count > weekday - 1 {
+                return weekDays[weekday - 1]
+            }
+        }
+        return ""
+    }
 }
