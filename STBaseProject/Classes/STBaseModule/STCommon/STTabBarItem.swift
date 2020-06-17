@@ -21,11 +21,11 @@ public class STTabBarItem: NSObject {
                                        backgroundColor: UIColor) -> UITabBarItem {
         var image: UIImage = UIImage.init()
         if let newImage = UIImage.init(named: normalImage) {
-            image = newImage.withRenderingMode(.alwaysTemplate)
+            image = newImage.withRenderingMode(.alwaysOriginal)
         }
         var lightImage: UIImage = UIImage.init()
         if let newImage = UIImage.init(named: selectedImage) {
-            lightImage = newImage.withRenderingMode(.alwaysTemplate)
+            lightImage = newImage.withRenderingMode(.alwaysOriginal)
         }
         let item: UITabBarItem = UITabBarItem.init(title: title, image: image, selectedImage: lightImage)
         UITabBarItem.appearance().setTitleTextAttributes(
