@@ -41,9 +41,17 @@ public class STPredicateCheck: NSObject {
         return isMatch
     }
 
-    /// pragma - 正则匹配用户姓名： 1-32位的中文或英文或数字
+    /// pragma - 正则匹配用户姓名： 1-16位的中文或英文或数字
     public class func st_checkUserName(userName: String) -> Bool {
-        let pattern = "[\u{4e00}-\u{9fa5}a-zA-Z0-9]{1,32}"
+        return STPredicateCheck.st_checkUserName(userName: userName, hasSpace: false)
+    }
+    
+    /// pragma - 正则匹配用户姓名： 1-16位的中文或英文或数字或空格
+    public class func st_checkUserName(userName: String, hasSpace: Bool) -> Bool {
+        var pattern = "[\u{4e00}-\u{9fa5}a-zA-Z0-9]{1,16}"
+        if hasSpace {
+            pattern = "[\u{4e00}-\u{9fa5}a-zA-Z0-9\\s]{1,16}"
+        }
         let pred = NSPredicate.init(format: "SELF MATCHES %@", pattern)
         let isMatch = pred.evaluate(with: userName)
         return isMatch
