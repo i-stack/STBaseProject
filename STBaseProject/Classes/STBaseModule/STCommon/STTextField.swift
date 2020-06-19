@@ -44,14 +44,12 @@ open class STTextField: UITextField {
     
     open override func awakeFromNib() {
         super.awakeFromNib()
-        self.addTarget()
-        self.configContent()
+        self.config()
     }
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        self.addTarget()
-        self.configContent()
+        self.config()
     }
     
     required public init?(coder: NSCoder) {
@@ -84,14 +82,19 @@ open class STTextField: UITextField {
         return CGRect.zero
     }
     
+    private func config() {
+        self.configContent()
+        self.addEditingChangedTarget()
+    }
+    
     private func configContent() {
         self.clearButtonMode = .whileEditing
         self.autocorrectionType = UITextAutocorrectionType.no
         self.autocapitalizationType = UITextAutocapitalizationType.none
     }
     
-    private func addTarget() {
-        self.addTarget(self, action: #selector(st_textFieldDidChange(textField:)), for: .editingChanged)
+    private func addEditingChangedTarget() {
+        self.addTarget(self, action: #selector(st_textFieldEditingChanged(textField:)), for: .editingChanged)
     }
         
     public func configAttributed(textColor: UIColor) -> Void {
@@ -110,5 +113,5 @@ open class STTextField: UITextField {
         }
     }
     
-    @objc open func st_textFieldDidChange(textField: STTextField) {}
+    @objc open func st_textFieldEditingChanged(textField: STTextField) {}
 }
