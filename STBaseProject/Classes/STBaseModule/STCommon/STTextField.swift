@@ -8,11 +8,16 @@
 
 import UIKit
 
+public protocol STTextFieldDelegate: NSObjectProtocol {
+    func st_textFieldEditingChanged(textField: STTextField)
+}
+
 open class STTextField: UITextField {
     
     open var orginLeft: CGFloat = 0
     open var orginRight: CGFloat = 0
     open var textIsCheck: Bool = false
+    weak open var cusDelegate: STTextFieldDelegate?
 
     @IBInspectable var cornerRadius: CGFloat {
         get {
@@ -113,5 +118,7 @@ open class STTextField: UITextField {
         }
     }
     
-    @objc open func st_textFieldEditingChanged(textField: STTextField) {}
+    @objc private func st_textFieldEditingChanged(textField: STTextField) {
+        self.cusDelegate?.st_textFieldEditingChanged(textField: textField)
+    }
 }
