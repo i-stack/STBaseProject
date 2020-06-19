@@ -14,8 +14,9 @@ public protocol STTextFieldDelegate: NSObjectProtocol {
 
 open class STTextField: UITextField {
     
-    open var orginLeft: CGFloat = 0
-    open var orginRight: CGFloat = 0
+    private var limitCount: Int = -1
+    private var orginLeft: CGFloat = 0
+    private var orginRight: CGFloat = 0
     open var textIsCheck: Bool = false
     weak open var cusDelegate: STTextFieldDelegate?
 
@@ -101,6 +102,17 @@ open class STTextField: UITextField {
     private func addEditingChangedTarget() {
         self.addTarget(self, action: #selector(st_textFieldEditingChanged(textField:)), for: .editingChanged)
     }
+    
+    /// 光标左右间距
+    public func config(orginLeft: CGFloat, orginRight: CGFloat) -> Void {
+        self.orginLeft = orginLeft
+        self.orginRight = orginRight
+    }
+    
+    /// 字符字数限制  textLimitCount <= 0 无限制
+    public func config(textLimitCount: Int) -> Void {
+        self.limitCount = textLimitCount
+    }
         
     public func configAttributed(textColor: UIColor) -> Void {
         if let attributedText = self.attributedPlaceholder {
@@ -119,6 +131,11 @@ open class STTextField: UITextField {
     }
     
     @objc private func st_textFieldEditingChanged(textField: STTextField) {
+        if self.limitCount > 0 {
+            if let inputText = textField.text, inputText.count > 0 {
+                self.text = String(inputText.prefix(self.limitCount))
+            }
+        }
         self.cusDelegate?.st_textFieldEditingChanged(textField: textField)
     }
 }
