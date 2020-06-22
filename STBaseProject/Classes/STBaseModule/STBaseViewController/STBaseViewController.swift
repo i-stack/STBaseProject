@@ -50,15 +50,6 @@ open class STBaseViewController: UIViewController {
         self.st_navigationBarView()
     }
     
-    override open func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if let nav = self.navigationController {
-            if nav.viewControllers.count <= 1 {
-                self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
-            }
-        }
-    }
-    
     private func st_baseConfig() -> Void {
         self.hidesBottomBarWhenPushed = true
         self.view.backgroundColor = UIColor.white
@@ -206,7 +197,7 @@ extension STBaseViewController: UIGestureRecognizerDelegate {
         if gestureRecognizer.isKind(of: UIPanGestureRecognizer.self) == true && otherGestureRecognizer.isKind(of: UIScreenEdgePanGestureRecognizer.self) == true {
             return true
         }
-        return true
+        return false
     }
 }
 
