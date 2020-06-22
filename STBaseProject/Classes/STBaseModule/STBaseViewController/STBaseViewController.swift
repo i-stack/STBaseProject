@@ -55,8 +55,7 @@ open class STBaseViewController: UIViewController {
         self.view.backgroundColor = UIColor.white
         self.automaticallyAdjustsScrollViewInsets = false
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
-        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
     }
     
     private func st_navigationBarView() -> Void {
@@ -173,7 +172,7 @@ open class STBaseViewController: UIViewController {
     }
     
     @objc open func st_leftBarBtnClick() -> Void {
-        if self.navigationController?.viewControllers.count ?? 0 > 1 {
+        if self.navigationController != nil, self.navigationController?.viewControllers.count ?? 0 > 1 {
             self.navigationController?.popViewController(animated: true)
         } else {
             self.dismiss(animated: true) {}
