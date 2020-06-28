@@ -67,7 +67,7 @@ public class STPredicateCheck: NSObject {
     
     /// pragma - 匹配手机号
     public class func st_checkPhoneNum(phoneNum: String) -> Bool {
-        let pattern = "1[0-9]{10}"
+        let pattern = "^1(3[0-9]|4[56789]|5[0-9]|6[6]|7[0-9]|8[0-9]|9[189])\\d{8}$"
         let pred = NSPredicate.init(format: "SELF MATCHES %@", pattern)
         let isMatch = pred.evaluate(with: phoneNum)
         return isMatch
