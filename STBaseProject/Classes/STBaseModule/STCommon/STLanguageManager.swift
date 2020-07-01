@@ -2,8 +2,8 @@
 //  STLanguageManager.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/12/10.
-//  Copyright © 2019 ST. All rights reserved.
+//  Created by stack on 2018/01/10.
+//  Copyright © 2018 ST. All rights reserved.
 //
 
 import Foundation

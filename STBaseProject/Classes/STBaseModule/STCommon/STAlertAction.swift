@@ -3,7 +3,7 @@
 //  Insight
 //
 //  Created by song on 2019/7/1.
-//  Copyright © 2020 Knowin. All rights reserved.
+//  Copyright © 2019年 ST. All rights reserved.
 //
 
 import UIKit

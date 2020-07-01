@@ -2,8 +2,8 @@
 //  STTimerTarget.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/10/13.
-//  Copyright © 2019 ST. All rights reserved.
+//  Created by stack on 2018/01/22.
+//  Copyright © 2018 ST. All rights reserved.
 //
 
 import UIKit

@@ -2,8 +2,8 @@
 //  STPasteboard.swift
 //  STBaseProject
 //
-//  Created by stack on 2017/10/24.
-//  Copyright © 2018年 ST. All rights reserved.
+//  Created by stack on 2017/02/24.
+//  Copyright © 2017年 ST. All rights reserved.
 //
 
 import Foundation

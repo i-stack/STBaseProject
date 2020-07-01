@@ -2,8 +2,8 @@
 //  STPredicateCheck.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/10/12.
-//  Copyright © 2019 ST. All rights reserved.
+//  Created by stack on 2018/08/12.
+//  Copyright © 2018 ST. All rights reserved.
 //
 
 import UIKit
