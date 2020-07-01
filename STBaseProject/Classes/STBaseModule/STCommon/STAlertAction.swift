@@ -8,7 +8,7 @@
 
 import UIKit
 
-extension UIAlertAction {
+public extension UIAlertAction {
     /// 取属性列表
     static var propertyNames: [String] {
         var outCount: UInt32 = 0
