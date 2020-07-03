@@ -41,4 +41,26 @@ public struct STDeviceInfo {
     public static func appInfo() -> Dictionary<String, Any> {
         return Bundle.main.infoDictionary ?? Dictionary<String, Any>()
     }
+    
+    public static func isLandscape() -> Bool {
+        let application = UIApplication .shared
+        let orientation = application.statusBarOrientation
+        if orientation.isLandscape {
+            return true
+        }
+        return false
+    }
+    
+    public static func isPortrait() -> Bool {
+        let application = UIApplication .shared
+        let orientation = application.statusBarOrientation
+        if orientation.isPortrait {
+            return true
+        }
+        return false
+    }
+
+    public static func statusBarOrientation() -> UIInterfaceOrientation {
+        return UIApplication.shared.statusBarOrientation
+    }
 }

@@ -150,3 +150,21 @@ public extension UIImage {
         }
     }
 }
+
+public extension UIImage {
+    static func st_getLaunchImage() -> UIImage {
+        let viewSize = UIScreen.main.bounds.size
+        var launchImage = ""
+        if let imageDict = Bundle.main.infoDictionary?["UILaunchImages"] as? Array<Dictionary<String, String>> {
+            for dict in imageDict {
+                if let value = dict["UILaunchImageSize"] {
+                    let imageSize = NSCoder.cgSize(for: value)
+                    if imageSize.equalTo(viewSize) {
+                        launchImage = dict["UILaunchImageName"] ?? ""
+                    }
+                }
+            }
+        }
+        return UIImage.init(named: launchImage) ?? UIImage()
+    }
+}
