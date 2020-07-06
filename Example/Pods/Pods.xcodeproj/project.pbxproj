@@ -18,7 +18,7 @@
 		46EB2E00000860 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000170 /* STBaseViewController.swift */; };
 		46EB2E00000870 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* STBaseViewModel.swift */; };
 		46EB2E00000880 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* STBtn.swift */; };
-		46EB2E00000890 /* STBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STBundle.swift */; };
+		46EB2E00000890 /* STPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STPoint.swift */; };
 		46EB2E000008A0 /* STConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STConstants.swift */; };
 		46EB2E000008B0 /* STDateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001E0 /* STDateManager.swift */; };
 		46EB2E000008C0 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STDeviceInfo.swift */; };
@@ -134,7 +134,7 @@
 		46EB2E00000170 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewController.swift; path = STBaseProject/Classes/STBaseModule/STBaseViewController/STBaseViewController.swift; sourceTree = "<group>"; };
 		46EB2E00000190 /* STBaseViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewModel.swift; path = STBaseProject/Classes/STBaseModule/STBaseViewModel/STBaseViewModel.swift; sourceTree = "<group>"; };
 		46EB2E000001B0 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STBtn.swift; sourceTree = "<group>"; };
-		46EB2E000001C0 /* STBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBundle.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STBundle.swift; sourceTree = "<group>"; };
+		46EB2E000001C0 /* STPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPoint.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPoint.swift; sourceTree = "<group>"; };
 		46EB2E000001D0 /* STConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STConstants.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STConstants.swift; sourceTree = "<group>"; };
 		46EB2E000001E0 /* STDateManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDateManager.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STDateManager.swift; sourceTree = "<group>"; };
 		46EB2E000001F0 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceInfo.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STDeviceInfo.swift; sourceTree = "<group>"; };
@@ -452,7 +452,7 @@
 			isa = PBXGroup;
 			children = (
 				46EB2E000001B0 /* STBtn.swift */,
-				46EB2E000001C0 /* STBundle.swift */,
+				46EB2E000001C0 /* STPoint.swift */,
 				46EB2E000001D0 /* STConstants.swift */,
 				46EB2E000001E0 /* STDateManager.swift */,
 				46EB2E000001F0 /* STDeviceInfo.swift */,
@@ -782,7 +782,7 @@
 				46EB2E00000860 /* STBaseViewController.swift in Sources */,
 				46EB2E00000870 /* STBaseViewModel.swift in Sources */,
 				46EB2E00000880 /* STBtn.swift in Sources */,
-				46EB2E00000890 /* STBundle.swift in Sources */,
+				46EB2E00000890 /* STPoint.swift in Sources */,
 				46EB2E000008A0 /* STConstants.swift in Sources */,
 				46EB2E000008B0 /* STDateManager.swift in Sources */,
 				46EB2E000008C0 /* STDeviceInfo.swift in Sources */,
