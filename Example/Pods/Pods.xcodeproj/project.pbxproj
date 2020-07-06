@@ -451,8 +451,8 @@
 		46EB2E000001A0 /* STCommon */ = {
 			isa = PBXGroup;
 			children = (
+				46EB2E00000320 /* STAlertAction.swift */,
 				46EB2E000001B0 /* STBtn.swift */,
-				46EB2E000001C0 /* STPoint.swift */,
 				46EB2E000001D0 /* STConstants.swift */,
 				46EB2E000001E0 /* STDateManager.swift */,
 				46EB2E000001F0 /* STDeviceInfo.swift */,
@@ -467,6 +467,7 @@
 				46EB2E00000280 /* STLanguageManager.swift */,
 				46EB2E00000290 /* STOpenSystemOperationController.swift */,
 				46EB2E000002A0 /* STPasteboard.swift */,
+				46EB2E000001C0 /* STPoint.swift */,
 				46EB2E000002B0 /* STPredicateCheck.swift */,
 				46EB2E000002C0 /* STString.swift */,
 				46EB2E000002D0 /* STTabBarItem.swift */,
@@ -474,7 +475,6 @@
 				46EB2E000002F0 /* STTimerTarget.swift */,
 				46EB2E00000300 /* STVerificationCodeBtn.swift */,
 				46EB2E00000310 /* STWebViewController.swift */,
-				46EB2E00000320 /* STAlertAction.swift */,
 			);
 			name = STCommon;
 			sourceTree = "<group>";
