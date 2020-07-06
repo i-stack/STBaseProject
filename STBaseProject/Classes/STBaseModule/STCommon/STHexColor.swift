@@ -75,4 +75,78 @@ public extension UIColor {
             alpha: CGFloat(alpha)
         )
     }
+    
+    func st_colorToHex() -> String {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        let multiplier = CGFloat(255.999999)
+        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return ""
+        }
+        if alpha == 1.0 {
+            return String(
+                format: "#%02lX%02lX%02lX",
+                Int(red * multiplier),
+                Int(green * multiplier),
+                Int(blue * multiplier)
+            )
+        } else {
+            return String(
+                format: "#%02lX%02lX%02lX%02lX",
+                Int(red * multiplier),
+                Int(green * multiplier),
+                Int(blue * multiplier),
+                Int(alpha * multiplier)
+            )
+        }
+    }
+    
+    func st_getColorR() -> CGFloat {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        let multiplier = CGFloat(255.999999)
+        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return 0.0
+        }
+        return red * multiplier
+    }
+    
+    func st_getColorG() -> CGFloat {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        let multiplier = CGFloat(255.999999)
+        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return 0.0
+        }
+        return green * multiplier
+    }
+    
+    func st_getColorB() -> CGFloat {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        let multiplier = CGFloat(255.999999)
+        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return 0.0
+        }
+        return blue * multiplier
+    }
+    
+    func st_getColorA() -> CGFloat {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return 0.0
+        }
+        return alpha
+    }
 }
