@@ -132,7 +132,7 @@ open class STTextField: UITextField {
     
     @objc private func st_textFieldEditingChanged(textField: STTextField) {
         if self.limitCount > 0 {
-            if let inputText = textField.text, inputText.count > 0 {
+            if let inputText = textField.text, inputText.count > self.limitCount {
                 self.text = String(inputText.prefix(self.limitCount))
             }
         }
