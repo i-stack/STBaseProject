@@ -25,12 +25,23 @@ open class STWebViewController: STBaseViewController {
 
     var webConfig: STWebConfig?
     var jsContext: JSContext?
-    var progress: UIProgressView?
     var orientationSupport: String?
     
     public init(config: STWebConfig) {
         super.init(nibName: nil, bundle: nil)
         self.webConfig = config
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    deinit {
+        if self.webView.isLoading {
+            self.webView.stopLoading()
+        }
+        self.webView.uiDelegate = nil
+        self.webView.navigationDelegate = nil
     }
     
     open override func viewDidLoad() {
@@ -47,9 +58,7 @@ open class STWebViewController: STBaseViewController {
         }
     }
     
-    open override func st_rightBarBtnClick() {
-        
-    }
+    open override func st_rightBarBtnClick() {}
     
     func configUI() -> Void {
         self.view.addSubview(self.webView)
@@ -67,15 +76,7 @@ open class STWebViewController: STBaseViewController {
             }
         }
     }
-    
-    required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    deinit {
 
-    }
-    
     lazy var webView: WKWebView = {
         let view = WKWebView()
         view.uiDelegate = self
