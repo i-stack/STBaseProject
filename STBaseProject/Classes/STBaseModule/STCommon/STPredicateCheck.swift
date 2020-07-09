@@ -80,4 +80,28 @@ public class STPredicateCheck: NSObject {
         let isMatch = pred.evaluate(with: text)
         return isMatch
     }
+    
+    /// pragma - 中英文标点
+    public class func st_checkPunctuation(text: String) -> Bool {
+        let pattern = "^[\\p{P}]*$"
+        let pred = NSPredicate.init(format: "SELF MATCHES %@", pattern)
+        let isMatch = pred.evaluate(with: text)
+        return isMatch
+    }
+    
+    /// pragma - utf-8编码中的所有中文字符
+    public class func st_checkChinaChar(text: String) -> Bool {
+        let pattern = "^[\\p{Han}]*$"
+        let pred = NSPredicate.init(format: "SELF MATCHES %@", pattern)
+        let isMatch = pred.evaluate(with: text)
+        return isMatch
+    }
+    
+    /// pragma - 中文、数字、字母、标点符号
+    public class func st_normalWithPunctuation(text: String) -> Bool {
+        let pattern = "^([\\p{Han}\\p{P}A-Za-z0-9])*$"
+        let pred = NSPredicate.init(format: "SELF MATCHES %@", pattern)
+        let isMatch = pred.evaluate(with: text)
+        return isMatch
+    }
 }
