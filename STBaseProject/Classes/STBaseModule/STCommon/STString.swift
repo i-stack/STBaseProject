@@ -124,3 +124,20 @@ public extension String {
         return str
     }
 }
+
+public extension String {
+    func st_parameterWithURL() -> Dictionary<String, Any> {
+        var parmDict: Dictionary<String, String> = Dictionary<String, String>()
+        if self.count > 0 {
+            let urlComponents = NSURLComponents.init(string: self)
+            if let queryItems = urlComponents?.queryItems {
+                for item in queryItems {
+                    if item.name.count > 0 {
+                        parmDict[item.name] = item.value
+                    }
+                }
+            }
+        }
+        return parmDict
+    }
+}
