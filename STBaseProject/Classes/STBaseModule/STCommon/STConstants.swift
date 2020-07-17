@@ -136,21 +136,21 @@ public class STConstants: NSObject {
         return self.st_apph() == 812 || self.st_apph() == 896
     }
     
-    public class func st_navHeight() -> CGFloat {
+    @objc public class func st_navHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return 88
         }
         return 64
     }
     
-    public class func st_tabBarHeight() -> CGFloat {
+    @objc public class func st_tabBarHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return 83
         }
         return 49
     }
     
-    public class func st_safeBarHeight() -> CGFloat {
+    @objc public class func st_safeBarHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return 34
         }
