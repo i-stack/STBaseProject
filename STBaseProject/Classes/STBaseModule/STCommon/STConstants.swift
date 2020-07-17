@@ -22,10 +22,10 @@ public enum STScreenSize {
 
 /// 自定义 bar height
 public struct STConstantBarHeightModel {
-    var navNormalHeight: CGFloat = 64.0
-    var navIsSafeHeight: CGFloat = 88.0
-    var tabBarNormalHeight: CGFloat = 49.0
-    var tabBarIsSafeHeight: CGFloat = 83.0
+    public var navNormalHeight: CGFloat = 64.0
+    public var navIsSafeHeight: CGFloat = 88.0
+    public var tabBarNormalHeight: CGFloat = 49.0
+    public var tabBarIsSafeHeight: CGFloat = 83.0
     public init() {}
 }
 
