@@ -20,14 +20,28 @@ public enum STScreenSize {
     case AMXScreenSize12p9Inch
 }
 
+/// 自定义 bar height
+public struct STConstantBarHeightModel {
+    var navNormalHeight: CGFloat = 64.0
+    var navIsSafeHeight: CGFloat = 88.0
+    var tabBarNormalHeight: CGFloat = 49.0
+    var tabBarIsSafeHeight: CGFloat = 83.0
+}
+
 public class STConstants: NSObject {
     
     private var benchmarkDesignSize = CGSize.zero
     public static let shared: STConstants = STConstants()
+    private var barHeightModel: STConstantBarHeightModel = STConstantBarHeightModel()
 
     /// @param 设计图基准尺寸
     public func st_configBenchmarkDesign(size: CGSize) -> Void {
         self.benchmarkDesignSize = size
+    }
+    
+    /// @param 自定义 bar 高度
+    public func st_customNavHeight(model: STConstantBarHeightModel) -> Void {
+        self.barHeightModel = model
     }
     
     private class func st_multiplier() -> CGFloat {
@@ -43,17 +57,6 @@ public class STConstants: NSObject {
     public class func st_handleFloat(float: CGFloat) -> CGFloat {
         let multiplier = self.st_multiplier()
         return float * multiplier
-//        if self.st_isIPhone5() {
-//            return float * 0.8
-//        } else if self.st_isIPhonePlus() {
-//            return float * 1.07
-//        } else if self.st_isIPhoneX() {
-//            return float * 1.07
-//        } else if self.st_isIPhoneXR() || self.st_isIPhoneXMax() {
-//            return float * 1.08
-//        } else {
-//            return float
-//        }
     }
     
     public class func st_adaptIPhone5(a: CGFloat) -> CGFloat {
@@ -136,21 +139,21 @@ public class STConstants: NSObject {
         return self.st_apph() == 812 || self.st_apph() == 896
     }
     
-    @objc dynamic public class func st_navHeight() -> CGFloat {
+    public class func st_navHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
-            return 88
+            return STConstants.shared.barHeightModel.navIsSafeHeight
         }
-        return 64
+        return STConstants.shared.barHeightModel.navNormalHeight
     }
     
-    @objc dynamic public class func st_tabBarHeight() -> CGFloat {
+    public class func st_tabBarHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
-            return 83
+            return STConstants.shared.barHeightModel.tabBarIsSafeHeight
         }
-        return 49
+        return STConstants.shared.barHeightModel.tabBarNormalHeight
     }
     
-    @objc dynamic public class func st_safeBarHeight() -> CGFloat {
+    public class func st_safeBarHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return 34
         }
