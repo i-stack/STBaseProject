@@ -136,15 +136,15 @@ public extension UIView {
     }
 
     private func showMessageManualMHidden(text: String, detailText: String, toView: UIView) -> Void {
-        let hud = STHUD.sharedHUD
-        if let spView = toView.superview {
-            spView.addSubview(hud)
-            spView.bringSubviewToFront(hud)
-        } else {
-            UIApplication.shared.keyWindow?.addSubview(hud)
-            UIApplication.shared.keyWindow?.bringSubviewToFront(hud)
+        DispatchQueue.main.async {
+            let hud = STHUD.sharedHUD
+            if let spView = toView.superview {
+                spView.addSubview(hud)
+            } else {
+                UIApplication.shared.keyWindow?.addSubview(hud)
+            }
+            hud.show(text: text, detailText: detailText)
         }
-        hud.show(text: text, detailText: detailText)
     }
 
     /// @prama 手动关闭MBProgressHUD
