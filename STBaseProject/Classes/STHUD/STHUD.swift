@@ -149,9 +149,11 @@ public extension UIView {
 
     /// @prama 手动关闭MBProgressHUD
     func hideHUD() -> Void {
-        let hud = STHUD.sharedHUD
-        hud.hide(animated: true)
-        hud.removeFromSuperview()
+        DispatchQueue.main.async {
+            let hud = STHUD.sharedHUD
+            hud.hide(animated: true)
+            hud.removeFromSuperview()
+        }
     }
 }
 
