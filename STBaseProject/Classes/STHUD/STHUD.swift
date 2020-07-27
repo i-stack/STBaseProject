@@ -139,8 +139,10 @@ public extension UIView {
         let hud = STHUD.sharedHUD
         if let spView = toView.superview {
             spView.addSubview(hud)
+            spView.bringSubviewToFront(hud)
         } else {
             UIApplication.shared.keyWindow?.addSubview(hud)
+            UIApplication.shared.keyWindow?.bringSubviewToFront(hud)
         }
         hud.show(text: text, detailText: detailText)
     }

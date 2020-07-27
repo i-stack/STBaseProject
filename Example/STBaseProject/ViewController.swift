@@ -14,17 +14,7 @@ class ViewController: STBaseViewController {
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(UIImage.st_getLaunchImage())
-    }
-    
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)
-        var config = STWebConfig()
-        config.url = "https://www.baidu.com"
-        config.titleText = "帮助与反馈"
-        let helpVC = STWebViewController.init(config: config)
-        self.navigationController?.pushViewController(helpVC, animated: true)
+        self.view.showLoadingManualMHidden()
     }
 }
 
