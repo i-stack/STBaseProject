@@ -15,6 +15,7 @@ public enum STHUDLocation {
     case bottom
 }
 
+/// state == true hud is show elsewise hud is hidden
 public typealias STHUDCompletionBlock = (_ state: Bool) -> Void
 
 open class STHUD: MBProgressHUD {
@@ -31,15 +32,18 @@ open class STHUD: MBProgressHUD {
     public static let sharedHUD: STHUD = STHUD()
     private var stCompletionBlock: STHUDCompletionBlock?
 
-    @objc open func show(text: String) -> Void {
+    public func show(text: String) -> Void {
         self.show(text: text, detailText: "")
     }
     
-    @objc open func show(text: String, detailText: String) -> Void {
+    public func show(text: String, detailText: String) -> Void {
         self.areDefaultMotionEffectsEnabled = false
         self.label.text = text
         self.detailsLabel.text = detailText
         self.show(animated: true)
+        if let block = self.stCompletionBlock {
+            block(true)
+        }
     }
     
     /// 默认配置
@@ -81,6 +85,13 @@ open class STHUD: MBProgressHUD {
                     activityView.color = UIColor.black.withAlphaComponent(0.6)
                 }
             }
+        }
+    }
+    
+    open override func hide(animated: Bool) {
+        super.hide(animated: animated)
+        if let block = self.stCompletionBlock {
+            block(true)
         }
     }
     
