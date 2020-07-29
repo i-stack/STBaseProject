@@ -35,11 +35,11 @@ open class STHUD: MBProgressHUD {
     public static let sharedHUD: STHUD = STHUD()
     private var stCompletionBlock: STHUDCompletionBlock?
     
-    override public init(frame: CGRect) {
+    override private init(frame: CGRect) {
         super.init(frame: frame)
     }
     
-    override public init(view: UIView) {
+    override private init(view: UIView) {
         super.init(view: view)
     }
     
