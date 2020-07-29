@@ -15,6 +15,8 @@ public enum STHUDLocation {
     case bottom
 }
 
+public typealias STHUDCompletionBlock = (_ state: Bool) -> Void
+
 open class STHUD: MBProgressHUD {
 
     open var labelFont: UIFont?
@@ -25,9 +27,10 @@ open class STHUD: MBProgressHUD {
     open var activityViewColor: UIColor?
     open var errorIconImageStr: String?
     open var afterDelay: TimeInterval = 1.5
-
-    public static let sharedHUD: STHUD = STHUD()
     
+    public static let sharedHUD: STHUD = STHUD()
+    private var stCompletionBlock: STHUDCompletionBlock?
+
     @objc open func show(text: String) -> Void {
         self.show(text: text, detailText: "")
     }
@@ -79,6 +82,10 @@ open class STHUD: MBProgressHUD {
                 }
             }
         }
+    }
+    
+    public func hudComplection(block: @escaping STHUDCompletionBlock) -> Void {
+        self.stCompletionBlock = block
     }
 }
 
