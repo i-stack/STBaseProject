@@ -15,7 +15,10 @@ public enum STHUDLocation {
     case bottom
 }
 
-/// state == true hud is show elsewise hud is hidden
+/**
+    监听hud状态
+    - Returns: true hud is show elsewise hud is hidden
+**/
 public typealias STHUDCompletionBlock = (_ state: Bool) -> Void
 
 open class STHUD: MBProgressHUD {
@@ -46,7 +49,7 @@ open class STHUD: MBProgressHUD {
         }
     }
     
-    /// 默认配置
+    /// 配置展示
     @objc open func configHUD() -> Void {
         self.label.numberOfLines = 0
         self.contentColor = UIColor.white
@@ -76,16 +79,21 @@ open class STHUD: MBProgressHUD {
         } else {
             self.bezelView.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         }
-        for subview in self.bezelView.subviews {
-            if subview.isKind(of: UIActivityIndicatorView.self) {
-                let activityView = subview as! UIActivityIndicatorView
-                if let color = self.activityViewColor {
-                    activityView.color = color
-                } else {
-                    activityView.color = UIColor.black.withAlphaComponent(0.6)
-                }
-            }
+        if let color = self.activityViewColor {
+            self.bezelView.color = color
+        } else {
+            self.bezelView.color = UIColor.black.withAlphaComponent(0.6)
         }
+//        for subview in self.bezelView.subviews {
+//            if subview.isKind(of: UIActivityIndicatorView.self) {
+//                let activityView = subview as! UIActivityIndicatorView
+//                if let color = self.activityViewColor {
+//                    activityView.color = color
+//                } else {
+//                    activityView.color = UIColor.black.withAlphaComponent(0.6)
+//                }
+//            }
+//        }
     }
     
     open override func hide(animated: Bool) {
