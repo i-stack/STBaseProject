@@ -28,11 +28,11 @@ open class STHUD: MBProgressHUD {
 
     public static let sharedHUD: STHUD = STHUD()
     
-    public func show(text: String) -> Void {
+    @objc open func show(text: String) -> Void {
         self.show(text: text, detailText: "")
     }
     
-    public func show(text: String, detailText: String) -> Void {
+    @objc open func show(text: String, detailText: String) -> Void {
         self.areDefaultMotionEffectsEnabled = false
         self.label.text = text
         self.detailsLabel.text = detailText
