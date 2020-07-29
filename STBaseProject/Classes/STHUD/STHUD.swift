@@ -27,20 +27,20 @@ open class STHUD: MBProgressHUD {
     open var afterDelay: TimeInterval = 1.5
 
     public static let sharedHUD: STHUD = STHUD()
-
+    
     public func show(text: String) -> Void {
         self.show(text: text, detailText: "")
     }
     
     public func show(text: String, detailText: String) -> Void {
-        //configHUD()
         self.areDefaultMotionEffectsEnabled = false
         self.label.text = text
         self.detailsLabel.text = detailText
         self.show(animated: true)
     }
     
-    public func configHUD() -> Void {
+    /// 默认配置
+    @objc open func configHUD() -> Void {
         self.label.numberOfLines = 0
         self.contentColor = UIColor.white
         self.bezelView.style = .solidColor
