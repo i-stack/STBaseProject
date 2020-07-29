@@ -34,6 +34,18 @@ open class STHUD: MBProgressHUD {
     
     public static let sharedHUD: STHUD = STHUD()
     private var stCompletionBlock: STHUDCompletionBlock?
+    
+    override public init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    override public init(view: UIView) {
+        super.init(view: view)
+    }
+    
+    required public init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
 
     public func show(text: String) -> Void {
         self.show(text: text, detailText: "")
