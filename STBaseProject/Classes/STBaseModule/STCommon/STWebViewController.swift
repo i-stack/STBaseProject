@@ -16,6 +16,7 @@ public struct STWebConfig {
     public var htmlString: String?
     public var backArrowIcon: String?
     public var showProgress: Bool?
+    public var textFont: UIFont?
     
     public init() {}
 }
