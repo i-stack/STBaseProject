@@ -57,6 +57,9 @@ open class STWebViewController: STBaseViewController {
         if let backArrowIcon = self.webConfig?.backArrowIcon {
             self.leftBtn.setImage(UIImage.init(named: backArrowIcon), for: .normal)
         }
+        if let font = self.webConfig?.textFont {
+            self.titleLabel.font = font
+        }
     }
     
     open override func st_rightBarBtnClick() {}
