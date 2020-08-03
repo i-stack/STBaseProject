@@ -77,10 +77,7 @@ public extension String {
         if let date = dateFormatter.date(from: self) {
             interval = date.timeIntervalSince1970
         }
-        if String(interval).count == 10 {
-            interval = interval * 1000.0
-        }
-        return interval
+        return interval * 1000.0
     }
     
     /// 比较给定Date与当前时间的时间差，返回相差的秒数
