@@ -257,7 +257,8 @@ public extension String {
             return 0
         }
         var timeStamp: TimeInterval = NSDecimalNumber.init(string: self).doubleValue
-        if self.count == 13 {
+        let stamp = abs(Int64(timeStamp))
+        if String(stamp).count == 13 {
             timeStamp = timeStamp / 1000.0
         }
         return timeStamp
