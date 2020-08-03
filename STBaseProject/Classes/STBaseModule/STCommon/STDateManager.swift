@@ -11,24 +11,37 @@ import Foundation
 
 public extension String {
     
-    /// @param 当前时间戳 yyyy-MM-dd HH:mm:ss
+    /// 当前时间戳
+    /// - Returns: yyyy-MM-dd HH:mm:ss
     func st_currentSystemTimestamp() -> String {
         return st_currentSystemTimestamp(dateFormat: "yyyy-MM-dd HH:mm:ss")
     }
     
-    /// @param 当前时间戳
+    /// 当前时间戳
+    ///
+    /// - Parameter dateFormat: 自定义时间格式，如：yyyy-MM-dd HH:mm:ss
+    ///
+    /// - Returns: 2018-06-20 12:00:00
     func st_currentSystemTimestamp(dateFormat: String) -> String {
-        let dateFormatter = String.self.formatter(dateFormat: dateFormat)
+        let dateFormatter = String.formatter(dateFormat: dateFormat)
         let dateStr = dateFormatter.string(from: Date())
         return dateStr
     }
     
-    /// @param 时间戳转时间 yyyy-MM-dd HH:mm:ss
+    /// 时间戳转时间
+    ///
+    /// 默认时间格式：yyyy-MM-dd HH:mm:ss
+    ///
+    /// - Returns: 2018-06-20 12:00:00
     func st_timestampToStr() -> String {
         return st_timestampToStr(dateFormat: "yyyy-MM-dd HH:mm:ss")
     }
     
-    /// @param 时间戳转时间
+    /// 时间戳转时间
+    ///
+    /// - Parameter dateFormat: 自定义时间格式，如：yyyy-MM-dd HH:mm:ss
+    ///
+    /// - Returns: 2018-06-20 12:00:00
     func st_timestampToStr(dateFormat: String) -> String {
         if self.count < 1 {
             return ""
@@ -40,7 +53,7 @@ public extension String {
         return timeStr
     }
     
-    /// @param 时间戳转Date
+    /// 时间戳转Date
     func st_timestampToDate() -> Date {
         if self.count < 1 {
             return Date()
@@ -50,7 +63,11 @@ public extension String {
         return date
     }
     
-    /// @param 时间字符串转时间戳（毫秒）
+    /// 时间字符串转时间戳
+    ///
+    /// - Parameter dateFormat: 自定义时间格式，如：yyyy-MM-dd HH:mm:ss
+    ///
+    /// - Returns: TimeInterval  毫秒
     func st_timeTotimestamp(dateFormat: String) -> TimeInterval {
         if self.count < 1 {
             return 0
@@ -66,14 +83,14 @@ public extension String {
         return interval
     }
     
-    /// @param 比较给定Date与当前时间的时间差，返回相差的秒数
+    /// 比较给定Date与当前时间的时间差，返回相差的秒数
     func st_timeDifference(date: Date) -> String {
         let localDate = Date()
         let difference = fabs(localDate.timeIntervalSince(date))
         return String(difference)
     }
     
-    /// @param 返回几天前、几小时前、几分钟前等
+    /// 返回几天前、几小时前、几分钟前等
     func st_timeStampToDay() -> String {
         let timeStamp = self.timeStampToSecond()
         let currentTime = Date().timeIntervalSince1970
@@ -101,37 +118,86 @@ public extension String {
         return "\(year)年前"
     }
     
-    /// @param 比较给定日期与当前日期 year {0: 相同，1: 大于当前日期， 2: 小于当前日期}
+    /// 比较给定日期与当前日期
+    ///
+    /// 比较 `year` 的大小
+    ///
+    /// - Returns:
+    ///     - 0：相同
+    ///     - 1：大于当前日期
+    ///     - 2：小于当前日期
     func st_compareYearWithCurrentDate() -> Int {
         return compareWithCurrentDate(compontent: .year)
     }
     
-    /// @param 比较给定日期与当前日期 month {0: 相同，1: 大于当前日期， 2: 小于当前日期}
+    /// 比较给定日期与当前日期
+    ///
+    /// 比较 `month` 的大小
+    ///
+    /// - Returns:
+    ///     - 0：相同
+    ///     - 1：大于当前日期
+    ///     - 2：小于当前日期
     func st_compareMonthWithCurrentDate() -> Int {
         return compareWithCurrentDate(compontent: .month)
     }
     
-    /// @param 比较给定日期与当前日期 day {0: 相同，1: 大于当前日期， 2: 小于当前日期}
+    /// 比较给定日期与当前日期
+    ///
+    /// 比较 `day` 的大小
+    ///
+    /// - Returns:
+    ///     - 0：相同
+    ///     - 1：大于当前日期
+    ///     - 2：小于当前日期
     func st_compareDayWithCurrentDate() -> Int {
         return compareWithCurrentDate(compontent: .day)
     }
     
-    /// @param 比较给定日期与当前日期 hour {0: 相同，1: 大于当前日期， 2: 小于当前日期}
+    /// 比较给定日期与当前日期
+    ///
+    /// 比较 `hour` 的大小
+    ///
+    /// - Returns:
+    ///     - 0：相同
+    ///     - 1：大于当前日期
+    ///     - 2：小于当前日期
     func st_compareHourWithCurrentDate() -> Int {
         return compareWithCurrentDate(compontent: .hour)
     }
     
-    /// @param 比较给定日期与当前日期 minute {0: 相同，1: 大于当前日期， 2: 小于当前日期}
+    /// 比较给定日期与当前日期
+    ///
+    /// 比较 `minute` 的大小
+    ///
+    /// - Returns:
+    ///     - 0：相同
+    ///     - 1：大于当前日期
+    ///     - 2：小于当前日期
     func st_compareMinuteWithCurrentDate() -> Int {
         return compareWithCurrentDate(compontent: .minute)
     }
     
-    /// @param 比较给定日期与当前日期 second {0: 相同，1: 大于当前日期， 2: 小于当前日期}
+    /// 比较给定日期与当前日期
+    ///
+    /// 比较 `second` 的大小
+    ///
+    /// - Returns:
+    ///     - 0：相同
+    ///     - 1：大于当前日期
+    ///     - 2：小于当前日期
     func st_compareSecondWithCurrentDate() -> Int {
         return compareWithCurrentDate(compontent: .second)
     }
     
-    /// @param 比较给定日期与当前日期 {0: 相同，1: 大于当前日期， 2: 小于当前日期}
+    /// 比较给定日期与当前日期
+    ///
+    /// 比较 `Date` 的大小
+    ///
+    /// - Returns:
+    ///     - 0：相同
+    ///     - 1：大于当前日期
+    ///     - 2：小于当前日期
     func st_compareWithCurrentDate() -> Int {
         var compareResult = 0
         let currentDate = Date()
