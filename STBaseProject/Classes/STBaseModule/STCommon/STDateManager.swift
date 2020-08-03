@@ -34,7 +34,7 @@ public extension String {
             return ""
         }
         let timeStamp: TimeInterval = self.timeStampToSecond()
-        let dateFormatter = String.self.formatter(dateFormat: dateFormat)
+        let dateFormatter = String.formatter(dateFormat: dateFormat)
         let date = Date.init(timeIntervalSince1970: timeStamp)
         let timeStr = dateFormatter.string(from: date)
         return timeStr
@@ -47,10 +47,7 @@ public extension String {
         }
         let timeStamp: TimeInterval = self.timeStampToSecond()
         let date = Date.init(timeIntervalSince1970: timeStamp)
-        let zone = NSTimeZone.system
-        let interval = zone.secondsFromGMT(for: date)
-        let localeDate = date.addingTimeInterval(TimeInterval(interval))
-        return localeDate
+        return date
     }
     
     /// @param 时间字符串转时间戳（毫秒）
