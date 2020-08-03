@@ -55,10 +55,13 @@ public extension String {
         if self.count < 1 {
             return 0
         }
-        let dateFormatter: DateFormatter = String.self.formatter(dateFormat: dateFormat)
+        let dateFormatter: DateFormatter = String.formatter(dateFormat: dateFormat)
         var interval: TimeInterval = 0
         if let date = dateFormatter.date(from: self) {
-            interval = date.timeIntervalSince1970 * 1000
+            interval = date.timeIntervalSince1970
+        }
+        if String(interval).count == 10 {
+            interval = interval * 1000.0
         }
         return interval
     }
@@ -190,10 +193,9 @@ public extension String {
         if self.count < 1 {
             return 0
         }
-        let stamp: Double = self.doubleValue
-        var timeStamp: TimeInterval = TimeInterval(stamp)
+        var timeStamp: TimeInterval = NSDecimalNumber.init(string: self).doubleValue
         if self.count == 13 {
-            timeStamp = TimeInterval(timeStamp / 1000)
+            timeStamp = timeStamp / 1000.0
         }
         return timeStamp
     }
