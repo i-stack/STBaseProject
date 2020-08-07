@@ -15,10 +15,9 @@ public enum STHUDLocation {
     case bottom
 }
 
-/**
-    监听hud状态
-    - Returns: true hud is show elsewise hud is hidden
-**/
+/// 监听`hud`状态
+/// - Parameter state: `hud` 是否展示
+/// - Returns: `true` hud is show elsewise `hud` is hidden
 public typealias STHUDCompletionBlock = (_ state: Bool) -> Void
 
 open class STHUD: MBProgressHUD {
@@ -96,16 +95,6 @@ open class STHUD: MBProgressHUD {
         } else {
             self.bezelView.color = UIColor.black.withAlphaComponent(0.6)
         }
-//        for subview in self.bezelView.subviews {
-//            if subview.isKind(of: UIActivityIndicatorView.self) {
-//                let activityView = subview as! UIActivityIndicatorView
-//                if let color = self.activityViewColor {
-//                    activityView.color = color
-//                } else {
-//                    activityView.color = UIColor.black.withAlphaComponent(0.6)
-//                }
-//            }
-//        }
     }
     
     open override func hide(animated: Bool) {
@@ -121,11 +110,21 @@ open class STHUD: MBProgressHUD {
 }
 
 public extension UIView {
-    /// @prama 显示HUD，自动关闭
+    /// 显示HUD
+    ///
+    /// 完成后会自动关闭，默认添加到`UIApplication.shared.keyWindow`
+    ///
+    /// - Parameter text: 展示文字
     func showAutoHidden(text: String) -> Void {
         self.showAutoHidden(text: text, toView: UIApplication.shared.keyWindow ?? UIView())
     }
     
+    /// 显示HUD
+    ///
+    /// 完成后会自动关闭
+    ///
+    /// - Parameter text: 展示文字
+    /// - Parameter toView: 添加到指定`view`
     func showAutoHidden(text: String, toView: UIView) -> Void {
         self.showAutoHidden(text: text, detailText: "", toView: toView)
     }
@@ -160,7 +159,9 @@ public extension UIView {
 }
 
 public extension UIView {
-    /// @prama 手动显示HUD，切记需要手动关闭
+    /// 显示HUD
+    ///
+    /// 切记需要手动关闭
     func showLoadingManualMHidden() -> Void {
         self.showLoadingManualMHidden(text: "")
     }
@@ -185,7 +186,7 @@ public extension UIView {
         }
     }
 
-    /// @prama 手动关闭MBProgressHUD
+    /// 关闭MBProgressHUD
     func hideHUD() -> Void {
         DispatchQueue.main.async {
             let hud = STHUD.sharedHUD

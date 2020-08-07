@@ -2,8 +2,8 @@
 //  STBtn.swift
 //  STBaseProject
 //
-//  Created by stack on 2017/10/14.
-//  Copyright © 2017年 ST. All rights reserved.
+//  Created by stack on 2019/10/14.
+//  Copyright © 2019年 ST. All rights reserved.
 //
 
 import UIKit

@@ -41,11 +41,12 @@ public extension Bundle {
         return string
     }
     
-    /**
-    设置语言
-    @param language 参数为语言包的前缀，比如Base.lproj 传入Base、
-    中文语言包zh-Hans.lproj传入zh-Hans，前提是工程中已经提前加入了语言包
-    */
+    /// 设置语言
+    ///
+    /// - Parameter language: 语言包的前缀，比如`Base.lproj`，传入`Base`
+    ///
+    /// `zh-Hans.lproj` 传入 `zh-Hans`，前提是工程中已经提前加入了语言包
+    ///
     static func st_setCusLanguage(language: String) -> Void {
         let df = UserDefaults.standard
         if language.count > 0 {
@@ -70,10 +71,7 @@ public extension Bundle {
         df.synchronize()
     }
     
-    /**
-     获取当前的自定义语言，如果使用的是跟随系统语言出参为nil
-     @return 语言类型
-     */
+    /// 获取当前的自定义语言，如果使用的是跟随系统语言出参为 `nil`
     static func st_getCustomLanguage() -> String {
         let df = UserDefaults.standard
         var language = ""
@@ -97,9 +95,7 @@ public extension Bundle {
         return language
     }
 
-    /**
-     恢复成跟随系统语言
-     */
+    /// 恢复跟随系统语言
     static func st_restoreSysLanguage() -> Void {
         self.st_setCusLanguage(language: "")
     }

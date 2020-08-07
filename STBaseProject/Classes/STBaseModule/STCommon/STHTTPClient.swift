@@ -279,6 +279,4 @@ extension STHTTPClient: URLSessionTaskDelegate {
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         
     }
-    
-    
 }

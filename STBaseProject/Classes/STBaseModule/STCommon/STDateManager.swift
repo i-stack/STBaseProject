@@ -2,8 +2,8 @@
 //  STDateManager.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/10/10.
-//  Copyright © 2018 ST. All rights reserved.
+//  Created by stack on 2019/10/10.
+//  Copyright © 2019 ST. All rights reserved.
 //
 
 import UIKit

@@ -14,13 +14,13 @@ open class STVerificationCodeBtn: STBtn {
     private var originTitle: String?
     private var tempTimerInterval: Int = 0
 
-    /// @param 显示后缀 10s 、10秒
+    /// 显示后缀 10s 、10秒
     open var titleSuffix: String = ""
     
-    /// @param 倒计时间隔时间
+    /// 倒计时间隔时间
     open var interval: TimeInterval = 1
     
-    /// @param 倒计时结束时间
+    /// 倒计时结束时间
     open var timerInterval: Int = 60
 
     deinit {

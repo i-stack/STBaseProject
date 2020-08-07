@@ -2,8 +2,8 @@
 //  STConstants.swift
 //  STBaseProject
 //
-//  Created by stack on 2017/10/14.
-//  Copyright © 2017年 ST. All rights reserved.
+//  Created by stack on 2019/03/16.
+//  Copyright © 2019年 ST. All rights reserved.
 //
 
 import UIKit
@@ -20,7 +20,7 @@ public enum STScreenSize {
     case AMXScreenSize12p9Inch
 }
 
-/// 自定义 bar height
+// 自定义 bar height
 public struct STConstantBarHeightModel {
     public var navNormalHeight: CGFloat = 64.0
     public var navIsSafeHeight: CGFloat = 88.0
@@ -35,12 +35,18 @@ public class STConstants: NSObject {
     public static let shared: STConstants = STConstants()
     private var barHeightModel: STConstantBarHeightModel = STConstantBarHeightModel()
 
-    /// @param 设计图基准尺寸
+    /// 设计图基准尺寸
+    ///
+    /// 配置一次
+    ///
+    /// - Parameter size: 基准尺寸
     public func st_configBenchmarkDesign(size: CGSize) -> Void {
         self.benchmarkDesignSize = size
     }
     
-    /// @param 自定义 bar 高度
+    /// 自定义 bar 高度
+    ///
+    /// - Parameter model: `STConstantBarHeightModel`
     public func st_customNavHeight(model: STConstantBarHeightModel) -> Void {
         self.barHeightModel = model
     }
@@ -54,7 +60,11 @@ public class STConstants: NSObject {
         return min / size.width
     }
     
-    /// @param 调用此方法前，需调用 st_configBenchmarkDesign 传入基准设计尺寸，配置一次
+    /// 当前屏幕与标准设计尺寸比例值
+    ///
+    /// 调用此方法前，需调用 `st_configBenchmarkDesign` 传入基准设计尺寸，配置一次
+    ///
+    /// - Parameter float: 设计图标注值
     public class func st_handleFloat(float: CGFloat) -> CGFloat {
         let multiplier = self.st_multiplier()
         return float * multiplier
