@@ -58,10 +58,10 @@ public extension String {
                 }
                 break
             case .int(let value):
-                cnt = String.init(format: "%@", value)
+                cnt = String(value)
                 break
             case .double(let value):
-                cnt = String.init(format: "%@", value)
+                cnt = String(value)
                 break
             case .string(let value):
                 cnt = value
