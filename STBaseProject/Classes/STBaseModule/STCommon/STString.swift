@@ -48,6 +48,27 @@ public extension String {
             } else {
                 cnt = "0"
             }
+        } else if let obj = object as? STJSONValue {
+            switch obj {
+            case .bool(let value):
+                if value {
+                    cnt = "1"
+                } else {
+                    cnt = "0"
+                }
+                break
+            case .int(let value):
+                cnt = String.init(format: "%@", value)
+                break
+            case .double(let value):
+                cnt = String.init(format: "%@", value)
+                break
+            case .string(let value):
+                cnt = value
+                break
+            default:
+                break
+            }
         }
         return cnt
     }
