@@ -9,7 +9,6 @@
 import UIKit
 
 open class STBaseViewModel: NSObject {
-    
     deinit {
         print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }

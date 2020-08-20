@@ -7,18 +7,16 @@
 //
 
 import UIKit
-/**
- *  NotificationCenter.default.addObserver(self, selector: #selector(userDidTakeScreenshot(note:)), name: UIApplication.userDidTakeScreenshotNotification, object: nil)
- *
- *  @objc func userDidTakeScreenshot(note: NSNotification) -> Void {
-        print("warning ======  userDidTakeScreenshot")
-        // call st_showScreenshotImage(rect: CGRect) class method can return UIImageView
-        // call st_imageWithScreenshot() class method can return UIImage
-    }
- */
-
+///
+/// NotificationCenter.default.addObserver(self, selector: #selector(userDidTakeScreenshot(note:)), name: UIApplication.userDidTakeScreenshotNotification, object: nil)
+///
+/// @objc func userDidTakeScreenshot(note: NSNotification) -> Void {
+///     print("warning ======  userDidTakeScreenshot")
+///     call st_showScreenshotImage(rect: CGRect) class method can return UIImageView
+///     call st_imageWithScreenshot() class method can return UIImage
+/// }
+///
 open class STScreenShot: NSObject {
-    
     class private func st_dataWithScreenshotInPNGFormat() -> Data {
         var imageSize: CGSize = CGSize.zero
         let orientation = UIApplication.shared.statusBarOrientation
