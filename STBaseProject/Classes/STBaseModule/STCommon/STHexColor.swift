@@ -112,7 +112,7 @@ public extension UIColor {
         guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
             return 0
         }
-        return Int(red * multiplier)
+        return Int(red * multiplier) <= 255 ? Int(red * multiplier) : 255
     }
     
     func st_getColorG() -> Int {
@@ -124,7 +124,7 @@ public extension UIColor {
         guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
             return 0
         }
-        return Int(green * multiplier)
+        return Int(green * multiplier) <= 255 ? Int(green * multiplier) : 255
     }
     
     func st_getColorB() -> Int {
@@ -136,7 +136,7 @@ public extension UIColor {
         guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
             return 0
         }
-        return Int(blue * multiplier)
+        return Int(blue * multiplier) <= 255 ? Int(blue * multiplier) : 255
     }
     
     func st_getColorA() -> CGFloat {
