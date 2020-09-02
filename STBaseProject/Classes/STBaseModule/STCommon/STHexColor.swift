@@ -103,40 +103,40 @@ public extension UIColor {
         }
     }
     
-    func st_getColorR() -> CGFloat {
+    func st_getColorR() -> Int {
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
-        let multiplier = CGFloat(255.999999)
+        let multiplier = CGFloat(255.0)
         guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0.0
+            return 0
         }
-        return red * multiplier
+        return Int(red * multiplier)
     }
     
-    func st_getColorG() -> CGFloat {
+    func st_getColorG() -> Int {
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
-        let multiplier = CGFloat(255.999999)
+        let multiplier = CGFloat(255.0)
         guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0.0
+            return 0
         }
-        return green * multiplier
+        return Int(green * multiplier)
     }
     
-    func st_getColorB() -> CGFloat {
+    func st_getColorB() -> Int {
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
-        let multiplier = CGFloat(255.999999)
+        let multiplier = CGFloat(255.0)
         guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0.0
+            return 0
         }
-        return blue * multiplier
+        return Int(blue * multiplier)
     }
     
     func st_getColorA() -> CGFloat {
