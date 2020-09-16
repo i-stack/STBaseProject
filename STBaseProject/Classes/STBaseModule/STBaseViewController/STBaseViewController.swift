@@ -41,13 +41,16 @@ open class STBaseViewController: UIViewController {
     open var navBgViewAttributeHeight: NSLayoutConstraint!
 
     deinit {
-        print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
 
     override open func viewDidLoad() {
         super.viewDidLoad()
         self.st_baseConfig()
         self.st_navigationBarView()
+        #if DEBUG
+        self.openLogPrintGestureRecognizer()
+        #endif
     }
     
     private func st_baseConfig() -> Void {
@@ -180,6 +183,36 @@ open class STBaseViewController: UIViewController {
     }
     
     @objc open func st_rightBarBtnClick() -> Void {}
+    
+    private func openLogPrintGestureRecognizer() {
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer.init(target: self, action: #selector(showLogPrintView))
+        tap.numberOfTapsRequired = 3
+        self.topBgView.addGestureRecognizer(tap)
+    }
+    
+    @objc private func showLogPrintView() {
+        if self.logView.superview != nil {
+            self.logView.removeFromSuperview()
+        }
+        UIApplication.shared.keyWindow?.addSubview(self.logView)
+        UIApplication.shared.keyWindow?.addConstraints([
+            NSLayoutConstraint.init(item: self.logView, attribute: .top, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .top, multiplier: 1, constant: 0),
+            NSLayoutConstraint.init(item: self.logView, attribute: .left, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .left, multiplier: 1, constant: 0),
+            NSLayoutConstraint.init(item: self.logView, attribute: .bottom, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .bottom, multiplier: 1, constant: 0),
+            NSLayoutConstraint.init(item: self.logView, attribute: .right, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .right, multiplier: 1, constant: 0)
+        ])
+    }
+    
+    private lazy var logView: STLogView = {
+        let view = STLogView()
+        view.backgroundColor = UIColor.black
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    public func logDataSources(log: String) {
+        self.logView.update(log: log)
+    }
 }
 
 extension STBaseViewController: UIGestureRecognizerDelegate {

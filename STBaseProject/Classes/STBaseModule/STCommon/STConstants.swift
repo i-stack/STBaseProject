@@ -175,6 +175,6 @@ public class STConstants: NSObject {
 public func STLog<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
     #if DEBUG
     let file = (file as NSString).lastPathComponent
-    print("\(file):(\(lineNum))--\(message)")
+    print("\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)")
     #endif
 }
