@@ -56,12 +56,15 @@ public class STLogView: UIView {
     
     func beginQueryLog() {
         self.stopQueryLog()
-        self.queryLogTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: {[weak self] (timer) in
+        self.queryLogTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: {[weak self] (timer) in
             guard let strongSelf = self else { return }
             let content = STFileManager.readFromFile(filePath: "\(STFileManager.getLibraryCachePath())/outputLog/log.text")
-            if !strongSelf.dataSources.contains(content) {
-                strongSelf.dataSources.append(content)
-                strongSelf.tableView.reloadData()
+            if content.count > 0 {
+                if !strongSelf.dataSources.contains(content) {
+                    strongSelf.dataSources.removeAll()
+                    strongSelf.dataSources.append(content)
+                    strongSelf.tableView.reloadData()
+                }
             }
         })
     }
