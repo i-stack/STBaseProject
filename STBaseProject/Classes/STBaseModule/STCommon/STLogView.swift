@@ -9,9 +9,11 @@
 import UIKit
 
 public class STLogView: UIView {
-    private var dataSources: [String] = [String]()
-    private var tableViewInBottom: Bool = false
     
+    private var queryLogTimer: Timer?
+    private var tableViewInBottom: Bool = false
+    private var dataSources: [String] = [String]()
+
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.configUI()
@@ -51,6 +53,38 @@ public class STLogView: UIView {
             NSLayoutConstraint.init(item: self.tableView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1, constant: 0)
         ])
     }
+    
+    func beginQueryLog() {
+        self.stopQueryLog()
+        self.queryLogTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: {[weak self] (timer) in
+            guard let strongSelf = self else { return }
+            if let currentVC = strongSelf.currentViewController() {
+                let description = currentVC.description
+                var currentVCName = description
+                if description.contains(".") {
+                    if let lastDescription = description.split(separator: ".").last {
+                        if lastDescription.contains(":") {
+                            if let firstDescription = lastDescription.split(separator: ":").first {
+                                currentVCName = String(firstDescription)
+                            }
+                        }
+                    }
+                }
+                let content = STFileManager.readFromFile(filePath: "\(STFileManager.getLibraryCachePath())/\(currentVCName).swift/log.text")
+                if !strongSelf.dataSources.contains(content) {
+                    strongSelf.dataSources.append(content)
+                    strongSelf.tableView.reloadData()
+                }
+            }
+        })
+    }
+    
+    func stopQueryLog() {
+        if self.queryLogTimer?.isValid ?? false {
+            self.queryLogTimer?.invalidate()
+            self.queryLogTimer = nil
+        }
+    }
 
     public func update(log: String) {
         self.dataSources.append(log)
@@ -61,6 +95,7 @@ public class STLogView: UIView {
     }
         
     @objc private func backBtnClick() {
+        self.stopQueryLog()
         self.removeFromSuperview()
     }
         
