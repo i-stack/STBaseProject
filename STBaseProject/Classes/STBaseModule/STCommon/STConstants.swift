@@ -177,7 +177,7 @@ public func STLog<T>(_ message: T, file: String = #file, funcName: String = #fun
     let file = (file as NSString).lastPathComponent
     let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
     print(content)
-    let path = STFileManager.create(filePath: "\(STFileManager.getLibraryCachePath())/\(file)", fileName: "log.text")
+    let path = STFileManager.create(filePath: "\(STFileManager.getLibraryCachePath())/outputLog", fileName: "log.text")
     STFileManager.writeToFile(content: content, filePath: path)
     #endif
 }

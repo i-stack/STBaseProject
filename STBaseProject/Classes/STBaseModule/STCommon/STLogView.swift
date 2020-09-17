@@ -58,23 +58,10 @@ public class STLogView: UIView {
         self.stopQueryLog()
         self.queryLogTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: {[weak self] (timer) in
             guard let strongSelf = self else { return }
-            if let currentVC = strongSelf.currentViewController() {
-                let description = currentVC.description
-                var currentVCName = description
-                if description.contains(".") {
-                    if let lastDescription = description.split(separator: ".").last {
-                        if lastDescription.contains(":") {
-                            if let firstDescription = lastDescription.split(separator: ":").first {
-                                currentVCName = String(firstDescription)
-                            }
-                        }
-                    }
-                }
-                let content = STFileManager.readFromFile(filePath: "\(STFileManager.getLibraryCachePath())/\(currentVCName).swift/log.text")
-                if !strongSelf.dataSources.contains(content) {
-                    strongSelf.dataSources.append(content)
-                    strongSelf.tableView.reloadData()
-                }
+            let content = STFileManager.readFromFile(filePath: "\(STFileManager.getLibraryCachePath())/outputLog/log.text")
+            if !strongSelf.dataSources.contains(content) {
+                strongSelf.dataSources.append(content)
+                strongSelf.tableView.reloadData()
             }
         })
     }
@@ -100,6 +87,7 @@ public class STLogView: UIView {
     }
         
     @objc private func cleanLogBtnClick() {
+        STFileManager.removeItem(atPath: "\(STFileManager.getLibraryCachePath())/outputLog/log.text")
         self.dataSources.removeAll()
         self.tableView.reloadData()
     }
