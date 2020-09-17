@@ -170,6 +170,10 @@ public class STConstants: NSObject {
         }
         return 0
     }
+    
+    public class func st_outputLogPath() -> String {
+        return "\(STFileManager.getLibraryCachePath())/outputLog/log.txt"
+    }
 }
 
 public func STLog<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
@@ -177,7 +181,7 @@ public func STLog<T>(_ message: T, file: String = #file, funcName: String = #fun
     let file = (file as NSString).lastPathComponent
     let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
     print(content)
-    let path = STFileManager.create(filePath: "\(STFileManager.getLibraryCachePath())/outputLog", fileName: "log.text")
+    let path = STFileManager.create(filePath: "\(STFileManager.getLibraryCachePath())/outputLog", fileName: "log.txt")
     STFileManager.writeToFile(content: content, filePath: path)
     #endif
 }
