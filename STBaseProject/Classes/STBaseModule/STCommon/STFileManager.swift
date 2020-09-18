@@ -25,7 +25,7 @@ public class STFileManager: NSObject {
                     do {
                         try data.write(to: URL.init(fileURLWithPath: filePath))
                     } catch {
-                        STLog("writeToFile Err: \(error.localizedDescription)")
+                        print("writeToFile Err: \(error.localizedDescription)")
                     }
                 }
             }
@@ -40,7 +40,7 @@ public class STFileManager: NSObject {
             do {
                 originContent = try String.init(contentsOfFile: filePath)
             } catch {
-                STLog("readFromFile Err: \(error.localizedDescription)")
+                print("readFromFile Err: \(error.localizedDescription)")
             }
         }
         return originContent
@@ -98,7 +98,7 @@ public class STFileManager: NSObject {
             do {
                 try fileManager.createDirectory(at: URL.init(fileURLWithPath: path), withIntermediateDirectories: true, attributes: nil)
             } catch {
-                STLog("createDirectory Err : \(error.localizedDescription)")
+                print("createDirectory Err : \(error.localizedDescription)")
             }
         }
     }
@@ -124,7 +124,7 @@ public class STFileManager: NSObject {
         do {
             try fileManager.copyItem(atPath: atPath, toPath: toPath)
         } catch {
-            STLog("copyItem Err : \(error.localizedDescription)")
+            print("copyItem Err : \(error.localizedDescription)")
         }
     }
 
@@ -134,7 +134,7 @@ public class STFileManager: NSObject {
         do {
             try fileManager.moveItem(atPath: atPath, toPath: toPath)
         } catch {
-            STLog("moveItem Err : \(error.localizedDescription)")
+            print("moveItem Err : \(error.localizedDescription)")
         }
     }
 
@@ -144,7 +144,7 @@ public class STFileManager: NSObject {
         do {
             try fileManager.removeItem(atPath: atPath)
         } catch {
-            STLog("removeItem Err : \(error.localizedDescription)")
+            print("removeItem Err : \(error.localizedDescription)")
         }
     }
 
@@ -155,7 +155,7 @@ public class STFileManager: NSObject {
         do {
             contentArr = try fileManager.contentsOfDirectory(atPath: atPath)
         } catch {
-            STLog("getContentsOfDirectory Err : \(error.localizedDescription)")
+            print("getContentsOfDirectory Err : \(error.localizedDescription)")
         }
         return contentArr
     }
