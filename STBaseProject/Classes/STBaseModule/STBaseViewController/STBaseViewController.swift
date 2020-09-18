@@ -205,15 +205,19 @@ open class STBaseViewController: UIViewController {
     }
     
     private lazy var logView: STLogView = {
-        let view = STLogView()
+        let view = STLogView.init(frame: CGRect.zero, delegate: self)
         view.backgroundColor = UIColor.black
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
-    public func logDataSources(log: String) {
-        self.logView.update(log: log)
-    }
+
+    private lazy var documentController: UIDocumentInteractionController = {
+        let path = STConstants.st_outputLogPath()
+        let documentController = UIDocumentInteractionController(url: URL.init(fileURLWithPath: path))
+        documentController.uti = "public.text"
+        documentController.delegate = self
+        return documentController
+    }()
 }
 
 extension STBaseViewController: UIGestureRecognizerDelegate {
@@ -231,6 +235,24 @@ extension STBaseViewController: UIGestureRecognizerDelegate {
             return true
         }
         return false
+    }
+}
+
+extension STBaseViewController: STLogViewDelegate, UIDocumentInteractionControllerDelegate {
+    func showDocumentInteractionController() {
+        self.documentController.presentOpenInMenu(from: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 400), in: self.view, animated: true)
+    }
+    
+    public func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
+        return self
+    }
+    
+    public func documentInteractionControllerViewForPreview(_ controller: UIDocumentInteractionController) -> UIView? {
+        return self.view
+    }
+    
+    public func documentInteractionControllerRectForPreview(_ controller: UIDocumentInteractionController) -> CGRect {
+        return self.view.bounds
     }
 }
 

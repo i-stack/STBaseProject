@@ -8,16 +8,25 @@
 
 import UIKit
 
-public class STLogView: UIView {
+protocol STLogViewDelegate: NSObjectProtocol {
+    func showDocumentInteractionController() -> Void
+}
+
+class STLogView: UIView {
     
     private var queryLogTimer: Timer?
     private var tableViewInBottom: Bool = false
+    private weak var mDelegate: STLogViewDelegate?
     private var dataSources: [String] = [String]()
-    private var documentController: UIDocumentInteractionController?
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.configUI()
+    }
+    
+    public convenience init(frame: CGRect, delegate: STLogViewDelegate) {
+        self.init(frame: frame)
+        self.mDelegate = delegate
     }
     
     required init?(coder: NSCoder) {
@@ -25,7 +34,6 @@ public class STLogView: UIView {
     }
     
     private func configUI() {
-//        self.addSubview(self.centerView)
         self.addSubview(self.backBtn)
         self.addSubview(self.cleanLogBtn)
         self.addSubview(self.outputLogBtn)
@@ -36,12 +44,6 @@ public class STLogView: UIView {
             NSLayoutConstraint.init(item: self.outputLogBtn, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 100),
             NSLayoutConstraint.init(item: self.outputLogBtn, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 80)
         ])
-//        self.addConstraints([
-//            NSLayoutConstraint.init(item: self.centerView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1, constant: 0),
-//            NSLayoutConstraint.init(item: self.centerView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1, constant: 0),
-//            NSLayoutConstraint.init(item: self.centerView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0),
-//            NSLayoutConstraint.init(item: self.centerView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 1)
-//        ])
         self.addConstraints([
             NSLayoutConstraint.init(item: self.backBtn, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.backBtn, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1, constant: 0),
@@ -83,14 +85,6 @@ public class STLogView: UIView {
             self.queryLogTimer = nil
         }
     }
-
-    public func update(log: String) {
-        self.dataSources.append(log)
-        self.tableView.reloadData()
-        if self.tableViewInBottom {
-            self.tableView.scrollToRow(at: IndexPath.init(row: self.dataSources.count - 1, section: 0), at: .bottom, animated: true)
-        }
-    }
         
     @objc private func backBtnClick() {
         self.stopQueryLog()
@@ -104,15 +98,7 @@ public class STLogView: UIView {
     }
     
     @objc private func outputLogBtnClick(sender: UIButton) {
-        let path = "\(STFileManager.getLibraryCachePath())/outputLog/log.text"
-        if let pathURL = URL.init(string: path) {
-            documentController = UIDocumentInteractionController(url: pathURL)
-            documentController?.delegate = self
-            let result = documentController?.presentOpenInMenu(from: CGRect.init(x: 0, y: 0, width: self.bounds.size.width, height: 200), in: self, animated: true) ?? false
-            if !result {
-                print("打开失败")
-            }
-        }
+        self.mDelegate?.showDocumentInteractionController()
     }
         
     private lazy var tableView: UITableView = {
@@ -155,13 +141,6 @@ public class STLogView: UIView {
         btn.addTarget(self, action: #selector(outputLogBtnClick(sender:)), for: .touchUpInside)
         return btn
     }()
-    
-    private lazy var centerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.clear
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }()
 }
 
 extension STLogView: UITableViewDelegate, UITableViewDataSource {
@@ -197,19 +176,5 @@ extension STLogView: UITableViewDelegate, UITableViewDataSource {
         } else {
             self.tableViewInBottom = false
         }
-    }
-}
-
-extension STLogView: UIDocumentInteractionControllerDelegate {
-    public func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
-        return self.currentViewController() ?? UIViewController()
-    }
-    
-    public func documentInteractionControllerViewForPreview(_ controller: UIDocumentInteractionController) -> UIView? {
-        return self
-    }
-    
-    public func documentInteractionControllerRectForPreview(_ controller: UIDocumentInteractionController) -> CGRect {
-        return self.bounds
     }
 }
