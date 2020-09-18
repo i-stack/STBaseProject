@@ -92,7 +92,7 @@ class STLogView: UIView {
     }
         
     @objc private func cleanLogBtnClick() {
-        STFileManager.removeItem(atPath: "\(STFileManager.getLibraryCachePath())/outputLog/log.text")
+        STFileManager.removeItem(atPath: STConstants.st_outputLogPath())
         self.dataSources.removeAll()
         self.tableView.reloadData()
     }
