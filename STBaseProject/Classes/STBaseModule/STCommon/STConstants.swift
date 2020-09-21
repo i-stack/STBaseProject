@@ -176,7 +176,17 @@ public class STConstants: NSObject {
     }
 }
 
+/// 在DEBUG模式下打印到控制台
 public func STLog<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
+    #if DEBUG
+    let file = (file as NSString).lastPathComponent
+    let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
+    print(content)
+    #endif
+}
+
+/// 在DEBUG模式下打印到控制台并保存日志
+public func STLogP<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
     #if DEBUG
     let file = (file as NSString).lastPathComponent
     let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
