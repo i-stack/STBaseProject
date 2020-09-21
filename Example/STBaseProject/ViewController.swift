@@ -17,11 +17,16 @@ class ViewController: STBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.st_showNavBtnType(type: .onlyShowTitle)
-        STLog("5555")
+        for index in 0...100 {
+            STLog("\(index)")
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
+        for index in 100...200 {
+            STLog("\(index)")
+        }
     }
     
     lazy var testView: STTestView = {

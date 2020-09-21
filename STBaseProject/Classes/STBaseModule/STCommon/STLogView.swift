@@ -68,12 +68,14 @@ class STLogView: UIView {
         self.stopQueryLog()
         self.queryLogTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: {[weak self] (timer) in
             guard let strongSelf = self else { return }
-            let content = STFileManager.readFromFile(filePath: "\(STFileManager.getLibraryCachePath())/outputLog/log.text")
-            if content.count > 0 {
-                if !strongSelf.dataSources.contains(content) {
-                    strongSelf.dataSources.removeAll()
-                    strongSelf.dataSources.append(content)
-                    strongSelf.tableView.reloadData()
+            let userDefault = UserDefaults.standard
+            if let origintContent = userDefault.object(forKey: STConstants.st_outputLogPath()) as? String {
+                if origintContent.count > 0 {
+                    if !strongSelf.dataSources.contains(origintContent) {
+                        strongSelf.dataSources.removeAll()
+                        strongSelf.dataSources.append(origintContent)
+                        strongSelf.tableView.reloadData()
+                    }
                 }
             }
         })
@@ -92,12 +94,16 @@ class STLogView: UIView {
     }
         
     @objc private func cleanLogBtnClick() {
+        let userDefault = UserDefaults.standard
+        userDefault.removeObject(forKey: STConstants.st_outputLogPath())
+        userDefault.synchronize()
         STFileManager.removeItem(atPath: STConstants.st_outputLogPath())
         self.dataSources.removeAll()
         self.tableView.reloadData()
     }
     
     @objc private func outputLogBtnClick(sender: UIButton) {
+        STFileManager.st_logWriteToFile()
         self.mDelegate?.showDocumentInteractionController()
     }
         

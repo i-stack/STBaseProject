@@ -181,7 +181,13 @@ public func STLog<T>(_ message: T, file: String = #file, funcName: String = #fun
     let file = (file as NSString).lastPathComponent
     let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
     print(content)
-    let path = STFileManager.create(filePath: "\(STFileManager.getLibraryCachePath())/outputLog", fileName: "log.txt")
-    STFileManager.writeToFile(content: content, filePath: path)
+    let userDefault = UserDefaults.standard
+    var allContent = ""
+    if let origintContent = userDefault.value(forKey: STConstants.st_outputLogPath()) as? String {
+        allContent = origintContent
+    }
+    allContent = "\(allContent)\n\(content)"
+    userDefault.set(allContent, forKey: STConstants.st_outputLogPath())
+    userDefault.synchronize()
     #endif
 }

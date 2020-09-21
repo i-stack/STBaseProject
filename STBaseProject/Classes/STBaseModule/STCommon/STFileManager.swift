@@ -159,4 +159,12 @@ public class STFileManager: NSObject {
         }
         return contentArr
     }
+    
+    public class func st_logWriteToFile() -> Void {
+        let userDefault = UserDefaults.standard
+        if let origintContent = userDefault.object(forKey: STConstants.st_outputLogPath()) as? String {
+            let path = STFileManager.create(filePath: "\(STFileManager.getLibraryCachePath())/outputLog", fileName: "log.txt")
+            STFileManager.writeToFile(content: origintContent, filePath: path)
+        }
+    }
 }
