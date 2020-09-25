@@ -95,25 +95,20 @@ public class STHTTPClient: NSObject {
     
     private func st_queryComponents(fromKey key: String, value: Any) -> [(String, String)] {
        var components: [(String, String)] = []
-
        if let dictionary = value as? [String: Any] {
-           for (nestedKey, value) in dictionary {
-               components += st_queryComponents(fromKey: "\(key)[\(nestedKey)]", value: value)
-           }
+            for (nestedKey, value) in dictionary {
+                components += st_queryComponents(fromKey: "\(key)[\(nestedKey)]", value: value)
+            }
        } else if let array = value as? [Any] {
-           for value in array {
-               components += st_queryComponents(fromKey: "\(key)[]", value: value)
-           }
+            for value in array {
+                components += st_queryComponents(fromKey: "\(key)[]", value: value)
+            }
        } else if let value = value as? NSNumber {
-           if value.boolValue {
-            components.append((st_escape(key), st_escape(value.boolValue ? "1" : "0")))
-           } else {
-               components.append((st_escape(key), st_escape("\(value)")))
-           }
+            components.append((st_escape(key), st_escape("\(value)")))
        } else if let bool = value as? Bool {
-           components.append((st_escape(key), st_escape(bool ? "1" : "0")))
+            components.append((st_escape(key), st_escape(bool ? "1" : "0")))
        } else {
-           components.append((st_escape(key), st_escape("\(value)")))
+            components.append((st_escape(key), st_escape("\(value)")))
        }
        return components
     }
