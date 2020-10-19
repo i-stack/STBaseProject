@@ -257,6 +257,16 @@ extension STBaseViewController: STLogViewDelegate, UIDocumentInteractionControll
 }
 
 public extension UIViewController {
+    func isDark() -> Bool {
+        if #available(iOS 12.0, *) {
+            if self.traitCollection.userInterfaceStyle == .dark {
+                return true
+            }
+            return false
+        }
+        return false
+    }
+    
     /// effect as present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil)
     func setPushAnimatedWithTransition(customSelf: UINavigationController) {
         let animation = CATransition.init()
