@@ -266,4 +266,31 @@ public extension UIViewController {
         animation.subtype = CATransitionSubtype.fromTop
         customSelf.view.layer.add(animation, forKey: nil)
     }
+    
+    func st_currentVC() -> UIViewController {
+        if let rootViewController = UIApplication.shared.keyWindow?.rootViewController {
+            let currentViewController = self.st_getCurrentViewControllerFrom(rootVC: rootViewController)
+            return currentViewController
+        }
+        return UIViewController()
+    }
+    
+    func st_getCurrentViewControllerFrom(rootVC: UIViewController) -> UIViewController {
+        var currentVC = rootVC
+        if let currentViewContoller = rootVC.presentedViewController {
+            currentVC = currentViewContoller
+        }
+        if rootVC.isKind(of: UINavigationController.self) {
+            let nav = rootVC as! UINavigationController
+            if let visibleViewController = nav.visibleViewController {
+                currentVC = self.st_getCurrentViewControllerFrom(rootVC: visibleViewController)
+            }
+        } else if rootVC.isKind(of: UITabBarController.self) {
+            let tabBar = rootVC as! UITabBarController
+            if let selectedViewController = tabBar.selectedViewController {
+                currentVC = self.st_getCurrentViewControllerFrom(rootVC: selectedViewController)
+            }
+        }
+        return currentVC
+    }
 }
