@@ -41,7 +41,7 @@ open class STBaseViewController: UIViewController {
     open var navBgViewAttributeHeight: NSLayoutConstraint!
 
     deinit {
-        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+//        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
 
     override open func viewDidLoad() {
