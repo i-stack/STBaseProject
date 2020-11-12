@@ -70,50 +70,6 @@ public class STConstants: NSObject {
         return float * multiplier
     }
     
-    public class func st_adaptIPhone5(a: CGFloat) -> CGFloat {
-        if self.st_apph() < 667 {
-            return a * 0.8
-        } else {
-            return a
-        }
-    }
-    
-    public class func st_adaptIPhonePlus(a: CGFloat) -> CGFloat {
-        if self.st_apph() < 667 {
-            return a * 0.8
-        } else if self.st_apph() == 667 {
-            return a * 0.9
-        } else {
-            return a
-        }
-    }
-    
-    public class func st_adaptSafeTop(a: CGFloat) -> CGFloat {
-        if self.st_apph() == 812 || self.st_apph() == 896 {
-            return a + 24
-        }
-        return a
-    }
-    
-    public class func st_adaptSafeBottom(a: CGFloat) -> CGFloat {
-        if self.st_apph() == 812 || self.st_apph() == 896 {
-            return a + 34
-        }
-        return a
-    }
-    
-    public class func st_adaptSTSafeBottom(a: CGFloat) -> CGFloat{
-        guard #available(iOS 11.0, *) else {
-            return a
-        }
-        let safeareInsets = UIApplication.shared.keyWindow?.safeAreaInsets
-        if safeareInsets!.bottom > 0 {
-            return a + 34
-        } else {
-            return a
-        }
-    }
-    
     public class func st_appw() -> CGFloat {
         return UIScreen.main.bounds.size.width
     }
@@ -126,30 +82,104 @@ public class STConstants: NSObject {
         return self.st_apph() < 667
     }
     
-    public class func st_isIPhone6() -> Bool {
+    /// 3.5inch
+    ///
+    /// 设备名称：3GS、4、4S
+    ///
+    /// 宽 x 高：320 x 480  @2x
+    public class func st_isIPhone480() -> Bool {
+        return self.st_apph() == 480
+    }
+    
+    /// 4.0inch
+    ///
+    /// 设备名称：5、5S、5C、SE
+    ///
+    /// 宽 x 高：320 x 568  @2x
+    public class func st_isIPhone568() -> Bool {
+        return self.st_apph() == 568
+    }
+    
+    /// 4.7inch
+    ///
+    /// 设备名称：6、6s、7、8
+    ///
+    /// 宽 x 高： 375 x 667  @2x
+    public class func st_isIPhone667() -> Bool {
         return self.st_apph() == 667
     }
     
+    /// 5.4inch
+    ///
+    /// 设备名称：12 mini
+    ///
+    /// 宽 x 高： 360 x 780  @3x
+    public class func st_isIPhone12Mini() -> Bool {
+        return self.st_apph() == 780
+    }
+    
+    /// 5.5inch
+    ///
+    /// 设备名称：6Plus、6sPlus、7Plus、8Plus
+    ///
+    /// 宽 x 高： 414 x 736 @3x
     public class func st_isIPhonePlus() -> Bool {
         return self.st_apph() == 736
     }
     
-    public class func st_isIPhoneX() -> Bool {
+    /// 5.8inch
+    ///
+    /// 设备名称：X、XS、11 Pro
+    ///
+    /// 宽 x 高： 375 x 812  @3x
+    public class func st_isIPhone812() -> Bool {
         return self.st_apph() == 812
     }
     
-    public class func st_isIPhoneXR() -> Bool {
+    /// 6.1inch
+    ///
+    /// 设备名称：12 Pro
+    ///
+    /// 宽 x 高：390 x 844  @3x
+    public class func st_isIPhone844() -> Bool {
+        return self.st_apph() == 844
+    }
+    
+    /// 6.1inch
+    ///
+    /// 设备名称：11、XR
+    ///
+    /// 宽 x 高：414 x 896  @2x
+    public class func st_isIPhone896() -> Bool {
         return self.st_apph() == 896
     }
     
-    public class func st_isIPhoneXMax() -> Bool {
-        return self.st_isIPhoneXR()
+    /// 6.5inch
+    ///
+    /// 设备名称：11 Pro Max
+    ///
+    /// 宽 x 高：414 x 896  @3x
+    public class func st_isIPhone11ProMax() -> Bool {
+        return self.st_apph() == 896
     }
     
+    /// 6.7inch
+    ///
+    /// 设备名称：12 Pro Max
+    ///
+    /// 宽 x 高：428 x 926
+    public class func st_isIPhone926() -> Bool {
+        return self.st_apph() == 926
+    }
+    
+    /// 是否是刘海屏
+    ///
+    /// 高度大于736 为刘海屏
     public class func st_isIPhoneSafe() -> Bool {
-        return self.st_apph() == 812 || self.st_apph() == 896
+        return self.st_apph() > 736
     }
     
+    /// 导航栏高度
     public class func st_navHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return STConstants.shared.barHeightModel.navIsSafeHeight
@@ -157,6 +187,7 @@ public class STConstants: NSObject {
         return STConstants.shared.barHeightModel.navNormalHeight
     }
     
+    /// tabBar高度
     public class func st_tabBarHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return STConstants.shared.barHeightModel.tabBarIsSafeHeight
