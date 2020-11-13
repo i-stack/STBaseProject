@@ -258,15 +258,12 @@ extension STBaseViewController: STLogViewDelegate, UIDocumentInteractionControll
 
 public extension UIViewController {
     func isDark() -> Bool {
-        var dark = false
-        DispatchQueue.main.sync {
-            if #available(iOS 12.0, *) {
-                if self.traitCollection.userInterfaceStyle == .dark {
-                    dark = true
-                }
+        if #available(iOS 12.0, *) {
+            if self.traitCollection.userInterfaceStyle == .dark {
+                return true
             }
         }
-        return dark
+        return false
     }
     
     /// effect as present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil)
