@@ -54,18 +54,7 @@ public extension UIFont {
     }
     
     private class func st_fontSize(size: CGFloat) -> CGFloat {
-        if STConstants.st_isIPhone5() {
-            if size <= 13 {
-                return size * 0.8
-            }
-            return size
-        } else if STConstants.st_isIPhoneX() || STConstants.st_isIPhonePlus() {
-            return size * 1.1
-        } else if STConstants.st_isIPhoneXR() || STConstants.st_isIPhoneXMax() {
-            return size * 1.1
-        } else {
-            return size
-        }
+        return size * STConstants.st_multiplier()
     }
     
     @objc class func st_systemFont(ofSize: CGFloat) -> UIFont {

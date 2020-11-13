@@ -51,7 +51,7 @@ public class STConstants: NSObject {
         self.barHeightModel = model
     }
     
-    private class func st_multiplier() -> CGFloat {
+    public class func st_multiplier() -> CGFloat {
         let size = STConstants.shared.benchmarkDesignSize
         if size == .zero {
             return 1.0

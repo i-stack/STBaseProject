@@ -17,20 +17,33 @@ class ViewController: STBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.st_showNavBtnType(type: .onlyShowTitle)
-        for index in 0...100 {
-            STLog("\(index)")
+        self.view.addSubview(self.applianceNameLabel)
+        self.applianceNameLabel.snp.makeConstraints { (make) in
+            make.top.equalTo(STConstants.st_handleFloat(float: 100))
+            make.left.equalTo(STConstants.st_handleFloat(float: 10))
+            make.right.equalTo(STConstants.st_handleFloat(float: -10))
+//            make.height.equalTo(STConstants.st_handleFloat(float: 40))
         }
+        self.applianceNameLabel.text = "中华人民共和国于1949年10月1日正式成立，good!"
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        for index in 100...200 {
-            STLog("\(index)")
-        }
     }
     
     lazy var testView: STTestView = {
         let view = STTestView.init(frame: CGRect.init(x: 0, y: 0, width: 100, height: 200))
         return view
+    }()
+    
+    lazy var applianceNameLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.textColor = UIColor.red
+        label.numberOfLines = 0
+        let fontSize = 18 * STConstants.st_multiplier()
+        print("current size:", self.view.bounds, "current font:", fontSize)
+        label.font = UIFont.st_systemFont(ofSize: 18, weight: .regular)
+        return label
     }()
 }
