@@ -39,17 +39,15 @@ open class STScanViewController: STOpenSystemOperationController {
     
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.st_regainScan()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        self.st_regainScan()
     }
     
     override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
         self.navigationController?.setNavigationBarHidden(true, animated: true)
-        if let newSession = self.session {
-            newSession.stopRunning()
-        }
+        self.st_stopScan()
     }
     
     /**
@@ -69,6 +67,12 @@ open class STScanViewController: STOpenSystemOperationController {
     public func st_regainScan() {
         if let newSession = self.session {
             newSession.startRunning()
+        }
+    }
+    
+    public func st_stopScan() {
+        if let newSession = self.session, newSession.isRunning {
+            newSession.stopRunning()
         }
     }
     
@@ -335,11 +339,9 @@ extension STScanViewController: AVCaptureMetadataOutputObjectsDelegate {
         if metadataObjects.count < 1 {
             return
         }
-        if let newSession = self.session {
-            newSession.stopRunning()
-            let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects.first as! AVMetadataMachineReadableCodeObject
-            self.st_renderUrlStr(url: metadataObject.stringValue ?? "")
-        }
+        self.st_stopScan()
+        let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects.first as! AVMetadataMachineReadableCodeObject
+        self.st_renderUrlStr(url: metadataObject.stringValue ?? "")
     }
 }
 
