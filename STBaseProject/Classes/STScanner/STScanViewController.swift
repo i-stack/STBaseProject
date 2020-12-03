@@ -39,9 +39,7 @@ open class STScanViewController: STOpenSystemOperationController {
     
     override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if let newSession = self.session {
-            newSession.startRunning()
-        }
+        self.st_regainScan()
         self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
     
@@ -66,6 +64,12 @@ open class STScanViewController: STOpenSystemOperationController {
 
     public func st_scanFinishCallback(block: @escaping ScanFinishBlock) -> Void {
         self.scanFinishBlock = block
+    }
+    
+    public func st_regainScan() {
+        if let newSession = self.session {
+            newSession.startRunning()
+        }
     }
     
     /**
