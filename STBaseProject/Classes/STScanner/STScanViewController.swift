@@ -274,7 +274,7 @@ open class STScanViewController: STOpenSystemOperationController {
         let outputImage: UIImage = UIImage.init(cgImage: scaledImage)
         UIGraphicsBeginImageContextWithOptions(outputImage.size, false, UIScreen.main.scale)
         outputImage.draw(in: CGRect.init(x: 0, y: 0, width: size.width, height: size.height))
-    //把水印图片画到生成的二维码图片上，注意尺寸不要太大（根据上面生成二维码设置的纠错程度设置），否则有可能造成扫不出来
+        //把水印图片画到生成的二维码图片上，注意尺寸不要太大（根据上面生成二维码设置的纠错程度设置），否则有可能造成扫不出来
         let waterImgH: CGFloat = waterImageSize.height
         let waterImgW: CGFloat = waterImageSize.width
         waterImage.draw(in: CGRect.init(x: (size.width - waterImgW) / 2.0, y: (size.height - waterImgH) / 2.0, width: waterImgW, height: waterImgH))
@@ -319,7 +319,9 @@ open class STScanViewController: STOpenSystemOperationController {
     
     func st_renderUrlStr(url: String) -> Void {
         if let newScanFinish = self.scanFinishBlock {
-            newScanFinish(url)
+            DispatchQueue.main.async {
+                newScanFinish(url)
+            }
         }
     }
 }
