@@ -221,7 +221,6 @@ public func STLogP<T>(_ message: T, file: String = #file, funcName: String = #fu
     #if DEBUG
     let file = (file as NSString).lastPathComponent
     let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
-    print(content)
     let userDefault = UserDefaults.standard
     var allContent = ""
     if let origintContent = userDefault.value(forKey: STConstants.st_outputLogPath()) as? String {

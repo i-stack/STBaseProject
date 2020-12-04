@@ -201,6 +201,9 @@ open class STBaseViewController: UIViewController {
             NSLayoutConstraint.init(item: self.logView, attribute: .bottom, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .bottom, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.logView, attribute: .right, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .right, multiplier: 1, constant: 0)
         ])
+        let userDefault = UserDefaults.standard
+        userDefault.removeObject(forKey: STConstants.st_outputLogPath())
+        userDefault.synchronize()
         self.logView.beginQueryLog()
     }
     
