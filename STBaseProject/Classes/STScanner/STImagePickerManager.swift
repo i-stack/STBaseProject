@@ -80,7 +80,7 @@ open class STImagePickerManager: NSObject, UIImagePickerControllerDelegate, UINa
     private func st_imagePickerViewController() -> Void {
         guard self.picker != nil else {
             self.picker = UIImagePickerController()
-            self.picker.delegate = self
+            self.picker.delegate = self.presentVC as? UIImagePickerControllerDelegate & UINavigationControllerDelegate
             self.picker.allowsEditing = true
             return
         }
