@@ -19,15 +19,15 @@ open class STScanManager: STImagePickerManager {
     var delayBarAction: Bool = false
     var scanFinishBlock: STScanFinishBlock?
 
-    var scanRect: CGRect?
     var scanType: STScanType?
-    var scanRectView: STScanView?
+    open var scanRect: CGRect?
+    open var scanRectView: STScanView?
     
-    var device: AVCaptureDevice?
-    var session: AVCaptureSession?
-    var input: AVCaptureDeviceInput?
-    var output: AVCaptureMetadataOutput?
-    var preview: AVCaptureVideoPreviewLayer?
+    private var device: AVCaptureDevice?
+    private var session: AVCaptureSession?
+    private var input: AVCaptureDeviceInput?
+    private var output: AVCaptureMetadataOutput?
+    private var preview: AVCaptureVideoPreviewLayer?
     
     /// 初始化二维码扫描控制器
     ///
@@ -39,6 +39,7 @@ open class STScanManager: STImagePickerManager {
         super.init(presentViewController: presentViewController)
         self.scanType = type
         self.scanFinishBlock = onFinish
+        self.configScanManager()
     }
 
     /// 扫描完成回调
@@ -68,7 +69,7 @@ open class STScanManager: STImagePickerManager {
     /// - Parameter onFinish: 识别成功回调，返回识别字符串
     /// - Parameter onFailed: 识别失败回调，返回Error
     ///
-    class open func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(String) -> Void, onFailed: @escaping(Error) -> Void) {
+    public class func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(String) -> Void, onFailed: @escaping(Error) -> Void) {
         if STDeviceInfo.currentSysVersion().doubleValue < 8.0 {
             DispatchQueue.main.async {
                 onFailed(NSError.init(domain: "Only supports iOS 8.0 system or higher", code: 0, userInfo: [:]))
@@ -106,7 +107,7 @@ open class STScanManager: STImagePickerManager {
     /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
     /// - Parameter onFailed: 识别失败回调，返回Error
     ///
-    class open func st_createQRImageWithString(content: String, qrSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
+    public class func st_createQRImageWithString(content: String, qrSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         self.st_createQRImageWithString(content: content, qrSize: qrSize, qrColor: UIColor.black, bkColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
     }
     
@@ -118,7 +119,7 @@ open class STScanManager: STImagePickerManager {
     /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
     /// - Parameter onFailed: 识别失败回调，返回Error
     ///
-    class open func st_createQRImageWithString(content: String, qrSize: CGSize, qrColor: UIColor, bkColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
+    public class func st_createQRImageWithString(content: String, qrSize: CGSize, qrColor: UIColor, bkColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
                 onFailed(NSError.init(domain: "content is nil", code: 0, userInfo: [:]))
@@ -163,7 +164,7 @@ open class STScanManager: STImagePickerManager {
     /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
     /// - Parameter onFailed: 识别失败回调，返回Error
     ///
-    class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
+    public class func st_createBarCodeImageWithString(content: String, barSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         self.st_createBarCodeImageWithString(content: content, barSize: barSize, barColor: UIColor.black, barBgColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
     }
     
@@ -175,7 +176,7 @@ open class STScanManager: STImagePickerManager {
     /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
     /// - Parameter onFailed: 识别失败回调，返回Error
     ///
-    class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, barColor: UIColor, barBgColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
+    public class func st_createBarCodeImageWithString(content: String, barSize: CGSize, barColor: UIColor, barBgColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
                 onFailed(NSError.init(domain: "content is nil", code: 0, userInfo: [:]))
@@ -219,7 +220,7 @@ open class STScanManager: STImagePickerManager {
     /// - Parameter barBgColor: 条形码背景色
     /// - Parameter onFinish: 识别成功回调，返回添加水印图片后，清晰的二维码图片
     ///
-    class open func st_getHDImgWithCIImage(content: String, size: CGSize, waterImage: UIImage, waterImageSize: CGSize, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
+    public class func st_getHDImgWithCIImage(content: String, size: CGSize, waterImage: UIImage, waterImageSize: CGSize, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
                 onFinish(.failure(NSError.init(domain: "content is nil!", code: 0, userInfo: [:])))
@@ -293,7 +294,7 @@ open class STScanManager: STImagePickerManager {
         picker.dismiss(animated: true, completion: nil)
     }
     
-    func detailSelectPhoto(image: UIImage) -> Void {
+    public func detailSelectPhoto(image: UIImage) -> Void {
         STScanManager.st_recognizeQrCodeImage(image: image, onFinish: {[weak self] (result) in
             guard let strongSelf = self else { return }
             strongSelf.st_renderUrlStr(url: result)
@@ -303,7 +304,7 @@ open class STScanManager: STImagePickerManager {
         }
     }
     
-    func st_renderUrlStr(url: String) -> Void {
+    private func st_renderUrlStr(url: String) -> Void {
         if let newScanFinish = self.scanFinishBlock {
             DispatchQueue.main.async {
                 newScanFinish(url)
@@ -311,7 +312,7 @@ open class STScanManager: STImagePickerManager {
         }
     }
     
-    public func configScanManager() {
+    private func configScanManager() {
         self.st_scanDevice()
         self.st_drawScanView()
     }
