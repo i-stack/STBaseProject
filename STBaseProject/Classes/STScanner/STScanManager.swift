@@ -29,8 +29,8 @@ open class STScanManager: STImagePickerManager {
     private var output: AVCaptureMetadataOutput?
     private var preview: AVCaptureVideoPreviewLayer?
     
-    public override init() {
-        super.init()
+    public override init(presentViewController: UIViewController) {
+        super.init(presentViewController: presentViewController)
     }
     
     /// 初始化二维码扫描控制器
