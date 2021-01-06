@@ -67,7 +67,7 @@ open class STImagePickerManager: NSObject, UIImagePickerControllerDelegate, UINa
         STLog("STOpenSystemOperationController dealloc")
     }
     
-    private override init() {
+    public override init() {
         super.init()
     }
     
