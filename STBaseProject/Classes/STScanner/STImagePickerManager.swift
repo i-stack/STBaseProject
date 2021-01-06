@@ -1,5 +1,5 @@
 //
-//  STOpenSystemOperationController.swift
+//  STImagePickerManager.swift
 //  STBaseProject
 //
 //  Created by stack on 2018/4/28.
@@ -53,14 +53,27 @@ public enum STOpenSourceError: LocalizedError {
 
 public typealias STImagePickerResult = (_ originalImage: UIImage, _ editedImage: UIImage, _ result: Bool, _ error: STOpenSourceError) -> Void
 
-open class STOpenSystemOperationController: STBaseViewController {
+open class STImagePickerManager: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
     open var customImageSize: CGSize?
     open var picker: UIImagePickerController!
+    weak var presentVC: UIViewController?
     public var imagePickerResult: STImagePickerResult?
 
-    override open func viewDidLoad() {
-        super.viewDidLoad()
+    deinit {
+        self.presentVC = nil
+        self.picker.delegate = nil
+        self.imagePickerResult = nil
+        STLog("STOpenSystemOperationController dealloc")
+    }
+    
+    private override init() {
+        super.init()
+    }
+    
+    public init(presentViewController: UIViewController) {
+        super.init()
+        self.presentVC = presentViewController
         self.st_imagePickerViewController()
     }
 
@@ -72,13 +85,11 @@ open class STOpenSystemOperationController: STBaseViewController {
             return
         }
     }
-}
 
-extension STOpenSystemOperationController {
     private func st_openPhotoLibrary(presentImagePickerDone: @escaping(Bool) -> Void) {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.photoLibrary) == true {
             picker.sourceType = UIImagePickerController.SourceType.photoLibrary
-            self.present(picker, animated: true) {
+            self.presentVC?.present(picker, animated: true) {
                 presentImagePickerDone(true)
             }
         } else {
@@ -93,7 +104,7 @@ extension STOpenSystemOperationController {
     private func st_openCamera(presentImagePickerDone: @escaping(Bool) -> Void) {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) == true {
             picker.sourceType = UIImagePickerController.SourceType.camera
-            self.present(picker, animated: true) {
+            self.presentVC?.present(picker, animated: true) {
                 presentImagePickerDone(true)
             }
         } else {
@@ -168,9 +179,7 @@ extension STOpenSystemOperationController {
             }
         }
     }
-}
-
-extension STOpenSystemOperationController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
     open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true) {
             DispatchQueue.main.async {

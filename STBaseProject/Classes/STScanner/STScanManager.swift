@@ -1,5 +1,5 @@
 //
-//  STScanViewController.swift
+//  STScanManager.swift
 //  STBaseProject
 //
 //  Created by stack on 2018/3/14.
@@ -11,13 +11,13 @@ import Photos
 import AVFoundation
 import AssetsLibrary
 
-public typealias ScanFinishBlock = (_ result: String) -> Void
+public typealias STScanFinishBlock = (_ result: String) -> Void
 
-open class STScanViewController: STOpenSystemOperationController {
+open class STScanManager: STImagePickerManager {
     
     var delayQRAction: Bool = false
     var delayBarAction: Bool = false
-    var scanFinishBlock: ScanFinishBlock?
+    var scanFinishBlock: STScanFinishBlock?
 
     var scanRect: CGRect?
     var scanType: STScanType?
@@ -29,58 +29,45 @@ open class STScanViewController: STOpenSystemOperationController {
     var output: AVCaptureMetadataOutput?
     var preview: AVCaptureVideoPreviewLayer?
     
-    override open func viewDidLoad() {
-        super.viewDidLoad()
-        self.st_scanDevice()
-        self.st_drawScanView()
-        self.st_navigationBar()
-        self.view.bringSubviewToFront(self.topBgView)
-    }
-    
-    override open func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
-        self.st_regainScan()
-    }
-    
-    override open func viewWillDisappear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
-        self.st_stopScan()
-    }
-    
-    /**
-     初始化二维码扫描控制器
-     @param type 扫码类型
-     */
-    convenience public init(qrType type: STScanType, onFinish: @escaping(ScanFinishBlock)) {
-        self.init()
+    /// 初始化二维码扫描控制器
+    ///
+    ///  - Parameter type: 扫码类型
+    ///  - Parameter presentViewController: 当前类所在viewController
+    ///  - Parameter onFinish: 扫描完成回调
+    ///
+    public init(qrType type: STScanType, presentViewController: UIViewController, onFinish: @escaping(STScanFinishBlock)) {
+        super.init(presentViewController: presentViewController)
         self.scanType = type
         self.scanFinishBlock = onFinish
     }
 
-    public func st_scanFinishCallback(block: @escaping ScanFinishBlock) -> Void {
+    /// 扫描完成回调
+    ///
+    ///  - Parameter block: 扫描完成回调
+    ///
+    public func st_scanFinishCallback(block: @escaping STScanFinishBlock) -> Void {
         self.scanFinishBlock = block
     }
     
+    /// 开启扫描
     public func st_regainScan() {
         if let newSession = self.session {
             newSession.startRunning()
         }
     }
     
+    /// 停止扫描
     public func st_stopScan() {
         if let newSession = self.session, newSession.isRunning {
             newSession.stopRunning()
         }
     }
     
-    /**
-     识别二维码
-     @param image UIImage对象
-     @param onFinish 识别结果回调
-     */
+    /// 识别二维码
+    /// - Parameter image: UIImage对象
+    /// - Parameter onFinish: 识别成功回调，返回识别字符串
+    /// - Parameter onFailed: 识别失败回调，返回Error
+    ///
     class open func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(String) -> Void, onFailed: @escaping(Error) -> Void) {
         if STDeviceInfo.currentSysVersion().doubleValue < 8.0 {
             DispatchQueue.main.async {
@@ -113,24 +100,24 @@ open class STScanViewController: STOpenSystemOperationController {
         }
     }
     
-    /**
-     生成二维码【白底黑色】
-     @param  content  二维码内容字符串【数字、字符、链接等】
-     @param  qrSize   生成图片的大小
-     @return onFinish 图片对象回调
-     */
+    /// 生成二维码【白底黑色】
+    /// - Parameter content: 二维码内容字符串【数字、字符、链接等】
+    /// - Parameter qrSize: 生成图片的大小
+    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
+    /// - Parameter onFailed: 识别失败回调，返回Error
+    ///
     class open func st_createQRImageWithString(content: String, qrSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         self.st_createQRImageWithString(content: content, qrSize: qrSize, qrColor: UIColor.black, bkColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
     }
     
-    /**
-     生成二维码【自定义颜色】
-     @param  content 二维码内容字符串【数字、字符、链接等】
-     @param  size 生成图片的大小
-     @param  qrColor 二维码颜色
-     @param  bkColor 背景色
-     @return UIImage图片对象
-     */
+    /// 生成二维码【自定义颜色】
+    /// - Parameter content: 二维码内容字符串【数字、字符、链接等】
+    /// - Parameter qrSize: 生成图片的大小
+    /// - Parameter qrColor: 二维码颜色
+    /// - Parameter bkColor: 背景色
+    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
+    /// - Parameter onFailed: 识别失败回调，返回Error
+    ///
     class open func st_createQRImageWithString(content: String, qrSize: CGSize, qrColor: UIColor, bkColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
@@ -170,24 +157,24 @@ open class STScanViewController: STOpenSystemOperationController {
         }
     }
 
-    /**
-     生成条形码【白底黑色】
-     @param content 条码内容【一般是数字】
-     @param barSize 生成条码图片的大小
-     @return UIImage图片对象
-     */
+    /// 生成条形码【白底黑色】
+    /// - Parameter content: 条码内容【一般是数字】
+    /// - Parameter barSize: 生成条码图片的大小
+    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
+    /// - Parameter onFailed: 识别失败回调，返回Error
+    ///
     class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         self.st_createBarCodeImageWithString(content: content, barSize: barSize, barColor: UIColor.black, barBgColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
     }
     
-    /**
-     生成条形码【自定义颜色】
-     @param content 条码内容【一般是数字】
-     @param size 生成条码图片的大小
-     @param qrColor 码颜色
-     @param bkColor 背景颜色
-     @return UIImage图片对象
-     */
+    /// 生成条形码【自定义颜色】
+    /// - Parameter content: 条码内容【一般是数字】
+    /// - Parameter barSize: 生成条码图片的大小
+    /// - Parameter barColor: 条形码颜色
+    /// - Parameter barBgColor: 条形码背景色
+    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
+    /// - Parameter onFailed: 识别失败回调，返回Error
+    ///
     class open func st_createBarCodeImageWithString(content: String, barSize: CGSize, barColor: UIColor, barBgColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
@@ -225,13 +212,13 @@ open class STScanViewController: STOpenSystemOperationController {
         }
     }
     
-    /**
-     调整二维码清晰度，添加水印图片
-     @param content 模糊的二维码图片字符串
-     @param size 二维码的宽高
-     @param waterImg 水印图片
-     @return 添加水印图片后，清晰的二维码图片
-     */
+    /// 调整二维码清晰度，添加水印图片
+    /// - Parameter content: 模糊的二维码图片字符串
+    /// - Parameter size: 二维码的宽高
+    /// - Parameter waterImg: 水印图片
+    /// - Parameter barBgColor: 条形码背景色
+    /// - Parameter onFinish: 识别成功回调，返回添加水印图片后，清晰的二维码图片
+    ///
     class open func st_getHDImgWithCIImage(content: String, size: CGSize, waterImage: UIImage, waterImageSize: CGSize, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
         if content.count < 1 {
             DispatchQueue.main.async {
@@ -306,17 +293,8 @@ open class STScanViewController: STOpenSystemOperationController {
         picker.dismiss(animated: true, completion: nil)
     }
     
-    override open func st_rightBarBtnClick() {
-        self.st_openSystemOperation(openSourceType: .photoLibrary, complection: {[weak self] (originImage, eidtedImage, result, error) in
-            guard let strongSelf = self else { return }
-            strongSelf.detailSelectPhoto(image: originImage)
-        }) { (result) in
-            
-        }
-    }
-    
     func detailSelectPhoto(image: UIImage) -> Void {
-        STScanViewController.st_recognizeQrCodeImage(image: image, onFinish: {[weak self] (result) in
+        STScanManager.st_recognizeQrCodeImage(image: image, onFinish: {[weak self] (result) in
             guard let strongSelf = self else { return }
             strongSelf.st_renderUrlStr(url: result)
         }) {[weak self] (error) in
@@ -332,27 +310,13 @@ open class STScanViewController: STOpenSystemOperationController {
             }
         }
     }
-}
-
-extension STScanViewController: AVCaptureMetadataOutputObjectsDelegate {
-    public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        if metadataObjects.count < 1 {
-            return
-        }
-        self.st_stopScan()
-        let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects.first as! AVMetadataMachineReadableCodeObject
-        self.st_renderUrlStr(url: metadataObject.stringValue ?? "")
-    }
-}
-
-extension STScanViewController {
-    func st_navigationBar() -> Void {
-        self.titleLabel.text = "二维码"
-        self.st_showNavBtnType(type: .showBothBtn)
-        self.rightBtn.setTitle("相册", for: UIControl.State.normal)
+    
+    public func configScanManager() {
+        self.st_scanDevice()
+        self.st_drawScanView()
     }
     
-    func st_scanDevice() -> Void {
+    private func st_scanDevice() -> Void {
         if self.st_isAvailableCamera() == true {
             self.device = AVCaptureDevice.default(for: .video)
             self.input = try? AVCaptureDeviceInput.init(device: self.device!)
@@ -373,7 +337,7 @@ extension STScanViewController {
                 if let newPreview = self.preview {
                     newPreview.videoGravity = .resizeAspectFill
                     newPreview.frame = UIScreen.main.bounds
-                    self.view.layer.insertSublayer(newPreview, at: 0)
+                    self.presentVC?.view.layer.insertSublayer(newPreview, at: 0)
                 }
             }
             self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
@@ -381,17 +345,17 @@ extension STScanViewController {
         }
     }
 
-    func st_drawScanView() -> Void {
-        self.scanRectView = STScanView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: self.view.bounds.size.height))
+    private func st_drawScanView() -> Void {
+        self.scanRectView = STScanView.init(frame: CGRect.init(x: 0, y: 0, width: self.presentVC?.view.bounds.size.width ?? UIScreen.main.bounds.size.width, height: self.presentVC?.view.bounds.size.height ?? UIScreen.main.bounds.size.height))
         self.scanRectView?.st_configScanType(scanType: self.scanType ?? STScanType.STScanTypeQrCode)
-        self.view.addSubview(self.scanRectView!)
+        self.presentVC?.view.addSubview(self.scanRectView!)
     }
     
-    func st_scanRectWithScale(scale: CGFloat) -> NSArray {
+    private func st_scanRectWithScale(scale: CGFloat) -> NSArray {
         let windowSize = UIScreen.main.bounds.size
         let left = 60.0 / scale
-        let scanSize = CGSize.init(width: self.view.frame.size.width - left * 2.0,
-                                   height: (self.view.frame.size.width - left * 2.0) / scale)
+        let scanSize = CGSize.init(width: self.presentVC?.view.frame.size.width ?? UIScreen.main.bounds.size.width - left * 2.0,
+                                   height: (self.presentVC?.view.frame.size.width ?? UIScreen.main.bounds.size.width - left * 2.0) / scale)
         var scanRect = CGRect.init(x: (windowSize.width - scanSize.width) / 2.0,
                                    y: (windowSize.height - scanSize.height) / 2.0,
                                    width: scanSize.width,
@@ -401,5 +365,14 @@ extension STScanViewController {
                                width: scanRect.size.height / windowSize.height,
                                height: scanRect.size.width / windowSize.width)
         return [NSCoder.string(for: scanRect), NSCoder.string(for: scanSize)]
+    }
+}
+
+extension STScanManager: AVCaptureMetadataOutputObjectsDelegate {
+    public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        if metadataObjects.count < 1 { return }
+        self.st_stopScan()
+        let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects.first as! AVMetadataMachineReadableCodeObject
+        self.st_renderUrlStr(url: metadataObject.stringValue ?? "")
     }
 }

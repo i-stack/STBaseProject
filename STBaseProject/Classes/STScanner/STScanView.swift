@@ -36,11 +36,11 @@ open class STScanView: UIView {
     
     override open func layoutSubviews() {
         super.layoutSubviews()
-        let left: CGFloat = leftDistance / heightScale
-        let sizeRetangle = CGSize.init(width: self.frame.size.width - left * 2,
-                                       height: self.frame.size.width - left * 2)
-        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / CGFloat(2 * self.heightScale)
         if let newLineImageView = lineImageView {
+            let left: CGFloat = leftDistance / heightScale
+            let sizeRetangle = CGSize.init(width: self.frame.size.width - left * 2,
+                                           height: self.frame.size.width - left * 2)
+            let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / CGFloat(2 * self.heightScale)
             newLineImageView.frame = CGRect.init(x: left,
                                                  y: YMinRetangle + 2,
                                                  width: sizeRetangle.width - 4,
@@ -71,18 +71,16 @@ open class STScanView: UIView {
         if self.needStop == true {
             return
         }
-        
-        let Left: CGFloat = leftDistance / heightScale
-        let sizeRetangle = CGSize.init(width: self.frame.size.width - Left * 2,
-                                       height: (self.frame.size.width - Left * 2) / self.heightScale)
-        let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / 2.0
-        let YMaxRetangle = YMinRetangle + sizeRetangle.height
-        let initFrame = CGRect.init(x: Left,
-                                    y: YMinRetangle + 2,
-                                    width: sizeRetangle.width - 4,
-                                    height: 5)
-        
         if let newLineImageView = self.lineImageView {
+            let Left: CGFloat = leftDistance / heightScale
+            let sizeRetangle = CGSize.init(width: self.frame.size.width - Left * 2,
+                                           height: (self.frame.size.width - Left * 2) / self.heightScale)
+            let YMinRetangle = self.frame.size.height / 2.0 - sizeRetangle.height / 2.0
+            let YMaxRetangle = YMinRetangle + sizeRetangle.height
+            let initFrame = CGRect.init(x: Left,
+                                        y: YMinRetangle + 2,
+                                        width: sizeRetangle.width - 4,
+                                        height: 5)
             newLineImageView.frame = initFrame
             newLineImageView.alpha = 1
             UIView.animate(withDuration: 1.5, animations: {
