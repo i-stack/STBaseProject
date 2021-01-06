@@ -19,20 +19,19 @@ open class STScanView: UIView {
     open var needStop: Bool?
     open var tipTitle: UILabel?
     open var scanType: STScanType?
-    
+    open var lineImageView: UIImageView?
+
     var heightScale: CGFloat = 0.0
-    var lineImageView: UIImageView?
     let leftDistance: CGFloat = 60.0
     
     deinit {
-        
+        STLog("STScanView dealloc")
     }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         needStop = false
         self.backgroundColor = UIColor.clear
-        self.lineImageView = UIImageView.init(image: self.st_scanBlueLineImage())
     }
     
     override open func layoutSubviews() {
@@ -65,8 +64,7 @@ open class STScanView: UIView {
                 self.st_startAnimating()
             })
         }
-        self.setNeedsDisplay()
-        self.setNeedsLayout()
+        self.layoutIfNeeded()
     }
     
     @objc open func st_startAnimating() -> Void {
@@ -107,7 +105,6 @@ open class STScanView: UIView {
     }
     
     func st_drawScanRect() -> Void {
-        
         let left = leftDistance / self.heightScale
         let sizeRetangle = CGSize.init(width: self.frame.size.width - left * 2,
                                        height: self.frame.size.width - left * 2)
@@ -232,15 +229,5 @@ extension STScanView {
             self.bringSubviewToFront(self.tipTitle!)
             return
         }
-    }
-}
-
-extension STScanView {
-    func st_scanBlueLineImage() -> UIImage {
-        let cbundle: Bundle = Bundle.init(for: STScanView.self)
-        let url: URL = cbundle.url(forResource: "STScanResource", withExtension: "bundle") ?? URL.init(fileURLWithPath: "")
-        let bundle: Bundle = Bundle.init(url: url) ?? Bundle.main
-        let image = UIImage.init(named: "st_scan_blue_line", in: bundle, compatibleWith: UITraitCollection()) ?? UIImage()
-        return image
     }
 }
