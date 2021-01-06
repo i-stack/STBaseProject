@@ -29,6 +29,10 @@ open class STScanManager: STImagePickerManager {
     private var output: AVCaptureMetadataOutput?
     private var preview: AVCaptureVideoPreviewLayer?
     
+    public override init() {
+        super.init()
+    }
+    
     /// 初始化二维码扫描控制器
     ///
     ///  - Parameter type: 扫码类型
