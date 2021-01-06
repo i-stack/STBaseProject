@@ -53,7 +53,7 @@ public enum STOpenSourceError: LocalizedError {
 
 public typealias STImagePickerResult = (_ originalImage: UIImage, _ editedImage: UIImage, _ result: Bool, _ error: STOpenSourceError) -> Void
 
-open class STImagePickerManager: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+open class STImagePickerManager: NSObject {
 
     open var customImageSize: CGSize?
     open var picker: UIImagePickerController!
