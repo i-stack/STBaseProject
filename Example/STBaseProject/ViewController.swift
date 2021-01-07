@@ -13,7 +13,6 @@ import STBaseProject
 class ViewController: STBaseViewController {
     
     var count: Int = 0
-    var imagePickerManager: STImagePickerManager?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,7 +25,6 @@ class ViewController: STBaseViewController {
 ////            make.height.equalTo(STConstants.st_handleFloat(float: 40))
 //        }
 //        self.applianceNameLabel.text = "中华人民共和国于1949年10月1日正式成立，good!"
-        self.imagePickerManager = STImagePickerManager.init(presentViewController: self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -35,10 +33,8 @@ class ViewController: STBaseViewController {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        self.imagePickerManager?.st_openSystemOperation(openSourceType: .photoLibrary, complection: {[weak self] (pickerModle) in
-            guard let strongSelf = self else { return }
-            print(pickerModle)
-        })
+        let nextVC = STNextViewController()
+        self.navigationController?.pushViewController(nextVC, animated: true)
     }
     
     lazy var testView: STTestView = {

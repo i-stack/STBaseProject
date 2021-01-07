@@ -64,12 +64,16 @@ open class STImagePickerManager: NSObject {
     open var customImageSize: CGSize?
     weak var presentVC: UIViewController?
     var imagePickerDidFinish: STImagePickerDidFinish?
-    open var imagePickerController: UIImagePickerController!
+    open var imagePickerController: UIImagePickerController?
 
     deinit {
         self.presentVC = nil
-        self.imagePickerController.delegate = nil
-        STLog("STOpenSystemOperationController dealloc")
+        self.imagePickerDidFinish = nil
+        if self.imagePickerController != nil {
+            self.imagePickerController?.delegate = nil
+            self.imagePickerController = nil
+        }
+        STLog("STImagePickerManager dealloc")
     }
     
     public override init() {
@@ -83,11 +87,10 @@ open class STImagePickerManager: NSObject {
     }
 
     private func st_imagePickerViewController() -> Void {
-        guard self.imagePickerController != nil else {
+        if self.imagePickerController == nil {
             self.imagePickerController = UIImagePickerController()
-            self.imagePickerController.delegate = self
-            self.imagePickerController.allowsEditing = true
-            return
+            self.imagePickerController?.delegate = self
+            self.imagePickerController?.allowsEditing = true
         }
     }
 
@@ -95,8 +98,8 @@ open class STImagePickerManager: NSObject {
         self.st_isAvailablePhoto {[weak self] (openSourceError) in
             guard let strongSelf = self else { return }
             if openSourceError == .openSourceOK {
-                strongSelf.imagePickerController.sourceType = .photoLibrary
-                strongSelf.presentVC?.present(strongSelf.imagePickerController, animated: true) {}
+                strongSelf.imagePickerController?.sourceType = .photoLibrary
+                strongSelf.presentVC?.present(strongSelf.imagePickerController ?? UIImagePickerController(), animated: true) {}
             } else {
                 let pickerModel = STImagePickerModel()
                 pickerModel.openSourceError = .openPhotoLibraryError
@@ -109,8 +112,8 @@ open class STImagePickerManager: NSObject {
         self.st_isAvailableCamera {[weak self] (openSourceError) in
             guard let strongSelf = self else { return }
             if openSourceError == .openSourceOK {
-                strongSelf.imagePickerController.sourceType = .camera
-                strongSelf.presentVC?.present(strongSelf.imagePickerController, animated: true) {}
+                strongSelf.imagePickerController?.sourceType = .camera
+                strongSelf.presentVC?.present(strongSelf.imagePickerController ?? UIImagePickerController(), animated: true) {}
             } else {
                 let pickerModel = STImagePickerModel()
                 pickerModel.openSourceError = .openCameraError

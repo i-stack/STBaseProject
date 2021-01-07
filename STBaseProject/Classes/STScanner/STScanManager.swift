@@ -54,7 +54,7 @@ open class STScanManager: STImagePickerManager {
         self.scanFinishBlock = block
     }
     
-    /// 开启扫描
+    /// 开始扫描
     public func st_beginScan() {
         if let newSession = self.session {
             newSession.startRunning()
