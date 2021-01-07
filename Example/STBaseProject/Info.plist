@@ -2,10 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>App需要您的同意，才能访问相机，如不允许，可能不能使用头像上传、扫一扫等功能</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string></string>
+	<string>App需要您的同意，才能访问相机，如不允许，可能不能使用头像上传、扫一扫等功能</string>
 	<key>NSCameraUsageDescription</key>
-	<string></string>
+	<string>App需要您的同意，才能访问相机，如不允许，可能不能使用头像上传、扫一扫等功能</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>

@@ -285,17 +285,13 @@ open class STScanManager: STImagePickerManager {
         }
     }
     
-    override open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+    public override func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true) {}
         var image: UIImage? = info[UIImagePickerController.InfoKey.editedImage] as? UIImage
         if image == nil {
             image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
         }
         self.detailSelectPhoto(image: image ?? UIImage())
-    }
-    
-    override open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        picker.dismiss(animated: true, completion: nil)
     }
     
     public func detailSelectPhoto(image: UIImage) -> Void {
@@ -322,31 +318,34 @@ open class STScanManager: STImagePickerManager {
     }
     
     private func st_scanDevice() -> Void {
-        if self.st_isAvailableCamera() == true {
-            self.device = AVCaptureDevice.default(for: .video)
-            self.input = try? AVCaptureDeviceInput.init(device: self.device!)
-            self.output = AVCaptureMetadataOutput.init()
-            self.output?.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            self.session = AVCaptureSession()
-            if let newSession = self.session {
-                newSession.canSetSessionPreset(AVCaptureSession.Preset.inputPriority)
-                if let newInput = self.input, newSession.canAddInput(newInput) == true {
-                    newSession.addInput(newInput)
+        self.st_isAvailableCamera {[weak self] (openSourceError) in
+            guard let strongSelf = self else { return }
+            if openSourceError == .openSourceOK {
+                strongSelf.device = AVCaptureDevice.default(for: .video)
+                strongSelf.input = try? AVCaptureDeviceInput.init(device: strongSelf.device!)
+                strongSelf.output = AVCaptureMetadataOutput.init()
+                strongSelf.output?.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
+                strongSelf.session = AVCaptureSession()
+                if let newSession = strongSelf.session {
+                    newSession.canSetSessionPreset(AVCaptureSession.Preset.inputPriority)
+                    if let newInput = strongSelf.input, newSession.canAddInput(newInput) == true {
+                        newSession.addInput(newInput)
+                    }
+                    if let newOutput = strongSelf.output, newSession.canAddOutput(newOutput) == true {
+                        newSession.addOutput(newOutput)
+                        newOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
+                        newOutput.rectOfInterest = strongSelf.scanRect ?? CGRect.zero
+                    }
+                    strongSelf.preview = AVCaptureVideoPreviewLayer.init(session: newSession)
+                    if let newPreview = strongSelf.preview {
+                        newPreview.videoGravity = .resizeAspectFill
+                        newPreview.frame = UIScreen.main.bounds
+                        strongSelf.presentVC?.view.layer.insertSublayer(newPreview, at: 0)
+                    }
                 }
-                if let newOutput = self.output, newSession.canAddOutput(newOutput) == true {
-                    newSession.addOutput(newOutput)
-                    newOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-                    newOutput.rectOfInterest = self.scanRect ?? CGRect.zero
-                }
-                self.preview = AVCaptureVideoPreviewLayer.init(session: newSession)
-                if let newPreview = self.preview {
-                    newPreview.videoGravity = .resizeAspectFill
-                    newPreview.frame = UIScreen.main.bounds
-                    self.presentVC?.view.layer.insertSublayer(newPreview, at: 0)
-                }
+                strongSelf.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
+                strongSelf.output?.rectOfInterest = NSCoder.cgRect(for: strongSelf.st_scanRectWithScale(scale: 1)[0] as! String)
             }
-            self.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-            self.output?.rectOfInterest = NSCoder.cgRect(for: self.st_scanRectWithScale(scale: 1)[0] as! String)
         }
     }
 

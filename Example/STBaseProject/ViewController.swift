@@ -13,22 +13,32 @@ import STBaseProject
 class ViewController: STBaseViewController {
     
     var count: Int = 0
+    var imagePickerManager: STImagePickerManager?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.st_showNavBtnType(type: .onlyShowTitle)
-        self.view.addSubview(self.applianceNameLabel)
-        self.applianceNameLabel.snp.makeConstraints { (make) in
-            make.top.equalTo(STConstants.st_handleFloat(float: 100))
-            make.left.equalTo(STConstants.st_handleFloat(float: 10))
-            make.right.equalTo(STConstants.st_handleFloat(float: -10))
-//            make.height.equalTo(STConstants.st_handleFloat(float: 40))
-        }
-        self.applianceNameLabel.text = "中华人民共和国于1949年10月1日正式成立，good!"
+//        self.view.addSubview(self.applianceNameLabel)
+//        self.applianceNameLabel.snp.makeConstraints { (make) in
+//            make.top.equalTo(STConstants.st_handleFloat(float: 100))
+//            make.left.equalTo(STConstants.st_handleFloat(float: 10))
+//            make.right.equalTo(STConstants.st_handleFloat(float: -10))
+////            make.height.equalTo(STConstants.st_handleFloat(float: 40))
+//        }
+//        self.applianceNameLabel.text = "中华人民共和国于1949年10月1日正式成立，good!"
+        self.imagePickerManager = STImagePickerManager.init(presentViewController: self)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
+        self.imagePickerManager?.st_openSystemOperation(openSourceType: .photoLibrary, complection: {[weak self] (pickerModle) in
+            guard let strongSelf = self else { return }
+            print(pickerModle)
+        })
     }
     
     lazy var testView: STTestView = {
