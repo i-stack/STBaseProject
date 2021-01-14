@@ -92,6 +92,11 @@ public extension UIFont {
         return font ?? UIFont.systemFont(ofSize: ofSize, weight: weight)
     }
     
+    @objc class func st_systemFont(ofSize: CGFloat, fontName: String) -> UIFont {
+        let size = UIFont.st_fontSize(size: ofSize)
+        return UIFont.init(name: fontName, size: ofSize) ?? UIFont.systemFont(ofSize: size)
+    }
+    
     @objc class func st_boldSystemFont(ofSize: CGFloat) -> UIFont {
         return self.st_systemFont(ofSize: ofSize, weight: .semibold)
     }

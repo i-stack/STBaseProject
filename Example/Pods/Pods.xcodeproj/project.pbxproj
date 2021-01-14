@@ -27,13 +27,13 @@
 		46EB2E00000900 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STFontManager.swift */; };
 		46EB2E00000910 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* STHexColor.swift */; };
 		46EB2E00000920 /* STHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STHTTPClient.swift */; };
-		46EB2E00000930 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STImage.swift */; };
-		46EB2E00000940 /* STISOCountryCodeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STISOCountryCodeInfo.swift */; };
-		46EB2E00000950 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STJSONValue.swift */; };
-		46EB2E00000960 /* STLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STLabel.swift */; };
-		46EB2E00000970 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STLanguageManager.swift */; };
-		46EB2E00000980 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* STLogView.swift */; };
-		46EB2E00000990 /* STPasteboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* STPasteboard.swift */; };
+		46EB2E00000930 /* STIBInspectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STIBInspectable.swift */; };
+		46EB2E00000940 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STImage.swift */; };
+		46EB2E00000950 /* STISOCountryCodeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STISOCountryCodeInfo.swift */; };
+		46EB2E00000960 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STJSONValue.swift */; };
+		46EB2E00000970 /* STLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STLabel.swift */; };
+		46EB2E00000980 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* STLanguageManager.swift */; };
+		46EB2E00000990 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* STLogView.swift */; };
 		46EB2E000009A0 /* STPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* STPoint.swift */; };
 		46EB2E000009B0 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* STPredicateCheck.swift */; };
 		46EB2E000009C0 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* STString.swift */; };
@@ -144,13 +144,13 @@
 		46EB2E00000220 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STFontManager.swift; sourceTree = "<group>"; };
 		46EB2E00000230 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHexColor.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STHexColor.swift; sourceTree = "<group>"; };
 		46EB2E00000240 /* STHTTPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHTTPClient.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STHTTPClient.swift; sourceTree = "<group>"; };
-		46EB2E00000250 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STImage.swift; sourceTree = "<group>"; };
-		46EB2E00000260 /* STISOCountryCodeInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STISOCountryCodeInfo.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STISOCountryCodeInfo.swift; sourceTree = "<group>"; };
-		46EB2E00000270 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STJSONValue.swift; sourceTree = "<group>"; };
-		46EB2E00000280 /* STLabel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLabel.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STLabel.swift; sourceTree = "<group>"; };
-		46EB2E00000290 /* STLanguageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLanguageManager.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STLanguageManager.swift; sourceTree = "<group>"; };
-		46EB2E000002A0 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogView.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STLogView.swift; sourceTree = "<group>"; };
-		46EB2E000002B0 /* STPasteboard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPasteboard.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPasteboard.swift; sourceTree = "<group>"; };
+		46EB2E00000250 /* STIBInspectable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STIBInspectable.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STIBInspectable.swift; sourceTree = "<group>"; };
+		46EB2E00000260 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STImage.swift; sourceTree = "<group>"; };
+		46EB2E00000270 /* STISOCountryCodeInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STISOCountryCodeInfo.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STISOCountryCodeInfo.swift; sourceTree = "<group>"; };
+		46EB2E00000280 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STJSONValue.swift; sourceTree = "<group>"; };
+		46EB2E00000290 /* STLabel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLabel.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STLabel.swift; sourceTree = "<group>"; };
+		46EB2E000002A0 /* STLanguageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLanguageManager.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STLanguageManager.swift; sourceTree = "<group>"; };
+		46EB2E000002B0 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogView.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STLogView.swift; sourceTree = "<group>"; };
 		46EB2E000002C0 /* STPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPoint.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPoint.swift; sourceTree = "<group>"; };
 		46EB2E000002D0 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STPredicateCheck.swift; sourceTree = "<group>"; };
 		46EB2E000002E0 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STString.swift; path = STBaseProject/Classes/STBaseModule/STCommon/STString.swift; sourceTree = "<group>"; };
@@ -465,13 +465,13 @@
 				46EB2E00000220 /* STFontManager.swift */,
 				46EB2E00000230 /* STHexColor.swift */,
 				46EB2E00000240 /* STHTTPClient.swift */,
-				46EB2E00000250 /* STImage.swift */,
-				46EB2E00000260 /* STISOCountryCodeInfo.swift */,
-				46EB2E00000270 /* STJSONValue.swift */,
-				46EB2E00000280 /* STLabel.swift */,
-				46EB2E00000290 /* STLanguageManager.swift */,
-				46EB2E000002A0 /* STLogView.swift */,
-				46EB2E000002B0 /* STPasteboard.swift */,
+				46EB2E00000250 /* STIBInspectable.swift */,
+				46EB2E00000260 /* STImage.swift */,
+				46EB2E00000270 /* STISOCountryCodeInfo.swift */,
+				46EB2E00000280 /* STJSONValue.swift */,
+				46EB2E00000290 /* STLabel.swift */,
+				46EB2E000002A0 /* STLanguageManager.swift */,
+				46EB2E000002B0 /* STLogView.swift */,
 				46EB2E000002C0 /* STPoint.swift */,
 				46EB2E000002D0 /* STPredicateCheck.swift */,
 				46EB2E000002E0 /* STString.swift */,
@@ -797,14 +797,14 @@
 				46EB2E00000910 /* STHexColor.swift in Sources */,
 				46EB2E00000920 /* STHTTPClient.swift in Sources */,
 				46EB2E00000A10 /* STHUD.swift in Sources */,
-				46EB2E00000930 /* STImage.swift in Sources */,
+				46EB2E00000930 /* STIBInspectable.swift in Sources */,
+				46EB2E00000940 /* STImage.swift in Sources */,
 				46EB2E00000A20 /* STImagePickerManager.swift in Sources */,
-				46EB2E00000940 /* STISOCountryCodeInfo.swift in Sources */,
-				46EB2E00000950 /* STJSONValue.swift in Sources */,
-				46EB2E00000960 /* STLabel.swift in Sources */,
-				46EB2E00000970 /* STLanguageManager.swift in Sources */,
-				46EB2E00000980 /* STLogView.swift in Sources */,
-				46EB2E00000990 /* STPasteboard.swift in Sources */,
+				46EB2E00000950 /* STISOCountryCodeInfo.swift in Sources */,
+				46EB2E00000960 /* STJSONValue.swift in Sources */,
+				46EB2E00000970 /* STLabel.swift in Sources */,
+				46EB2E00000980 /* STLanguageManager.swift in Sources */,
+				46EB2E00000990 /* STLogView.swift in Sources */,
 				46EB2E000009A0 /* STPoint.swift in Sources */,
 				46EB2E000009B0 /* STPredicateCheck.swift in Sources */,
 				46EB2E00000A30 /* STScanManager.swift in Sources */,

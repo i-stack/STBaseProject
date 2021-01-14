@@ -161,4 +161,9 @@ public extension String {
         }
         return parmDict
     }
+    
+    func st_pasteboardWithString(pasteboardString: String) -> Void {
+        let pasteboard = UIPasteboard.general
+        pasteboard.string = pasteboardString
+    }
 }
