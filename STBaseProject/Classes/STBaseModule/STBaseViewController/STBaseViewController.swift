@@ -270,12 +270,20 @@ public extension UIViewController {
     }
     
     /// effect as present(_ viewControllerToPresent: UIViewController, animated flag: Bool, completion: (() -> Void)? = nil)
-    func setPushAnimatedWithTransition(customSelf: UINavigationController) {
+    func setPushAnimatedPresentWithTransition(customSelf: UINavigationController) {
         let animation = CATransition.init()
         animation.duration = 0.3
-        animation.timingFunction = CAMediaTimingFunction.init(name: CAMediaTimingFunctionName.easeInEaseOut)
         animation.type = CATransitionType.moveIn
         animation.subtype = CATransitionSubtype.fromTop
+        customSelf.view.layer.add(animation, forKey: nil)
+    }
+    
+    /// effect as dismiss(animated: Bool, completion: (() -> Void)? = nil)
+    func setPushAnimatedDismissWithTransition(customSelf: UINavigationController) {
+        let animation = CATransition.init()
+        animation.duration = 0.3
+        animation.type = CATransitionType.moveIn
+        animation.subtype = CATransitionSubtype.fromBottom
         customSelf.view.layer.add(animation, forKey: nil)
     }
     
