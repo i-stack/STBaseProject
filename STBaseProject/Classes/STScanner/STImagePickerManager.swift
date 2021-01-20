@@ -138,80 +138,64 @@ open class STImagePickerManager: NSObject {
     
     public func st_isAvailablePhoto(complection: @escaping(STOpenSourceError) -> Void) {
         if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) == true {
-            var hasAuthorization = false
             let authorizationStatus: PHAuthorizationStatus = PHPhotoLibrary.authorizationStatus()
             if authorizationStatus == .authorized {
-                hasAuthorization = true
-            } else if authorizationStatus == .restricted || authorizationStatus == .denied {
-                hasAuthorization = false
-            } else if authorizationStatus == .notDetermined {
-                PHPhotoLibrary.requestAuthorization { (status) in
-                    if status == .authorized {
-                        hasAuthorization = true
-                    } else if status == .restricted || status == .denied {
-                        hasAuthorization = false
-                    }
-                }
-            }
-            if hasAuthorization {
                 DispatchQueue.main.async {
                     complection(.openSourceOK)
                 }
-            } else {
-                self.st_authorizationFailed(openSourceType: .camera, complection: complection)
+            } else if authorizationStatus == .restricted || authorizationStatus == .denied {
+                DispatchQueue.main.async {
+                    complection(.authorizationPhotoLibraryFailed)
+                }
+            } else if authorizationStatus == .notDetermined {
+                PHPhotoLibrary.requestAuthorization { (status) in
+                    if status == .authorized {
+                        DispatchQueue.main.async {
+                            complection(.openSourceOK)
+                        }
+                    } else if status == .restricted || status == .denied {
+                        DispatchQueue.main.async {
+                            complection(.authorizationPhotoLibraryFailed)
+                        }
+                    }
+                }
             }
         } else {
             DispatchQueue.main.async {
-                complection(.unknown)
+                complection(.openPhotoLibraryError)
             }
         }
     }
     
     public func st_isAvailableCamera(complection: @escaping(STOpenSourceError) -> Void) {
         if UIImagePickerController.isSourceTypeAvailable(.camera) == true {
-            var hasAuthorization = false
             let mediaType = AVMediaType.video
             let authorizationStatus: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: mediaType)
             if authorizationStatus == .authorized {
-                hasAuthorization = true
-            } else if authorizationStatus == .restricted || authorizationStatus == .denied {
-                hasAuthorization = false
-            } else if authorizationStatus == .notDetermined {
-                AVCaptureDevice.requestAccess(for: mediaType) { (granted) in
-                    hasAuthorization = granted
-                }
-            }
-            if hasAuthorization {
                 DispatchQueue.main.async {
                     complection(.openSourceOK)
                 }
-            } else {
-                self.st_authorizationFailed(openSourceType: .camera, complection: complection)
+            } else if authorizationStatus == .restricted || authorizationStatus == .denied {
+                DispatchQueue.main.async {
+                    complection(.authorizationCameraFailed)
+                }
+            } else if authorizationStatus == .notDetermined {
+                AVCaptureDevice.requestAccess(for: mediaType) { (granted) in
+                    if granted {
+                        DispatchQueue.main.async {
+                            complection(.openSourceOK)
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            complection(.authorizationCameraFailed)
+                        }
+                    }
+                }
             }
         } else {
             DispatchQueue.main.async {
                 complection(.unsupportSimulator)
             }
-        }
-    }
-    
-    private func st_authorizationFailed(openSourceType: STOpenSourceType, complection: @escaping(STOpenSourceError) -> Void) {
-        var openSourceError: STOpenSourceError = .unknown
-        switch openSourceType {
-        case .camera:
-            openSourceError = .authorizationCameraFailed
-            break
-        case .photoLibrary:
-            openSourceError = .authorizationPhotoLibraryFailed
-            break
-        case .simulator:
-            openSourceError = .unsupportSimulator
-            break
-        default:
-            break
-        }
-        DispatchQueue.main.async {
-            complection(openSourceError)
         }
     }
 }
