@@ -38,8 +38,11 @@ open class STHUD: MBProgressHUD {
         super.init(frame: frame)
     }
     
-    override private init(view: UIView) {
+    override public init(view: UIView) {
         super.init(view: view)
+        let hud = MBProgressHUD.init(view: view)
+        hud.removeFromSuperViewOnHide = true
+        view.addSubview(hud)
     }
     
     required public init?(coder: NSCoder) {
