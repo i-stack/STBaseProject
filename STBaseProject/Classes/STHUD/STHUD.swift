@@ -224,7 +224,7 @@ public extension UIView {
         if let spView = toView.superview {
             view = spView
         }
-        let hud = STHUD.showAdded(to: view, animated: true)
+        let hud = STHUD.init(view: view)//STHUD.showAdded(to: view, animated: true)
         hud.configHUD()
         hud.show(text: text, detailText: detailText)
         if icon.count > 0 {
