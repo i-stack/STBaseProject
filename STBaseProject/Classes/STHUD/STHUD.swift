@@ -15,38 +15,22 @@ public enum STHUDLocation {
     case bottom
 }
 
-/// 监听`hud`状态
-/// - Parameter state: `hud` 是否展示
-/// - Returns: `true` hud is show elsewise `hud` is hidden
-public typealias STHUDCompletionBlock = (_ state: Bool) -> Void
-
-open class STHUD: MBProgressHUD {
+open class STHUD: NSObject {
 
     open var labelFont: UIFont?
     open var labelColor: UIColor?
-    open var detailLabelFont: UIFont?
-    open var detailLabelColor: UIColor?
     open var customBgColor: UIColor?
-    open var activityViewColor: UIColor?
+    open var detailLabelFont: UIFont?
     open var errorIconImageStr: String?
+    open var detailLabelColor: UIColor?
+    open var activityViewColor: UIColor?
     open var afterDelay: TimeInterval = 1.5
     
+    public var progressHUD: MBProgressHUD?
     public static let sharedHUD: STHUD = STHUD()
-    private var stCompletionBlock: STHUDCompletionBlock?
     
-    override private init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-    
-    override public init(view: UIView) {
-        super.init(view: view)
-        let hud = MBProgressHUD.init(view: view)
-        hud.removeFromSuperViewOnHide = true
-        view.addSubview(hud)
-    }
-    
-    required public init?(coder: NSCoder) {
-        super.init(coder: coder)
+    private override init() {
+        super.init()
     }
 
     public func show(text: String) -> Void {
@@ -54,61 +38,96 @@ open class STHUD: MBProgressHUD {
     }
     
     public func show(text: String, detailText: String) -> Void {
-        self.areDefaultMotionEffectsEnabled = false
-        self.label.text = text
-        self.detailsLabel.text = detailText
-        self.show(animated: true)
-        if let block = self.stCompletionBlock {
-            block(true)
-        }
+        self.progressHUD?.label.text = text
+        self.progressHUD?.detailsLabel.text = detailText
+        self.progressHUD?.areDefaultMotionEffectsEnabled = false
+        self.progressHUD?.show(animated: true)
     }
     
     /// 配置展示
-    @objc open func configHUD() -> Void {
-        self.label.numberOfLines = 0
-        self.contentColor = UIColor.white
-        self.bezelView.style = .solidColor
-        if let font = self.labelFont {
-            self.label.font = font
+    @objc public func configHUD(showInView: UIView, icon: String, offset: CGPoint) -> Void {
+        self.progressHUD?.isHidden = true
+        if self.progressHUD?.superview != nil {
+            self.progressHUD?.hide(animated: true)
+        }
+        self.progressHUD = MBProgressHUD.init(view: showInView)
+        self.configHUBCommonProperty()
+        if icon.count > 0 {
+            self.progressHUD?.customView = UIImageView.init(image: UIImage.init(named: icon))
+            self.progressHUD?.mode = .customView
         } else {
-            self.label.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
+            self.progressHUD?.mode = .text
+        }
+        self.progressHUD?.offset = offset
+        self.progressHUD?.isHidden = false
+        showInView.addSubview(self.progressHUD ?? MBProgressHUD())
+    }
+    
+    /// 配置展示
+    @objc public func configManualHiddenHUD(showInView: UIView) -> Void {
+        if self.progressHUD?.superview != nil {
+            self.progressHUD?.hide(animated: true)
+        }
+        self.progressHUD = MBProgressHUD.init()
+        self.configHUBCommonProperty()
+        showInView.addSubview(self.progressHUD ?? MBProgressHUD())
+    }
+    
+    private func configHUBCommonProperty() {
+        guard self.progressHUD != nil else { return }
+        self.progressHUD?.delegate = self
+        self.progressHUD?.label.numberOfLines = 0
+        self.progressHUD?.contentColor = UIColor.white
+        self.progressHUD?.bezelView.style = .solidColor
+        self.progressHUD?.removeFromSuperViewOnHide = true
+        if let font = self.labelFont {
+            self.progressHUD?.label.font = font
+        } else {
+            self.progressHUD?.label.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
         }
         if let color = self.labelColor {
-            self.label.textColor = color
+            self.progressHUD?.label.textColor = color
         } else {
-            self.label.textColor = UIColor.black
+            self.progressHUD?.label.textColor = UIColor.black
         }
         if let detailsLabelFont = self.labelFont {
-            self.detailsLabel.font = detailsLabelFont
+            self.progressHUD?.detailsLabel.font = detailsLabelFont
         } else {
-            self.detailsLabel.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
+            self.progressHUD?.detailsLabel.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
         }
         if let detailsLabelColor = self.detailLabelColor {
-            self.detailsLabel.textColor = detailsLabelColor
+            self.progressHUD?.detailsLabel.textColor = detailsLabelColor
         } else {
-            self.detailsLabel.textColor = UIColor.white
+            self.progressHUD?.detailsLabel.textColor = UIColor.white
         }
         if let customColor = self.customBgColor {
-            self.bezelView.backgroundColor = customColor
+            self.progressHUD?.bezelView.backgroundColor = customColor
         } else {
-            self.bezelView.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+            self.progressHUD?.bezelView.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         }
         if let color = self.activityViewColor {
-            self.bezelView.color = color
+            self.progressHUD?.bezelView.color = color
         } else {
-            self.bezelView.color = UIColor.black.withAlphaComponent(0.6)
+            self.progressHUD?.bezelView.color = UIColor.black.withAlphaComponent(0.6)
         }
     }
     
-    open override func hide(animated: Bool) {
-        super.hide(animated: animated)
-        if let block = self.stCompletionBlock {
-            block(true)
+    public func hide(animated: Bool) {
+        if self.progressHUD?.superview != nil {
+            self.progressHUD?.hide(animated: animated)
         }
     }
     
-    public func hudComplection(block: @escaping STHUDCompletionBlock) -> Void {
-        self.stCompletionBlock = block
+    public func hide(animated: Bool, afterDelay: TimeInterval) {
+        if self.progressHUD?.superview != nil {
+            self.progressHUD?.hide(animated: animated, afterDelay: afterDelay)
+        }
+    }
+}
+
+extension STHUD: MBProgressHUDDelegate {
+    public func hudWasHidden(_ hud: MBProgressHUD) {
+   
     }
 }
 
@@ -145,7 +164,7 @@ public extension UIView {
     }
     
     func showAutoHidden(text: String, location: STHUDLocation) -> Void {
-        self.showAutoHidden(text: text, location: location, toView: UIApplication.shared.keyWindow ?? UIView())
+        self.showAutoHidden(text: text, location: location, toView: UIApplication.shared.keyWindow ?? self)
     }
     
     func showAutoHidden(text: String, location: STHUDLocation, toView: UIView) -> Void {
@@ -153,7 +172,7 @@ public extension UIView {
     }
     
     func showAutoHidden(text: String, detailText: String, location: STHUDLocation) -> Void {
-        self.showAutoHidden(text: text, detailText: detailText, location: location, toView: UIApplication.shared.keyWindow ?? UIView())
+        self.showAutoHidden(text: text, detailText: detailText, location: location, toView: UIApplication.shared.keyWindow ?? self)
     }
     
     func showAutoHidden(text: String, detailText: String, location: STHUDLocation, toView: UIView) -> Void {
@@ -165,25 +184,25 @@ public extension UIView {
     /// 显示HUD
     ///
     /// 切记需要手动关闭
-    func showLoadingManualMHidden() -> Void {
-        self.showLoadingManualMHidden(text: "")
+    func showLoadingManualHidden() -> Void {
+        self.showLoadingManualHidden(text: "")
     }
     
-    func showLoadingManualMHidden(text: String) -> Void {
-        self.showLoadingManualMHidden(text: text, toView: UIApplication.shared.keyWindow ?? UIView())
+    func showLoadingManualHidden(text: String) -> Void {
+        self.showLoadingManualHidden(text: text, toView: UIApplication.shared.keyWindow ?? self)
     }
     
-    func showLoadingManualMHidden(text: String, toView: UIView) -> Void {
-        self.showMessageManualMHidden(text: text, detailText: "", toView: toView)
+    func showLoadingManualHidden(text: String, toView: UIView) -> Void {
+        self.showLoadingManualHidden(text: text, detailText: "", toView: toView)
     }
 
-    private func showMessageManualMHidden(text: String, detailText: String, toView: UIView) -> Void {
+    private func showLoadingManualHidden(text: String, detailText: String, toView: UIView) -> Void {
         DispatchQueue.main.async {
             let hud = STHUD.sharedHUD
-            if let spView = toView.superview {
-                spView.addSubview(hud)
+            if toView.superview != nil {
+                hud.configManualHiddenHUD(showInView: toView)
             } else {
-                UIApplication.shared.keyWindow?.addSubview(hud)
+                hud.configManualHiddenHUD(showInView: UIApplication.shared.keyWindow ?? self)
             }
             hud.show(text: text, detailText: detailText)
         }
@@ -192,9 +211,7 @@ public extension UIView {
     /// 关闭MBProgressHUD
     func hideHUD() -> Void {
         DispatchQueue.main.async {
-            let hud = STHUD.sharedHUD
-            hud.hide(animated: true)
-            hud.removeFromSuperview()
+            STHUD.sharedHUD.hide(animated: true)
         }
     }
 }
@@ -219,22 +236,13 @@ public extension UIView {
     }
     
     private func show(text: String, detailText: String, icon: String, offset: CGPoint, afterDelay: TimeInterval, toView: UIView) -> Void {
-        self.hideHUD()
-        var view: UIView = UIApplication.shared.windows.last ?? UIView()
-        if let spView = toView.superview {
-            view = spView
-        }
-        let hud = STHUD.init(view: view)
-        hud.configHUD()
-        hud.show(text: text, detailText: detailText)
-        if icon.count > 0 {
-            hud.customView = UIImageView.init(image: UIImage.init(named: icon))
-            hud.mode = .customView
+        let hud = STHUD.sharedHUD
+        if toView.superview != nil {
+            hud.configHUD(showInView: toView, icon: icon, offset: offset)
         } else {
-            hud.mode = .text
+            hud.configHUD(showInView: UIApplication.shared.keyWindow ?? self, icon: icon, offset: offset)
         }
-        hud.offset = offset
-        hud.removeFromSuperViewOnHide = true
+        hud.show(text: text, detailText: detailText)
         hud.hide(animated: true, afterDelay: afterDelay)
     }
 }
