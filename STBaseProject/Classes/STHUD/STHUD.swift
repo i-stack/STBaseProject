@@ -15,20 +15,28 @@ public enum STHUDLocation {
     case bottom
 }
 
+/// 监听`hud`状态
+/// - Parameter state: `hud` 是否展示
+/// - Returns: `true` hud is show elsewise `hud` is hidden
+public typealias STHUDCompletionBlock = (_ state: Bool) -> Void
+
 open class STHUD: NSObject {
 
     open var labelFont: UIFont?
+    open var customView: UIView?
     open var labelColor: UIColor?
     open var customBgColor: UIColor?
     open var detailLabelFont: UIFont?
     open var errorIconImageStr: String?
     open var detailLabelColor: UIColor?
     open var activityViewColor: UIColor?
+    open var hudMode: MBProgressHUDMode?
     open var afterDelay: TimeInterval = 1.5
     
     public var progressHUD: MBProgressHUD?
     public static let sharedHUD: STHUD = STHUD()
-    
+    private var stCompletionBlock: STHUDCompletionBlock?
+
     private override init() {
         super.init()
     }
@@ -42,6 +50,9 @@ open class STHUD: NSObject {
         self.progressHUD?.detailsLabel.text = detailText
         self.progressHUD?.areDefaultMotionEffectsEnabled = false
         self.progressHUD?.show(animated: true)
+        if let block = self.stCompletionBlock {
+            block(true)
+        }
     }
     
     /// 配置展示
@@ -110,6 +121,12 @@ open class STHUD: NSObject {
         } else {
             self.progressHUD?.bezelView.color = UIColor.black.withAlphaComponent(0.6)
         }
+        if let mode = self.hudMode {
+            self.progressHUD?.mode = mode
+        }
+        if let cusView = self.customView {
+            self.progressHUD?.customView = cusView
+        }
     }
     
     public func hide(animated: Bool) {
@@ -123,11 +140,17 @@ open class STHUD: NSObject {
             self.progressHUD?.hide(animated: animated, afterDelay: afterDelay)
         }
     }
+    
+    public func hudComplection(block: @escaping STHUDCompletionBlock) -> Void {
+        self.stCompletionBlock = block
+    }
 }
 
 extension STHUD: MBProgressHUDDelegate {
     public func hudWasHidden(_ hud: MBProgressHUD) {
-   
+        if let block = self.stCompletionBlock {
+            block(false)
+        }
     }
 }
 
