@@ -14,6 +14,8 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
+		E454C6C125C293E800B98363 /* STTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E454C6BF25C293E800B98363 /* STTestViewController.swift */; };
+		E454C6C225C293E800B98363 /* STTestViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E454C6C025C293E800B98363 /* STTestViewController.xib */; };
 		E46045BE23CD9A7F00D4AA81 /* STTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46045BD23CD9A7F00D4AA81 /* STTestView.swift */; };
 		E4FEB62825A6FD680055D834 /* STNextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FEB62725A6FD680055D834 /* STNextViewController.swift */; };
 /* End PBXBuildFile section */
@@ -47,6 +49,8 @@
 		BCBDD6C1F1A3F9746985EE4C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		D130156922DC92BC00D5216C /* STBaseProject-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-Bridging-Header.h"; sourceTree = "<group>"; };
 		D39D8AFC82CB37AB8D99B8AB /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		E454C6BF25C293E800B98363 /* STTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTestViewController.swift; sourceTree = "<group>"; };
+		E454C6C025C293E800B98363 /* STTestViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STTestViewController.xib; sourceTree = "<group>"; };
 		E46045BD23CD9A7F00D4AA81 /* STTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTestView.swift; sourceTree = "<group>"; };
 		E4FEB62725A6FD680055D834 /* STNextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STNextViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -106,6 +110,8 @@
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				E4FEB62725A6FD680055D834 /* STNextViewController.swift */,
+				E454C6BF25C293E800B98363 /* STTestViewController.swift */,
+				E454C6C025C293E800B98363 /* STTestViewController.xib */,
 				E46045BD23CD9A7F00D4AA81 /* STTestView.swift */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
@@ -252,6 +258,7 @@
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
+				E454C6C225C293E800B98363 /* STTestViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +327,7 @@
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 				E4FEB62825A6FD680055D834 /* STNextViewController.swift in Sources */,
 				E46045BE23CD9A7F00D4AA81 /* STTestView.swift in Sources */,
+				E454C6C125C293E800B98363 /* STTestViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

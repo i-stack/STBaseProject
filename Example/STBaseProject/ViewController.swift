@@ -33,7 +33,7 @@ class ViewController: STBaseViewController {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        let nextVC = STNextViewController()
+        let nextVC = STTestViewController.init(nibName: "STTestViewController", bundle: nil)
         self.navigationController?.pushViewController(nextVC, animated: true)
     }
     
