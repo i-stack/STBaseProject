@@ -26,7 +26,6 @@ public struct STConstantBarHeightModel {
     public var navIsSafeHeight: CGFloat = 88.0
     public var tabBarNormalHeight: CGFloat = 49.0
     public var tabBarIsSafeHeight: CGFloat = 83.0
-    public init() {}
 }
 
 public class STConstants: NSObject {
@@ -34,6 +33,10 @@ public class STConstants: NSObject {
     private var benchmarkDesignSize = CGSize.zero
     public static let shared: STConstants = STConstants()
     private var barHeightModel: STConstantBarHeightModel = STConstantBarHeightModel()
+    
+    private override init() {
+        super.init()
+    }
 
     /// 设计图基准尺寸
     ///

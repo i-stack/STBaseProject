@@ -10,60 +10,66 @@ import UIKit
 
 open class STBaseView: UIView {
     
-    public var tableView: UITableView?
-    public var baseContentView: UIView?
-    public var baseScrollView: UIScrollView?
-
     deinit {
-        print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
     
-    public func st_baseViewAddScrollView() -> Void {
-        self.st_baseViewAddScrollView(customScrollView: createScrollView())
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.st_baseViewAddScrollView()
     }
     
-    public func st_baseViewAddScrollView(customScrollView: UIScrollView) -> Void {
-        self.baseScrollView = customScrollView
-        self.addSubview(self.baseScrollView ?? UIScrollView())
-        self.baseContentView = createContentView()
-        self.baseScrollView?.addSubview(self.baseContentView ?? UIView())
+    required public init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.st_baseViewAddScrollView()
     }
     
-    public func st_baseViewAddTableView(frame: CGRect, style: UITableView.Style) -> Void {
-        self.tableView = self.createTableView(frame: frame, style: style)
-        self.addSubview(self.tableView ?? UITableView())
+    private func st_baseViewAddScrollView() -> Void {
+        self.addSubview(self.baseScrollView )
+        self.baseScrollView.addSubview(self.baseContentView)
+        self.addConstraints([
+                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1, constant: 0),
+                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
+                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1, constant: 0),
+                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1, constant: 0)
+        ])
+        self.baseScrollView.addConstraints([
+                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .width, relatedBy: .equal, toItem: self.baseScrollView, attribute: .width, multiplier: 1, constant: 0),
+                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .trailing, relatedBy: .equal, toItem: self.baseScrollView, attribute: .trailing, multiplier: 1, constant: 0),
+                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .leading, relatedBy: .equal, toItem: self.baseScrollView, attribute: .leading, multiplier: 1, constant: 0)
+        ])
     }
     
-    private func createScrollView() -> UIScrollView {
+    public func updateContentViewBottom(itemView: UIView, constant: CGFloat) {
+        let bottomConstraint: NSLayoutConstraint = NSLayoutConstraint.init(item: self.baseContentView, attribute: .bottom, relatedBy: .equal, toItem: itemView, attribute: .bottom, multiplier: 1, constant: constant)
+        self.baseScrollView.addConstraint(bottomConstraint)
+    }
+    
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            var height: CGFloat = 0
+            for view in self.baseContentView.subviews {
+                height += (view.frame.size.height)
+            }
+            self.baseScrollView.contentSize = CGSize.init(width: self.bounds.size.width, height: height)
+        }
+    }
+    
+    private lazy var baseScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.isPagingEnabled = true
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
-    }
+    }()
     
-    private func createContentView() -> UIView {
-        let view = UIView()
-        return view
-    }
-    
-    private func createTableView(frame: CGRect, style: UITableView.Style) -> UITableView {
-        let tableView = UITableView.init(frame: frame, style: style)
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.tableFooterView = UIView()
-        return tableView
-    }
-}
-
-extension STBaseView: UITableViewDelegate, UITableViewDataSource {
-    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
-    }
-    
-    open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
-    }
+    public lazy var baseContentView: UIView = {
+        let contentView = UIView()
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        return contentView
+    }()
 }
 
 extension UIView {

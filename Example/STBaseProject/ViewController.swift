@@ -25,6 +25,8 @@ class ViewController: STBaseViewController {
 ////            make.height.equalTo(STConstants.st_handleFloat(float: 40))
 //        }
 //        self.applianceNameLabel.text = "中华人民共和国于1949年10月1日正式成立，good!"
+        self.view.addSubview(self.testView)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -33,12 +35,12 @@ class ViewController: STBaseViewController {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        let nextVC = STTestViewController.init(nibName: "STTestViewController", bundle: nil)
-        self.navigationController?.pushViewController(nextVC, animated: true)
+//        let nextVC = STTestViewController.init(nibName: "STTestViewController", bundle: nil)
+//        self.navigationController?.pushViewController(nextVC, animated: true)
     }
     
     lazy var testView: STTestView = {
-        let view = STTestView.init(frame: CGRect.init(x: 0, y: 0, width: 100, height: 200))
+        let view = STTestView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 400))
         return view
     }()
     
