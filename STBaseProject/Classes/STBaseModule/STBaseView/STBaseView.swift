@@ -10,6 +10,8 @@ import UIKit
 
 open class STBaseView: UIView {
     
+    private var extraContentSizeOffset: CGFloat = 0
+        
     deinit {
         STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
@@ -29,30 +31,31 @@ open class STBaseView: UIView {
         self.baseScrollView.addSubview(self.baseContentView)
         self.addConstraints([
                             NSLayoutConstraint.init(item: self.baseScrollView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1, constant: 0),
-                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
+                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1, constant: 0),
                             NSLayoutConstraint.init(item: self.baseScrollView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1, constant: 0),
-                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1, constant: 0)
+                            NSLayoutConstraint.init(item: self.baseScrollView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1, constant: 0)
         ])
         self.baseScrollView.addConstraints([
                                             NSLayoutConstraint.init(item: self.baseContentView, attribute: .width, relatedBy: .equal, toItem: self.baseScrollView, attribute: .width, multiplier: 1, constant: 0),
-                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .trailing, relatedBy: .equal, toItem: self.baseScrollView, attribute: .trailing, multiplier: 1, constant: 0),
-                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .leading, relatedBy: .equal, toItem: self.baseScrollView, attribute: .leading, multiplier: 1, constant: 0)
+                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .top, relatedBy: .equal, toItem: self.baseScrollView, attribute: .top, multiplier: 1, constant: 0),
+                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .leading, relatedBy: .equal, toItem: self.baseScrollView, attribute: .leading, multiplier: 1, constant: 0),
+                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .bottom, relatedBy: .equal, toItem: self.baseScrollView, attribute: .bottom, multiplier: 1, constant: 0),
+                                            NSLayoutConstraint.init(item: self.baseContentView, attribute: .trailing, relatedBy: .equal, toItem: self.baseScrollView, attribute: .trailing, multiplier: 1, constant: 0)
         ])
     }
     
-    public func updateContentViewBottom(itemView: UIView, constant: CGFloat) {
-        let bottomConstraint: NSLayoutConstraint = NSLayoutConstraint.init(item: self.baseContentView, attribute: .bottom, relatedBy: .equal, toItem: itemView, attribute: .bottom, multiplier: 1, constant: constant)
-        self.baseScrollView.addConstraint(bottomConstraint)
+    public func updateExtraContentSize(offset: CGFloat) {
+        self.extraContentSizeOffset = offset
     }
     
     open override func layoutSubviews() {
         super.layoutSubviews()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             var height: CGFloat = 0
-            for view in self.baseContentView.subviews {
-                height += (view.frame.size.height)
+            if let lastView = self.baseContentView.subviews.last {
+                height = lastView.frame.maxY
             }
-            self.baseScrollView.contentSize = CGSize.init(width: self.bounds.size.width, height: height)
+            self.baseScrollView.contentSize = CGSize.init(width: self.bounds.size.width, height: height + self.extraContentSizeOffset)
         }
     }
     

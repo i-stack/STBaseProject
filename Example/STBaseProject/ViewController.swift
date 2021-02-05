@@ -26,6 +26,12 @@ class ViewController: STBaseViewController {
 //        }
 //        self.applianceNameLabel.text = "中华人民共和国于1949年10月1日正式成立，good!"
         self.view.addSubview(self.testView)
+        self.testView.snp.makeConstraints { (make) in
+            make.top.equalTo(STConstants.st_handleFloat(float: 0))
+            make.left.equalTo(STConstants.st_handleFloat(float: 0))
+            make.right.equalTo(STConstants.st_handleFloat(float: 0))
+            make.bottom.equalTo(STConstants.st_handleFloat(float: -200))
+        }
         
     }
     
@@ -35,8 +41,8 @@ class ViewController: STBaseViewController {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-//        let nextVC = STTestViewController.init(nibName: "STTestViewController", bundle: nil)
-//        self.navigationController?.pushViewController(nextVC, animated: true)
+        let nextVC = STTestViewController.init(nibName: "STTestViewController", bundle: nil)
+        self.navigationController?.pushViewController(nextVC, animated: true)
     }
     
     lazy var testView: STTestView = {

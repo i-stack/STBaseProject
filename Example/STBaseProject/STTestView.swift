@@ -14,7 +14,15 @@ class STTestView: STBaseView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+        self.configUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.configUI()
+    }
+    
+    func configUI() {
         self.backgroundColor = UIColor.red
         
         let view = UIView()
@@ -56,15 +64,5 @@ class STTestView: STBaseView {
             make.top.equalTo(view3.snp.bottom).offset(20)
             make.left.right.height.equalTo(view)
         }
-        
-//        self.baseContentView.snp.makeConstraints({ (make) in
-//            make.bottom.equalTo(view4.snp.bottom).offset(20)
-//        })
-        
-        self.updateContentViewBottom(itemView: view4, constant: 20)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }
