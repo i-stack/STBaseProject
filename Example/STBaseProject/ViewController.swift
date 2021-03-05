@@ -25,6 +25,14 @@ class ViewController: STBaseViewController {
 ////            make.height.equalTo(STConstants.st_handleFloat(float: 40))
 //        }
 //        self.applianceNameLabel.text = "中华人民共和国于1949年10月1日正式成立，good!"
+        self.view.addSubview(self.testView)
+        self.testView.snp.makeConstraints { (make) in
+            make.top.equalTo(STConstants.st_handleFloat(float: 0))
+            make.left.equalTo(STConstants.st_handleFloat(float: 0))
+            make.right.equalTo(STConstants.st_handleFloat(float: 0))
+            make.bottom.equalTo(STConstants.st_handleFloat(float: -200))
+        }
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -38,7 +46,7 @@ class ViewController: STBaseViewController {
     }
     
     lazy var testView: STTestView = {
-        let view = STTestView.init(frame: CGRect.init(x: 0, y: 0, width: 100, height: 200))
+        let view = STTestView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 400))
         return view
     }()
     

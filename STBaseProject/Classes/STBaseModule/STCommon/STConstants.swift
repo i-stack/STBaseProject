@@ -34,6 +34,10 @@ public class STConstants: NSObject {
     private var benchmarkDesignSize = CGSize.zero
     public static let shared: STConstants = STConstants()
     private var barHeightModel: STConstantBarHeightModel = STConstantBarHeightModel()
+    
+    private override init() {
+        super.init()
+    }
 
     /// 设计图基准尺寸
     ///
