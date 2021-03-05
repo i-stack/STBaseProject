@@ -26,6 +26,7 @@ public struct STConstantBarHeightModel {
     public var navIsSafeHeight: CGFloat = 88.0
     public var tabBarNormalHeight: CGFloat = 49.0
     public var tabBarIsSafeHeight: CGFloat = 83.0
+    public init() {}
 }
 
 public class STConstants: NSObject {
