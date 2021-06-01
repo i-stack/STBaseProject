@@ -32,7 +32,8 @@ class ViewController: STBaseViewController {
             make.right.equalTo(STConstants.st_handleFloat(float: 0))
             make.bottom.equalTo(STConstants.st_handleFloat(float: -200))
         }
-        
+        STLogP("viewDidLoad")
+        STLogP("viewDidLoad")
     }
     
     override func viewWillAppear(_ animated: Bool) {

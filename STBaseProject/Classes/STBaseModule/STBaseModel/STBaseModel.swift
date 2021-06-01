@@ -11,7 +11,7 @@ import UIKit
 open class STBaseModel: NSObject {
     
     deinit {
-        
+        print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
     
     open override func value(forUndefinedKey key: String) -> Any? {
@@ -25,6 +25,28 @@ open class STBaseModel: NSObject {
 
     open override func setValue(_ value: Any?, forUndefinedKey key: String) {
         print("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
+    }
+    
+    open override class func resolveInstanceMethod(_ sel: Selector!) -> Bool {
+        if let aMethod = class_getInstanceMethod(self, NSSelectorFromString("unrecognizedSelectorSentToInstance")) {
+            class_addMethod(self, sel, method_getImplementation(aMethod), method_getTypeEncoding(aMethod))
+        }
+        return super.resolveInstanceMethod(sel)
+    }
+    
+    open override class func resolveClassMethod(_ sel: Selector!) -> Bool {
+        if let aMethod = class_getClassMethod(self, NSSelectorFromString("unrecognizedSelectorSentToClass")) {
+            class_addMethod(self, sel, method_getImplementation(aMethod), method_getTypeEncoding(aMethod))
+        }
+        return super.resolveInstanceMethod(sel)
+    }
+    
+    private func unrecognizedSelectorSentToInstance() {
+        print("unrecognized selector sent to Instance");
+    }
+    
+    private class func unrecognizedSelectorSentToClass() {
+        print("unrecognized selector sent to class");
     }
 }
 

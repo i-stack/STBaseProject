@@ -8,8 +8,6 @@
 
 import UIKit
 
-open class STBaseViewModel: NSObject {
-    deinit {
-        print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
-    }
+open class STBaseViewModel: STBaseModel {
+    
 }

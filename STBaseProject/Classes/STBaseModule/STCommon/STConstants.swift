@@ -207,7 +207,12 @@ public class STConstants: NSObject {
     }
     
     public class func st_outputLogPath() -> String {
-        return "\(STFileManager.getLibraryCachePath())/outputLog/log.txt"
+        let outputPath = "\(STFileManager.getLibraryCachePath())/outputLog"
+        let pathIsExist = STFileManager.fileExistAt(path: outputPath)
+        if !pathIsExist.0 {
+            let _ = STFileManager.create(filePath: outputPath, fileName: "log.txt")
+        }
+        return "\(outputPath)/log.txt"
     }
 }
 
@@ -226,13 +231,15 @@ public func STLogP<T>(_ message: T, file: String = #file, funcName: String = #fu
     let file = (file as NSString).lastPathComponent
     let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
     print(content)
-    let userDefault = UserDefaults.standard
     var allContent = ""
-    if let origintContent = userDefault.value(forKey: STConstants.st_outputLogPath()) as? String {
+    let userDefault = UserDefaults.standard
+    let outputPath = STConstants.st_outputLogPath()
+    if let origintContent = userDefault.value(forKey: outputPath) as? String {
         allContent = origintContent
     }
     allContent = "\(allContent)\n\(content)"
-    userDefault.set(allContent, forKey: STConstants.st_outputLogPath())
+    STFileManager.writeToFile(content: allContent, filePath: outputPath)
+    userDefault.set(allContent, forKey: outputPath)
     userDefault.synchronize()
     #endif
 }
