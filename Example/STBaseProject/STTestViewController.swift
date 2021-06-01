@@ -18,7 +18,7 @@ class STTestViewController: STBaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("nameLabel top constraint \(self.tpConstraint.constant) -- height constraint \(self.heightConstraint.constant)")
+        STLogP("nameLabel top constraint \(self.tpConstraint.constant) -- height constraint \(self.heightConstraint.constant)")
         // Do any additional setup after loading the view.
     }
 
