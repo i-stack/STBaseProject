@@ -38,6 +38,7 @@ open class STBaseViewController: UIViewController {
     open var titleLabelAttributeRight: NSLayoutConstraint!
     open var titleLabelAttributeHeight: NSLayoutConstraint!
 
+    open var topViewAttributeHeight: NSLayoutConstraint!
     open var navBgViewAttributeHeight: NSLayoutConstraint!
 
     deinit {
@@ -128,11 +129,12 @@ open class STBaseViewController: UIViewController {
     }
     
     private func st_beginLayoutSubviews() -> Void {
+        self.topViewAttributeHeight = NSLayoutConstraint.init(item: self.topBgView!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STConstants.st_navHeight())
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.topBgView!, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.topBgView!, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.topBgView!, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.topBgView!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STConstants.st_navHeight())
+            self.topViewAttributeHeight
         ])
         
         self.navBgViewAttributeHeight = NSLayoutConstraint.init(item: self.navBgView!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 44)
