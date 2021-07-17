@@ -17,6 +17,8 @@
 		E454C6C125C293E800B98363 /* STTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E454C6BF25C293E800B98363 /* STTestViewController.swift */; };
 		E454C6C225C293E800B98363 /* STTestViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E454C6C025C293E800B98363 /* STTestViewController.xib */; };
 		E46045BE23CD9A7F00D4AA81 /* STTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46045BD23CD9A7F00D4AA81 /* STTestView.swift */; };
+		E4C724A526A30916003F19A1 /* STTestTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4C724A326A30916003F19A1 /* STTestTableViewCell.swift */; };
+		E4C724A626A30916003F19A1 /* STTestTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4C724A426A30916003F19A1 /* STTestTableViewCell.xib */; };
 		E4FEB62825A6FD680055D834 /* STNextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4FEB62725A6FD680055D834 /* STNextViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,6 +54,8 @@
 		E454C6BF25C293E800B98363 /* STTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTestViewController.swift; sourceTree = "<group>"; };
 		E454C6C025C293E800B98363 /* STTestViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STTestViewController.xib; sourceTree = "<group>"; };
 		E46045BD23CD9A7F00D4AA81 /* STTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTestView.swift; sourceTree = "<group>"; };
+		E4C724A326A30916003F19A1 /* STTestTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTestTableViewCell.swift; sourceTree = "<group>"; };
+		E4C724A426A30916003F19A1 /* STTestTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STTestTableViewCell.xib; sourceTree = "<group>"; };
 		E4FEB62725A6FD680055D834 /* STNextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STNextViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -113,6 +117,8 @@
 				E454C6BF25C293E800B98363 /* STTestViewController.swift */,
 				E454C6C025C293E800B98363 /* STTestViewController.xib */,
 				E46045BD23CD9A7F00D4AA81 /* STTestView.swift */,
+				E4C724A326A30916003F19A1 /* STTestTableViewCell.swift */,
+				E4C724A426A30916003F19A1 /* STTestTableViewCell.xib */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
 			name = "Example for STBaseProject";
@@ -255,6 +261,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E4C724A626A30916003F19A1 /* STTestTableViewCell.xib in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
@@ -325,6 +332,7 @@
 			files = (
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
+				E4C724A526A30916003F19A1 /* STTestTableViewCell.swift in Sources */,
 				E4FEB62825A6FD680055D834 /* STNextViewController.swift in Sources */,
 				E46045BE23CD9A7F00D4AA81 /* STTestView.swift in Sources */,
 				E454C6C125C293E800B98363 /* STTestViewController.swift in Sources */,

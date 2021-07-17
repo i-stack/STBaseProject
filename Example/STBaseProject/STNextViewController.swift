@@ -11,8 +11,9 @@ import SnapKit
 import STBaseProject
 
 class STNextViewController: STBaseViewController {
+    
+    
 
-    var imagePickerManager: STImagePickerManager?
 
     deinit {
         STLog("STNextViewController dealloc")
@@ -20,38 +21,30 @@ class STNextViewController: STBaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.imagePickerManager = STImagePickerManager.init(presentViewController: self)
         self.st_showNavBtnType(type: .showLeftBtn)
         self.view.backgroundColor = UIColor.orange
+        self.view.addSubview(self.progressView)
+        self.progressView.snp.makeConstraints { make in
+            make.height.equalTo(20)
+            make.top.equalTo(100)
+            make.left.right.equalToSuperview()
+        }
     }
     
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
+        for index in 1..<11 {
+            self.progressView.setProgress(Float(index) * 0.1, animated: true)
+        }
         
-        let alert = UIAlertController.init(title: nil, message: nil, preferredStyle: .actionSheet)
-        let albumAction = UIAlertAction.init(title: "从手机相册中选择", style: .default) {[weak self] (action) in
-            guard let strongSelf = self else { return }
-            strongSelf.imagePickerManager?.st_openSystemOperation(openSourceType: .photoLibrary, complection: { (pickerModel) in
-                if pickerModel.openSourceError == .openSourceOK {
-                    if let editImage = pickerModel.editedImage {
-                    }
-                }
-            })
-        }
-        alert.addAction(albumAction)
-        let phoneAction = UIAlertAction.init(title: "拍照", style: .default) {[weak self] (action) in
-            guard let strongSelf = self else { return }
-            strongSelf.imagePickerManager?.st_openSystemOperation(openSourceType: .camera, complection: { (pickerModel) in
-                if pickerModel.openSourceError == .openSourceOK {
-                    if let editImage = pickerModel.editedImage {
-                    }
-                }
-            })
-        }
-        alert.addAction(phoneAction)
-        let cancelAction = UIAlertAction.init(title: "取消", style: .cancel) { (action) in}
-        alert.addAction(cancelAction)
-        self.present(alert, animated: true, completion: nil)
     }
+    
+    private lazy var progressView: UIProgressView = {
+        var progress = UIProgressView()
+        progress.progressTintColor = UIColor.green
+//        progress.progress = 0.5
+        progress.trackTintColor = UIColor.blue // huad
+        return progress
+    }()
 }

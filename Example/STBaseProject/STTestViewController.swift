@@ -10,27 +10,56 @@ import UIKit
 import STBaseProject
 
 class STTestViewController: STBaseViewController {
+    
+    var executeTimer: Timer?
+    var timeCount: Float = 1.0
+    @IBOutlet weak var tableView: UITableView!
+    
+    deinit {
+        print("STTestViewController dealloc")
+    }
 
-    @IBOutlet weak var heightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var tpConstraint: NSLayoutConstraint!
-    @IBOutlet weak var nameLabel: UILabel!
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        STLogP("nameLabel top constraint \(self.tpConstraint.constant) -- height constraint \(self.heightConstraint.constant)")
-        // Do any additional setup after loading the view.
+        self.st_showNavBtnType(type: .showLeftBtn)
+        tableView.register(UINib.init(nibName: "STTestTableViewCell", bundle: nil), forCellReuseIdentifier: "STTestTableViewCell")
     }
-
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    
+    private func beginExecute(row: Int) {
+        if executeTimer == nil {
+            executeTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: {[weak self] timer in
+                guard let strongSelf = self else { return }
+                if let cell = strongSelf.tableView.cellForRow(at: IndexPath.init(row: row, section: 0)) as? STTestTableViewCell {
+                    cell.progressView.setProgress(strongSelf.timeCount * 0.1, animated: true)
+                }
+                strongSelf.timeCount += 1
+//                if strongSelf.timeCount >= 10.0 {
+//                    strongSelf.endExecute()
+//                }
+            })
+        }
     }
-    */
+    
+    private func endExecute() {
+        if executeTimer?.isValid ?? false {
+            executeTimer?.invalidate()
+            executeTimer = nil
+            timeCount = 1.0
+        }
+    }
+}
 
+extension STTestViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 10
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "STTestTableViewCell", for: indexPath)
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.beginExecute(row: indexPath.row)
+    }
 }
