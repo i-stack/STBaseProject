@@ -11,55 +11,27 @@ import STBaseProject
 
 class STTestViewController: STBaseViewController {
     
-    var executeTimer: Timer?
-    var timeCount: Float = 1.0
-    @IBOutlet weak var tableView: UITableView!
-    
     deinit {
-        print("STTestViewController dealloc")
+        STLogP("STTestViewController dealloc")
     }
-
+    var count: Int = 0
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.titleLabel.text = "STTestViewController"
         self.st_showNavBtnType(type: .showLeftBtn)
-        tableView.register(UINib.init(nibName: "STTestTableViewCell", bundle: nil), forCellReuseIdentifier: "STTestTableViewCell")
+        self.view.backgroundColor = UIColor.blue
+        STLogP("STTestViewController execting count: \(self.count)")
+        
+        Timer.scheduledTimer(withTimeInterval: 2, repeats: true, block: {[weak self] (timer) in
+            guard let strongSelf = self else { return }
+            strongSelf.count += 1
+            STLogP("STTestViewController execting count: \(strongSelf.count)")
+        })
     }
     
-    private func beginExecute(row: Int) {
-        if executeTimer == nil {
-            executeTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: {[weak self] timer in
-                guard let strongSelf = self else { return }
-                if let cell = strongSelf.tableView.cellForRow(at: IndexPath.init(row: row, section: 0)) as? STTestTableViewCell {
-                    cell.progressView.setProgress(strongSelf.timeCount * 0.1, animated: true)
-                }
-                strongSelf.timeCount += 1
-//                if strongSelf.timeCount >= 10.0 {
-//                    strongSelf.endExecute()
-//                }
-            })
-        }
-    }
-    
-    private func endExecute() {
-        if executeTimer?.isValid ?? false {
-            executeTimer?.invalidate()
-            executeTimer = nil
-            timeCount = 1.0
-        }
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
     }
 }
 
-extension STTestViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "STTestTableViewCell", for: indexPath)
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        self.beginExecute(row: indexPath.row)
-    }
-}

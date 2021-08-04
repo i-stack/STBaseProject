@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina4_0" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -11,7 +11,6 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="STTestViewController" customModule="STBaseProject_Example" customModuleProvider="target">
             <connections>
-                <outlet property="tableView" destination="wB3-RX-ATc" id="SGP-dS-T1q"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -19,24 +18,8 @@
         <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
             <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-            <subviews>
-                <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="wB3-RX-ATc">
-                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
-                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    <connections>
-                        <outlet property="dataSource" destination="-1" id="pav-Cf-ijY"/>
-                        <outlet property="delegate" destination="-1" id="Kgk-yz-0hr"/>
-                    </connections>
-                </tableView>
-            </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-            <constraints>
-                <constraint firstItem="wB3-RX-ATc" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" id="3PY-dh-Qcx"/>
-                <constraint firstItem="wB3-RX-ATc" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" id="9L6-SX-fqZ"/>
-                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="wB3-RX-ATc" secondAttribute="bottom" id="hrO-C3-8xL"/>
-                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="wB3-RX-ATc" secondAttribute="trailing" id="vqR-iz-1sa"/>
-            </constraints>
             <point key="canvasLocation" x="138.75" y="153.16901408450704"/>
         </view>
     </objects>

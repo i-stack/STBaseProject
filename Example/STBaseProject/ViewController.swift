@@ -11,20 +11,15 @@ import SnapKit
 import STBaseProject
 
 class ViewController: STBaseViewController {
-    
-    var count: Int = 0
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         self.st_showNavBtnType(type: .onlyShowTitle)
+        self.titleLabel.text = "ViewController"
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesBegan(touches, with: event)
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
         let nextVC = STTestViewController.init(nibName: "STTestViewController", bundle: nil)
         self.navigationController?.pushViewController(nextVC, animated: true)
     }

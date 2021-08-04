@@ -23,7 +23,8 @@ open class STBaseViewController: UIViewController {
     open var leftBtn: UIButton!
     open var rightBtn: UIButton!
     open var titleLabel: UILabel!
-
+    
+    private var logView: STLogView?
     private var defaultValue: CGFloat = 44
 
     open var leftBtnAttributeLeft: NSLayoutConstraint!
@@ -193,28 +194,29 @@ open class STBaseViewController: UIViewController {
     }
     
     @objc private func showLogPrintView() {
-        if self.logView.superview != nil {
-            self.logView.removeFromSuperview()
+        if self.logView == nil {
+            self.logView = self.createLogView()
         }
-        UIApplication.shared.keyWindow?.addSubview(self.logView)
-        UIApplication.shared.keyWindow?.addConstraints([
-            NSLayoutConstraint.init(item: self.logView, attribute: .top, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .top, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.logView, attribute: .left, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .left, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.logView, attribute: .bottom, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .bottom, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.logView, attribute: .right, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .right, multiplier: 1, constant: 0)
-        ])
-        let userDefault = UserDefaults.standard
-        userDefault.removeObject(forKey: STConstants.st_outputLogPath())
-        userDefault.synchronize()
-        self.logView.beginQueryLog()
+        if let lv = self.logView {
+            if lv.superview == nil {
+                UIApplication.shared.keyWindow?.addSubview(lv)
+                UIApplication.shared.keyWindow?.addConstraints([
+                    NSLayoutConstraint.init(item: lv, attribute: .top, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .top, multiplier: 1, constant: 0),
+                    NSLayoutConstraint.init(item: lv, attribute: .left, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .left, multiplier: 1, constant: 0),
+                    NSLayoutConstraint.init(item: lv, attribute: .bottom, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .bottom, multiplier: 1, constant: 0),
+                    NSLayoutConstraint.init(item: lv, attribute: .right, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .right, multiplier: 1, constant: 0)
+                ])
+            }
+        }
+        self.logView?.beginQueryLogP(content: "")
     }
     
-    private lazy var logView: STLogView = {
+    private func createLogView() -> STLogView {
         let view = STLogView.init(frame: CGRect.zero, delegate: self)
         view.backgroundColor = UIColor.black
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
-    }()
+    }
 
     private lazy var documentController: UIDocumentInteractionController = {
         let path = STConstants.st_outputLogPath()
@@ -244,7 +246,12 @@ extension STBaseViewController: UIGestureRecognizerDelegate {
 }
 
 extension STBaseViewController: STLogViewDelegate, UIDocumentInteractionControllerDelegate {
-    func showDocumentInteractionController() {
+    func logViewBackBtnClick() {
+        self.logView?.removeFromSuperview()
+        self.logView = nil
+    }
+    
+    func logViewShowDocumentInteractionController() {
         self.documentController.presentOpenInMenu(from: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 400), in: self.view, animated: true)
     }
     

@@ -9,19 +9,25 @@
 import UIKit
 
 protocol STLogViewDelegate: NSObjectProtocol {
-    func showDocumentInteractionController() -> Void
+    func logViewBackBtnClick() -> Void
+    func logViewShowDocumentInteractionController() -> Void
 }
 
 class STLogView: UIView {
     
-    private var queryLogTimer: Timer?
-    private var tableViewInBottom: Bool = false
+    private var outputPath: String = ""
     private weak var mDelegate: STLogViewDelegate?
     private var dataSources: [String] = [String]()
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.configUI()
+        self.outputPath = STConstants.st_outputLogPath()
+        NotificationCenter.default.addObserver(self, selector: #selector(beginQueryLogP(notification:)), name: NSNotification.Name(rawValue: STConstants.st_notificationQueryLogName()), object: nil)
     }
     
     public convenience init(frame: CGRect, delegate: STLogViewDelegate) {
@@ -64,47 +70,47 @@ class STLogView: UIView {
         ])
     }
     
-    func beginQueryLog() {
-        self.stopQueryLog()
-        self.queryLogTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true, block: {[weak self] (timer) in
-            guard let strongSelf = self else { return }
-            let userDefault = UserDefaults.standard
-            if let origintContent = userDefault.object(forKey: STConstants.st_outputLogPath()) as? String {
-                if origintContent.count > 0 {
-                    if !strongSelf.dataSources.contains(origintContent) {
-                        strongSelf.dataSources.removeAll()
-                        strongSelf.dataSources.append(origintContent)
-                        strongSelf.tableView.reloadData()
-                    }
-                }
-            }
-        })
-    }
-    
-    func stopQueryLog() {
-        if self.queryLogTimer?.isValid ?? false {
-            self.queryLogTimer?.invalidate()
-            self.queryLogTimer = nil
+    @objc private func beginQueryLogP(notification: Notification) {
+        if let content = notification.object as? String {
+            self.beginQueryLogP(content: content)
         }
     }
-        
+    
+    func beginQueryLogP(content: String) {
+        if content.count > 0 {
+            self.dataSources.append(content)
+        } else {
+            let userDefault = UserDefaults.standard
+            if let origintContent = userDefault.object(forKey: self.outputPath) as? String {
+                if origintContent.count > 0 {
+                    self.dataSources.removeAll()
+                    self.dataSources.append(origintContent)
+                }
+            }
+        }
+        if self.dataSources.count > 0 {
+            self.tableView.reloadData()
+            let indexPath = IndexPath.init(row: self.dataSources.count - 1, section: 0)
+            self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+        }
+    }
+    
     @objc private func backBtnClick() {
-        self.stopQueryLog()
-        self.removeFromSuperview()
+        self.mDelegate?.logViewBackBtnClick()
     }
         
     @objc private func cleanLogBtnClick() {
-        let userDefault = UserDefaults.standard
-        userDefault.removeObject(forKey: STConstants.st_outputLogPath())
-        userDefault.synchronize()
-        STFileManager.removeItem(atPath: STConstants.st_outputLogPath())
         self.dataSources.removeAll()
         self.tableView.reloadData()
+        let userDefault = UserDefaults.standard
+        userDefault.removeObject(forKey: self.outputPath)
+        userDefault.synchronize()
+        STFileManager.removeItem(atPath: self.outputPath)
     }
     
     @objc private func outputLogBtnClick(sender: UIButton) {
         STFileManager.st_logWriteToFile()
-        self.mDelegate?.showDocumentInteractionController()
+        self.mDelegate?.logViewShowDocumentInteractionController()
     }
         
     private lazy var tableView: UITableView = {
@@ -159,11 +165,10 @@ extension STLogView: UITableViewDelegate, UITableViewDataSource {
         if cell == nil {
             cell = UITableViewCell.init(style: .default, reuseIdentifier: "STLogViewController")
             cell?.selectionStyle = .none
-            cell?.backgroundColor = UIColor.black
             cell?.textLabel?.numberOfLines = 0
+            cell?.backgroundColor = UIColor.black
             cell?.textLabel?.textColor = UIColor.green
         }
-        
         let text = self.dataSources[indexPath.row]
         cell?.textLabel?.text = text
         return cell ?? UITableViewCell()
@@ -171,16 +176,5 @@ extension STLogView: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
-    }
-    
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let height = scrollView.frame.size.height
-        let contentOffsetY = scrollView.contentOffset.y
-        let bottomOffset = scrollView.contentSize.height - contentOffsetY
-        if bottomOffset <= height {
-            self.tableViewInBottom = true
-        } else {
-            self.tableViewInBottom = false
-        }
     }
 }

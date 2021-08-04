@@ -141,10 +141,12 @@ public class STFileManager: NSObject {
     /// 删除文件or文件夹
     public static func removeItem(atPath: String) {
         let fileManager = FileManager.default
-        do {
-            try fileManager.removeItem(atPath: atPath)
-        } catch {
-            print("removeItem Err : \(error.localizedDescription)")
+        if fileManager.fileExists(atPath: atPath) {
+            do {
+                try fileManager.removeItem(atPath: atPath)
+            } catch {
+                print("removeItem Err : \(error.localizedDescription)")
+            }
         }
     }
 
