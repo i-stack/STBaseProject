@@ -24,7 +24,6 @@ open class STBaseViewController: UIViewController {
     open var rightBtn: UIButton!
     open var titleLabel: UILabel!
     
-    private var logView: STLogView?
     private var defaultValue: CGFloat = 44
 
     open var leftBtnAttributeLeft: NSLayoutConstraint!
@@ -50,9 +49,6 @@ open class STBaseViewController: UIViewController {
         super.viewDidLoad()
         self.st_baseConfig()
         self.st_navigationBarView()
-        #if DEBUG
-        self.openLogPrintGestureRecognizer()
-        #endif
     }
     
     private func st_baseConfig() -> Void {
@@ -186,45 +182,6 @@ open class STBaseViewController: UIViewController {
     }
     
     @objc open func st_rightBarBtnClick() -> Void {}
-    
-    private func openLogPrintGestureRecognizer() {
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer.init(target: self, action: #selector(showLogPrintView))
-        tap.numberOfTapsRequired = 3
-        self.topBgView.addGestureRecognizer(tap)
-    }
-    
-    @objc private func showLogPrintView() {
-        if self.logView == nil {
-            self.logView = self.createLogView()
-        }
-        if let lv = self.logView {
-            if lv.superview == nil {
-                UIApplication.shared.keyWindow?.addSubview(lv)
-                UIApplication.shared.keyWindow?.addConstraints([
-                    NSLayoutConstraint.init(item: lv, attribute: .top, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .top, multiplier: 1, constant: 0),
-                    NSLayoutConstraint.init(item: lv, attribute: .left, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .left, multiplier: 1, constant: 0),
-                    NSLayoutConstraint.init(item: lv, attribute: .bottom, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .bottom, multiplier: 1, constant: 0),
-                    NSLayoutConstraint.init(item: lv, attribute: .right, relatedBy: .equal, toItem: UIApplication.shared.keyWindow, attribute: .right, multiplier: 1, constant: 0)
-                ])
-            }
-        }
-        self.logView?.beginQueryLogP(content: "")
-    }
-    
-    private func createLogView() -> STLogView {
-        let view = STLogView.init(frame: CGRect.zero, delegate: self)
-        view.backgroundColor = UIColor.black
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
-    }
-
-    private lazy var documentController: UIDocumentInteractionController = {
-        let path = STConstants.st_outputLogPath()
-        let documentController = UIDocumentInteractionController(url: URL.init(fileURLWithPath: path))
-        documentController.uti = "public.text"
-        documentController.delegate = self
-        return documentController
-    }()
 }
 
 extension STBaseViewController: UIGestureRecognizerDelegate {
@@ -242,29 +199,6 @@ extension STBaseViewController: UIGestureRecognizerDelegate {
             return true
         }
         return false
-    }
-}
-
-extension STBaseViewController: STLogViewDelegate, UIDocumentInteractionControllerDelegate {
-    func logViewBackBtnClick() {
-        self.logView?.removeFromSuperview()
-        self.logView = nil
-    }
-    
-    func logViewShowDocumentInteractionController() {
-        self.documentController.presentOpenInMenu(from: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 400), in: self.view, animated: true)
-    }
-    
-    public func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
-        return self
-    }
-    
-    public func documentInteractionControllerViewForPreview(_ controller: UIDocumentInteractionController) -> UIView? {
-        return self.view
-    }
-    
-    public func documentInteractionControllerRectForPreview(_ controller: UIDocumentInteractionController) -> CGRect {
-        return self.view.bounds
     }
 }
 
