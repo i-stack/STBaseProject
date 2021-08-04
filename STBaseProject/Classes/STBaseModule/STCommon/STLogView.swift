@@ -13,7 +13,7 @@ protocol STLogViewDelegate: NSObjectProtocol {
     func logViewShowDocumentInteractionController() -> Void
 }
 
-class STLogView: UIView {
+open class STLogView: UIView {
     
     private var outputPath: String = ""
     private weak var mDelegate: STLogViewDelegate?
@@ -30,12 +30,7 @@ class STLogView: UIView {
         NotificationCenter.default.addObserver(self, selector: #selector(beginQueryLogP(notification:)), name: NSNotification.Name(rawValue: STConstants.st_notificationQueryLogName()), object: nil)
     }
     
-    public convenience init(frame: CGRect, delegate: STLogViewDelegate) {
-        self.init(frame: frame)
-        self.mDelegate = delegate
-    }
-    
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         super.init(coder: coder)
     }
     
@@ -76,7 +71,7 @@ class STLogView: UIView {
         }
     }
     
-    func beginQueryLogP(content: String) {
+    public func beginQueryLogP(content: String) {
         if content.count > 0 {
             self.dataSources.append(content)
         } else {
