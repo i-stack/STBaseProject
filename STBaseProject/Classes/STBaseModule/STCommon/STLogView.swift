@@ -8,7 +8,7 @@
 
 import UIKit
 
-protocol STLogViewDelegate: NSObjectProtocol {
+public protocol STLogViewDelegate: NSObjectProtocol {
     func logViewBackBtnClick() -> Void
     func logViewShowDocumentInteractionController() -> Void
 }
@@ -16,7 +16,7 @@ protocol STLogViewDelegate: NSObjectProtocol {
 open class STLogView: UIView {
     
     private var outputPath: String = ""
-    private weak var mDelegate: STLogViewDelegate?
+    open weak var mDelegate: STLogViewDelegate?
     private var dataSources: [String] = [String]()
     
     deinit {
