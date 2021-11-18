@@ -14,4 +14,7 @@ target 'STBaseProject_Example' do
   pod 'STBaseProject/STScreenshot', :path => '../'
 
   pod 'SnapKit'
+  pod 'Alamofire'
+  pod 'SDWebImage'
+  
 end

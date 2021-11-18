@@ -30,6 +30,7 @@ open class STBaseModel: NSObject {
     open override class func resolveInstanceMethod(_ sel: Selector!) -> Bool {
         if let aMethod = class_getInstanceMethod(self, NSSelectorFromString("unrecognizedSelectorSentToInstance")) {
             class_addMethod(self, sel, method_getImplementation(aMethod), method_getTypeEncoding(aMethod))
+            return true
         }
         return super.resolveInstanceMethod(sel)
     }
@@ -37,6 +38,7 @@ open class STBaseModel: NSObject {
     open override class func resolveClassMethod(_ sel: Selector!) -> Bool {
         if let aMethod = class_getClassMethod(self, NSSelectorFromString("unrecognizedSelectorSentToClass")) {
             class_addMethod(self, sel, method_getImplementation(aMethod), method_getTypeEncoding(aMethod))
+            return true
         }
         return super.resolveInstanceMethod(sel)
     }
