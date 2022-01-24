@@ -11,7 +11,7 @@ import Foundation
 extension NSLayoutConstraint {
     @IBInspectable open var isAdaptateScreen: Bool {
         set {
-            self.constant = self.constant * STConstants.st_multiplier()
+            self.constant = STConstants.st_handleFloat(float: self.constant)
         }
         get {
             return true
@@ -23,8 +23,7 @@ extension UILabel {
     @IBInspectable open var isAdapterFont: Bool {
         set {
             let fontName = self.font.fontName
-            let adapterSize = self.font.pointSize * STConstants.st_multiplier()
-            self.font = UIFont.st_systemFont(ofSize: adapterSize, fontName: fontName)
+            self.font = UIFont.st_systemFont(ofSize: self.font.pointSize, fontName: fontName)
         }
         get {
             return true

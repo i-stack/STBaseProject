@@ -14,6 +14,7 @@ class STTestViewController: STBaseViewController {
     deinit {
         STLogP("STTestViewController dealloc")
     }
+    
     var count: Int = 0
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,7 +32,5 @@ class STTestViewController: STBaseViewController {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        
     }
 }
-

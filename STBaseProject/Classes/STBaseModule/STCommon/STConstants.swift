@@ -71,7 +71,9 @@ public class STConstants: NSObject {
     /// - Parameter float: 设计图标注值
     public class func st_handleFloat(float: CGFloat) -> CGFloat {
         let multiplier = self.st_multiplier()
-        return float * multiplier
+        let result = float * multiplier
+        let scale = UIScreen.main.scale
+        return (result * scale).rounded(.up) / scale
     }
     
     public class func st_appw() -> CGFloat {

@@ -12,9 +12,6 @@ import STBaseProject
 
 class STNextViewController: STBaseViewController {
     
-    
-
-
     deinit {
         STLog("STNextViewController dealloc")
     }
@@ -30,14 +27,12 @@ class STNextViewController: STBaseViewController {
             make.left.right.equalToSuperview()
         }
     }
-    
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         for index in 1..<11 {
             self.progressView.setProgress(Float(index) * 0.1, animated: true)
         }
-        
     }
     
     private lazy var progressView: UIProgressView = {
