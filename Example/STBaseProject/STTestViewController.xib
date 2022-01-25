@@ -19,16 +19,32 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="e4o-ap-XsO">
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="e4o-ap-XsO">
                     <rect key="frame" x="105" y="172" width="42" height="21"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                     <nil key="textColor"/>
                     <nil key="highlightedColor"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="autoConstraint" value="YES"/>
+                    </userDefinedRuntimeAttributes>
                 </label>
             </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="e4o-ap-XsO" firstAttribute="leading" secondItem="fnl-2z-Ty3" secondAttribute="leading" constant="105" id="1lP-Mh-PIM">
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="autoConstant" value="YES"/>
+                    </userDefinedRuntimeAttributes>
+                </constraint>
+                <constraint firstItem="e4o-ap-XsO" firstAttribute="top" secondItem="fnl-2z-Ty3" secondAttribute="top" constant="172" id="kh0-1C-ahV"/>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="trailing" secondItem="e4o-ap-XsO" secondAttribute="trailing" constant="173" id="n5V-ho-TbY">
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="autoConstant" value="YES"/>
+                    </userDefinedRuntimeAttributes>
+                </constraint>
+                <constraint firstItem="fnl-2z-Ty3" firstAttribute="bottom" secondItem="e4o-ap-XsO" secondAttribute="bottom" constant="375" id="v6b-jr-WVj"/>
+            </constraints>
             <point key="canvasLocation" x="138.75" y="153.16901408450704"/>
         </view>
     </objects>

@@ -59,7 +59,7 @@ open class STBaseView: UIView {
         }
     }
     
-    private lazy var baseScrollView: UIScrollView = {
+    public lazy var baseScrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.isPagingEnabled = true
         scrollView.showsVerticalScrollIndicator = false
