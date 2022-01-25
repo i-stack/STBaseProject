@@ -112,7 +112,9 @@ extension UIView {
 
 open class STBaseScrollerView: UIScrollView {
     open override func touchesShouldCancel(in view: UIView) -> Bool {
-        super.touchesShouldCancel(in: view)
-        return true
+        if view.isKind(of: UIButton.self) {
+            return true
+        }
+        return super.touchesShouldCancel(in: view)
     }
 }
