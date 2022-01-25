@@ -59,8 +59,8 @@ open class STBaseView: UIView {
         }
     }
     
-    public lazy var baseScrollView: UIScrollView = {
-        let scrollView = UIScrollView()
+    public lazy var baseScrollView: STBaseScrollerView = {
+        let scrollView = STBaseScrollerView()
         scrollView.isPagingEnabled = true
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
@@ -107,5 +107,12 @@ extension UIView {
         } else {
             return vc
         }
+    }
+}
+
+open class STBaseScrollerView: UIScrollView {
+    open override func touchesShouldCancel(in view: UIView) -> Bool {
+        super.touchesShouldCancel(in: view)
+        return true
     }
 }
