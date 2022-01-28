@@ -22,10 +22,17 @@ class STTestView: STBaseView {
         self.configUI()
     }
     
+    @objc func btnClick() {
+        print("btnclicked")
+    }
+    
     func configUI() {
         self.backgroundColor = UIColor.red
-        
-        let view = UIView()
+        self.baseScrollView.delaysContentTouches = false
+        let view = UIButton()
+        view.setTitle("click", for: .normal)
+        view.setTitleColor(UIColor.white, for: .normal)
+        view.addTarget(self, action: #selector(btnClick), for: .touchUpInside)
         view.backgroundColor = UIColor.purple
         self.baseContentView.addSubview(view)
         view.snp.makeConstraints { (make) in

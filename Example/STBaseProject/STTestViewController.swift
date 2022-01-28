@@ -23,12 +23,16 @@ class STTestViewController: STBaseViewController {
         self.view.backgroundColor = UIColor.blue
         STLogP("STTestViewController execting count: \(self.count)")
         
-        Timer.scheduledTimer(withTimeInterval: 2, repeats: true, block: {[weak self] (timer) in
-            guard let strongSelf = self else { return }
-            strongSelf.count += 1
-            STLogP("STTestViewController execting count: \(strongSelf.count)")
-        })
+        self.view.addSubview(self.testView)
+        self.testView.snp.makeConstraints { make in
+            make.top.left.bottom.right.equalTo(0)
+        }
     }
+    
+    lazy var testView: STTestView = {
+        let view = STTestView()
+        return view
+    }()
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
