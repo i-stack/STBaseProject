@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum STJSONValue: Decodable {
+public enum STJSONValue: Codable {
     
     case int(Int)
     case bool(Bool)
