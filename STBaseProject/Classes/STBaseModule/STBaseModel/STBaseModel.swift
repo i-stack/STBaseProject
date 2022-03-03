@@ -11,20 +11,20 @@ import UIKit
 open class STBaseModel: NSObject {
     
     deinit {
-        print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
     
     open override func value(forUndefinedKey key: String) -> Any? {
-        print("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
+        STLog("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
         return nil
     }
 
     open override class func setValue(_ value: Any?, forUndefinedKey key: String) {
-        print("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
+        STLog("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
     }
 
     open override func setValue(_ value: Any?, forUndefinedKey key: String) {
-        print("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
+        STLog("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
     }
     
     open override class func resolveInstanceMethod(_ sel: Selector!) -> Bool {
@@ -44,11 +44,11 @@ open class STBaseModel: NSObject {
     }
     
     private func unrecognizedSelectorSentToInstance() {
-        print("unrecognized selector sent to Instance");
+        STLog("unrecognized selector sent to Instance");
     }
     
     private class func unrecognizedSelectorSentToClass() {
-        print("unrecognized selector sent to class");
+        STLog("unrecognized selector sent to class");
     }
 }
 
