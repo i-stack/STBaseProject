@@ -104,9 +104,8 @@ extension UIView {
             return nil
         } else if let naiVC = vc as? UINavigationController {
             return currentViewController(naiVC.visibleViewController)
-        } else {
-            return vc
         }
+        return vc
     }
 }
 
