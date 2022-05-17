@@ -1,4 +1,4 @@
-platform :ios, '10.0'
+platform :ios, '12.0'
 
 use_frameworks!
 
@@ -12,6 +12,7 @@ target 'STBaseProject_Example' do
   pod 'STBaseProject/STHUD', :path => '../'
   pod 'STBaseProject/STScanner', :path => '../'
   pod 'STBaseProject/STScreenshot', :path => '../'
+  pod 'STBaseProject/STBaseConfig', :path => '../'
 
   pod 'SnapKit'
   pod 'Alamofire'

@@ -1,6 +1,6 @@
 {
   "name": "STBaseProject",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "summary": "Collect common classes in the development process.",
   "description": "Collect common classes in the development process. Can custom.",
   "homepage": "https://github.com/songMW/STBaseProject",
@@ -13,10 +13,10 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "0.1.0"
+    "tag": "0.1.2"
   },
   "platforms": {
-    "ios": "10.0"
+    "ios": "12.0"
   },
   "resources": [
     "STBaseProject/Assets/*"
@@ -50,13 +50,13 @@
           "source_files": [
             "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift"
           ]
-        },
-        {
-          "name": "STCommon",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STCommon/*.swift"
-          ]
         }
+      ]
+    },
+    {
+      "name": "STBaseConfig",
+      "source_files": [
+        "STBaseProject/Classes/STBaseConfig/*.swift"
       ]
     },
     {

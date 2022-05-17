@@ -74,7 +74,7 @@ open class STScanManager: STImagePickerManager {
     /// - Parameter onFailed: 识别失败回调，返回Error
     ///
     public class func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(String) -> Void, onFailed: @escaping(Error) -> Void) {
-        if STDeviceInfo.currentSysVersion().doubleValue < 8.0 {
+        if Double(UIDevice.current.systemVersion) ?? 0.0 < 8.0 {
             DispatchQueue.main.async {
                 onFailed(NSError.init(domain: "Only supports iOS 8.0 system or higher", code: 0, userInfo: [:]))
             }

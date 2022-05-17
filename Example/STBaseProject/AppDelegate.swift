@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        STConstants.shared.st_configBenchmarkDesign(size: CGSize.init(width: 375, height: 812))
+        STScreenSizeConstants.shared.st_configBenchmarkDesign(size: CGSize.init(width: 375, height: 812))
         let vc = ViewController()
         let nav = UINavigationController.init(rootViewController: vc)
         self.window?.rootViewController = nav

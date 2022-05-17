@@ -11,20 +11,20 @@ import UIKit
 open class STBaseModel: NSObject {
     
     deinit {
-        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+        STBaseModel.debugPrint(content: "🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
     
     open override func value(forUndefinedKey key: String) -> Any? {
-        STLog("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
+        STBaseModel.debugPrint(content: "⚠️ ⚠️ Key = \(key) isValueForUndefinedKey ⚠️ ⚠️")
         return nil
     }
 
     open override class func setValue(_ value: Any?, forUndefinedKey key: String) {
-        STLog("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
+        STBaseModel.debugPrint(content: "⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
     }
 
     open override func setValue(_ value: Any?, forUndefinedKey key: String) {
-        STLog("⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
+        STBaseModel.debugPrint(content: "⚠️ ⚠️ Key = \(key) isUndefinedKey ⚠️ ⚠️")
     }
     
     open override class func resolveInstanceMethod(_ sel: Selector!) -> Bool {
@@ -44,11 +44,17 @@ open class STBaseModel: NSObject {
     }
     
     private func unrecognizedSelectorSentToInstance() {
-        STLog("unrecognized selector sent to Instance");
+        STBaseModel.debugPrint(content: "unrecognized selector sent to Instance")
     }
     
     private class func unrecognizedSelectorSentToClass() {
-        STLog("unrecognized selector sent to class");
+        debugPrint(content: "unrecognized selector sent to class")
+    }
+    
+    private class func debugPrint(content: String) {
+#if DEBUG
+        print(content)
+#endif
     }
 }
 

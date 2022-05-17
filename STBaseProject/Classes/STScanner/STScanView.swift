@@ -25,7 +25,7 @@ open class STScanView: UIView {
     let leftDistance: CGFloat = 60.0
     
     deinit {
-        STLog("STScanView dealloc")
+        
     }
     
     override init(frame: CGRect) {

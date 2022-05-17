@@ -8,6 +8,6 @@
 
 import UIKit
 
-open class STBaseViewModel: STBaseModel {
+open class STBaseViewModel: NSObject {
     
 }

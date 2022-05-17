@@ -1,24 +1,30 @@
 PODS:
+  - Alamofire (5.5.0)
   - MBProgressHUD (1.2.0)
+  - SDWebImage (5.12.3):
+    - SDWebImage/Core (= 5.12.3)
+  - SDWebImage/Core (5.12.3)
   - SnapKit (5.0.1)
-  - STBaseProject/STBaseModule (0.1.0):
-    - STBaseProject/STBaseModule/STBaseModel (= 0.1.0)
-    - STBaseProject/STBaseModule/STBaseView (= 0.1.0)
-    - STBaseProject/STBaseModule/STBaseViewController (= 0.1.0)
-    - STBaseProject/STBaseModule/STBaseViewModel (= 0.1.0)
-    - STBaseProject/STBaseModule/STCommon (= 0.1.0)
-  - STBaseProject/STBaseModule/STBaseModel (0.1.0)
-  - STBaseProject/STBaseModule/STBaseView (0.1.0)
-  - STBaseProject/STBaseModule/STBaseViewController (0.1.0)
-  - STBaseProject/STBaseModule/STBaseViewModel (0.1.0)
-  - STBaseProject/STBaseModule/STCommon (0.1.0)
-  - STBaseProject/STHUD (0.1.0):
+  - STBaseProject/STBaseConfig (0.1.2)
+  - STBaseProject/STBaseModule (0.1.2):
+    - STBaseProject/STBaseModule/STBaseModel (= 0.1.2)
+    - STBaseProject/STBaseModule/STBaseView (= 0.1.2)
+    - STBaseProject/STBaseModule/STBaseViewController (= 0.1.2)
+    - STBaseProject/STBaseModule/STBaseViewModel (= 0.1.2)
+  - STBaseProject/STBaseModule/STBaseModel (0.1.2)
+  - STBaseProject/STBaseModule/STBaseView (0.1.2)
+  - STBaseProject/STBaseModule/STBaseViewController (0.1.2)
+  - STBaseProject/STBaseModule/STBaseViewModel (0.1.2)
+  - STBaseProject/STHUD (0.1.2):
     - MBProgressHUD
-  - STBaseProject/STScanner (0.1.0)
-  - STBaseProject/STScreenshot (0.1.0)
+  - STBaseProject/STScanner (0.1.2)
+  - STBaseProject/STScreenshot (0.1.2)
 
 DEPENDENCIES:
+  - Alamofire
+  - SDWebImage
   - SnapKit
+  - STBaseProject/STBaseConfig (from `../`)
   - STBaseProject/STBaseModule (from `../`)
   - STBaseProject/STHUD (from `../`)
   - STBaseProject/STScanner (from `../`)
@@ -26,7 +32,9 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Alamofire
     - MBProgressHUD
+    - SDWebImage
     - SnapKit
 
 EXTERNAL SOURCES:
@@ -34,10 +42,12 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
+  Alamofire: 1c4fb5369c3fe93d2857c780d8bbe09f06f97e7c
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  SDWebImage: 53179a2dba77246efa8a9b85f5c5b21f8f43e38f
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  STBaseProject: 024c801fdaffd61b8d35032e315a575caab8038d
+  STBaseProject: a6d7bbae6436bc05f95ec4e978b0f39ab9b7028c
 
-PODFILE CHECKSUM: 2b2afe6428f720c40a6aa4e79b848d18d618bd52
+PODFILE CHECKSUM: c9133b30a76218be926f82df21bf1c4c8d9b9343
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.11.3

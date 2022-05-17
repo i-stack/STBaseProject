@@ -73,7 +73,9 @@ open class STImagePickerManager: NSObject {
             self.imagePickerController?.delegate = nil
             self.imagePickerController = nil
         }
-        STLog("STImagePickerManager dealloc")
+        #if DEBUG
+        print("STImagePickerManager dealloc")
+        #endif
     }
     
     public override init() {

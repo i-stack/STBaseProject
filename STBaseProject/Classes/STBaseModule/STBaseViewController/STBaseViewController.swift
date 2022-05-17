@@ -54,23 +54,22 @@ open class STBaseViewController: UIViewController {
     private func st_baseConfig() -> Void {
         self.hidesBottomBarWhenPushed = true
         self.view.backgroundColor = UIColor.white
-        self.automaticallyAdjustsScrollViewInsets = false
         self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.navigationController?.interactivePopGestureRecognizer?.delegate = nil
     }
     
     private func st_navigationBarView() -> Void {
-        self.topBgView = UIView.init()
+        self.topBgView = UIView()
         self.topBgView.isHidden = true
         self.topBgView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(self.topBgView)
         
-        self.navBgView = UIView.init()
+        self.navBgView = UIView()
         self.navBgView.isHidden = true
         self.navBgView.translatesAutoresizingMaskIntoConstraints = false
         self.topBgView.addSubview(self.navBgView)
         
-        self.titleLabel = UILabel.init()
+        self.titleLabel = UILabel()
         self.titleLabel.textAlignment = NSTextAlignment.center
         self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -126,7 +125,7 @@ open class STBaseViewController: UIViewController {
     }
     
     private func st_beginLayoutSubviews() -> Void {
-        self.topViewAttributeHeight = NSLayoutConstraint.init(item: self.topBgView!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STConstants.st_navHeight())
+        self.topViewAttributeHeight = NSLayoutConstraint.init(item: self.topBgView!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: self.navHeight())
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.topBgView!, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.topBgView!, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0),
@@ -182,6 +181,13 @@ open class STBaseViewController: UIViewController {
     }
     
     @objc open func st_rightBarBtnClick() -> Void {}
+    
+    private func navHeight() -> CGFloat {
+        if UIScreen.main.bounds.size.height > 736 {
+            return 88.0
+        }
+        return 64.0
+    }
 }
 
 extension STBaseViewController: UIGestureRecognizerDelegate {

@@ -13,7 +13,9 @@ open class STBaseView: UIView {
     private var extraContentSizeOffset: CGFloat = 0
         
     deinit {
-        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+#if DEBUG
+        print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+#endif
     }
     
     public override init(frame: CGRect) {
