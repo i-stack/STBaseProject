@@ -1,9 +1,8 @@
 {
   "name": "STBaseProject",
-  "version": "0.1.2",
-  "summary": "Collect common classes in the development process.",
-  "description": "Collect common classes in the development process. Can custom.",
-  "homepage": "https://github.com/songMW/STBaseProject",
+  "version": "1.0.4",
+  "summary": "Project infrastructure, common tools. The new project can inherit.",
+  "homepage": "https://github.com/i-stack/STBaseProject",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -13,62 +12,35 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "0.1.2"
+    "tag": "1.0.4"
   },
   "platforms": {
     "ios": "12.0"
   },
-  "resources": [
-    "STBaseProject/Assets/*"
+  "swift_versions": [
+    "5"
   ],
   "default_subspecs": "STBaseModule",
-  "public_header_files": "Pod/Classes/**/*",
   "subspecs": [
     {
       "name": "STBaseModule",
-      "subspecs": [
-        {
-          "name": "STBaseViewController",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift"
-          ]
-        },
-        {
-          "name": "STBaseView",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseView/*.swift"
-          ]
-        },
-        {
-          "name": "STBaseViewModel",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift"
-          ]
-        },
-        {
-          "name": "STBaseModel",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift"
-          ]
-        }
-      ]
+      "source_files": [
+        "STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift",
+        "STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift",
+        "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift",
+        "STBaseProject/Classes/STBaseModule/STBaseView/*.swift"
+      ],
+      "dependencies": {
+        "STBaseProject/STBaseConfig": [
+
+        ]
+      }
     },
     {
       "name": "STBaseConfig",
       "source_files": [
         "STBaseProject/Classes/STBaseConfig/*.swift"
       ]
-    },
-    {
-      "name": "STHUD",
-      "source_files": [
-        "STBaseProject/Classes/STHUD/*.swift"
-      ],
-      "dependencies": {
-        "MBProgressHUD": [
-
-        ]
-      }
     },
     {
       "name": "STScanner",
@@ -82,5 +54,6 @@
         "STBaseProject/Classes/STScreenshot/*.swift"
       ]
     }
-  ]
+  ],
+  "swift_version": "5"
 }

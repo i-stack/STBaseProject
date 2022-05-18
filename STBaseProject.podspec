@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'STBaseProject'
-  s.version          = '1.0.3'
+  s.version          = '1.0.4'
   s.summary          = 'Project infrastructure, common tools. The new project can inherit.'
 #  s.description      = <<-DESC
 #      Collect common classes in the development process. Can custom.
@@ -29,22 +29,13 @@ Pod::Spec.new do |s|
   s.default_subspecs = 'STBaseModule'
   s.subspec 'STBaseModule' do |ss|
     
-    ss.subspec 'STBaseViewController' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift']
-    end
-
-    ss.subspec 'STBaseView' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseView/*.swift']
-    end
-    
-    ss.subspec 'STBaseViewModel' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift']
-    end
-    
-    ss.subspec 'STBaseModel' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseModel/*.swift']
-    end
-    
+    ss.source_files = [
+        'STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift',
+        'STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift',
+        'STBaseProject/Classes/STBaseModule/STBaseModel/*.swift',
+        'STBaseProject/Classes/STBaseModule/STBaseView/*.swift'
+    ]
+    ss.dependency 'STBaseProject/STBaseConfig'
   end
   
   s.subspec 'STBaseConfig' do |ss|
