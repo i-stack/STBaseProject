@@ -8,8 +8,8 @@
 
 Pod::Spec.new do |s|
   s.name             = 'STBaseProject'
-  s.version          = '1.0.2'
-#  s.summary          = 'Collect common classes in the development process.'
+  s.version          = '1.0.3'
+  s.summary          = 'Project infrastructure, common tools. The new project can inherit.'
 #  s.description      = <<-DESC
 #      Collect common classes in the development process. Can custom.
 #                       DESC
