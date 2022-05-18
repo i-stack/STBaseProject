@@ -8,13 +8,13 @@
 
 Pod::Spec.new do |s|
   s.name             = 'STBaseProject'
-  s.version          = '1.0.1'
-  s.summary          = 'Collect common classes in the development process.'
-  s.description      = <<-DESC
-      Collect common classes in the development process. Can custom.
-                       DESC
+  s.version          = '1.0.2'
+#  s.summary          = 'Collect common classes in the development process.'
+#  s.description      = <<-DESC
+#      Collect common classes in the development process. Can custom.
+#                       DESC
 
-  s.homepage         = 'https://github.com/songMW/STBaseProject'
+  s.homepage         = 'https://github.com/i-stack/STBaseProject'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'songMW' => 'songshoubing7664@163.com' }
