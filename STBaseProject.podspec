@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'STBaseProject'
-  s.version          = '1.0.0'
+  s.version          = '1.0.1'
   s.summary          = 'Collect common classes in the development process.'
   s.description      = <<-DESC
       Collect common classes in the development process. Can custom.
