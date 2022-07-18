@@ -7,278 +7,284 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		46EB2E000010C0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000010B0 /* Foundation.framework */; };
-		46EB2E000010D0 /* AFError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000100 /* AFError.swift */; };
-		46EB2E000010E0 /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000110 /* Alamofire.swift */; };
-		46EB2E000010F0 /* AlamofireExtended.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000120 /* AlamofireExtended.swift */; };
-		46EB2E00001100 /* AuthenticationInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000130 /* AuthenticationInterceptor.swift */; };
-		46EB2E00001110 /* CachedResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000140 /* CachedResponseHandler.swift */; };
-		46EB2E00001120 /* Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000150 /* Combine.swift */; };
-		46EB2E00001130 /* Concurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* Concurrency.swift */; };
-		46EB2E00001140 /* DispatchQueue+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000170 /* DispatchQueue+Alamofire.swift */; };
-		46EB2E00001150 /* EventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000180 /* EventMonitor.swift */; };
-		46EB2E00001160 /* HTTPHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* HTTPHeaders.swift */; };
-		46EB2E00001170 /* HTTPMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* HTTPMethod.swift */; };
-		46EB2E00001180 /* MultipartFormData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* MultipartFormData.swift */; };
-		46EB2E00001190 /* MultipartUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* MultipartUpload.swift */; };
-		46EB2E000011A0 /* NetworkReachabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* NetworkReachabilityManager.swift */; };
-		46EB2E000011B0 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001E0 /* Notifications.swift */; };
-		46EB2E000011C0 /* OperationQueue+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* OperationQueue+Alamofire.swift */; };
-		46EB2E000011D0 /* ParameterEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* ParameterEncoder.swift */; };
-		46EB2E000011E0 /* ParameterEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* ParameterEncoding.swift */; };
-		46EB2E000011F0 /* Protected.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* Protected.swift */; };
-		46EB2E00001200 /* RedirectHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* RedirectHandler.swift */; };
-		46EB2E00001210 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* Request.swift */; };
-		46EB2E00001220 /* RequestInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* RequestInterceptor.swift */; };
-		46EB2E00001230 /* RequestTaskMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* RequestTaskMap.swift */; };
-		46EB2E00001240 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* Response.swift */; };
-		46EB2E00001250 /* ResponseSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* ResponseSerialization.swift */; };
-		46EB2E00001260 /* Result+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* Result+Alamofire.swift */; };
-		46EB2E00001270 /* RetryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* RetryPolicy.swift */; };
-		46EB2E00001280 /* ServerTrustEvaluation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* ServerTrustEvaluation.swift */; };
-		46EB2E00001290 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* Session.swift */; };
-		46EB2E000012A0 /* SessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* SessionDelegate.swift */; };
-		46EB2E000012B0 /* StringEncoding+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* StringEncoding+Alamofire.swift */; };
-		46EB2E000012C0 /* URLConvertible+URLRequestConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002F0 /* URLConvertible+URLRequestConvertible.swift */; };
-		46EB2E000012D0 /* URLEncodedFormEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000300 /* URLEncodedFormEncoder.swift */; };
-		46EB2E000012E0 /* URLRequest+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000310 /* URLRequest+Alamofire.swift */; };
-		46EB2E000012F0 /* URLSessionConfiguration+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000320 /* URLSessionConfiguration+Alamofire.swift */; };
-		46EB2E00001300 /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000330 /* Validation.swift */; };
-		46EB2E00001360 /* Alamofire-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00001350 /* Alamofire-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000013A0 /* Alamofire-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00001390 /* Alamofire-dummy.m */; };
-		46EB2E00001440 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000010B0 /* Foundation.framework */; };
-		46EB2E00001450 /* NSButton+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000360 /* NSButton+WebCache.m */; };
-		46EB2E00001460 /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000380 /* NSData+ImageContentType.m */; };
-		46EB2E00001470 /* NSImage+Compatibility.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* NSImage+Compatibility.m */; };
-		46EB2E00001480 /* SDAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* SDAnimatedImage.m */; };
-		46EB2E00001490 /* SDAnimatedImagePlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003E0 /* SDAnimatedImagePlayer.m */; };
-		46EB2E000014A0 /* SDAnimatedImageRep.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* SDAnimatedImageRep.m */; };
-		46EB2E000014B0 /* SDAnimatedImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000420 /* SDAnimatedImageView+WebCache.m */; };
-		46EB2E000014C0 /* SDAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000440 /* SDAnimatedImageView.m */; };
-		46EB2E000014D0 /* SDDiskCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000460 /* SDDiskCache.m */; };
-		46EB2E000014E0 /* SDGraphicsImageRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000480 /* SDGraphicsImageRenderer.m */; };
-		46EB2E000014F0 /* SDImageAPNGCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004A0 /* SDImageAPNGCoder.m */; };
-		46EB2E00001500 /* SDImageAWebPCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004C0 /* SDImageAWebPCoder.m */; };
-		46EB2E00001510 /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004E0 /* SDImageCache.m */; };
-		46EB2E00001520 /* SDImageCacheConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000500 /* SDImageCacheConfig.m */; };
-		46EB2E00001530 /* SDImageCacheDefine.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000520 /* SDImageCacheDefine.m */; };
-		46EB2E00001540 /* SDImageCachesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000540 /* SDImageCachesManager.m */; };
-		46EB2E00001550 /* SDImageCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000560 /* SDImageCoder.m */; };
-		46EB2E00001560 /* SDImageCoderHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000580 /* SDImageCoderHelper.m */; };
-		46EB2E00001570 /* SDImageCodersManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000005A0 /* SDImageCodersManager.m */; };
-		46EB2E00001580 /* SDImageFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000005C0 /* SDImageFrame.m */; };
-		46EB2E00001590 /* SDImageGIFCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000005E0 /* SDImageGIFCoder.m */; };
-		46EB2E000015A0 /* SDImageGraphics.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000600 /* SDImageGraphics.m */; };
-		46EB2E000015B0 /* SDImageHEICCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000620 /* SDImageHEICCoder.m */; };
-		46EB2E000015C0 /* SDImageIOAnimatedCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000640 /* SDImageIOAnimatedCoder.m */; };
-		46EB2E000015D0 /* SDImageIOCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000660 /* SDImageIOCoder.m */; };
-		46EB2E000015E0 /* SDImageLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000680 /* SDImageLoader.m */; };
-		46EB2E000015F0 /* SDImageLoadersManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000006A0 /* SDImageLoadersManager.m */; };
-		46EB2E00001600 /* SDImageTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000006C0 /* SDImageTransformer.m */; };
-		46EB2E00001610 /* SDMemoryCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000006E0 /* SDMemoryCache.m */; };
-		46EB2E00001620 /* SDWebImageCacheKeyFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000700 /* SDWebImageCacheKeyFilter.m */; };
-		46EB2E00001630 /* SDWebImageCacheSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000720 /* SDWebImageCacheSerializer.m */; };
-		46EB2E00001640 /* SDWebImageCompat.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000740 /* SDWebImageCompat.m */; };
-		46EB2E00001650 /* SDWebImageDefine.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000760 /* SDWebImageDefine.m */; };
-		46EB2E00001660 /* SDWebImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000780 /* SDWebImageDownloader.m */; };
-		46EB2E00001670 /* SDWebImageDownloaderConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007A0 /* SDWebImageDownloaderConfig.m */; };
-		46EB2E00001680 /* SDWebImageDownloaderDecryptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007C0 /* SDWebImageDownloaderDecryptor.m */; };
-		46EB2E00001690 /* SDWebImageDownloaderOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007E0 /* SDWebImageDownloaderOperation.m */; };
-		46EB2E000016A0 /* SDWebImageDownloaderRequestModifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000800 /* SDWebImageDownloaderRequestModifier.m */; };
-		46EB2E000016B0 /* SDWebImageDownloaderResponseModifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000820 /* SDWebImageDownloaderResponseModifier.m */; };
-		46EB2E000016C0 /* SDWebImageError.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000840 /* SDWebImageError.m */; };
-		46EB2E000016D0 /* SDWebImageIndicator.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000860 /* SDWebImageIndicator.m */; };
-		46EB2E000016E0 /* SDWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000880 /* SDWebImageManager.m */; };
-		46EB2E000016F0 /* SDWebImageOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000008A0 /* SDWebImageOperation.m */; };
-		46EB2E00001700 /* SDWebImageOptionsProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000008C0 /* SDWebImageOptionsProcessor.m */; };
-		46EB2E00001710 /* SDWebImagePrefetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000008E0 /* SDWebImagePrefetcher.m */; };
-		46EB2E00001720 /* SDWebImageTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000900 /* SDWebImageTransition.m */; };
-		46EB2E00001730 /* UIButton+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000920 /* UIButton+WebCache.m */; };
-		46EB2E00001740 /* UIImage+ExtendedCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000940 /* UIImage+ExtendedCacheData.m */; };
-		46EB2E00001750 /* UIImage+ForceDecode.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000960 /* UIImage+ForceDecode.m */; };
-		46EB2E00001760 /* UIImage+GIF.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000980 /* UIImage+GIF.m */; };
-		46EB2E00001770 /* UIImage+MemoryCacheCost.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000009A0 /* UIImage+MemoryCacheCost.m */; };
-		46EB2E00001780 /* UIImage+Metadata.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000009C0 /* UIImage+Metadata.m */; };
-		46EB2E00001790 /* UIImage+MultiFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000009E0 /* UIImage+MultiFormat.m */; };
-		46EB2E000017A0 /* UIImage+Transform.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A00 /* UIImage+Transform.m */; };
-		46EB2E000017B0 /* UIImageView+HighlightedWebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A20 /* UIImageView+HighlightedWebCache.m */; };
-		46EB2E000017C0 /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A40 /* UIImageView+WebCache.m */; };
-		46EB2E000017D0 /* UIView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A60 /* UIView+WebCache.m */; };
-		46EB2E000017E0 /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A80 /* UIView+WebCacheOperation.m */; };
-		46EB2E000017F0 /* NSBezierPath+SDRoundedCorners.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AB0 /* NSBezierPath+SDRoundedCorners.m */; };
-		46EB2E00001800 /* SDAssociatedObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AD0 /* SDAssociatedObject.m */; };
-		46EB2E00001810 /* SDAsyncBlockOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AF0 /* SDAsyncBlockOperation.m */; };
-		46EB2E00001820 /* SDDeviceHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B10 /* SDDeviceHelper.m */; };
-		46EB2E00001830 /* SDDisplayLink.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B30 /* SDDisplayLink.m */; };
-		46EB2E00001840 /* SDFileAttributeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B50 /* SDFileAttributeHelper.m */; };
-		46EB2E00001850 /* SDImageAssetManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B70 /* SDImageAssetManager.m */; };
-		46EB2E00001860 /* SDImageCachesManagerOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B90 /* SDImageCachesManagerOperation.m */; };
-		46EB2E00001870 /* SDInternalMacros.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BC0 /* SDInternalMacros.m */; };
-		46EB2E00001880 /* SDWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BF0 /* SDWeakProxy.m */; };
-		46EB2E00001890 /* UIColor+SDHexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C20 /* UIColor+SDHexString.m */; };
-		46EB2E000018A0 /* NSButton+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000350 /* NSButton+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000018B0 /* NSData+ImageContentType.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000370 /* NSData+ImageContentType.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000018C0 /* NSImage+Compatibility.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* NSImage+Compatibility.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000018D0 /* SDAnimatedImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000003B0 /* SDAnimatedImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000018E0 /* SDAnimatedImagePlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* SDAnimatedImagePlayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000018F0 /* SDAnimatedImageRep.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000003F0 /* SDAnimatedImageRep.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001900 /* SDAnimatedImageView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000410 /* SDAnimatedImageView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001910 /* SDAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000430 /* SDAnimatedImageView.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001920 /* SDDiskCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000450 /* SDDiskCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001930 /* SDGraphicsImageRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000470 /* SDGraphicsImageRenderer.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001940 /* SDImageAPNGCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000490 /* SDImageAPNGCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001950 /* SDImageAWebPCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000004B0 /* SDImageAWebPCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001960 /* SDImageCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000004D0 /* SDImageCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001970 /* SDImageCacheConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000004F0 /* SDImageCacheConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001980 /* SDImageCacheDefine.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000510 /* SDImageCacheDefine.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001990 /* SDImageCachesManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000530 /* SDImageCachesManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000019A0 /* SDImageCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000550 /* SDImageCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000019B0 /* SDImageCoderHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000570 /* SDImageCoderHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000019C0 /* SDImageCodersManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000590 /* SDImageCodersManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000019D0 /* SDImageFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000005B0 /* SDImageFrame.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000019E0 /* SDImageGIFCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000005D0 /* SDImageGIFCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000019F0 /* SDImageGraphics.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000005F0 /* SDImageGraphics.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A00 /* SDImageHEICCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000610 /* SDImageHEICCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A10 /* SDImageIOAnimatedCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000630 /* SDImageIOAnimatedCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A20 /* SDImageIOCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000650 /* SDImageIOCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A30 /* SDImageLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000670 /* SDImageLoader.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A40 /* SDImageLoadersManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000690 /* SDImageLoadersManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A50 /* SDImageTransformer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000006B0 /* SDImageTransformer.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A60 /* SDMemoryCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000006D0 /* SDMemoryCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A70 /* SDWebImageCacheKeyFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000006F0 /* SDWebImageCacheKeyFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A80 /* SDWebImageCacheSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000710 /* SDWebImageCacheSerializer.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001A90 /* SDWebImageCompat.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000730 /* SDWebImageCompat.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001AA0 /* SDWebImageDefine.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000750 /* SDWebImageDefine.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001AB0 /* SDWebImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000770 /* SDWebImageDownloader.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001AC0 /* SDWebImageDownloaderConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000790 /* SDWebImageDownloaderConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001AD0 /* SDWebImageDownloaderDecryptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007B0 /* SDWebImageDownloaderDecryptor.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001AE0 /* SDWebImageDownloaderOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007D0 /* SDWebImageDownloaderOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001AF0 /* SDWebImageDownloaderRequestModifier.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007F0 /* SDWebImageDownloaderRequestModifier.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B00 /* SDWebImageDownloaderResponseModifier.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000810 /* SDWebImageDownloaderResponseModifier.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B10 /* SDWebImageError.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000830 /* SDWebImageError.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B20 /* SDWebImageIndicator.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000850 /* SDWebImageIndicator.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B30 /* SDWebImageManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000870 /* SDWebImageManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B40 /* SDWebImageOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000890 /* SDWebImageOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B50 /* SDWebImageOptionsProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000008B0 /* SDWebImageOptionsProcessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B60 /* SDWebImagePrefetcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000008D0 /* SDWebImagePrefetcher.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B70 /* SDWebImageTransition.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000008F0 /* SDWebImageTransition.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B80 /* UIButton+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000910 /* UIButton+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001B90 /* UIImage+ExtendedCacheData.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000930 /* UIImage+ExtendedCacheData.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001BA0 /* UIImage+ForceDecode.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000950 /* UIImage+ForceDecode.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001BB0 /* UIImage+GIF.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000970 /* UIImage+GIF.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001BC0 /* UIImage+MemoryCacheCost.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000990 /* UIImage+MemoryCacheCost.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001BD0 /* UIImage+Metadata.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000009B0 /* UIImage+Metadata.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001BE0 /* UIImage+MultiFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000009D0 /* UIImage+MultiFormat.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001BF0 /* UIImage+Transform.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000009F0 /* UIImage+Transform.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001C00 /* UIImageView+HighlightedWebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A10 /* UIImageView+HighlightedWebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001C10 /* UIImageView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A30 /* UIImageView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001C20 /* UIView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A50 /* UIView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001C30 /* UIView+WebCacheOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A70 /* UIView+WebCacheOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001C40 /* SDWebImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A90 /* SDWebImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001C50 /* NSBezierPath+SDRoundedCorners.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AA0 /* NSBezierPath+SDRoundedCorners.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001C60 /* SDAssociatedObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AC0 /* SDAssociatedObject.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001C70 /* SDAsyncBlockOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AE0 /* SDAsyncBlockOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001C80 /* SDDeviceHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B00 /* SDDeviceHelper.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001C90 /* SDDisplayLink.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B20 /* SDDisplayLink.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001CA0 /* SDFileAttributeHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B40 /* SDFileAttributeHelper.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001CB0 /* SDImageAssetManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B60 /* SDImageAssetManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001CC0 /* SDImageCachesManagerOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B80 /* SDImageCachesManagerOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001CD0 /* SDImageIOAnimatedCoderInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BA0 /* SDImageIOAnimatedCoderInternal.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001CE0 /* SDInternalMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BB0 /* SDInternalMacros.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001CF0 /* SDmetamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BD0 /* SDmetamacros.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001D00 /* SDWeakProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BE0 /* SDWeakProxy.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001D10 /* SDWebImageTransitionInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C00 /* SDWebImageTransitionInternal.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001D20 /* UIColor+SDHexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C10 /* UIColor+SDHexString.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46EB2E00001D80 /* SDWebImage-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00001D70 /* SDWebImage-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001DC0 /* SDWebImage-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00001DB0 /* SDWebImage-dummy.m */; };
-		46EB2E00001E60 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000010B0 /* Foundation.framework */; };
-		46EB2E00001E70 /* STDateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C40 /* STDateManager.swift */; };
-		46EB2E00001E80 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C50 /* STDeviceInfo.swift */; };
-		46EB2E00001E90 /* STFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C60 /* STFileManager.swift */; };
-		46EB2E00001EA0 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C70 /* STFontManager.swift */; };
-		46EB2E00001EB0 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C80 /* STHexColor.swift */; };
-		46EB2E00001EC0 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C90 /* STJSONValue.swift */; };
-		46EB2E00001ED0 /* STLogPrint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CA0 /* STLogPrint.swift */; };
-		46EB2E00001EE0 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CB0 /* STLogView.swift */; };
-		46EB2E00001EF0 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CC0 /* STPredicateCheck.swift */; };
-		46EB2E00001F00 /* STScreenSizeConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CD0 /* STScreenSizeConstants.swift */; };
-		46EB2E00001F10 /* STStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CE0 /* STStringExtension.swift */; };
-		46EB2E00001F20 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D10 /* STBaseViewController.swift */; };
-		46EB2E00001F30 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D30 /* STBaseViewModel.swift */; };
-		46EB2E00001F40 /* STBaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D50 /* STBaseModel.swift */; };
-		46EB2E00001F50 /* STBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D70 /* STBaseView.swift */; };
-		46EB2E00001FB0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00001FA0 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00001FF0 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00001FE0 /* STBaseProject-dummy.m */; };
-		46EB2E00002090 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000010B0 /* Foundation.framework */; };
-		46EB2E000020A0 /* Constraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D80 /* Constraint.swift */; };
-		46EB2E000020B0 /* ConstraintAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D90 /* ConstraintAttributes.swift */; };
-		46EB2E000020C0 /* ConstraintConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DA0 /* ConstraintConfig.swift */; };
-		46EB2E000020D0 /* ConstraintConstantTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DB0 /* ConstraintConstantTarget.swift */; };
-		46EB2E000020E0 /* ConstraintDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DC0 /* ConstraintDescription.swift */; };
-		46EB2E000020F0 /* ConstraintDirectionalInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DD0 /* ConstraintDirectionalInsets.swift */; };
-		46EB2E00002100 /* ConstraintDirectionalInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DE0 /* ConstraintDirectionalInsetTarget.swift */; };
-		46EB2E00002110 /* ConstraintDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DF0 /* ConstraintDSL.swift */; };
-		46EB2E00002120 /* ConstraintInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E00 /* ConstraintInsets.swift */; };
-		46EB2E00002130 /* ConstraintInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E10 /* ConstraintInsetTarget.swift */; };
-		46EB2E00002140 /* ConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E20 /* ConstraintItem.swift */; };
-		46EB2E00002150 /* ConstraintLayoutGuide+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E30 /* ConstraintLayoutGuide+Extensions.swift */; };
-		46EB2E00002160 /* ConstraintLayoutGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E40 /* ConstraintLayoutGuide.swift */; };
-		46EB2E00002170 /* ConstraintLayoutGuideDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E50 /* ConstraintLayoutGuideDSL.swift */; };
-		46EB2E00002180 /* ConstraintLayoutSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E60 /* ConstraintLayoutSupport.swift */; };
-		46EB2E00002190 /* ConstraintLayoutSupportDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E70 /* ConstraintLayoutSupportDSL.swift */; };
-		46EB2E000021A0 /* ConstraintMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E80 /* ConstraintMaker.swift */; };
-		46EB2E000021B0 /* ConstraintMakerEditable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E90 /* ConstraintMakerEditable.swift */; };
-		46EB2E000021C0 /* ConstraintMakerExtendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EA0 /* ConstraintMakerExtendable.swift */; };
-		46EB2E000021D0 /* ConstraintMakerFinalizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EB0 /* ConstraintMakerFinalizable.swift */; };
-		46EB2E000021E0 /* ConstraintMakerPrioritizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EC0 /* ConstraintMakerPrioritizable.swift */; };
-		46EB2E000021F0 /* ConstraintMakerRelatable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000ED0 /* ConstraintMakerRelatable+Extensions.swift */; };
-		46EB2E00002200 /* ConstraintMakerRelatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EE0 /* ConstraintMakerRelatable.swift */; };
-		46EB2E00002210 /* ConstraintMultiplierTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EF0 /* ConstraintMultiplierTarget.swift */; };
-		46EB2E00002220 /* ConstraintOffsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F00 /* ConstraintOffsetTarget.swift */; };
-		46EB2E00002230 /* ConstraintPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F10 /* ConstraintPriority.swift */; };
-		46EB2E00002240 /* ConstraintPriorityTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F20 /* ConstraintPriorityTarget.swift */; };
-		46EB2E00002250 /* ConstraintRelatableTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F30 /* ConstraintRelatableTarget.swift */; };
-		46EB2E00002260 /* ConstraintRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F40 /* ConstraintRelation.swift */; };
-		46EB2E00002270 /* ConstraintView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F50 /* ConstraintView+Extensions.swift */; };
-		46EB2E00002280 /* ConstraintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F60 /* ConstraintView.swift */; };
-		46EB2E00002290 /* ConstraintViewDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F70 /* ConstraintViewDSL.swift */; };
-		46EB2E000022A0 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F80 /* Debugging.swift */; };
-		46EB2E000022B0 /* LayoutConstraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F90 /* LayoutConstraint.swift */; };
-		46EB2E000022C0 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FA0 /* LayoutConstraintItem.swift */; };
-		46EB2E000022D0 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FB0 /* Typealiases.swift */; };
-		46EB2E000022E0 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FC0 /* UILayoutSupport+Extensions.swift */; };
-		46EB2E00002340 /* SnapKit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00002330 /* SnapKit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00002380 /* SnapKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00002370 /* SnapKit-dummy.m */; };
-		46EB2E000023A0 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00002390 /* CFNetwork.framework */; };
-		46EB2E000023C0 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000023B0 /* ImageIO.framework */; };
-		46EB2E00002460 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000010B0 /* Foundation.framework */; };
-		46EB2E000024D0 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000024C0 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00002520 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00002510 /* Pods-STBaseProject_Example-dummy.m */; };
+		46EB2E00001120 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00001110 /* Foundation.framework */; };
+		46EB2E00001130 /* AFError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000100 /* AFError.swift */; };
+		46EB2E00001140 /* Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000110 /* Alamofire.swift */; };
+		46EB2E00001150 /* AlamofireExtended.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000120 /* AlamofireExtended.swift */; };
+		46EB2E00001160 /* AuthenticationInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000130 /* AuthenticationInterceptor.swift */; };
+		46EB2E00001170 /* CachedResponseHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000140 /* CachedResponseHandler.swift */; };
+		46EB2E00001180 /* Combine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000150 /* Combine.swift */; };
+		46EB2E00001190 /* Concurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* Concurrency.swift */; };
+		46EB2E000011A0 /* DispatchQueue+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000170 /* DispatchQueue+Alamofire.swift */; };
+		46EB2E000011B0 /* EventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000180 /* EventMonitor.swift */; };
+		46EB2E000011C0 /* HTTPHeaders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* HTTPHeaders.swift */; };
+		46EB2E000011D0 /* HTTPMethod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* HTTPMethod.swift */; };
+		46EB2E000011E0 /* MultipartFormData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* MultipartFormData.swift */; };
+		46EB2E000011F0 /* MultipartUpload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* MultipartUpload.swift */; };
+		46EB2E00001200 /* NetworkReachabilityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* NetworkReachabilityManager.swift */; };
+		46EB2E00001210 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001E0 /* Notifications.swift */; };
+		46EB2E00001220 /* OperationQueue+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* OperationQueue+Alamofire.swift */; };
+		46EB2E00001230 /* ParameterEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* ParameterEncoder.swift */; };
+		46EB2E00001240 /* ParameterEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* ParameterEncoding.swift */; };
+		46EB2E00001250 /* Protected.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* Protected.swift */; };
+		46EB2E00001260 /* RedirectHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* RedirectHandler.swift */; };
+		46EB2E00001270 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* Request.swift */; };
+		46EB2E00001280 /* RequestInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* RequestInterceptor.swift */; };
+		46EB2E00001290 /* RequestTaskMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* RequestTaskMap.swift */; };
+		46EB2E000012A0 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* Response.swift */; };
+		46EB2E000012B0 /* ResponseSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* ResponseSerialization.swift */; };
+		46EB2E000012C0 /* Result+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* Result+Alamofire.swift */; };
+		46EB2E000012D0 /* RetryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* RetryPolicy.swift */; };
+		46EB2E000012E0 /* ServerTrustEvaluation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* ServerTrustEvaluation.swift */; };
+		46EB2E000012F0 /* Session.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* Session.swift */; };
+		46EB2E00001300 /* SessionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* SessionDelegate.swift */; };
+		46EB2E00001310 /* StringEncoding+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* StringEncoding+Alamofire.swift */; };
+		46EB2E00001320 /* URLConvertible+URLRequestConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002F0 /* URLConvertible+URLRequestConvertible.swift */; };
+		46EB2E00001330 /* URLEncodedFormEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000300 /* URLEncodedFormEncoder.swift */; };
+		46EB2E00001340 /* URLRequest+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000310 /* URLRequest+Alamofire.swift */; };
+		46EB2E00001350 /* URLSessionConfiguration+Alamofire.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000320 /* URLSessionConfiguration+Alamofire.swift */; };
+		46EB2E00001360 /* Validation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000330 /* Validation.swift */; };
+		46EB2E000013C0 /* Alamofire-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000013B0 /* Alamofire-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001400 /* Alamofire-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000013F0 /* Alamofire-dummy.m */; };
+		46EB2E000014A0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00001110 /* Foundation.framework */; };
+		46EB2E000014B0 /* NSButton+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000360 /* NSButton+WebCache.m */; };
+		46EB2E000014C0 /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000380 /* NSData+ImageContentType.m */; };
+		46EB2E000014D0 /* NSImage+Compatibility.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* NSImage+Compatibility.m */; };
+		46EB2E000014E0 /* SDAnimatedImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* SDAnimatedImage.m */; };
+		46EB2E000014F0 /* SDAnimatedImagePlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003E0 /* SDAnimatedImagePlayer.m */; };
+		46EB2E00001500 /* SDAnimatedImageRep.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* SDAnimatedImageRep.m */; };
+		46EB2E00001510 /* SDAnimatedImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000420 /* SDAnimatedImageView+WebCache.m */; };
+		46EB2E00001520 /* SDAnimatedImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000440 /* SDAnimatedImageView.m */; };
+		46EB2E00001530 /* SDDiskCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000460 /* SDDiskCache.m */; };
+		46EB2E00001540 /* SDGraphicsImageRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000480 /* SDGraphicsImageRenderer.m */; };
+		46EB2E00001550 /* SDImageAPNGCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004A0 /* SDImageAPNGCoder.m */; };
+		46EB2E00001560 /* SDImageAWebPCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004C0 /* SDImageAWebPCoder.m */; };
+		46EB2E00001570 /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000004E0 /* SDImageCache.m */; };
+		46EB2E00001580 /* SDImageCacheConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000500 /* SDImageCacheConfig.m */; };
+		46EB2E00001590 /* SDImageCacheDefine.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000520 /* SDImageCacheDefine.m */; };
+		46EB2E000015A0 /* SDImageCachesManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000540 /* SDImageCachesManager.m */; };
+		46EB2E000015B0 /* SDImageCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000560 /* SDImageCoder.m */; };
+		46EB2E000015C0 /* SDImageCoderHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000580 /* SDImageCoderHelper.m */; };
+		46EB2E000015D0 /* SDImageCodersManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000005A0 /* SDImageCodersManager.m */; };
+		46EB2E000015E0 /* SDImageFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000005C0 /* SDImageFrame.m */; };
+		46EB2E000015F0 /* SDImageGIFCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000005E0 /* SDImageGIFCoder.m */; };
+		46EB2E00001600 /* SDImageGraphics.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000600 /* SDImageGraphics.m */; };
+		46EB2E00001610 /* SDImageHEICCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000620 /* SDImageHEICCoder.m */; };
+		46EB2E00001620 /* SDImageIOAnimatedCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000640 /* SDImageIOAnimatedCoder.m */; };
+		46EB2E00001630 /* SDImageIOCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000660 /* SDImageIOCoder.m */; };
+		46EB2E00001640 /* SDImageLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000680 /* SDImageLoader.m */; };
+		46EB2E00001650 /* SDImageLoadersManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000006A0 /* SDImageLoadersManager.m */; };
+		46EB2E00001660 /* SDImageTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000006C0 /* SDImageTransformer.m */; };
+		46EB2E00001670 /* SDMemoryCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000006E0 /* SDMemoryCache.m */; };
+		46EB2E00001680 /* SDWebImageCacheKeyFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000700 /* SDWebImageCacheKeyFilter.m */; };
+		46EB2E00001690 /* SDWebImageCacheSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000720 /* SDWebImageCacheSerializer.m */; };
+		46EB2E000016A0 /* SDWebImageCompat.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000740 /* SDWebImageCompat.m */; };
+		46EB2E000016B0 /* SDWebImageDefine.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000760 /* SDWebImageDefine.m */; };
+		46EB2E000016C0 /* SDWebImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000780 /* SDWebImageDownloader.m */; };
+		46EB2E000016D0 /* SDWebImageDownloaderConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007A0 /* SDWebImageDownloaderConfig.m */; };
+		46EB2E000016E0 /* SDWebImageDownloaderDecryptor.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007C0 /* SDWebImageDownloaderDecryptor.m */; };
+		46EB2E000016F0 /* SDWebImageDownloaderOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007E0 /* SDWebImageDownloaderOperation.m */; };
+		46EB2E00001700 /* SDWebImageDownloaderRequestModifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000800 /* SDWebImageDownloaderRequestModifier.m */; };
+		46EB2E00001710 /* SDWebImageDownloaderResponseModifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000820 /* SDWebImageDownloaderResponseModifier.m */; };
+		46EB2E00001720 /* SDWebImageError.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000840 /* SDWebImageError.m */; };
+		46EB2E00001730 /* SDWebImageIndicator.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000860 /* SDWebImageIndicator.m */; };
+		46EB2E00001740 /* SDWebImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000880 /* SDWebImageManager.m */; };
+		46EB2E00001750 /* SDWebImageOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000008A0 /* SDWebImageOperation.m */; };
+		46EB2E00001760 /* SDWebImageOptionsProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000008C0 /* SDWebImageOptionsProcessor.m */; };
+		46EB2E00001770 /* SDWebImagePrefetcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000008E0 /* SDWebImagePrefetcher.m */; };
+		46EB2E00001780 /* SDWebImageTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000900 /* SDWebImageTransition.m */; };
+		46EB2E00001790 /* UIButton+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000920 /* UIButton+WebCache.m */; };
+		46EB2E000017A0 /* UIImage+ExtendedCacheData.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000940 /* UIImage+ExtendedCacheData.m */; };
+		46EB2E000017B0 /* UIImage+ForceDecode.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000960 /* UIImage+ForceDecode.m */; };
+		46EB2E000017C0 /* UIImage+GIF.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000980 /* UIImage+GIF.m */; };
+		46EB2E000017D0 /* UIImage+MemoryCacheCost.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000009A0 /* UIImage+MemoryCacheCost.m */; };
+		46EB2E000017E0 /* UIImage+Metadata.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000009C0 /* UIImage+Metadata.m */; };
+		46EB2E000017F0 /* UIImage+MultiFormat.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000009E0 /* UIImage+MultiFormat.m */; };
+		46EB2E00001800 /* UIImage+Transform.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A00 /* UIImage+Transform.m */; };
+		46EB2E00001810 /* UIImageView+HighlightedWebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A20 /* UIImageView+HighlightedWebCache.m */; };
+		46EB2E00001820 /* UIImageView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A40 /* UIImageView+WebCache.m */; };
+		46EB2E00001830 /* UIView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A60 /* UIView+WebCache.m */; };
+		46EB2E00001840 /* UIView+WebCacheOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A80 /* UIView+WebCacheOperation.m */; };
+		46EB2E00001850 /* NSBezierPath+SDRoundedCorners.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AB0 /* NSBezierPath+SDRoundedCorners.m */; };
+		46EB2E00001860 /* SDAssociatedObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AD0 /* SDAssociatedObject.m */; };
+		46EB2E00001870 /* SDAsyncBlockOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AF0 /* SDAsyncBlockOperation.m */; };
+		46EB2E00001880 /* SDDeviceHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B10 /* SDDeviceHelper.m */; };
+		46EB2E00001890 /* SDDisplayLink.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B30 /* SDDisplayLink.m */; };
+		46EB2E000018A0 /* SDFileAttributeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B50 /* SDFileAttributeHelper.m */; };
+		46EB2E000018B0 /* SDImageAssetManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B70 /* SDImageAssetManager.m */; };
+		46EB2E000018C0 /* SDImageCachesManagerOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B90 /* SDImageCachesManagerOperation.m */; };
+		46EB2E000018D0 /* SDInternalMacros.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BC0 /* SDInternalMacros.m */; };
+		46EB2E000018E0 /* SDWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BF0 /* SDWeakProxy.m */; };
+		46EB2E000018F0 /* UIColor+SDHexString.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C20 /* UIColor+SDHexString.m */; };
+		46EB2E00001900 /* NSButton+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000350 /* NSButton+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001910 /* NSData+ImageContentType.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000370 /* NSData+ImageContentType.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001920 /* NSImage+Compatibility.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* NSImage+Compatibility.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001930 /* SDAnimatedImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000003B0 /* SDAnimatedImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001940 /* SDAnimatedImagePlayer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* SDAnimatedImagePlayer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001950 /* SDAnimatedImageRep.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000003F0 /* SDAnimatedImageRep.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001960 /* SDAnimatedImageView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000410 /* SDAnimatedImageView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001970 /* SDAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000430 /* SDAnimatedImageView.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001980 /* SDDiskCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000450 /* SDDiskCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001990 /* SDGraphicsImageRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000470 /* SDGraphicsImageRenderer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000019A0 /* SDImageAPNGCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000490 /* SDImageAPNGCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000019B0 /* SDImageAWebPCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000004B0 /* SDImageAWebPCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000019C0 /* SDImageCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000004D0 /* SDImageCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000019D0 /* SDImageCacheConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000004F0 /* SDImageCacheConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000019E0 /* SDImageCacheDefine.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000510 /* SDImageCacheDefine.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000019F0 /* SDImageCachesManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000530 /* SDImageCachesManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A00 /* SDImageCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000550 /* SDImageCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A10 /* SDImageCoderHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000570 /* SDImageCoderHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A20 /* SDImageCodersManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000590 /* SDImageCodersManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A30 /* SDImageFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000005B0 /* SDImageFrame.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A40 /* SDImageGIFCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000005D0 /* SDImageGIFCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A50 /* SDImageGraphics.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000005F0 /* SDImageGraphics.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A60 /* SDImageHEICCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000610 /* SDImageHEICCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A70 /* SDImageIOAnimatedCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000630 /* SDImageIOAnimatedCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A80 /* SDImageIOCoder.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000650 /* SDImageIOCoder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001A90 /* SDImageLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000670 /* SDImageLoader.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001AA0 /* SDImageLoadersManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000690 /* SDImageLoadersManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001AB0 /* SDImageTransformer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000006B0 /* SDImageTransformer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001AC0 /* SDMemoryCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000006D0 /* SDMemoryCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001AD0 /* SDWebImageCacheKeyFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000006F0 /* SDWebImageCacheKeyFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001AE0 /* SDWebImageCacheSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000710 /* SDWebImageCacheSerializer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001AF0 /* SDWebImageCompat.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000730 /* SDWebImageCompat.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B00 /* SDWebImageDefine.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000750 /* SDWebImageDefine.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B10 /* SDWebImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000770 /* SDWebImageDownloader.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B20 /* SDWebImageDownloaderConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000790 /* SDWebImageDownloaderConfig.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B30 /* SDWebImageDownloaderDecryptor.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007B0 /* SDWebImageDownloaderDecryptor.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B40 /* SDWebImageDownloaderOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007D0 /* SDWebImageDownloaderOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B50 /* SDWebImageDownloaderRequestModifier.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007F0 /* SDWebImageDownloaderRequestModifier.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B60 /* SDWebImageDownloaderResponseModifier.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000810 /* SDWebImageDownloaderResponseModifier.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B70 /* SDWebImageError.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000830 /* SDWebImageError.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B80 /* SDWebImageIndicator.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000850 /* SDWebImageIndicator.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001B90 /* SDWebImageManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000870 /* SDWebImageManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001BA0 /* SDWebImageOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000890 /* SDWebImageOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001BB0 /* SDWebImageOptionsProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000008B0 /* SDWebImageOptionsProcessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001BC0 /* SDWebImagePrefetcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000008D0 /* SDWebImagePrefetcher.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001BD0 /* SDWebImageTransition.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000008F0 /* SDWebImageTransition.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001BE0 /* UIButton+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000910 /* UIButton+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001BF0 /* UIImage+ExtendedCacheData.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000930 /* UIImage+ExtendedCacheData.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C00 /* UIImage+ForceDecode.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000950 /* UIImage+ForceDecode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C10 /* UIImage+GIF.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000970 /* UIImage+GIF.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C20 /* UIImage+MemoryCacheCost.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000990 /* UIImage+MemoryCacheCost.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C30 /* UIImage+Metadata.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000009B0 /* UIImage+Metadata.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C40 /* UIImage+MultiFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000009D0 /* UIImage+MultiFormat.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C50 /* UIImage+Transform.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000009F0 /* UIImage+Transform.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C60 /* UIImageView+HighlightedWebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A10 /* UIImageView+HighlightedWebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C70 /* UIImageView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A30 /* UIImageView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C80 /* UIView+WebCache.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A50 /* UIView+WebCache.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001C90 /* UIView+WebCacheOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A70 /* UIView+WebCacheOperation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001CA0 /* SDWebImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000A90 /* SDWebImage.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001CB0 /* NSBezierPath+SDRoundedCorners.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AA0 /* NSBezierPath+SDRoundedCorners.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001CC0 /* SDAssociatedObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AC0 /* SDAssociatedObject.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001CD0 /* SDAsyncBlockOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000AE0 /* SDAsyncBlockOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001CE0 /* SDDeviceHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B00 /* SDDeviceHelper.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001CF0 /* SDDisplayLink.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B20 /* SDDisplayLink.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D00 /* SDFileAttributeHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B40 /* SDFileAttributeHelper.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D10 /* SDImageAssetManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B60 /* SDImageAssetManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D20 /* SDImageCachesManagerOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B80 /* SDImageCachesManagerOperation.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D30 /* SDImageIOAnimatedCoderInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BA0 /* SDImageIOAnimatedCoderInternal.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D40 /* SDInternalMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BB0 /* SDInternalMacros.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D50 /* SDmetamacros.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BD0 /* SDmetamacros.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D60 /* SDWeakProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BE0 /* SDWeakProxy.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D70 /* SDWebImageTransitionInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C00 /* SDWebImageTransitionInternal.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001D80 /* UIColor+SDHexString.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C10 /* UIColor+SDHexString.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		46EB2E00001DE0 /* SDWebImage-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00001DD0 /* SDWebImage-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00001E20 /* SDWebImage-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00001E10 /* SDWebImage-dummy.m */; };
+		46EB2E00001EC0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00001110 /* Foundation.framework */; };
+		46EB2E00001ED0 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C40 /* STBtn.swift */; };
+		46EB2E00001EE0 /* STDateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C50 /* STDateManager.swift */; };
+		46EB2E00001EF0 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C60 /* STDeviceInfo.swift */; };
+		46EB2E00001F00 /* STEncrypt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C70 /* STEncrypt.swift */; };
+		46EB2E00001F10 /* STFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C80 /* STFileManager.swift */; };
+		46EB2E00001F20 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000C90 /* STFontManager.swift */; };
+		46EB2E00001F30 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CA0 /* STHexColor.swift */; };
+		46EB2E00001F40 /* STIBInspectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CB0 /* STIBInspectable.swift */; };
+		46EB2E00001F50 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CC0 /* STJSONValue.swift */; };
+		46EB2E00001F60 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CD0 /* STLanguageManager.swift */; };
+		46EB2E00001F70 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CE0 /* STLogView.swift */; };
+		46EB2E00001F80 /* STModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CF0 /* STModel.swift */; };
+		46EB2E00001F90 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D00 /* STPredicateCheck.swift */; };
+		46EB2E00001FA0 /* STScreenSizeConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D10 /* STScreenSizeConstants.swift */; };
+		46EB2E00001FB0 /* STStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D20 /* STStringExtension.swift */; };
+		46EB2E00001FC0 /* STTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D30 /* STTabBarItem.swift */; };
+		46EB2E00001FD0 /* STTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D40 /* STTimer.swift */; };
+		46EB2E00001FE0 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D70 /* STBaseViewController.swift */; };
+		46EB2E00001FF0 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D90 /* STBaseViewModel.swift */; };
+		46EB2E00002000 /* STBaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DB0 /* STBaseModel.swift */; };
+		46EB2E00002010 /* STBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DD0 /* STBaseView.swift */; };
+		46EB2E00002070 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00002060 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000020B0 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000020A0 /* STBaseProject-dummy.m */; };
+		46EB2E00002150 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00001110 /* Foundation.framework */; };
+		46EB2E00002160 /* Constraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DE0 /* Constraint.swift */; };
+		46EB2E00002170 /* ConstraintAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000DF0 /* ConstraintAttributes.swift */; };
+		46EB2E00002180 /* ConstraintConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E00 /* ConstraintConfig.swift */; };
+		46EB2E00002190 /* ConstraintConstantTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E10 /* ConstraintConstantTarget.swift */; };
+		46EB2E000021A0 /* ConstraintDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E20 /* ConstraintDescription.swift */; };
+		46EB2E000021B0 /* ConstraintDirectionalInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E30 /* ConstraintDirectionalInsets.swift */; };
+		46EB2E000021C0 /* ConstraintDirectionalInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E40 /* ConstraintDirectionalInsetTarget.swift */; };
+		46EB2E000021D0 /* ConstraintDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E50 /* ConstraintDSL.swift */; };
+		46EB2E000021E0 /* ConstraintInsets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E60 /* ConstraintInsets.swift */; };
+		46EB2E000021F0 /* ConstraintInsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E70 /* ConstraintInsetTarget.swift */; };
+		46EB2E00002200 /* ConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E80 /* ConstraintItem.swift */; };
+		46EB2E00002210 /* ConstraintLayoutGuide+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E90 /* ConstraintLayoutGuide+Extensions.swift */; };
+		46EB2E00002220 /* ConstraintLayoutGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EA0 /* ConstraintLayoutGuide.swift */; };
+		46EB2E00002230 /* ConstraintLayoutGuideDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EB0 /* ConstraintLayoutGuideDSL.swift */; };
+		46EB2E00002240 /* ConstraintLayoutSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EC0 /* ConstraintLayoutSupport.swift */; };
+		46EB2E00002250 /* ConstraintLayoutSupportDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000ED0 /* ConstraintLayoutSupportDSL.swift */; };
+		46EB2E00002260 /* ConstraintMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EE0 /* ConstraintMaker.swift */; };
+		46EB2E00002270 /* ConstraintMakerEditable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EF0 /* ConstraintMakerEditable.swift */; };
+		46EB2E00002280 /* ConstraintMakerExtendable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F00 /* ConstraintMakerExtendable.swift */; };
+		46EB2E00002290 /* ConstraintMakerFinalizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F10 /* ConstraintMakerFinalizable.swift */; };
+		46EB2E000022A0 /* ConstraintMakerPrioritizable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F20 /* ConstraintMakerPrioritizable.swift */; };
+		46EB2E000022B0 /* ConstraintMakerRelatable+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F30 /* ConstraintMakerRelatable+Extensions.swift */; };
+		46EB2E000022C0 /* ConstraintMakerRelatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F40 /* ConstraintMakerRelatable.swift */; };
+		46EB2E000022D0 /* ConstraintMultiplierTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F50 /* ConstraintMultiplierTarget.swift */; };
+		46EB2E000022E0 /* ConstraintOffsetTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F60 /* ConstraintOffsetTarget.swift */; };
+		46EB2E000022F0 /* ConstraintPriority.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F70 /* ConstraintPriority.swift */; };
+		46EB2E00002300 /* ConstraintPriorityTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F80 /* ConstraintPriorityTarget.swift */; };
+		46EB2E00002310 /* ConstraintRelatableTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000F90 /* ConstraintRelatableTarget.swift */; };
+		46EB2E00002320 /* ConstraintRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FA0 /* ConstraintRelation.swift */; };
+		46EB2E00002330 /* ConstraintView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FB0 /* ConstraintView+Extensions.swift */; };
+		46EB2E00002340 /* ConstraintView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FC0 /* ConstraintView.swift */; };
+		46EB2E00002350 /* ConstraintViewDSL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FD0 /* ConstraintViewDSL.swift */; };
+		46EB2E00002360 /* Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FE0 /* Debugging.swift */; };
+		46EB2E00002370 /* LayoutConstraint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000FF0 /* LayoutConstraint.swift */; };
+		46EB2E00002380 /* LayoutConstraintItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00001000 /* LayoutConstraintItem.swift */; };
+		46EB2E00002390 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00001010 /* Typealiases.swift */; };
+		46EB2E000023A0 /* UILayoutSupport+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00001020 /* UILayoutSupport+Extensions.swift */; };
+		46EB2E00002400 /* SnapKit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000023F0 /* SnapKit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00002440 /* SnapKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00002430 /* SnapKit-dummy.m */; };
+		46EB2E00002460 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00002450 /* CFNetwork.framework */; };
+		46EB2E00002480 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00002470 /* ImageIO.framework */; };
+		46EB2E00002520 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00001110 /* Foundation.framework */; };
+		46EB2E00002590 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00002580 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000025E0 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000025D0 /* Pods-STBaseProject_Example-dummy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		46EB2E00002530 /* PBXContainerItemProxy */ = {
+		46EB2E000025F0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = EAAA1AD3A8A1B59AB91319EE40752C6D;
 			remoteInfo = Alamofire;
 		};
-		46EB2E00002550 /* PBXContainerItemProxy */ = {
+		46EB2E00002610 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 3847153A6E5EEFB86565BA840768F429;
 			remoteInfo = SDWebImage;
 		};
-		46EB2E00002570 /* PBXContainerItemProxy */ = {
+		46EB2E00002630 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 894EA9674D0D5CFEF493FE4E266279C6;
 			remoteInfo = STBaseProject;
 		};
-		46EB2E00002590 /* PBXContainerItemProxy */ = {
+		46EB2E00002650 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
@@ -467,101 +473,107 @@
 		46EB2E00000C00 /* SDWebImageTransitionInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageTransitionInternal.h; path = SDWebImage/Private/SDWebImageTransitionInternal.h; sourceTree = "<group>"; };
 		46EB2E00000C10 /* UIColor+SDHexString.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIColor+SDHexString.h"; path = "SDWebImage/Private/UIColor+SDHexString.h"; sourceTree = "<group>"; };
 		46EB2E00000C20 /* UIColor+SDHexString.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIColor+SDHexString.m"; path = "SDWebImage/Private/UIColor+SDHexString.m"; sourceTree = "<group>"; };
-		46EB2E00000C40 /* STDateManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDateManager.swift; path = STBaseProject/Classes/STBaseConfig/STDateManager.swift; sourceTree = "<group>"; };
-		46EB2E00000C50 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceInfo.swift; path = STBaseProject/Classes/STBaseConfig/STDeviceInfo.swift; sourceTree = "<group>"; };
-		46EB2E00000C60 /* STFileManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFileManager.swift; path = STBaseProject/Classes/STBaseConfig/STFileManager.swift; sourceTree = "<group>"; };
-		46EB2E00000C70 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STBaseConfig/STFontManager.swift; sourceTree = "<group>"; };
-		46EB2E00000C80 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHexColor.swift; path = STBaseProject/Classes/STBaseConfig/STHexColor.swift; sourceTree = "<group>"; };
-		46EB2E00000C90 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STBaseConfig/STJSONValue.swift; sourceTree = "<group>"; };
-		46EB2E00000CA0 /* STLogPrint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogPrint.swift; path = STBaseProject/Classes/STBaseConfig/STLogPrint.swift; sourceTree = "<group>"; };
-		46EB2E00000CB0 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogView.swift; path = STBaseProject/Classes/STBaseConfig/STLogView.swift; sourceTree = "<group>"; };
-		46EB2E00000CC0 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STBaseConfig/STPredicateCheck.swift; sourceTree = "<group>"; };
-		46EB2E00000CD0 /* STScreenSizeConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScreenSizeConstants.swift; path = STBaseProject/Classes/STBaseConfig/STScreenSizeConstants.swift; sourceTree = "<group>"; };
-		46EB2E00000CE0 /* STStringExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STStringExtension.swift; path = STBaseProject/Classes/STBaseConfig/STStringExtension.swift; sourceTree = "<group>"; };
-		46EB2E00000D10 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewController.swift; sourceTree = "<group>"; };
-		46EB2E00000D30 /* STBaseViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewModel.swift; sourceTree = "<group>"; };
-		46EB2E00000D50 /* STBaseModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseModel.swift; sourceTree = "<group>"; };
-		46EB2E00000D70 /* STBaseView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseView.swift; sourceTree = "<group>"; };
-		46EB2E00000D80 /* Constraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Constraint.swift; path = Sources/Constraint.swift; sourceTree = "<group>"; };
-		46EB2E00000D90 /* ConstraintAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintAttributes.swift; path = Sources/ConstraintAttributes.swift; sourceTree = "<group>"; };
-		46EB2E00000DA0 /* ConstraintConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConfig.swift; path = Sources/ConstraintConfig.swift; sourceTree = "<group>"; };
-		46EB2E00000DB0 /* ConstraintConstantTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConstantTarget.swift; path = Sources/ConstraintConstantTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000DC0 /* ConstraintDescription.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDescription.swift; path = Sources/ConstraintDescription.swift; sourceTree = "<group>"; };
-		46EB2E00000DD0 /* ConstraintDirectionalInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsets.swift; path = Sources/ConstraintDirectionalInsets.swift; sourceTree = "<group>"; };
-		46EB2E00000DE0 /* ConstraintDirectionalInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsetTarget.swift; path = Sources/ConstraintDirectionalInsetTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000DF0 /* ConstraintDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDSL.swift; path = Sources/ConstraintDSL.swift; sourceTree = "<group>"; };
-		46EB2E00000E00 /* ConstraintInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsets.swift; path = Sources/ConstraintInsets.swift; sourceTree = "<group>"; };
-		46EB2E00000E10 /* ConstraintInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsetTarget.swift; path = Sources/ConstraintInsetTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000E20 /* ConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintItem.swift; path = Sources/ConstraintItem.swift; sourceTree = "<group>"; };
-		46EB2E00000E30 /* ConstraintLayoutGuide+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintLayoutGuide+Extensions.swift"; path = "Sources/ConstraintLayoutGuide+Extensions.swift"; sourceTree = "<group>"; };
-		46EB2E00000E40 /* ConstraintLayoutGuide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuide.swift; path = Sources/ConstraintLayoutGuide.swift; sourceTree = "<group>"; };
-		46EB2E00000E50 /* ConstraintLayoutGuideDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuideDSL.swift; path = Sources/ConstraintLayoutGuideDSL.swift; sourceTree = "<group>"; };
-		46EB2E00000E60 /* ConstraintLayoutSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupport.swift; path = Sources/ConstraintLayoutSupport.swift; sourceTree = "<group>"; };
-		46EB2E00000E70 /* ConstraintLayoutSupportDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupportDSL.swift; path = Sources/ConstraintLayoutSupportDSL.swift; sourceTree = "<group>"; };
-		46EB2E00000E80 /* ConstraintMaker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMaker.swift; path = Sources/ConstraintMaker.swift; sourceTree = "<group>"; };
-		46EB2E00000E90 /* ConstraintMakerEditable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerEditable.swift; path = Sources/ConstraintMakerEditable.swift; sourceTree = "<group>"; };
-		46EB2E00000EA0 /* ConstraintMakerExtendable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerExtendable.swift; path = Sources/ConstraintMakerExtendable.swift; sourceTree = "<group>"; };
-		46EB2E00000EB0 /* ConstraintMakerFinalizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerFinalizable.swift; path = Sources/ConstraintMakerFinalizable.swift; sourceTree = "<group>"; };
-		46EB2E00000EC0 /* ConstraintMakerPrioritizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerPrioritizable.swift; path = Sources/ConstraintMakerPrioritizable.swift; sourceTree = "<group>"; };
-		46EB2E00000ED0 /* ConstraintMakerRelatable+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintMakerRelatable+Extensions.swift"; path = "Sources/ConstraintMakerRelatable+Extensions.swift"; sourceTree = "<group>"; };
-		46EB2E00000EE0 /* ConstraintMakerRelatable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerRelatable.swift; path = Sources/ConstraintMakerRelatable.swift; sourceTree = "<group>"; };
-		46EB2E00000EF0 /* ConstraintMultiplierTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMultiplierTarget.swift; path = Sources/ConstraintMultiplierTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000F00 /* ConstraintOffsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintOffsetTarget.swift; path = Sources/ConstraintOffsetTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000F10 /* ConstraintPriority.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriority.swift; path = Sources/ConstraintPriority.swift; sourceTree = "<group>"; };
-		46EB2E00000F20 /* ConstraintPriorityTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriorityTarget.swift; path = Sources/ConstraintPriorityTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000F30 /* ConstraintRelatableTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelatableTarget.swift; path = Sources/ConstraintRelatableTarget.swift; sourceTree = "<group>"; };
-		46EB2E00000F40 /* ConstraintRelation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelation.swift; path = Sources/ConstraintRelation.swift; sourceTree = "<group>"; };
-		46EB2E00000F50 /* ConstraintView+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintView+Extensions.swift"; path = "Sources/ConstraintView+Extensions.swift"; sourceTree = "<group>"; };
-		46EB2E00000F60 /* ConstraintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintView.swift; path = Sources/ConstraintView.swift; sourceTree = "<group>"; };
-		46EB2E00000F70 /* ConstraintViewDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintViewDSL.swift; path = Sources/ConstraintViewDSL.swift; sourceTree = "<group>"; };
-		46EB2E00000F80 /* Debugging.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Debugging.swift; path = Sources/Debugging.swift; sourceTree = "<group>"; };
-		46EB2E00000F90 /* LayoutConstraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraint.swift; path = Sources/LayoutConstraint.swift; sourceTree = "<group>"; };
-		46EB2E00000FA0 /* LayoutConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraintItem.swift; path = Sources/LayoutConstraintItem.swift; sourceTree = "<group>"; };
-		46EB2E00000FB0 /* Typealiases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Typealiases.swift; path = Sources/Typealiases.swift; sourceTree = "<group>"; };
-		46EB2E00000FC0 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "UILayoutSupport+Extensions.swift"; path = "Sources/UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
-		46EB2E00000FE0 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
-		46EB2E00000FF0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
-		46EB2E00001000 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		46EB2E000010B0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		46EB2E00001320 /* Alamofire.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Alamofire.debug.xcconfig; sourceTree = "<group>"; };
-		46EB2E00001330 /* Alamofire.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Alamofire.release.xcconfig; sourceTree = "<group>"; };
-		46EB2E00001340 /* Alamofire.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = Alamofire.modulemap; sourceTree = "<group>"; };
-		46EB2E00001350 /* Alamofire-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Alamofire-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E00001370 /* Alamofire-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Alamofire-Info.plist"; sourceTree = "<group>"; };
-		46EB2E00001380 /* Alamofire-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Alamofire-prefix.pch"; sourceTree = "<group>"; };
-		46EB2E00001390 /* Alamofire-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Alamofire-dummy.m"; sourceTree = "<group>"; };
-		46EB2E00001D40 /* SDWebImage.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SDWebImage.debug.xcconfig; sourceTree = "<group>"; };
-		46EB2E00001D50 /* SDWebImage.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SDWebImage.release.xcconfig; sourceTree = "<group>"; };
-		46EB2E00001D60 /* SDWebImage.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SDWebImage.modulemap; sourceTree = "<group>"; };
-		46EB2E00001D70 /* SDWebImage-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SDWebImage-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E00001D90 /* SDWebImage-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SDWebImage-Info.plist"; sourceTree = "<group>"; };
-		46EB2E00001DA0 /* SDWebImage-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SDWebImage-prefix.pch"; sourceTree = "<group>"; };
-		46EB2E00001DB0 /* SDWebImage-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SDWebImage-dummy.m"; sourceTree = "<group>"; };
-		46EB2E00001F70 /* STBaseProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.debug.xcconfig; sourceTree = "<group>"; };
-		46EB2E00001F80 /* STBaseProject.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.release.xcconfig; sourceTree = "<group>"; };
-		46EB2E00001F90 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
-		46EB2E00001FA0 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E00001FC0 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
-		46EB2E00001FD0 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
-		46EB2E00001FE0 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
-		46EB2E00002300 /* SnapKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.debug.xcconfig; sourceTree = "<group>"; };
-		46EB2E00002310 /* SnapKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.release.xcconfig; sourceTree = "<group>"; };
-		46EB2E00002320 /* SnapKit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SnapKit.modulemap; sourceTree = "<group>"; };
-		46EB2E00002330 /* SnapKit-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E00002350 /* SnapKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SnapKit-Info.plist"; sourceTree = "<group>"; };
-		46EB2E00002360 /* SnapKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-prefix.pch"; sourceTree = "<group>"; };
-		46EB2E00002370 /* SnapKit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SnapKit-dummy.m"; sourceTree = "<group>"; };
-		46EB2E00002390 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
-		46EB2E000023B0 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/ImageIO.framework; sourceTree = DEVELOPER_DIR; };
-		46EB2E00002480 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
-		46EB2E00002490 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		46EB2E000024A0 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
-		46EB2E000024B0 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
-		46EB2E000024C0 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E000024E0 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
-		46EB2E000024F0 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		46EB2E00002500 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		46EB2E00002510 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000C40 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STBaseConfig/STBtn.swift; sourceTree = "<group>"; };
+		46EB2E00000C50 /* STDateManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDateManager.swift; path = STBaseProject/Classes/STBaseConfig/STDateManager.swift; sourceTree = "<group>"; };
+		46EB2E00000C60 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceInfo.swift; path = STBaseProject/Classes/STBaseConfig/STDeviceInfo.swift; sourceTree = "<group>"; };
+		46EB2E00000C70 /* STEncrypt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STEncrypt.swift; path = STBaseProject/Classes/STBaseConfig/STEncrypt.swift; sourceTree = "<group>"; };
+		46EB2E00000C80 /* STFileManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFileManager.swift; path = STBaseProject/Classes/STBaseConfig/STFileManager.swift; sourceTree = "<group>"; };
+		46EB2E00000C90 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STBaseConfig/STFontManager.swift; sourceTree = "<group>"; };
+		46EB2E00000CA0 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHexColor.swift; path = STBaseProject/Classes/STBaseConfig/STHexColor.swift; sourceTree = "<group>"; };
+		46EB2E00000CB0 /* STIBInspectable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STIBInspectable.swift; path = STBaseProject/Classes/STBaseConfig/STIBInspectable.swift; sourceTree = "<group>"; };
+		46EB2E00000CC0 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STBaseConfig/STJSONValue.swift; sourceTree = "<group>"; };
+		46EB2E00000CD0 /* STLanguageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLanguageManager.swift; path = STBaseProject/Classes/STBaseConfig/STLanguageManager.swift; sourceTree = "<group>"; };
+		46EB2E00000CE0 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogView.swift; path = STBaseProject/Classes/STBaseConfig/STLogView.swift; sourceTree = "<group>"; };
+		46EB2E00000CF0 /* STModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STModel.swift; path = STBaseProject/Classes/STBaseConfig/STModel.swift; sourceTree = "<group>"; };
+		46EB2E00000D00 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STBaseConfig/STPredicateCheck.swift; sourceTree = "<group>"; };
+		46EB2E00000D10 /* STScreenSizeConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScreenSizeConstants.swift; path = STBaseProject/Classes/STBaseConfig/STScreenSizeConstants.swift; sourceTree = "<group>"; };
+		46EB2E00000D20 /* STStringExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STStringExtension.swift; path = STBaseProject/Classes/STBaseConfig/STStringExtension.swift; sourceTree = "<group>"; };
+		46EB2E00000D30 /* STTabBarItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTabBarItem.swift; path = STBaseProject/Classes/STBaseConfig/STTabBarItem.swift; sourceTree = "<group>"; };
+		46EB2E00000D40 /* STTimer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTimer.swift; path = STBaseProject/Classes/STBaseConfig/STTimer.swift; sourceTree = "<group>"; };
+		46EB2E00000D70 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewController.swift; sourceTree = "<group>"; };
+		46EB2E00000D90 /* STBaseViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewModel.swift; sourceTree = "<group>"; };
+		46EB2E00000DB0 /* STBaseModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseModel.swift; sourceTree = "<group>"; };
+		46EB2E00000DD0 /* STBaseView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseView.swift; sourceTree = "<group>"; };
+		46EB2E00000DE0 /* Constraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Constraint.swift; path = Sources/Constraint.swift; sourceTree = "<group>"; };
+		46EB2E00000DF0 /* ConstraintAttributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintAttributes.swift; path = Sources/ConstraintAttributes.swift; sourceTree = "<group>"; };
+		46EB2E00000E00 /* ConstraintConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConfig.swift; path = Sources/ConstraintConfig.swift; sourceTree = "<group>"; };
+		46EB2E00000E10 /* ConstraintConstantTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintConstantTarget.swift; path = Sources/ConstraintConstantTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000E20 /* ConstraintDescription.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDescription.swift; path = Sources/ConstraintDescription.swift; sourceTree = "<group>"; };
+		46EB2E00000E30 /* ConstraintDirectionalInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsets.swift; path = Sources/ConstraintDirectionalInsets.swift; sourceTree = "<group>"; };
+		46EB2E00000E40 /* ConstraintDirectionalInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDirectionalInsetTarget.swift; path = Sources/ConstraintDirectionalInsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000E50 /* ConstraintDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDSL.swift; path = Sources/ConstraintDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000E60 /* ConstraintInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsets.swift; path = Sources/ConstraintInsets.swift; sourceTree = "<group>"; };
+		46EB2E00000E70 /* ConstraintInsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsetTarget.swift; path = Sources/ConstraintInsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000E80 /* ConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintItem.swift; path = Sources/ConstraintItem.swift; sourceTree = "<group>"; };
+		46EB2E00000E90 /* ConstraintLayoutGuide+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintLayoutGuide+Extensions.swift"; path = "Sources/ConstraintLayoutGuide+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000EA0 /* ConstraintLayoutGuide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuide.swift; path = Sources/ConstraintLayoutGuide.swift; sourceTree = "<group>"; };
+		46EB2E00000EB0 /* ConstraintLayoutGuideDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuideDSL.swift; path = Sources/ConstraintLayoutGuideDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000EC0 /* ConstraintLayoutSupport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupport.swift; path = Sources/ConstraintLayoutSupport.swift; sourceTree = "<group>"; };
+		46EB2E00000ED0 /* ConstraintLayoutSupportDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupportDSL.swift; path = Sources/ConstraintLayoutSupportDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000EE0 /* ConstraintMaker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMaker.swift; path = Sources/ConstraintMaker.swift; sourceTree = "<group>"; };
+		46EB2E00000EF0 /* ConstraintMakerEditable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerEditable.swift; path = Sources/ConstraintMakerEditable.swift; sourceTree = "<group>"; };
+		46EB2E00000F00 /* ConstraintMakerExtendable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerExtendable.swift; path = Sources/ConstraintMakerExtendable.swift; sourceTree = "<group>"; };
+		46EB2E00000F10 /* ConstraintMakerFinalizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerFinalizable.swift; path = Sources/ConstraintMakerFinalizable.swift; sourceTree = "<group>"; };
+		46EB2E00000F20 /* ConstraintMakerPrioritizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerPrioritizable.swift; path = Sources/ConstraintMakerPrioritizable.swift; sourceTree = "<group>"; };
+		46EB2E00000F30 /* ConstraintMakerRelatable+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintMakerRelatable+Extensions.swift"; path = "Sources/ConstraintMakerRelatable+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000F40 /* ConstraintMakerRelatable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerRelatable.swift; path = Sources/ConstraintMakerRelatable.swift; sourceTree = "<group>"; };
+		46EB2E00000F50 /* ConstraintMultiplierTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMultiplierTarget.swift; path = Sources/ConstraintMultiplierTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000F60 /* ConstraintOffsetTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintOffsetTarget.swift; path = Sources/ConstraintOffsetTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000F70 /* ConstraintPriority.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriority.swift; path = Sources/ConstraintPriority.swift; sourceTree = "<group>"; };
+		46EB2E00000F80 /* ConstraintPriorityTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriorityTarget.swift; path = Sources/ConstraintPriorityTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000F90 /* ConstraintRelatableTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelatableTarget.swift; path = Sources/ConstraintRelatableTarget.swift; sourceTree = "<group>"; };
+		46EB2E00000FA0 /* ConstraintRelation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelation.swift; path = Sources/ConstraintRelation.swift; sourceTree = "<group>"; };
+		46EB2E00000FB0 /* ConstraintView+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "ConstraintView+Extensions.swift"; path = "Sources/ConstraintView+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00000FC0 /* ConstraintView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintView.swift; path = Sources/ConstraintView.swift; sourceTree = "<group>"; };
+		46EB2E00000FD0 /* ConstraintViewDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintViewDSL.swift; path = Sources/ConstraintViewDSL.swift; sourceTree = "<group>"; };
+		46EB2E00000FE0 /* Debugging.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Debugging.swift; path = Sources/Debugging.swift; sourceTree = "<group>"; };
+		46EB2E00000FF0 /* LayoutConstraint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraint.swift; path = Sources/LayoutConstraint.swift; sourceTree = "<group>"; };
+		46EB2E00001000 /* LayoutConstraintItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutConstraintItem.swift; path = Sources/LayoutConstraintItem.swift; sourceTree = "<group>"; };
+		46EB2E00001010 /* Typealiases.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Typealiases.swift; path = Sources/Typealiases.swift; sourceTree = "<group>"; };
+		46EB2E00001020 /* UILayoutSupport+Extensions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "UILayoutSupport+Extensions.swift"; path = "Sources/UILayoutSupport+Extensions.swift"; sourceTree = "<group>"; };
+		46EB2E00001040 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		46EB2E00001050 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		46EB2E00001060 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		46EB2E00001110 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E00001380 /* Alamofire.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Alamofire.debug.xcconfig; sourceTree = "<group>"; };
+		46EB2E00001390 /* Alamofire.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Alamofire.release.xcconfig; sourceTree = "<group>"; };
+		46EB2E000013A0 /* Alamofire.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = Alamofire.modulemap; sourceTree = "<group>"; };
+		46EB2E000013B0 /* Alamofire-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Alamofire-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E000013D0 /* Alamofire-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Alamofire-Info.plist"; sourceTree = "<group>"; };
+		46EB2E000013E0 /* Alamofire-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Alamofire-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E000013F0 /* Alamofire-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Alamofire-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00001DA0 /* SDWebImage.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SDWebImage.debug.xcconfig; sourceTree = "<group>"; };
+		46EB2E00001DB0 /* SDWebImage.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SDWebImage.release.xcconfig; sourceTree = "<group>"; };
+		46EB2E00001DC0 /* SDWebImage.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SDWebImage.modulemap; sourceTree = "<group>"; };
+		46EB2E00001DD0 /* SDWebImage-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SDWebImage-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00001DF0 /* SDWebImage-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SDWebImage-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00001E00 /* SDWebImage-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SDWebImage-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E00001E10 /* SDWebImage-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SDWebImage-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00002030 /* STBaseProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.debug.xcconfig; sourceTree = "<group>"; };
+		46EB2E00002040 /* STBaseProject.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.release.xcconfig; sourceTree = "<group>"; };
+		46EB2E00002050 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
+		46EB2E00002060 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00002080 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00002090 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E000020A0 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
+		46EB2E000023C0 /* SnapKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.debug.xcconfig; sourceTree = "<group>"; };
+		46EB2E000023D0 /* SnapKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.release.xcconfig; sourceTree = "<group>"; };
+		46EB2E000023E0 /* SnapKit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = SnapKit.modulemap; sourceTree = "<group>"; };
+		46EB2E000023F0 /* SnapKit-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00002410 /* SnapKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "SnapKit-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00002420 /* SnapKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SnapKit-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E00002430 /* SnapKit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SnapKit-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00002450 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E00002470 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS14.0.sdk/System/Library/Frameworks/ImageIO.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E00002540 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00002550 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00002560 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00002570 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
+		46EB2E00002580 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E000025A0 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
+		46EB2E000025B0 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		46EB2E000025C0 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
+		46EB2E000025D0 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
 		5D797E9A5C5782CE845840781FA1CC81 /* Alamofire */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Alamofire; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8429AD56E21AAC3CB084E87A10AB851C /* Pods-STBaseProject_Example */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-STBaseProject_Example"; path = Pods_STBaseProject_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		979486118B3E90C08386079D57962701 /* SnapKit */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SnapKit; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -570,45 +582,45 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		46EB2E00001080 /* Frameworks */ = {
+		46EB2E000010E0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000023A0 /* CFNetwork.framework in Frameworks */,
-				46EB2E000010C0 /* Foundation.framework in Frameworks */,
+				46EB2E00002460 /* CFNetwork.framework in Frameworks */,
+				46EB2E00001120 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001420 /* Frameworks */ = {
+		46EB2E00001480 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00001440 /* Foundation.framework in Frameworks */,
-				46EB2E000023C0 /* ImageIO.framework in Frameworks */,
+				46EB2E000014A0 /* Foundation.framework in Frameworks */,
+				46EB2E00002480 /* ImageIO.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001E40 /* Frameworks */ = {
+		46EB2E00001EA0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00001E60 /* Foundation.framework in Frameworks */,
+				46EB2E00001EC0 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002070 /* Frameworks */ = {
+		46EB2E00002130 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00002090 /* Foundation.framework in Frameworks */,
+				46EB2E00002150 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002440 /* Frameworks */ = {
+		46EB2E00002500 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00002460 /* Foundation.framework in Frameworks */,
+				46EB2E00002520 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -642,7 +654,7 @@
 		46EB2E00000060 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000010A0 /* iOS */,
+				46EB2E00001100 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -650,7 +662,7 @@
 		46EB2E00000070 /* Targets Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00002470 /* Pods-STBaseProject_Example */,
+				46EB2E00002530 /* Pods-STBaseProject_Example */,
 			);
 			name = "Targets Support Files";
 			sourceTree = "<group>";
@@ -712,7 +724,7 @@
 				46EB2E00000310 /* URLRequest+Alamofire.swift */,
 				46EB2E00000320 /* URLSessionConfiguration+Alamofire.swift */,
 				46EB2E00000330 /* Validation.swift */,
-				46EB2E00001310 /* Support Files */,
+				46EB2E00001370 /* Support Files */,
 			);
 			name = Alamofire;
 			path = Alamofire;
@@ -722,7 +734,7 @@
 			isa = PBXGroup;
 			children = (
 				46EB2E00000340 /* Core */,
-				46EB2E00001D30 /* Support Files */,
+				46EB2E00001D90 /* Support Files */,
 			);
 			name = SDWebImage;
 			path = SDWebImage;
@@ -731,10 +743,10 @@
 		46EB2E000000D0 /* STBaseProject */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000FD0 /* Pod */,
+				46EB2E00001030 /* Pod */,
 				46EB2E00000C30 /* STBaseConfig */,
-				46EB2E00000CF0 /* STBaseModule */,
-				46EB2E00001F60 /* Support Files */,
+				46EB2E00000D50 /* STBaseModule */,
+				46EB2E00002020 /* Support Files */,
 			);
 			name = STBaseProject;
 			path = ../..;
@@ -743,44 +755,44 @@
 		46EB2E000000E0 /* SnapKit */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000D80 /* Constraint.swift */,
-				46EB2E00000D90 /* ConstraintAttributes.swift */,
-				46EB2E00000DA0 /* ConstraintConfig.swift */,
-				46EB2E00000DB0 /* ConstraintConstantTarget.swift */,
-				46EB2E00000DC0 /* ConstraintDescription.swift */,
-				46EB2E00000DD0 /* ConstraintDirectionalInsets.swift */,
-				46EB2E00000DE0 /* ConstraintDirectionalInsetTarget.swift */,
-				46EB2E00000DF0 /* ConstraintDSL.swift */,
-				46EB2E00000E00 /* ConstraintInsets.swift */,
-				46EB2E00000E10 /* ConstraintInsetTarget.swift */,
-				46EB2E00000E20 /* ConstraintItem.swift */,
-				46EB2E00000E40 /* ConstraintLayoutGuide.swift */,
-				46EB2E00000E30 /* ConstraintLayoutGuide+Extensions.swift */,
-				46EB2E00000E50 /* ConstraintLayoutGuideDSL.swift */,
-				46EB2E00000E60 /* ConstraintLayoutSupport.swift */,
-				46EB2E00000E70 /* ConstraintLayoutSupportDSL.swift */,
-				46EB2E00000E80 /* ConstraintMaker.swift */,
-				46EB2E00000E90 /* ConstraintMakerEditable.swift */,
-				46EB2E00000EA0 /* ConstraintMakerExtendable.swift */,
-				46EB2E00000EB0 /* ConstraintMakerFinalizable.swift */,
-				46EB2E00000EC0 /* ConstraintMakerPrioritizable.swift */,
-				46EB2E00000EE0 /* ConstraintMakerRelatable.swift */,
-				46EB2E00000ED0 /* ConstraintMakerRelatable+Extensions.swift */,
-				46EB2E00000EF0 /* ConstraintMultiplierTarget.swift */,
-				46EB2E00000F00 /* ConstraintOffsetTarget.swift */,
-				46EB2E00000F10 /* ConstraintPriority.swift */,
-				46EB2E00000F20 /* ConstraintPriorityTarget.swift */,
-				46EB2E00000F30 /* ConstraintRelatableTarget.swift */,
-				46EB2E00000F40 /* ConstraintRelation.swift */,
-				46EB2E00000F60 /* ConstraintView.swift */,
-				46EB2E00000F50 /* ConstraintView+Extensions.swift */,
-				46EB2E00000F70 /* ConstraintViewDSL.swift */,
-				46EB2E00000F80 /* Debugging.swift */,
-				46EB2E00000F90 /* LayoutConstraint.swift */,
-				46EB2E00000FA0 /* LayoutConstraintItem.swift */,
-				46EB2E00000FB0 /* Typealiases.swift */,
-				46EB2E00000FC0 /* UILayoutSupport+Extensions.swift */,
-				46EB2E000022F0 /* Support Files */,
+				46EB2E00000DE0 /* Constraint.swift */,
+				46EB2E00000DF0 /* ConstraintAttributes.swift */,
+				46EB2E00000E00 /* ConstraintConfig.swift */,
+				46EB2E00000E10 /* ConstraintConstantTarget.swift */,
+				46EB2E00000E20 /* ConstraintDescription.swift */,
+				46EB2E00000E30 /* ConstraintDirectionalInsets.swift */,
+				46EB2E00000E40 /* ConstraintDirectionalInsetTarget.swift */,
+				46EB2E00000E50 /* ConstraintDSL.swift */,
+				46EB2E00000E60 /* ConstraintInsets.swift */,
+				46EB2E00000E70 /* ConstraintInsetTarget.swift */,
+				46EB2E00000E80 /* ConstraintItem.swift */,
+				46EB2E00000EA0 /* ConstraintLayoutGuide.swift */,
+				46EB2E00000E90 /* ConstraintLayoutGuide+Extensions.swift */,
+				46EB2E00000EB0 /* ConstraintLayoutGuideDSL.swift */,
+				46EB2E00000EC0 /* ConstraintLayoutSupport.swift */,
+				46EB2E00000ED0 /* ConstraintLayoutSupportDSL.swift */,
+				46EB2E00000EE0 /* ConstraintMaker.swift */,
+				46EB2E00000EF0 /* ConstraintMakerEditable.swift */,
+				46EB2E00000F00 /* ConstraintMakerExtendable.swift */,
+				46EB2E00000F10 /* ConstraintMakerFinalizable.swift */,
+				46EB2E00000F20 /* ConstraintMakerPrioritizable.swift */,
+				46EB2E00000F40 /* ConstraintMakerRelatable.swift */,
+				46EB2E00000F30 /* ConstraintMakerRelatable+Extensions.swift */,
+				46EB2E00000F50 /* ConstraintMultiplierTarget.swift */,
+				46EB2E00000F60 /* ConstraintOffsetTarget.swift */,
+				46EB2E00000F70 /* ConstraintPriority.swift */,
+				46EB2E00000F80 /* ConstraintPriorityTarget.swift */,
+				46EB2E00000F90 /* ConstraintRelatableTarget.swift */,
+				46EB2E00000FA0 /* ConstraintRelation.swift */,
+				46EB2E00000FC0 /* ConstraintView.swift */,
+				46EB2E00000FB0 /* ConstraintView+Extensions.swift */,
+				46EB2E00000FD0 /* ConstraintViewDSL.swift */,
+				46EB2E00000FE0 /* Debugging.swift */,
+				46EB2E00000FF0 /* LayoutConstraint.swift */,
+				46EB2E00001000 /* LayoutConstraintItem.swift */,
+				46EB2E00001010 /* Typealiases.swift */,
+				46EB2E00001020 /* UILayoutSupport+Extensions.swift */,
+				46EB2E000023B0 /* Support Files */,
 			);
 			name = SnapKit;
 			path = SnapKit;
@@ -938,160 +950,166 @@
 		46EB2E00000C30 /* STBaseConfig */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000C40 /* STDateManager.swift */,
-				46EB2E00000C50 /* STDeviceInfo.swift */,
-				46EB2E00000C60 /* STFileManager.swift */,
-				46EB2E00000C70 /* STFontManager.swift */,
-				46EB2E00000C80 /* STHexColor.swift */,
-				46EB2E00000C90 /* STJSONValue.swift */,
-				46EB2E00000CA0 /* STLogPrint.swift */,
-				46EB2E00000CB0 /* STLogView.swift */,
-				46EB2E00000CC0 /* STPredicateCheck.swift */,
-				46EB2E00000CD0 /* STScreenSizeConstants.swift */,
-				46EB2E00000CE0 /* STStringExtension.swift */,
+				46EB2E00000C40 /* STBtn.swift */,
+				46EB2E00000C50 /* STDateManager.swift */,
+				46EB2E00000C60 /* STDeviceInfo.swift */,
+				46EB2E00000C70 /* STEncrypt.swift */,
+				46EB2E00000C80 /* STFileManager.swift */,
+				46EB2E00000C90 /* STFontManager.swift */,
+				46EB2E00000CA0 /* STHexColor.swift */,
+				46EB2E00000CB0 /* STIBInspectable.swift */,
+				46EB2E00000CC0 /* STJSONValue.swift */,
+				46EB2E00000CD0 /* STLanguageManager.swift */,
+				46EB2E00000CE0 /* STLogView.swift */,
+				46EB2E00000CF0 /* STModel.swift */,
+				46EB2E00000D00 /* STPredicateCheck.swift */,
+				46EB2E00000D10 /* STScreenSizeConstants.swift */,
+				46EB2E00000D20 /* STStringExtension.swift */,
+				46EB2E00000D30 /* STTabBarItem.swift */,
+				46EB2E00000D40 /* STTimer.swift */,
 			);
 			name = STBaseConfig;
 			sourceTree = "<group>";
 		};
-		46EB2E00000CF0 /* STBaseModule */ = {
+		46EB2E00000D50 /* STBaseModule */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000D40 /* STBaseModel */,
-				46EB2E00000D60 /* STBaseView */,
-				46EB2E00000D00 /* STBaseViewController */,
-				46EB2E00000D20 /* STBaseViewModel */,
+				46EB2E00000DA0 /* STBaseModel */,
+				46EB2E00000DC0 /* STBaseView */,
+				46EB2E00000D60 /* STBaseViewController */,
+				46EB2E00000D80 /* STBaseViewModel */,
 			);
 			name = STBaseModule;
 			sourceTree = "<group>";
 		};
-		46EB2E00000D00 /* STBaseViewController */ = {
+		46EB2E00000D60 /* STBaseViewController */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000D10 /* STBaseViewController.swift */,
+				46EB2E00000D70 /* STBaseViewController.swift */,
 			);
 			name = STBaseViewController;
 			path = STBaseProject/Classes/STBaseModule/STBaseViewController;
 			sourceTree = "<group>";
 		};
-		46EB2E00000D20 /* STBaseViewModel */ = {
+		46EB2E00000D80 /* STBaseViewModel */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000D30 /* STBaseViewModel.swift */,
+				46EB2E00000D90 /* STBaseViewModel.swift */,
 			);
 			name = STBaseViewModel;
 			path = STBaseProject/Classes/STBaseModule/STBaseViewModel;
 			sourceTree = "<group>";
 		};
-		46EB2E00000D40 /* STBaseModel */ = {
+		46EB2E00000DA0 /* STBaseModel */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000D50 /* STBaseModel.swift */,
+				46EB2E00000DB0 /* STBaseModel.swift */,
 			);
 			name = STBaseModel;
 			path = STBaseProject/Classes/STBaseModule/STBaseModel;
 			sourceTree = "<group>";
 		};
-		46EB2E00000D60 /* STBaseView */ = {
+		46EB2E00000DC0 /* STBaseView */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000D70 /* STBaseView.swift */,
+				46EB2E00000DD0 /* STBaseView.swift */,
 			);
 			name = STBaseView;
 			path = STBaseProject/Classes/STBaseModule/STBaseView;
 			sourceTree = "<group>";
 		};
-		46EB2E00000FD0 /* Pod */ = {
+		46EB2E00001030 /* Pod */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000FE0 /* LICENSE */,
-				46EB2E00000FF0 /* README.md */,
-				46EB2E00001000 /* STBaseProject.podspec */,
+				46EB2E00001040 /* LICENSE */,
+				46EB2E00001050 /* README.md */,
+				46EB2E00001060 /* STBaseProject.podspec */,
 			);
 			name = Pod;
 			sourceTree = "<group>";
 		};
-		46EB2E000010A0 /* iOS */ = {
+		46EB2E00001100 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00002390 /* CFNetwork.framework */,
-				46EB2E000010B0 /* Foundation.framework */,
-				46EB2E000023B0 /* ImageIO.framework */,
+				46EB2E00002450 /* CFNetwork.framework */,
+				46EB2E00001110 /* Foundation.framework */,
+				46EB2E00002470 /* ImageIO.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		46EB2E00001310 /* Support Files */ = {
+		46EB2E00001370 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00001340 /* Alamofire.modulemap */,
-				46EB2E00001390 /* Alamofire-dummy.m */,
-				46EB2E00001370 /* Alamofire-Info.plist */,
-				46EB2E00001380 /* Alamofire-prefix.pch */,
-				46EB2E00001350 /* Alamofire-umbrella.h */,
-				46EB2E00001320 /* Alamofire.debug.xcconfig */,
-				46EB2E00001330 /* Alamofire.release.xcconfig */,
+				46EB2E000013A0 /* Alamofire.modulemap */,
+				46EB2E000013F0 /* Alamofire-dummy.m */,
+				46EB2E000013D0 /* Alamofire-Info.plist */,
+				46EB2E000013E0 /* Alamofire-prefix.pch */,
+				46EB2E000013B0 /* Alamofire-umbrella.h */,
+				46EB2E00001380 /* Alamofire.debug.xcconfig */,
+				46EB2E00001390 /* Alamofire.release.xcconfig */,
 			);
 			name = "Support Files";
 			path = "../Target Support Files/Alamofire";
 			sourceTree = "<group>";
 		};
-		46EB2E00001D30 /* Support Files */ = {
+		46EB2E00001D90 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00001D60 /* SDWebImage.modulemap */,
-				46EB2E00001DB0 /* SDWebImage-dummy.m */,
-				46EB2E00001D90 /* SDWebImage-Info.plist */,
-				46EB2E00001DA0 /* SDWebImage-prefix.pch */,
-				46EB2E00001D70 /* SDWebImage-umbrella.h */,
-				46EB2E00001D40 /* SDWebImage.debug.xcconfig */,
-				46EB2E00001D50 /* SDWebImage.release.xcconfig */,
+				46EB2E00001DC0 /* SDWebImage.modulemap */,
+				46EB2E00001E10 /* SDWebImage-dummy.m */,
+				46EB2E00001DF0 /* SDWebImage-Info.plist */,
+				46EB2E00001E00 /* SDWebImage-prefix.pch */,
+				46EB2E00001DD0 /* SDWebImage-umbrella.h */,
+				46EB2E00001DA0 /* SDWebImage.debug.xcconfig */,
+				46EB2E00001DB0 /* SDWebImage.release.xcconfig */,
 			);
 			name = "Support Files";
 			path = "../Target Support Files/SDWebImage";
 			sourceTree = "<group>";
 		};
-		46EB2E00001F60 /* Support Files */ = {
+		46EB2E00002020 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00001F90 /* STBaseProject.modulemap */,
-				46EB2E00001FE0 /* STBaseProject-dummy.m */,
-				46EB2E00001FC0 /* STBaseProject-Info.plist */,
-				46EB2E00001FD0 /* STBaseProject-prefix.pch */,
-				46EB2E00001FA0 /* STBaseProject-umbrella.h */,
-				46EB2E00001F70 /* STBaseProject.debug.xcconfig */,
-				46EB2E00001F80 /* STBaseProject.release.xcconfig */,
+				46EB2E00002050 /* STBaseProject.modulemap */,
+				46EB2E000020A0 /* STBaseProject-dummy.m */,
+				46EB2E00002080 /* STBaseProject-Info.plist */,
+				46EB2E00002090 /* STBaseProject-prefix.pch */,
+				46EB2E00002060 /* STBaseProject-umbrella.h */,
+				46EB2E00002030 /* STBaseProject.debug.xcconfig */,
+				46EB2E00002040 /* STBaseProject.release.xcconfig */,
 			);
 			name = "Support Files";
 			path = "Example/Pods/Target Support Files/STBaseProject";
 			sourceTree = "<group>";
 		};
-		46EB2E000022F0 /* Support Files */ = {
+		46EB2E000023B0 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00002320 /* SnapKit.modulemap */,
-				46EB2E00002370 /* SnapKit-dummy.m */,
-				46EB2E00002350 /* SnapKit-Info.plist */,
-				46EB2E00002360 /* SnapKit-prefix.pch */,
-				46EB2E00002330 /* SnapKit-umbrella.h */,
-				46EB2E00002300 /* SnapKit.debug.xcconfig */,
-				46EB2E00002310 /* SnapKit.release.xcconfig */,
+				46EB2E000023E0 /* SnapKit.modulemap */,
+				46EB2E00002430 /* SnapKit-dummy.m */,
+				46EB2E00002410 /* SnapKit-Info.plist */,
+				46EB2E00002420 /* SnapKit-prefix.pch */,
+				46EB2E000023F0 /* SnapKit-umbrella.h */,
+				46EB2E000023C0 /* SnapKit.debug.xcconfig */,
+				46EB2E000023D0 /* SnapKit.release.xcconfig */,
 			);
 			name = "Support Files";
 			path = "../Target Support Files/SnapKit";
 			sourceTree = "<group>";
 		};
-		46EB2E00002470 /* Pods-STBaseProject_Example */ = {
+		46EB2E00002530 /* Pods-STBaseProject_Example */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000024B0 /* Pods-STBaseProject_Example.modulemap */,
-				46EB2E00002500 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
-				46EB2E000024F0 /* Pods-STBaseProject_Example-acknowledgements.plist */,
-				46EB2E00002510 /* Pods-STBaseProject_Example-dummy.m */,
-				46EB2E000024E0 /* Pods-STBaseProject_Example-frameworks.sh */,
-				46EB2E000024A0 /* Pods-STBaseProject_Example-Info.plist */,
-				46EB2E000024C0 /* Pods-STBaseProject_Example-umbrella.h */,
-				46EB2E00002490 /* Pods-STBaseProject_Example.debug.xcconfig */,
-				46EB2E00002480 /* Pods-STBaseProject_Example.release.xcconfig */,
+				46EB2E00002570 /* Pods-STBaseProject_Example.modulemap */,
+				46EB2E000025C0 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
+				46EB2E000025B0 /* Pods-STBaseProject_Example-acknowledgements.plist */,
+				46EB2E000025D0 /* Pods-STBaseProject_Example-dummy.m */,
+				46EB2E000025A0 /* Pods-STBaseProject_Example-frameworks.sh */,
+				46EB2E00002560 /* Pods-STBaseProject_Example-Info.plist */,
+				46EB2E00002580 /* Pods-STBaseProject_Example-umbrella.h */,
+				46EB2E00002550 /* Pods-STBaseProject_Example.debug.xcconfig */,
+				46EB2E00002540 /* Pods-STBaseProject_Example.release.xcconfig */,
 			);
 			name = "Pods-STBaseProject_Example";
 			path = "Target Support Files/Pods-STBaseProject_Example";
@@ -1100,116 +1118,116 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		46EB2E00001060 /* Headers */ = {
+		46EB2E000010C0 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00001360 /* Alamofire-umbrella.h in Headers */,
+				46EB2E000013C0 /* Alamofire-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001400 /* Headers */ = {
+		46EB2E00001460 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00001C50 /* NSBezierPath+SDRoundedCorners.h in Headers */,
-				46EB2E000018A0 /* NSButton+WebCache.h in Headers */,
-				46EB2E000018B0 /* NSData+ImageContentType.h in Headers */,
-				46EB2E000018C0 /* NSImage+Compatibility.h in Headers */,
-				46EB2E000018D0 /* SDAnimatedImage.h in Headers */,
-				46EB2E000018E0 /* SDAnimatedImagePlayer.h in Headers */,
-				46EB2E000018F0 /* SDAnimatedImageRep.h in Headers */,
-				46EB2E00001910 /* SDAnimatedImageView.h in Headers */,
-				46EB2E00001900 /* SDAnimatedImageView+WebCache.h in Headers */,
-				46EB2E00001C60 /* SDAssociatedObject.h in Headers */,
-				46EB2E00001C70 /* SDAsyncBlockOperation.h in Headers */,
-				46EB2E00001C80 /* SDDeviceHelper.h in Headers */,
-				46EB2E00001920 /* SDDiskCache.h in Headers */,
-				46EB2E00001C90 /* SDDisplayLink.h in Headers */,
-				46EB2E00001CA0 /* SDFileAttributeHelper.h in Headers */,
-				46EB2E00001930 /* SDGraphicsImageRenderer.h in Headers */,
-				46EB2E00001940 /* SDImageAPNGCoder.h in Headers */,
-				46EB2E00001CB0 /* SDImageAssetManager.h in Headers */,
-				46EB2E00001950 /* SDImageAWebPCoder.h in Headers */,
-				46EB2E00001960 /* SDImageCache.h in Headers */,
-				46EB2E00001970 /* SDImageCacheConfig.h in Headers */,
-				46EB2E00001980 /* SDImageCacheDefine.h in Headers */,
-				46EB2E00001990 /* SDImageCachesManager.h in Headers */,
-				46EB2E00001CC0 /* SDImageCachesManagerOperation.h in Headers */,
-				46EB2E000019A0 /* SDImageCoder.h in Headers */,
-				46EB2E000019B0 /* SDImageCoderHelper.h in Headers */,
-				46EB2E000019C0 /* SDImageCodersManager.h in Headers */,
-				46EB2E000019D0 /* SDImageFrame.h in Headers */,
-				46EB2E000019E0 /* SDImageGIFCoder.h in Headers */,
-				46EB2E000019F0 /* SDImageGraphics.h in Headers */,
-				46EB2E00001A00 /* SDImageHEICCoder.h in Headers */,
-				46EB2E00001A10 /* SDImageIOAnimatedCoder.h in Headers */,
-				46EB2E00001CD0 /* SDImageIOAnimatedCoderInternal.h in Headers */,
-				46EB2E00001A20 /* SDImageIOCoder.h in Headers */,
-				46EB2E00001A30 /* SDImageLoader.h in Headers */,
-				46EB2E00001A40 /* SDImageLoadersManager.h in Headers */,
-				46EB2E00001A50 /* SDImageTransformer.h in Headers */,
-				46EB2E00001CE0 /* SDInternalMacros.h in Headers */,
-				46EB2E00001A60 /* SDMemoryCache.h in Headers */,
-				46EB2E00001CF0 /* SDmetamacros.h in Headers */,
-				46EB2E00001D00 /* SDWeakProxy.h in Headers */,
-				46EB2E00001C40 /* SDWebImage.h in Headers */,
-				46EB2E00001D80 /* SDWebImage-umbrella.h in Headers */,
-				46EB2E00001A70 /* SDWebImageCacheKeyFilter.h in Headers */,
-				46EB2E00001A80 /* SDWebImageCacheSerializer.h in Headers */,
-				46EB2E00001A90 /* SDWebImageCompat.h in Headers */,
-				46EB2E00001AA0 /* SDWebImageDefine.h in Headers */,
-				46EB2E00001AB0 /* SDWebImageDownloader.h in Headers */,
-				46EB2E00001AC0 /* SDWebImageDownloaderConfig.h in Headers */,
-				46EB2E00001AD0 /* SDWebImageDownloaderDecryptor.h in Headers */,
-				46EB2E00001AE0 /* SDWebImageDownloaderOperation.h in Headers */,
-				46EB2E00001AF0 /* SDWebImageDownloaderRequestModifier.h in Headers */,
-				46EB2E00001B00 /* SDWebImageDownloaderResponseModifier.h in Headers */,
-				46EB2E00001B10 /* SDWebImageError.h in Headers */,
-				46EB2E00001B20 /* SDWebImageIndicator.h in Headers */,
-				46EB2E00001B30 /* SDWebImageManager.h in Headers */,
-				46EB2E00001B40 /* SDWebImageOperation.h in Headers */,
-				46EB2E00001B50 /* SDWebImageOptionsProcessor.h in Headers */,
-				46EB2E00001B60 /* SDWebImagePrefetcher.h in Headers */,
-				46EB2E00001B70 /* SDWebImageTransition.h in Headers */,
-				46EB2E00001D10 /* SDWebImageTransitionInternal.h in Headers */,
-				46EB2E00001B80 /* UIButton+WebCache.h in Headers */,
-				46EB2E00001D20 /* UIColor+SDHexString.h in Headers */,
-				46EB2E00001B90 /* UIImage+ExtendedCacheData.h in Headers */,
-				46EB2E00001BA0 /* UIImage+ForceDecode.h in Headers */,
-				46EB2E00001BB0 /* UIImage+GIF.h in Headers */,
-				46EB2E00001BC0 /* UIImage+MemoryCacheCost.h in Headers */,
-				46EB2E00001BD0 /* UIImage+Metadata.h in Headers */,
-				46EB2E00001BE0 /* UIImage+MultiFormat.h in Headers */,
-				46EB2E00001BF0 /* UIImage+Transform.h in Headers */,
-				46EB2E00001C00 /* UIImageView+HighlightedWebCache.h in Headers */,
-				46EB2E00001C10 /* UIImageView+WebCache.h in Headers */,
-				46EB2E00001C20 /* UIView+WebCache.h in Headers */,
-				46EB2E00001C30 /* UIView+WebCacheOperation.h in Headers */,
+				46EB2E00001CB0 /* NSBezierPath+SDRoundedCorners.h in Headers */,
+				46EB2E00001900 /* NSButton+WebCache.h in Headers */,
+				46EB2E00001910 /* NSData+ImageContentType.h in Headers */,
+				46EB2E00001920 /* NSImage+Compatibility.h in Headers */,
+				46EB2E00001930 /* SDAnimatedImage.h in Headers */,
+				46EB2E00001940 /* SDAnimatedImagePlayer.h in Headers */,
+				46EB2E00001950 /* SDAnimatedImageRep.h in Headers */,
+				46EB2E00001970 /* SDAnimatedImageView.h in Headers */,
+				46EB2E00001960 /* SDAnimatedImageView+WebCache.h in Headers */,
+				46EB2E00001CC0 /* SDAssociatedObject.h in Headers */,
+				46EB2E00001CD0 /* SDAsyncBlockOperation.h in Headers */,
+				46EB2E00001CE0 /* SDDeviceHelper.h in Headers */,
+				46EB2E00001980 /* SDDiskCache.h in Headers */,
+				46EB2E00001CF0 /* SDDisplayLink.h in Headers */,
+				46EB2E00001D00 /* SDFileAttributeHelper.h in Headers */,
+				46EB2E00001990 /* SDGraphicsImageRenderer.h in Headers */,
+				46EB2E000019A0 /* SDImageAPNGCoder.h in Headers */,
+				46EB2E00001D10 /* SDImageAssetManager.h in Headers */,
+				46EB2E000019B0 /* SDImageAWebPCoder.h in Headers */,
+				46EB2E000019C0 /* SDImageCache.h in Headers */,
+				46EB2E000019D0 /* SDImageCacheConfig.h in Headers */,
+				46EB2E000019E0 /* SDImageCacheDefine.h in Headers */,
+				46EB2E000019F0 /* SDImageCachesManager.h in Headers */,
+				46EB2E00001D20 /* SDImageCachesManagerOperation.h in Headers */,
+				46EB2E00001A00 /* SDImageCoder.h in Headers */,
+				46EB2E00001A10 /* SDImageCoderHelper.h in Headers */,
+				46EB2E00001A20 /* SDImageCodersManager.h in Headers */,
+				46EB2E00001A30 /* SDImageFrame.h in Headers */,
+				46EB2E00001A40 /* SDImageGIFCoder.h in Headers */,
+				46EB2E00001A50 /* SDImageGraphics.h in Headers */,
+				46EB2E00001A60 /* SDImageHEICCoder.h in Headers */,
+				46EB2E00001A70 /* SDImageIOAnimatedCoder.h in Headers */,
+				46EB2E00001D30 /* SDImageIOAnimatedCoderInternal.h in Headers */,
+				46EB2E00001A80 /* SDImageIOCoder.h in Headers */,
+				46EB2E00001A90 /* SDImageLoader.h in Headers */,
+				46EB2E00001AA0 /* SDImageLoadersManager.h in Headers */,
+				46EB2E00001AB0 /* SDImageTransformer.h in Headers */,
+				46EB2E00001D40 /* SDInternalMacros.h in Headers */,
+				46EB2E00001AC0 /* SDMemoryCache.h in Headers */,
+				46EB2E00001D50 /* SDmetamacros.h in Headers */,
+				46EB2E00001D60 /* SDWeakProxy.h in Headers */,
+				46EB2E00001CA0 /* SDWebImage.h in Headers */,
+				46EB2E00001DE0 /* SDWebImage-umbrella.h in Headers */,
+				46EB2E00001AD0 /* SDWebImageCacheKeyFilter.h in Headers */,
+				46EB2E00001AE0 /* SDWebImageCacheSerializer.h in Headers */,
+				46EB2E00001AF0 /* SDWebImageCompat.h in Headers */,
+				46EB2E00001B00 /* SDWebImageDefine.h in Headers */,
+				46EB2E00001B10 /* SDWebImageDownloader.h in Headers */,
+				46EB2E00001B20 /* SDWebImageDownloaderConfig.h in Headers */,
+				46EB2E00001B30 /* SDWebImageDownloaderDecryptor.h in Headers */,
+				46EB2E00001B40 /* SDWebImageDownloaderOperation.h in Headers */,
+				46EB2E00001B50 /* SDWebImageDownloaderRequestModifier.h in Headers */,
+				46EB2E00001B60 /* SDWebImageDownloaderResponseModifier.h in Headers */,
+				46EB2E00001B70 /* SDWebImageError.h in Headers */,
+				46EB2E00001B80 /* SDWebImageIndicator.h in Headers */,
+				46EB2E00001B90 /* SDWebImageManager.h in Headers */,
+				46EB2E00001BA0 /* SDWebImageOperation.h in Headers */,
+				46EB2E00001BB0 /* SDWebImageOptionsProcessor.h in Headers */,
+				46EB2E00001BC0 /* SDWebImagePrefetcher.h in Headers */,
+				46EB2E00001BD0 /* SDWebImageTransition.h in Headers */,
+				46EB2E00001D70 /* SDWebImageTransitionInternal.h in Headers */,
+				46EB2E00001BE0 /* UIButton+WebCache.h in Headers */,
+				46EB2E00001D80 /* UIColor+SDHexString.h in Headers */,
+				46EB2E00001BF0 /* UIImage+ExtendedCacheData.h in Headers */,
+				46EB2E00001C00 /* UIImage+ForceDecode.h in Headers */,
+				46EB2E00001C10 /* UIImage+GIF.h in Headers */,
+				46EB2E00001C20 /* UIImage+MemoryCacheCost.h in Headers */,
+				46EB2E00001C30 /* UIImage+Metadata.h in Headers */,
+				46EB2E00001C40 /* UIImage+MultiFormat.h in Headers */,
+				46EB2E00001C50 /* UIImage+Transform.h in Headers */,
+				46EB2E00001C60 /* UIImageView+HighlightedWebCache.h in Headers */,
+				46EB2E00001C70 /* UIImageView+WebCache.h in Headers */,
+				46EB2E00001C80 /* UIView+WebCache.h in Headers */,
+				46EB2E00001C90 /* UIView+WebCacheOperation.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001E20 /* Headers */ = {
+		46EB2E00001E80 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00001FB0 /* STBaseProject-umbrella.h in Headers */,
+				46EB2E00002070 /* STBaseProject-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002050 /* Headers */ = {
+		46EB2E00002110 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00002340 /* SnapKit-umbrella.h in Headers */,
+				46EB2E00002400 /* SnapKit-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002420 /* Headers */ = {
+		46EB2E000024E0 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000024D0 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
+				46EB2E00002590 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1218,12 +1236,12 @@
 /* Begin PBXNativeTarget section */
 		19622742EBA51E823D6DAE3F8CDBFAD4 /* SnapKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00002010 /* Build configuration list for PBXNativeTarget "SnapKit" */;
+			buildConfigurationList = 46EB2E000020D0 /* Build configuration list for PBXNativeTarget "SnapKit" */;
 			buildPhases = (
-				46EB2E00002050 /* Headers */,
-				46EB2E00002060 /* Sources */,
-				46EB2E00002070 /* Frameworks */,
-				46EB2E00002080 /* Resources */,
+				46EB2E00002110 /* Headers */,
+				46EB2E00002120 /* Sources */,
+				46EB2E00002130 /* Frameworks */,
+				46EB2E00002140 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -1236,12 +1254,12 @@
 		};
 		3847153A6E5EEFB86565BA840768F429 /* SDWebImage */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E000013C0 /* Build configuration list for PBXNativeTarget "SDWebImage" */;
+			buildConfigurationList = 46EB2E00001420 /* Build configuration list for PBXNativeTarget "SDWebImage" */;
 			buildPhases = (
-				46EB2E00001400 /* Headers */,
-				46EB2E00001410 /* Sources */,
-				46EB2E00001420 /* Frameworks */,
-				46EB2E00001430 /* Resources */,
+				46EB2E00001460 /* Headers */,
+				46EB2E00001470 /* Sources */,
+				46EB2E00001480 /* Frameworks */,
+				46EB2E00001490 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -1254,20 +1272,20 @@
 		};
 		81CE5441F11F92C51AAE7BA692D0FA83 /* Pods-STBaseProject_Example */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E000023E0 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
+			buildConfigurationList = 46EB2E000024A0 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
 			buildPhases = (
-				46EB2E00002420 /* Headers */,
-				46EB2E00002430 /* Sources */,
-				46EB2E00002440 /* Frameworks */,
-				46EB2E00002450 /* Resources */,
+				46EB2E000024E0 /* Headers */,
+				46EB2E000024F0 /* Sources */,
+				46EB2E00002500 /* Frameworks */,
+				46EB2E00002510 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				46EB2E00002540 /* PBXTargetDependency */,
-				46EB2E00002560 /* PBXTargetDependency */,
-				46EB2E00002580 /* PBXTargetDependency */,
-				46EB2E000025A0 /* PBXTargetDependency */,
+				46EB2E00002600 /* PBXTargetDependency */,
+				46EB2E00002620 /* PBXTargetDependency */,
+				46EB2E00002640 /* PBXTargetDependency */,
+				46EB2E00002660 /* PBXTargetDependency */,
 			);
 			name = "Pods-STBaseProject_Example";
 			productName = Pods_STBaseProject_Example;
@@ -1276,12 +1294,12 @@
 		};
 		894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00001DE0 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
+			buildConfigurationList = 46EB2E00001E40 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
 			buildPhases = (
-				46EB2E00001E20 /* Headers */,
-				46EB2E00001E30 /* Sources */,
-				46EB2E00001E40 /* Frameworks */,
-				46EB2E00001E50 /* Resources */,
+				46EB2E00001E80 /* Headers */,
+				46EB2E00001E90 /* Sources */,
+				46EB2E00001EA0 /* Frameworks */,
+				46EB2E00001EB0 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -1294,12 +1312,12 @@
 		};
 		EAAA1AD3A8A1B59AB91319EE40752C6D /* Alamofire */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00001020 /* Build configuration list for PBXNativeTarget "Alamofire" */;
+			buildConfigurationList = 46EB2E00001080 /* Build configuration list for PBXNativeTarget "Alamofire" */;
 			buildPhases = (
-				46EB2E00001060 /* Headers */,
-				46EB2E00001070 /* Sources */,
-				46EB2E00001080 /* Frameworks */,
-				46EB2E00001090 /* Resources */,
+				46EB2E000010C0 /* Headers */,
+				46EB2E000010D0 /* Sources */,
+				46EB2E000010E0 /* Frameworks */,
+				46EB2E000010F0 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -1316,8 +1334,8 @@
 		46EB2E00000000 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1240;
-				LastUpgradeCheck = 1240;
+				LastSwiftUpdateCheck = 1300;
+				LastUpgradeCheck = 1300;
 			};
 			buildConfigurationList = 46EB2E00000030 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1342,35 +1360,35 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		46EB2E00001090 /* Resources */ = {
+		46EB2E000010F0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001430 /* Resources */ = {
+		46EB2E00001490 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001E50 /* Resources */ = {
+		46EB2E00001EB0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002080 /* Resources */ = {
+		46EB2E00002140 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002450 /* Resources */ = {
+		46EB2E00002510 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1380,229 +1398,235 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		46EB2E00001070 /* Sources */ = {
+		46EB2E000010D0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000010D0 /* AFError.swift in Sources */,
-				46EB2E000010E0 /* Alamofire.swift in Sources */,
-				46EB2E000013A0 /* Alamofire-dummy.m in Sources */,
-				46EB2E000010F0 /* AlamofireExtended.swift in Sources */,
-				46EB2E00001100 /* AuthenticationInterceptor.swift in Sources */,
-				46EB2E00001110 /* CachedResponseHandler.swift in Sources */,
-				46EB2E00001120 /* Combine.swift in Sources */,
-				46EB2E00001130 /* Concurrency.swift in Sources */,
-				46EB2E00001140 /* DispatchQueue+Alamofire.swift in Sources */,
-				46EB2E00001150 /* EventMonitor.swift in Sources */,
-				46EB2E00001160 /* HTTPHeaders.swift in Sources */,
-				46EB2E00001170 /* HTTPMethod.swift in Sources */,
-				46EB2E00001180 /* MultipartFormData.swift in Sources */,
-				46EB2E00001190 /* MultipartUpload.swift in Sources */,
-				46EB2E000011A0 /* NetworkReachabilityManager.swift in Sources */,
-				46EB2E000011B0 /* Notifications.swift in Sources */,
-				46EB2E000011C0 /* OperationQueue+Alamofire.swift in Sources */,
-				46EB2E000011D0 /* ParameterEncoder.swift in Sources */,
-				46EB2E000011E0 /* ParameterEncoding.swift in Sources */,
-				46EB2E000011F0 /* Protected.swift in Sources */,
-				46EB2E00001200 /* RedirectHandler.swift in Sources */,
-				46EB2E00001210 /* Request.swift in Sources */,
-				46EB2E00001220 /* RequestInterceptor.swift in Sources */,
-				46EB2E00001230 /* RequestTaskMap.swift in Sources */,
-				46EB2E00001240 /* Response.swift in Sources */,
-				46EB2E00001250 /* ResponseSerialization.swift in Sources */,
-				46EB2E00001260 /* Result+Alamofire.swift in Sources */,
-				46EB2E00001270 /* RetryPolicy.swift in Sources */,
-				46EB2E00001280 /* ServerTrustEvaluation.swift in Sources */,
-				46EB2E00001290 /* Session.swift in Sources */,
-				46EB2E000012A0 /* SessionDelegate.swift in Sources */,
-				46EB2E000012B0 /* StringEncoding+Alamofire.swift in Sources */,
-				46EB2E000012C0 /* URLConvertible+URLRequestConvertible.swift in Sources */,
-				46EB2E000012D0 /* URLEncodedFormEncoder.swift in Sources */,
-				46EB2E000012E0 /* URLRequest+Alamofire.swift in Sources */,
-				46EB2E000012F0 /* URLSessionConfiguration+Alamofire.swift in Sources */,
-				46EB2E00001300 /* Validation.swift in Sources */,
+				46EB2E00001130 /* AFError.swift in Sources */,
+				46EB2E00001140 /* Alamofire.swift in Sources */,
+				46EB2E00001400 /* Alamofire-dummy.m in Sources */,
+				46EB2E00001150 /* AlamofireExtended.swift in Sources */,
+				46EB2E00001160 /* AuthenticationInterceptor.swift in Sources */,
+				46EB2E00001170 /* CachedResponseHandler.swift in Sources */,
+				46EB2E00001180 /* Combine.swift in Sources */,
+				46EB2E00001190 /* Concurrency.swift in Sources */,
+				46EB2E000011A0 /* DispatchQueue+Alamofire.swift in Sources */,
+				46EB2E000011B0 /* EventMonitor.swift in Sources */,
+				46EB2E000011C0 /* HTTPHeaders.swift in Sources */,
+				46EB2E000011D0 /* HTTPMethod.swift in Sources */,
+				46EB2E000011E0 /* MultipartFormData.swift in Sources */,
+				46EB2E000011F0 /* MultipartUpload.swift in Sources */,
+				46EB2E00001200 /* NetworkReachabilityManager.swift in Sources */,
+				46EB2E00001210 /* Notifications.swift in Sources */,
+				46EB2E00001220 /* OperationQueue+Alamofire.swift in Sources */,
+				46EB2E00001230 /* ParameterEncoder.swift in Sources */,
+				46EB2E00001240 /* ParameterEncoding.swift in Sources */,
+				46EB2E00001250 /* Protected.swift in Sources */,
+				46EB2E00001260 /* RedirectHandler.swift in Sources */,
+				46EB2E00001270 /* Request.swift in Sources */,
+				46EB2E00001280 /* RequestInterceptor.swift in Sources */,
+				46EB2E00001290 /* RequestTaskMap.swift in Sources */,
+				46EB2E000012A0 /* Response.swift in Sources */,
+				46EB2E000012B0 /* ResponseSerialization.swift in Sources */,
+				46EB2E000012C0 /* Result+Alamofire.swift in Sources */,
+				46EB2E000012D0 /* RetryPolicy.swift in Sources */,
+				46EB2E000012E0 /* ServerTrustEvaluation.swift in Sources */,
+				46EB2E000012F0 /* Session.swift in Sources */,
+				46EB2E00001300 /* SessionDelegate.swift in Sources */,
+				46EB2E00001310 /* StringEncoding+Alamofire.swift in Sources */,
+				46EB2E00001320 /* URLConvertible+URLRequestConvertible.swift in Sources */,
+				46EB2E00001330 /* URLEncodedFormEncoder.swift in Sources */,
+				46EB2E00001340 /* URLRequest+Alamofire.swift in Sources */,
+				46EB2E00001350 /* URLSessionConfiguration+Alamofire.swift in Sources */,
+				46EB2E00001360 /* Validation.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001410 /* Sources */ = {
+		46EB2E00001470 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000017F0 /* NSBezierPath+SDRoundedCorners.m in Sources */,
-				46EB2E00001450 /* NSButton+WebCache.m in Sources */,
-				46EB2E00001460 /* NSData+ImageContentType.m in Sources */,
-				46EB2E00001470 /* NSImage+Compatibility.m in Sources */,
-				46EB2E00001480 /* SDAnimatedImage.m in Sources */,
-				46EB2E00001490 /* SDAnimatedImagePlayer.m in Sources */,
-				46EB2E000014A0 /* SDAnimatedImageRep.m in Sources */,
-				46EB2E000014C0 /* SDAnimatedImageView.m in Sources */,
-				46EB2E000014B0 /* SDAnimatedImageView+WebCache.m in Sources */,
-				46EB2E00001800 /* SDAssociatedObject.m in Sources */,
-				46EB2E00001810 /* SDAsyncBlockOperation.m in Sources */,
-				46EB2E00001820 /* SDDeviceHelper.m in Sources */,
-				46EB2E000014D0 /* SDDiskCache.m in Sources */,
-				46EB2E00001830 /* SDDisplayLink.m in Sources */,
-				46EB2E00001840 /* SDFileAttributeHelper.m in Sources */,
-				46EB2E000014E0 /* SDGraphicsImageRenderer.m in Sources */,
-				46EB2E000014F0 /* SDImageAPNGCoder.m in Sources */,
-				46EB2E00001850 /* SDImageAssetManager.m in Sources */,
-				46EB2E00001500 /* SDImageAWebPCoder.m in Sources */,
-				46EB2E00001510 /* SDImageCache.m in Sources */,
-				46EB2E00001520 /* SDImageCacheConfig.m in Sources */,
-				46EB2E00001530 /* SDImageCacheDefine.m in Sources */,
-				46EB2E00001540 /* SDImageCachesManager.m in Sources */,
-				46EB2E00001860 /* SDImageCachesManagerOperation.m in Sources */,
-				46EB2E00001550 /* SDImageCoder.m in Sources */,
-				46EB2E00001560 /* SDImageCoderHelper.m in Sources */,
-				46EB2E00001570 /* SDImageCodersManager.m in Sources */,
-				46EB2E00001580 /* SDImageFrame.m in Sources */,
-				46EB2E00001590 /* SDImageGIFCoder.m in Sources */,
-				46EB2E000015A0 /* SDImageGraphics.m in Sources */,
-				46EB2E000015B0 /* SDImageHEICCoder.m in Sources */,
-				46EB2E000015C0 /* SDImageIOAnimatedCoder.m in Sources */,
-				46EB2E000015D0 /* SDImageIOCoder.m in Sources */,
-				46EB2E000015E0 /* SDImageLoader.m in Sources */,
-				46EB2E000015F0 /* SDImageLoadersManager.m in Sources */,
-				46EB2E00001600 /* SDImageTransformer.m in Sources */,
-				46EB2E00001870 /* SDInternalMacros.m in Sources */,
-				46EB2E00001610 /* SDMemoryCache.m in Sources */,
-				46EB2E00001880 /* SDWeakProxy.m in Sources */,
-				46EB2E00001DC0 /* SDWebImage-dummy.m in Sources */,
-				46EB2E00001620 /* SDWebImageCacheKeyFilter.m in Sources */,
-				46EB2E00001630 /* SDWebImageCacheSerializer.m in Sources */,
-				46EB2E00001640 /* SDWebImageCompat.m in Sources */,
-				46EB2E00001650 /* SDWebImageDefine.m in Sources */,
-				46EB2E00001660 /* SDWebImageDownloader.m in Sources */,
-				46EB2E00001670 /* SDWebImageDownloaderConfig.m in Sources */,
-				46EB2E00001680 /* SDWebImageDownloaderDecryptor.m in Sources */,
-				46EB2E00001690 /* SDWebImageDownloaderOperation.m in Sources */,
-				46EB2E000016A0 /* SDWebImageDownloaderRequestModifier.m in Sources */,
-				46EB2E000016B0 /* SDWebImageDownloaderResponseModifier.m in Sources */,
-				46EB2E000016C0 /* SDWebImageError.m in Sources */,
-				46EB2E000016D0 /* SDWebImageIndicator.m in Sources */,
-				46EB2E000016E0 /* SDWebImageManager.m in Sources */,
-				46EB2E000016F0 /* SDWebImageOperation.m in Sources */,
-				46EB2E00001700 /* SDWebImageOptionsProcessor.m in Sources */,
-				46EB2E00001710 /* SDWebImagePrefetcher.m in Sources */,
-				46EB2E00001720 /* SDWebImageTransition.m in Sources */,
-				46EB2E00001730 /* UIButton+WebCache.m in Sources */,
-				46EB2E00001890 /* UIColor+SDHexString.m in Sources */,
-				46EB2E00001740 /* UIImage+ExtendedCacheData.m in Sources */,
-				46EB2E00001750 /* UIImage+ForceDecode.m in Sources */,
-				46EB2E00001760 /* UIImage+GIF.m in Sources */,
-				46EB2E00001770 /* UIImage+MemoryCacheCost.m in Sources */,
-				46EB2E00001780 /* UIImage+Metadata.m in Sources */,
-				46EB2E00001790 /* UIImage+MultiFormat.m in Sources */,
-				46EB2E000017A0 /* UIImage+Transform.m in Sources */,
-				46EB2E000017B0 /* UIImageView+HighlightedWebCache.m in Sources */,
-				46EB2E000017C0 /* UIImageView+WebCache.m in Sources */,
-				46EB2E000017D0 /* UIView+WebCache.m in Sources */,
-				46EB2E000017E0 /* UIView+WebCacheOperation.m in Sources */,
+				46EB2E00001850 /* NSBezierPath+SDRoundedCorners.m in Sources */,
+				46EB2E000014B0 /* NSButton+WebCache.m in Sources */,
+				46EB2E000014C0 /* NSData+ImageContentType.m in Sources */,
+				46EB2E000014D0 /* NSImage+Compatibility.m in Sources */,
+				46EB2E000014E0 /* SDAnimatedImage.m in Sources */,
+				46EB2E000014F0 /* SDAnimatedImagePlayer.m in Sources */,
+				46EB2E00001500 /* SDAnimatedImageRep.m in Sources */,
+				46EB2E00001520 /* SDAnimatedImageView.m in Sources */,
+				46EB2E00001510 /* SDAnimatedImageView+WebCache.m in Sources */,
+				46EB2E00001860 /* SDAssociatedObject.m in Sources */,
+				46EB2E00001870 /* SDAsyncBlockOperation.m in Sources */,
+				46EB2E00001880 /* SDDeviceHelper.m in Sources */,
+				46EB2E00001530 /* SDDiskCache.m in Sources */,
+				46EB2E00001890 /* SDDisplayLink.m in Sources */,
+				46EB2E000018A0 /* SDFileAttributeHelper.m in Sources */,
+				46EB2E00001540 /* SDGraphicsImageRenderer.m in Sources */,
+				46EB2E00001550 /* SDImageAPNGCoder.m in Sources */,
+				46EB2E000018B0 /* SDImageAssetManager.m in Sources */,
+				46EB2E00001560 /* SDImageAWebPCoder.m in Sources */,
+				46EB2E00001570 /* SDImageCache.m in Sources */,
+				46EB2E00001580 /* SDImageCacheConfig.m in Sources */,
+				46EB2E00001590 /* SDImageCacheDefine.m in Sources */,
+				46EB2E000015A0 /* SDImageCachesManager.m in Sources */,
+				46EB2E000018C0 /* SDImageCachesManagerOperation.m in Sources */,
+				46EB2E000015B0 /* SDImageCoder.m in Sources */,
+				46EB2E000015C0 /* SDImageCoderHelper.m in Sources */,
+				46EB2E000015D0 /* SDImageCodersManager.m in Sources */,
+				46EB2E000015E0 /* SDImageFrame.m in Sources */,
+				46EB2E000015F0 /* SDImageGIFCoder.m in Sources */,
+				46EB2E00001600 /* SDImageGraphics.m in Sources */,
+				46EB2E00001610 /* SDImageHEICCoder.m in Sources */,
+				46EB2E00001620 /* SDImageIOAnimatedCoder.m in Sources */,
+				46EB2E00001630 /* SDImageIOCoder.m in Sources */,
+				46EB2E00001640 /* SDImageLoader.m in Sources */,
+				46EB2E00001650 /* SDImageLoadersManager.m in Sources */,
+				46EB2E00001660 /* SDImageTransformer.m in Sources */,
+				46EB2E000018D0 /* SDInternalMacros.m in Sources */,
+				46EB2E00001670 /* SDMemoryCache.m in Sources */,
+				46EB2E000018E0 /* SDWeakProxy.m in Sources */,
+				46EB2E00001E20 /* SDWebImage-dummy.m in Sources */,
+				46EB2E00001680 /* SDWebImageCacheKeyFilter.m in Sources */,
+				46EB2E00001690 /* SDWebImageCacheSerializer.m in Sources */,
+				46EB2E000016A0 /* SDWebImageCompat.m in Sources */,
+				46EB2E000016B0 /* SDWebImageDefine.m in Sources */,
+				46EB2E000016C0 /* SDWebImageDownloader.m in Sources */,
+				46EB2E000016D0 /* SDWebImageDownloaderConfig.m in Sources */,
+				46EB2E000016E0 /* SDWebImageDownloaderDecryptor.m in Sources */,
+				46EB2E000016F0 /* SDWebImageDownloaderOperation.m in Sources */,
+				46EB2E00001700 /* SDWebImageDownloaderRequestModifier.m in Sources */,
+				46EB2E00001710 /* SDWebImageDownloaderResponseModifier.m in Sources */,
+				46EB2E00001720 /* SDWebImageError.m in Sources */,
+				46EB2E00001730 /* SDWebImageIndicator.m in Sources */,
+				46EB2E00001740 /* SDWebImageManager.m in Sources */,
+				46EB2E00001750 /* SDWebImageOperation.m in Sources */,
+				46EB2E00001760 /* SDWebImageOptionsProcessor.m in Sources */,
+				46EB2E00001770 /* SDWebImagePrefetcher.m in Sources */,
+				46EB2E00001780 /* SDWebImageTransition.m in Sources */,
+				46EB2E00001790 /* UIButton+WebCache.m in Sources */,
+				46EB2E000018F0 /* UIColor+SDHexString.m in Sources */,
+				46EB2E000017A0 /* UIImage+ExtendedCacheData.m in Sources */,
+				46EB2E000017B0 /* UIImage+ForceDecode.m in Sources */,
+				46EB2E000017C0 /* UIImage+GIF.m in Sources */,
+				46EB2E000017D0 /* UIImage+MemoryCacheCost.m in Sources */,
+				46EB2E000017E0 /* UIImage+Metadata.m in Sources */,
+				46EB2E000017F0 /* UIImage+MultiFormat.m in Sources */,
+				46EB2E00001800 /* UIImage+Transform.m in Sources */,
+				46EB2E00001810 /* UIImageView+HighlightedWebCache.m in Sources */,
+				46EB2E00001820 /* UIImageView+WebCache.m in Sources */,
+				46EB2E00001830 /* UIView+WebCache.m in Sources */,
+				46EB2E00001840 /* UIView+WebCacheOperation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00001E30 /* Sources */ = {
+		46EB2E00001E90 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00001F40 /* STBaseModel.swift in Sources */,
-				46EB2E00001FF0 /* STBaseProject-dummy.m in Sources */,
-				46EB2E00001F50 /* STBaseView.swift in Sources */,
-				46EB2E00001F20 /* STBaseViewController.swift in Sources */,
-				46EB2E00001F30 /* STBaseViewModel.swift in Sources */,
-				46EB2E00001E70 /* STDateManager.swift in Sources */,
-				46EB2E00001E80 /* STDeviceInfo.swift in Sources */,
-				46EB2E00001E90 /* STFileManager.swift in Sources */,
-				46EB2E00001EA0 /* STFontManager.swift in Sources */,
-				46EB2E00001EB0 /* STHexColor.swift in Sources */,
-				46EB2E00001EC0 /* STJSONValue.swift in Sources */,
-				46EB2E00001ED0 /* STLogPrint.swift in Sources */,
-				46EB2E00001EE0 /* STLogView.swift in Sources */,
-				46EB2E00001EF0 /* STPredicateCheck.swift in Sources */,
-				46EB2E00001F00 /* STScreenSizeConstants.swift in Sources */,
-				46EB2E00001F10 /* STStringExtension.swift in Sources */,
+				46EB2E00002000 /* STBaseModel.swift in Sources */,
+				46EB2E000020B0 /* STBaseProject-dummy.m in Sources */,
+				46EB2E00002010 /* STBaseView.swift in Sources */,
+				46EB2E00001FE0 /* STBaseViewController.swift in Sources */,
+				46EB2E00001FF0 /* STBaseViewModel.swift in Sources */,
+				46EB2E00001ED0 /* STBtn.swift in Sources */,
+				46EB2E00001EE0 /* STDateManager.swift in Sources */,
+				46EB2E00001EF0 /* STDeviceInfo.swift in Sources */,
+				46EB2E00001F00 /* STEncrypt.swift in Sources */,
+				46EB2E00001F10 /* STFileManager.swift in Sources */,
+				46EB2E00001F20 /* STFontManager.swift in Sources */,
+				46EB2E00001F30 /* STHexColor.swift in Sources */,
+				46EB2E00001F40 /* STIBInspectable.swift in Sources */,
+				46EB2E00001F50 /* STJSONValue.swift in Sources */,
+				46EB2E00001F60 /* STLanguageManager.swift in Sources */,
+				46EB2E00001F70 /* STLogView.swift in Sources */,
+				46EB2E00001F80 /* STModel.swift in Sources */,
+				46EB2E00001F90 /* STPredicateCheck.swift in Sources */,
+				46EB2E00001FA0 /* STScreenSizeConstants.swift in Sources */,
+				46EB2E00001FB0 /* STStringExtension.swift in Sources */,
+				46EB2E00001FC0 /* STTabBarItem.swift in Sources */,
+				46EB2E00001FD0 /* STTimer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002060 /* Sources */ = {
+		46EB2E00002120 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000020A0 /* Constraint.swift in Sources */,
-				46EB2E000020B0 /* ConstraintAttributes.swift in Sources */,
-				46EB2E000020C0 /* ConstraintConfig.swift in Sources */,
-				46EB2E000020D0 /* ConstraintConstantTarget.swift in Sources */,
-				46EB2E000020E0 /* ConstraintDescription.swift in Sources */,
-				46EB2E000020F0 /* ConstraintDirectionalInsets.swift in Sources */,
-				46EB2E00002100 /* ConstraintDirectionalInsetTarget.swift in Sources */,
-				46EB2E00002110 /* ConstraintDSL.swift in Sources */,
-				46EB2E00002120 /* ConstraintInsets.swift in Sources */,
-				46EB2E00002130 /* ConstraintInsetTarget.swift in Sources */,
-				46EB2E00002140 /* ConstraintItem.swift in Sources */,
-				46EB2E00002160 /* ConstraintLayoutGuide.swift in Sources */,
-				46EB2E00002150 /* ConstraintLayoutGuide+Extensions.swift in Sources */,
-				46EB2E00002170 /* ConstraintLayoutGuideDSL.swift in Sources */,
-				46EB2E00002180 /* ConstraintLayoutSupport.swift in Sources */,
-				46EB2E00002190 /* ConstraintLayoutSupportDSL.swift in Sources */,
-				46EB2E000021A0 /* ConstraintMaker.swift in Sources */,
-				46EB2E000021B0 /* ConstraintMakerEditable.swift in Sources */,
-				46EB2E000021C0 /* ConstraintMakerExtendable.swift in Sources */,
-				46EB2E000021D0 /* ConstraintMakerFinalizable.swift in Sources */,
-				46EB2E000021E0 /* ConstraintMakerPrioritizable.swift in Sources */,
-				46EB2E00002200 /* ConstraintMakerRelatable.swift in Sources */,
-				46EB2E000021F0 /* ConstraintMakerRelatable+Extensions.swift in Sources */,
-				46EB2E00002210 /* ConstraintMultiplierTarget.swift in Sources */,
-				46EB2E00002220 /* ConstraintOffsetTarget.swift in Sources */,
-				46EB2E00002230 /* ConstraintPriority.swift in Sources */,
-				46EB2E00002240 /* ConstraintPriorityTarget.swift in Sources */,
-				46EB2E00002250 /* ConstraintRelatableTarget.swift in Sources */,
-				46EB2E00002260 /* ConstraintRelation.swift in Sources */,
-				46EB2E00002280 /* ConstraintView.swift in Sources */,
-				46EB2E00002270 /* ConstraintView+Extensions.swift in Sources */,
-				46EB2E00002290 /* ConstraintViewDSL.swift in Sources */,
-				46EB2E000022A0 /* Debugging.swift in Sources */,
-				46EB2E000022B0 /* LayoutConstraint.swift in Sources */,
-				46EB2E000022C0 /* LayoutConstraintItem.swift in Sources */,
-				46EB2E00002380 /* SnapKit-dummy.m in Sources */,
-				46EB2E000022D0 /* Typealiases.swift in Sources */,
-				46EB2E000022E0 /* UILayoutSupport+Extensions.swift in Sources */,
+				46EB2E00002160 /* Constraint.swift in Sources */,
+				46EB2E00002170 /* ConstraintAttributes.swift in Sources */,
+				46EB2E00002180 /* ConstraintConfig.swift in Sources */,
+				46EB2E00002190 /* ConstraintConstantTarget.swift in Sources */,
+				46EB2E000021A0 /* ConstraintDescription.swift in Sources */,
+				46EB2E000021B0 /* ConstraintDirectionalInsets.swift in Sources */,
+				46EB2E000021C0 /* ConstraintDirectionalInsetTarget.swift in Sources */,
+				46EB2E000021D0 /* ConstraintDSL.swift in Sources */,
+				46EB2E000021E0 /* ConstraintInsets.swift in Sources */,
+				46EB2E000021F0 /* ConstraintInsetTarget.swift in Sources */,
+				46EB2E00002200 /* ConstraintItem.swift in Sources */,
+				46EB2E00002220 /* ConstraintLayoutGuide.swift in Sources */,
+				46EB2E00002210 /* ConstraintLayoutGuide+Extensions.swift in Sources */,
+				46EB2E00002230 /* ConstraintLayoutGuideDSL.swift in Sources */,
+				46EB2E00002240 /* ConstraintLayoutSupport.swift in Sources */,
+				46EB2E00002250 /* ConstraintLayoutSupportDSL.swift in Sources */,
+				46EB2E00002260 /* ConstraintMaker.swift in Sources */,
+				46EB2E00002270 /* ConstraintMakerEditable.swift in Sources */,
+				46EB2E00002280 /* ConstraintMakerExtendable.swift in Sources */,
+				46EB2E00002290 /* ConstraintMakerFinalizable.swift in Sources */,
+				46EB2E000022A0 /* ConstraintMakerPrioritizable.swift in Sources */,
+				46EB2E000022C0 /* ConstraintMakerRelatable.swift in Sources */,
+				46EB2E000022B0 /* ConstraintMakerRelatable+Extensions.swift in Sources */,
+				46EB2E000022D0 /* ConstraintMultiplierTarget.swift in Sources */,
+				46EB2E000022E0 /* ConstraintOffsetTarget.swift in Sources */,
+				46EB2E000022F0 /* ConstraintPriority.swift in Sources */,
+				46EB2E00002300 /* ConstraintPriorityTarget.swift in Sources */,
+				46EB2E00002310 /* ConstraintRelatableTarget.swift in Sources */,
+				46EB2E00002320 /* ConstraintRelation.swift in Sources */,
+				46EB2E00002340 /* ConstraintView.swift in Sources */,
+				46EB2E00002330 /* ConstraintView+Extensions.swift in Sources */,
+				46EB2E00002350 /* ConstraintViewDSL.swift in Sources */,
+				46EB2E00002360 /* Debugging.swift in Sources */,
+				46EB2E00002370 /* LayoutConstraint.swift in Sources */,
+				46EB2E00002380 /* LayoutConstraintItem.swift in Sources */,
+				46EB2E00002440 /* SnapKit-dummy.m in Sources */,
+				46EB2E00002390 /* Typealiases.swift in Sources */,
+				46EB2E000023A0 /* UILayoutSupport+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00002430 /* Sources */ = {
+		46EB2E000024F0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00002520 /* Pods-STBaseProject_Example-dummy.m in Sources */,
+				46EB2E000025E0 /* Pods-STBaseProject_Example-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		46EB2E00002540 /* PBXTargetDependency */ = {
+		46EB2E00002600 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = Alamofire;
 			target = EAAA1AD3A8A1B59AB91319EE40752C6D /* Alamofire */;
-			targetProxy = 46EB2E00002530 /* PBXContainerItemProxy */;
+			targetProxy = 46EB2E000025F0 /* PBXContainerItemProxy */;
 		};
-		46EB2E00002560 /* PBXTargetDependency */ = {
+		46EB2E00002620 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SDWebImage;
 			target = 3847153A6E5EEFB86565BA840768F429 /* SDWebImage */;
-			targetProxy = 46EB2E00002550 /* PBXContainerItemProxy */;
+			targetProxy = 46EB2E00002610 /* PBXContainerItemProxy */;
 		};
-		46EB2E00002580 /* PBXTargetDependency */ = {
+		46EB2E00002640 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = STBaseProject;
 			target = 894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */;
-			targetProxy = 46EB2E00002570 /* PBXContainerItemProxy */;
+			targetProxy = 46EB2E00002630 /* PBXContainerItemProxy */;
 		};
-		46EB2E000025A0 /* PBXTargetDependency */ = {
+		46EB2E00002660 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = SnapKit;
 			target = 19622742EBA51E823D6DAE3F8CDBFAD4 /* SnapKit */;
-			targetProxy = 46EB2E00002590 /* PBXContainerItemProxy */;
+			targetProxy = 46EB2E00002650 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1735,9 +1759,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00001030 /* Release */ = {
+		46EB2E00001090 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00001330 /* Alamofire.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00001390 /* Alamofire.release.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1768,9 +1792,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00001040 /* Debug */ = {
+		46EB2E000010A0 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00001320 /* Alamofire.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00001380 /* Alamofire.debug.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1800,9 +1824,9 @@
 			};
 			name = Debug;
 		};
-		46EB2E000013D0 /* Release */ = {
+		46EB2E00001430 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00001D50 /* SDWebImage.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00001DB0 /* SDWebImage.release.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1832,9 +1856,9 @@
 			};
 			name = Release;
 		};
-		46EB2E000013E0 /* Debug */ = {
+		46EB2E00001440 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00001D40 /* SDWebImage.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00001DA0 /* SDWebImage.debug.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1863,9 +1887,9 @@
 			};
 			name = Debug;
 		};
-		46EB2E00001DF0 /* Release */ = {
+		46EB2E00001E50 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00001F80 /* STBaseProject.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00002040 /* STBaseProject.release.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1896,9 +1920,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00001E00 /* Debug */ = {
+		46EB2E00001E60 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00001F70 /* STBaseProject.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00002030 /* STBaseProject.debug.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1928,9 +1952,9 @@
 			};
 			name = Debug;
 		};
-		46EB2E00002020 /* Release */ = {
+		46EB2E000020E0 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00002310 /* SnapKit.release.xcconfig */;
+			baseConfigurationReference = 46EB2E000023D0 /* SnapKit.release.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1961,9 +1985,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00002030 /* Debug */ = {
+		46EB2E000020F0 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00002300 /* SnapKit.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E000023C0 /* SnapKit.debug.xcconfig */;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -1993,9 +2017,9 @@
 			};
 			name = Debug;
 		};
-		46EB2E000023F0 /* Release */ = {
+		46EB2E000024B0 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00002480 /* Pods-STBaseProject_Example.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00002540 /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -2028,9 +2052,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00002400 /* Debug */ = {
+		46EB2E000024C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00002490 /* Pods-STBaseProject_Example.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00002550 /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -2074,47 +2098,47 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00001020 /* Build configuration list for PBXNativeTarget "Alamofire" */ = {
+		46EB2E00001080 /* Build configuration list for PBXNativeTarget "Alamofire" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00001040 /* Debug */,
-				46EB2E00001030 /* Release */,
+				46EB2E000010A0 /* Debug */,
+				46EB2E00001090 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E000013C0 /* Build configuration list for PBXNativeTarget "SDWebImage" */ = {
+		46EB2E00001420 /* Build configuration list for PBXNativeTarget "SDWebImage" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E000013E0 /* Debug */,
-				46EB2E000013D0 /* Release */,
+				46EB2E00001440 /* Debug */,
+				46EB2E00001430 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00001DE0 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
+		46EB2E00001E40 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00001E00 /* Debug */,
-				46EB2E00001DF0 /* Release */,
+				46EB2E00001E60 /* Debug */,
+				46EB2E00001E50 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00002010 /* Build configuration list for PBXNativeTarget "SnapKit" */ = {
+		46EB2E000020D0 /* Build configuration list for PBXNativeTarget "SnapKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00002030 /* Debug */,
-				46EB2E00002020 /* Release */,
+				46EB2E000020F0 /* Debug */,
+				46EB2E000020E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E000023E0 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
+		46EB2E000024A0 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00002400 /* Debug */,
-				46EB2E000023F0 /* Release */,
+				46EB2E000024C0 /* Debug */,
+				46EB2E000024B0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

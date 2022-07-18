@@ -13,6 +13,7 @@ target 'STBaseProject_Example' do
 #  pod 'STBaseProject/STScanner', :path => '../'
 #  pod 'STBaseProject/STScreenshot', :path => '../'
 #  pod 'STBaseProject/STBaseConfig', :path => '../'
+#  pod 'STBaseProject/STBaseConfig', :path => '../'
 
   pod 'SnapKit'
   pod 'Alamofire'

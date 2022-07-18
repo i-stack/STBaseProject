@@ -16,7 +16,6 @@ class ViewController: STBaseViewController {
         super.viewDidLoad()
         self.st_showNavBtnType(type: .onlyShowTitle)
         self.titleLabel.text = "ViewController"
-        randomString()
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -41,7 +40,5 @@ class ViewController: STBaseViewController {
         } catch {
             
         }
-        
-        
     }
 }
