@@ -233,7 +233,7 @@
 		46EB2E000023F0 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E70 /* STLogView.swift */; };
 		46EB2E00002400 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E80 /* STPredicateCheck.swift */; };
 		46EB2E00002410 /* STScreenSizeConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000E90 /* STScreenSizeConstants.swift */; };
-		46EB2E00002420 /* STStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EA0 /* STStringExtension.swift */; };
+		46EB2E00002420 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EA0 /* STString.swift */; };
 		46EB2E00002430 /* STTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EB0 /* STTabBarItem.swift */; };
 		46EB2E00002440 /* STThreadSafe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000EC0 /* STThreadSafe.swift */; };
 		46EB2E00002450 /* STTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000ED0 /* STTimer.swift */; };
@@ -548,7 +548,7 @@
 		46EB2E00000E70 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogView.swift; path = STBaseProject/Classes/STBaseConfig/STLogView.swift; sourceTree = "<group>"; };
 		46EB2E00000E80 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STBaseConfig/STPredicateCheck.swift; sourceTree = "<group>"; };
 		46EB2E00000E90 /* STScreenSizeConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STScreenSizeConstants.swift; path = STBaseProject/Classes/STBaseConfig/STScreenSizeConstants.swift; sourceTree = "<group>"; };
-		46EB2E00000EA0 /* STStringExtension.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STStringExtension.swift; path = STBaseProject/Classes/STBaseConfig/STStringExtension.swift; sourceTree = "<group>"; };
+		46EB2E00000EA0 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STString.swift; path = STBaseProject/Classes/STBaseConfig/STString.swift; sourceTree = "<group>"; };
 		46EB2E00000EB0 /* STTabBarItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTabBarItem.swift; path = STBaseProject/Classes/STBaseConfig/STTabBarItem.swift; sourceTree = "<group>"; };
 		46EB2E00000EC0 /* STThreadSafe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STThreadSafe.swift; path = STBaseProject/Classes/STBaseConfig/STThreadSafe.swift; sourceTree = "<group>"; };
 		46EB2E00000ED0 /* STTimer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTimer.swift; path = STBaseProject/Classes/STBaseConfig/STTimer.swift; sourceTree = "<group>"; };
@@ -1081,7 +1081,7 @@
 				46EB2E00000E70 /* STLogView.swift */,
 				46EB2E00000E80 /* STPredicateCheck.swift */,
 				46EB2E00000E90 /* STScreenSizeConstants.swift */,
-				46EB2E00000EA0 /* STStringExtension.swift */,
+				46EB2E00000EA0 /* STString.swift */,
 				46EB2E00000EB0 /* STTabBarItem.swift */,
 				46EB2E00000EC0 /* STThreadSafe.swift */,
 				46EB2E00000ED0 /* STTimer.swift */,
@@ -1752,7 +1752,7 @@
 				46EB2E000023F0 /* STLogView.swift in Sources */,
 				46EB2E00002400 /* STPredicateCheck.swift in Sources */,
 				46EB2E00002410 /* STScreenSizeConstants.swift in Sources */,
-				46EB2E00002420 /* STStringExtension.swift in Sources */,
+				46EB2E00002420 /* STString.swift in Sources */,
 				46EB2E00002430 /* STTabBarItem.swift in Sources */,
 				46EB2E00002440 /* STThreadSafe.swift in Sources */,
 				46EB2E00002450 /* STTimer.swift in Sources */,
