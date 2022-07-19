@@ -1,5 +1,6 @@
 PODS:
   - Alamofire (5.6.1)
+  - BeeHive (1.6.0)
   - SDWebImage (5.12.5):
     - SDWebImage/Core (= 5.12.5)
   - SDWebImage/Core (5.12.5)
@@ -10,6 +11,7 @@ PODS:
 
 DEPENDENCIES:
   - Alamofire
+  - BeeHive
   - SDWebImage
   - SnapKit
   - STBaseProject/STBaseModule (from `../`)
@@ -17,6 +19,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Alamofire
+    - BeeHive
     - SDWebImage
     - SnapKit
 
@@ -26,10 +29,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 87bd8c952f9a4454320fce00d9cc3de57bcadaf5
+  BeeHive: 64c01ddec33b9ef8813701e075eeb732327d0f75
   SDWebImage: 0905f1b7760fc8ac4198cae0036600d67478751e
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
   STBaseProject: 90a2a80e075a0f06ea075da5db7589ddcf89ccba
 
-PODFILE CHECKSUM: 8df01e9723543748b9fc39c0b02b3cfccb3ec7ac
+PODFILE CHECKSUM: 590cecc9a6eeced53fd83b493df41a8a71b4350c
 
 COCOAPODS: 1.11.3

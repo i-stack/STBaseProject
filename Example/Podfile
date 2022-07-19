@@ -19,4 +19,5 @@ target 'STBaseProject_Example' do
   pod 'Alamofire'
   pod 'SDWebImage'
   
+  pod "BeeHive"
 end

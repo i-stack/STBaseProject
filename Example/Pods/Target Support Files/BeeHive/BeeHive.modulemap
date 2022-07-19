@@ -1,0 +1,6 @@
+framework module BeeHive {
+  umbrella header "BeeHive-umbrella.h"
+
+  export *
+  module * { export * }
+}
