@@ -33,10 +33,8 @@ public extension UIColor {
                 }
                 return UIColor.clear
             }
-            return self.st_color(hexString: hexString, alpha: alpha)
-        } else {
-            return self.st_color(hexString: hexString, alpha: alpha)
         }
+        return self.st_color(hexString: hexString, alpha: alpha)
     }
     
     static func st_color(hexString: String) -> UIColor {
