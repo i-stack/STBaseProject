@@ -12,22 +12,27 @@ import Foundation
 public extension String {
     func st_jsonStringToPrettyPrintedJson(jsonString: String?) -> String {
         if let str = jsonString {
-            let jsonData = str.data(using: String.Encoding.utf8)!
-            let jsonObject: AnyObject = try! JSONSerialization.jsonObject(with: jsonData, options: []) as AnyObject
-            let prettyJsonData = try! JSONSerialization.data(withJSONObject: jsonObject, options: JSONSerialization.WritingOptions.prettyPrinted)
-            let prettyPrintedJson = NSString(data: prettyJsonData, encoding: String.Encoding.utf8.rawValue)!
-            return prettyPrintedJson as String
+            if let jsonData = str.data(using: String.Encoding.utf8) {
+                if let jsonObject = try? JSONSerialization.jsonObject(with: jsonData, options: []) as AnyObject {
+                    if let prettyJsonData = try? JSONSerialization.data(withJSONObject: jsonObject, options: JSONSerialization.WritingOptions.prettyPrinted) {
+                        if let prettyPrintedJson = String(data: prettyJsonData, encoding: .utf8) {
+                            return prettyPrintedJson
+                        }
+                    }
+                }
+            }
         }
         return ""
     }
     
     func st_dictToJSON(dict: NSDictionary) -> String {
-        if dict.count < 1 {
-            return ""
+        if dict.count < 1 { return "" }
+        if let data = try? JSONSerialization.data(withJSONObject: dict, options: []) as Data {
+            if let jsonStr = String.init(data: data, encoding: .utf8) {
+                return jsonStr
+            }
         }
-        let data: NSData! = try! JSONSerialization.data(withJSONObject: dict, options: []) as NSData
-        let jsonStr: String = String.init(data: data! as Data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) ?? ""
-        return jsonStr
+        return ""
     }
 }
 

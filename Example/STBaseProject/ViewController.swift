@@ -21,15 +21,9 @@ class ViewController: STBaseViewController {
         imageView.sd_setImage(with: URL.init(string: "https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/de66ab3f19a5499eb6ceff64db5e9476~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp"))
         self.view.addSubview(imageView)
         
-//        print(Thread.current)
-//        dispatch_main_async_safe {
-//            print(Thread.current)
-//        }
-//        
-//        DispatchQueue.global().async {
-//            self.randomString()
-//        }
-//
+        dispatch_main_async_safe {[weak self]
+            
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
