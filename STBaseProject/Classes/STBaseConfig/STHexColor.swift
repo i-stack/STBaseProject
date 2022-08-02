@@ -10,33 +10,24 @@ import UIKit
 
 public extension UIColor {
     
-    static func st_color(darkModeName: String) -> UIColor {
-        return st_color(darkModeName: darkModeName, hexString: "", alpha: 1.0)
+    static func st_color(colorSet: String) -> UIColor {
+        return st_color(colorSet: colorSet, alpha: 1.0)
     }
     
-    static func st_color(darkModeName: String, alpha: CGFloat) -> UIColor {
-        return st_color(darkModeName: darkModeName, hexString: "", alpha: alpha)
-    }
-    
-    static func st_color(darkModeName: String, hexString: String) -> UIColor {
-        return st_color(darkModeName: darkModeName, hexString: hexString, alpha: 1.0)
-    }
-    
-    static func st_color(darkModeName: String, hexString: String, alpha: CGFloat) -> UIColor {
+    static func st_color(colorSet: String, alpha: CGFloat) -> UIColor {
         if #available(iOS 11.0, *) {
-            if darkModeName.count > 0 {
-                if let color = UIColor.init(named: darkModeName) {
+            if colorSet.count > 0 {
+                if let color = UIColor.init(named: colorSet) {
                     if alpha < 1.0 {
                         return color.withAlphaComponent(alpha)
                     }
                     return color
                 }
-                return UIColor.clear
             }
         }
-        return self.st_color(hexString: hexString, alpha: alpha)
+        return UIColor.clear
     }
-    
+
     static func st_color(hexString: String) -> UIColor {
         return self.st_color(hexString: hexString, alpha: 1.0)
     }
@@ -146,5 +137,68 @@ public extension UIColor {
             return 0.0
         }
         return alpha
+    }
+}
+
+public struct STColorsInfo: Codable {
+    public var colors: Dictionary<String, STColorModel> = Dictionary<String, STColorModel>()
+}
+
+public struct STColorModel: Codable {
+    public var light: String = ""
+    public var dark: String = ""
+}
+
+public extension UIColor {
+    
+    private struct STColorAssociatedKeys {
+        static var colorsInfoKey = "colorsInfoKey"
+    }
+    
+    static func st_resolvedColor(jsonString: String) {
+        if jsonString.count > 0 {
+            if let data = try? Data(contentsOf: URL(fileURLWithPath: jsonString)) {
+                if let objc = try? JSONSerialization.jsonObject(with: data) as? Dictionary<String, Dictionary<String, String>> {
+                    var colorsInfo = STColorsInfo()
+                    for key in objc.keys {
+                        var colorModel = STColorModel()
+                        if let value = objc[key] {
+                            colorModel.light = String.st_returnStr(object: value["light"] ?? "")
+                            colorModel.dark = String.st_returnStr(object: value["dark"] ?? "")
+                        }
+                        colorsInfo.colors[key] = colorModel
+                    }
+                    if colorsInfo.colors.count > 0 {
+                        objc_setAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey, colorsInfo, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                    }
+                }
+            }
+        }
+    }
+    
+    static func st_color(dynamicProvider key: String) -> UIColor {
+        if let colorsInfo = objc_getAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey) as? STColorsInfo {
+            if colorsInfo.colors.count > 0, key.count > 0 {
+                if let colorModel = colorsInfo.colors[key] {
+                    if #available(iOS 13.0, *) {
+                        return UIColor.init { trainCollection in
+                            if trainCollection.userInterfaceStyle == .light {
+                                return UIColor.st_color(hexString: colorModel.light)
+                            }
+                            return UIColor.st_color(hexString: colorModel.dark)
+                        }
+                    }
+                }
+            }
+        }
+        return UIColor.clear
+    }
+    
+    static func st_cleanColorAssociatedObject() {
+        if let colorsInfo = objc_getAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey) as? STColorsInfo {
+            if colorsInfo.colors.count > 0 {
+                objc_setAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            }
+        }
     }
 }

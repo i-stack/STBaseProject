@@ -18,12 +18,26 @@ class ViewController: STBaseViewController {
         self.st_showNavBtnType(type: .onlyShowTitle)
         self.titleLabel.text = "ViewController"
         let imageView = UIImageView()
-        imageView.sd_setImage(with: URL.init(string: "https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/de66ab3f19a5499eb6ceff64db5e9476~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp"))
+        imageView.image = UIImage.init(named: "page")
+        imageView.frame = CGRect.init(x: 100, y: 300, width: 100, height: 100)
+        
+        // 离屏渲染
+//        imageView.layer.cornerRadius = 10
+//        imageView.layer.masksToBounds = true
+//        imageView.backgroundColor = UIColor.purple
+        
+        // 离屏渲染
+//        imageView.layer.shouldRasterize = true
+        
+        imageView.layer.shadowColor = UIColor.red.cgColor
+        
+//        imageView.sd_setImage(with: URL.init(string: "https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/de66ab3f19a5499eb6ceff64db5e9476~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp"))
         self.view.addSubview(imageView)
         
-        dispatch_main_async_safe {[weak self]
-            
-        }
+        let jsonString = Bundle.main.path(forResource: "color", ofType: ".json")
+        UIColor.st_resolvedColor(jsonString: jsonString ?? "")
+        imageView.backgroundColor = UIColor.st_color(dynamicProvider: "T020")
+        
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
