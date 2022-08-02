@@ -10,28 +10,21 @@ import UIKit
 
 public extension UIColor {
     
-    static func st_color(colorSet: String) -> UIColor {
-        return st_color(colorSet: colorSet, alpha: 1.0)
-    }
-    
-    static func st_color(colorSet: String, alpha: CGFloat) -> UIColor {
-        if #available(iOS 11.0, *) {
-            if colorSet.count > 0 {
-                if let color = UIColor.init(named: colorSet) {
-                    if alpha < 1.0 {
-                        return color.withAlphaComponent(alpha)
-                    }
-                    return color
-                }
-            }
-        }
-        return UIColor.clear
-    }
-
+    /// 十六进制转颜色
+    /// - Parameters:
+    ///   - hexString: 颜色十六进制数
+    /// - Returns: UIColor
+    ///
     static func st_color(hexString: String) -> UIColor {
         return self.st_color(hexString: hexString, alpha: 1.0)
     }
     
+    /// 十六进制转颜色
+    /// - Parameters:
+    ///   - hexString: 颜色十六进制数
+    ///   - alpha: 透明度
+    /// - Returns: UIColor
+    ///
     static func st_color(hexString: String, alpha: CGFloat) -> UIColor {
         if hexString.count < 1 {
             return UIColor.clear
@@ -140,6 +133,31 @@ public extension UIColor {
     }
 }
 
+@available(iOS 11, *)
+public extension UIColor {
+    
+    /// 获取Images.scassets中添加的颜色
+    /// - Parameters:
+    ///   - colorSet: 颜色名
+    /// - Returns: UIColor
+    ///
+    static func st_color(colorSet: String) -> UIColor {
+        return st_color(colorSet: colorSet, alpha: 1.0)
+    }
+    
+    static func st_color(colorSet: String, alpha: CGFloat) -> UIColor {
+        if colorSet.count > 0 {
+            if let color = UIColor.init(named: colorSet) {
+                if alpha < 1.0 {
+                    return color.withAlphaComponent(alpha)
+                }
+                return color
+            }
+        }
+        return UIColor.clear
+    }
+}
+
 public struct STColorsInfo: Codable {
     public var colors: Dictionary<String, STColorModel> = Dictionary<String, STColorModel>()
 }
@@ -149,12 +167,30 @@ public struct STColorModel: Codable {
     public var dark: String = ""
 }
 
+@available(iOS 13, *)
 public extension UIColor {
     
     private struct STColorAssociatedKeys {
         static var colorsInfoKey = "colorsInfoKey"
     }
     
+    /// 获取本地或者网络上的颜色列表，每次程序启动时调用一次
+    ///
+    ///     {
+    ///         "T010":{
+    ///             "light": "#333333",
+    ///             "dark": "#C2C2C2"
+    ///         },
+    ///
+    ///         "T020":{
+    ///             "light": "#666666",
+    ///             "dark": "#888888"
+    ///         }
+    ///     }
+    ///
+    /// - Parameters:
+    ///   - jsonString: 获取本地或者网络上的颜色字符串，json类型
+    ///
     static func st_resolvedColor(jsonString: String) {
         if jsonString.count > 0 {
             if let data = try? Data(contentsOf: URL(fileURLWithPath: jsonString)) {
@@ -176,17 +212,20 @@ public extension UIColor {
         }
     }
     
+    /// 动态设置颜色
+    /// - Parameters:
+    ///   - dynamicProvider: 颜色 key
+    /// - Returns: UIColor
+    ///
     static func st_color(dynamicProvider key: String) -> UIColor {
         if let colorsInfo = objc_getAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey) as? STColorsInfo {
             if colorsInfo.colors.count > 0, key.count > 0 {
                 if let colorModel = colorsInfo.colors[key] {
-                    if #available(iOS 13.0, *) {
-                        return UIColor.init { trainCollection in
-                            if trainCollection.userInterfaceStyle == .light {
-                                return UIColor.st_color(hexString: colorModel.light)
-                            }
-                            return UIColor.st_color(hexString: colorModel.dark)
+                    return UIColor.init { trainCollection in
+                        if trainCollection.userInterfaceStyle == .light {
+                            return UIColor.st_color(hexString: colorModel.light)
                         }
+                        return UIColor.st_color(hexString: colorModel.dark)
                     }
                 }
             }
