@@ -126,9 +126,20 @@ public extension String {
 }
 
 public extension String {
-    func st_attributed(originStr: String, originStrColor: UIColor, originStrFont: UIFont, replaceStrs: [String], replaceStrColors: [UIColor], replaceStrFonts: [UIFont]) -> NSMutableAttributedString {
+    func st_attributed(originStr: String,
+                       originStrColor: UIColor,
+                       originStrFont: UIFont,
+                       replaceStrs: [String],
+                       replaceStrColors: [UIColor],
+                       replaceStrFonts: [UIFont]) -> NSMutableAttributedString {
         let str = NSMutableAttributedString.init(string: originStr)
-        str.addAttributes([NSAttributedString.Key.font : originStrFont, NSAttributedString.Key.foregroundColor: originStrColor], range: NSRange.init(location: 0, length: str.length))
+        str.addAttributes(
+            [
+                NSAttributedString.Key.font: originStrFont,
+                NSAttributedString.Key.foregroundColor: originStrColor
+            ],
+            range: NSRange.init(location: 0, length: str.length)
+        )
         for (i, replaceStr) in replaceStrs.enumerated() {
             if originStr.contains(replaceStr) {
                 let range = originStr.range(of: replaceStr)!
@@ -144,7 +155,13 @@ public extension String {
                 if replaceStrColors.count > i {
                     color = replaceStrColors[i]
                 }
-                str.addAttributes([NSAttributedString.Key.font: font, NSAttributedString.Key.foregroundColor: color], range: NSRange.init(location: location, length: length))
+                str.addAttributes(
+                    [
+                        NSAttributedString.Key.font: font,
+                        NSAttributedString.Key.foregroundColor: color
+                    ],
+                    range: NSRange.init(location: location, length: length)
+                )
             }
         }
         return str
