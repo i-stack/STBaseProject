@@ -19,22 +19,34 @@ public class STTabBarItem: NSObject {
                                        normalTitleColor: UIColor,
                                        selectedTitleColor: UIColor,
                                        backgroundColor: UIColor) -> UITabBarItem {
-        var image: UIImage = UIImage.init()
+        var image: UIImage = UIImage()
         if let newImage = UIImage.init(named: normalImage) {
             image = newImage.withRenderingMode(.alwaysOriginal)
         }
-        var lightImage: UIImage = UIImage.init()
+        var lightImage: UIImage = UIImage()
         if let newImage = UIImage.init(named: selectedImage) {
             lightImage = newImage.withRenderingMode(.alwaysOriginal)
         }
-        let item: UITabBarItem = UITabBarItem.init(title: title, image: image, selectedImage: lightImage)
+        let item: UITabBarItem = UITabBarItem.init(title: title,
+                                                   image: image,
+                                                   selectedImage: lightImage)
+        let font = UIFont.init(name: titleFontName, size: titleSize) ?? UIFont.systemFont(ofSize: titleSize)
         UITabBarItem.appearance().setTitleTextAttributes(
-            [NSAttributedString.Key.foregroundColor: normalTitleColor,
-             NSAttributedString.Key.backgroundColor: backgroundColor,
-             NSAttributedString.Key.font: UIFont.init(name: titleFontName, size: titleSize) ?? UIFont.systemFont(ofSize: titleSize)], for: UIControl.State.normal)
+            [
+                NSAttributedString.Key.foregroundColor: normalTitleColor,
+                NSAttributedString.Key.backgroundColor: backgroundColor,
+                NSAttributedString.Key.font: font
+            ],
+            for: UIControl.State.normal
+        )
+        
         UITabBarItem.appearance().setTitleTextAttributes(
-            [NSAttributedString.Key.foregroundColor: selectedTitleColor,
-             NSAttributedString.Key.font: UIFont.init(name: titleFontName, size: titleSize) ?? UIFont.systemFont(ofSize: titleSize)], for: UIControl.State.selected)
+            [
+                NSAttributedString.Key.foregroundColor: selectedTitleColor,
+                NSAttributedString.Key.font: font
+            ],
+            for: UIControl.State.selected
+        )
         return item
     }
 }
