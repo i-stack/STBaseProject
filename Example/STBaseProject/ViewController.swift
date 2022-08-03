@@ -15,58 +15,51 @@ class ViewController: STBaseViewController {
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.st_showNavBtnType(type: .onlyShowTitle)
         self.titleLabel.text = "ViewController"
-        let imageView = UIImageView()
-        imageView.image = UIImage.init(named: "page")
-        imageView.frame = CGRect.init(x: 100, y: 300, width: 100, height: 100)
-        
-        // 离屏渲染
-//        imageView.layer.cornerRadius = 10
-//        imageView.layer.masksToBounds = true
-//        imageView.backgroundColor = UIColor.purple
-        
-        // 离屏渲染
-//        imageView.layer.shouldRasterize = true
-        
-        imageView.layer.shadowColor = UIColor.red.cgColor
-        
-//        imageView.sd_setImage(with: URL.init(string: "https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/de66ab3f19a5499eb6ceff64db5e9476~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp"))
-        self.view.addSubview(imageView)
-        
-        let jsonString = Bundle.main.path(forResource: "color", ofType: ".json")
-        UIColor.st_resolvedColor(jsonString: jsonString ?? "")
-        imageView.backgroundColor = UIColor.st_color(dynamicProvider: "T020")
-        
+        self.st_showNavBtnType(type: .onlyShowTitle)
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        let nextVC = STTestViewController.init(nibName: "STTestViewController", bundle: nil)
-        self.navigationController?.pushViewController(nextVC, animated: true)
+    }
+}
+
+extension ViewController {
+    @objc func testRandomString() {
+        var dict: Dictionary<String, String> = Dictionary<String, String>()
+        for i in 0..<1000 {
+            dict["key\(i)"] = "\(i)"
+        }
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
+            let outputPath = "\(STFileManager.getLibraryCachePath())/jsonData"
+            let pathIsExist = STFileManager.fileExistAt(path: outputPath)
+            if pathIsExist.0 {
+                let path = STFileManager.create(filePath: outputPath, fileName: "json.json")
+                print(outputPath)
+                try jsonData.write(to: URL.init(fileURLWithPath: path), options: .atomic)
+            } else {
+                print(outputPath + "not exist")
+            }
+        } catch {
+            print(error.localizedDescription)
+        }
     }
     
-    @objc func randomString() {
-//        var dict: Dictionary<String, String> = Dictionary<String, String>()
-//        for i in 0..<1000 {
-//            dict["key\(i)"] = "\(i)"
-//        }
-//
-//        do {
-//            let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
-//            let outputPath = "\(STFileManager.getLibraryCachePath())/jsonData"
-//            let pathIsExist = STFileManager.fileExistAt(path: outputPath)
-//            let path = STFileManager.create(filePath: outputPath, fileName: "json.json")
-//            print(outputPath)
-//            try jsonData.write(to: URL.init(fileURLWithPath: path), options: .atomic)
-//        } catch {
-//
-//        }
-        print("randomString")
-        print(Thread.current)
-
-        dispatch_main_async_safe {
-            print(Thread.current)
-        }
+    func testBtn() {
+        let btn = STBtn()
+        btn.backgroundColor = UIColor.orange
+        btn.frame = CGRect.init(x: 10, y: 300, width: 380, height: 100)
+        btn.setTitle("test001", for: .normal)
+        btn.setTitleColor(UIColor.red, for: .normal)
+        btn.setImage(UIImage.init(named: "Image"), for: .normal)
+        btn.st_layoutButtonWithEdgeInsets(style: .bottom, imageTitleSpace: 10)
+        btn.addTarget(self, action: #selector(btnClick(sender:)), for: .touchUpInside)
+        self.view.addSubview(btn)
+    }
+    
+    @objc func btnClick(sender: STBtn) {
+        sender.st_layoutButtonWithEdgeInsets(style: .reset, imageTitleSpace: 0)
     }
 }
