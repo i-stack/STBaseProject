@@ -18,6 +18,7 @@ public enum STBtnEdgeInsetsStyle {
 
 open class STBtn: UIButton {
     
+    /// 按钮标识符，类比 tag 使用
     open var identifier: Any?
     
     @IBInspectable open var borderWidth: CGFloat {
@@ -61,6 +62,12 @@ open class STBtn: UIButton {
         super.init(coder: aDecoder)
     }
     
+    /// 设置标题与图片位置
+    ///
+    /// - Parameters:
+    ///   - style: 标题、图片位置枚举
+    ///   - imageTitleSpace: 标题、图片之间间距
+    ///
     public func st_layoutButtonWithEdgeInsets(style: STBtnEdgeInsetsStyle, imageTitleSpace: CGFloat) -> Void {
         let imageWith: CGFloat = self.imageView?.image?.size.width ?? 0.0
         let imageHeight: CGFloat = self.imageView?.image?.size.height ?? 0.0
@@ -89,6 +96,8 @@ open class STBtn: UIButton {
             labelEdgeInsets = UIEdgeInsets.init(top: 0, left: -imageWith - imageTitleSpace / 2.0, bottom: 0, right: imageWith + imageTitleSpace / 2.0)
             break
         case .reset:
+            imageEdgeInsets = UIEdgeInsets.zero
+            labelEdgeInsets = UIEdgeInsets.zero
             break
         }
         
@@ -96,10 +105,22 @@ open class STBtn: UIButton {
         self.imageEdgeInsets = imageEdgeInsets
     }
     
+    /// 设置按钮
+    ///
+    /// - Parameters:
+    ///   - cornerRadius: 圆角
+    ///
     public func st_roundedButton(cornerRadius: CGFloat) -> Void {
         self.st_roundedButton(cornerRadius: cornerRadius, borderWidth: 0, borderWidthColor: UIColor.clear)
     }
     
+    /// 设置按钮
+    ///
+    /// - Parameters:
+    ///   - cornerRadius: 圆角
+    ///   - borderWidth: 边框宽
+    ///   - borderWidthColor: 边框颜色
+    ///
     public func st_roundedButton(cornerRadius: CGFloat, borderWidth: CGFloat, borderWidthColor: UIColor) -> Void {
         self.borderWidth = borderWidth
         self.cornerRadius = cornerRadius
