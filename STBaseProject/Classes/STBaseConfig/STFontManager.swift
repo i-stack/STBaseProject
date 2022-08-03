@@ -9,7 +9,12 @@
 import UIKit
 
 public extension UIFont {
-    class func initializeMethod() {
+    
+    private struct STFontKeys {
+        static let pingFangSC = "PingFangSC"
+    }
+    
+    class func initializeMethod(customFontName: String) {
         self.st_initNameSwizzled()
         self.st_systemFontSwizzled()
         self.st_systemFontSwizzledWithWeight()
@@ -58,10 +63,7 @@ public extension UIFont {
     }
     
     @objc class func st_systemFont(ofSize: CGFloat) -> UIFont {
-        if let font = UIFont.init(name: "PingFangSC-Regular", size: ofSize) {
-            return font
-        }
-        return UIFont.systemFont(ofSize: ofSize)
+        return self.st_systemFont(ofSize: ofSize, weight: .regular)
     }
     
     @objc class func st_systemFont(ofSize: CGFloat, weight: UIFont.Weight) -> UIFont {
@@ -69,22 +71,22 @@ public extension UIFont {
         let size = UIFont.st_fontSize(size: ofSize)
         switch weight {
         case .medium:
-            font = UIFont.init(name: "PingFangSC-Medium", size: size)
+            font = UIFont.init(name: "\(STFontKeys.pingFangSC)-Medium", size: size)
             break
         case .semibold, .bold:
-            font = UIFont.init(name: "PingFangSC-Semibold", size: size)
+            font = UIFont.init(name: "\(STFontKeys.pingFangSC)-Semibold", size: size)
             break
         case .light:
-            font = UIFont.init(name: "PingFangSC-Light", size: size)
+            font = UIFont.init(name: "\(STFontKeys.pingFangSC)-Light", size: size)
             break
         case .ultraLight:
-            font = UIFont.init(name: "PingFangSC-Ultralight", size: size)
+            font = UIFont.init(name: "\(STFontKeys.pingFangSC)-Ultralight", size: size)
             break
         case .regular:
-            font = UIFont.init(name: "PingFangSC-Regular", size: size)
+            font = UIFont.init(name: "\(STFontKeys.pingFangSC)-Regular", size: size)
             break
         case .thin:
-            font = UIFont.init(name: "PingFangSC-Thin", size: size)
+            font = UIFont.init(name: "\(STFontKeys.pingFangSC)-Thin", size: size)
             break
         default:
             break
