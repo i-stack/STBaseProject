@@ -6,26 +6,27 @@
 //  Copyright © 2018 ST. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 public class STTimer: NSObject {
 
-    static var timerDict: [String: DispatchSourceTimer] = [String: DispatchSourceTimer]()
-    static let semaphore = DispatchSemaphore.init(value: 1)
     private weak var target: AnyObject?
 
     public init(aTarget: AnyObject) {
         super.init()
         self.target = aTarget
     }
-
+    
     public override func forwardingTarget(for aSelector: Selector!) -> Any? {
         return self.target
     }
 }
 
 // MARK: - GCD
-extension STTimer {
+public class STTimerGCD {
+    
+    private static var timerDict: [String: DispatchSourceTimer] = [String: DispatchSourceTimer]()
+    private static let semaphore = DispatchSemaphore.init(value: 1)
 
     @discardableResult
     public class func st_scheduledTimer(withTimeInterval interval: Int, repeats: Bool, async: Bool, block: @escaping (String) -> Void) -> String {

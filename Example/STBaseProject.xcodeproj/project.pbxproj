@@ -15,6 +15,8 @@
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
 		62C35D5E28937A3C00C449DF /* color.json in Resources */ = {isa = PBXBuildFile; fileRef = 62C35D5D28937A3C00C449DF /* color.json */; };
+		62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C35D61289B634B00C449DF /* STNextViewController.swift */; };
+		62C35D64289B634B00C449DF /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 62C35D62289B634B00C449DF /* STNextViewController.xib */; };
 		62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */; };
 		62CBA81927D9D6CD001204B1 /* file.html in Resources */ = {isa = PBXBuildFile; fileRef = 62CBA81827D9D6CD001204B1 /* file.html */; };
 /* End PBXBuildFile section */
@@ -45,6 +47,8 @@
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		62C35D5D28937A3C00C449DF /* color.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = color.json; sourceTree = "<group>"; };
+		62C35D61289B634B00C449DF /* STNextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STNextViewController.swift; sourceTree = "<group>"; };
+		62C35D62289B634B00C449DF /* STNextViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STNextViewController.xib; sourceTree = "<group>"; };
 		62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCustomURLProtocol.swift; sourceTree = "<group>"; };
 		62CBA81827D9D6CD001204B1 /* file.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = file.html; sourceTree = "<group>"; };
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -107,6 +111,8 @@
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
+				62C35D61289B634B00C449DF /* STNextViewController.swift */,
+				62C35D62289B634B00C449DF /* STNextViewController.xib */,
 				62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
@@ -253,6 +259,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				62C35D64289B634B00C449DF /* STNextViewController.xib in Resources */,
 				62CBA81927D9D6CD001204B1 /* file.html in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				62C35D5E28937A3C00C449DF /* color.json in Resources */,
@@ -280,6 +287,7 @@
 				"${PODS_ROOT}/Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/BeeHive/BeeHive.framework",
+				"${BUILT_PRODUCTS_DIR}/MBProgressHUD/MBProgressHUD.framework",
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/STBaseProject/STBaseProject.framework",
 				"${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework",
@@ -288,6 +296,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/BeeHive.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MBProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/STBaseProject.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SnapKit.framework",
@@ -328,6 +337,7 @@
 			files = (
 				62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
+				62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

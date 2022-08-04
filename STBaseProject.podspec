@@ -50,10 +50,10 @@ Pod::Spec.new do |s|
       ss.source_files = ['STBaseProject/Classes/STScreenshot/*.swift']
   end
 
-  #  s.subspec 'STHUD' do |ss|
-  #      ss.source_files = ['STBaseProject/Classes/STHUD/*.swift']
-  #      ss.dependency 'MBProgressHUD'
-  #  end
+  s.subspec 'STHUD' do |ss|
+      ss.source_files = ['STBaseProject/Classes/STHUD/*.swift']
+      ss.dependency 'MBProgressHUD'
+  end
   
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'

@@ -53,6 +53,17 @@
       "source_files": [
         "STBaseProject/Classes/STScreenshot/*.swift"
       ]
+    },
+    {
+      "name": "STHUD",
+      "source_files": [
+        "STBaseProject/Classes/STHUD/*.swift"
+      ],
+      "dependencies": {
+        "MBProgressHUD": [
+
+        ]
+      }
     }
   ],
   "swift_version": "5"

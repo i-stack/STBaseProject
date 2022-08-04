@@ -1,6 +1,7 @@
 PODS:
   - Alamofire (5.6.1)
   - BeeHive (1.6.0)
+  - MBProgressHUD (1.2.0)
   - SDWebImage (5.12.5):
     - SDWebImage/Core (= 5.12.5)
   - SDWebImage/Core (5.12.5)
@@ -8,6 +9,8 @@ PODS:
   - STBaseProject/STBaseConfig (1.0.4)
   - STBaseProject/STBaseModule (1.0.4):
     - STBaseProject/STBaseConfig
+  - STBaseProject/STHUD (1.0.4):
+    - MBProgressHUD
 
 DEPENDENCIES:
   - Alamofire
@@ -15,11 +18,13 @@ DEPENDENCIES:
   - SDWebImage
   - SnapKit
   - STBaseProject/STBaseModule (from `../`)
+  - STBaseProject/STHUD (from `../`)
 
 SPEC REPOS:
   trunk:
     - Alamofire
     - BeeHive
+    - MBProgressHUD
     - SDWebImage
     - SnapKit
 
@@ -30,10 +35,11 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: 87bd8c952f9a4454320fce00d9cc3de57bcadaf5
   BeeHive: 64c01ddec33b9ef8813701e075eeb732327d0f75
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   SDWebImage: 0905f1b7760fc8ac4198cae0036600d67478751e
   SnapKit: e01d52ebb8ddbc333eefe2132acf85c8227d9c25
-  STBaseProject: 90a2a80e075a0f06ea075da5db7589ddcf89ccba
+  STBaseProject: eae14a68969e934b4c7339aecc7dc2274b76d01d
 
-PODFILE CHECKSUM: 590cecc9a6eeced53fd83b493df41a8a71b4350c
+PODFILE CHECKSUM: ca4734ea66c9877fed0d0701591277b326bee61c
 
 COCOAPODS: 1.11.3

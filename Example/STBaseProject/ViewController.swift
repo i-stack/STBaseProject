@@ -16,11 +16,14 @@ class ViewController: STBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.titleLabel.text = "ViewController"
+        self.titleLabel.textColor = UIColor.black
         self.st_showNavBtnType(type: .onlyShowTitle)
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
+        let nextVC = STNextViewController.init(nibName: "STNextViewController", bundle: nil)
+        self.navigationController?.pushViewController(nextVC, animated: true)
     }
 }
 
