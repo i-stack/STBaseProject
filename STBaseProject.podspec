@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/i-stack/STBaseProject'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'songMW' => 'songshoubing7664@163.com' }
+#  s.author           = { 'songMW' => 'songshoubing7664@163.com' }
   s.source           = { :git => 'https://github.com/i-stack/STBaseProject.git', :tag => s.version.to_s }
 
   s.ios.deployment_target = '12.0'
@@ -55,6 +55,4 @@ Pod::Spec.new do |s|
       ss.dependency 'MBProgressHUD'
   end
   
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end
