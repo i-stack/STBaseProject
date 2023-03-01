@@ -19,6 +19,21 @@
 		62C35D64289B634B00C449DF /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 62C35D62289B634B00C449DF /* STNextViewController.xib */; };
 		62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */; };
 		62CBA81927D9D6CD001204B1 /* file.html in Resources */ = {isa = PBXBuildFile; fileRef = 62CBA81827D9D6CD001204B1 /* file.html */; };
+		E409782429A2615300918A1E /* content.json in Resources */ = {isa = PBXBuildFile; fileRef = E409782329A2615300918A1E /* content.json */; };
+		E41AED1A29AC509100760473 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E41AED1929AC509100760473 /* ViewController.xib */; };
+		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
+		E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1E29AC558A00760473 /* ViewControllerModel.swift */; };
+		E41AED2229AC55FB00760473 /* STMoushiVideoDownViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED2029AC55FB00760473 /* STMoushiVideoDownViewController.swift */; };
+		E41AED2329AC55FB00760473 /* STMoushiVideoDownViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E41AED2129AC55FB00760473 /* STMoushiVideoDownViewController.xib */; };
+		E41AED2D29AC970C00760473 /* STMoushiVideoDownViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED2C29AC970C00760473 /* STMoushiVideoDownViewModel.swift */; };
+		E41AED2F29AC971C00760473 /* STMoushiVideoDownModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED2E29AC971C00760473 /* STMoushiVideoDownModel.swift */; };
+		E41AED3229AC98B900760473 /* STLocalBusinessOperatorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED3029AC98B900760473 /* STLocalBusinessOperatorViewController.swift */; };
+		E41AED3329AC98B900760473 /* STLocalBusinessOperatorViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E41AED3129AC98B900760473 /* STLocalBusinessOperatorViewController.xib */; };
+		E41AED3529AC98C700760473 /* STLocalBusinessOperatorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED3429AC98C700760473 /* STLocalBusinessOperatorViewModel.swift */; };
+		E41AED3729AC98D300760473 /* STLocalBusinessOperatorModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED3629AC98D300760473 /* STLocalBusinessOperatorModel.swift */; };
+		E41AED3A29ACA3F800760473 /* STURLRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED3929ACA3F800760473 /* STURLRequest.swift */; };
+		E41AED3C29AE356700760473 /* sourceUrl1676862352564.m3u8 in Resources */ = {isa = PBXBuildFile; fileRef = E41AED3B29AE356700760473 /* sourceUrl1676862352564.m3u8 */; };
+		E41AED3E29AFB5CF00760473 /* resources.json in Resources */ = {isa = PBXBuildFile; fileRef = E41AED3D29AFB5CF00760473 /* resources.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +70,21 @@
 		BCBDD6C1F1A3F9746985EE4C /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		D130156922DC92BC00D5216C /* STBaseProject-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-Bridging-Header.h"; sourceTree = "<group>"; };
 		D39D8AFC82CB37AB8D99B8AB /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		E409782329A2615300918A1E /* content.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = content.json; sourceTree = "<group>"; };
+		E41AED1929AC509100760473 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
+		E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerViewModel.swift; sourceTree = "<group>"; };
+		E41AED1E29AC558A00760473 /* ViewControllerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerModel.swift; sourceTree = "<group>"; };
+		E41AED2029AC55FB00760473 /* STMoushiVideoDownViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STMoushiVideoDownViewController.swift; sourceTree = "<group>"; };
+		E41AED2129AC55FB00760473 /* STMoushiVideoDownViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STMoushiVideoDownViewController.xib; sourceTree = "<group>"; };
+		E41AED2C29AC970C00760473 /* STMoushiVideoDownViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STMoushiVideoDownViewModel.swift; sourceTree = "<group>"; };
+		E41AED2E29AC971C00760473 /* STMoushiVideoDownModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STMoushiVideoDownModel.swift; sourceTree = "<group>"; };
+		E41AED3029AC98B900760473 /* STLocalBusinessOperatorViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STLocalBusinessOperatorViewController.swift; sourceTree = "<group>"; };
+		E41AED3129AC98B900760473 /* STLocalBusinessOperatorViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STLocalBusinessOperatorViewController.xib; sourceTree = "<group>"; };
+		E41AED3429AC98C700760473 /* STLocalBusinessOperatorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STLocalBusinessOperatorViewModel.swift; sourceTree = "<group>"; };
+		E41AED3629AC98D300760473 /* STLocalBusinessOperatorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STLocalBusinessOperatorModel.swift; sourceTree = "<group>"; };
+		E41AED3929ACA3F800760473 /* STURLRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STURLRequest.swift; sourceTree = "<group>"; };
+		E41AED3B29AE356700760473 /* sourceUrl1676862352564.m3u8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sourceUrl1676862352564.m3u8; sourceTree = "<group>"; };
+		E41AED3D29AFB5CF00760473 /* resources.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = resources.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,10 +140,13 @@
 			isa = PBXGroup;
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
-				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				62C35D61289B634B00C449DF /* STNextViewController.swift */,
 				62C35D62289B634B00C449DF /* STNextViewController.xib */,
 				62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */,
+				E41AED3829ACA3D700760473 /* Constants */,
+				E41AED2429AC968D00760473 /* Module */,
+				E409782329A2615300918A1E /* content.json */,
+				E41AED3B29AE356700760473 /* sourceUrl1676862352564.m3u8 */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
 			name = "Example for STBaseProject";
@@ -168,6 +201,98 @@
 				446826C3C0555726F3F40A4F /* Pods-STBaseProject_Example.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		E41AED1B29AC546400760473 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */,
+			);
+			name = ViewModel;
+			sourceTree = "<group>";
+		};
+		E41AED2429AC968D00760473 /* Module */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED2929AC96C700760473 /* HomePage */,
+				E41AED2529AC969200760473 /* Moushi */,
+			);
+			name = Module;
+			sourceTree = "<group>";
+		};
+		E41AED2529AC969200760473 /* Moushi */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED2829AC96BE00760473 /* Model */,
+				E41AED2729AC96B700760473 /* ViewModel */,
+				E41AED2629AC96A800760473 /* ViewController */,
+			);
+			name = Moushi;
+			sourceTree = "<group>";
+		};
+		E41AED2629AC96A800760473 /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED2029AC55FB00760473 /* STMoushiVideoDownViewController.swift */,
+				E41AED2129AC55FB00760473 /* STMoushiVideoDownViewController.xib */,
+				E41AED3029AC98B900760473 /* STLocalBusinessOperatorViewController.swift */,
+				E41AED3129AC98B900760473 /* STLocalBusinessOperatorViewController.xib */,
+			);
+			name = ViewController;
+			sourceTree = "<group>";
+		};
+		E41AED2729AC96B700760473 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED2C29AC970C00760473 /* STMoushiVideoDownViewModel.swift */,
+				E41AED3429AC98C700760473 /* STLocalBusinessOperatorViewModel.swift */,
+			);
+			name = ViewModel;
+			sourceTree = "<group>";
+		};
+		E41AED2829AC96BE00760473 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED2E29AC971C00760473 /* STMoushiVideoDownModel.swift */,
+				E41AED3629AC98D300760473 /* STLocalBusinessOperatorModel.swift */,
+				E41AED3D29AFB5CF00760473 /* resources.json */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		E41AED2929AC96C700760473 /* HomePage */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED2B29AC96E100760473 /* Model */,
+				E41AED1B29AC546400760473 /* ViewModel */,
+				E41AED2A29AC96D200760473 /* ViewController */,
+			);
+			name = HomePage;
+			sourceTree = "<group>";
+		};
+		E41AED2A29AC96D200760473 /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				607FACD71AFB9204008FA782 /* ViewController.swift */,
+				E41AED1929AC509100760473 /* ViewController.xib */,
+			);
+			name = ViewController;
+			sourceTree = "<group>";
+		};
+		E41AED2B29AC96E100760473 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED1E29AC558A00760473 /* ViewControllerModel.swift */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		E41AED3829ACA3D700760473 /* Constants */ = {
+			isa = PBXGroup;
+			children = (
+				E41AED3929ACA3F800760473 /* STURLRequest.swift */,
+			);
+			name = Constants;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -259,10 +384,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E409782429A2615300918A1E /* content.json in Resources */,
+				E41AED3329AC98B900760473 /* STLocalBusinessOperatorViewController.xib in Resources */,
 				62C35D64289B634B00C449DF /* STNextViewController.xib in Resources */,
+				E41AED3C29AE356700760473 /* sourceUrl1676862352564.m3u8 in Resources */,
+				E41AED1A29AC509100760473 /* ViewController.xib in Resources */,
 				62CBA81927D9D6CD001204B1 /* file.html in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
+				E41AED2329AC55FB00760473 /* STMoushiVideoDownViewController.xib in Resources */,
 				62C35D5E28937A3C00C449DF /* color.json in Resources */,
+				E41AED3E29AFB5CF00760473 /* resources.json in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
 				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
 			);
@@ -337,7 +468,16 @@
 			files = (
 				62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
+				E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */,
+				E41AED2F29AC971C00760473 /* STMoushiVideoDownModel.swift in Sources */,
+				E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */,
+				E41AED3229AC98B900760473 /* STLocalBusinessOperatorViewController.swift in Sources */,
+				E41AED3529AC98C700760473 /* STLocalBusinessOperatorViewModel.swift in Sources */,
+				E41AED2D29AC970C00760473 /* STMoushiVideoDownViewModel.swift in Sources */,
+				E41AED3729AC98D300760473 /* STLocalBusinessOperatorModel.swift in Sources */,
+				E41AED2229AC55FB00760473 /* STMoushiVideoDownViewController.swift in Sources */,
 				62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */,
+				E41AED3A29ACA3F800760473 /* STURLRequest.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

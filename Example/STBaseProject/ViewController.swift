@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  STBaseProject
 //
-//  Created by stackMW on 05/16/2017.
+//  Created by i-stack on 05/16/2017.
 //  Copyright (c) 2019 songMW. All rights reserved.
 //
 
@@ -13,17 +13,52 @@ import SDWebImage
 
 class ViewController: STBaseViewController {
         
+    @IBOutlet weak var topConstraint: NSLayoutConstraint!
+    @IBOutlet weak var tableView: UITableView!
+    
+    var viewModel: ViewControllerViewModel?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.titleLabel.text = "ViewController"
         self.titleLabel.textColor = UIColor.black
         self.st_showNavBtnType(type: .onlyShowTitle)
+        self.tableView.tableFooterView = UIView()
+        self.topConstraint.constant = STScreenSizeConstants.st_navHeight()
+        self.viewModel?.loadData {[weak self] result in
+            guard let strongSelf = self else { return }
+            if result {
+                strongSelf.tableView.reloadData()
+            }
+        }
+    }
+}
+
+extension ViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return self.viewModel?.cellDateSources().count ?? 0
     }
     
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesEnded(touches, with: event)
-        let nextVC = STNextViewController.init(nibName: "STNextViewController", bundle: nil)
-        self.navigationController?.pushViewController(nextVC, animated: true)
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let identifier = ""
+        var cell = tableView.dequeueReusableCell(withIdentifier: identifier)
+        if (cell == nil) {
+            cell = UITableViewCell.init(style: .default, reuseIdentifier: identifier)
+            cell?.selectionStyle = .none
+        }
+        let model = self.viewModel?.cellForRow(indexPath: indexPath)
+        cell?.textLabel?.text = model?.title
+        return cell ?? UITableViewCell()
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let model = self.viewModel?.cellForRow(indexPath: indexPath) {
+            let namespace = Bundle.main.infoDictionary!["CFBundleName"] as! String
+            let classFromStr: AnyClass? = NSClassFromString(namespace + "." + model.className)
+            let viewControllerClass = classFromStr as! UIViewController.Type
+            let moushiVC = viewControllerClass.init(nibName: model.nibName, bundle: nil)
+            self.navigationController?.pushViewController(moushiVC, animated: true)
+        }
     }
 }
 
@@ -64,5 +99,30 @@ extension ViewController {
     
     @objc func btnClick(sender: STBtn) {
         sender.st_layoutButtonWithEdgeInsets(style: .reset, imageTitleSpace: 0)
+    }
+}
+
+extension ViewController {
+    
+    struct JsonModel: Codable {
+        var posts: [PostModel] = [PostModel]()
+    }
+    
+    struct PostModel: Codable {
+        var permalink: String = ""
+    }
+    
+    func parseJson() {
+        if let jsonString = Bundle.main.path(forResource: "content", ofType: "json") {
+            do {
+                let data = try Data(contentsOf: URL(fileURLWithPath: jsonString))
+                let jsonModel = try JSONDecoder().decode(JsonModel.self, from: data)
+                for post in jsonModel.posts {
+                    print(post.permalink)
+                }
+            } catch {
+                
+            }
+        }
     }
 }

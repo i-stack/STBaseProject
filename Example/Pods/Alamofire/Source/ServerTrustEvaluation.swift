@@ -604,7 +604,7 @@ extension AlamofireExtension where ExtendedType == SecTrust {
         certificates.af.publicKeys
     }
 
-    #if swift(>=5.5) // Xcode 13 / 2021 SDKs.
+    #if swift(>=5.5.1) // Xcode 13.1 / 2021 SDKs.
     /// The `SecCertificate`s contained in `self`.
     public var certificates: [SecCertificate] {
         if #available(iOS 15, macOS 12, tvOS 15, watchOS 8, *) {
@@ -715,11 +715,15 @@ extension AlamofireExtension where ExtendedType == SecCertificate {
 
         guard let createdTrust = trust, trustCreationStatus == errSecSuccess else { return nil }
 
+        #if swift(>=5.3.1) // SecTrustCopyKey not visible in Xcode <= 12.1, despite being a 2020 API.
         if #available(iOS 14, macOS 11, tvOS 14, watchOS 7, *) {
             return SecTrustCopyKey(createdTrust)
         } else {
             return SecTrustCopyPublicKey(createdTrust)
         }
+        #else
+        return SecTrustCopyPublicKey(createdTrust)
+        #endif
     }
 }
 
