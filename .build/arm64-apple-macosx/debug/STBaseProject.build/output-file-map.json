@@ -1,0 +1,11 @@
+{
+  "": {
+    "swift-dependencies": "/Users/song/Desktop/iOS/STBaseProject/.build/arm64-apple-macosx/debug/STBaseProject.build/master.swiftdeps"
+  },
+  "/Users/song/Desktop/iOS/STBaseProject/Sources/main.swift": {
+    "dependencies": "/Users/song/Desktop/iOS/STBaseProject/.build/arm64-apple-macosx/debug/STBaseProject.build/main.d",
+    "object": "/Users/song/Desktop/iOS/STBaseProject/.build/arm64-apple-macosx/debug/STBaseProject.build/main.swift.o",
+    "swiftmodule": "/Users/song/Desktop/iOS/STBaseProject/.build/arm64-apple-macosx/debug/STBaseProject.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/song/Desktop/iOS/STBaseProject/.build/arm64-apple-macosx/debug/STBaseProject.build/main.swiftdeps"
+  }
+}

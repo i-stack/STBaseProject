@@ -15,11 +15,11 @@ target 'STBaseProject_Example' do
   #  pod 'STBaseProject/STBaseConfig', :path => '../'
   #  pod 'STBaseProject/STBaseConfig', :path => '../'
   
-  pod 'SnapKit'
-  pod 'Alamofire'
-  pod 'SDWebImage'
-  pod "BeeHive"
-  pod "mobile-ffmpeg-full"
+#  pod 'SnapKit'
+#  pod 'Alamofire'
+#  pod 'SDWebImage'
+#  pod "BeeHive"
+#  pod "mobile-ffmpeg-full"
 
   
 end

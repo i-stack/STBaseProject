@@ -171,7 +171,7 @@ public struct STColorModel: Codable {
 public extension UIColor {
     
     private struct STColorAssociatedKeys {
-        static var colorsInfoKey = "colorsInfoKey"
+        static var colorsInfoKey = true
     }
     
     /// 获取本地或者网络上的颜色列表，每次程序启动时调用一次

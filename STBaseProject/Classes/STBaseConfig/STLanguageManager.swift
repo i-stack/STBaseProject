@@ -9,11 +9,11 @@
 import Foundation
 
 struct STLanguageConstantKey {
-    static var kBundleKey = "kBundleKey"
+    static var kBundleKey = true
     let appLanguageSwitchKey = "App_Language_Switch_Key"
 }
 
-public class STLanguageManager: Bundle {
+public class STLanguageManager: Bundle, @unchecked Sendable {
     
     deinit {
         objc_removeAssociatedObjects(self)

@@ -7,7 +7,8 @@
 //
 
 import UIKit
-import MBProgressHUD
+//import STProgressHUD
+//import STProgressHUD
 
 public enum STHUDLocation {
     case center
@@ -30,10 +31,10 @@ open class STHUD: NSObject {
     open var errorIconImageStr: String?
     open var detailLabelColor: UIColor?
     open var activityViewColor: UIColor?
-    open var hudMode: MBProgressHUDMode?
+//    open var hudMode: STProgressHUDMode?
     open var afterDelay: TimeInterval = 1.5
     
-    public var progressHUD: MBProgressHUD?
+    public var progressHUD: STProgressHUD?
     public static let sharedHUD: STHUD = STHUD()
     private var stCompletionBlock: STHUDCompletionBlock?
 
@@ -46,9 +47,9 @@ open class STHUD: NSObject {
     }
     
     public func show(text: String, detailText: String) -> Void {
-        self.progressHUD?.label.text = text
-        self.progressHUD?.detailsLabel.text = detailText
-        self.progressHUD?.areDefaultMotionEffectsEnabled = false
+        self.progressHUD?.label?.text = text
+        self.progressHUD?.detailsLabel?.text = detailText
+//        self.progressHUD?.areDefaultMotionEffectsEnabled = false
         self.progressHUD?.show(animated: true)
         if let block = self.stCompletionBlock {
             block(true)
@@ -61,7 +62,7 @@ open class STHUD: NSObject {
         if self.progressHUD?.superview != nil {
             self.progressHUD?.hide(animated: true)
         }
-        self.progressHUD = MBProgressHUD.init(view: showInView)
+        self.progressHUD = STProgressHUD.init(withView: showInView)
         self.configHUBCommonProperty()
         if icon.count > 0 {
             self.progressHUD?.customView = UIImageView.init(image: UIImage.init(named: icon))
@@ -71,7 +72,7 @@ open class STHUD: NSObject {
         }
         self.progressHUD?.offset = offset
         self.progressHUD?.isHidden = false
-        showInView.addSubview(self.progressHUD ?? MBProgressHUD())
+        showInView.addSubview(self.progressHUD ?? STProgressHUD())
     }
     
     /// 配置展示
@@ -79,51 +80,51 @@ open class STHUD: NSObject {
         if self.progressHUD?.superview != nil {
             self.progressHUD?.hide(animated: true)
         }
-        self.progressHUD = MBProgressHUD.init()
+        self.progressHUD = STProgressHUD.init()
         self.configHUBCommonProperty()
-        showInView.addSubview(self.progressHUD ?? MBProgressHUD())
+        showInView.addSubview(self.progressHUD ?? STProgressHUD())
     }
     
     private func configHUBCommonProperty() {
         guard self.progressHUD != nil else { return }
         self.progressHUD?.delegate = self
-        self.progressHUD?.label.numberOfLines = 0
+        self.progressHUD?.label?.numberOfLines = 0
         self.progressHUD?.contentColor = UIColor.white
-        self.progressHUD?.bezelView.style = .solidColor
+        self.progressHUD?.bezelView?.style = .solidColor
         self.progressHUD?.removeFromSuperViewOnHide = true
         if let font = self.labelFont {
-            self.progressHUD?.label.font = font
+            self.progressHUD?.label?.font = font
         } else {
-            self.progressHUD?.label.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
+            self.progressHUD?.label?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         }
         if let color = self.labelColor {
-            self.progressHUD?.label.textColor = color
+            self.progressHUD?.label?.textColor = color
         } else {
-            self.progressHUD?.label.textColor = UIColor.black
+            self.progressHUD?.label?.textColor = UIColor.black
         }
         if let detailsLabelFont = self.labelFont {
-            self.progressHUD?.detailsLabel.font = detailsLabelFont
+            self.progressHUD?.detailsLabel?.font = detailsLabelFont
         } else {
-            self.progressHUD?.detailsLabel.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
+            self.progressHUD?.detailsLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         }
         if let detailsLabelColor = self.detailLabelColor {
-            self.progressHUD?.detailsLabel.textColor = detailsLabelColor
+            self.progressHUD?.detailsLabel?.textColor = detailsLabelColor
         } else {
-            self.progressHUD?.detailsLabel.textColor = UIColor.white
+            self.progressHUD?.detailsLabel?.textColor = UIColor.white
         }
         if let customColor = self.customBgColor {
-            self.progressHUD?.bezelView.backgroundColor = customColor
+            self.progressHUD?.bezelView?.backgroundColor = customColor
         } else {
-            self.progressHUD?.bezelView.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+            self.progressHUD?.bezelView?.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         }
         if let color = self.activityViewColor {
-            self.progressHUD?.bezelView.color = color
+            self.progressHUD?.bezelView?.color = color
         } else {
-            self.progressHUD?.bezelView.color = UIColor.black.withAlphaComponent(0.6)
+            self.progressHUD?.bezelView?.color = UIColor.black.withAlphaComponent(0.6)
         }
-        if let mode = self.hudMode {
-            self.progressHUD?.mode = mode
-        }
+//        if let mode = self.hudMode {
+//            self.progressHUD?.mode = mode
+//        }
         if let cusView = self.customView {
             self.progressHUD?.customView = cusView
         }
@@ -146,8 +147,8 @@ open class STHUD: NSObject {
     }
 }
 
-extension STHUD: MBProgressHUDDelegate {
-    public func hudWasHidden(_ hud: MBProgressHUD) {
+extension STHUD: STProgressHUDDelegate {
+    public func hudWasHidden(_ hud: STProgressHUD) {
         if let block = self.stCompletionBlock {
             block(false)
         }
@@ -231,7 +232,7 @@ public extension UIView {
         }
     }
 
-    /// 关闭MBProgressHUD
+    /// 关闭STProgressHUD
     func hideHUD() -> Void {
         DispatchQueue.main.async {
             STHUD.sharedHUD.hide(animated: true)
