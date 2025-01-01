@@ -11,11 +11,11 @@
 pod 'STBaseProject'
 ```
 
-## 基础配置
+## Basic Configuration
 
-在 AppDelegate 中配置：
+Configure in AppDelegate:
 
-***自定义导航栏高度***
+**Custom navigation bar height**
 
 ```swift
 private func customNavBar() {
@@ -25,7 +25,7 @@ private func customNavBar() {
     STConstants.shared.st_customNavHeight(model: model)
 }
 ```
-***设计图基准尺寸配置***
+**Design drawing baseline dimension configuration**
 
 ```swift
 
@@ -38,26 +38,18 @@ private func configBenchmarkDesign() {
 
 #### 一、STBaseViewController
 
-主要功能：
-
-> 1、实现自定义导航栏，继承此类的 `ViewController` 可以进行二次封装进行 ***字体、颜色、位置*** 的修改；
+> 1. Implement a customizable navigation bar, `ViewController` inheriting from this class can be repackaged for modifications of `font, color, position`;
 > 
-> 2、所有 `ViewController` 都可以继承此类；
+> 2. All `ViewController` can inherit from this class;
 
 #### 二、STBaseView
 
-主要功能：
-
-> 可选使用 `UIScrollView` 作为父类进行界面布局；
+> Optionally use `UIScrollView` as the parent class for layout；
 
 #### 三、STBaseModel 
 
-主要功能：
-
-> 针对 `forUndefinedKey` 异常的处理；
+> Handling of `forUndefinedKey` exceptions;
 
 #### 四、STBtn
 
-主要功能：
-
-> 按钮标题文字与图片位置设置；
+> Button title text and image position settings;

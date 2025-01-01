@@ -1,21 +1,18 @@
 {
   "name": "STBaseProject",
-  "version": "2.0.0",
+  "version": "1.0.6",
+  "license": "MIT",
   "summary": "Project infrastructure, common tools. The new project can inherit.",
   "homepage": "https://github.com/i-stack/STBaseProject",
-  "license": {
-    "type": "MIT",
-    "file": "LICENSE"
-  },
   "authors": {
     "i-stack": "songshoubing7664@163.com"
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "2.0.0"
+    "tag": "1.0.6"
   },
   "platforms": {
-    "ios": "12.0"
+    "ios": "13.0"
   },
   "swift_versions": [
     "5"
@@ -31,9 +28,8 @@
         "STBaseProject/Classes/STBaseModule/STBaseView/*.swift"
       ],
       "dependencies": {
-        "STBaseProject/STBaseConfig": [
-
-        ]
+        "STBaseProject/STBaseConfig": [],
+        "STBaseProject/STCustomTools": []
       }
     },
     {
@@ -43,21 +39,33 @@
       ]
     },
     {
+      "name": "STCustomTools",
+      "source_files": [
+        "STBaseProject/Classes/STCustomTools/*.swift"
+      ]
+    },
+    {
+      "name": "STOptionalTools",
+      "source_files": [
+        "STBaseProject/Classes/STOptionalTools/*.swift"
+      ]
+    },
+    {
       "name": "STScanner",
       "source_files": [
-        "STBaseProject/Classes/STScanner/*.swift"
+        "STBaseProject/Classes/STOptionalTools/STScanner/*.swift"
       ]
     },
     {
       "name": "STScreenshot",
       "source_files": [
-        "STBaseProject/Classes/STScreenshot/*.swift"
+        "STBaseProject/Classes/STOptionalTools/STScreenshot/*.swift"
       ]
     },
     {
       "name": "STHUD",
       "source_files": [
-        "STBaseProject/Classes/STHUD/*.swift"
+        "STBaseProject/Classes/STOptionalTools/STHUD/*.swift"
       ]
     }
   ],

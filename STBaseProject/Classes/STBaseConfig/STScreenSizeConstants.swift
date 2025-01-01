@@ -3,7 +3,6 @@
 //  STBaseProject
 //
 //  Created by stack on 2019/03/16.
-//  Copyright © 2019年 ST. All rights reserved.
 //
 
 import UIKit
@@ -20,7 +19,7 @@ public enum STScreenSize {
     case AMXScreenSize12p9Inch
 }
 
-// 自定义 bar height
+// custom bar height
 public struct STConstantBarHeightModel {
     public var navNormalHeight: CGFloat = 64.0
     public var navIsSafeHeight: CGFloat = 88.0
@@ -39,18 +38,20 @@ public class STScreenSizeConstants: NSObject {
         super.init()
     }
 
-    /// 设计图基准尺寸
+    /// Design drawing baseline dimensions
     ///
-    /// 配置一次
+    /// Configure once
     ///
-    /// - Parameter size: 基准尺寸
+    /// - Parameter size: Basic size
+    ///
     public func st_configBenchmarkDesign(size: CGSize) -> Void {
         self.benchmarkDesignSize = size
     }
     
-    /// 自定义 bar 高度
+    /// custom bar height
     ///
     /// - Parameter model: `STConstantBarHeightModel`
+    ///
     public func st_customNavHeight(model: STConstantBarHeightModel) -> Void {
         self.barHeightModel = model
     }
@@ -64,11 +65,12 @@ public class STScreenSizeConstants: NSObject {
         return min / size.width
     }
     
-    /// 当前屏幕与标准设计尺寸比例值
+    /// Current screen ratio to the standard design size
     ///
-    /// 调用此方法前，需调用 `st_configBenchmarkDesign` 传入基准设计尺寸，配置一次
+    /// Before calling this method, `st_configBenchmarkDesign` should be called with the standard design size to configure once
     ///
-    /// - Parameter float: 设计图标注值
+    /// - Parameter float: The marked value on the design drawing
+    ///
     public class func st_handleFloat(float: CGFloat) -> CGFloat {
         let multiplier = self.st_multiplier()
         let result = float * multiplier
@@ -90,102 +92,113 @@ public class STScreenSizeConstants: NSObject {
     
     /// 3.5inch
     ///
-    /// 设备名称：3GS、4、4S
+    /// Device name: 3GS、4、4S
     ///
-    /// 宽 x 高：320 x 480  @2x
+    /// width x height: 320 x 480 @2x
+    ///
     public class func st_isIPhone480() -> Bool {
         return self.st_apph() == 480
     }
     
     /// 4.0inch
     ///
-    /// 设备名称：5、5S、5C、SE
+    /// Device name: 5、5S、5C、SE
     ///
-    /// 宽 x 高：320 x 568  @2x
+    /// width x height:320 x 568 @2x
+    /// 
     public class func st_isIPhone568() -> Bool {
         return self.st_apph() == 568
     }
     
     /// 4.7inch
     ///
-    /// 设备名称：6、6s、7、8
+    /// Device name: 6、6s、7、8
     ///
-    /// 宽 x 高： 375 x 667  @2x
+    /// width x height: 375 x 667 @2x
+    ///
     public class func st_isIPhone667() -> Bool {
         return self.st_apph() == 667
     }
     
     /// 5.4inch
     ///
-    /// 设备名称：12 mini
+    /// Device name: 12 mini
     ///
-    /// 宽 x 高： 360 x 780  @3x
+    /// width x height: 360 x 780 @3x
+    ///
     public class func st_isIPhone12Mini() -> Bool {
         return self.st_apph() == 780
     }
     
     /// 5.5inch
     ///
-    /// 设备名称：6Plus、6sPlus、7Plus、8Plus
+    /// Device name: 6Plus、6sPlus、7Plus、8Plus
     ///
-    /// 宽 x 高： 414 x 736 @3x
+    /// width x height: 414 x 736 @3x
+    ///
     public class func st_isIPhonePlus() -> Bool {
         return self.st_apph() == 736
     }
     
     /// 5.8inch
     ///
-    /// 设备名称：X、XS、11 Pro
+    /// Device name: X、XS、11 Pro
     ///
-    /// 宽 x 高： 375 x 812  @3x
+    /// width x height: 375 x 812 @3x
+    ///
     public class func st_isIPhone812() -> Bool {
         return self.st_apph() == 812
     }
     
     /// 6.1inch
     ///
-    /// 设备名称：12 Pro
+    /// Device name: 12 Pro
     ///
-    /// 宽 x 高：390 x 844  @3x
+    /// width x height:390 x 844 @3x
+    ///
     public class func st_isIPhone844() -> Bool {
         return self.st_apph() == 844
     }
     
     /// 6.1inch
     ///
-    /// 设备名称：11、XR
+    /// Device name: 11、XR
     ///
-    /// 宽 x 高：414 x 896  @2x
+    /// width x height:414 x 896 @2x
+    ///
     public class func st_isIPhone896() -> Bool {
         return self.st_apph() == 896
     }
     
     /// 6.5inch
     ///
-    /// 设备名称：11 Pro Max
+    /// Device name: 11 Pro Max
     ///
-    /// 宽 x 高：414 x 896  @3x
+    /// width x height:414 x 896 @3x
+    ///
     public class func st_isIPhone11ProMax() -> Bool {
         return self.st_apph() == 896
     }
     
     /// 6.7inch
     ///
-    /// 设备名称：12 Pro Max
+    /// Device name: 12 Pro Max
     ///
-    /// 宽 x 高：428 x 926
+    /// width x height: 428 x 926
+    ///
     public class func st_isIPhone926() -> Bool {
         return self.st_apph() == 926
     }
     
-    /// 是否是刘海屏
+    /// Is it a notch screen
     ///
-    /// 高度大于736 为刘海屏
+    /// If the height is greater than 736, it is a notch screen
+    ///
     public class func st_isIPhoneSafe() -> Bool {
         return self.st_apph() > 736
     }
     
-    /// 导航栏高度
+    /// nav height
     public class func st_navHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return STScreenSizeConstants.shared.barHeightModel.navIsSafeHeight
@@ -193,7 +206,7 @@ public class STScreenSizeConstants: NSObject {
         return STScreenSizeConstants.shared.barHeightModel.navNormalHeight
     }
     
-    /// tabBar高度
+    /// tabBar height
     public class func st_tabBarHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
             return STScreenSizeConstants.shared.barHeightModel.tabBarIsSafeHeight

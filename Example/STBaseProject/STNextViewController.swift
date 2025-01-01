@@ -32,7 +32,6 @@ class STNextViewController: STBaseViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 //        self.delayTimer?.invalidate()
-        STTimerGCD.st_cancelTask(name: self.delayTimerName ?? "")
     }
 }
 
@@ -57,10 +56,7 @@ extension STNextViewController {
 //        RunLoop.current.add(timer, forMode: .common)
 //        self.delayTimer = timer
         
-        let timer = STTimerGCD.st_scheduledTimer(withTimeInterval: 1, repeats: true, async: true) { name in
-            STLog(name)
-        }
-        self.delayTimerName = timer
+   
         
 //        self.aTarget = STTimer.init(aTarget: self)
 //        let timer = Timer.scheduledTimer(timeInterval: 1, target: self.aTarget ?? nil, selector: #selector(handleHideTimer), userInfo: nil, repeats: true)
