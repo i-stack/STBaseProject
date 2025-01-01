@@ -79,32 +79,30 @@ open class STBaseView: UIView {
 
 extension UIView {
     public func currentViewController() -> (UIViewController?) {
-        var window = UIApplication.shared.keyWindow
-        if window?.windowLevel != UIWindow.Level.normal {
-            let windows = UIApplication.shared.windows
-            for windowTemp in windows {
-                if windowTemp.windowLevel == UIWindow.Level.normal {
-                    window = windowTemp
+        var keyWindow: UIWindow?
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            for window in windowScene.windows {
+                if window.isKeyWindow {
+                    keyWindow = window
                     break
                 }
             }
         }
-        let vc = window?.rootViewController
-        return currentViewController(vc)
+        return currentViewController(keyWindow?.rootViewController)
     }
 
-    func currentViewController(_ vc :UIViewController?) -> UIViewController? {
-        if vc == nil {
-            return nil
-        }
+    func currentViewController(_ vc: UIViewController?) -> UIViewController? {
+        if vc == nil { return nil }
         if let presentVC = vc?.presentedViewController {
             return currentViewController(presentVC)
-        } else if let tabVC = vc as? UITabBarController {
+        }
+        if let tabVC = vc as? UITabBarController {
             if let selectVC = tabVC.selectedViewController {
                 return currentViewController(selectVC)
             }
             return nil
-        } else if let naiVC = vc as? UINavigationController {
+        }
+        if let naiVC = vc as? UINavigationController {
             return currentViewController(naiVC.visibleViewController)
         }
         return vc

@@ -3,7 +3,6 @@
 //  STBaseProject
 //
 //  Created by stack on 2018/3/14.
-//  Copyright © 2018 ST. All rights reserved.
 //
 
 import UIKit

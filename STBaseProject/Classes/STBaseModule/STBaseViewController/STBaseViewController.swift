@@ -3,17 +3,16 @@
 //  STBaseProject
 //
 //  Created by stack on 2017/10/4.
-//  Copyright © 2017年 ST. All rights reserved.
 //
 
 import UIKit
 
 public enum STNavBtnShowType {
-    case none               // 默认什么都不显示
-    case showBothBtn        // 显示左侧、右侧按钮和title
-    case showLeftBtn        // 显示左侧按钮和title
-    case showRightBtn       // 显示右侧按钮和title
-    case onlyShowTitle      // 只显示title
+    case none               // show nothing
+    case showBothBtn        // show left button right button and title
+    case showLeftBtn        // show left button and title
+    case showRightBtn       // show right button and title
+    case onlyShowTitle      // only show title
 }
 
 open class STBaseViewController: UIViewController {
@@ -237,9 +236,15 @@ public extension UIViewController {
     }
     
     func st_currentVC() -> UIViewController {
-        if let rootViewController = UIApplication.shared.keyWindow?.rootViewController {
-            let currentViewController = self.st_getCurrentViewControllerFrom(rootVC: rootViewController)
-            return currentViewController
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            for window in windowScene.windows {
+                if window.isKeyWindow {
+                    if let rootViewController = window.rootViewController {
+                        let currentViewController = self.st_getCurrentViewControllerFrom(rootVC: rootViewController)
+                        return currentViewController
+                    }
+                }
+            }
         }
         return UIViewController()
     }

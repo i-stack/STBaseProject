@@ -26,7 +26,6 @@ Pod::Spec.new do |s|
         'STBaseProject/Classes/STBaseModule/STBaseModel/*.swift',
         'STBaseProject/Classes/STBaseModule/STBaseView/*.swift'
     ]
-    ss.dependency 'STBaseProject/STBaseConfig'
     ss.dependency 'STBaseProject/STCustomTools'
   end
   
@@ -36,11 +35,12 @@ Pod::Spec.new do |s|
   
   s.subspec 'STCustomTools' do |ss|
     ss.source_files = ['STBaseProject/Classes/STCustomTools/*.swift']
+    ss.dependency 'STBaseProject/STBaseConfig'
   end
   
-  s.subspec 'STOptionalTools' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STOptionalTools/*.swift']
-  end
+#  s.subspec 'STOptionalTools' do |ss|
+#    ss.source_files = ['STBaseProject/Classes/STOptionalTools/*.swift']
+#  end
     
   s.subspec 'STScanner' do |ss|
     ss.source_files = ['STBaseProject/Classes/STOptionalTools/STScanner/*.swift']
