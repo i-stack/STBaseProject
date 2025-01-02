@@ -1,22 +1,20 @@
 PODS:
-  - STBaseProject/STBaseConfig (1.0.7)
-  - STBaseProject/STBaseModule (1.0.7):
+  - STBaseProject/STBaseConfig (1.0.8)
+  - STBaseProject/STBaseModule (1.0.8):
     - STBaseProject/STCustomTools
-  - STBaseProject/STCustomTools (1.0.7):
+  - STBaseProject/STCustomTools (1.0.8):
     - STBaseProject/STBaseConfig
-  - STBaseProject/STHUD (1.0.7)
 
 DEPENDENCIES:
   - STBaseProject/STBaseModule (from `../`)
-  - STBaseProject/STHUD (from `../`)
 
 EXTERNAL SOURCES:
   STBaseProject:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: 1c4d6fddb13991d35bff4aae7c99aa003964290b
+  STBaseProject: 154a545052a3563954021a10e44588fb45d2c37e
 
-PODFILE CHECKSUM: f085417cbd34b2ac670dd0e1d2f3456d7996a488
+PODFILE CHECKSUM: c83f51a11def85f928922e6149bde4f010ebc8f6
 
 COCOAPODS: 1.16.2

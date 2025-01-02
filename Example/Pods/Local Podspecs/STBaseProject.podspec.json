@@ -1,6 +1,6 @@
 {
   "name": "STBaseProject",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "license": "MIT",
   "summary": "Project infrastructure, common tools. The new project can inherit.",
   "homepage": "https://github.com/i-stack/STBaseProject",
@@ -9,7 +9,7 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "1.0.7"
+    "tag": "1.0.8"
   },
   "platforms": {
     "ios": "13.0"
@@ -42,7 +42,8 @@
     {
       "name": "STCustomTools",
       "source_files": [
-        "STBaseProject/Classes/STCustomTools/*.swift"
+        "STBaseProject/Classes/STCustomTools/*.swift",
+        "STBaseProject/Classes/STCustomTools/STHUD/*.swift"
       ],
       "dependencies": {
         "STBaseProject/STBaseConfig": [
@@ -60,12 +61,6 @@
       "name": "STScreenshot",
       "source_files": [
         "STBaseProject/Classes/STOptionalTools/STScreenshot/*.swift"
-      ]
-    },
-    {
-      "name": "STHUD",
-      "source_files": [
-        "STBaseProject/Classes/STOptionalTools/STHUD/*.swift"
       ]
     }
   ],
