@@ -3,7 +3,6 @@
 //  STProgressHUD
 //
 //  Created by kang huawei on 2017/3/20.
-//  Copyright © 2017年 huaweikang. All rights reserved.
 //
 
 import UIKit
@@ -11,7 +10,6 @@ import Foundation
 import CoreGraphics
 
 public protocol STProgressHUDDelegate {
-    // Called after the hud was fully hidden from the screen, default not do anything
     func hudWasHidden(_ hud: STProgressHUD)
 }
 
@@ -85,7 +83,7 @@ public class STProgressHUD: UIView {
     public var offset: CGPoint = CGPoint(x: 0, y: 0)
     public var margin: CGFloat = 20.0
     public var minSize:CGSize = CGSize.zero
-    public var isSquare = false         // force the hud dimensions to be equal if possible
+    public var isSquare = false
     public var isDefaultMotionEffectsEnabled = true
     public var minShowTime: TimeInterval = 0.0
     public var completionBlock: (() -> Void)?
@@ -168,14 +166,12 @@ public class STProgressHUD: UIView {
         commonInit()
     }
     
-    
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         commonInit()
     }
 
     convenience init(withView view: UIView) {
-        //assert(view != nil, "View must not be nil.")
         self.init(frame: view.bounds)
     }
     
@@ -392,7 +388,7 @@ public class STProgressHUD: UIView {
             if indicator as? UIActivityIndicatorView == nil {
                 // Update to indeterminate mode
                 indicator?.removeFromSuperview()
-                let activityIndicator = UIActivityIndicatorView(style: .whiteLarge)
+                let activityIndicator = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
                 activityIndicator.startAnimating()
                 indicator = activityIndicator
                 bezelView?.addSubview(activityIndicator)

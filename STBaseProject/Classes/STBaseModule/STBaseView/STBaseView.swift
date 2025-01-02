@@ -3,7 +3,6 @@
 //  STBaseProject
 //
 //  Created by stack on 2018/3/14.
-//  Copyright © 2018 ST. All rights reserved.
 //
 
 import UIKit
@@ -79,15 +78,7 @@ open class STBaseView: UIView {
 
 extension UIView {
     public func currentViewController() -> (UIViewController?) {
-        var keyWindow: UIWindow?
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            for window in windowScene.windows {
-                if window.isKeyWindow {
-                    keyWindow = window
-                    break
-                }
-            }
-        }
+        let keyWindow: UIWindow? = st_keyWindow()
         return currentViewController(keyWindow?.rootViewController)
     }
 
@@ -106,6 +97,17 @@ extension UIView {
             return currentViewController(naiVC.visibleViewController)
         }
         return vc
+    }
+    
+    func st_keyWindow() -> UIWindow? {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            for window in windowScene.windows {
+                if window.isKeyWindow {
+                    return window
+                }
+            }
+        }
+        return nil
     }
 }
 

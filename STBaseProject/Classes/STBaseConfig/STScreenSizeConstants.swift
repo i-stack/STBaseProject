@@ -105,7 +105,7 @@ public class STScreenSizeConstants: NSObject {
     /// Device name: 5、5S、5C、SE
     ///
     /// width x height:320 x 568 @2x
-    /// 
+    ///
     public class func st_isIPhone568() -> Bool {
         return self.st_apph() == 568
     }

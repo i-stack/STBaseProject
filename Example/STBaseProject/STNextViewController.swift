@@ -78,6 +78,6 @@ extension STNextViewController {
     }
     
     @objc func btnClick(sender: STBtn) {
-        testTimer()
+        self.view.showLoadingManualHidden()
     }
 }

@@ -3,12 +3,10 @@
 //  ProgressHUD
 //
 //  Created by kang huawei on 2017/3/20.
-//  Copyright © 2017年 huaweikang. All rights reserved.
 //
 
 import UIKit
 import CoreGraphics
-
 
 class STProgressView: UIView {
     var progress: Float = 0.0 {
@@ -18,7 +16,6 @@ class STProgressView: UIView {
             }
         }
     }
-
 }
 
 class STBarProgressView: STProgressView {
@@ -140,12 +137,10 @@ class STBarProgressView: STProgressView {
             
             context?.fillPath()
         }
-        
     }
 }
 
-class STCircleProcessView: STProgressView {         // base class of Round and Annular viw
-    // Indicator progress color, default white
+class STCircleProcessView: STProgressView {
     var progressTintColor: UIColor = UIColor.red {
         didSet {
             if oldValue != progressTintColor {

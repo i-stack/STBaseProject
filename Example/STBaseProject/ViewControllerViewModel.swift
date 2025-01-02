@@ -27,7 +27,7 @@ class ViewControllerViewModel: NSObject {
         dataSources.removeAll()
         var model = ViewControllerModel()
         model.title = "谋事视频下载"
-        model.nibName = "STMoushiVideoDownViewController"
+        model.nibName = "STNextViewController"
         model.className = model.nibName
         dataSources.append(model)
         DispatchQueue.main.async {

@@ -3,12 +3,9 @@
 //  STBaseProject
 //
 //  Created by stack on 2017/10/14.
-//  Copyright © 2017年 ST. All rights reserved.
 //
 
 import UIKit
-//import STProgressHUD
-//import STProgressHUD
 
 public enum STHUDLocation {
     case center
@@ -16,9 +13,6 @@ public enum STHUDLocation {
     case bottom
 }
 
-/// 监听`hud`状态
-/// - Parameter state: `hud` 是否展示
-/// - Returns: `true` hud is show elsewise `hud` is hidden
 public typealias STHUDCompletionBlock = (_ state: Bool) -> Void
 
 open class STHUD: NSObject {
@@ -31,7 +25,6 @@ open class STHUD: NSObject {
     open var errorIconImageStr: String?
     open var detailLabelColor: UIColor?
     open var activityViewColor: UIColor?
-//    open var hudMode: STProgressHUDMode?
     open var afterDelay: TimeInterval = 1.5
     
     public var progressHUD: STProgressHUD?
@@ -49,14 +42,12 @@ open class STHUD: NSObject {
     public func show(text: String, detailText: String) -> Void {
         self.progressHUD?.label?.text = text
         self.progressHUD?.detailsLabel?.text = detailText
-//        self.progressHUD?.areDefaultMotionEffectsEnabled = false
         self.progressHUD?.show(animated: true)
         if let block = self.stCompletionBlock {
             block(true)
         }
     }
     
-    /// 配置展示
     @objc public func configHUD(showInView: UIView, icon: String, offset: CGPoint) -> Void {
         self.progressHUD?.isHidden = true
         if self.progressHUD?.superview != nil {
@@ -75,12 +66,11 @@ open class STHUD: NSObject {
         showInView.addSubview(self.progressHUD ?? STProgressHUD())
     }
     
-    /// 配置展示
     @objc public func configManualHiddenHUD(showInView: UIView) -> Void {
         if self.progressHUD?.superview != nil {
             self.progressHUD?.hide(animated: true)
         }
-        self.progressHUD = STProgressHUD.init()
+        self.progressHUD = STProgressHUD.init(withView: showInView)
         self.configHUBCommonProperty()
         showInView.addSubview(self.progressHUD ?? STProgressHUD())
     }
@@ -122,12 +112,10 @@ open class STHUD: NSObject {
         } else {
             self.progressHUD?.bezelView?.color = UIColor.black.withAlphaComponent(0.6)
         }
-//        if let mode = self.hudMode {
-//            self.progressHUD?.mode = mode
-//        }
         if let cusView = self.customView {
             self.progressHUD?.customView = cusView
         }
+//        self.progressHUD?.mode = .determinate
     }
     
     public func hide(animated: Bool) {
@@ -156,27 +144,32 @@ extension STHUD: STProgressHUDDelegate {
 }
 
 public extension UIView {
-    /// 显示HUD
+    
+    /// show HUD
     ///
-    /// 完成后会自动关闭，默认添加到`UIApplication.shared.keyWindow`
+    /// After completion, it will close automatically
     ///
-    /// - Parameter text: 展示文字
+    /// Automatically added to `self.st_keyWindow()`
+    ///
+    /// - Parameter text: show text
+    ///
     func showAutoHidden(text: String) -> Void {
-        self.showAutoHidden(text: text, toView: UIApplication.shared.keyWindow ?? UIView())
+        self.showAutoHidden(text: text, toView: self.st_keyWindow() ?? UIView())
     }
     
-    /// 显示HUD
+    /// show HUD
     ///
-    /// 完成后会自动关闭
+    /// After completion, it will close automatically
     ///
-    /// - Parameter text: 展示文字
-    /// - Parameter toView: 添加到指定`view`
+    /// - Parameter text:  show text
+    /// - Parameter toView: show view
+    ///
     func showAutoHidden(text: String, toView: UIView) -> Void {
         self.showAutoHidden(text: text, detailText: "", toView: toView)
     }
     
     func showAutoHidden(text: String, detailText: String) -> Void {
-        self.showAutoHidden(text: text, detailText: detailText, toView: UIApplication.shared.keyWindow ?? UIView())
+        self.showAutoHidden(text: text, detailText: detailText, toView: self.st_keyWindow() ?? UIView())
     }
     
     func showAutoHidden(text: String, detailText: String, toView: UIView) -> Void {
@@ -188,7 +181,7 @@ public extension UIView {
     }
     
     func showAutoHidden(text: String, location: STHUDLocation) -> Void {
-        self.showAutoHidden(text: text, location: location, toView: UIApplication.shared.keyWindow ?? self)
+        self.showAutoHidden(text: text, location: location, toView: self.st_keyWindow() ?? self)
     }
     
     func showAutoHidden(text: String, location: STHUDLocation, toView: UIView) -> Void {
@@ -196,7 +189,7 @@ public extension UIView {
     }
     
     func showAutoHidden(text: String, detailText: String, location: STHUDLocation) -> Void {
-        self.showAutoHidden(text: text, detailText: detailText, location: location, toView: UIApplication.shared.keyWindow ?? self)
+        self.showAutoHidden(text: text, detailText: detailText, location: location, toView: self.st_keyWindow() ?? self)
     }
     
     func showAutoHidden(text: String, detailText: String, location: STHUDLocation, toView: UIView) -> Void {
@@ -205,15 +198,16 @@ public extension UIView {
 }
 
 public extension UIView {
-    /// 显示HUD
+    /// show HUD
     ///
-    /// 切记需要手动关闭
+    /// Remember to turn off manually
+    ///
     func showLoadingManualHidden() -> Void {
         self.showLoadingManualHidden(text: "")
     }
     
     func showLoadingManualHidden(text: String) -> Void {
-        self.showLoadingManualHidden(text: text, toView: UIApplication.shared.keyWindow ?? self)
+        self.showLoadingManualHidden(text: text, toView: self.st_keyWindow() ?? self)
     }
     
     func showLoadingManualHidden(text: String, toView: UIView) -> Void {
@@ -226,13 +220,12 @@ public extension UIView {
             if toView.superview != nil {
                 hud.configManualHiddenHUD(showInView: toView)
             } else {
-                hud.configManualHiddenHUD(showInView: UIApplication.shared.keyWindow ?? self)
+                hud.configManualHiddenHUD(showInView: self.st_keyWindow() ?? self)
             }
             hud.show(text: text, detailText: detailText)
         }
     }
 
-    /// 关闭STProgressHUD
     func hideHUD() -> Void {
         DispatchQueue.main.async {
             STHUD.sharedHUD.hide(animated: true)
@@ -264,7 +257,7 @@ public extension UIView {
         if toView.superview != nil {
             hud.configHUD(showInView: toView, icon: icon, offset: offset)
         } else {
-            hud.configHUD(showInView: UIApplication.shared.keyWindow ?? self, icon: icon, offset: offset)
+            hud.configHUD(showInView: self.st_keyWindow() ?? self, icon: icon, offset: offset)
         }
         hud.show(text: text, detailText: detailText)
         hud.hide(animated: true, afterDelay: afterDelay)

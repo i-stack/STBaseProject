@@ -236,14 +236,10 @@ public extension UIViewController {
     }
     
     func st_currentVC() -> UIViewController {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            for window in windowScene.windows {
-                if window.isKeyWindow {
-                    if let rootViewController = window.rootViewController {
-                        let currentViewController = self.st_getCurrentViewControllerFrom(rootVC: rootViewController)
-                        return currentViewController
-                    }
-                }
+        if let keyWindow = self.view.st_keyWindow() {
+            if let rootViewController = keyWindow.rootViewController {
+                let currentViewController = self.st_getCurrentViewControllerFrom(rootVC: rootViewController)
+                return currentViewController
             }
         }
         return UIViewController()
