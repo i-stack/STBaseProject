@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name = 'STBaseProject'
-  s.version = '1.0.9'
+  s.version = '1.1.0'
   s.license = 'MIT'
   s.summary = 'Project infrastructure, common tools. The new project can inherit.'
   s.homepage = 'https://github.com/i-stack/STBaseProject'
