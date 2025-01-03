@@ -76,41 +76,6 @@ open class STBaseView: UIView {
     }()
 }
 
-extension UIView {
-    public func currentViewController() -> (UIViewController?) {
-        let keyWindow: UIWindow? = st_keyWindow()
-        return currentViewController(keyWindow?.rootViewController)
-    }
-
-    func currentViewController(_ vc: UIViewController?) -> UIViewController? {
-        if vc == nil { return nil }
-        if let presentVC = vc?.presentedViewController {
-            return currentViewController(presentVC)
-        }
-        if let tabVC = vc as? UITabBarController {
-            if let selectVC = tabVC.selectedViewController {
-                return currentViewController(selectVC)
-            }
-            return nil
-        }
-        if let naiVC = vc as? UINavigationController {
-            return currentViewController(naiVC.visibleViewController)
-        }
-        return vc
-    }
-    
-    func st_keyWindow() -> UIWindow? {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            for window in windowScene.windows {
-                if window.isKeyWindow {
-                    return window
-                }
-            }
-        }
-        return nil
-    }
-}
-
 open class STBaseScrollerView: UIScrollView {
     open override func touchesShouldCancel(in view: UIView) -> Bool {
         if view.isKind(of: UIButton.self) {

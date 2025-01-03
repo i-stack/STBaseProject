@@ -25,7 +25,7 @@ class ViewController: STBaseViewController {
         self.titleLabel.textColor = UIColor.black
         self.st_showNavBtnType(type: .onlyShowTitle)
         self.tableView.tableFooterView = UIView()
-        self.topConstraint.constant = STScreenSizeConstants.st_navHeight()
+        self.topConstraint.constant = STBaseConstants.st_navHeight()
         self.viewModel?.loadData {[weak self] result in
             guard let strongSelf = self else { return }
             if result {
@@ -42,7 +42,7 @@ class ViewController: STBaseViewController {
         // 调用示例
         let url = "https://example.com/api?device=ios&name=iphone"
         let params = ["token": "abcd1234", "platform": "iOS"]
-        if let newURL = url.st_appendParametersToURLUsingComponents(to: url, parameters: params) {
+        if let newURL = url.st_appendParametersToURLUsingComponents(parameters: params) {
             print(newURL) // 输出: https://example.com/api?token=abcd1234&platform=iOS
         }
     }

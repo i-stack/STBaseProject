@@ -10,7 +10,7 @@ import UIKit
 extension NSLayoutConstraint {
     @IBInspectable open var autoConstant: Bool {
         set {
-            self.constant = STScreenSizeConstants.st_handleFloat(float: self.constant)
+            self.constant = STBaseConstants.st_handleFloat(float: self.constant)
         }
         get {
             return true

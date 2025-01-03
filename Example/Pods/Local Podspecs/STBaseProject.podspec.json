@@ -1,6 +1,6 @@
 {
   "name": "STBaseProject",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "license": "MIT",
   "summary": "Project infrastructure, common tools. The new project can inherit.",
   "homepage": "https://github.com/i-stack/STBaseProject",
@@ -9,7 +9,7 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "1.0.9"
+    "tag": "1.1.0"
   },
   "platforms": {
     "ios": "13.0"
@@ -17,7 +17,6 @@
   "swift_versions": [
     "5"
   ],
-  "default_subspecs": "STBaseModule",
   "subspecs": [
     {
       "name": "STBaseModule",
@@ -26,16 +25,38 @@
         "STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift",
         "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift",
         "STBaseProject/Classes/STBaseModule/STBaseView/*.swift",
-        "STBaseProject/Classes/STBaseModule/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STHUD/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STHTTP/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STOther/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STString/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STThread/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STManager/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STUIControl/*.swift",
-        "STBaseProject/Classes/STBaseModule/STCustomTools/STDeviceInfo/*.swift"
+        "STBaseProject/Classes/STBaseModule/STBaseConfig/*.swift"
+      ],
+      "dependencies": {
+        "STBaseProject/STCustomTools": [
+
+        ]
+      }
+    },
+    {
+      "name": "STBaseConstants",
+      "source_files": [
+        "STBaseProject/Classes/STBaseConstants/*.swift"
       ]
+    },
+    {
+      "name": "STCustomTools",
+      "source_files": [
+        "STBaseProject/Classes/STCustomTools/*.swift",
+        "STBaseProject/Classes/STCustomTools/STHUD/*.swift",
+        "STBaseProject/Classes/STCustomTools/STHTTP/*.swift",
+        "STBaseProject/Classes/STCustomTools/STOther/*.swift",
+        "STBaseProject/Classes/STCustomTools/STString/*.swift",
+        "STBaseProject/Classes/STCustomTools/STThread/*.swift",
+        "STBaseProject/Classes/STCustomTools/STManager/*.swift",
+        "STBaseProject/Classes/STCustomTools/STUIControl/*.swift",
+        "STBaseProject/Classes/STCustomTools/STDeviceInfo/*.swift"
+      ],
+      "dependencies": {
+        "STBaseProject/STBaseConstants": [
+
+        ]
+      }
     }
   ],
   "swift_version": "5"

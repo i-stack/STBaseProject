@@ -9,7 +9,7 @@ import UIKit
 import Foundation
 
 public extension String {
-    func st_jsonStringToPrettyPrintedJson(jsonString: String?) -> String {
+    static func st_jsonStringToPrettyPrintedJson(jsonString: String?) -> String {
         if let str = jsonString {
             let jsonData = str.data(using: String.Encoding.utf8)!
             let jsonObject: AnyObject = try! JSONSerialization.jsonObject(with: jsonData, options: []) as AnyObject
@@ -20,7 +20,7 @@ public extension String {
         return ""
     }
     
-    func st_dictToJSON(dict: NSDictionary) -> String {
+    static func st_dictToJSON(dict: NSDictionary) -> String {
         if dict.count < 1 {
             return ""
         }
@@ -93,23 +93,19 @@ public extension String {
         return numString ?? string
     }
     
-    func st_stringToDouble(string: String) -> Double {
+    func st_stringToDouble() -> Double {
         let formatter = NumberFormatter()
         formatter.locale = Locale.current
         formatter.decimalSeparator = "."
-        if let result = formatter.number(from: string) {
+        if let result = formatter.number(from: self) {
             return result.doubleValue
         } else {
             formatter.decimalSeparator = ","
-            if let result = formatter.number(from: string) {
+            if let result = formatter.number(from: self) {
                 return result.doubleValue
             }
         }
         return 0
-    }
-    
-    var doubleValue: Double {
-        return st_stringToDouble(string: self)
     }
     
     func st_convertToCurrency(style: NumberFormatter.Style) -> String {
@@ -120,7 +116,7 @@ public extension String {
 }
 
 public extension String {
-    func st_attributed(originStr: String, originStrColor: UIColor, originStrFont: UIFont, replaceStrs: [String], replaceStrColors: [UIColor], replaceStrFonts: [UIFont]) -> NSMutableAttributedString {
+    static func st_attributed(originStr: String, originStrColor: UIColor, originStrFont: UIFont, replaceStrs: [String], replaceStrColors: [UIColor], replaceStrFonts: [UIFont]) -> NSMutableAttributedString {
         let str = NSMutableAttributedString.init(string: originStr)
         str.addAttributes([NSAttributedString.Key.font : originStrFont, NSAttributedString.Key.foregroundColor: originStrColor], range: NSRange.init(location: 0, length: str.length))
         for (i, replaceStr) in replaceStrs.enumerated() {
@@ -161,8 +157,8 @@ public extension String {
         return parmDict
     }
     
-    func st_appendParametersToURLUsingComponents(to url: String, parameters: [String: String]) -> String? {
-        guard var components = URLComponents(string: url) else {
+    func st_appendParametersToURLUsingComponents(parameters: [String: String]) -> String? {
+        guard var components = URLComponents(string: self) else {
             return nil
         }
         var queryItems = components.queryItems ?? []

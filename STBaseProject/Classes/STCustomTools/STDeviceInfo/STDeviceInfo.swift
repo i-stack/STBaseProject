@@ -64,7 +64,7 @@ public struct STDeviceInfo {
         return UIDevice.current.systemVersion
     }
     
-    func st_getDeviceBrand() -> String {
+    public static func st_getDeviceBrand() -> String {
         switch UIDevice.current.userInterfaceIdiom {
         case .phone:
             return "iPhone"
@@ -81,7 +81,7 @@ public struct STDeviceInfo {
         }
     }
     
-    func st_getDeviceScreenInfo() -> (width: CGFloat, height: CGFloat, diagonal: Double) {
+    public static func st_getDeviceScreenInfo() -> (width: CGFloat, height: CGFloat, diagonal: Double) {
         let screenWidth = UIScreen.main.bounds.width
         let screenHeight = UIScreen.main.bounds.height
         let screenScale = UIScreen.main.scale
@@ -94,7 +94,7 @@ public struct STDeviceInfo {
         return (width: screenWidth, height: screenHeight, diagonal: diagonalInInches)
     }
     
-    func st_getDevicePPI() -> CGFloat {
+    public static func st_getDevicePPI() -> CGFloat {
         let deviceIdentifier = st_getDeviceIdentifier()
         let deviceModel = st_getDeviceModel(identifier: deviceIdentifier)
         switch deviceModel {
@@ -117,7 +117,7 @@ public struct STDeviceInfo {
     }
     
     // iPhone14,3
-    func st_getDeviceIdentifier() -> String {
+    public static func st_getDeviceIdentifier() -> String {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machineMirror = Mirror(reflecting: systemInfo.machine)
@@ -129,7 +129,7 @@ public struct STDeviceInfo {
     }
 
     // iPhone 13 Pro
-    func st_getDeviceModel(identifier: String) -> String {
+    public static func st_getDeviceModel(identifier: String) -> String {
         switch identifier {
         case "iPhone6,1", "iPhone6,2": return "iPhone 5s"
         case "iPhone7,2": return "iPhone 6"
@@ -259,7 +259,7 @@ public extension STDeviceInfo {
         return UIDevice.current.systemVersion
     }
     
-    func st_getDeviceBatteryStatusInfo() -> [String: Any] {
+    static func st_getDeviceBatteryStatusInfo() -> [String: Any] {
         let device = UIDevice.current
         device.isBatteryMonitoringEnabled = true
         return [
@@ -270,7 +270,7 @@ public extension STDeviceInfo {
 }
 
 public extension STDeviceInfo {
-    func st_getNetworkInfo() -> [String: Any] {
+    static func st_getNetworkInfo() -> [String: Any] {
         var networkInfo: [String: Any] = [:]
         if let interfaces = CNCopySupportedInterfaces() as? [String] {
             for interface in interfaces {
@@ -289,11 +289,11 @@ public extension STDeviceInfo {
 }
 
 public extension STDeviceInfo {
-    func st_isRunningOnSimulator() -> Bool {
+    static func st_isRunningOnSimulator() -> Bool {
         return TARGET_OS_SIMULATOR != 0
     }
 
-    func st_isDeviceJailbroken() -> Bool {
+    static func st_isDeviceJailbroken() -> Bool {
         let jailbreakPaths = [
             "/Applications/Cydia.app",
             "/Library/MobileSubstrate/MobileSubstrate.dylib",
@@ -311,7 +311,7 @@ public extension STDeviceInfo {
 }
 
 public extension STDeviceInfo {
-    func st_getTotalStorage() -> Int64 {
+    static func st_getTotalStorage() -> Int64 {
         if let attributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory()),
            let totalSize = attributes[.systemSize] as? Int64 {
             return totalSize
@@ -319,7 +319,7 @@ public extension STDeviceInfo {
         return 0
     }
 
-    func st_getFreeStorage() -> Int64 {
+    static func st_getFreeStorage() -> Int64 {
         if let attributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory()),
            let freeSize = attributes[.systemFreeSize] as? Int64 {
             return freeSize
@@ -327,11 +327,11 @@ public extension STDeviceInfo {
         return 0
     }
 
-    func st_getTotalRAM() -> Int64 {
+    static func st_getTotalRAM() -> Int64 {
         return Int64(ProcessInfo.processInfo.physicalMemory)
     }
 
-    func st_getFreeRAM() -> Int64 {
+    static func st_getFreeRAM() -> Int64 {
         var vmStats = vm_statistics64()
         var size = mach_msg_type_number_t(MemoryLayout.size(ofValue: vmStats) / MemoryLayout<integer_t>.size)
         let hostPort = mach_host_self()
@@ -340,13 +340,10 @@ public extension STDeviceInfo {
                 host_statistics64(hostPort, HOST_VM_INFO64, $0, &size)
             }
         }
-
         if result != KERN_SUCCESS {
             return 0
         }
-
         let freeMemory = UInt64(vmStats.free_count) * UInt64(vm_page_size)
         return Int64(freeMemory)
     }
-
 }

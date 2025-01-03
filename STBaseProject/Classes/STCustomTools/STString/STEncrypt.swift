@@ -9,7 +9,7 @@ import Foundation
 import CryptoKit
 
 public extension String {
-    func st_sha256Hash(for input: String) -> String {
+    static func st_sha256Hash(for input: String) -> String {
         let inputData = Data(input.utf8)
         let hashed = SHA256.hash(data: inputData)
         return hashed.map { String(format: "%02x", $0) }.joined()

@@ -1,5 +1,5 @@
 //
-//  STScreenSizeConstants.swift
+//  STBaseConstants.swift
 //  STBaseProject
 //
 //  Created by stack on 2019/03/16.
@@ -28,10 +28,10 @@ public struct STConstantBarHeightModel {
     public init() {}
 }
 
-public class STScreenSizeConstants: NSObject {
+public class STBaseConstants: NSObject {
     
     private var benchmarkDesignSize = CGSize.zero
-    public static let shared: STScreenSizeConstants = STScreenSizeConstants()
+    public static let shared: STBaseConstants = STBaseConstants()
     private var barHeightModel: STConstantBarHeightModel = STConstantBarHeightModel()
     
     private override init() {
@@ -57,7 +57,7 @@ public class STScreenSizeConstants: NSObject {
     }
     
     public class func st_multiplier() -> CGFloat {
-        let size = STScreenSizeConstants.shared.benchmarkDesignSize
+        let size = STBaseConstants.shared.benchmarkDesignSize
         if size == .zero {
             return 1.0
         }
@@ -201,17 +201,17 @@ public class STScreenSizeConstants: NSObject {
     /// nav height
     public class func st_navHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
-            return STScreenSizeConstants.shared.barHeightModel.navIsSafeHeight
+            return STBaseConstants.shared.barHeightModel.navIsSafeHeight
         }
-        return STScreenSizeConstants.shared.barHeightModel.navNormalHeight
+        return STBaseConstants.shared.barHeightModel.navNormalHeight
     }
     
     /// tabBar height
     public class func st_tabBarHeight() -> CGFloat {
         if self.st_isIPhoneSafe() {
-            return STScreenSizeConstants.shared.barHeightModel.tabBarIsSafeHeight
+            return STBaseConstants.shared.barHeightModel.tabBarIsSafeHeight
         }
-        return STScreenSizeConstants.shared.barHeightModel.tabBarNormalHeight
+        return STBaseConstants.shared.barHeightModel.tabBarNormalHeight
     }
     
     public class func st_safeBarHeight() -> CGFloat {
