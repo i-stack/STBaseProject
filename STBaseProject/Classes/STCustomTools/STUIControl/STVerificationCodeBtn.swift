@@ -3,7 +3,6 @@
 //  STBaseProject
 //
 //  Created by stack on 2020/2/8.
-//  Copyright © 2020 ST. All rights reserved.
 //
 
 import UIKit
@@ -14,13 +13,13 @@ open class STVerificationCodeBtn: STBtn {
     private var originTitle: String?
     private var tempTimerInterval: Int = 0
 
-    /// 显示后缀 10s 、10秒
+    /// Display suffix 10s, 10 seconds
     open var titleSuffix: String = ""
     
-    /// 倒计时间隔时间
+    /// Countdown interval time
     open var interval: TimeInterval = 1
     
-    /// 倒计时结束时间
+    /// Countdown end time
     open var timerInterval: Int = 60
 
     deinit {

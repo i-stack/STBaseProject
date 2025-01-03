@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name = 'STBaseProject'
-  s.version = '1.0.8'
+  s.version = '1.0.9'
   s.license = 'MIT'
   s.summary = 'Project infrastructure, common tools. The new project can inherit.'
   s.homepage = 'https://github.com/i-stack/STBaseProject'
@@ -36,7 +36,14 @@ Pod::Spec.new do |s|
   s.subspec 'STCustomTools' do |ss|
     ss.source_files = [
       'STBaseProject/Classes/STCustomTools/*.swift',
-      'STBaseProject/Classes/STCustomTools/STHUD/*.swift'
+      'STBaseProject/Classes/STCustomTools/STHUD/*.swift',
+      'STBaseProject/Classes/STCustomTools/STHTTP/*.swift',
+      'STBaseProject/Classes/STCustomTools/STOther/*.swift',
+      'STBaseProject/Classes/STCustomTools/STString/*.swift',
+      'STBaseProject/Classes/STCustomTools/STThread/*.swift',
+      'STBaseProject/Classes/STCustomTools/STManager/*.swift',
+      'STBaseProject/Classes/STCustomTools/STUIControl/*.swift',
+      'STBaseProject/Classes/STCustomTools/STDeviceInfo/*.swift'
     ]
     ss.dependency 'STBaseProject/STBaseConfig'
   end

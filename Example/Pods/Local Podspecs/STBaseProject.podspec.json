@@ -43,7 +43,14 @@
       "name": "STCustomTools",
       "source_files": [
         "STBaseProject/Classes/STCustomTools/*.swift",
-        "STBaseProject/Classes/STCustomTools/STHUD/*.swift"
+        "STBaseProject/Classes/STCustomTools/STHUD/*.swift",
+        "STBaseProject/Classes/STCustomTools/STHTTP/*.swift",
+        "STBaseProject/Classes/STCustomTools/STOther/*.swift",
+        "STBaseProject/Classes/STCustomTools/STString/*.swift",
+        "STBaseProject/Classes/STCustomTools/STThread/*.swift",
+        "STBaseProject/Classes/STCustomTools/STManager/*.swift",
+        "STBaseProject/Classes/STCustomTools/STUIControl/*.swift",
+        "STBaseProject/Classes/STCustomTools/STDeviceInfo/*.swift"
       ],
       "dependencies": {
         "STBaseProject/STBaseConfig": [

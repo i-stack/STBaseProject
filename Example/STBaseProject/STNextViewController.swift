@@ -78,6 +78,14 @@ extension STNextViewController {
     }
     
     @objc func btnClick(sender: STBtn) {
-        self.view.showLoadingManualHidden()
+        let url = URL(string: "https://www.baidu.com")!
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("Error: \(error.localizedDescription)")
+            } else {
+                print("Success")
+            }
+        }
+        task.resume()
     }
 }

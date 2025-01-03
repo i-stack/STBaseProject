@@ -23,6 +23,7 @@
 		E41AED1A29AC509100760473 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E41AED1929AC509100760473 /* ViewController.xib */; };
 		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
 		E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1E29AC558A00760473 /* ViewControllerModel.swift */; };
+		E438C4072D2690B10022AD20 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E438C4062D2690B10022AD20 /* NetworkExtension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +64,7 @@
 		E41AED1929AC509100760473 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerViewModel.swift; sourceTree = "<group>"; };
 		E41AED1E29AC558A00760473 /* ViewControllerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerModel.swift; sourceTree = "<group>"; };
+		E438C4062D2690B10022AD20 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		E457BB522D1E859100F5EFAC /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -72,6 +74,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34CA454AA8FD1F60C7B63C3F /* Pods_STBaseProject_Example.framework in Frameworks */,
+				E438C4072D2690B10022AD20 /* NetworkExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +91,7 @@
 		30DD7ED2B9D148B9BB2FD4F5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E438C4062D2690B10022AD20 /* NetworkExtension.framework */,
 				0527130535D9B00C23149A00 /* Pods_STBaseProject_Example.framework */,
 				B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */,
 			);
@@ -279,11 +283,9 @@
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
 						LastSwiftMigration = 1020;
-						ProvisioningStyle = Automatic;
 					};
 					607FACE41AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
-						DevelopmentTeam = 6JKG74Q9YS;
 						LastSwiftMigration = 1020;
 						TestTargetID = 607FACCF1AFB9204008FA782;
 					};
@@ -540,7 +542,7 @@
 			baseConfigurationReference = D39D8AFC82CB37AB8D99B8AB /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Apple Development: songshoubing7664@163.com (786QGSAU53)";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 46AQGL4J36;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -551,8 +553,7 @@
 					"@executable_path/Frameworks",
 				);
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.--PRODUCT-NAME-rfc1034identifier-";
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = "org.cocoapods.STBaseProject-Example";
+				PRODUCT_BUNDLE_IDENTIFIER = org.cocoapods.STBaseProject.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/STBaseProject/STBaseProject-Bridging-Header.h";
@@ -567,7 +568,7 @@
 			baseConfigurationReference = 446826C3C0555726F3F40A4F /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "Apple Development: songshoubing7664@163.com (786QGSAU53)";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 46AQGL4J36;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
@@ -578,8 +579,7 @@
 					"@executable_path/Frameworks",
 				);
 				MODULE_NAME = ExampleApp;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.--PRODUCT-NAME-rfc1034identifier-";
-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = "org.cocoapods.STBaseProject-Example";
+				PRODUCT_BUNDLE_IDENTIFIER = org.cocoapods.STBaseProject.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/STBaseProject/STBaseProject-Bridging-Header.h";
@@ -594,7 +594,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				DEVELOPMENT_TEAM = 6JKG74Q9YS;
+				DEVELOPMENT_TEAM = 46AQGL4J36;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
@@ -621,7 +621,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				DEVELOPMENT_TEAM = 6JKG74Q9YS;
+				DEVELOPMENT_TEAM = 46AQGL4J36;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",

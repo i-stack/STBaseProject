@@ -3,7 +3,6 @@
 //  STBaseProject
 //
 //  Created by stack on 2017/10/23.
-//  Copyright © 2017年 ST. All rights reserved.
 //
 
 import UIKit
@@ -160,6 +159,18 @@ public extension String {
             }
         }
         return parmDict
+    }
+    
+    func st_appendParametersToURLUsingComponents(to url: String, parameters: [String: String]) -> String? {
+        guard var components = URLComponents(string: url) else {
+            return nil
+        }
+        var queryItems = components.queryItems ?? []
+        parameters.forEach { key, value in
+            queryItems.append(URLQueryItem(name: key, value: value))
+        }
+        components.queryItems = queryItems
+        return components.url?.absoluteString
     }
     
     func st_pasteboardWithString(pasteboardString: String) -> Void {

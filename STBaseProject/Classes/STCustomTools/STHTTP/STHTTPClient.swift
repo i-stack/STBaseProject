@@ -29,7 +29,7 @@ public enum STHTTPMethod: String {
 public class STHTTPClient: NSObject {
 
     open var timeout: TimeInterval = 6
-    public static let shareSession: STHTTPClient = STHTTPClient()
+    public static let shared: STHTTPClient = STHTTPClient()
     
     private func st_http(request: URLRequest, requestTask: STRequestTask, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) {
         switch requestTask {

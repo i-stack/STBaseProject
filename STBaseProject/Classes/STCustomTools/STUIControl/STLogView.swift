@@ -25,8 +25,8 @@ open class STLogView: UIView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.configUI()
-        self.outputPath = STConstants.st_outputLogPath()
-        NotificationCenter.default.addObserver(self, selector: #selector(beginQueryLogP(notification:)), name: NSNotification.Name(rawValue: STConstants.st_notificationQueryLogName()), object: nil)
+        self.outputPath = STFileManager.st_outputLogPath()
+        NotificationCenter.default.addObserver(self, selector: #selector(beginQueryLogP(notification:)), name: NSNotification.Name(rawValue: STLogView.st_notificationQueryLogName()), object: nil)
     }
     
     required public init?(coder: NSCoder) {
@@ -195,30 +195,3 @@ extension STLogView {
         return "com.notification.queryLog"
     }
 }
-
-//public func STLog<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
-//    #if DEBUG
-//    let file = (file as NSString).lastPathComponent
-//    let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
-//    print(content)
-//    #endif
-//}
-//
-//public func STLogP<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
-//    #if DEBUG
-//    let file = (file as NSString).lastPathComponent
-//    let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
-//    print(content)
-//    var allContent = ""
-//    let outputPath = STLogView.st_outputLogPath()
-//    let userDefault = UserDefaults.standard
-//    if let origintContent = userDefault.object(forKey: outputPath) as? String {
-//        allContent = "\(origintContent)\n\(content)"
-//    } else {
-//        allContent = content
-//    }
-//    userDefault.setValue(allContent, forKey: outputPath)
-//    userDefault.synchronize()
-//    NotificationCenter.default.post(name: NSNotification.Name(rawValue: STLogView.st_notificationQueryLogName()), object: content)
-//    #endif
-//}

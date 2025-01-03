@@ -26,10 +26,10 @@ open class STHUD: NSObject {
     open var detailLabelColor: UIColor?
     open var activityViewColor: UIColor?
     open var afterDelay: TimeInterval = 1.5
-    
     public var progressHUD: STProgressHUD?
     public static let sharedHUD: STHUD = STHUD()
     private var stCompletionBlock: STHUDCompletionBlock?
+    open var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
 
     private override init() {
         super.init()
@@ -115,7 +115,7 @@ open class STHUD: NSObject {
         if let cusView = self.customView {
             self.progressHUD?.customView = cusView
         }
-//        self.progressHUD?.mode = .determinate
+        self.progressHUD?.mode = self.hudMode
     }
     
     public func hide(animated: Bool) {
