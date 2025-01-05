@@ -45,6 +45,8 @@ class ViewController: STBaseViewController {
         if let newURL = url.st_appendParametersToURLUsingComponents(parameters: params) {
             print(newURL) // 输出: https://example.com/api?token=abcd1234&platform=iOS
         }
+        
+        print("currentIpAddress", STDeviceInfo.st_getDeviceIPAddress())
     }
 }
 

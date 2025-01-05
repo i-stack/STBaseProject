@@ -99,7 +99,7 @@ public extension Bundle {
         self.st_setCusLanguage(language: "")
     }
     
-    private static func st_sysLanguage() -> String {
+    static func st_sysLanguage() -> String {
         let languages = NSLocale.preferredLanguages
         if languages.count > 0 {
             if let language = languages.first {

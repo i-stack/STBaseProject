@@ -6,9 +6,11 @@
 //
 
 import UIKit
-import Contacts
 import Darwin
+import Network
+import Contacts
 import AdSupport
+import NetworkExtension
 import SystemConfiguration.CaptiveNetwork
 
 public struct STDeviceInfo {
@@ -307,6 +309,45 @@ public extension STDeviceInfo {
             }
         }
         return false
+    }
+    
+    static func st_isUseVPNConnected() -> Bool {
+        let vpnManager = NEVPNManager.shared()
+        var vpnIsConnected: Bool = false
+        vpnManager.loadFromPreferences { error in
+            if error != nil {
+                vpnIsConnected = false
+            } else {
+                vpnIsConnected = vpnManager.connection.status == .connected
+            }
+        }
+        
+        return vpnIsConnected
+    }
+    
+    static func st_getDeviceIPAddress() -> String {
+        var address: String = ""
+        var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
+        guard getifaddrs(&ifaddr) == 0 else { return "" }
+        guard let firstAddr = ifaddr else { return "" }
+        for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
+            let interface = ifptr.pointee
+            let addrFamily = interface.ifa_addr.pointee.sa_family
+            if addrFamily == UInt8(AF_INET) || addrFamily == UInt8(AF_INET6) {
+                let name = String(cString: interface.ifa_name)
+                if name == "en0" { // Wi-Fi
+                    var addr = interface.ifa_addr.pointee
+                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+                    getnameinfo(&addr, socklen_t(interface.ifa_addr.pointee.sa_len),
+                                &hostname, socklen_t(hostname.count),
+                                nil, socklen_t(0), NI_NUMERICHOST)
+                    address = String(cString: hostname)
+                    break
+                }
+            }
+        }
+        freeifaddrs(ifaddr)
+        return address
     }
 }
 
