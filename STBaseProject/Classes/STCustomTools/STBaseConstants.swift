@@ -61,8 +61,8 @@ public class STBaseConstants: NSObject {
         if size == .zero {
             return 1.0
         }
-        let min = UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height : UIScreen.main.bounds.width
-        return min / size.width
+        let minScreenSize = min(UIScreen.main.bounds.width, UIScreen.main.bounds.height)
+        return minScreenSize / size.width
     }
     
     /// Current screen ratio to the standard design size

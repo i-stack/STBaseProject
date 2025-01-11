@@ -28,6 +28,25 @@ public extension String {
         let jsonStr: String = String.init(data: data! as Data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue)) ?? ""
         return jsonStr
     }
+    
+    static func st_convertModelToParams<T>(_ model: T) -> [String: String] {
+        var params: [String: String] = [:]
+        let mirror = Mirror(reflecting: model)
+        for case let (label?, value) in mirror.children {
+            if let stringValue = value as? String {
+                params[label] = stringValue
+            } else if let convertibleValue = "\(value)" as String? {
+                params[label] = convertibleValue
+            }
+        }
+        return params
+    }
+    
+    static func st_convertDictToURLEncoded(params: [String: String]) -> Data {
+        if params.count < 1 { return Data()}
+        let parameterString = params.map { "\($0.key)=\($0.value)" }.joined(separator: "&")
+        return parameterString.data(using: .utf8) ?? Data()
+    }
 }
 
 public extension String {
