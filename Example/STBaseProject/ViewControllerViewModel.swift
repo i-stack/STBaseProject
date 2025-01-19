@@ -26,7 +26,7 @@ class ViewControllerViewModel: NSObject {
     func loadData(complection: @escaping(Bool) -> Void) {
         dataSources.removeAll()
         var model = ViewControllerModel()
-        model.title = "谋事视频下载"
+        model.title = Bundle.st_localizedString(key: "test1")
         model.nibName = "STNextViewController"
         model.className = model.nibName
         dataSources.append(model)

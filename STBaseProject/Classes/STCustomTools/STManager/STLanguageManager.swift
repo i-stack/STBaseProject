@@ -8,7 +8,7 @@
 import Foundation
 
 struct STLanguageConstantKey {
-    static var kBundleKey = true
+    static var customBundleKey: UInt8 = 10
     let appLanguageSwitchKey = "App_Language_Switch_Key"
 }
 
@@ -19,7 +19,7 @@ public class STLanguageManager: Bundle, @unchecked Sendable {
     }
     
     public override func localizedString(forKey key: String, value: String?, table tableName: String?) -> String {
-        if let bundle = objc_getAssociatedObject(self, &STLanguageConstantKey.kBundleKey) as? Bundle {
+        if let bundle = objc_getAssociatedObject(self, &STLanguageConstantKey.customBundleKey) as? Bundle {
             return bundle.localizedString(forKey: key, value: value, table: tableName)
         }
         return super.localizedString(forKey: key, value: value, table: tableName)
@@ -27,17 +27,18 @@ public class STLanguageManager: Bundle, @unchecked Sendable {
 }
 
 public extension Bundle {
-    static func st_localizedString(key: String) -> String {
-        var string: String = ""
-        let language = self.st_getCustomLanguage()
-        if let lPath = Bundle.main.path(forResource: language, ofType: "lproj") {
-            if let bundle = Bundle.init(path: lPath) {
-                string = bundle.localizedString(forKey: key, value: nil, table: "Localizable")
-            }
-        } else {
-            string = Bundle.main.localizedString(forKey: key, value: nil, table: "Localizable")
+    static var customLanguageBundle: Bundle? {
+        get {
+            return objc_getAssociatedObject(Bundle.main, &STLanguageConstantKey.customBundleKey) as? Bundle
         }
-        return string
+        set {
+            objc_setAssociatedObject(Bundle.main, &STLanguageConstantKey.customBundleKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    static func st_localizedString(key: String, tableName: String = "Localizable") -> String {
+        let bundle = customLanguageBundle ?? Bundle.main
+        return bundle.localizedString(forKey: key, value: nil, table: tableName)
     }
     
     /// setting language
@@ -47,84 +48,56 @@ public extension Bundle {
     /// `zh-Hans.lproj` pass in `zh-Hans`, provided that the language package has been added to the project in advance.
     ///
     static func st_setCusLanguage(language: String) -> Void {
-        let df = UserDefaults.standard
-        if language.count > 0 {
-            var newLanguage = language
-            if newLanguage.contains(".lproj") {
-                let components = newLanguage.components(separatedBy: ".")
-                if components.count > 0 {
-                    if let first = components.first {
-                        newLanguage = first
-                    }
-                }
-            }
-            if let path = Bundle.main.path(forResource: newLanguage, ofType: "lproj") {
-                if let bundle = Bundle.init(path: path) {
-                    objc_setAssociatedObject(Bundle.main, &STLanguageConstantKey.kBundleKey, bundle, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-                }
-            }
-            df.set(newLanguage, forKey: STLanguageConstantKey().appLanguageSwitchKey)
-        } else {
-            df.removeObject(forKey: STLanguageConstantKey().appLanguageSwitchKey)
+        guard !language.isEmpty else {
+            customLanguageBundle = nil
+            UserDefaults.standard.removeObject(forKey: STLanguageConstantKey().appLanguageSwitchKey)
+            UserDefaults.standard.synchronize()
+            return
         }
-        df.synchronize()
+        
+        if let path = Bundle.main.path(forResource: language, ofType: "lproj") {
+            if let bundle = Bundle.init(path: path) {
+                customLanguageBundle = bundle
+                UserDefaults.standard.set(language, forKey: STLanguageConstantKey().appLanguageSwitchKey)
+            }
+        } else {
+            customLanguageBundle = nil
+            UserDefaults.standard.removeObject(forKey: STLanguageConstantKey().appLanguageSwitchKey)
+        }
+        UserDefaults.standard.synchronize()
     }
     
     /// Get the current custom language; if the system language is followed, the output is `nil`.
     static func st_getCustomLanguage() -> String {
-        let df = UserDefaults.standard
-        var language = ""
-        if let lan = df.value(forKey: STLanguageConstantKey().appLanguageSwitchKey) as? String {
-            language = lan
+        if let language = UserDefaults.standard.string(forKey: STLanguageConstantKey().appLanguageSwitchKey), !language.isEmpty {
+            return language
         }
-        
-        if language.count < 1 {
-            language = self.st_appSupportLanguage()
-        }
-        
-        if language.contains("zh-Hans") {
-            language = "zh-Hans"
-        } else if language.contains("zh-Hant") {
-            language = "zh-Hant"
-        } else if language.contains("en") {
-            language = "en"
-        } else if language.contains("en-AU") {
-            language = "en-AU"
-        }
-        return language
+        return self.st_appSupportLanguage()
     }
 
     /// Follow the system language for recovery.
-    static func st_restoreSysLanguage() -> Void {
+    static func st_restoreSystemLanguage() -> Void {
         self.st_setCusLanguage(language: "")
     }
     
-    static func st_sysLanguage() -> String {
-        let languages = NSLocale.preferredLanguages
-        if languages.count > 0 {
-            if let language = languages.first {
-                return language
-            }
-        }
-        return "en-CN"
+    static func st_systemLanguage() -> String {
+        return NSLocale.preferredLanguages.first ?? "en"
     }
     
      static func st_appSupportLanguage() -> String {
-        if let languages = UserDefaults.standard.value(forKey: "AppleLanguages") as? Array<String>, languages.count > 0 {
-            if let language = languages.first {
-                return language
-            }
+         if let languages = UserDefaults.standard.value(forKey: "AppleLanguages") as? [String], !languages.isEmpty {
+             return languages.first ?? "en"
         }
-        return "en-CN"
+        return "en"
     }
     
     static func st_configLanguage() -> Void {
         object_setClass(Bundle.main, STLanguageManager.self)
-        let cusLan = STLanguageManager.st_getCustomLanguage()
-        if cusLan.count < 1 {
-            STLanguageManager.st_setCusLanguage(language: "en")
+        let customLanguage = st_getCustomLanguage()
+        if customLanguage.isEmpty {
+            st_setCusLanguage(language: "en")
         } else {
-            STLanguageManager.st_setCusLanguage(language: cusLan)
+            st_setCusLanguage(language: customLanguage)
         }
     }
 }

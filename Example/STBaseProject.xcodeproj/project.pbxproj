@@ -16,7 +16,6 @@
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
 		62C35D5E28937A3C00C449DF /* color.json in Resources */ = {isa = PBXBuildFile; fileRef = 62C35D5D28937A3C00C449DF /* color.json */; };
 		62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C35D61289B634B00C449DF /* STNextViewController.swift */; };
-		62C35D64289B634B00C449DF /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 62C35D62289B634B00C449DF /* STNextViewController.xib */; };
 		62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */; };
 		62CBA81927D9D6CD001204B1 /* file.html in Resources */ = {isa = PBXBuildFile; fileRef = 62CBA81827D9D6CD001204B1 /* file.html */; };
 		E409782429A2615300918A1E /* content.json in Resources */ = {isa = PBXBuildFile; fileRef = E409782329A2615300918A1E /* content.json */; };
@@ -24,6 +23,9 @@
 		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
 		E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1E29AC558A00760473 /* ViewControllerModel.swift */; };
 		E438C4072D2690B10022AD20 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E438C4062D2690B10022AD20 /* NetworkExtension.framework */; };
+		E48B26272D3CA2D700BF3FC3 /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48B26262D3CA2D700BF3FC3 /* STNextViewController.xib */; };
+		E48B26362D3CA50800BF3FC3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E48B26342D3CA50800BF3FC3 /* Localizable.strings */; };
+		E48B263E2D3CA6EC00BF3FC3 /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48B263D2D3CA6EC00BF3FC3 /* Label.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,7 +55,6 @@
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		62C35D5D28937A3C00C449DF /* color.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = color.json; sourceTree = "<group>"; };
 		62C35D61289B634B00C449DF /* STNextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STNextViewController.swift; sourceTree = "<group>"; };
-		62C35D62289B634B00C449DF /* STNextViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STNextViewController.xib; sourceTree = "<group>"; };
 		62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCustomURLProtocol.swift; sourceTree = "<group>"; };
 		62CBA81827D9D6CD001204B1 /* file.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = file.html; sourceTree = "<group>"; };
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -66,6 +67,12 @@
 		E41AED1E29AC558A00760473 /* ViewControllerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerModel.swift; sourceTree = "<group>"; };
 		E438C4062D2690B10022AD20 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		E457BB522D1E859100F5EFAC /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		E48B26252D3CA2D700BF3FC3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/STNextViewController.xib; sourceTree = "<group>"; };
+		E48B26352D3CA50800BF3FC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		E48B26372D3CA51D00BF3FC3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		E48B263A2D3CA69400BF3FC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/STNextViewController.strings; sourceTree = "<group>"; };
+		E48B263B2D3CA69800BF3FC3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/STNextViewController.strings"; sourceTree = "<group>"; };
+		E48B263D2D3CA6EC00BF3FC3 /* Label.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,10 +131,11 @@
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				62C35D61289B634B00C449DF /* STNextViewController.swift */,
-				62C35D62289B634B00C449DF /* STNextViewController.xib */,
+				E48B26262D3CA2D700BF3FC3 /* STNextViewController.xib */,
 				62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */,
 				E41AED2429AC968D00760473 /* Module */,
 				E409782329A2615300918A1E /* content.json */,
+				E48B263C2D3CA6D900BF3FC3 /* Extension */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
 			name = "Example for STBaseProject";
@@ -144,6 +152,7 @@
 				D130156922DC92BC00D5216C /* STBaseProject-Bridging-Header.h */,
 				62CBA81827D9D6CD001204B1 /* file.html */,
 				62C35D5D28937A3C00C449DF /* color.json */,
+				E48B26342D3CA50800BF3FC3 /* Localizable.strings */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -228,6 +237,14 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
+		E48B263C2D3CA6D900BF3FC3 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				E48B263D2D3CA6EC00BF3FC3 /* Label.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -298,6 +315,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = 607FACC71AFB9204008FA782;
 			productRefGroup = 607FACD11AFB9204008FA782 /* Products */;
@@ -316,9 +334,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				E409782429A2615300918A1E /* content.json in Resources */,
-				62C35D64289B634B00C449DF /* STNextViewController.xib in Resources */,
+				E48B26272D3CA2D700BF3FC3 /* STNextViewController.xib in Resources */,
 				E41AED1A29AC509100760473 /* ViewController.xib in Resources */,
 				62CBA81927D9D6CD001204B1 /* file.html in Resources */,
+				E48B26362D3CA50800BF3FC3 /* Localizable.strings in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
 				62C35D5E28937A3C00C449DF /* color.json in Resources */,
 				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
@@ -387,6 +406,7 @@
 				E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */,
 				E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */,
 				62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */,
+				E48B263E2D3CA6EC00BF3FC3 /* Label.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -424,6 +444,25 @@
 				607FACDF1AFB9204008FA782 /* Base */,
 			);
 			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+		E48B26262D3CA2D700BF3FC3 /* STNextViewController.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E48B26252D3CA2D700BF3FC3 /* Base */,
+				E48B263A2D3CA69400BF3FC3 /* en */,
+				E48B263B2D3CA69800BF3FC3 /* zh-Hans */,
+			);
+			name = STNextViewController.xib;
+			sourceTree = "<group>";
+		};
+		E48B26342D3CA50800BF3FC3 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E48B26352D3CA50800BF3FC3 /* en */,
+				E48B26372D3CA51D00BF3FC3 /* zh-Hans */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

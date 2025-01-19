@@ -1,0 +1,36 @@
+//
+//  Localizable.strings
+//  UrtyePbhk
+//
+//  Created by song on 2024/12/28.
+//
+
+"lianxirenAuthority" = "UrtyePbhk perlu meminta izin kontak Anda untuk memverifikasi keaslian identitas Anda, membantu Anda menyelesaikan proses sertifikasi dengan cepat, dan juga membantu Anda lolos permohonan pinjaman.";
+
+"numberShow" = "Enter the password we sent you to themobile number ";
+
+"delay"="Delay";
+"realyment"="Realyment";
+"apply"="Apply";
+"review"="Review";
+"finish"="Finish";
+
+"productLimtTime"="The loan period is ";
+"productRate"="The interest rate is as low as ";
+"productListTip"="You can also view other popularloan products";
+
+"SelectStreetTown"="Select street/town";
+
+"PrivacyAgreement"="Perjanjian Privasi";
+"OnlineService"="Online Service";
+
+"PrivacyAgreementRead"="Saya telah membaca dan setuju Perjanjian Privasi";
+"PrivacyAgreementReadPart"="Perjanjian Privasi";
+"userPrivacyAgreement"="Harap baca perjanjian dan setujui ";
+
+"GoodMorning"="Selamat pagi ";
+"SettingTip"="Layanan Pinjaman yang Mudah, Cepat dan Aman";
+"Productdetails"="Detail produk";
+"PersonalInformation"="Rincian Produk";
+"BankInformation"="Lkat Kartu Bank";
+"ContactsInformation"="Kontak Darurat";
