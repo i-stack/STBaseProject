@@ -27,37 +27,46 @@ Pod::Spec.new do |s|
       'STBaseProject/Classes/STBaseModule/STBaseView/*.swift',
       'STBaseProject/Classes/STBaseModule/STBaseConfig/*.swift',
     ]
-    ss.dependency 'STBaseProject/STCustomTools'
+    ss.dependency 'STBaseProject/STDeviceInfo'
+    ss.dependency 'STBaseProject/STExtension'
+    ss.dependency 'STBaseProject/STUIControl'
+    ss.dependency 'STBaseProject/STThread'
+    ss.dependency 'STBaseProject/STHTTP'
   end
   
-  s.subspec 'STCustomTools' do |ss|
-    ss.source_files = [
-      'STBaseProject/Classes/STCustomTools/*.swift',
-      'STBaseProject/Classes/STCustomTools/STHUD/*.swift',
-      'STBaseProject/Classes/STCustomTools/STHTTP/*.swift',
-      'STBaseProject/Classes/STCustomTools/STOther/*.swift',
-      'STBaseProject/Classes/STCustomTools/STString/*.swift',
-      'STBaseProject/Classes/STCustomTools/STThread/*.swift',
-      'STBaseProject/Classes/STCustomTools/STManager/*.swift',
-      'STBaseProject/Classes/STCustomTools/STUIControl/*.swift',
-      'STBaseProject/Classes/STCustomTools/STDeviceInfo/*.swift'
-    ]
+  s.subspec 'STDeviceInfo' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STDeviceInfo/*.swift']
+    ss.dependency 'DeviceKit'
   end
-  
-#  s.subspec 'STOptionalTools' do |ss|
-#    ss.source_files = ['STBaseProject/Classes/STOptionalTools/*.swift']
-#  end
-    
-#  s.subspec 'STScanner' do |ss|
-#    ss.source_files = ['STBaseProject/Classes/STOptionalTools/STScanner/*.swift']
-#  end
-#
-#  s.subspec 'STScreenshot' do |ss|
-#    ss.source_files = ['STBaseProject/Classes/STOptionalTools/STScreenshot/*.swift']
-#  end
 
-#  s.subspec 'STHUD' do |ss|
-#    ss.source_files = ['STBaseProject/Classes/STOptionalTools/STHUD/*.swift']
-#  end
+  s.subspec 'STExtension' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STExtension/*.swift']
+  end
+  
+  s.subspec 'STUIControl' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STUIControl/*.swift']
+    ss.dependency 'STBaseProject/STManager'
+  end
+    
+  s.subspec 'STManager' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STManager/*.swift']
+  end
+  
+  s.subspec 'STThread' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STThread/*.swift']
+  end
+  
+  s.subspec 'STHTTP' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STHTTP/*.swift']
+  end
+
+  s.subspec 'STDialog' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
+    ss.dependency 'MBProgressHUD'
+  end
+  
+  s.subspec 'STOther' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STOther/*.swift']
+  end
   
 end

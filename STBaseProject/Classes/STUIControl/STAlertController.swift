@@ -7,72 +7,121 @@
 
 import UIKit
 
-enum STAlertStyle: Int, @unchecked Sendable {
+public enum STAlertStyle: Int, @unchecked Sendable {
     case actionSheet = 0
     case alert = 1
 }
 
-enum STAlertBtnClickType {
+public enum STAlertBtnClickType {
     case btnClick
     case leftBtnClick
     case rightBtnClick
 }
 
-struct STAlertInfo {
-    var title: String = ""
-    var message: String = ""
+public struct STAlertInfo {
+    var title: TextInfo = TextInfo()
+    var message: TextInfo = TextInfo()
     var style: STAlertStyle = .alert
-    var buttonActions: [STAlertActionInfo] = []
+    var buttonActions: [Action] = []
     var buttonHandlers: [(Bool, String) -> Void] = []
-}
-
-struct STAlertActionInfo {
-    var font: UIFont?
-    var title: String = ""
-    var titleColor: UIColor?
-    var backgroundColor: UIColor?
-    var customButton: STBtn? // If there is a value, use it first
-}
-
-class STAlertController: UIViewController {
+        
+    public struct TextInfo {
+        var text: String = ""
+        var textFont: UIFont?
+        var textColor: UIColor?
+    }
     
+    public struct Action {
+        var font: UIFont?
+        var title: String = ""
+        var titleColor: UIColor?
+        var backgroundColor: UIColor?
+        var customButton: STBtn? // If there is a value, use it first
+    }
+    
+    public struct LineImageView {
+        var hBackgroundColor: UIColor?
+        var vBackgroundColor: UIColor?
+    }
+}
+
+open class STAlertController: UIViewController {
+    
+    private var isPresented: Bool = false
     private var newConstraint: NSLayoutConstraint!
     private var backgroundColor: UIColor = UIColor.white
     private var alertInfo: STAlertInfo = STAlertInfo()
-   
-    convenience init(title: String, message: String, style: STAlertStyle) {
+    
+    convenience init(style: STAlertStyle) {
         self.init()
-        self.alertInfo.title = title
-        self.alertInfo.message = message
         self.alertInfo.style = style
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    convenience init(title: String, message: String, style: STAlertStyle) {
+        self.init()
+        self.alertInfo.style = style
+        self.alertInfo.title.text = title
+        self.alertInfo.message.text = message
     }
     
-    override func viewDidLoad() {
+    convenience init(info: STAlertInfo) {
+        self.init()
+        self.alertInfo = info
+    }
+    
+    open override func viewDidLoad() {
         super.viewDidLoad()
     }
     
-    func setup() {
-        configCustomAlertView()
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.modalPresentationStyle = .overFullScreen
     }
     
-    func setBackground(color: UIColor) {
+    open override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.isPresented = true
+    }
+    
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.isPresented = false
+    }
+    
+    public func getIsPresented() -> Bool {
+        return self.isPresented
+    }
+    
+    public func setup() {
+        self.configCustomAlertView()
+    }
+    
+    public func setBackground(color: UIColor) {
         self.backgroundColor = color
     }
     
-    func addAction(actionInfo: STAlertActionInfo, handler: @escaping((Bool, String) -> Void)) {
-        if self.alertInfo.buttonActions.count < 2 {
-            self.alertInfo.buttonActions.append(actionInfo)
+    public func updateTitle(text: String) {
+        self.titleLabel.text = text
+    }
+    
+    public func updateMessage(text: String) {
+        self.messageLabel.text = text
+    }
+    
+    public func addAction(action: STAlertInfo.Action, handler: @escaping((Bool, String) -> Void)) {
+        if self.alertInfo.style == .alert {
+            if self.alertInfo.buttonActions.count < 2 {
+                self.alertInfo.buttonActions.append(action)
+            } else {
+                self.alertInfo.buttonActions[1] = action
+            }
         } else {
-            self.alertInfo.buttonActions[1] = actionInfo
+            self.alertInfo.buttonActions.append(action)
         }
         self.alertInfo.buttonHandlers.append(handler)
     }
     
-    func animateIn() {
+    public func animateIn() {
         self.alertView.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
         self.alertView.alpha = 0
 
@@ -82,7 +131,7 @@ class STAlertController: UIViewController {
         })
     }
        
-    func animateOut(completion: (() -> Void)? = nil) {
+    public func animateOut(completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: 0.4, animations: {
            self.alertView.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
            self.alertView.alpha = 0
@@ -91,17 +140,24 @@ class STAlertController: UIViewController {
         })
     }
        
-    func show(in parentVC: UIViewController) {
-        parentVC.present(self, animated: true, completion: nil)
+    public func show(in parentVC: UIViewController) {
+        if let presentedVC = parentVC.presentedViewController {
+            presentedVC.dismiss(animated: false) { [weak self] in
+                guard let strongSelf = self else { return }
+                parentVC.present(strongSelf, animated: true, completion: nil)
+            }
+        } else {
+            parentVC.present(self, animated: true, completion: nil)
+        }
     }
 
-    func dismissAlert() {
-        animateOut {
+    public func dismissAlert() {
+        self.animateOut {
             self.dismiss(animated: true, completion: nil)
         }
     }
 
-    func configCustomAlertView() {
+    private func configCustomAlertView() {
         self.view.addSubview(self.alertView)
         self.newConstraint = NSLayoutConstraint.init(item: self.alertView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 180)
         if self.alertInfo.style == .alert {
@@ -120,9 +176,9 @@ class STAlertController: UIViewController {
             ])
         }
         
-        if self.alertInfo.title != "" && self.alertInfo.message != "" {
-            self.titleLabel.text = self.alertInfo.title
-            self.messageLabel.text = self.alertInfo.message
+        if self.alertInfo.title.text != "" && self.alertInfo.message.text != "" {
+            self.titleLabel.text = self.alertInfo.title.text
+            self.messageLabel.text = self.alertInfo.message.text
             self.alertView.addSubview(self.titleLabel)
             self.alertView.addSubview(self.messageLabel)
             self.view.addConstraints([
@@ -135,16 +191,16 @@ class STAlertController: UIViewController {
                 NSLayoutConstraint.init(item: self.messageLabel, attribute: .left, relatedBy: .equal, toItem: self.titleLabel, attribute: .left, multiplier: 1, constant: 20),
                 NSLayoutConstraint.init(item: self.messageLabel, attribute: .right, relatedBy: .equal, toItem: self.titleLabel, attribute: .right, multiplier: 1, constant: -20),
             ])
-        } else if self.alertInfo.title != "" && self.alertInfo.message == "" {
-            self.titleLabel.text = self.alertInfo.title
+        } else if self.alertInfo.title.text != "" && self.alertInfo.message.text == "" {
+            self.titleLabel.text = self.alertInfo.title.text
             self.alertView.addSubview(self.titleLabel)
             self.view.addConstraints([
                 NSLayoutConstraint.init(item: self.titleLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: 20),
                 NSLayoutConstraint.init(item: self.titleLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 20),
                 NSLayoutConstraint.init(item: self.titleLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -20),
             ])
-        } else if self.alertInfo.title == "" && self.alertInfo.message != "" {
-            self.messageLabel.text = self.alertInfo.message
+        } else if self.alertInfo.title.text == "" && self.alertInfo.message.text != "" {
+            self.messageLabel.text = self.alertInfo.message.text
             self.alertView.addSubview(self.messageLabel)
             self.view.addConstraints([
                 NSLayoutConstraint.init(item: self.messageLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: 20),
@@ -152,10 +208,10 @@ class STAlertController: UIViewController {
                 NSLayoutConstraint.init(item: self.messageLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -20),
             ])
         }
-        configBtn()
+        self.configAlertBtn()
     }
     
-    @objc func alertButtonClick(sender: STBtn) {
+    @objc private func alertButtonClick(sender: STBtn) {
         if self.alertInfo.buttonHandlers.count == 1 {
             if let handler = self.alertInfo.buttonHandlers.first {
                 handler(true, sender.titleLabel?.text ?? "")
@@ -173,11 +229,11 @@ class STAlertController: UIViewController {
         }
     }
     
-    private func configBtn() {
+    private func configAlertBtn() {
         if self.alertInfo.buttonActions.count < 1 { return }
         if self.alertInfo.buttonActions.count == 1 {
             self.alertView.addSubview(self.lineImageH)
-            let btn = createBtn(actionInfo: self.alertInfo.buttonActions[0])
+            let btn = self.createBtn(action: self.alertInfo.buttonActions[0])
             btn.identifier = STAlertBtnClickType.btnClick
             btn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(btn)
@@ -197,12 +253,12 @@ class STAlertController: UIViewController {
             self.alertView.addSubview(self.lineImageH)
             self.alertView.addSubview(self.lineImageV)
             
-            let leftBtn = createBtn(actionInfo: self.alertInfo.buttonActions[0])
+            let leftBtn = self.createBtn(action: self.alertInfo.buttonActions[0])
             leftBtn.identifier = STAlertBtnClickType.leftBtnClick
             leftBtn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(leftBtn)
             
-            let rightBtn = createBtn(actionInfo: self.alertInfo.buttonActions[1])
+            let rightBtn = self.createBtn(action: self.alertInfo.buttonActions[1])
             rightBtn.identifier = STAlertBtnClickType.rightBtnClick
             rightBtn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(rightBtn)
@@ -232,9 +288,9 @@ class STAlertController: UIViewController {
             ])
         }
         self.view.layoutIfNeeded()
-        if self.alertInfo.message != "" {
+        if self.alertInfo.message.text != "" {
             self.newConstraint.constant = self.messageLabel.frame.maxY + 54
-        } else if self.alertInfo.title != "" {
+        } else if self.alertInfo.title.text != "" {
             self.newConstraint.constant = self.titleLabel.frame.maxY + 54
         }
         UIView.animate(withDuration: 0.3) {
@@ -274,26 +330,26 @@ class STAlertController: UIViewController {
         return label
     }()
     
-    private func createBtn(actionInfo: STAlertActionInfo) -> STBtn {
-        if let customButton = actionInfo.customButton {
+    private func createBtn(action: STAlertInfo.Action) -> STBtn {
+        if let customButton = action.customButton {
             return customButton
         }
         let btn = STBtn(type: .custom)
         btn.isUserInteractionEnabled = true
         btn.contentVerticalAlignment = .center
         btn.contentHorizontalAlignment = .center
-        btn.setTitle(actionInfo.title, for: .normal)
-        if let font = actionInfo.font {
+        btn.setTitle(action.title, for: .normal)
+        if let font = action.font {
             btn.titleLabel?.font = font
         } else {
             btn.titleLabel?.font = UIFont.st_systemFont(ofSize: 14, weight: .regular)
         }
-        if let titleColor = actionInfo.titleColor {
+        if let titleColor = action.titleColor {
             btn.setTitleColor(titleColor, for: .normal)
         } else {
             btn.setTitleColor(UIColor.systemGray, for: .normal)
         }
-        if let backgroundColor = actionInfo.backgroundColor {
+        if let backgroundColor = action.backgroundColor {
             btn.backgroundColor = backgroundColor
         }
         btn.translatesAutoresizingMaskIntoConstraints = false

@@ -59,13 +59,12 @@ public extension UIImage {
         return imageData
     }
     
-    func st_imageFormat() -> STImageFormat {
-        let data = st_imageToData()
+    func st_getImageFormat() -> STImageFormat {
+        let data = self.st_imageToData()
         let newData = NSData.init(data: data)
         if newData.length < 1 {
             return .STImageFormatUndefined
         }
-        
         var c: UInt8?
         newData.getBytes(&c, length: 1)
         switch c {
@@ -116,12 +115,33 @@ public extension UIImage {
         return .STImageFormatUndefined
     }
     
+    func st_getImageType() -> String? {
+        let format = self.st_getImageFormat()
+        switch format {
+        case .STImageFormatPNG:
+            return "png"
+        case .STImageFormatGIF:
+            return "gif"
+        case .STImageFormatJPEG:
+            return "jpeg"
+        case .STImageFormatTIFF:
+            return "tiff"
+        case .STImageFormatWebP:
+            return "webp"
+        case .STImageFormatHEIC:
+            return "heic"
+        case .STImageFormatHEIF:
+            return "heif"
+        case .STImageFormatUndefined:
+            return nil
+        }
+    }
+    
     /// 获取图片某一点的颜色
     func st_getPointColor(point: CGPoint) -> UIColor {
         guard CGRect(origin: CGPoint(x: 0, y: 0), size: self.size).contains(point) else {
             return UIColor.clear
         }
-
         let pointX = trunc(point.x);
         let pointY = trunc(point.y);
 
@@ -148,6 +168,44 @@ public extension UIImage {
         } else {
             return UIColor(red: red, green: green, blue: blue, alpha: alpha)
         }
+    }
+}
+
+public extension UIImage {
+    static func st_compressImageToSize(_ image: UIImage, maxFileSize: Int) -> Data? {
+        let maxFileSizeBytes = maxFileSize * 1024
+        var compressionQuality: CGFloat = 1.0
+        let imageData = image.jpegData(compressionQuality: compressionQuality)
+        guard var data = imageData, data.count > maxFileSizeBytes else {
+            return imageData
+        }
+        while data.count > maxFileSizeBytes && compressionQuality > 0.1 {
+            compressionQuality -= 0.1
+            if let compressedData = image.jpegData(compressionQuality: compressionQuality) {
+                data = compressedData
+            }
+        }
+        if data.count > maxFileSizeBytes {
+            let targetSize = self.st_calculateTargetSize(for: image, maxFileSize: maxFileSizeBytes)
+            if let resizedImage = self.st_resizeImage(image, targetSize: targetSize) {
+                return self.st_compressImageToSize(resizedImage, maxFileSize: maxFileSize)
+            }
+        }
+        return data
+    }
+    
+    static func st_resizeImage(_ image: UIImage, targetSize: CGSize) -> UIImage? {
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: targetSize))
+        }
+    }
+
+    static func st_calculateTargetSize(for image: UIImage, maxFileSize: Int) -> CGSize {
+        let originalSize = CGSize(width: image.size.width, height: image.size.height)
+        let scaleFactor = sqrt(Double(maxFileSize) / Double(image.jpegData(compressionQuality: 1.0)?.count ?? 1))
+        return CGSize(width: originalSize.width * CGFloat(scaleFactor),
+                      height: originalSize.height * CGFloat(scaleFactor))
     }
 }
 

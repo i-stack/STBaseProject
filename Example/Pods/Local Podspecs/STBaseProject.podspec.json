@@ -1,6 +1,6 @@
 {
   "name": "STBaseProject",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "license": "MIT",
   "summary": "Project infrastructure, common tools. The new project can inherit.",
   "homepage": "https://github.com/i-stack/STBaseProject",
@@ -9,7 +9,7 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "1.1.0"
+    "tag": "1.1.2"
   },
   "platforms": {
     "ios": "13.0"
@@ -28,35 +28,69 @@
         "STBaseProject/Classes/STBaseModule/STBaseConfig/*.swift"
       ],
       "dependencies": {
-        "STBaseProject/STCustomTools": [
-
-        ]
+        "STBaseProject/STDeviceInfo": [],
+        "STBaseProject/STExtension": [],
+        "STBaseProject/STUIControl": [],
+        "STBaseProject/STThread": [],
+        "STBaseProject/STHTTP": []
       }
     },
     {
-      "name": "STBaseConstants",
+      "name": "STExtension",
       "source_files": [
-        "STBaseProject/Classes/STBaseConstants/*.swift"
+        "STBaseProject/Classes/STExtension/*.swift"
       ]
     },
     {
-      "name": "STCustomTools",
+      "name": "STUIControl",
       "source_files": [
-        "STBaseProject/Classes/STCustomTools/*.swift",
-        "STBaseProject/Classes/STCustomTools/STHUD/*.swift",
-        "STBaseProject/Classes/STCustomTools/STHTTP/*.swift",
-        "STBaseProject/Classes/STCustomTools/STOther/*.swift",
-        "STBaseProject/Classes/STCustomTools/STString/*.swift",
-        "STBaseProject/Classes/STCustomTools/STThread/*.swift",
-        "STBaseProject/Classes/STCustomTools/STManager/*.swift",
-        "STBaseProject/Classes/STCustomTools/STUIControl/*.swift",
-        "STBaseProject/Classes/STCustomTools/STDeviceInfo/*.swift"
+        "STBaseProject/Classes/STUIControl/*.swift"
       ],
       "dependencies": {
-        "STBaseProject/STBaseConstants": [
-
-        ]
+        "STBaseProject/STManager": []
       }
+    },
+    {
+      "name": "STDeviceInfo",
+      "source_files": [
+        "STBaseProject/Classes/STDeviceInfo/*.swift"
+      ],
+      "dependencies": {
+        "DeviceKit": []
+      }
+    },
+    {
+      "name": "STManager",
+      "source_files": [
+        "STBaseProject/Classes/STManager/*.swift"
+      ]
+    },
+    {
+      "name": "STThread",
+      "source_files": [
+        "STBaseProject/Classes/STThread/*.swift"
+      ]
+    },
+    {
+      "name": "STHTTP",
+      "source_files": [
+        "STBaseProject/Classes/STHTTP/*.swift"
+      ]
+    },
+    {
+      "name": "STDialog",
+      "source_files": [
+        "STBaseProject/Classes/STDialog/*.swift"
+      ],
+      "dependencies": {
+        "MBProgressHUD": []
+      }
+    },
+    {
+      "name": "STOther",
+      "source_files": [
+        "STBaseProject/Classes/STOther/*.swift"
+      ]
     }
   ],
   "swift_version": "5"

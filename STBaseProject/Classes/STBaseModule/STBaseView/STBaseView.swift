@@ -19,23 +19,22 @@ open class STBaseView: UIView {
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        self.st_baseViewAddScrollView()
     }
     
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
-        self.st_baseViewAddScrollView()
     }
     
-    private func st_baseViewAddScrollView() -> Void {
+    // MARK: - UIScrollView
+    public func st_baseViewAddScrollView() -> Void {
         self.addSubview(self.baseScrollView )
-        self.baseScrollView.addSubview(self.baseContentView)
         self.addConstraints([
             NSLayoutConstraint.init(item: self.baseScrollView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.baseScrollView, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.baseScrollView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.baseScrollView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1, constant: 0)
         ])
+        self.baseScrollView.addSubview(self.baseContentView)
         self.baseScrollView.addConstraints([
             NSLayoutConstraint.init(item: self.baseContentView, attribute: .width, relatedBy: .equal, toItem: self.baseScrollView, attribute: .width, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.baseContentView, attribute: .top, relatedBy: .equal, toItem: self.baseScrollView, attribute: .top, multiplier: 1, constant: 0),
@@ -45,42 +44,57 @@ open class STBaseView: UIView {
         ])
     }
     
-    public func updateExtraContentSize(offset: CGFloat) {
+    public func st_updateExtraContentSize(offset: CGFloat) {
         self.extraContentSizeOffset = offset
     }
     
-    open override func layoutSubviews() {
-        super.layoutSubviews()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            var height: CGFloat = 0
-            if let lastView = self.baseContentView.subviews.last {
-                height = lastView.frame.maxY
-            }
-            self.baseScrollView.contentSize = CGSize.init(width: self.bounds.size.width, height: height + self.extraContentSizeOffset)
-        }
-    }
-    
-    public lazy var baseScrollView: STBaseScrollerView = {
-        let scrollView = STBaseScrollerView()
+    public lazy var baseScrollView: UIScrollView = {
+        let scrollView = UIScrollView()
         scrollView.isPagingEnabled = true
+        scrollView.isScrollEnabled = true
+        scrollView.isUserInteractionEnabled = true
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
+        scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
     public lazy var baseContentView: UIView = {
         let contentView = UIView()
+        contentView.backgroundColor = UIColor.clear
         contentView.translatesAutoresizingMaskIntoConstraints = false
         return contentView
     }()
-}
-
-open class STBaseScrollerView: UIScrollView {
-    open override func touchesShouldCancel(in view: UIView) -> Bool {
-        if view.isKind(of: UIButton.self) {
-            return true
-        }
-        return super.touchesShouldCancel(in: view)
-    }
+    
+    // MARK: - UITableView
+    public lazy var baseTableViewG: UITableView = {
+        let view = UITableView.init(frame: .zero, style: .grouped)
+        view.separatorStyle = .none
+        view.tableFooterView = UIView()
+        view.backgroundColor = UIColor.clear
+        view.rowHeight = UITableView.automaticDimension
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    public lazy var baseTableViewP: UITableView = {
+        let view = UITableView.init(frame: .zero, style: .plain)
+        view.separatorStyle = .none
+        view.tableFooterView = UIView()
+        view.backgroundColor = UIColor.clear
+        view.rowHeight = UITableView.automaticDimension
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    // MARK: - UICollectionView
+    public lazy var baseCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+        collectionView.backgroundColor = .clear
+        collectionView.showsVerticalScrollIndicator = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
 }

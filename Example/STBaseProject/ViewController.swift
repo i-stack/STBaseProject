@@ -108,13 +108,12 @@ extension ViewController {
         btn.setTitle("test001", for: .normal)
         btn.setTitleColor(UIColor.red, for: .normal)
         btn.setImage(UIImage.init(named: "Image"), for: .normal)
-        btn.st_layoutButtonWithEdgeInsets(style: .bottom, imageTitleSpace: 10)
         btn.addTarget(self, action: #selector(btnClick(sender:)), for: .touchUpInside)
         self.view.addSubview(btn)
     }
     
     @objc func btnClick(sender: STBtn) {
-        sender.st_layoutButtonWithEdgeInsets(style: .reset, imageTitleSpace: 0)
+        
     }
 }
 

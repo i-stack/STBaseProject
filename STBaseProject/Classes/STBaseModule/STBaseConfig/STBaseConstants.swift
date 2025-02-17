@@ -8,17 +8,6 @@
 import UIKit
 import Foundation
 
-public enum STScreenSize {
-    case AMXScreenSizeCurrent
-    case AMXScreenSize3p5Inch
-    case AMXScreenSize4Inch
-    case AMXScreenSize4p7Inch
-    case AMXScreenSize5p5Inch
-    case AMXScreenSize7p9Inch
-    case AMXScreenSize9p7Inch
-    case AMXScreenSize12p9Inch
-}
-
 // custom bar height
 public struct STConstantBarHeightModel {
     public var navNormalHeight: CGFloat = 64.0
@@ -90,117 +79,17 @@ public class STBaseConstants: NSObject {
         return self.st_apph() < 667
     }
     
-    /// 3.5inch
-    ///
-    /// Device name: 3GS、4、4S
-    ///
-    /// width x height: 320 x 480 @2x
-    ///
-    public class func st_isIPhone480() -> Bool {
-        return self.st_apph() == 480
-    }
-    
-    /// 4.0inch
-    ///
-    /// Device name: 5、5S、5C、SE
-    ///
-    /// width x height:320 x 568 @2x
-    ///
-    public class func st_isIPhone568() -> Bool {
-        return self.st_apph() == 568
-    }
-    
-    /// 4.7inch
-    ///
-    /// Device name: 6、6s、7、8
-    ///
-    /// width x height: 375 x 667 @2x
-    ///
-    public class func st_isIPhone667() -> Bool {
-        return self.st_apph() == 667
-    }
-    
-    /// 5.4inch
-    ///
-    /// Device name: 12 mini
-    ///
-    /// width x height: 360 x 780 @3x
-    ///
-    public class func st_isIPhone12Mini() -> Bool {
-        return self.st_apph() == 780
-    }
-    
-    /// 5.5inch
-    ///
-    /// Device name: 6Plus、6sPlus、7Plus、8Plus
-    ///
-    /// width x height: 414 x 736 @3x
-    ///
-    public class func st_isIPhonePlus() -> Bool {
-        return self.st_apph() == 736
-    }
-    
-    /// 5.8inch
-    ///
-    /// Device name: X、XS、11 Pro
-    ///
-    /// width x height: 375 x 812 @3x
-    ///
-    public class func st_isIPhone812() -> Bool {
-        return self.st_apph() == 812
-    }
-    
-    /// 6.1inch
-    ///
-    /// Device name: 12 Pro
-    ///
-    /// width x height:390 x 844 @3x
-    ///
-    public class func st_isIPhone844() -> Bool {
-        return self.st_apph() == 844
-    }
-    
-    /// 6.1inch
-    ///
-    /// Device name: 11、XR
-    ///
-    /// width x height:414 x 896 @2x
-    ///
-    public class func st_isIPhone896() -> Bool {
-        return self.st_apph() == 896
-    }
-    
-    /// 6.5inch
-    ///
-    /// Device name: 11 Pro Max
-    ///
-    /// width x height:414 x 896 @3x
-    ///
-    public class func st_isIPhone11ProMax() -> Bool {
-        return self.st_apph() == 896
-    }
-    
-    /// 6.7inch
-    ///
-    /// Device name: 12 Pro Max
-    ///
-    /// width x height: 428 x 926
-    ///
-    public class func st_isIPhone926() -> Bool {
-        return self.st_apph() == 926
-    }
-    
     /// Is it a notch screen
     ///
     /// If the height is greater than 736, it is a notch screen
     ///
-    public class func st_isIPhoneSafe() -> Bool {
+    public class func st_isNotchScreen() -> Bool {
         return self.st_apph() > 736
     }
     
     /// nav height
     public class func st_navHeight() -> CGFloat {
-        if self.st_isIPhoneSafe() {
+        if self.st_isNotchScreen() {
             return STBaseConstants.shared.barHeightModel.navIsSafeHeight
         }
         return STBaseConstants.shared.barHeightModel.navNormalHeight
@@ -208,14 +97,14 @@ public class STBaseConstants: NSObject {
     
     /// tabBar height
     public class func st_tabBarHeight() -> CGFloat {
-        if self.st_isIPhoneSafe() {
+        if self.st_isNotchScreen() {
             return STBaseConstants.shared.barHeightModel.tabBarIsSafeHeight
         }
         return STBaseConstants.shared.barHeightModel.tabBarNormalHeight
     }
     
     public class func st_safeBarHeight() -> CGFloat {
-        if self.st_isIPhoneSafe() {
+        if self.st_isNotchScreen() {
             return 34
         }
         return 0

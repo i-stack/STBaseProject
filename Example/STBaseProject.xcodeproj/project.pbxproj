@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -23,9 +23,10 @@
 		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
 		E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1E29AC558A00760473 /* ViewControllerModel.swift */; };
 		E438C4072D2690B10022AD20 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E438C4062D2690B10022AD20 /* NetworkExtension.framework */; };
-		E48B26272D3CA2D700BF3FC3 /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E48B26262D3CA2D700BF3FC3 /* STNextViewController.xib */; };
+		E47FFDD72D4BCC520068B492 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FFDD62D4BCC520068B492 /* File.swift */; };
 		E48B26362D3CA50800BF3FC3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E48B26342D3CA50800BF3FC3 /* Localizable.strings */; };
 		E48B263E2D3CA6EC00BF3FC3 /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48B263D2D3CA6EC00BF3FC3 /* Label.swift */; };
+		E4F5D9192D6330FA00A6C212 /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,12 +68,11 @@
 		E41AED1E29AC558A00760473 /* ViewControllerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerModel.swift; sourceTree = "<group>"; };
 		E438C4062D2690B10022AD20 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
 		E457BB522D1E859100F5EFAC /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
-		E48B26252D3CA2D700BF3FC3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/STNextViewController.xib; sourceTree = "<group>"; };
+		E47FFDD62D4BCC520068B492 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		E48B26352D3CA50800BF3FC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E48B26372D3CA51D00BF3FC3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		E48B263A2D3CA69400BF3FC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/STNextViewController.strings; sourceTree = "<group>"; };
-		E48B263B2D3CA69800BF3FC3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/STNextViewController.strings"; sourceTree = "<group>"; };
 		E48B263D2D3CA6EC00BF3FC3 /* Label.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
+		E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STNextViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,8 +131,9 @@
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				62C35D61289B634B00C449DF /* STNextViewController.swift */,
-				E48B26262D3CA2D700BF3FC3 /* STNextViewController.xib */,
+				E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */,
 				62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */,
+				E47FFDD62D4BCC520068B492 /* File.swift */,
 				E41AED2429AC968D00760473 /* Module */,
 				E409782329A2615300918A1E /* content.json */,
 				E48B263C2D3CA6D900BF3FC3 /* Extension */,
@@ -309,7 +310,7 @@
 				};
 			};
 			buildConfigurationList = 607FACCB1AFB9204008FA782 /* Build configuration list for PBXProject "STBaseProject" */;
-			compatibilityVersion = "Xcode 15.0";
+			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -334,7 +335,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E409782429A2615300918A1E /* content.json in Resources */,
-				E48B26272D3CA2D700BF3FC3 /* STNextViewController.xib in Resources */,
+				E4F5D9192D6330FA00A6C212 /* STNextViewController.xib in Resources */,
 				E41AED1A29AC509100760473 /* ViewController.xib in Resources */,
 				62CBA81927D9D6CD001204B1 /* file.html in Resources */,
 				E48B26362D3CA50800BF3FC3 /* Localizable.strings in Resources */,
@@ -406,6 +407,7 @@
 				E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */,
 				E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */,
 				62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */,
+				E47FFDD72D4BCC520068B492 /* File.swift in Sources */,
 				E48B263E2D3CA6EC00BF3FC3 /* Label.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
@@ -444,16 +446,6 @@
 				607FACDF1AFB9204008FA782 /* Base */,
 			);
 			name = LaunchScreen.xib;
-			sourceTree = "<group>";
-		};
-		E48B26262D3CA2D700BF3FC3 /* STNextViewController.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E48B26252D3CA2D700BF3FC3 /* Base */,
-				E48B263A2D3CA69400BF3FC3 /* en */,
-				E48B263B2D3CA69800BF3FC3 /* zh-Hans */,
-			);
-			name = STNextViewController.xib;
 			sourceTree = "<group>";
 		};
 		E48B26342D3CA50800BF3FC3 /* Localizable.strings */ = {

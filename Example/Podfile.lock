@@ -1,20 +1,41 @@
 PODS:
-  - STBaseProject/STBaseConstants (1.1.0)
-  - STBaseProject/STBaseModule (1.1.0):
-    - STBaseProject/STCustomTools
-  - STBaseProject/STCustomTools (1.1.0):
-    - STBaseProject/STBaseConstants
+  - DeviceKit (5.5.0)
+  - MBProgressHUD (1.2.0)
+  - STBaseProject/STBaseModule (1.1.2):
+    - STBaseProject/STDeviceInfo
+    - STBaseProject/STExtension
+    - STBaseProject/STHTTP
+    - STBaseProject/STThread
+    - STBaseProject/STUIControl
+  - STBaseProject/STDeviceInfo (1.1.2):
+    - DeviceKit
+  - STBaseProject/STDialog (1.1.2):
+    - MBProgressHUD
+  - STBaseProject/STExtension (1.1.2)
+  - STBaseProject/STHTTP (1.1.2)
+  - STBaseProject/STManager (1.1.2)
+  - STBaseProject/STThread (1.1.2)
+  - STBaseProject/STUIControl (1.1.2):
+    - STBaseProject/STManager
 
 DEPENDENCIES:
   - STBaseProject/STBaseModule (from `../`)
+  - STBaseProject/STDialog (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - DeviceKit
+    - MBProgressHUD
 
 EXTERNAL SOURCES:
   STBaseProject:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: 8553a296641531334c3936e29a41aa9d46ae886c
+  DeviceKit: d83e38ca196a4ebf0cc5f37d6f0316a24b794d5b
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  STBaseProject: 19f9e7780c0140a7be99cfdb3649341632c36b1d
 
-PODFILE CHECKSUM: e49d2f800b6cc06dd8cff16a10ac774cebf5dc57
+PODFILE CHECKSUM: a78ef1a1b061596713e03cc5e5bea8f071f0911a
 
 COCOAPODS: 1.16.2

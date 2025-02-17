@@ -3,142 +3,239 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		46EB2E00000500 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000004F0 /* Foundation.framework */; };
-		46EB2E00000510 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000000F0 /* STBaseViewController.swift */; };
-		46EB2E00000520 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000110 /* STBaseViewModel.swift */; };
-		46EB2E00000530 /* STBaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000130 /* STBaseModel.swift */; };
-		46EB2E00000540 /* STBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000150 /* STBaseView.swift */; };
-		46EB2E00000550 /* STBaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000170 /* STBaseConfig.swift */; };
-		46EB2E00000560 /* STBaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* STBaseConstants.swift */; };
-		46EB2E00000570 /* STHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* STHUD.swift */; };
-		46EB2E00000580 /* STProgressHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STProgressHUD.swift */; };
-		46EB2E00000590 /* STProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STProgressView.swift */; };
-		46EB2E000005A0 /* STHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STHTTPClient.swift */; };
-		46EB2E000005B0 /* STNetworkMonitoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* STNetworkMonitoring.swift */; };
-		46EB2E000005C0 /* STISOCountryCodeInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STISOCountryCodeInfo.swift */; };
-		46EB2E000005D0 /* STEncrypt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STEncrypt.swift */; };
-		46EB2E000005E0 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STHexColor.swift */; };
-		46EB2E000005F0 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STJSONValue.swift */; };
-		46EB2E00000600 /* STPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STPoint.swift */; };
-		46EB2E00000610 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STPredicateCheck.swift */; };
-		46EB2E00000620 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STString.swift */; };
-		46EB2E00000630 /* STThreadSafe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* STThreadSafe.swift */; };
-		46EB2E00000640 /* STTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* STTimer.swift */; };
-		46EB2E00000650 /* STDateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* STDateManager.swift */; };
-		46EB2E00000660 /* STFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002F0 /* STFileManager.swift */; };
-		46EB2E00000670 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000300 /* STFontManager.swift */; };
-		46EB2E00000680 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000310 /* STLanguageManager.swift */; };
-		46EB2E00000690 /* STAlertAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000330 /* STAlertAction.swift */; };
-		46EB2E000006A0 /* STAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000340 /* STAlertController.swift */; };
-		46EB2E000006B0 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000350 /* STBtn.swift */; };
-		46EB2E000006C0 /* STIBInspectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000360 /* STIBInspectable.swift */; };
-		46EB2E000006D0 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000370 /* STImage.swift */; };
-		46EB2E000006E0 /* STLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000380 /* STLabel.swift */; };
-		46EB2E000006F0 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* STLogView.swift */; };
-		46EB2E00000700 /* STTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* STTabBarItem.swift */; };
-		46EB2E00000710 /* STTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003B0 /* STTextField.swift */; };
-		46EB2E00000720 /* STVerificationCodeBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* STVerificationCodeBtn.swift */; };
-		46EB2E00000730 /* STView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* STView.swift */; };
-		46EB2E00000740 /* STViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003E0 /* STViewController.swift */; };
-		46EB2E00000750 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* STDeviceInfo.swift */; };
-		46EB2E000007B0 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007A0 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E000007F0 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000007E0 /* STBaseProject-dummy.m */; };
-		46EB2E00000890 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E000004F0 /* Foundation.framework */; };
-		46EB2E00000900 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000008F0 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		46EB2E00000950 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000940 /* Pods-STBaseProject_Example-dummy.m */; };
+		46EB2E00000560 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00000550 /* Foundation.framework */; };
+		46EB2E000005F0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000460 /* PrivacyInfo.xcprivacy */; };
+		46EB2E00000620 /* Device.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000000F0 /* Device.generated.swift */; };
+		46EB2E00000670 /* DeviceKit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000660 /* DeviceKit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000006B0 /* DeviceKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000006A0 /* DeviceKit-dummy.m */; };
+		46EB2E00000750 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00000550 /* Foundation.framework */; };
+		46EB2E00000760 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000110 /* MBProgressHUD.m */; };
+		46EB2E00000770 /* MBProgressHUD.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000100 /* MBProgressHUD.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E000007D0 /* MBProgressHUD-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000007C0 /* MBProgressHUD-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000810 /* MBProgressHUD-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000800 /* MBProgressHUD-dummy.m */; };
+		46EB2E000008B0 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00000550 /* Foundation.framework */; };
+		46EB2E000008C0 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000140 /* STBaseViewController.swift */; };
+		46EB2E000008D0 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* STBaseViewModel.swift */; };
+		46EB2E000008E0 /* STBaseModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000180 /* STBaseModel.swift */; };
+		46EB2E000008F0 /* STBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* STBaseView.swift */; };
+		46EB2E00000900 /* STBaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STBaseConfig.swift */; };
+		46EB2E00000910 /* STBaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STBaseConstants.swift */; };
+		46EB2E00000920 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STDeviceInfo.swift */; };
+		46EB2E00000940 /* STHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STHUD.swift */; };
+		46EB2E00000950 /* STData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STData.swift */; };
+		46EB2E00000960 /* STDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STDate.swift */; };
+		46EB2E00000970 /* STEncrypt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STEncrypt.swift */; };
+		46EB2E00000980 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STHexColor.swift */; };
+		46EB2E00000990 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STJSONValue.swift */; };
+		46EB2E000009A0 /* STPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STPoint.swift */; };
+		46EB2E000009B0 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* STPredicateCheck.swift */; };
+		46EB2E000009C0 /* STString.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* STString.swift */; };
+		46EB2E000009D0 /* STHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* STHTTPClient.swift */; };
+		46EB2E000009E0 /* STNetworkMonitoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* STNetworkMonitoring.swift */; };
+		46EB2E000009F0 /* STCameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000300 /* STCameraManager.swift */; };
+		46EB2E00000A00 /* STFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000310 /* STFileManager.swift */; };
+		46EB2E00000A10 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000320 /* STFontManager.swift */; };
+		46EB2E00000A20 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000330 /* STLanguageManager.swift */; };
+		46EB2E00000A30 /* STLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000340 /* STLocationManager.swift */; };
+		46EB2E00000A40 /* STThreadSafe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000360 /* STThreadSafe.swift */; };
+		46EB2E00000A50 /* STTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000370 /* STTimer.swift */; };
+		46EB2E00000A60 /* STAlertAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* STAlertAction.swift */; };
+		46EB2E00000A70 /* STAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* STAlertController.swift */; };
+		46EB2E00000A80 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003B0 /* STBtn.swift */; };
+		46EB2E00000A90 /* STIBInspectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* STIBInspectable.swift */; };
+		46EB2E00000AA0 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* STImage.swift */; };
+		46EB2E00000AB0 /* STLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003E0 /* STLabel.swift */; };
+		46EB2E00000AC0 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003F0 /* STLogView.swift */; };
+		46EB2E00000AD0 /* STTabBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* STTabBarItem.swift */; };
+		46EB2E00000AE0 /* STTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000410 /* STTextField.swift */; };
+		46EB2E00000AF0 /* STVerificationCodeBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000420 /* STVerificationCodeBtn.swift */; };
+		46EB2E00000B00 /* STView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000430 /* STView.swift */; };
+		46EB2E00000B10 /* STViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000440 /* STViewController.swift */; };
+		46EB2E00000B70 /* STBaseProject-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000B60 /* STBaseProject-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000BB0 /* STBaseProject-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BA0 /* STBaseProject-dummy.m */; };
+		46EB2E00000BD0 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BC0 /* CoreGraphics.framework */; };
+		46EB2E00000BF0 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00000BE0 /* QuartzCore.framework */; };
+		46EB2E00000C90 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00000550 /* Foundation.framework */; };
+		46EB2E00000D00 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E00000CF0 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		46EB2E00000D50 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000D40 /* Pods-STBaseProject_Example-dummy.m */; };
+		46EB2E00000DE0 /* DeviceKit.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 4F2B8512E61CD5FEC093A4D7D66EFD01 /* DeviceKit.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		46EB2E00000960 /* PBXContainerItemProxy */ = {
+		46EB2E00000D60 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46EB2E00000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4CDD1C6C8885D07092D8EA708AAC0E53;
+			remoteInfo = DeviceKit;
+		};
+		46EB2E00000D80 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46EB2E00000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 82B0A41D3031FF27D78E17B0A9A46FB0;
+			remoteInfo = MBProgressHUD;
+		};
+		46EB2E00000DA0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46EB2E00000000 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 894EA9674D0D5CFEF493FE4E266279C6;
 			remoteInfo = STBaseProject;
 		};
+		46EB2E00000DC0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46EB2E00000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 71202798008C8B43F85D0A7C26EC0807;
+			remoteInfo = "DeviceKit-DeviceKit";
+		};
+		46EB2E00000DF0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46EB2E00000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4CDD1C6C8885D07092D8EA708AAC0E53;
+			remoteInfo = DeviceKit;
+		};
+		46EB2E00000E10 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46EB2E00000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 82B0A41D3031FF27D78E17B0A9A46FB0;
+			remoteInfo = MBProgressHUD;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		46EB2E000000C0 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		46EB2E000000F0 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewController.swift; sourceTree = "<group>"; };
-		46EB2E00000110 /* STBaseViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewModel.swift; sourceTree = "<group>"; };
-		46EB2E00000130 /* STBaseModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseModel.swift; sourceTree = "<group>"; };
-		46EB2E00000150 /* STBaseView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseView.swift; sourceTree = "<group>"; };
-		46EB2E00000170 /* STBaseConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseConfig.swift; sourceTree = "<group>"; };
-		46EB2E00000190 /* STBaseConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseConstants.swift; path = STBaseProject/Classes/STCustomTools/STBaseConstants.swift; sourceTree = "<group>"; };
-		46EB2E000001B0 /* STHUD.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STHUD.swift; sourceTree = "<group>"; };
-		46EB2E000001C0 /* STProgressHUD.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STProgressHUD.swift; sourceTree = "<group>"; };
-		46EB2E000001D0 /* STProgressView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STProgressView.swift; sourceTree = "<group>"; };
-		46EB2E000001F0 /* STHTTPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STHTTPClient.swift; sourceTree = "<group>"; };
-		46EB2E00000200 /* STNetworkMonitoring.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STNetworkMonitoring.swift; sourceTree = "<group>"; };
-		46EB2E00000220 /* STISOCountryCodeInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STISOCountryCodeInfo.swift; sourceTree = "<group>"; };
-		46EB2E00000240 /* STEncrypt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STEncrypt.swift; sourceTree = "<group>"; };
-		46EB2E00000250 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STHexColor.swift; sourceTree = "<group>"; };
-		46EB2E00000260 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STJSONValue.swift; sourceTree = "<group>"; };
-		46EB2E00000270 /* STPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STPoint.swift; sourceTree = "<group>"; };
-		46EB2E00000280 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STPredicateCheck.swift; sourceTree = "<group>"; };
-		46EB2E00000290 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STString.swift; sourceTree = "<group>"; };
-		46EB2E000002B0 /* STThreadSafe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STThreadSafe.swift; sourceTree = "<group>"; };
-		46EB2E000002C0 /* STTimer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STTimer.swift; sourceTree = "<group>"; };
-		46EB2E000002E0 /* STDateManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STDateManager.swift; sourceTree = "<group>"; };
-		46EB2E000002F0 /* STFileManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STFileManager.swift; sourceTree = "<group>"; };
-		46EB2E00000300 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STFontManager.swift; sourceTree = "<group>"; };
-		46EB2E00000310 /* STLanguageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STLanguageManager.swift; sourceTree = "<group>"; };
-		46EB2E00000330 /* STAlertAction.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STAlertAction.swift; sourceTree = "<group>"; };
-		46EB2E00000340 /* STAlertController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STAlertController.swift; sourceTree = "<group>"; };
-		46EB2E00000350 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBtn.swift; sourceTree = "<group>"; };
-		46EB2E00000360 /* STIBInspectable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STIBInspectable.swift; sourceTree = "<group>"; };
-		46EB2E00000370 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STImage.swift; sourceTree = "<group>"; };
-		46EB2E00000380 /* STLabel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STLabel.swift; sourceTree = "<group>"; };
-		46EB2E00000390 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STLogView.swift; sourceTree = "<group>"; };
-		46EB2E000003A0 /* STTabBarItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STTabBarItem.swift; sourceTree = "<group>"; };
-		46EB2E000003B0 /* STTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STTextField.swift; sourceTree = "<group>"; };
-		46EB2E000003C0 /* STVerificationCodeBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STVerificationCodeBtn.swift; sourceTree = "<group>"; };
-		46EB2E000003D0 /* STView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STView.swift; sourceTree = "<group>"; };
-		46EB2E000003E0 /* STViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STViewController.swift; sourceTree = "<group>"; };
-		46EB2E00000400 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STDeviceInfo.swift; sourceTree = "<group>"; };
-		46EB2E00000420 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
-		46EB2E00000430 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
-		46EB2E00000440 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		46EB2E000004F0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		46EB2E00000770 /* STBaseProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.debug.xcconfig; sourceTree = "<group>"; };
-		46EB2E00000780 /* STBaseProject.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.release.xcconfig; sourceTree = "<group>"; };
-		46EB2E00000790 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
-		46EB2E000007A0 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E000007C0 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
-		46EB2E000007D0 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
-		46EB2E000007E0 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
-		46EB2E000008B0 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
-		46EB2E000008C0 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
-		46EB2E000008D0 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
-		46EB2E000008E0 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
-		46EB2E000008F0 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
-		46EB2E00000910 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
-		46EB2E00000920 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
-		46EB2E00000930 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
-		46EB2E00000940 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
-		8429AD56E21AAC3CB084E87A10AB851C /* Pods-STBaseProject_Example */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-STBaseProject_Example"; path = Pods_STBaseProject_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = STBaseProject; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		190D7383CCEFD8AB3F8CB93098A3F214 /* DeviceKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DeviceKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		46EB2E000000E0 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		46EB2E000000F0 /* Device.generated.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Device.generated.swift; path = Source/Device.generated.swift; sourceTree = "<group>"; };
+		46EB2E00000100 /* MBProgressHUD.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
+		46EB2E00000110 /* MBProgressHUD.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		46EB2E00000140 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewController.swift; sourceTree = "<group>"; };
+		46EB2E00000160 /* STBaseViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseViewModel.swift; sourceTree = "<group>"; };
+		46EB2E00000180 /* STBaseModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseModel.swift; sourceTree = "<group>"; };
+		46EB2E000001A0 /* STBaseView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseView.swift; sourceTree = "<group>"; };
+		46EB2E000001C0 /* STBaseConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseConfig.swift; sourceTree = "<group>"; };
+		46EB2E000001D0 /* STBaseConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = STBaseConstants.swift; sourceTree = "<group>"; };
+		46EB2E000001F0 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceInfo.swift; path = STBaseProject/Classes/STDeviceInfo/STDeviceInfo.swift; sourceTree = "<group>"; };
+		46EB2E00000220 /* STHUD.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHUD.swift; path = STBaseProject/Classes/STDialog/STHUD.swift; sourceTree = "<group>"; };
+		46EB2E00000240 /* STData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STData.swift; path = STBaseProject/Classes/STExtension/STData.swift; sourceTree = "<group>"; };
+		46EB2E00000250 /* STDate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDate.swift; path = STBaseProject/Classes/STExtension/STDate.swift; sourceTree = "<group>"; };
+		46EB2E00000260 /* STEncrypt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STEncrypt.swift; path = STBaseProject/Classes/STExtension/STEncrypt.swift; sourceTree = "<group>"; };
+		46EB2E00000270 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHexColor.swift; path = STBaseProject/Classes/STExtension/STHexColor.swift; sourceTree = "<group>"; };
+		46EB2E00000280 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STExtension/STJSONValue.swift; sourceTree = "<group>"; };
+		46EB2E00000290 /* STPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPoint.swift; path = STBaseProject/Classes/STExtension/STPoint.swift; sourceTree = "<group>"; };
+		46EB2E000002A0 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STExtension/STPredicateCheck.swift; sourceTree = "<group>"; };
+		46EB2E000002B0 /* STString.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STString.swift; path = STBaseProject/Classes/STExtension/STString.swift; sourceTree = "<group>"; };
+		46EB2E000002D0 /* STHTTPClient.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHTTPClient.swift; path = STBaseProject/Classes/STHTTP/STHTTPClient.swift; sourceTree = "<group>"; };
+		46EB2E000002E0 /* STNetworkMonitoring.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STNetworkMonitoring.swift; path = STBaseProject/Classes/STHTTP/STNetworkMonitoring.swift; sourceTree = "<group>"; };
+		46EB2E00000300 /* STCameraManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STCameraManager.swift; path = STBaseProject/Classes/STManager/STCameraManager.swift; sourceTree = "<group>"; };
+		46EB2E00000310 /* STFileManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFileManager.swift; path = STBaseProject/Classes/STManager/STFileManager.swift; sourceTree = "<group>"; };
+		46EB2E00000320 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STManager/STFontManager.swift; sourceTree = "<group>"; };
+		46EB2E00000330 /* STLanguageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLanguageManager.swift; path = STBaseProject/Classes/STManager/STLanguageManager.swift; sourceTree = "<group>"; };
+		46EB2E00000340 /* STLocationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLocationManager.swift; path = STBaseProject/Classes/STManager/STLocationManager.swift; sourceTree = "<group>"; };
+		46EB2E00000360 /* STThreadSafe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STThreadSafe.swift; path = STBaseProject/Classes/STThread/STThreadSafe.swift; sourceTree = "<group>"; };
+		46EB2E00000370 /* STTimer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTimer.swift; path = STBaseProject/Classes/STThread/STTimer.swift; sourceTree = "<group>"; };
+		46EB2E00000390 /* STAlertAction.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STAlertAction.swift; path = STBaseProject/Classes/STUIControl/STAlertAction.swift; sourceTree = "<group>"; };
+		46EB2E000003A0 /* STAlertController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STAlertController.swift; path = STBaseProject/Classes/STUIControl/STAlertController.swift; sourceTree = "<group>"; };
+		46EB2E000003B0 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STUIControl/STBtn.swift; sourceTree = "<group>"; };
+		46EB2E000003C0 /* STIBInspectable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STIBInspectable.swift; path = STBaseProject/Classes/STUIControl/STIBInspectable.swift; sourceTree = "<group>"; };
+		46EB2E000003D0 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STUIControl/STImage.swift; sourceTree = "<group>"; };
+		46EB2E000003E0 /* STLabel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLabel.swift; path = STBaseProject/Classes/STUIControl/STLabel.swift; sourceTree = "<group>"; };
+		46EB2E000003F0 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogView.swift; path = STBaseProject/Classes/STUIControl/STLogView.swift; sourceTree = "<group>"; };
+		46EB2E00000400 /* STTabBarItem.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTabBarItem.swift; path = STBaseProject/Classes/STUIControl/STTabBarItem.swift; sourceTree = "<group>"; };
+		46EB2E00000410 /* STTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STTextField.swift; path = STBaseProject/Classes/STUIControl/STTextField.swift; sourceTree = "<group>"; };
+		46EB2E00000420 /* STVerificationCodeBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STVerificationCodeBtn.swift; path = STBaseProject/Classes/STUIControl/STVerificationCodeBtn.swift; sourceTree = "<group>"; };
+		46EB2E00000430 /* STView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STView.swift; path = STBaseProject/Classes/STUIControl/STView.swift; sourceTree = "<group>"; };
+		46EB2E00000440 /* STViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STViewController.swift; path = STBaseProject/Classes/STUIControl/STViewController.swift; sourceTree = "<group>"; };
+		46EB2E00000460 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Source/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		46EB2E00000480 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		46EB2E00000490 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		46EB2E000004A0 /* STBaseProject.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; path = STBaseProject.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		46EB2E00000550 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E00000610 /* ResourceBundle-DeviceKit-DeviceKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-DeviceKit-DeviceKit-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000630 /* DeviceKit.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DeviceKit.debug.xcconfig; sourceTree = "<group>"; };
+		46EB2E00000640 /* DeviceKit.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DeviceKit.release.xcconfig; sourceTree = "<group>"; };
+		46EB2E00000650 /* DeviceKit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = DeviceKit.modulemap; sourceTree = "<group>"; };
+		46EB2E00000660 /* DeviceKit-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DeviceKit-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000680 /* DeviceKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "DeviceKit-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000690 /* DeviceKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DeviceKit-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E000006A0 /* DeviceKit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DeviceKit-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000790 /* MBProgressHUD.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MBProgressHUD.debug.xcconfig; sourceTree = "<group>"; };
+		46EB2E000007A0 /* MBProgressHUD.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MBProgressHUD.release.xcconfig; sourceTree = "<group>"; };
+		46EB2E000007B0 /* MBProgressHUD.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = MBProgressHUD.modulemap; sourceTree = "<group>"; };
+		46EB2E000007C0 /* MBProgressHUD-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MBProgressHUD-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E000007E0 /* MBProgressHUD-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "MBProgressHUD-Info.plist"; sourceTree = "<group>"; };
+		46EB2E000007F0 /* MBProgressHUD-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MBProgressHUD-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E00000800 /* MBProgressHUD-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "MBProgressHUD-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000B30 /* STBaseProject.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.debug.xcconfig; sourceTree = "<group>"; };
+		46EB2E00000B40 /* STBaseProject.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = STBaseProject.release.xcconfig; sourceTree = "<group>"; };
+		46EB2E00000B50 /* STBaseProject.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = STBaseProject.modulemap; sourceTree = "<group>"; };
+		46EB2E00000B60 /* STBaseProject-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000B80 /* STBaseProject-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "STBaseProject-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000B90 /* STBaseProject-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-prefix.pch"; sourceTree = "<group>"; };
+		46EB2E00000BA0 /* STBaseProject-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "STBaseProject-dummy.m"; sourceTree = "<group>"; };
+		46EB2E00000BC0 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E00000BE0 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/QuartzCore.framework; sourceTree = DEVELOPER_DIR; };
+		46EB2E00000CB0 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00000CC0 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		46EB2E00000CD0 /* Pods-STBaseProject_Example-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-Info.plist"; sourceTree = "<group>"; };
+		46EB2E00000CE0 /* Pods-STBaseProject_Example.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-STBaseProject_Example.modulemap"; sourceTree = "<group>"; };
+		46EB2E00000CF0 /* Pods-STBaseProject_Example-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-STBaseProject_Example-umbrella.h"; sourceTree = "<group>"; };
+		46EB2E00000D10 /* Pods-STBaseProject_Example-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-STBaseProject_Example-frameworks.sh"; sourceTree = "<group>"; };
+		46EB2E00000D20 /* Pods-STBaseProject_Example-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-STBaseProject_Example-acknowledgements.plist"; sourceTree = "<group>"; };
+		46EB2E00000D30 /* Pods-STBaseProject_Example-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-STBaseProject_Example-acknowledgements.markdown"; sourceTree = "<group>"; };
+		46EB2E00000D40 /* Pods-STBaseProject_Example-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-STBaseProject_Example-dummy.m"; sourceTree = "<group>"; };
+		4F2B8512E61CD5FEC093A4D7D66EFD01 /* DeviceKit.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DeviceKit.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B8FAB0D627B17EDE1366984278705D9 /* MBProgressHUD.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MBProgressHUD.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = STBaseProject.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		46EB2E000004C0 /* Frameworks */ = {
+		46EB2E00000520 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000500 /* Foundation.framework in Frameworks */,
+				46EB2E00000560 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000870 /* Frameworks */ = {
+		46EB2E000005D0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000890 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000730 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000BD0 /* CoreGraphics.framework in Frameworks */,
+				46EB2E00000750 /* Foundation.framework in Frameworks */,
+				46EB2E00000BF0 /* QuartzCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000890 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E000008B0 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000C70 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000C90 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,9 +245,10 @@
 		46EB2E00000010 = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000000C0 /* Podfile */,
+				46EB2E000000E0 /* Podfile */,
 				46EB2E00000090 /* Development Pods */,
 				46EB2E00000060 /* Frameworks */,
+				46EB2E00000080 /* Pods */,
 				46EB2E00000020 /* Products */,
 				46EB2E00000070 /* Targets Support Files */,
 			);
@@ -159,8 +257,11 @@
 		46EB2E00000020 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8429AD56E21AAC3CB084E87A10AB851C /* Pods-STBaseProject_Example */,
-				D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject */,
+				190D7383CCEFD8AB3F8CB93098A3F214 /* DeviceKit.framework */,
+				4F2B8512E61CD5FEC093A4D7D66EFD01 /* DeviceKit.bundle */,
+				8B8FAB0D627B17EDE1366984278705D9 /* MBProgressHUD.framework */,
+				8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */,
+				D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -168,7 +269,7 @@
 		46EB2E00000060 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000004E0 /* iOS */,
+				46EB2E00000540 /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -176,244 +277,290 @@
 		46EB2E00000070 /* Targets Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000008A0 /* Pods-STBaseProject_Example */,
+				46EB2E00000CA0 /* Pods-STBaseProject_Example */,
 			);
 			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
+		46EB2E00000080 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E000000B0 /* DeviceKit */,
+				46EB2E000000C0 /* MBProgressHUD */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 		46EB2E00000090 /* Development Pods */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000000B0 /* STBaseProject */,
+				46EB2E000000D0 /* STBaseProject */,
 			);
 			name = "Development Pods";
 			sourceTree = "<group>";
 		};
-		46EB2E000000B0 /* STBaseProject */ = {
+		46EB2E000000B0 /* DeviceKit */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000410 /* Pod */,
-				46EB2E000000D0 /* STBaseModule */,
-				46EB2E00000180 /* STCustomTools */,
-				46EB2E00000760 /* Support Files */,
+				46EB2E000000F0 /* Device.generated.swift */,
+				46EB2E00000450 /* Resources */,
+				46EB2E00000600 /* Support Files */,
+			);
+			path = DeviceKit;
+			sourceTree = "<group>";
+		};
+		46EB2E000000C0 /* MBProgressHUD */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000100 /* MBProgressHUD.h */,
+				46EB2E00000110 /* MBProgressHUD.m */,
+				46EB2E00000780 /* Support Files */,
+			);
+			path = MBProgressHUD;
+			sourceTree = "<group>";
+		};
+		46EB2E000000D0 /* STBaseProject */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000470 /* Pod */,
+				46EB2E00000120 /* STBaseModule */,
+				46EB2E000001E0 /* STDeviceInfo */,
+				46EB2E00000200 /* STDialog */,
+				46EB2E00000230 /* STExtension */,
+				46EB2E000002C0 /* STHTTP */,
+				46EB2E000002F0 /* STManager */,
+				46EB2E00000350 /* STThread */,
+				46EB2E00000380 /* STUIControl */,
+				46EB2E00000B20 /* Support Files */,
 			);
 			name = STBaseProject;
 			path = ../..;
 			sourceTree = "<group>";
 		};
-		46EB2E000000D0 /* STBaseModule */ = {
+		46EB2E00000120 /* STBaseModule */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000160 /* STBaseConfig */,
-				46EB2E00000120 /* STBaseModel */,
-				46EB2E00000140 /* STBaseView */,
-				46EB2E000000E0 /* STBaseViewController */,
-				46EB2E00000100 /* STBaseViewModel */,
+				46EB2E000001B0 /* STBaseConfig */,
+				46EB2E00000170 /* STBaseModel */,
+				46EB2E00000190 /* STBaseView */,
+				46EB2E00000130 /* STBaseViewController */,
+				46EB2E00000150 /* STBaseViewModel */,
 			);
 			name = STBaseModule;
 			sourceTree = "<group>";
 		};
-		46EB2E000000E0 /* STBaseViewController */ = {
+		46EB2E00000130 /* STBaseViewController */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000000F0 /* STBaseViewController.swift */,
+				46EB2E00000140 /* STBaseViewController.swift */,
 			);
 			name = STBaseViewController;
 			path = STBaseProject/Classes/STBaseModule/STBaseViewController;
 			sourceTree = "<group>";
 		};
-		46EB2E00000100 /* STBaseViewModel */ = {
+		46EB2E00000150 /* STBaseViewModel */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000110 /* STBaseViewModel.swift */,
+				46EB2E00000160 /* STBaseViewModel.swift */,
 			);
 			name = STBaseViewModel;
 			path = STBaseProject/Classes/STBaseModule/STBaseViewModel;
 			sourceTree = "<group>";
 		};
-		46EB2E00000120 /* STBaseModel */ = {
+		46EB2E00000170 /* STBaseModel */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000130 /* STBaseModel.swift */,
+				46EB2E00000180 /* STBaseModel.swift */,
 			);
 			name = STBaseModel;
 			path = STBaseProject/Classes/STBaseModule/STBaseModel;
 			sourceTree = "<group>";
 		};
-		46EB2E00000140 /* STBaseView */ = {
+		46EB2E00000190 /* STBaseView */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000150 /* STBaseView.swift */,
+				46EB2E000001A0 /* STBaseView.swift */,
 			);
 			name = STBaseView;
 			path = STBaseProject/Classes/STBaseModule/STBaseView;
 			sourceTree = "<group>";
 		};
-		46EB2E00000160 /* STBaseConfig */ = {
+		46EB2E000001B0 /* STBaseConfig */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000170 /* STBaseConfig.swift */,
+				46EB2E000001C0 /* STBaseConfig.swift */,
+				46EB2E000001D0 /* STBaseConstants.swift */,
 			);
 			name = STBaseConfig;
 			path = STBaseProject/Classes/STBaseModule/STBaseConfig;
 			sourceTree = "<group>";
 		};
-		46EB2E00000180 /* STCustomTools */ = {
+		46EB2E000001E0 /* STDeviceInfo */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000190 /* STBaseConstants.swift */,
-				46EB2E000003F0 /* STDeviceInfo */,
-				46EB2E000001E0 /* STHTTP */,
-				46EB2E000001A0 /* STHUD */,
-				46EB2E000002D0 /* STManager */,
-				46EB2E00000210 /* STOther */,
-				46EB2E00000230 /* STString */,
-				46EB2E000002A0 /* STThread */,
-				46EB2E00000320 /* STUIControl */,
-			);
-			name = STCustomTools;
-			sourceTree = "<group>";
-		};
-		46EB2E000001A0 /* STHUD */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E000001B0 /* STHUD.swift */,
-				46EB2E000001C0 /* STProgressHUD.swift */,
-				46EB2E000001D0 /* STProgressView.swift */,
-			);
-			name = STHUD;
-			path = STBaseProject/Classes/STCustomTools/STHUD;
-			sourceTree = "<group>";
-		};
-		46EB2E000001E0 /* STHTTP */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E000001F0 /* STHTTPClient.swift */,
-				46EB2E00000200 /* STNetworkMonitoring.swift */,
-			);
-			name = STHTTP;
-			path = STBaseProject/Classes/STCustomTools/STHTTP;
-			sourceTree = "<group>";
-		};
-		46EB2E00000210 /* STOther */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E00000220 /* STISOCountryCodeInfo.swift */,
-			);
-			name = STOther;
-			path = STBaseProject/Classes/STCustomTools/STOther;
-			sourceTree = "<group>";
-		};
-		46EB2E00000230 /* STString */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E00000240 /* STEncrypt.swift */,
-				46EB2E00000250 /* STHexColor.swift */,
-				46EB2E00000260 /* STJSONValue.swift */,
-				46EB2E00000270 /* STPoint.swift */,
-				46EB2E00000280 /* STPredicateCheck.swift */,
-				46EB2E00000290 /* STString.swift */,
-			);
-			name = STString;
-			path = STBaseProject/Classes/STCustomTools/STString;
-			sourceTree = "<group>";
-		};
-		46EB2E000002A0 /* STThread */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E000002B0 /* STThreadSafe.swift */,
-				46EB2E000002C0 /* STTimer.swift */,
-			);
-			name = STThread;
-			path = STBaseProject/Classes/STCustomTools/STThread;
-			sourceTree = "<group>";
-		};
-		46EB2E000002D0 /* STManager */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E000002E0 /* STDateManager.swift */,
-				46EB2E000002F0 /* STFileManager.swift */,
-				46EB2E00000300 /* STFontManager.swift */,
-				46EB2E00000310 /* STLanguageManager.swift */,
-			);
-			name = STManager;
-			path = STBaseProject/Classes/STCustomTools/STManager;
-			sourceTree = "<group>";
-		};
-		46EB2E00000320 /* STUIControl */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E00000330 /* STAlertAction.swift */,
-				46EB2E00000340 /* STAlertController.swift */,
-				46EB2E00000350 /* STBtn.swift */,
-				46EB2E00000360 /* STIBInspectable.swift */,
-				46EB2E00000370 /* STImage.swift */,
-				46EB2E00000380 /* STLabel.swift */,
-				46EB2E00000390 /* STLogView.swift */,
-				46EB2E000003A0 /* STTabBarItem.swift */,
-				46EB2E000003B0 /* STTextField.swift */,
-				46EB2E000003C0 /* STVerificationCodeBtn.swift */,
-				46EB2E000003D0 /* STView.swift */,
-				46EB2E000003E0 /* STViewController.swift */,
-			);
-			name = STUIControl;
-			path = STBaseProject/Classes/STCustomTools/STUIControl;
-			sourceTree = "<group>";
-		};
-		46EB2E000003F0 /* STDeviceInfo */ = {
-			isa = PBXGroup;
-			children = (
-				46EB2E00000400 /* STDeviceInfo.swift */,
+				46EB2E000001F0 /* STDeviceInfo.swift */,
 			);
 			name = STDeviceInfo;
-			path = STBaseProject/Classes/STCustomTools/STDeviceInfo;
 			sourceTree = "<group>";
 		};
-		46EB2E00000410 /* Pod */ = {
+		46EB2E00000200 /* STDialog */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000420 /* LICENSE */,
-				46EB2E00000430 /* README.md */,
-				46EB2E00000440 /* STBaseProject.podspec */,
+				46EB2E00000220 /* STHUD.swift */,
+			);
+			name = STDialog;
+			sourceTree = "<group>";
+		};
+		46EB2E00000230 /* STExtension */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000240 /* STData.swift */,
+				46EB2E00000250 /* STDate.swift */,
+				46EB2E00000260 /* STEncrypt.swift */,
+				46EB2E00000270 /* STHexColor.swift */,
+				46EB2E00000280 /* STJSONValue.swift */,
+				46EB2E00000290 /* STPoint.swift */,
+				46EB2E000002A0 /* STPredicateCheck.swift */,
+				46EB2E000002B0 /* STString.swift */,
+			);
+			name = STExtension;
+			sourceTree = "<group>";
+		};
+		46EB2E000002C0 /* STHTTP */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E000002D0 /* STHTTPClient.swift */,
+				46EB2E000002E0 /* STNetworkMonitoring.swift */,
+			);
+			name = STHTTP;
+			sourceTree = "<group>";
+		};
+		46EB2E000002F0 /* STManager */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000300 /* STCameraManager.swift */,
+				46EB2E00000310 /* STFileManager.swift */,
+				46EB2E00000320 /* STFontManager.swift */,
+				46EB2E00000330 /* STLanguageManager.swift */,
+				46EB2E00000340 /* STLocationManager.swift */,
+			);
+			name = STManager;
+			sourceTree = "<group>";
+		};
+		46EB2E00000350 /* STThread */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000360 /* STThreadSafe.swift */,
+				46EB2E00000370 /* STTimer.swift */,
+			);
+			name = STThread;
+			sourceTree = "<group>";
+		};
+		46EB2E00000380 /* STUIControl */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000390 /* STAlertAction.swift */,
+				46EB2E000003A0 /* STAlertController.swift */,
+				46EB2E000003B0 /* STBtn.swift */,
+				46EB2E000003C0 /* STIBInspectable.swift */,
+				46EB2E000003D0 /* STImage.swift */,
+				46EB2E000003E0 /* STLabel.swift */,
+				46EB2E000003F0 /* STLogView.swift */,
+				46EB2E00000400 /* STTabBarItem.swift */,
+				46EB2E00000410 /* STTextField.swift */,
+				46EB2E00000420 /* STVerificationCodeBtn.swift */,
+				46EB2E00000430 /* STView.swift */,
+				46EB2E00000440 /* STViewController.swift */,
+			);
+			name = STUIControl;
+			sourceTree = "<group>";
+		};
+		46EB2E00000450 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000460 /* PrivacyInfo.xcprivacy */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		46EB2E00000470 /* Pod */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000480 /* LICENSE */,
+				46EB2E00000490 /* README.md */,
+				46EB2E000004A0 /* STBaseProject.podspec */,
 			);
 			name = Pod;
 			sourceTree = "<group>";
 		};
-		46EB2E000004E0 /* iOS */ = {
+		46EB2E00000540 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000004F0 /* Foundation.framework */,
+				46EB2E00000BC0 /* CoreGraphics.framework */,
+				46EB2E00000550 /* Foundation.framework */,
+				46EB2E00000BE0 /* QuartzCore.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
 		};
-		46EB2E00000760 /* Support Files */ = {
+		46EB2E00000600 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000790 /* STBaseProject.modulemap */,
-				46EB2E000007E0 /* STBaseProject-dummy.m */,
-				46EB2E000007C0 /* STBaseProject-Info.plist */,
-				46EB2E000007D0 /* STBaseProject-prefix.pch */,
-				46EB2E000007A0 /* STBaseProject-umbrella.h */,
-				46EB2E00000770 /* STBaseProject.debug.xcconfig */,
-				46EB2E00000780 /* STBaseProject.release.xcconfig */,
+				46EB2E00000650 /* DeviceKit.modulemap */,
+				46EB2E000006A0 /* DeviceKit-dummy.m */,
+				46EB2E00000680 /* DeviceKit-Info.plist */,
+				46EB2E00000690 /* DeviceKit-prefix.pch */,
+				46EB2E00000660 /* DeviceKit-umbrella.h */,
+				46EB2E00000630 /* DeviceKit.debug.xcconfig */,
+				46EB2E00000640 /* DeviceKit.release.xcconfig */,
+				46EB2E00000610 /* ResourceBundle-DeviceKit-DeviceKit-Info.plist */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/DeviceKit";
+			sourceTree = "<group>";
+		};
+		46EB2E00000780 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E000007B0 /* MBProgressHUD.modulemap */,
+				46EB2E00000800 /* MBProgressHUD-dummy.m */,
+				46EB2E000007E0 /* MBProgressHUD-Info.plist */,
+				46EB2E000007F0 /* MBProgressHUD-prefix.pch */,
+				46EB2E000007C0 /* MBProgressHUD-umbrella.h */,
+				46EB2E00000790 /* MBProgressHUD.debug.xcconfig */,
+				46EB2E000007A0 /* MBProgressHUD.release.xcconfig */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/MBProgressHUD";
+			sourceTree = "<group>";
+		};
+		46EB2E00000B20 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				46EB2E00000B50 /* STBaseProject.modulemap */,
+				46EB2E00000BA0 /* STBaseProject-dummy.m */,
+				46EB2E00000B80 /* STBaseProject-Info.plist */,
+				46EB2E00000B90 /* STBaseProject-prefix.pch */,
+				46EB2E00000B60 /* STBaseProject-umbrella.h */,
+				46EB2E00000B30 /* STBaseProject.debug.xcconfig */,
+				46EB2E00000B40 /* STBaseProject.release.xcconfig */,
 			);
 			name = "Support Files";
 			path = "Example/Pods/Target Support Files/STBaseProject";
 			sourceTree = "<group>";
 		};
-		46EB2E000008A0 /* Pods-STBaseProject_Example */ = {
+		46EB2E00000CA0 /* Pods-STBaseProject_Example */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E000008E0 /* Pods-STBaseProject_Example.modulemap */,
-				46EB2E00000930 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
-				46EB2E00000920 /* Pods-STBaseProject_Example-acknowledgements.plist */,
-				46EB2E00000940 /* Pods-STBaseProject_Example-dummy.m */,
-				46EB2E00000910 /* Pods-STBaseProject_Example-frameworks.sh */,
-				46EB2E000008D0 /* Pods-STBaseProject_Example-Info.plist */,
-				46EB2E000008F0 /* Pods-STBaseProject_Example-umbrella.h */,
-				46EB2E000008C0 /* Pods-STBaseProject_Example.debug.xcconfig */,
-				46EB2E000008B0 /* Pods-STBaseProject_Example.release.xcconfig */,
+				46EB2E00000CE0 /* Pods-STBaseProject_Example.modulemap */,
+				46EB2E00000D30 /* Pods-STBaseProject_Example-acknowledgements.markdown */,
+				46EB2E00000D20 /* Pods-STBaseProject_Example-acknowledgements.plist */,
+				46EB2E00000D40 /* Pods-STBaseProject_Example-dummy.m */,
+				46EB2E00000D10 /* Pods-STBaseProject_Example-frameworks.sh */,
+				46EB2E00000CD0 /* Pods-STBaseProject_Example-Info.plist */,
+				46EB2E00000CF0 /* Pods-STBaseProject_Example-umbrella.h */,
+				46EB2E00000CC0 /* Pods-STBaseProject_Example.debug.xcconfig */,
+				46EB2E00000CB0 /* Pods-STBaseProject_Example.release.xcconfig */,
 			);
 			name = "Pods-STBaseProject_Example";
 			path = "Target Support Files/Pods-STBaseProject_Example";
@@ -422,60 +569,135 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		46EB2E000004A0 /* Headers */ = {
+		46EB2E00000500 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E000007B0 /* STBaseProject-umbrella.h in Headers */,
+				46EB2E00000670 /* DeviceKit-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000850 /* Headers */ = {
+		46EB2E00000710 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000900 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
+				46EB2E00000770 /* MBProgressHUD.h in Headers */,
+				46EB2E000007D0 /* MBProgressHUD-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000870 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000B70 /* STBaseProject-umbrella.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000C50 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000D00 /* Pods-STBaseProject_Example-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		81CE5441F11F92C51AAE7BA692D0FA83 /* Pods-STBaseProject_Example */ = {
+		4CDD1C6C8885D07092D8EA708AAC0E53 /* DeviceKit */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00000810 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
+			buildConfigurationList = 46EB2E000004C0 /* Build configuration list for PBXNativeTarget "DeviceKit" */;
 			buildPhases = (
-				46EB2E00000850 /* Headers */,
-				46EB2E00000860 /* Sources */,
-				46EB2E00000870 /* Frameworks */,
-				46EB2E00000880 /* Resources */,
+				46EB2E00000500 /* Headers */,
+				46EB2E00000510 /* Sources */,
+				46EB2E00000520 /* Frameworks */,
+				46EB2E00000530 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				46EB2E00000970 /* PBXTargetDependency */,
+				46EB2E00000DD0 /* PBXTargetDependency */,
+			);
+			name = DeviceKit;
+			productName = DeviceKit;
+			productReference = 190D7383CCEFD8AB3F8CB93098A3F214 /* DeviceKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		71202798008C8B43F85D0A7C26EC0807 /* DeviceKit-DeviceKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46EB2E00000580 /* Build configuration list for PBXNativeTarget "DeviceKit-DeviceKit" */;
+			buildPhases = (
+				46EB2E000005C0 /* Sources */,
+				46EB2E000005D0 /* Frameworks */,
+				46EB2E000005E0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "DeviceKit-DeviceKit";
+			productName = DeviceKit;
+			productReference = 4F2B8512E61CD5FEC093A4D7D66EFD01 /* DeviceKit.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+		81CE5441F11F92C51AAE7BA692D0FA83 /* Pods-STBaseProject_Example */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46EB2E00000C10 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */;
+			buildPhases = (
+				46EB2E00000C50 /* Headers */,
+				46EB2E00000C60 /* Sources */,
+				46EB2E00000C70 /* Frameworks */,
+				46EB2E00000C80 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				46EB2E00000D70 /* PBXTargetDependency */,
+				46EB2E00000D90 /* PBXTargetDependency */,
+				46EB2E00000DB0 /* PBXTargetDependency */,
 			);
 			name = "Pods-STBaseProject_Example";
 			productName = Pods_STBaseProject_Example;
-			productReference = 8429AD56E21AAC3CB084E87A10AB851C /* Pods-STBaseProject_Example */;
+			productReference = 8429AD56E21AAC3CB084E87A10AB851C /* Pods_STBaseProject_Example.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		82B0A41D3031FF27D78E17B0A9A46FB0 /* MBProgressHUD */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46EB2E000006D0 /* Build configuration list for PBXNativeTarget "MBProgressHUD" */;
+			buildPhases = (
+				46EB2E00000710 /* Headers */,
+				46EB2E00000720 /* Sources */,
+				46EB2E00000730 /* Frameworks */,
+				46EB2E00000740 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MBProgressHUD;
+			productName = MBProgressHUD;
+			productReference = 8B8FAB0D627B17EDE1366984278705D9 /* MBProgressHUD.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 46EB2E00000460 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
+			buildConfigurationList = 46EB2E00000830 /* Build configuration list for PBXNativeTarget "STBaseProject" */;
 			buildPhases = (
-				46EB2E000004A0 /* Headers */,
-				46EB2E000004B0 /* Sources */,
-				46EB2E000004C0 /* Frameworks */,
-				46EB2E000004D0 /* Resources */,
+				46EB2E00000870 /* Headers */,
+				46EB2E00000880 /* Sources */,
+				46EB2E00000890 /* Frameworks */,
+				46EB2E000008A0 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				46EB2E00000E00 /* PBXTargetDependency */,
+				46EB2E00000E20 /* PBXTargetDependency */,
 			);
 			name = STBaseProject;
 			productName = STBaseProject;
-			productReference = D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject */;
+			productReference = D59DEF3371D09AA3A0DEF7CF307DC302 /* STBaseProject.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -488,7 +710,7 @@
 				LastUpgradeCheck = 1600;
 			};
 			buildConfigurationList = 46EB2E00000030 /* Build configuration list for PBXProject "Pods" */;
-			compatibilityVersion = "Xcode 15.0";
+			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -496,12 +718,13 @@
 				en,
 			);
 			mainGroup = 46EB2E00000010;
-			minimizedProjectReferenceProxies = 0;
-			preferredProjectObjectVersion = 77;
 			productRefGroup = 46EB2E00000020 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				4CDD1C6C8885D07092D8EA708AAC0E53 /* DeviceKit */,
+				71202798008C8B43F85D0A7C26EC0807 /* DeviceKit-DeviceKit */,
+				82B0A41D3031FF27D78E17B0A9A46FB0 /* MBProgressHUD */,
 				81CE5441F11F92C51AAE7BA692D0FA83 /* Pods-STBaseProject_Example */,
 				894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */,
 			);
@@ -509,14 +732,37 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		46EB2E000004D0 /* Resources */ = {
+		46EB2E00000530 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000DE0 /* DeviceKit.bundle in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E000005E0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E000005F0 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000740 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000880 /* Resources */ = {
+		46EB2E000008A0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000C80 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -526,67 +772,122 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		46EB2E000004B0 /* Sources */ = {
+		46EB2E00000510 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000690 /* STAlertAction.swift in Sources */,
-				46EB2E000006A0 /* STAlertController.swift in Sources */,
-				46EB2E00000550 /* STBaseConfig.swift in Sources */,
-				46EB2E00000560 /* STBaseConstants.swift in Sources */,
-				46EB2E00000530 /* STBaseModel.swift in Sources */,
-				46EB2E000007F0 /* STBaseProject-dummy.m in Sources */,
-				46EB2E00000540 /* STBaseView.swift in Sources */,
-				46EB2E00000510 /* STBaseViewController.swift in Sources */,
-				46EB2E00000520 /* STBaseViewModel.swift in Sources */,
-				46EB2E000006B0 /* STBtn.swift in Sources */,
-				46EB2E00000650 /* STDateManager.swift in Sources */,
-				46EB2E00000750 /* STDeviceInfo.swift in Sources */,
-				46EB2E000005D0 /* STEncrypt.swift in Sources */,
-				46EB2E00000660 /* STFileManager.swift in Sources */,
-				46EB2E00000670 /* STFontManager.swift in Sources */,
-				46EB2E000005E0 /* STHexColor.swift in Sources */,
-				46EB2E000005A0 /* STHTTPClient.swift in Sources */,
-				46EB2E00000570 /* STHUD.swift in Sources */,
-				46EB2E000006C0 /* STIBInspectable.swift in Sources */,
-				46EB2E000006D0 /* STImage.swift in Sources */,
-				46EB2E000005C0 /* STISOCountryCodeInfo.swift in Sources */,
-				46EB2E000005F0 /* STJSONValue.swift in Sources */,
-				46EB2E000006E0 /* STLabel.swift in Sources */,
-				46EB2E00000680 /* STLanguageManager.swift in Sources */,
-				46EB2E000006F0 /* STLogView.swift in Sources */,
-				46EB2E000005B0 /* STNetworkMonitoring.swift in Sources */,
-				46EB2E00000600 /* STPoint.swift in Sources */,
-				46EB2E00000610 /* STPredicateCheck.swift in Sources */,
-				46EB2E00000580 /* STProgressHUD.swift in Sources */,
-				46EB2E00000590 /* STProgressView.swift in Sources */,
-				46EB2E00000620 /* STString.swift in Sources */,
-				46EB2E00000700 /* STTabBarItem.swift in Sources */,
-				46EB2E00000710 /* STTextField.swift in Sources */,
-				46EB2E00000630 /* STThreadSafe.swift in Sources */,
-				46EB2E00000640 /* STTimer.swift in Sources */,
-				46EB2E00000720 /* STVerificationCodeBtn.swift in Sources */,
-				46EB2E00000730 /* STView.swift in Sources */,
-				46EB2E00000740 /* STViewController.swift in Sources */,
+				46EB2E00000620 /* Device.generated.swift in Sources */,
+				46EB2E000006B0 /* DeviceKit-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46EB2E00000860 /* Sources */ = {
+		46EB2E000005C0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000950 /* Pods-STBaseProject_Example-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000720 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000760 /* MBProgressHUD.m in Sources */,
+				46EB2E00000810 /* MBProgressHUD-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000880 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000A60 /* STAlertAction.swift in Sources */,
+				46EB2E00000A70 /* STAlertController.swift in Sources */,
+				46EB2E00000900 /* STBaseConfig.swift in Sources */,
+				46EB2E00000910 /* STBaseConstants.swift in Sources */,
+				46EB2E000008E0 /* STBaseModel.swift in Sources */,
+				46EB2E00000BB0 /* STBaseProject-dummy.m in Sources */,
+				46EB2E000008F0 /* STBaseView.swift in Sources */,
+				46EB2E000008C0 /* STBaseViewController.swift in Sources */,
+				46EB2E000008D0 /* STBaseViewModel.swift in Sources */,
+				46EB2E00000A80 /* STBtn.swift in Sources */,
+				46EB2E000009F0 /* STCameraManager.swift in Sources */,
+				46EB2E00000950 /* STData.swift in Sources */,
+				46EB2E00000960 /* STDate.swift in Sources */,
+				46EB2E00000920 /* STDeviceInfo.swift in Sources */,
+				46EB2E00000970 /* STEncrypt.swift in Sources */,
+				46EB2E00000A00 /* STFileManager.swift in Sources */,
+				46EB2E00000A10 /* STFontManager.swift in Sources */,
+				46EB2E00000980 /* STHexColor.swift in Sources */,
+				46EB2E000009D0 /* STHTTPClient.swift in Sources */,
+				46EB2E00000940 /* STHUD.swift in Sources */,
+				46EB2E00000A90 /* STIBInspectable.swift in Sources */,
+				46EB2E00000AA0 /* STImage.swift in Sources */,
+				46EB2E00000990 /* STJSONValue.swift in Sources */,
+				46EB2E00000AB0 /* STLabel.swift in Sources */,
+				46EB2E00000A20 /* STLanguageManager.swift in Sources */,
+				46EB2E00000A30 /* STLocationManager.swift in Sources */,
+				46EB2E00000AC0 /* STLogView.swift in Sources */,
+				46EB2E000009E0 /* STNetworkMonitoring.swift in Sources */,
+				46EB2E000009A0 /* STPoint.swift in Sources */,
+				46EB2E000009B0 /* STPredicateCheck.swift in Sources */,
+				46EB2E000009C0 /* STString.swift in Sources */,
+				46EB2E00000AD0 /* STTabBarItem.swift in Sources */,
+				46EB2E00000AE0 /* STTextField.swift in Sources */,
+				46EB2E00000A40 /* STThreadSafe.swift in Sources */,
+				46EB2E00000A50 /* STTimer.swift in Sources */,
+				46EB2E00000AF0 /* STVerificationCodeBtn.swift in Sources */,
+				46EB2E00000B00 /* STView.swift in Sources */,
+				46EB2E00000B10 /* STViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46EB2E00000C60 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46EB2E00000D50 /* Pods-STBaseProject_Example-dummy.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		46EB2E00000970 /* PBXTargetDependency */ = {
+		46EB2E00000D70 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DeviceKit;
+			target = 4CDD1C6C8885D07092D8EA708AAC0E53 /* DeviceKit */;
+			targetProxy = 46EB2E00000D60 /* PBXContainerItemProxy */;
+		};
+		46EB2E00000D90 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MBProgressHUD;
+			target = 82B0A41D3031FF27D78E17B0A9A46FB0 /* MBProgressHUD */;
+			targetProxy = 46EB2E00000D80 /* PBXContainerItemProxy */;
+		};
+		46EB2E00000DB0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = STBaseProject;
 			target = 894EA9674D0D5CFEF493FE4E266279C6 /* STBaseProject */;
-			targetProxy = 46EB2E00000960 /* PBXContainerItemProxy */;
+			targetProxy = 46EB2E00000DA0 /* PBXContainerItemProxy */;
+		};
+		46EB2E00000DD0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "DeviceKit-DeviceKit";
+			target = 71202798008C8B43F85D0A7C26EC0807 /* DeviceKit-DeviceKit */;
+			targetProxy = 46EB2E00000DC0 /* PBXContainerItemProxy */;
+		};
+		46EB2E00000E00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DeviceKit;
+			target = 4CDD1C6C8885D07092D8EA708AAC0E53 /* DeviceKit */;
+			targetProxy = 46EB2E00000DF0 /* PBXContainerItemProxy */;
+		};
+		46EB2E00000E20 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MBProgressHUD;
+			target = 82B0A41D3031FF27D78E17B0A9A46FB0 /* MBProgressHUD */;
+			targetProxy = 46EB2E00000E10 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -719,9 +1020,199 @@
 			};
 			name = Release;
 		};
-		46EB2E00000470 /* Release */ = {
+		46EB2E000004D0 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000780 /* STBaseProject.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00000640 /* DeviceKit.release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_PREFIX_HEADER = "Target Support Files/DeviceKit/DeviceKit-prefix.pch";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Target Support Files/DeviceKit/DeviceKit-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/DeviceKit/DeviceKit.modulemap";
+				PRODUCT_MODULE_NAME = DeviceKit;
+				PRODUCT_NAME = DeviceKit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		46EB2E000004E0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E00000630 /* DeviceKit.debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_PREFIX_HEADER = "Target Support Files/DeviceKit/DeviceKit-prefix.pch";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Target Support Files/DeviceKit/DeviceKit-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/DeviceKit/DeviceKit.modulemap";
+				PRODUCT_MODULE_NAME = DeviceKit;
+				PRODUCT_NAME = DeviceKit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		46EB2E00000590 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E00000640 /* DeviceKit.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/DeviceKit";
+				IBSC_MODULE = DeviceKit;
+				INFOPLIST_FILE = "Target Support Files/DeviceKit/ResourceBundle-DeviceKit-DeviceKit-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_NAME = DeviceKit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
+		46EB2E000005A0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E00000630 /* DeviceKit.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)/DeviceKit";
+				IBSC_MODULE = DeviceKit;
+				INFOPLIST_FILE = "Target Support Files/DeviceKit/ResourceBundle-DeviceKit-DeviceKit-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_NAME = DeviceKit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		46EB2E000006E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E000007A0 /* MBProgressHUD.release.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_PREFIX_HEADER = "Target Support Files/MBProgressHUD/MBProgressHUD-prefix.pch";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Target Support Files/MBProgressHUD/MBProgressHUD-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/MBProgressHUD/MBProgressHUD.modulemap";
+				PRODUCT_MODULE_NAME = MBProgressHUD;
+				PRODUCT_NAME = MBProgressHUD;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		46EB2E000006F0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E00000790 /* MBProgressHUD.debug.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_PREFIX_HEADER = "Target Support Files/MBProgressHUD/MBProgressHUD-prefix.pch";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Target Support Files/MBProgressHUD/MBProgressHUD-Info.plist";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MODULEMAP_FILE = "Target Support Files/MBProgressHUD/MBProgressHUD.modulemap";
+				PRODUCT_MODULE_NAME = MBProgressHUD;
+				PRODUCT_NAME = MBProgressHUD;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) ";
+				SWIFT_INSTALL_OBJC_HEADER = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		46EB2E00000840 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46EB2E00000B40 /* STBaseProject.release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -759,9 +1250,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00000480 /* Debug */ = {
+		46EB2E00000850 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E00000770 /* STBaseProject.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00000B30 /* STBaseProject.debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -798,9 +1289,9 @@
 			};
 			name = Debug;
 		};
-		46EB2E00000820 /* Release */ = {
+		46EB2E00000C20 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E000008B0 /* Pods-STBaseProject_Example.release.xcconfig */;
+			baseConfigurationReference = 46EB2E00000CB0 /* Pods-STBaseProject_Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -838,9 +1329,9 @@
 			};
 			name = Release;
 		};
-		46EB2E00000830 /* Debug */ = {
+		46EB2E00000C30 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 46EB2E000008C0 /* Pods-STBaseProject_Example.debug.xcconfig */;
+			baseConfigurationReference = 46EB2E00000CC0 /* Pods-STBaseProject_Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -889,20 +1380,47 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00000460 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
+		46EB2E000004C0 /* Build configuration list for PBXNativeTarget "DeviceKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00000480 /* Debug */,
-				46EB2E00000470 /* Release */,
+				46EB2E000004E0 /* Debug */,
+				46EB2E000004D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		46EB2E00000810 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
+		46EB2E00000580 /* Build configuration list for PBXNativeTarget "DeviceKit-DeviceKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				46EB2E00000830 /* Debug */,
-				46EB2E00000820 /* Release */,
+				46EB2E000005A0 /* Debug */,
+				46EB2E00000590 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46EB2E000006D0 /* Build configuration list for PBXNativeTarget "MBProgressHUD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46EB2E000006F0 /* Debug */,
+				46EB2E000006E0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46EB2E00000830 /* Build configuration list for PBXNativeTarget "STBaseProject" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46EB2E00000850 /* Debug */,
+				46EB2E00000840 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46EB2E00000C10 /* Build configuration list for PBXNativeTarget "Pods-STBaseProject_Example" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46EB2E00000C30 /* Debug */,
+				46EB2E00000C20 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

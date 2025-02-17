@@ -9,6 +9,12 @@ import UIKit
 
 public protocol STTextFieldDelegate: NSObjectProtocol {
     func st_textFieldEditingChanged(textField: STTextField)
+    func st_textFieldBackwardKeyPressed(textField: STTextField)
+}
+
+public extension STTextFieldDelegate {
+    func st_textFieldEditingChanged(textField: STTextField) {}
+    func st_textFieldBackwardKeyPressed(textField: STTextField) {}
 }
 
 open class STTextField: UITextField {
@@ -18,6 +24,15 @@ open class STTextField: UITextField {
     private var orginRight: CGFloat = 0
     open var textIsCheck: Bool = false
     weak open var cusDelegate: STTextFieldDelegate?
+    
+    @IBInspectable open var localizedPlaceholder: String {
+        set {
+            self.placeholder = Bundle.st_localizedString(key: newValue)
+        }
+        get {
+            return self.placeholder ?? ""
+        }
+    }
 
     @IBInspectable var cornerRadius: CGFloat {
         get {
@@ -59,6 +74,13 @@ open class STTextField: UITextField {
     
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+    
+    open override func deleteBackward() {
+        super.deleteBackward()
+        if let delegate = self.cusDelegate {
+            delegate.st_textFieldBackwardKeyPressed(textField: self)
+        }
     }
     
     open override func textRect(forBounds bounds: CGRect) -> CGRect {

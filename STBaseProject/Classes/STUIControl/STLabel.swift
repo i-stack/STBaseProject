@@ -17,6 +17,53 @@ public class STLabel: UILabel {
     
     private var verticalAlignment: STLabelVerticalAlignment?
     
+    @IBInspectable open var autoFont: UIFont {
+        set {
+            let fontName = self.font.fontName
+            self.font = UIFont.st_systemFont(ofSize: self.font.pointSize, fontName: fontName)
+        }
+        get {
+            return self.font
+        }
+    }
+    
+    @IBInspectable open var localizedTitle: String {
+        set {
+            self.text = Bundle.st_localizedString(key: newValue)
+        }
+        get {
+            return self.text ?? ""
+        }
+    }
+    
+    @IBInspectable var cornerRadius: CGFloat {
+        set {
+            layer.cornerRadius = newValue
+            layer.masksToBounds = newValue > 0
+        }
+        get {
+            return layer.cornerRadius
+        }
+    }
+    
+    @IBInspectable var borderWidth: CGFloat {
+        set {
+            layer.borderWidth = newValue > 0 ? newValue : 0
+        }
+        get {
+            return layer.borderWidth
+        }
+    }
+    
+    @IBInspectable var borderColor: UIColor {
+        set {
+            layer.borderColor = newValue.cgColor
+        }
+        get {
+            return UIColor(cgColor: layer.borderColor!)
+        }
+    }
+    
     public init(frame: CGRect, type: STLabelVerticalAlignment) {
         super.init(frame: frame)
         self.verticalAlignment = type

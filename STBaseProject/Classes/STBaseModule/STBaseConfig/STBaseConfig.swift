@@ -13,9 +13,8 @@ public class STBaseConfig: NSObject {
     public static let shared: STBaseConfig = STBaseConfig()
     
     public func defaultBaseConfig() {
-        configBenchmarkDesign(size: nil)
-        configCustomNavBar(normalHeight: nil, safeHeigh: nil)
-//        configHUDParam(customView: nil)
+        self.configBenchmarkDesign(size: nil)
+        self.configCustomNavBar(normalHeight: nil, safeHeigh: nil)
     }
     
     public func configBenchmarkDesign(size: CGSize?) {
@@ -32,14 +31,4 @@ public class STBaseConfig: NSObject {
         model.navIsSafeHeight = safeHeigh ?? 100
         STBaseConstants.shared.st_customNavHeight(model: model)
     }
-    
-//    public func configHUDParam(customView: UIView?) {
-//        STHUD.sharedHUD.hudMode = .customView
-//        if let newCustomView = customView {
-//            STHUD.sharedHUD.customView = newCustomView
-//        }
-//        STHUD.sharedHUD.labelColor = UIColor.white
-//        STHUD.sharedHUD.activityViewColor = UIColor.st_color(hexString: "#000000", alpha: 0.3)
-//        STHUD.sharedHUD.labelFont = UIFont.st_systemFont(ofSize: 14, weight: .regular)
-//    }
 }

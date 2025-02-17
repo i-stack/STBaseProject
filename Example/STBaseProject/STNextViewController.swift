@@ -11,17 +11,37 @@ import STBaseProject
 
 class STNextViewController: STBaseViewController {
     
+    @IBOutlet weak var detailBtn: STBtn!
     private var aTarget: STTimer?
     private var delayTimer: Timer?
     private var delayTimerName: String?
-
+    
+    var count = 0
+    var spacing = STBtnSpacing()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.timerBtn()
+        self.detailBtn.backgroundColor = UIColor.orange
+        
+        spacing = STBtnSpacing.init(spacing: 5, topSpacing: 5)
+        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .top, spacing: spacing)
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
+        count += 1
+        if count == 1 {
+            spacing = STBtnSpacing.init(spacing: 10, leftSpacing: 20)
+        } else if count == 2 {
+            spacing = STBtnSpacing.init(spacing: 10, rightSpacing: 20)
+        } else if count == 3 {
+            spacing = STBtnSpacing.init(spacing: 20, leftSpacing: 10, rightSpacing: 10)
+        } else {
+            count = 0
+            spacing = STBtnSpacing.init(spacing: 10)
+        }
+        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .left, spacing: spacing)
     }
     
     deinit {
@@ -78,14 +98,16 @@ extension STNextViewController {
     }
     
     @objc func btnClick(sender: STBtn) {
-        let url = URL(string: "https://www.baidu.com")!
-        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("Error: \(error.localizedDescription)")
-            } else {
-                print("Success")
-            }
-        }
-        task.resume()
+//        let url = URL(string: "https://www.baidu.com")!
+//        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+//            if let error = error {
+//                print("Error: \(error.localizedDescription)")
+//            } else {
+//                print("Success")
+//            }
+//        }
+//        task.resume()
+        
+        STDeviceInfo.st_getNetworkInfo()
     }
 }

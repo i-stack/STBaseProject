@@ -55,11 +55,7 @@ public extension String {
         if let obj = object as? NSNumber {
             cnt = String.init(format: "%@", obj)
         } else if let obj = object as? String {
-            if obj.contains("null") || obj.contains("nan") || obj.contains("nil") {
-                cnt = ""
-            } else {
-                cnt = obj
-            }
+            cnt = obj
         } else if let obj = object as? Bool {
             if obj {
                 cnt = "1"
@@ -191,5 +187,23 @@ public extension String {
     func st_pasteboardWithString(pasteboardString: String) -> Void {
         let pasteboard = UIPasteboard.general
         pasteboard.string = pasteboardString
+    }
+}
+
+public extension String {
+    static func st_generateRandomString() -> String {
+        let characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let length = Int.random(in: 6...10)
+        let randomString = String((0..<length).compactMap { _ in
+            characters.randomElement()
+        })
+        return randomString
+    }
+    
+    func st_maskPhoneNumber() -> String {
+        guard self.count == 11 else { return self }
+        let startIndex = self.index(self.startIndex, offsetBy: 3)
+        let endIndex = self.index(self.startIndex, offsetBy: 7)
+        return self.replacingCharacters(in: startIndex..<endIndex, with: "****")
     }
 }
