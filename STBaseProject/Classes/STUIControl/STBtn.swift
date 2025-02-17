@@ -109,16 +109,13 @@ open class STBtn: UIButton {
         }
     }
     
-    open override class func awakeFromNib() {
-        super.awakeFromNib()
-    }
-    
     override public init(frame: CGRect) {
         super.init(frame: frame)
     }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        self.updateFontSize()
     }
     
     open override func layoutSubviews() {
@@ -220,5 +217,11 @@ open class STBtn: UIButton {
         self.borderWidth = borderWidth
         self.cornerRadius = cornerRadius
         self.borderColor = borderWidthColor
+    }
+    
+    private func updateFontSize() {
+        if let fontName = self.titleLabel?.font.fontName, let fontSize = self.titleLabel?.font.pointSize {
+            self.titleLabel?.font = UIFont.st_systemFont(ofSize: fontSize, fontName: fontName)
+        }
     }
 }

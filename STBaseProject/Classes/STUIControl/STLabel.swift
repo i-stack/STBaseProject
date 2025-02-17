@@ -16,17 +16,7 @@ public enum STLabelVerticalAlignment {
 public class STLabel: UILabel {
     
     private var verticalAlignment: STLabelVerticalAlignment?
-    
-    @IBInspectable open var autoFont: UIFont {
-        set {
-            let fontName = self.font.fontName
-            self.font = UIFont.st_systemFont(ofSize: self.font.pointSize, fontName: fontName)
-        }
-        get {
-            return self.font
-        }
-    }
-    
+        
     @IBInspectable open var localizedTitle: String {
         set {
             self.text = Bundle.st_localizedString(key: newValue)
@@ -76,6 +66,17 @@ public class STLabel: UILabel {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        self.verticalAlignment = STLabelVerticalAlignment.middle
+        self.updateFontSize()
+    }
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+    }
+    
+    private func updateFontSize() {
+        let fontName = self.font.fontName
+        self.font = UIFont.st_systemFont(ofSize: self.font.pointSize, fontName: fontName)
     }
     
     public override func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {

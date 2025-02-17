@@ -61,11 +61,6 @@ open class STTextField: UITextField {
             layer.borderColor = newValue.cgColor
         }
     }
-    
-    open override func awakeFromNib() {
-        super.awakeFromNib()
-        self.config()
-    }
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -74,6 +69,7 @@ open class STTextField: UITextField {
     
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
+        self.config()
     }
     
     open override func deleteBackward() {

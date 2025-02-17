@@ -55,10 +55,7 @@ public extension UIFont {
     }
     
     @objc class func st_systemFont(ofSize: CGFloat) -> UIFont {
-        if let font = UIFont.init(name: "PingFangSC-Regular", size: ofSize) {
-            return font
-        }
-        return UIFont.systemFont(ofSize: ofSize)
+        return self.st_systemFont(ofSize: ofSize, weight: .regular)
     }
     
     @objc class func st_systemFont(ofSize: CGFloat, weight: UIFont.Weight) -> UIFont {
@@ -67,24 +64,17 @@ public extension UIFont {
         switch weight {
         case .medium:
             font = UIFont.init(name: "PingFangSC-Medium", size: size)
-            break
         case .semibold, .bold:
             font = UIFont.init(name: "PingFangSC-Semibold", size: size)
-            break
         case .light:
             font = UIFont.init(name: "PingFangSC-Light", size: size)
-            break
         case .ultraLight:
             font = UIFont.init(name: "PingFangSC-Ultralight", size: size)
-            break
         case .regular:
             font = UIFont.init(name: "PingFangSC-Regular", size: size)
-            break
         case .thin:
             font = UIFont.init(name: "PingFangSC-Thin", size: size)
-            break
-        default:
-            break
+        default: break
         }
         return font ?? UIFont.systemFont(ofSize: ofSize, weight: weight)
     }
