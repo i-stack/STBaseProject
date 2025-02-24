@@ -20,23 +20,48 @@ Pod::Spec.new do |s|
   
 #  s.default_subspecs = 'STBaseModule'
   s.subspec 'STBaseModule' do |ss|
-    ss.source_files = [
-      'STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift',
-      'STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift',
-      'STBaseProject/Classes/STBaseModule/STBaseModel/*.swift',
-      'STBaseProject/Classes/STBaseModule/STBaseView/*.swift'
+    ss.source_files = ['STBaseProject/Classes/STConfig/*.swift'
+#      'STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift',
+#      'STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift',
+#      'STBaseProject/Classes/STBaseModule/STBaseModel/*.swift',
+#      'STBaseProject/Classes/STBaseModule/STBaseView/*.swift',
     ]
-    ss.dependency 'STBaseProject/STExtension'
+    
+    ss.subspec 'STBaseViewController' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift']
+    end
+
+    ss.subspec 'STBaseView' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseView/*.swift']
+    end
+
+    ss.subspec 'STBaseViewModel' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift']
+    end
+
+    ss.subspec 'STBaseModel' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseModel/*.swift']
+    end
+    
+#    ss.subspec 'STConfig' do |sss|
+#      sss.source_files = ['STBaseProject/Classes/STConfig/*.swift']
+#    end
+
+    ss.subspec 'STExtension' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STExtension/*.swift']
+    end
+    
+#    ss.dependency 'STBaseProject/STConfig'
+#    ss.dependency 'STBaseProject/STExtension'
   end
   
-  s.subspec 'STBaseConfig' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STBaseConfig/*.swift']
-  end
-
-  s.subspec 'STExtension' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STExtension/*.swift']
-    ss.dependency 'STBaseProject/STBaseConfig'
-  end
+#  s.subspec 'STBaseConfig' do |ss|
+#    ss.source_files = ['STBaseProject/Classes/STConfig/*.swift']
+#  end
+#
+#  s.subspec 'STExtension' do |ss|
+#    ss.source_files = ['STBaseProject/Classes/STExtension/*.swift']
+#  end
   
 #  s.subspec 'STUIControl' do |ss|
 #    ss.source_files = ['STBaseProject/Classes/STUIControl/*.swift']

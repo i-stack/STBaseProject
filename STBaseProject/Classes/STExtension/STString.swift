@@ -125,27 +125,27 @@ public extension String {
 }
 
 public extension String {
-    static func st_attributed(originStr: String, originStrColor: UIColor, originStrFont: UIFont, replaceStrs: [String], replaceStrColors: [UIColor], replaceStrFonts: [UIFont]) -> NSMutableAttributedString {
-        let str = NSMutableAttributedString.init(string: originStr)
-        str.addAttributes([NSAttributedString.Key.font : originStrFont, NSAttributedString.Key.foregroundColor: originStrColor], range: NSRange.init(location: 0, length: str.length))
-        for (i, replaceStr) in replaceStrs.enumerated() {
-            if originStr.contains(replaceStr) {
-                let range = originStr.range(of: replaceStr)!
-                let location = originStr.distance(from: originStr.startIndex, to: range.lowerBound)
-                let length = originStr.distance(from: range.lowerBound, to: range.upperBound)
-                var font = originStrFont
-                if replaceStrFonts.count > i {
-                    font = replaceStrFonts[i]
-                }
-                var color = UIColor.clear
-                if replaceStrColors.count > i {
-                    color = replaceStrColors[i]
-                }
-                str.addAttributes([NSAttributedString.Key.font: font, NSAttributedString.Key.foregroundColor: color], range: NSRange.init(location: location, length: length))
-            }
-        }
-        return str
-    }
+//    static func st_attributed(originStr: String, originStrColor: UIColor, originStrFont: UIFont, replaceStrs: [String], replaceStrColors: [UIColor], replaceStrFonts: [UIFont]) -> NSMutableAttributedString {
+//        let str = NSMutableAttributedString.init(string: originStr)
+//        str.addAttributes([NSAttributedString.Key.font : originStrFont, NSAttributedString.Key.foregroundColor: originStrColor], range: NSRange.init(location: 0, length: str.length))
+//        for (i, replaceStr) in replaceStrs.enumerated() {
+//            if originStr.contains(replaceStr) {
+//                let range = originStr.range(of: replaceStr)!
+//                let location = originStr.distance(from: originStr.startIndex, to: range.lowerBound)
+//                let length = originStr.distance(from: range.lowerBound, to: range.upperBound)
+//                var font = originStrFont
+//                if replaceStrFonts.count > i {
+//                    font = replaceStrFonts[i]
+//                }
+//                var color = UIColor.clear
+//                if replaceStrColors.count > i {
+//                    color = replaceStrColors[i]
+//                }
+//                str.addAttributes([NSAttributedString.Key.font: font, NSAttributedString.Key.foregroundColor: color], range: NSRange.init(location: location, length: length))
+//            }
+//        }
+//        return str
+//    }
 }
 
 public extension String {
