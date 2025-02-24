@@ -57,29 +57,23 @@ public extension String {
         } else if let obj = object as? String {
             cnt = obj
         } else if let obj = object as? Bool {
+            cnt = "0"
             if obj {
                 cnt = "1"
-            } else {
-                cnt = "0"
             }
         } else if let obj = object as? STJSONValue {
             switch obj {
             case .bool(let value):
+                cnt = "0"
                 if value {
                     cnt = "1"
-                } else {
-                    cnt = "0"
                 }
-                break
             case .int(let value):
                 cnt = String(value)
-                break
             case .double(let value):
                 cnt = String(value)
-                break
             case .string(let value):
                 cnt = value
-                break
             default:
                 break
             }
@@ -139,12 +133,10 @@ public extension String {
                 let range = originStr.range(of: replaceStr)!
                 let location = originStr.distance(from: originStr.startIndex, to: range.lowerBound)
                 let length = originStr.distance(from: range.lowerBound, to: range.upperBound)
-                
-                var font = UIFont.st_systemFont(ofSize: 14)
+                var font = originStrFont
                 if replaceStrFonts.count > i {
                     font = replaceStrFonts[i]
                 }
-                
                 var color = UIColor.clear
                 if replaceStrColors.count > i {
                     color = replaceStrColors[i]
@@ -200,11 +192,12 @@ public extension String {
         return randomString
     }
     
-    func st_maskPhoneNumber() -> String {
-        guard self.count == 11 else { return self }
-        let startIndex = self.index(self.startIndex, offsetBy: 3)
-        let endIndex = self.index(self.startIndex, offsetBy: 7)
-        return self.replacingCharacters(in: startIndex..<endIndex, with: "****")
+    func st_maskPhoneNumber(start: Int, end: Int) -> String {
+        guard start < end, self.count > end else { return self }
+        let startIndex = self.index(self.startIndex, offsetBy: start)
+        let endIndex = self.index(self.startIndex, offsetBy: end)
+        let mask = String(repeating: "*", count: end - start)
+        return self.replacingCharacters(in: startIndex..<endIndex, with: mask)
     }
 }
 

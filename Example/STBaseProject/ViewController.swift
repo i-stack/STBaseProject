@@ -32,7 +32,7 @@ class ViewController: STBaseViewController {
                 strongSelf.tableView.reloadData()
             }
         }
-        networkManager.startMonitoring { status, tip in
+        networkManager.st_startMonitoring { status, tip in
             print(status, tip)
         }
         testParmAppent()

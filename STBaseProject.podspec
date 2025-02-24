@@ -24,45 +24,31 @@ Pod::Spec.new do |s|
       'STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift',
       'STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift',
       'STBaseProject/Classes/STBaseModule/STBaseModel/*.swift',
-      'STBaseProject/Classes/STBaseModule/STBaseView/*.swift',
-      'STBaseProject/Classes/STBaseModule/STBaseConfig/*.swift',
+      'STBaseProject/Classes/STBaseModule/STBaseView/*.swift'
     ]
-    ss.dependency 'STBaseProject/STDeviceInfo'
-    ss.dependency 'STBaseProject/STExtension'
+#    ss.dependency 'STBaseProject/STBaseConfig'
+#    ss.dependency 'STBaseProject/STExtension'
     ss.dependency 'STBaseProject/STUIControl'
-    ss.dependency 'STBaseProject/STThread'
-    ss.dependency 'STBaseProject/STHTTP'
   end
   
-  s.subspec 'STDeviceInfo' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STDeviceInfo/*.swift']
-    ss.dependency 'DeviceKit'
+  s.subspec 'STBaseConfig' do |ss|
+    ss.source_files = ['STBaseProject/Classes/STBaseConfig/*.swift']
   end
 
   s.subspec 'STExtension' do |ss|
     ss.source_files = ['STBaseProject/Classes/STExtension/*.swift']
+    ss.dependency 'STBaseProject/STBaseConfig'
   end
   
   s.subspec 'STUIControl' do |ss|
     ss.source_files = ['STBaseProject/Classes/STUIControl/*.swift']
-    ss.dependency 'STBaseProject/STManager'
-  end
-    
-  s.subspec 'STManager' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STManager/*.swift']
-  end
-  
-  s.subspec 'STThread' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STThread/*.swift']
-  end
-  
-  s.subspec 'STHTTP' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STHTTP/*.swift']
+    ss.dependency 'STBaseProject/STExtension'
   end
 
   s.subspec 'STDialog' do |ss|
     ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
     ss.dependency 'MBProgressHUD'
+    ss.dependency 'STBaseProject/STUIControl'
   end
   
   s.subspec 'STOther' do |ss|

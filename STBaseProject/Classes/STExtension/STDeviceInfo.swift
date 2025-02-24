@@ -10,12 +10,10 @@ import Darwin
 import Network
 import Contacts
 import AdSupport
-import DeviceKit
 import NetworkExtension
 import SystemConfiguration.CaptiveNetwork
 
 public struct STDeviceInfo {
-
     public static func st_currentAppVersion() -> String {
         let info = self.st_appInfo()
         if let appVersion = info["CFBundleShortVersionString"] as? String {
@@ -67,38 +65,6 @@ public struct STDeviceInfo {
         return UIDevice.current.systemVersion
     }
     
-    public static func st_getDeviceBrand() -> String {
-        switch UIDevice.current.userInterfaceIdiom {
-        case .phone:
-            return "phone"
-        case .pad:
-            return "pad"
-        case .tv:
-            return "tv"
-        case .carPlay:
-            return "carPlay"
-        case .mac:
-            return "mac"
-        case .vision:
-            return "vision"
-        default:
-            return "unspecified"
-        }
-    }
-    
-    public static func st_getDeviceScreenInfo() -> (width: CGFloat, height: CGFloat, diagonal: Double) {
-        let screenWidth = UIScreen.main.bounds.width
-        let screenHeight = UIScreen.main.bounds.height
-        let screenScale = UIScreen.main.scale
-        let physicalWidth = screenWidth * screenScale
-        let physicalHeight = screenHeight * screenScale
-        return (width: physicalWidth, height: physicalHeight, diagonal: Device.current.diagonal)
-    }
-    
-    public static func st_getDevicePPI() -> CGFloat {
-        return CGFloat(Device.current.ppi ?? 326)
-    }
-    
     /// Gets the identifier from the system, such as "iPhone14,3".
     public static func st_getDeviceIdentifier() -> String {
         var systemInfo = utsname()
@@ -111,15 +77,6 @@ public struct STDeviceInfo {
         return identifier
     }
 
-    /// such as "iPhone 13 Pro"
-    public static func st_getDeviceModel(identifier: String) -> String {
-        if identifier.isEmpty {
-            let reId = self.st_getDeviceIdentifier()
-            return String(describing: Device.mapToDevice(identifier: reId))
-        }
-        return String(describing: Device.mapToDevice(identifier: identifier))
-    }
-    
     static func st_getDeviceBatteryStatusInfo() -> [String: Any] {
         let device = UIDevice.current
         device.isBatteryMonitoringEnabled = true
@@ -164,7 +121,6 @@ public extension STDeviceInfo {
 
 // MARK: - idfa, idfv
 public extension STDeviceInfo {
-    
     static func st_idfa() -> String {
         return ASIdentifierManager.shared().advertisingIdentifier.uuidString
     }

@@ -145,7 +145,6 @@ extension STHUD: MBProgressHUDDelegate {
 }
 
 public extension UIView {
-    
     /// show HUD
     ///
     /// After completion, it will close automatically

@@ -20,6 +20,7 @@ public struct STCameraModel {
     var imageData: Data?
     var serviceKey: String = "" // need setting, upload image service-key
     var imageSource: STCamerImageSource?
+    var authorizationStatus: AVAuthorizationStatus?
 }
 
 public struct STCameraConfiguration {
@@ -39,6 +40,8 @@ public class STCameraManager: NSObject {
     public func st_openCamera(isFront cameraDevice: Bool, from viewController: UIViewController, completion: @escaping (STCameraModel) -> Void) {
         self.completion = completion
         let status = AVCaptureDevice.authorizationStatus(for: .video)
+        var cameraModel = STCameraModel()
+        cameraModel.authorizationStatus = status
         switch status {
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
@@ -47,14 +50,14 @@ public class STCameraManager: NSObject {
                     if granted {
                         strongSelf.st_showCustomCamera(isFront: cameraDevice, viewController: viewController)
                     } else {
-//                        strongSelf.st_showPermissionAlert(from: viewController)
+                        completion(cameraModel)
                     }
                 }
             }
         case .authorized:
             self.st_showCustomCamera(isFront: cameraDevice, viewController: viewController)
-        case .denied, .restricted: break
-//            self.st_showPermissionAlert(from: viewController)
+        case .denied, .restricted:
+            completion(cameraModel)
         default:
             break
         }

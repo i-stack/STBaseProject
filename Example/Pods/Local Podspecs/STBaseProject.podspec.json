@@ -1,6 +1,6 @@
 {
   "name": "STBaseProject",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "license": "MIT",
   "summary": "Project infrastructure, common tools. The new project can inherit.",
   "homepage": "https://github.com/i-stack/STBaseProject",
@@ -9,7 +9,7 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "1.1.2"
+    "tag": "1.1.3"
   },
   "platforms": {
     "ios": "13.0"
@@ -24,31 +24,26 @@
         "STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift",
         "STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift",
         "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift",
-        "STBaseProject/Classes/STBaseModule/STBaseView/*.swift",
-        "STBaseProject/Classes/STBaseModule/STBaseConfig/*.swift"
+        "STBaseProject/Classes/STBaseModule/STBaseView/*.swift"
       ],
       "dependencies": {
-        "STBaseProject/STDeviceInfo": [],
-        "STBaseProject/STExtension": [],
-        "STBaseProject/STUIControl": [],
-        "STBaseProject/STThread": [],
-        "STBaseProject/STHTTP": []
+        "STBaseProject/STUIControl": []
       }
     },
     {
-      "name": "STDeviceInfo",
+      "name": "STBaseConfig",
       "source_files": [
-        "STBaseProject/Classes/STDeviceInfo/*.swift"
-      ],
-      "dependencies": {
-        "DeviceKit": []
-      }
+        "STBaseProject/Classes/STBaseConfig/*.swift"
+      ]
     },
     {
       "name": "STExtension",
       "source_files": [
         "STBaseProject/Classes/STExtension/*.swift"
-      ]
+      ],
+      "dependencies": {
+        "STBaseProject/STBaseConfig": []
+      }
     },
     {
       "name": "STUIControl",
@@ -56,26 +51,8 @@
         "STBaseProject/Classes/STUIControl/*.swift"
       ],
       "dependencies": {
-        "STBaseProject/STManager": []
+        "STBaseProject/STExtension": []
       }
-    },
-    {
-      "name": "STManager",
-      "source_files": [
-        "STBaseProject/Classes/STManager/*.swift"
-      ]
-    },
-    {
-      "name": "STThread",
-      "source_files": [
-        "STBaseProject/Classes/STThread/*.swift"
-      ]
-    },
-    {
-      "name": "STHTTP",
-      "source_files": [
-        "STBaseProject/Classes/STHTTP/*.swift"
-      ]
     },
     {
       "name": "STDialog",
@@ -83,7 +60,8 @@
         "STBaseProject/Classes/STDialog/*.swift"
       ],
       "dependencies": {
-        "MBProgressHUD": []
+        "MBProgressHUD": [],
+        "STBaseProject/STUIControl": []
       }
     },
     {

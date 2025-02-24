@@ -24,24 +24,26 @@ class STNextViewController: STBaseViewController {
         self.timerBtn()
         self.detailBtn.backgroundColor = UIColor.orange
         
-        spacing = STBtnSpacing.init(spacing: 5, topSpacing: 5)
-        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .top, spacing: spacing)
+        let str = "12345678909".st_maskPhoneNumber(start: 8, end: 10)
+        self.detailBtn.setTitle(str, for: .normal)
+//        spacing = STBtnSpacing.init(spacing: 5, topSpacing: 5)
+//        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .top, spacing: spacing)
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        count += 1
-        if count == 1 {
-            spacing = STBtnSpacing.init(spacing: 10, leftSpacing: 20)
-        } else if count == 2 {
-            spacing = STBtnSpacing.init(spacing: 10, rightSpacing: 20)
-        } else if count == 3 {
-            spacing = STBtnSpacing.init(spacing: 20, leftSpacing: 10, rightSpacing: 10)
-        } else {
-            count = 0
-            spacing = STBtnSpacing.init(spacing: 10)
-        }
-        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .left, spacing: spacing)
+//        count += 1
+//        if count == 1 {
+//            spacing = STBtnSpacing.init(spacing: 10, leftSpacing: 20)
+//        } else if count == 2 {
+//            spacing = STBtnSpacing.init(spacing: 10, rightSpacing: 20)
+//        } else if count == 3 {
+//            spacing = STBtnSpacing.init(spacing: 20, leftSpacing: 10, rightSpacing: 10)
+//        } else {
+//            count = 0
+//            spacing = STBtnSpacing.init(spacing: 10)
+//        }
+//        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .left, spacing: spacing)
     }
     
     deinit {
