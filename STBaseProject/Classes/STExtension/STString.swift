@@ -207,3 +207,9 @@ public extension String {
         return self.replacingCharacters(in: startIndex..<endIndex, with: "****")
     }
 }
+
+public extension String {
+    func st_toData() -> Data? {
+        return self.data(using: .utf8) ?? nil
+    }
+}

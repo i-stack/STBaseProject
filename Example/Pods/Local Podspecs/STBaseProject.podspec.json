@@ -36,6 +36,15 @@
       }
     },
     {
+      "name": "STDeviceInfo",
+      "source_files": [
+        "STBaseProject/Classes/STDeviceInfo/*.swift"
+      ],
+      "dependencies": {
+        "DeviceKit": []
+      }
+    },
+    {
       "name": "STExtension",
       "source_files": [
         "STBaseProject/Classes/STExtension/*.swift"
@@ -48,15 +57,6 @@
       ],
       "dependencies": {
         "STBaseProject/STManager": []
-      }
-    },
-    {
-      "name": "STDeviceInfo",
-      "source_files": [
-        "STBaseProject/Classes/STDeviceInfo/*.swift"
-      ],
-      "dependencies": {
-        "DeviceKit": []
       }
     },
     {

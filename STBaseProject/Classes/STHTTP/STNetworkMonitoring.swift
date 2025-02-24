@@ -19,7 +19,7 @@ public class STNetworkMonitoring: NSObject {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "STNetworkMonitoring")
 
-    public func startMonitoring(networkStatusChanged: @escaping ((STNetworkStatus, String) -> Void)) {
+    public func st_startMonitoring(networkStatusChanged: @escaping ((STNetworkStatus, String) -> Void)) {
         monitor.pathUpdateHandler = { path in
             if path.status == .satisfied {
                 if path.usesInterfaceType(.wifi) {
@@ -34,13 +34,7 @@ public class STNetworkMonitoring: NSObject {
         monitor.start(queue: queue)
     }
 
-    public func stopMonitoring() {
+    public func st_stopMonitoring() {
         monitor.cancel()
-    }
-}
-
-public extension STNetworkMonitoring {
-    func st_checkNetworkAuthorizationStatus() {
-
     }
 }
