@@ -1,11 +1,9 @@
 PODS:
   - STBaseProject/STBaseConfig (1.1.3)
   - STBaseProject/STBaseModule (1.1.3):
-    - STBaseProject/STUIControl
+    - STBaseProject/STExtension
   - STBaseProject/STExtension (1.1.3):
     - STBaseProject/STBaseConfig
-  - STBaseProject/STUIControl (1.1.3):
-    - STBaseProject/STExtension
 
 DEPENDENCIES:
   - STBaseProject/STBaseModule (from `../`)
@@ -15,7 +13,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: 2cb53849b88d06dfa5063ca8cf13fcea82eecd9f
+  STBaseProject: a06f6e7dfc651267fa09ea4df36fd657ba237963
 
 PODFILE CHECKSUM: f3244c801690ed24e724b1dc0ac9787cbb61cb1b
 

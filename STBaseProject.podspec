@@ -26,9 +26,7 @@ Pod::Spec.new do |s|
       'STBaseProject/Classes/STBaseModule/STBaseModel/*.swift',
       'STBaseProject/Classes/STBaseModule/STBaseView/*.swift'
     ]
-#    ss.dependency 'STBaseProject/STBaseConfig'
-#    ss.dependency 'STBaseProject/STExtension'
-    ss.dependency 'STBaseProject/STUIControl'
+    ss.dependency 'STBaseProject/STExtension'
   end
   
   s.subspec 'STBaseConfig' do |ss|
@@ -40,16 +38,16 @@ Pod::Spec.new do |s|
     ss.dependency 'STBaseProject/STBaseConfig'
   end
   
-  s.subspec 'STUIControl' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STUIControl/*.swift']
-    ss.dependency 'STBaseProject/STExtension'
-  end
+#  s.subspec 'STUIControl' do |ss|
+#    ss.source_files = ['STBaseProject/Classes/STUIControl/*.swift']
+#    ss.dependency 'STBaseProject/STExtension'
+#  end
 
-  s.subspec 'STDialog' do |ss|
-    ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
-    ss.dependency 'MBProgressHUD'
-    ss.dependency 'STBaseProject/STUIControl'
-  end
+#  s.subspec 'STDialog' do |ss|
+#    ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
+#    ss.dependency 'MBProgressHUD'
+#    ss.dependency 'STBaseProject/STUIControl'
+#  end
   
   s.subspec 'STOther' do |ss|
     ss.source_files = ['STBaseProject/Classes/STOther/*.swift']

@@ -27,7 +27,7 @@
         "STBaseProject/Classes/STBaseModule/STBaseView/*.swift"
       ],
       "dependencies": {
-        "STBaseProject/STUIControl": []
+        "STBaseProject/STExtension": []
       }
     },
     {
@@ -43,25 +43,6 @@
       ],
       "dependencies": {
         "STBaseProject/STBaseConfig": []
-      }
-    },
-    {
-      "name": "STUIControl",
-      "source_files": [
-        "STBaseProject/Classes/STUIControl/*.swift"
-      ],
-      "dependencies": {
-        "STBaseProject/STExtension": []
-      }
-    },
-    {
-      "name": "STDialog",
-      "source_files": [
-        "STBaseProject/Classes/STDialog/*.swift"
-      ],
-      "dependencies": {
-        "MBProgressHUD": [],
-        "STBaseProject/STUIControl": []
       }
     },
     {
