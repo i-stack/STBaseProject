@@ -149,20 +149,6 @@ public extension STDeviceInfo {
         return networkInfo
     }
     
-    static func st_isUseVPNConnected() -> Bool {
-        let vpnManager = NEVPNManager.shared()
-        var vpnIsConnected: Bool = false
-        vpnManager.loadFromPreferences { error in
-            if error != nil {
-                vpnIsConnected = false
-            } else {
-                vpnIsConnected = vpnManager.connection.status == .connected
-            }
-        }
-        
-        return vpnIsConnected
-    }
-    
     static func st_getDeviceIPAddress() -> String {
         var address: String = ""
         var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil

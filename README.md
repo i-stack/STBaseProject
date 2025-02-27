@@ -55,11 +55,3 @@ private func configBenchmarkDesign() {
 > Button title text and image position settings;
 
 #### 五、STDeviceInfo
-
-1、st_isUseVPNConnected() 
-
-<key>UIBackgroundModes</key>
-<array>
-    <string>fetch</string>
-    <string>processing</string>
-</array>
