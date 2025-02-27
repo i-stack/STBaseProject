@@ -14,10 +14,9 @@ Pod::Spec.new do |s|
   s.homepage = 'https://github.com/i-stack/STBaseProject'
   s.author = { 'i-stack' => 'songshoubing7664@163.com' }
   s.source = { :git => 'https://github.com/i-stack/STBaseProject.git', :tag => s.version }
-  
   s.ios.deployment_target = '13.0'
   s.swift_versions = ['5']
-  
+
   s.subspec 'STConfig' do |ss|
     ss.source_files = ['STBaseProject/Classes/STConfig/*.swift']
   end
@@ -43,17 +42,11 @@ Pod::Spec.new do |s|
       sss.source_files = ['STBaseProject/Classes/STBaseModule/STExtensionTools/*.swift']
     end
     
-    ss.subspec 'STUIControl' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBaseModule/STUIControl/*.swift']
-      sss.dependency 'STBaseProject/STBaseModule/STExtensionTools'
-    end
-    
     ss.dependency 'STBaseProject/STConfig'
   end
   
   s.subspec 'STDialog' do |ss|
     ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
-#    ss.dependency 'STBaseProject/STConfig'
     ss.dependency 'MBProgressHUD'
   end
   
