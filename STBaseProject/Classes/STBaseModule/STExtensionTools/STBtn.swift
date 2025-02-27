@@ -59,18 +59,6 @@ open class STBtn: UIButton {
     private var style: STBtnEdgeInsetsStyle = .reset
     private var btnSpacing: STBtnSpacing = STBtnSpacing()
     
-//    @IBInspectable open var autoFont: String {
-//        set {
-//            if let label = self.titleLabel {
-//                let fontName = label.font.fontName
-//                label.font = UIFont.st_systemFont(ofSize: label.font.pointSize, fontName: fontName)
-//            }
-//        }
-//        get {
-//            return self.titleLabel?.font.fontName ?? ""
-//        }
-//    }
-    
     @IBInspectable open var localizedTitle: String {
         set {
             self.setTitle(Bundle.st_localizedString(key: newValue), for: .normal)

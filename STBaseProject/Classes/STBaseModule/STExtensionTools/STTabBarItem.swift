@@ -9,7 +9,6 @@ import UIKit
 import Foundation
 
 public class STTabBarItem: NSObject {
-    
     public class func st_setTabBarItem(title: String,
                                        titleSize: CGFloat,
                                        titleFontName: String,

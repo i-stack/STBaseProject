@@ -8,12 +8,6 @@
 
 import UIKit
 
-public enum STScanType {
-    case STScanTypeQrCode
-    case STScanTypeBarCode
-    case STScanTypeAll
-}
-
 open class STScanView: UIView {
 
     open var needStop: Bool?
@@ -213,7 +207,6 @@ open class STScanView: UIView {
 }
 
 extension STScanView {
-
     func st_drawTitle(orginY: CGFloat) -> Void {
         guard self.tipTitle != nil else {
             self.tipTitle = UILabel.init(frame: CGRect.init(x: 0, y: orginY, width: self.frame.size.width, height: 50))

@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name = 'STBaseProject'
-  s.version = '1.1.4'
+  s.version = '1.1.5'
   s.license = 'MIT'
   s.summary = 'Project infrastructure, common tools. The new project can inherit.'
   s.homepage = 'https://github.com/i-stack/STBaseProject'
@@ -23,7 +23,6 @@ Pod::Spec.new do |s|
   end
   
   s.subspec 'STBaseModule' do |ss|
-    
     ss.subspec 'STBaseViewController' do |sss|
       sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift']
     end
@@ -46,6 +45,7 @@ Pod::Spec.new do |s|
     
     ss.subspec 'STUIControl' do |sss|
       sss.source_files = ['STBaseProject/Classes/STBaseModule/STUIControl/*.swift']
+      sss.dependency 'STBaseProject/STBaseModule/STExtensionTools'
     end
     
     ss.dependency 'STBaseProject/STConfig'
@@ -53,6 +53,7 @@ Pod::Spec.new do |s|
   
   s.subspec 'STDialog' do |ss|
     ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
+#    ss.dependency 'STBaseProject/STConfig'
     ss.dependency 'MBProgressHUD'
   end
   

@@ -134,6 +134,17 @@ open class STHUD: NSObject {
     public func hudComplection(block: @escaping STHUDCompletionBlock) -> Void {
         self.stCompletionBlock = block
     }
+    
+    static func keyWindow() -> UIWindow? {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            for window in windowScene.windows {
+                if window.isKeyWindow {
+                    return window
+                }
+            }
+        }
+        return nil
+    }
 }
 
 extension STHUD: MBProgressHUDDelegate {
@@ -149,12 +160,12 @@ public extension UIView {
     ///
     /// After completion, it will close automatically
     ///
-    /// Automatically added to `self.st_keyWindow()`
+    /// Automatically added to `self.keyWindow()`
     ///
     /// - Parameter text: show text
     ///
     func showAutoHidden(text: String) -> Void {
-        self.showAutoHidden(text: text, toView: self.st_keyWindow() ?? UIView())
+        self.showAutoHidden(text: text, toView: STHUD.keyWindow() ?? UIView())
     }
     
     /// show HUD
@@ -169,7 +180,7 @@ public extension UIView {
     }
     
     func showAutoHidden(text: String, detailText: String) -> Void {
-        self.showAutoHidden(text: text, detailText: detailText, toView: self.st_keyWindow() ?? UIView())
+        self.showAutoHidden(text: text, detailText: detailText, toView: STHUD.keyWindow() ?? UIView())
     }
     
     func showAutoHidden(text: String, detailText: String, toView: UIView) -> Void {
@@ -181,7 +192,7 @@ public extension UIView {
     }
     
     func showAutoHidden(text: String, location: STHUDLocation) -> Void {
-        self.showAutoHidden(text: text, location: location, toView: self.st_keyWindow() ?? self)
+        self.showAutoHidden(text: text, location: location, toView: STHUD.keyWindow() ?? self)
     }
     
     func showAutoHidden(text: String, location: STHUDLocation, toView: UIView) -> Void {
@@ -189,7 +200,7 @@ public extension UIView {
     }
     
     func showAutoHidden(text: String, detailText: String, location: STHUDLocation) -> Void {
-        self.showAutoHidden(text: text, detailText: detailText, location: location, toView: self.st_keyWindow() ?? self)
+        self.showAutoHidden(text: text, detailText: detailText, location: location, toView: STHUD.keyWindow() ?? self)
     }
     
     func showAutoHidden(text: String, detailText: String, location: STHUDLocation, toView: UIView) -> Void {
@@ -207,7 +218,7 @@ public extension UIView {
     }
     
     func showLoadingManualHidden(text: String) -> Void {
-        self.showLoadingManualHidden(text: text, toView: self.st_keyWindow() ?? self)
+        self.showLoadingManualHidden(text: text, toView: STHUD.keyWindow() ?? self)
     }
     
     func showLoadingManualHidden(text: String, toView: UIView) -> Void {
@@ -220,7 +231,7 @@ public extension UIView {
             if toView.superview != nil {
                 hud.configManualHiddenHUD(showInView: toView)
             } else {
-                hud.configManualHiddenHUD(showInView: self.st_keyWindow() ?? self)
+                hud.configManualHiddenHUD(showInView: STHUD.keyWindow() ?? self)
             }
             hud.show(text: text, detailText: detailText)
         }
@@ -257,7 +268,7 @@ public extension UIView {
         if toView.superview != nil {
             hud.configHUD(showInView: toView, icon: icon, offset: offset)
         } else {
-            hud.configHUD(showInView: self.st_keyWindow() ?? self, icon: icon, offset: offset)
+            hud.configHUD(showInView: STHUD.keyWindow() ?? self, icon: icon, offset: offset)
         }
         hud.show(text: text, detailText: detailText)
         hud.hide(animated: true, afterDelay: afterDelay)

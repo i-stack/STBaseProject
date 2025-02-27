@@ -11,6 +11,12 @@ import Photos
 import AVFoundation
 import AssetsLibrary
 
+public enum STScanType {
+    case STScanTypeQrCode
+    case STScanTypeBarCode
+    case STScanTypeAll
+}
+
 public typealias STScanFinishBlock = (_ result: String) -> Void
 
 open class STScanManager: STImagePickerManager {
