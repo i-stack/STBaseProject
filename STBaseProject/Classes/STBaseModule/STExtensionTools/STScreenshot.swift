@@ -19,7 +19,11 @@ import UIKit
 open class STScreenShot: NSObject {
     class private func st_dataWithScreenshotInPNGFormat() -> Data {
         var imageSize: CGSize = CGSize.zero
-        let orientation = UIApplication.shared.statusBarOrientation
+        var ifo: UIInterfaceOrientation?
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            ifo = windowScene.interfaceOrientation
+        }
+        guard let orientation = ifo else { return Data()}
         if orientation.isPortrait == true {
             imageSize = UIScreen.main.bounds.size
         } else {
