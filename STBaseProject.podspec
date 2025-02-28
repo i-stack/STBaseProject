@@ -24,6 +24,7 @@ Pod::Spec.new do |s|
   s.subspec 'STBaseModule' do |ss|
     ss.subspec 'STBaseViewController' do |sss|
       sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift']
+      sss.dependency 'STBaseProject/STBaseModule/STExtensionTools'
     end
 
     ss.subspec 'STBaseView' do |sss|

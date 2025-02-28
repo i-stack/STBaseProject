@@ -1,23 +1,24 @@
 PODS:
-  - STBaseProject/STBaseModule (1.1.5):
-    - STBaseProject/STBaseModule/STBaseModel (= 1.1.5)
-    - STBaseProject/STBaseModule/STBaseView (= 1.1.5)
-    - STBaseProject/STBaseModule/STBaseViewController (= 1.1.5)
-    - STBaseProject/STBaseModule/STBaseViewModel (= 1.1.5)
-    - STBaseProject/STBaseModule/STExtensionTools (= 1.1.5)
+  - STBaseProject/STBaseModule (1.1.2):
+    - STBaseProject/STBaseModule/STBaseModel (= 1.1.2)
+    - STBaseProject/STBaseModule/STBaseView (= 1.1.2)
+    - STBaseProject/STBaseModule/STBaseViewController (= 1.1.2)
+    - STBaseProject/STBaseModule/STBaseViewModel (= 1.1.2)
+    - STBaseProject/STBaseModule/STExtensionTools (= 1.1.2)
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseModel (1.1.5):
+  - STBaseProject/STBaseModule/STBaseModel (1.1.2):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseView (1.1.5):
+  - STBaseProject/STBaseModule/STBaseView (1.1.2):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseViewController (1.1.5):
+  - STBaseProject/STBaseModule/STBaseViewController (1.1.2):
+    - STBaseProject/STBaseModule/STExtensionTools
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseViewModel (1.1.5):
+  - STBaseProject/STBaseModule/STBaseViewModel (1.1.2):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STExtensionTools (1.1.5):
+  - STBaseProject/STBaseModule/STExtensionTools (1.1.2):
     - STBaseProject/STConfig
-  - STBaseProject/STConfig (1.1.5)
-  - STBaseProject/STDialog (1.1.5):
+  - STBaseProject/STConfig (1.1.2)
+  - STBaseProject/STDialog (1.1.2):
     - STBaseProject/STBaseModule/STExtensionTools
 
 DEPENDENCIES:
@@ -29,7 +30,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: eda5fc2a404111fb869d3610a44a56455581bd89
+  STBaseProject: 954f2f9ec7c92d10ba724c209d4e64d75f02d512
 
 PODFILE CHECKSUM: a78ef1a1b061596713e03cc5e5bea8f071f0911a
 
