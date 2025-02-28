@@ -39,14 +39,7 @@ class ViewController: STBaseViewController {
     }
     
     func testParmAppent() {
-        // 调用示例
-        let url = "https://example.com/api?device=ios&name=iphone"
-        let params = ["token": "abcd1234", "platform": "iOS"]
-        if let newURL = url.st_appendParametersToURLUsingComponents(parameters: params) {
-            print(newURL) // 输出: https://example.com/api?token=abcd1234&platform=iOS
-        }
         
-        print("currentIpAddress", STDeviceInfo.st_getDeviceIPAddress())
     }
 }
 
