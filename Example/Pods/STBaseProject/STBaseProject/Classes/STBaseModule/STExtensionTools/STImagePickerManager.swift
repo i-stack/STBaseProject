@@ -13,13 +13,11 @@ import AssetsLibrary
 
 public enum STOpenSourceType {
     case camera
-    case simulator
+    case cameraFront
     case photoLibrary
-    case unknown
 }
 
 public enum STOpenSourceError: LocalizedError {
-    
     case unknown
     case openSourceOK
     case openCameraError
@@ -28,7 +26,6 @@ public enum STOpenSourceError: LocalizedError {
     case authorizationCameraFailed
     case authorizationPhotoLibraryFailed
     case imagePickerControllerDidCancelError
-
     var errorDescription: String {
         switch self {
         case .openCameraError:
@@ -51,9 +48,14 @@ public enum STOpenSourceError: LocalizedError {
     }
 }
 
-public class STImagePickerModel: NSObject {
+public struct STImagePickerModel {
     public var editedImage: UIImage?
     public var originalImage: UIImage?
+    public var fileName: String?
+    public var mimeType: String?
+    public var imageData: Data?
+    public var serviceKey: String = "" // need setting, upload image service-key
+    public var imageSource: STOpenSourceType?
     public var openSourceError: STOpenSourceError?
 }
 
@@ -82,17 +84,20 @@ open class STImagePickerManager: NSObject {
         super.init()
     }
     
-    public init(presentViewController: UIViewController) {
+    public init(presentViewController: UIViewController, overlayView: UIView?) {
         super.init()
         self.presentVC = presentViewController
-        self.st_imagePickerViewController()
+        self.st_imagePickerViewController(overlayView: overlayView)
     }
 
-    private func st_imagePickerViewController() -> Void {
+    private func st_imagePickerViewController(overlayView: UIView?) -> Void {
         if self.imagePickerController == nil {
             self.imagePickerController = UIImagePickerController()
             self.imagePickerController?.delegate = self
             self.imagePickerController?.allowsEditing = true
+            if let ov = overlayView {
+                self.imagePickerController?.cameraOverlayView = ov
+            }
         }
     }
 
@@ -100,10 +105,9 @@ open class STImagePickerManager: NSObject {
         self.st_isAvailablePhoto {[weak self] (openSourceError) in
             guard let strongSelf = self else { return }
             if openSourceError == .openSourceOK {
-                strongSelf.imagePickerController?.sourceType = .photoLibrary
-                strongSelf.presentVC?.present(strongSelf.imagePickerController ?? UIImagePickerController(), animated: true) {}
+                strongSelf.presentVC?.present(strongSelf.imagePickerController ?? UIImagePickerController(), animated: true)
             } else {
-                let pickerModel = STImagePickerModel()
+                var pickerModel = STImagePickerModel()
                 pickerModel.openSourceError = .openPhotoLibraryError
                 complection(pickerModel)
             }
@@ -114,10 +118,9 @@ open class STImagePickerManager: NSObject {
         self.st_isAvailableCamera {[weak self] (openSourceError) in
             guard let strongSelf = self else { return }
             if openSourceError == .openSourceOK {
-                strongSelf.imagePickerController?.sourceType = .camera
-                strongSelf.presentVC?.present(strongSelf.imagePickerController ?? UIImagePickerController(), animated: true) {}
+                strongSelf.presentVC?.present(strongSelf.imagePickerController ?? UIImagePickerController(), animated: true)
             } else {
-                let pickerModel = STImagePickerModel()
+                var pickerModel = STImagePickerModel()
                 pickerModel.openSourceError = .openCameraError
                 complection(pickerModel)
             }
@@ -128,13 +131,16 @@ open class STImagePickerManager: NSObject {
         self.imagePickerDidFinish = complection
         switch openSourceType {
         case .photoLibrary:
+            self.imagePickerController?.sourceType = .photoLibrary
             self.st_openPhotoLibrary(complection: complection)
-            break
         case .camera:
+            self.imagePickerController?.sourceType = .camera
+            self.imagePickerController?.cameraDevice = .rear
             self.st_openCamera(complection: complection)
-            break
-        default:
-            break
+        case .cameraFront:
+            self.imagePickerController?.sourceType = .camera
+            self.imagePickerController?.cameraDevice = .front
+            self.st_openCamera(complection: complection)
         }
     }
     
@@ -171,8 +177,7 @@ open class STImagePickerManager: NSObject {
     
     public func st_isAvailableCamera(complection: @escaping(STOpenSourceError) -> Void) {
         if UIImagePickerController.isSourceTypeAvailable(.camera) == true {
-            let mediaType = AVMediaType.video
-            let authorizationStatus: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: mediaType)
+            let authorizationStatus: AVAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
             if authorizationStatus == .authorized {
                 DispatchQueue.main.async {
                     complection(.openSourceOK)
@@ -182,7 +187,7 @@ open class STImagePickerManager: NSObject {
                     complection(.authorizationCameraFailed)
                 }
             } else if authorizationStatus == .notDetermined {
-                AVCaptureDevice.requestAccess(for: mediaType) { (granted) in
+                AVCaptureDevice.requestAccess(for: .video) { (granted) in
                     if granted {
                         DispatchQueue.main.async {
                             complection(.openSourceOK)
@@ -200,6 +205,16 @@ open class STImagePickerManager: NSObject {
             }
         }
     }
+    
+    public func hiddenCameraOriginBtn(_ fromView: UIView) {
+        for v in fromView.subviews {
+            if v.description.contains("CAMFlipButton") {
+                v.isHidden = true
+                break
+            }
+            self.hiddenCameraOriginBtn(v)
+        }
+    }
 }
 
 extension STImagePickerManager: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -211,7 +226,7 @@ extension STImagePickerManager: UIImagePickerControllerDelegate, UINavigationCon
         editedImage.draw(in: CGRect.init(x: 0, y: 0, width: newSize.width, height: newSize.height))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        let pickerModel = STImagePickerModel()
+        var pickerModel = STImagePickerModel()
         pickerModel.editedImage = newImage
         pickerModel.originalImage = originalImage
         pickerModel.openSourceError = .openSourceOK
@@ -222,7 +237,7 @@ extension STImagePickerManager: UIImagePickerControllerDelegate, UINavigationCon
     }
 
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        let pickerModel = STImagePickerModel()
+        var pickerModel = STImagePickerModel()
         pickerModel.openSourceError = .imagePickerControllerDidCancelError
         if let complection = self.imagePickerDidFinish {
             complection(pickerModel)
@@ -230,3 +245,48 @@ extension STImagePickerManager: UIImagePickerControllerDelegate, UINavigationCon
         picker.dismiss(animated: true) {}
     }
 }
+
+public extension STImagePickerManager {
+    func st_uploadImage(pickerModel: STImagePickerModel, otherParams: [String: String], httpBody: Data, urlString: String, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NSError(domain: "Invalid URL", code: -1, userInfo: nil)))
+            return
+        }
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        let httpBody = self.st_createFormDataBody(pickerModel: pickerModel, otherParams: otherParams, boundary: boundary)
+        request.httpBody = httpBody
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            if let data = data, let result = String(data: data, encoding: .utf8) {
+                completion(.success(result))
+            } else {
+                completion(.failure(NSError(domain: "Invalid response", code: -1, userInfo: nil)))
+            }
+        }
+        task.resume()
+    }
+        
+    func st_createFormDataBody(pickerModel: STImagePickerModel, otherParams: [String: String], boundary: String) -> Data {
+        var body = Data()
+        for (key, value) in otherParams {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
+        }
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"\(pickerModel.serviceKey)\"; filename=\"\(pickerModel.fileName ?? "temp.image")\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: \(pickerModel.mimeType ?? "image/jpeg")\r\n\r\n".data(using: .utf8)!)
+        body.append(pickerModel.imageData ?? Data())
+        body.append("\r\n".data(using: .utf8)!)
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        return body
+    }
+}
+
