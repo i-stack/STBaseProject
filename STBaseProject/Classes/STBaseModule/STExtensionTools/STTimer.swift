@@ -9,9 +9,14 @@ import UIKit
 
 public class STTimer: NSObject {
 
-    static var timerDict: [String: DispatchSourceTimer] = [String: DispatchSourceTimer]()
     static let semaphore = DispatchSemaphore.init(value: 1)
+    static var timerDict: [String: DispatchSourceTimer] = [String: DispatchSourceTimer]()
+    
     private weak var target: AnyObject?
+    private var timer: DispatchSourceTimer?
+    private var secondsRepeating: Double = 1
+    private var secondsRemaining: Int = 10
+    private let queue = DispatchQueue(label: "com.STBaseProject.timer")
 
     public init(aTarget: AnyObject) {
         super.init()
@@ -21,10 +26,41 @@ public class STTimer: NSObject {
     public override func forwardingTarget(for aSelector: Selector!) -> Any? {
         return self.target
     }
-}
-
-// MARK: - GCD
-extension STTimer {
+    
+    public init(seconds: Int, repeating: Double) {
+        super.init()
+        self.secondsRemaining = seconds
+        self.secondsRepeating = repeating
+    }
+    
+    public func st_countdownTimerStart(completion: @escaping (Int, Bool) -> Void) {
+        timer?.cancel()
+        timer = DispatchSource.makeTimerSource(queue: queue)
+        timer?.schedule(deadline: .now(), repeating: self.secondsRepeating)
+        timer?.setEventHandler { [weak self] in
+            guard let strongSelf = self else { return }
+            if strongSelf.secondsRemaining > 0 {
+                DispatchQueue.main.async {
+                    completion(strongSelf.secondsRemaining, false)
+                }
+                STLog("⏳ 倒计时：\(strongSelf.secondsRemaining) 秒")
+                strongSelf.secondsRemaining -= 1
+            } else {
+                strongSelf.timer?.cancel()
+                STLog("✅ 倒计时结束，执行后续操作...")
+                DispatchQueue.main.async {
+                    completion(0, true)
+                }
+            }
+        }
+        timer?.resume()
+    }
+    
+    public func st_countdownTimerCancel() {
+        timer?.cancel()
+        timer = nil
+        STLog("⏹ 倒计时取消")
+    }
 
     @discardableResult
     public class func st_scheduledTimer(withTimeInterval interval: Int, repeats: Bool, async: Bool, block: @escaping (String) -> Void) -> String {
