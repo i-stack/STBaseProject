@@ -68,7 +68,7 @@
         "STBaseProject/Classes/STDialog/*.swift"
       ],
       "dependencies": {
-        "MBProgressHUD": []
+        "STBaseProject/STBaseModule/STExtensionTools": []
       }
     }
   ],

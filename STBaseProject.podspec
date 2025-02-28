@@ -47,7 +47,8 @@ Pod::Spec.new do |s|
   
   s.subspec 'STDialog' do |ss|
     ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
-    ss.dependency 'MBProgressHUD'
+    ss.dependency 'STBaseProject/STBaseModule/STExtensionTools'
+#    ss.dependency 'MBProgressHUD'
   end
   
 end

@@ -34,7 +34,7 @@ class STNextViewController: STBaseViewController, WKScriptMessageHandler {
         self.detailBtn.addTarget(self, action: #selector(testTimer), for: .touchUpInside)
         let str = "12345678909".st_maskPhoneNumber(start: 8, end: 10)
         self.detailBtn.setTitle(str, for: .normal)
-//        self.view.showLoadingManualHidden()
+        self.view.showLoadingManualHidden()
 //        spacing = STBtnSpacing.init(spacing: 5, topSpacing: 5)
 //        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .top, spacing: spacing)
     }
