@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name = 'STBaseProject'
-  s.version = '1.1.5'
+  s.version = '1.1.2'
   s.license = 'MIT'
   s.summary = 'Project infrastructure, common tools. The new project can inherit.'
   s.homepage = 'https://github.com/i-stack/STBaseProject'
@@ -48,7 +48,6 @@ Pod::Spec.new do |s|
   s.subspec 'STDialog' do |ss|
     ss.source_files = ['STBaseProject/Classes/STDialog/*.swift']
     ss.dependency 'STBaseProject/STBaseModule/STExtensionTools'
-#    ss.dependency 'MBProgressHUD'
   end
   
 end
