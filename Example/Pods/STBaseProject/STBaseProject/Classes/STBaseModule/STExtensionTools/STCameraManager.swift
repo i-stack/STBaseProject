@@ -23,21 +23,13 @@ public struct STCameraModel {
     var authorizationStatus: AVAuthorizationStatus?
 }
 
-public struct STCameraConfiguration {
-    var compressImageMaxFileSize: CGFloat?
-    var cameraDevice: UIImagePickerController.CameraDevice?
-    var permissionTitle: String = "Camera permission has been disabled"
-    var permissionMessage: String = "Please go to settings to enable camera permissions"
-}
-
 public class STCameraManager: NSObject {
     
     static let shared = STCameraManager()
     private var completion: ((STCameraModel) -> Void) = { _ in }
     private var imagePickerController: UIImagePickerController?
-    private var cameraConfig: STCameraConfiguration = STCameraConfiguration()
 
-    public func st_openCamera(isFront cameraDevice: Bool, from viewController: UIViewController, completion: @escaping (STCameraModel) -> Void) {
+    public func st_openCamera(isFront cameraDevice: Bool, from viewController: UIViewController, overlayView: UIView?, completion: @escaping (STCameraModel) -> Void) {
         self.completion = completion
         let status = AVCaptureDevice.authorizationStatus(for: .video)
         var cameraModel = STCameraModel()
@@ -48,41 +40,39 @@ public class STCameraManager: NSObject {
                 guard let strongSelf = self else { return }
                 DispatchQueue.main.async {
                     if granted {
-                        strongSelf.st_showCustomCamera(isFront: cameraDevice, viewController: viewController)
+                        strongSelf.st_showCustomCamera(isFront: cameraDevice, viewController: viewController, overlayView: overlayView)
                     } else {
                         completion(cameraModel)
                     }
                 }
             }
         case .authorized:
-            self.st_showCustomCamera(isFront: cameraDevice, viewController: viewController)
+            self.st_showCustomCamera(isFront: cameraDevice, viewController: viewController, overlayView: overlayView)
         case .denied, .restricted:
-            completion(cameraModel)
+            DispatchQueue.main.async {
+                completion(cameraModel)
+            }
         default:
             break
         }
     }
     
-    private func st_showCustomCamera(isFront cameraDevice: Bool, viewController: UIViewController) {
+    private func st_showCustomCamera(isFront cameraDevice: Bool, viewController: UIViewController, overlayView: UIView?) {
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             self.imagePickerController = UIImagePickerController()
-            imagePickerController?.sourceType = .camera
-            if cameraDevice {
-                imagePickerController?.cameraDevice = .front
-                imagePickerController?.showsCameraControls = false
-                let overlayView = UIView(frame: viewController.view.bounds)
-                overlayView.backgroundColor = .clear
-                
-                let captureButton = UIButton(frame: CGRect(x: (viewController.view.bounds.width - 70) / 2, y: viewController.view.bounds.height - 100, width: 70, height: 70))
-                captureButton.layer.cornerRadius = 35
-                captureButton.backgroundColor = .red
-                captureButton.addTarget(self, action: #selector(st_capturePhoto), for: .touchUpInside)
-                
-                overlayView.addSubview(captureButton)
-                imagePickerController?.cameraOverlayView = overlayView
+            self.imagePickerController?.sourceType = .camera
+            self.imagePickerController?.allowsEditing = false
+            self.imagePickerController?.delegate = self
+            if let ov = overlayView {
+                self.imagePickerController?.cameraOverlayView = ov
+            } else {
+                let ov = UIView(frame: CGRect.init(x: 0, y: 0, width: viewController.view.frame.size.width, height: viewController.view.frame.size.height - 200))
+                ov.backgroundColor = .clear
+                self.imagePickerController?.cameraOverlayView = ov
             }
-            imagePickerController?.allowsEditing = true
-            imagePickerController?.delegate = self
+            if cameraDevice {
+                self.imagePickerController?.cameraDevice = .front
+            }
             if let presentedVC = viewController.presentedViewController {
                 presentedVC.dismiss(animated: true) {
                     viewController.present(self.imagePickerController ?? UIImagePickerController(), animated: true, completion: nil)
@@ -99,8 +89,14 @@ public class STCameraManager: NSObject {
         self.imagePickerController?.takePicture()
     }
     
-    public func st_updateCameraConfiguration(config: STCameraConfiguration) {
-        self.cameraConfig = config
+    public func hiddenCameraOriginBtn(_ fromView: UIView) {
+        for v in fromView.subviews {
+            if v.description.contains("CAMFlipButton") {
+                v.isHidden = true
+                break
+            }
+            self.hiddenCameraOriginBtn(v)
+        }
     }
 }
 
@@ -113,18 +109,7 @@ extension STCameraManager: UIImagePickerControllerDelegate, UINavigationControll
             model.imageSource = .camera
         }
         if let image = info[.originalImage] as? UIImage {
-            if let compressedImageData = UIImage.st_compressImageToSize(image, maxFileSize: 300) {
-                print("Compressed image size: \(compressedImageData.count / 1024) KB")
-                model.image = image
-                model.imageData = compressedImageData
-            } else {
-                print("Failed to compress image.")
-            }
-            if model.mimeType == nil {
-                if let type = image.st_getImageType() {
-                    model.mimeType = "image/\(type)"
-                }
-            }
+            model.image = image
         }
         model.fileName = "photo_\(UUID().uuidString).jpg"
         self.completion(model)
