@@ -6,13 +6,11 @@ install! 'cocoapods', :deterministic_uuids => false
 
 target 'STBaseProject_Example' do
   
-  #  pod 'STBaseProject'
+  pod 'STBaseProject'
   
-  pod 'STBaseProject/STBaseModule', :path => '../'
-#  pod 'STBaseProject/STCustomTools', :path => '../'
-  pod 'STBaseProject/STDialog', :path => '../'
-  #  pod 'STBaseProject/STScanner', :path => '../'
-  #  pod 'STBaseProject/STScreenshot', :path => '../'
+  #pod 'STBaseProject/STBaseModule', :path => '../'
+  #pod 'STBaseProject/STDialog', :path => '../'
+
   
 #  pod 'SnapKit'
 #  pod 'Alamofire'
