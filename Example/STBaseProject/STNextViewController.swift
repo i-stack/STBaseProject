@@ -8,8 +8,13 @@
 
 import UIKit
 import STBaseProject
+import WebKit
 
-class STNextViewController: STBaseViewController {
+class STNextViewController: STBaseViewController, WKScriptMessageHandler {
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        
+    }
+    
     
     @IBOutlet weak var detailBtn: STBtn!
     private var aTarget: STTimer?
@@ -19,19 +24,24 @@ class STNextViewController: STBaseViewController {
     var count = 0
     var spacing = STBtnSpacing()
     
+
+        
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.timerBtn()
         self.detailBtn.backgroundColor = UIColor.orange
-        
+        self.detailBtn.addTarget(self, action: #selector(testTimer), for: .touchUpInside)
         let str = "12345678909".st_maskPhoneNumber(start: 8, end: 10)
         self.detailBtn.setTitle(str, for: .normal)
+//        self.view.showLoadingManualHidden()
 //        spacing = STBtnSpacing.init(spacing: 5, topSpacing: 5)
 //        self.detailBtn.st_layoutButtonWithEdgeInsets(style: .top, spacing: spacing)
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
+        self.view.hideHUD()
 //        count += 1
 //        if count == 1 {
 //            spacing = STBtnSpacing.init(spacing: 10, leftSpacing: 20)
@@ -59,7 +69,13 @@ class STNextViewController: STBaseViewController {
 
 extension STNextViewController {
     
-    func testTimer() {
+    @objc func testTimer() {
+        let web = STCustomWebViewController()
+        
+        let webInfo = STWebInfo(url: "https://www.cpta.com.cn/index.html")
+        web.webInfo = webInfo
+       
+        self.navigationController?.pushViewController(web, animated: true)
 //        let timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(handleHideTimer), userInfo: nil, repeats: true)
 //        delayTimer = timer
         
@@ -100,16 +116,6 @@ extension STNextViewController {
     }
     
     @objc func btnClick(sender: STBtn) {
-//        let url = URL(string: "https://www.baidu.com")!
-//        let task = URLSession.shared.dataTask(with: url) { data, response, error in
-//            if let error = error {
-//                print("Error: \(error.localizedDescription)")
-//            } else {
-//                print("Success")
-//            }
-//        }
-//        task.resume()
-        
-        STDeviceInfo.st_getNetworkInfo()
+
     }
 }

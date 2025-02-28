@@ -7,31 +7,43 @@
 //
 
 import UIKit
+import STBaseProject
+import WebKit
 
-class STCustomURLProtocol: URLProtocol {
+class STCustomWebViewController: STBaseWKViewController {
     
-    /// 适用于UIWebView
-    override class func canInit(with request: URLRequest) -> Bool {
-        if request.url?.scheme?.caseInsensitiveCompare("myapp") == .orderedSame {
-            return true
-        }
-        return true
+    deinit {
+        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
     
-    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-        return request
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.configWeb()
     }
     
-    override func startLoading() {
-        let response = URLResponse.init(url: request.url!, mimeType: "image/png", expectedContentLength: -1, textEncodingName: nil)
-        if let data = UIImage.init(named: "bg_content")?.pngData() {
-            self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            self.client?.urlProtocol(self, didLoad: data)
-            self.client?.urlProtocolDidFinishLoading(self)
-        }
+    func configWeb() {
+        let contentController = WKUserContentController()
+        contentController.add(self, name: "reneging")
+        let config = WKWebViewConfiguration()
+        config.userContentController = contentController
+        self.configWkWebView(config: config, showProgressView: true)
+        self.loadWebInfo()
     }
     
-    override func stopLoading() {
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.wkWebView.configuration.userContentController.removeScriptMessageHandler(forName: "reneging")
+    }
+    
+    override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         
+    }
+    
+    override func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        self.wkWebView.evaluateJavaScript("document.title") { result, error in
+            if let text = result {
+                self.titleLabel.text = String.st_returnStr(object: text)
+            }
+        }
     }
 }

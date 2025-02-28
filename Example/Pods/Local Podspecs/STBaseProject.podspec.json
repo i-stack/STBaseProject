@@ -1,6 +1,6 @@
 {
   "name": "STBaseProject",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "license": "MIT",
   "summary": "Project infrastructure, common tools. The new project can inherit.",
   "homepage": "https://github.com/i-stack/STBaseProject",
@@ -9,7 +9,7 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "1.1.4"
+    "tag": "1.1.5"
   },
   "platforms": {
     "ios": "13.0"
@@ -59,15 +59,6 @@
           "source_files": [
             "STBaseProject/Classes/STBaseModule/STExtensionTools/*.swift"
           ]
-        },
-        {
-          "name": "STUIControl",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STUIControl/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STBaseModule/STExtensionTools": []
-          }
         }
       ]
     },

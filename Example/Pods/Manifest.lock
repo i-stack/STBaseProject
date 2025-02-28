@@ -1,28 +1,24 @@
 PODS:
   - MBProgressHUD (1.2.0)
-  - STBaseProject/STBaseModule (1.1.4):
-    - STBaseProject/STBaseModule/STBaseModel (= 1.1.4)
-    - STBaseProject/STBaseModule/STBaseView (= 1.1.4)
-    - STBaseProject/STBaseModule/STBaseViewController (= 1.1.4)
-    - STBaseProject/STBaseModule/STBaseViewModel (= 1.1.4)
-    - STBaseProject/STBaseModule/STExtensionTools (= 1.1.4)
-    - STBaseProject/STBaseModule/STUIControl (= 1.1.4)
+  - STBaseProject/STBaseModule (1.1.5):
+    - STBaseProject/STBaseModule/STBaseModel (= 1.1.5)
+    - STBaseProject/STBaseModule/STBaseView (= 1.1.5)
+    - STBaseProject/STBaseModule/STBaseViewController (= 1.1.5)
+    - STBaseProject/STBaseModule/STBaseViewModel (= 1.1.5)
+    - STBaseProject/STBaseModule/STExtensionTools (= 1.1.5)
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseModel (1.1.4):
+  - STBaseProject/STBaseModule/STBaseModel (1.1.5):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseView (1.1.4):
+  - STBaseProject/STBaseModule/STBaseView (1.1.5):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseViewController (1.1.4):
+  - STBaseProject/STBaseModule/STBaseViewController (1.1.5):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseViewModel (1.1.4):
+  - STBaseProject/STBaseModule/STBaseViewModel (1.1.5):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STExtensionTools (1.1.4):
+  - STBaseProject/STBaseModule/STExtensionTools (1.1.5):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STUIControl (1.1.4):
-    - STBaseProject/STBaseModule/STExtensionTools
-    - STBaseProject/STConfig
-  - STBaseProject/STConfig (1.1.4)
-  - STBaseProject/STDialog (1.1.4):
+  - STBaseProject/STConfig (1.1.5)
+  - STBaseProject/STDialog (1.1.5):
     - MBProgressHUD
 
 DEPENDENCIES:
@@ -39,7 +35,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  STBaseProject: bd7ceb7754b5b9ac12eb44757d6e79f29fe0030b
+  STBaseProject: a247592f6d0e8b6cf02fdfa947358fb80b2aa538
 
 PODFILE CHECKSUM: a78ef1a1b061596713e03cc5e5bea8f071f0911a
 
