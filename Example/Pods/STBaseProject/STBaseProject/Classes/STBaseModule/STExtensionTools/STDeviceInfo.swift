@@ -86,38 +86,6 @@ public struct STDeviceInfo {
     }
 }
 
-public extension STDeviceInfo {
-    func st_requestContactPermission(complete: @escaping((Bool, [CNContact], String) -> Void)) {
-        CNContactStore().requestAccess(for: .contacts) { (granted, error) in
-            if granted {
-                self.st_fetchContactInfo(complete: complete)
-            } else {
-                complete(false, [], "Access denied: \(error?.localizedDescription ?? "Unknown error")")
-            }
-        }
-    }
-
-    func st_fetchContactInfo(complete: @escaping((Bool, [CNContact], String) -> Void)) {
-        let contactStore = CNContactStore()
-        let keysDescriptor = [
-            CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
-            CNContactPhoneNumbersKey as CNKeyDescriptor
-        ]
-        do {
-            let containers = try contactStore.containers(matching: nil)
-            var allContacts: [CNContact] = []
-            for container in containers {
-                let fetchPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
-                let contacts = try contactStore.unifiedContacts(matching: fetchPredicate, keysToFetch: keysDescriptor)
-                allContacts.append(contentsOf: contacts)
-            }
-            complete(true, allContacts, "")
-        } catch {
-            complete(false, [], "Error fetching contacts: \(error.localizedDescription)")
-        }
-    }
-}
-
 // MARK: - idfa, idfv
 public extension STDeviceInfo {
     static func st_idfa() -> String {
@@ -126,28 +94,6 @@ public extension STDeviceInfo {
     
     static func st_idfv() -> String {
         return UIDevice.current.identifierForVendor?.uuidString ?? ""
-    }
-}
-
-public extension STDeviceInfo {
-    static func st_isRunningOnSimulator() -> Bool {
-        return TARGET_OS_SIMULATOR != 0
-    }
-
-    static func st_isDeviceJailbroken() -> Bool {
-        let jailbreakPaths = [
-            "/Applications/Cydia.app",
-            "/Library/MobileSubstrate/MobileSubstrate.dylib",
-            "/bin/bash",
-            "/usr/sbin/sshd",
-            "/etc/apt"
-        ]
-        for path in jailbreakPaths {
-            if FileManager.default.fileExists(atPath: path) {
-                return true
-            }
-        }
-        return false
     }
 }
 
