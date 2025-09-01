@@ -1,6 +1,6 @@
 //
 //  STCameraManager.swift
-//  UrtyePbhk
+//  STBaseProject
 //
 //  Created by song on 2025/1/13.
 //
@@ -8,174 +8,315 @@
 import UIKit
 import AVFoundation
 
-public enum STCamerImageSource: Int {
+// MARK: - 枚举和错误类型
+public enum STCameraImageSource: Int, CaseIterable {
     case photoLibrary = 1
     case camera = 2
+    
+    public var description: String {
+        switch self {
+        case .photoLibrary: return "photo_library".localized
+        case .camera: return "camera".localized
+        }
+    }
 }
 
+public enum STCameraError: LocalizedError {
+    case permissionDenied(STCameraImageSource)
+    case deviceNotAvailable
+    case compressionFailed
+    case uploadFailed(Error)
+    case invalidURL
+    case unknown
+    
+    public var errorDescription: String? {
+        switch self {
+        case .permissionDenied(let source):
+            return "permission_denied_\(source == .camera ? "camera" : "photo")".localized
+        case .deviceNotAvailable:
+            return "device_not_available".localized
+        case .compressionFailed:
+            return "compression_failed".localized
+        case .uploadFailed(let error):
+            return "upload_failed".localized + ": \(error.localizedDescription)"
+        case .invalidURL:
+            return "invalid_url".localized
+        case .unknown:
+            return "unknown_error".localized
+        }
+    }
+}
+
+// MARK: - 数据模型
 public struct STCameraModel {
-    var image: UIImage?
-    var fileName: String?
-    var mimeType: String?
-    var imageData: Data?
-    var serviceKey: String = "" // need setting, upload image service-key
-    var imageSource: STCamerImageSource?
-    var authorizationStatus: AVAuthorizationStatus?
+    public var image: UIImage?
+    public var fileName: String?
+    public var mimeType: String?
+    public var imageData: Data?
+    public var serviceKey: String = ""
+    public var imageSource: STCameraImageSource?
+    public var authorizationStatus: AVAuthorizationStatus?
+    public var error: STCameraError?
+    
+    public init() {}
 }
 
 public struct STCameraConfiguration {
-    var compressImageMaxFileSize: CGFloat?
-    var cameraDevice: UIImagePickerController.CameraDevice?
-    var permissionTitle: String = "Camera permission has been disabled"
-    var permissionMessage: String = "Please go to settings to enable camera permissions"
+    public var compressImageMaxFileSize: Int = 300 // KB
+    public var cameraDevice: UIImagePickerController.CameraDevice = .rear
+    public var allowsEditing: Bool = true
+    public var showsCameraControls: Bool = true
+    public var compressionQuality: CGFloat = 0.8
+    public var imageFormat: String = "jpeg"
+    
+    // 本地化支持
+    public var permissionTitle: String = "camera_permission_title".localized
+    public var permissionMessage: String = "camera_permission_message".localized
+    public var settingsButtonTitle: String = "settings".localized
+    public var cancelButtonTitle: String = "cancel".localized
+    
+    public init() {}
 }
 
+// MARK: - 相机管理器
 public class STCameraManager: NSObject {
     
-    static let shared = STCameraManager()
+    public static let shared = STCameraManager()
     private var completion: ((STCameraModel) -> Void) = { _ in }
     private var imagePickerController: UIImagePickerController?
-    private var cameraConfig: STCameraConfiguration = STCameraConfiguration()
-
-    public func st_openCamera(isFront cameraDevice: Bool, from viewController: UIViewController, completion: @escaping (STCameraModel) -> Void) {
+    private var configuration: STCameraConfiguration = STCameraConfiguration()
+    
+    private override init() {
+        super.init()
+    }
+    
+    deinit {
+        imagePickerController?.delegate = nil
+        imagePickerController = nil
+    }
+    
+    /// 更新配置
+    public func updateConfiguration(_ config: STCameraConfiguration) {
+        self.configuration = config
+    }
+    
+    /// 打开相机
+    public func openCamera(from viewController: UIViewController, 
+                          configuration: STCameraConfiguration? = nil,
+                          completion: @escaping (STCameraModel) -> Void) {
+        if let config = configuration {
+            self.configuration = config
+        }
+        
         self.completion = completion
         let status = AVCaptureDevice.authorizationStatus(for: .video)
-        var cameraModel = STCameraModel()
-        cameraModel.authorizationStatus = status
+        
         switch status {
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                guard let strongSelf = self else { return }
                 DispatchQueue.main.async {
                     if granted {
-                        strongSelf.st_showCustomCamera(isFront: cameraDevice, viewController: viewController)
+                        self?.presentCamera(from: viewController)
                     } else {
-                        completion(cameraModel)
+                        self?.handlePermissionDenied(.camera)
                     }
                 }
             }
         case .authorized:
-            self.st_showCustomCamera(isFront: cameraDevice, viewController: viewController)
+            presentCamera(from: viewController)
         case .denied, .restricted:
-            completion(cameraModel)
-        default:
-            break
+            handlePermissionDenied(.camera)
+        @unknown default:
+            handleError(.unknown)
         }
     }
     
-    private func st_showCustomCamera(isFront cameraDevice: Bool, viewController: UIViewController) {
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            self.imagePickerController = UIImagePickerController()
-            imagePickerController?.sourceType = .camera
-            if cameraDevice {
-                imagePickerController?.cameraDevice = .front
-                imagePickerController?.showsCameraControls = false
-                let overlayView = UIView(frame: viewController.view.bounds)
-                overlayView.backgroundColor = .clear
-                
-                let captureButton = UIButton(frame: CGRect(x: (viewController.view.bounds.width - 70) / 2, y: viewController.view.bounds.height - 100, width: 70, height: 70))
-                captureButton.layer.cornerRadius = 35
-                captureButton.backgroundColor = .red
-                captureButton.addTarget(self, action: #selector(st_capturePhoto), for: .touchUpInside)
-                
-                overlayView.addSubview(captureButton)
-                imagePickerController?.cameraOverlayView = overlayView
-            }
-            imagePickerController?.allowsEditing = true
-            imagePickerController?.delegate = self
-            if let presentedVC = viewController.presentedViewController {
-                presentedVC.dismiss(animated: true) {
-                    viewController.present(self.imagePickerController ?? UIImagePickerController(), animated: true, completion: nil)
-                }
-            } else {
-                viewController.present(self.imagePickerController ?? UIImagePickerController(), animated: true)
+    /// 打开照片库
+    public func openPhotoLibrary(from viewController: UIViewController,
+                                configuration: STCameraConfiguration? = nil,
+                                completion: @escaping (STCameraModel) -> Void) {
+        if let config = configuration {
+            self.configuration = config
+        }
+        
+        self.completion = completion
+        presentPhotoLibrary(from: viewController)
+    }
+    
+    // MARK: - 私有方法
+    private func presentCamera(from viewController: UIViewController) {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            handleError(.deviceNotAvailable)
+            return
+        }
+        
+        setupImagePickerController(sourceType: .camera)
+        presentImagePicker(from: viewController)
+    }
+    
+    private func presentPhotoLibrary(from viewController: UIViewController) {
+        guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else {
+            handleError(.deviceNotAvailable)
+            return
+        }
+        
+        setupImagePickerController(sourceType: .photoLibrary)
+        presentImagePicker(from: viewController)
+    }
+    
+    private func setupImagePickerController(sourceType: UIImagePickerController.SourceType) {
+        imagePickerController = UIImagePickerController()
+        imagePickerController?.sourceType = sourceType
+        imagePickerController?.allowsEditing = configuration.allowsEditing
+        imagePickerController?.delegate = self
+        
+        if sourceType == .camera {
+            imagePickerController?.cameraDevice = configuration.cameraDevice
+            imagePickerController?.showsCameraControls = configuration.showsCameraControls
+        }
+    }
+    
+    private func presentImagePicker(from viewController: UIViewController) {
+        guard let picker = imagePickerController else { return }
+        
+        if let presentedVC = viewController.presentedViewController {
+            presentedVC.dismiss(animated: false) {
+                viewController.present(picker, animated: true)
             }
         } else {
-            print("camera can not use")
+            viewController.present(picker, animated: true)
         }
     }
     
-    @objc private func st_capturePhoto() {
-        self.imagePickerController?.takePicture()
+    private func handlePermissionDenied(_ source: STCameraImageSource) {
+        var model = STCameraModel()
+        model.error = .permissionDenied(source)
+        completion(model)
     }
     
-    public func st_updateCameraConfiguration(config: STCameraConfiguration) {
-        self.cameraConfig = config
+    private func handleError(_ error: STCameraError) {
+        var model = STCameraModel()
+        model.error = error
+        completion(model)
     }
 }
 
+// MARK: - UIImagePickerControllerDelegate
 extension STCameraManager: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         var model = STCameraModel()
-        if picker.sourceType == .photoLibrary {
-            model.imageSource = .photoLibrary
-        } else if picker.sourceType == .camera {
-            model.imageSource = .camera
+        
+        // 设置图片来源
+        model.imageSource = picker.sourceType == .camera ? .camera : .photoLibrary
+        
+        // 获取图片
+        let imageKey = configuration.allowsEditing ? UIImagePickerController.InfoKey.editedImage : UIImagePickerController.InfoKey.originalImage
+        guard let image = info[imageKey] as? UIImage ?? info[UIImagePickerController.InfoKey.originalImage] as? UIImage else {
+            handleError(.unknown)
+            picker.dismiss(animated: true)
+            return
         }
-        if let image = info[.originalImage] as? UIImage {
-            if let compressedImageData = UIImage.st_compressImageToSize(image, maxFileSize: 300) {
-                print("Compressed image size: \(compressedImageData.count / 1024) KB")
-                model.image = image
-                model.imageData = compressedImageData
-            } else {
-                print("Failed to compress image.")
-            }
-            if model.mimeType == nil {
-                if let type = image.st_getImageType() {
-                    model.mimeType = "image/\(type)"
-                }
-            }
+        
+        model.image = image
+        
+        // 压缩图片
+        if let compressedData = UIImage.smartCompress(image, maxFileSize: configuration.compressImageMaxFileSize) {
+            model.imageData = compressedData
+            #if DEBUG
+            print("压缩后图片大小: \(compressedData.count / 1024) KB")
+            #endif
+        } else {
+            model.error = .compressionFailed
         }
-        model.fileName = "photo_\(UUID().uuidString).jpg"
-        self.completion(model)
-        picker.dismiss(animated: true, completion: nil)
+        
+        // 设置文件信息
+        if let type = image.getTypeString() {
+            model.mimeType = "image/\(type)"
+            model.fileName = "photo_\(Date().timeIntervalSince1970).\(type)"
+        } else {
+            model.mimeType = "image/\(configuration.imageFormat)"
+            model.fileName = "photo_\(Date().timeIntervalSince1970).\(configuration.imageFormat)"
+        }
+        
+        completion(model)
+        picker.dismiss(animated: true)
     }
     
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        picker.dismiss(animated: true, completion: nil)
+        picker.dismiss(animated: true)
     }
 }
 
+// MARK: - 上传功能
 public extension STCameraManager {
-    func st_uploadImage(cameraModel: STCameraModel, otherParams: [String: String], httpBody: Data, urlString: String, completion: @escaping (Result<String, Error>) -> Void) {
+    /// 上传图片
+    func uploadImage(model: STCameraModel, 
+                    toURL urlString: String,
+                    parameters: [String: String] = [:],
+                    completion: @escaping (Result<String, STCameraError>) -> Void) {
         guard let url = URL(string: urlString) else {
-            completion(.failure(NSError(domain: "Invalid URL", code: -1, userInfo: nil)))
+            completion(.failure(.invalidURL))
             return
         }
+        
+        guard let imageData = model.imageData else {
+            completion(.failure(.unknown))
+            return
+        }
+        
         let boundary = "Boundary-\(UUID().uuidString)"
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        let httpBody = self.st_createFormDataBody(cameraModel: cameraModel, otherParams: otherParams, boundary: boundary)
-        request.httpBody = httpBody
+        request.httpBody = createFormDataBody(model: model, parameters: parameters, boundary: boundary)
+        
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            if let data = data, let result = String(data: data, encoding: .utf8) {
-                completion(.success(result))
-            } else {
-                completion(.failure(NSError(domain: "Invalid response", code: -1, userInfo: nil)))
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(.uploadFailed(error)))
+                    return
+                }
+                
+                if let data = data, let result = String(data: data, encoding: .utf8) {
+                    completion(.success(result))
+                } else {
+                    completion(.failure(.unknown))
+                }
             }
         }
         task.resume()
     }
-        
-    func st_createFormDataBody(cameraModel: STCameraModel, otherParams: [String: String], boundary: String) -> Data {
+    
+    /// 创建表单数据
+    private func createFormDataBody(model: STCameraModel, parameters: [String: String], boundary: String) -> Data {
         var body = Data()
-        for (key, value) in otherParams {
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
-            body.append("\(value)\r\n".data(using: .utf8)!)
+        
+        // 添加其他参数
+        for (key, value) in parameters {
+            body.appendString("--\(boundary)\r\n")
+            body.appendString("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n")
+            body.appendString("\(value)\r\n")
         }
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"\(cameraModel.serviceKey)\"; filename=\"\(cameraModel.fileName ?? "temp.image")\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: \(cameraModel.mimeType ?? "image/jpeg")\r\n\r\n".data(using: .utf8)!)
-        body.append(cameraModel.imageData ?? Data())
-        body.append("\r\n".data(using: .utf8)!)
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        // 添加图片数据
+        body.appendString("--\(boundary)\r\n")
+        let fieldName = model.serviceKey.isEmpty ? "image" : model.serviceKey
+        let fileName = model.fileName ?? "image.jpg"
+        body.appendString("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n")
+        body.appendString("Content-Type: \(model.mimeType ?? "image/jpeg")\r\n\r\n")
+        body.append(model.imageData ?? Data())
+        body.appendString("\r\n")
+        body.appendString("--\(boundary)--\r\n")
+        
         return body
+    }
+}
+
+// MARK: - Data Extension
+private extension Data {
+    mutating func appendString(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
     }
 }
