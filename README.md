@@ -613,7 +613,726 @@ response.message = "success"
 response.data = user
 ```
 
-### 五、STBtn
+### 五、STBaseViewModel
+
+`STBaseViewModel` 是一个功能强大的 ViewModel 基类，提供了完整的 MVVM 架构支持。它基于 Combine 框架构建，提供了网络请求、状态管理、缓存、分页、数据验证等丰富的功能。
+
+#### 主要特性
+
+- **网络请求管理**：自动处理网络错误、重试机制、JSON 解析
+- **状态管理**：加载状态、刷新状态、错误状态管理
+- **缓存管理**：内存缓存、磁盘缓存、缓存策略
+- **分页管理**：自动分页加载、下拉刷新、上拉加载更多
+- **数据验证**：表单验证、响应验证、自定义验证规则
+- **数据绑定**：基于 Combine 的响应式数据绑定
+
+#### 基础使用
+
+```swift
+class UserListViewModel: STBaseViewModel {
+    
+    @Published var users: [User] = []
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String?
+    
+    override init() {
+        super.init()
+        st_setupBindings()
+        st_setupConfig()
+    }
+    
+    private func st_setupBindings() {
+        // 绑定加载状态
+        st_bindLoadingState(to: self, keyPath: \.isLoading)
+        
+        // 绑定错误信息
+        st_bindError(to: self, keyPath: \.errorMessage)
+        
+        // 绑定数据更新
+        st_bindDataUpdate(to: self) { [weak self] _ in
+            self?.st_handleDataUpdate()
+        }
+    }
+    
+    private func st_setupConfig() {
+        // 配置请求参数
+        requestConfig = STRequestConfig(
+            timeoutInterval: 30,
+            retryCount: 2,
+            showLoading: true,
+            showError: true
+        )
+        
+        // 配置分页参数
+        paginationConfig = STPaginationConfig(
+            pageSize: 20,
+            currentPage: 1,
+            hasMoreData: true
+        )
+        
+        // 配置缓存参数
+        cacheConfig = STCacheConfig(
+            enableCache: true,
+            cacheKey: "user_list",
+            cacheExpiration: 300,
+            cachePolicy: .both
+        )
+    }
+    
+    override func st_loadData(page: Int) {
+        let url = URL(string: "https://api.example.com/users?page=\(page)")!
+        let request = st_createRequest(url: url)
+        
+        st_request(request, responseType: UserListResponse.self) { [weak self] result in
+            switch result {
+            case .success(let response):
+                self?.st_handleSuccess(response)
+            case .failure(let error):
+                self?.st_handleFailure(error)
+            }
+        }
+    }
+}
+```
+
+#### 网络请求
+
+```swift
+// GET 请求
+st_get(url: "https://api.example.com/users", responseType: UserListResponse.self) { result in
+    switch result {
+    case .success(let response):
+        print("获取用户列表成功: \(response.data.count) 个用户")
+    case .failure(let error):
+        print("获取用户列表失败: \(error.errorDescription ?? "")")
+    }
+}
+
+// POST 请求
+let parameters = ["name": "张三", "email": "zhangsan@example.com"]
+st_post(url: "https://api.example.com/users", parameters: parameters, responseType: UserResponse.self) { result in
+    switch result {
+    case .success(let response):
+        print("创建用户成功: \(response.data.name)")
+    case .failure(let error):
+        print("创建用户失败: \(error.errorDescription ?? "")")
+    }
+}
+
+// PUT 请求
+st_put(url: "https://api.example.com/users/123", parameters: parameters, responseType: UserResponse.self) { result in
+    // 处理响应
+}
+
+// DELETE 请求
+st_delete(url: "https://api.example.com/users/123", responseType: UserResponse.self) { result in
+    // 处理响应
+}
+```
+
+#### 缓存管理
+
+```swift
+// 设置缓存
+st_setCache(userData, forKey: "user_cache")
+
+// 获取缓存
+if let cachedData = st_getCache(forKey: "user_cache") {
+    print("从缓存获取数据: \(cachedData)")
+}
+
+// 移除缓存
+st_removeCache(forKey: "user_cache")
+
+// 清空缓存
+st_clearCache()
+```
+
+#### 分页管理
+
+```swift
+// 刷新数据
+st_refresh()
+
+// 加载下一页
+st_loadNextPage()
+
+// 重写加载数据方法
+override func st_loadData(page: Int) {
+    let url = URL(string: "https://api.example.com/users?page=\(page)")!
+    let request = st_createRequest(url: url)
+    
+    st_request(request, responseType: UserListResponse.self) { [weak self] result in
+        // 处理响应
+    }
+}
+```
+
+#### 数据验证
+
+```swift
+// 表单验证
+class FormViewModel: STBaseViewModel {
+    @Published var email: String = ""
+    @Published var password: String = ""
+    @Published var isFormValid: Bool = false
+    
+    private func st_validateForm() {
+        let isEmailValid = st_validateEmail(email)
+        let isPasswordValid = password.count >= 6
+        isFormValid = isEmailValid && isPasswordValid
+    }
+    
+    func submitForm() {
+        guard isFormValid else {
+            let error = STBaseError.validationError("表单验证失败")
+            self.error.send(error)
+            return
+        }
+        
+        // 提交表单
+    }
+}
+```
+
+#### 状态管理
+
+```swift
+// 监听加载状态
+loadingState
+    .sink { state in
+        switch state {
+        case .loading:
+            print("正在加载...")
+        case .loaded:
+            print("加载完成")
+        case .failed(let error):
+            print("加载失败: \(error.errorDescription ?? "")")
+        case .empty:
+            print("数据为空")
+        case .idle:
+            break
+        }
+    }
+    .store(in: &cancellables)
+
+// 监听刷新状态
+refreshState
+    .sink { state in
+        switch state {
+        case .refreshing:
+            print("正在刷新...")
+        case .noMoreData:
+            print("没有更多数据")
+        case .failed(let error):
+            print("刷新失败: \(error.errorDescription ?? "")")
+        case .idle:
+            break
+        }
+    }
+    .store(in: &cancellables)
+```
+
+#### 文件上传和下载
+
+```swift
+// 上传文件
+let uploadFile = STUploadFile(
+    data: fileData,
+    fileName: "document.pdf",
+    mimeType: "application/pdf"
+)
+
+st_upload(
+    url: "https://api.example.com/upload",
+    parameters: ["category": "document"],
+    files: [uploadFile],
+    responseType: UploadResponse.self,
+    progress: { progress in
+        print("上传进度: \(progress.progress * 100)%")
+    }
+) { result in
+    switch result {
+    case .success(let response):
+        print("文件上传成功")
+    case .failure(let error):
+        print("文件上传失败: \(error.errorDescription ?? "")")
+    }
+}
+
+// 下载文件
+st_download(
+    url: "https://api.example.com/download/file.pdf",
+    progress: { progress in
+        print("下载进度: \(progress.progress * 100)%")
+    }
+) { localURL, error in
+    if let localURL = localURL {
+        print("文件下载成功: \(localURL)")
+    } else {
+        print("文件下载失败: \(error?.errorDescription ?? "")")
+    }
+}
+```
+
+#### 网络状态监控
+
+```swift
+// 检查网络状态
+let networkStatus = st_checkNetworkStatus()
+switch networkStatus {
+case .reachable(let connectionType):
+    switch connectionType {
+    case .ethernetOrWiFi:
+        print("WiFi 或以太网连接")
+    case .cellular:
+        print("蜂窝网络连接")
+    }
+case .notReachable:
+    print("网络不可用")
+case .unknown:
+    print("网络状态未知")
+}
+
+// 等待网络可用
+st_waitForNetwork {
+    print("网络已可用，可以执行请求")
+}
+```
+
+#### 认证和请求头管理
+
+```swift
+// 设置认证 Token
+st_setAuthToken("your_token_here")
+
+// 设置自定义请求头
+st_setCustomHeaders([
+    "X-Client-Version": "1.0.0",
+    "X-Platform": "iOS"
+])
+
+// 清除认证信息
+st_clearAuth()
+```
+
+#### 错误处理
+
+```swift
+// 自定义错误处理
+override func st_onFailed(_ error: STBaseError) {
+    super.st_onFailed(error)
+    
+    switch error {
+    case .networkError(let message):
+        print("网络错误: \(message)")
+    case .dataError(let message):
+        print("数据错误: \(message)")
+    case .businessError(let code, let message):
+        print("业务错误 [\(code)]: \(message)")
+    default:
+        print("其他错误: \(error.errorDescription ?? "")")
+    }
+}
+```
+
+### 六、STHTTPSession
+
+`STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
+
+#### 主要特性
+
+- **便捷的请求方法**：GET、POST、PUT、DELETE 等 HTTP 方法
+- **参数编码**：URL、JSON、Form Data、Multipart 编码支持
+- **请求头管理**：统一的请求头设置和管理
+- **错误处理**：完善的错误类型和处理机制
+- **响应处理**：状态码检查、数据解码、响应头获取
+- **统一响应处理**：HTTP 和业务响应统一处理
+- **网络管理**：请求取消、缓存管理、认证管理
+
+#### 基础配置
+
+```swift
+// 全局默认配置（可选）
+STHTTPSession.shared.defaultRequestHeaders.st_setAuthorization("default_token")
+STHTTPSession.shared.defaultRequestConfig = STRequestConfig(
+    timeoutInterval: 30,
+    retryCount: 2,
+    retryDelay: 1.0
+)
+
+// 每个 ViewModel 的独立配置
+class UserViewModel: STBaseViewModel {
+    override init() {
+        super.init()
+        
+        // 设置独立的请求配置
+        requestConfig = STRequestConfig(
+            timeoutInterval: 30,
+            retryCount: 3,
+            showLoading: true
+        )
+        
+        // 设置独立的请求头
+        requestHeaders.st_setAuthorization("user_token")
+        requestHeaders.st_setCustomHeaders([
+            "X-Client-Version": "1.0.0",
+            "X-Platform": "iOS"
+        ])
+    }
+}
+```
+
+#### GET 请求
+
+```swift
+// 简单 GET 请求
+STHTTPSession.shared.st_get(url: "https://api.example.com/users") { response in
+    if response.isSuccess {
+        if let userList = response.st_decode(UserListResponse.self) {
+            print("获取用户列表成功: \(userList.data.count) 个用户")
+        }
+    } else {
+        print("获取用户列表失败: \(response.error?.localizedDescription ?? "")")
+    }
+}
+
+// 带参数的 GET 请求
+let parameters = [
+    "page": 1,
+    "pageSize": 20,
+    "status": "active"
+]
+
+STHTTPSession.shared.st_get(url: "https://api.example.com/users", parameters: parameters) { response in
+    // 处理响应
+}
+
+#### 业务响应处理
+
+```swift
+// 处理标准业务响应
+STHTTPSession.shared.st_get(url: "https://api.example.com/users") { response in
+    if response.businessIsSuccess {
+        print("业务成功: \(response.businessMessage)")
+        if let userData = response.businessData as? [String: Any] {
+            print("用户数据: \(userData)")
+        }
+    } else {
+        print("业务失败: \(response.businessMessage)")
+    }
+}
+
+// 处理分页响应
+STHTTPSession.shared.st_get(url: "https://api.example.com/users?page=1&pageSize=20") { response in
+    if response.businessIsSuccess {
+        // 获取分页信息
+        if let paginationInfo = response.st_paginationInfo {
+            print("当前页: \(paginationInfo.page)")
+            print("总数量: \(paginationInfo.totalCount)")
+            print("是否有下一页: \(paginationInfo.hasNextPage)")
+        }
+        
+        // 获取数据列表
+        if let data = response.businessData as? [String: Any],
+           let list = data["list"] as? [Any] {
+            print("数据列表: \(list.count) 条")
+        }
+    }
+}
+```
+```
+
+#### POST 请求
+
+```swift
+// JSON 编码的 POST 请求
+let parameters = [
+    "name": "张三",
+    "email": "zhangsan@example.com",
+    "password": "123456"
+]
+
+STHTTPSession.shared.st_post(url: "https://api.example.com/users", parameters: parameters) { response in
+    if response.isSuccess {
+        if let userResponse = response.st_decode(UserResponse.self) {
+            print("创建用户成功: \(userResponse.data.name)")
+        }
+    } else {
+        print("创建用户失败: \(response.error?.localizedDescription ?? "")")
+    }
+}
+
+// Form Data 编码的 POST 请求
+STHTTPSession.shared.st_post(
+    url: "https://api.example.com/login",
+    parameters: parameters,
+    encodingType: .formData
+) { response in
+    if response.isSuccess {
+        if let json = response.json as? [String: Any],
+           let token = json["token"] as? String {
+            STHTTPSession.shared.st_setAuthToken(token)
+        }
+    }
+}
+```
+
+#### PUT 和 DELETE 请求
+
+```swift
+// PUT 请求
+STHTTPSession.shared.st_put(url: "https://api.example.com/users/123", parameters: parameters) { response in
+    if response.isSuccess {
+        print("更新用户成功")
+    }
+}
+
+// DELETE 请求
+STHTTPSession.shared.st_delete(url: "https://api.example.com/users/123") { response in
+    if response.isSuccess {
+        print("删除用户成功")
+    }
+}
+```
+
+#### 通用请求方法
+
+```swift
+// 自定义请求
+STHTTPSession.shared.st_request(
+    url: "https://api.example.com/search",
+    method: .post,
+    parameters: parameters,
+    encodingType: .json
+) { response in
+    if response.isSuccess {
+        if let json = response.json {
+            print("搜索成功: \(json)")
+        }
+    }
+}
+```
+
+#### 参数编码
+
+```swift
+let parameters = [
+    "name": "张三",
+    "age": 25,
+    "isActive": true,
+    "tags": ["iOS", "Swift", "Developer"],
+    "profile": [
+        "bio": "iOS 开发者",
+        "location": "北京"
+    ]
+]
+
+// URL 编码
+let urlEncoded = STParameterEncoder.st_encodeURL(parameters)
+
+// JSON 编码
+if let jsonData = STParameterEncoder.st_encodeJSON(parameters) {
+    let jsonString = String(data: jsonData, encoding: .utf8)
+}
+
+// Form Data 编码
+if let formData = STParameterEncoder.st_encodeFormData(parameters) {
+    let formString = String(data: formData, encoding: .utf8)
+}
+```
+
+#### 响应处理
+
+```swift
+STHTTPSession.shared.st_get(url: "https://api.example.com/status") { response in
+    // 检查状态码
+    print("状态码: \(response.statusCode)")
+    
+    // 检查是否为成功响应
+    if response.isSuccess {
+        print("请求成功")
+    } else if response.st_isClientError {
+        print("客户端错误")
+    } else if response.st_isServerError {
+        print("服务器错误")
+    }
+    
+    // 获取响应头
+    if let contentType = response.st_getHeader("Content-Type") {
+        print("Content-Type: \(contentType)")
+    }
+    
+    // 获取响应数据
+    if let json = response.json {
+        print("JSON 数据: \(json)")
+    }
+    
+    if let string = response.string {
+        print("字符串数据: \(string)")
+    }
+    
+    // 解码为指定类型
+    if let userResponse = response.st_decode(UserResponse.self) {
+        print("解码成功: \(userResponse.data.name)")
+    }
+}
+```
+
+#### 错误处理
+
+```swift
+STHTTPSession.shared.st_get(url: "https://invalid-url.com/api") { response in
+    if let error = response.error as? STHTTPError {
+        switch error {
+        case .invalidURL:
+            print("URL 无效")
+        case .networkError(let networkError):
+            print("网络错误: \(networkError.localizedDescription)")
+        case .httpError(let code, let message):
+            print("HTTP 错误 [\(code)]: \(message)")
+        case .noData:
+            print("无数据返回")
+        case .encodingError:
+            print("参数编码失败")
+        case .decodingError:
+            print("数据解码失败")
+        }
+    } else {
+        print("其他错误: \(response.error?.localizedDescription ?? "")")
+    }
+}
+```
+
+#### 文件上传和下载
+
+```swift
+// 上传图片
+STHTTPSession.shared.st_uploadImage(
+    url: "https://api.example.com/upload",
+    image: selectedImage,
+    parameters: ["description": "用户头像"]
+) { response in
+    if response.isSuccess {
+        print("图片上传成功")
+    }
+}
+
+// 上传文件
+let uploadFile = STUploadFile(
+    data: fileData,
+    fileName: "document.pdf",
+    mimeType: "application/pdf"
+)
+
+STHTTPSession.shared.st_upload(
+    url: "https://api.example.com/upload",
+    parameters: ["category": "document"],
+    files: [uploadFile],
+    progress: { progress in
+        print("上传进度: \(progress.progress * 100)%")
+    }
+) { response in
+    if response.isSuccess {
+        print("文件上传成功")
+    }
+}
+
+// 下载文件
+STHTTPSession.shared.st_download(
+    url: "https://api.example.com/download/file.pdf",
+    progress: { progress in
+        print("下载进度: \(progress.progress * 100)%")
+    }
+) { localURL, response in
+    if let localURL = localURL {
+        print("文件下载成功: \(localURL)")
+    }
+}
+```
+
+#### 网络状态监控
+
+```swift
+// 检查网络状态
+let networkStatus = STHTTPSession.shared.st_checkNetworkStatus()
+switch networkStatus {
+case .reachable(let connectionType):
+    switch connectionType {
+    case .ethernetOrWiFi:
+        print("WiFi 或以太网连接")
+    case .cellular:
+        print("蜂窝网络连接")
+    }
+case .notReachable:
+    print("网络不可用")
+case .unknown:
+    print("网络状态未知")
+}
+
+// 等待网络可用
+STHTTPSession.shared.st_waitForNetwork {
+    print("网络已可用，可以执行请求")
+}
+
+// 监听网络状态变化
+STHTTPSession.shared.networkReachability.status
+    .sink { status in
+        switch status {
+        case .reachable:
+            print("网络已连接")
+        case .notReachable:
+            print("网络已断开")
+        case .unknown:
+            print("网络状态未知")
+        }
+    }
+    .store(in: &cancellables)
+```
+
+#### 请求链和验证
+
+```swift
+// 带验证的请求链
+STHTTPSession.shared.st_requestChain(
+    url: "https://api.example.com/users",
+    method: .get,
+    validate: { response in
+        // 自定义验证逻辑
+        return response.statusCode == 200 && response.json != nil
+    }
+) { response in
+    if response.isSuccess {
+        print("请求成功并通过验证")
+    } else {
+        print("请求失败或验证失败")
+    }
+}
+```
+
+#### 网络管理
+
+```swift
+// 取消所有请求
+STHTTPSession.shared.st_cancelAllRequests()
+
+// 清除缓存
+STHTTPSession.shared.st_clearCache()
+
+// 清除认证信息
+STHTTPSession.shared.st_clearAuth()
+
+// 设置新的认证 token
+STHTTPSession.shared.st_setAuthToken("new_token_here")
+
+// 设置自定义请求头
+STHTTPSession.shared.st_setCustomHeaders([
+    "X-Request-ID": UUID().uuidString,
+    "X-Timestamp": "\(Date().timeIntervalSince1970)"
+])
+```
+
+### 七、STBtn
 
 > Button title text and image position settings;
 
