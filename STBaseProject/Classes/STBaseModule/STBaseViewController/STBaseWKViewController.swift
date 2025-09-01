@@ -249,7 +249,7 @@ open class STBaseWKViewController: STBaseViewController {
             self.wkWebView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             self.wkWebView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.wkWebView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.wkWebView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STBaseConstants.st_navHeight()),
+            self.wkWebView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STDeviceAdapter.st_navHeight()),
         ])
         self.view.bringSubviewToFront(self.topBgView)
     }
@@ -295,7 +295,7 @@ open class STBaseWKViewController: STBaseViewController {
         // 添加错误视图
         self.view.addSubview(self.errorView)
         NSLayoutConstraint.activate([
-            self.errorView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STBaseConstants.st_navHeight()),
+            self.errorView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STDeviceAdapter.st_navHeight()),
             self.errorView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.errorView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             self.errorView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)

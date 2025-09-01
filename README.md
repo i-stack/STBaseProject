@@ -14,6 +14,8 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 - 📱 **现代化设计**：支持深色模式，适配不同屏幕尺寸
 - 🔧 **高度可配置**：丰富的配置选项，满足不同需求
 - 🛡️ **错误处理**：完善的错误处理和状态管理
+- 📐 **设备适配**：智能的设备判断和尺寸计算
+- 🎯 **比例缩放**：基于设计稿的精确比例缩放
 
 ## Installation
 
@@ -25,28 +27,158 @@ pod 'STBaseProject'
 
 Configure in AppDelegate:
 
-**Custom navigation bar height**
-
 ```swift
-private func customNavBar() {
-    var model = STConstantBarHeightModel.init()
-    model.navNormalHeight = 76
-    model.navIsSafeHeight = 100
-    STConstants.shared.st_customNavHeight(model: model)
-}
-```
-
-**Design drawing baseline dimension configuration**
-
-```swift
-private func configBenchmarkDesign() {
-    STConstants.shared.st_configBenchmarkDesign(size: CGSize.init(width: 375, height: 812))
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    
+    // 配置基础设置
+    STBaseConfig.shared.st_setDefaultConfig()
+    
+    // 或者自定义配置
+    STBaseConfig.shared.st_configCompleteUI(
+        designSize: CGSize(width: 375, height: 812),  // iPhone X 设计稿尺寸
+        navNormalHeight: 64,    // 普通设备导航栏高度
+        navSafeHeight: 88,      // 刘海屏设备导航栏高度
+        tabBarNormalHeight: 49, // 普通设备 TabBar 高度
+        tabBarSafeHeight: 83    // 刘海屏设备 TabBar 高度
+    )
+    
+    return true
 }
 ```
 
 ## 组件使用指南
 
-### 一、STBaseViewController
+### 一、STBaseConfig 和 STDeviceAdapter
+
+#### STBaseConfig - 基础配置管理
+
+`STBaseConfig` 负责管理设计基准尺寸和界面高度配置，提供统一的配置接口。
+
+##### 主要功能
+
+- **设计基准配置**：设置设计稿的基准尺寸
+- **导航栏配置**：自定义导航栏高度
+- **TabBar 配置**：自定义 TabBar 高度
+- **完整配置**：一次性配置所有界面尺寸
+
+##### 使用示例
+
+```swift
+// 设置默认配置（推荐）
+STBaseConfig.shared.st_setDefaultConfig()
+
+// 自定义设计基准尺寸
+STBaseConfig.shared.st_configBenchmarkDesign(size: CGSize(width: 375, height: 812))
+
+// 自定义导航栏高度
+STBaseConfig.shared.st_configCustomNavBar(normalHeight: 64, safeHeight: 88)
+
+// 自定义 TabBar 高度
+STBaseConfig.shared.st_configCustomTabBar(normalHeight: 49, safeHeight: 83)
+
+// 完整配置
+STBaseConfig.shared.st_configCompleteUI(
+    designSize: CGSize(width: 375, height: 812),
+    navNormalHeight: 64,
+    navSafeHeight: 88,
+    tabBarNormalHeight: 49,
+    tabBarSafeHeight: 83
+)
+```
+
+#### STDeviceAdapter - 设备适配和尺寸计算
+
+`STDeviceAdapter` 提供设备判断、尺寸计算、比例缩放等功能，支持多设备适配。
+
+##### 主要功能
+
+- **设备判断**：iPhone、iPad、刘海屏等设备类型判断
+- **尺寸计算**：屏幕尺寸、导航栏高度、安全区域等
+- **比例缩放**：基于设计稿的精确比例计算
+- **实用方法**：内容区域高度、方向判断等
+
+##### 设备判断
+
+```swift
+// 设备类型判断
+let deviceType = STDeviceAdapter.st_deviceType()
+let isIPad = STDeviceAdapter.st_isIPad()
+let isNotchScreen = STDeviceAdapter.st_isNotchScreen()
+
+// 屏幕方向判断
+let isLandscape = STDeviceAdapter.st_isLandscape()
+let isPortrait = STDeviceAdapter.st_isPortrait()
+```
+
+##### 尺寸获取
+
+```swift
+// 屏幕尺寸
+let screenWidth = STDeviceAdapter.st_appw()
+let screenHeight = STDeviceAdapter.st_apph()
+let screenSize = STDeviceAdapter.st_screenSize()
+
+// 界面高度
+let navHeight = STDeviceAdapter.st_navHeight()
+let tabBarHeight = STDeviceAdapter.st_tabBarHeight()
+let statusBarHeight = STDeviceAdapter.st_statusBarHeight()
+let safeBarHeight = STDeviceAdapter.st_safeBarHeight()
+
+// 内容区域高度
+let contentHeight = STDeviceAdapter.st_contentHeight()
+let contentHeightWithTabBar = STDeviceAdapter.st_contentHeightWithTabBar()
+```
+
+##### 比例缩放
+
+```swift
+// 基础比例计算
+let multiplier = STDeviceAdapter.st_multiplier()
+let heightMultiplier = STDeviceAdapter.st_heightMultiplier()
+
+// 尺寸适配
+let adaptedWidth = STDeviceAdapter.st_adaptWidth(100)      // 适配宽度
+let adaptedHeight = STDeviceAdapter.st_adaptHeight(50)     // 适配高度
+let adaptedFontSize = STDeviceAdapter.st_adaptFontSize(16) // 适配字体
+let adaptedSpacing = STDeviceAdapter.st_adaptSpacing(10)   // 适配间距
+
+// 手动计算
+let result = STDeviceAdapter.st_handleFloat(100)           // 基于宽度
+let heightResult = STDeviceAdapter.st_handleHeightFloat(50) // 基于高度
+```
+
+##### 实际应用示例
+
+```swift
+class CustomView: UIView {
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupUI()
+    }
+    
+    private func setupUI() {
+        // 使用适配后的尺寸
+        let buttonWidth = STDeviceAdapter.st_adaptWidth(120)
+        let buttonHeight = STDeviceAdapter.st_adaptHeight(44)
+        let fontSize = STDeviceAdapter.st_adaptFontSize(16)
+        let margin = STDeviceAdapter.st_adaptSpacing(20)
+        
+        let button = UIButton(frame: CGRect(x: margin, y: margin, width: buttonWidth, height: buttonHeight))
+        button.titleLabel?.font = UIFont.systemFont(ofSize: fontSize)
+        button.setTitle("适配按钮", for: .normal)
+        
+        addSubview(button)
+    }
+}
+```
+
+### 二、STBaseViewController
 
 `STBaseViewController` 是一个功能强大的基础视图控制器类，专门用于定制导航栏样式。所有继承自 `STBaseViewController` 的视图控制器都可以使用统一的导航栏样式，同时支持子类进行个性化定制。
 
@@ -120,7 +252,7 @@ self.st_setTitleView(titleView)
 self.st_setStatusBarHidden(true)
 ```
 
-### 二、STBaseWKViewController
+### 三、STBaseWKViewController
 
 `STBaseWKViewController` 是一个功能强大的 WebView 控制器类，专门用于全局样式的 WebView 加载。它基于 `STBaseViewController` 构建，提供了完整的 WebView 功能，包括加载状态管理、错误处理、JavaScript 交互等。
 
@@ -266,7 +398,7 @@ let script = "receiveDataFromNative(\(data))"
 self.st_evaluateJavaScript(script)
 ```
 
-### 三、STBaseView
+### 四、STBaseView
 
 `STBaseView` 是一个功能强大的基础视图类，提供了多种布局模式和自动滚动功能。它可以根据内容大小自动选择合适的布局方式，支持 ScrollView、TableView、CollectionView 等多种布局模式。
 
@@ -496,7 +628,7 @@ let tableView = st_getTableView()
 let collectionView = st_getCollectionView()
 ```
 
-### 四、STBaseModel
+### 五、STBaseModel
 
 `STBaseModel` 是一个功能强大的统一iOS模型基类，为iOS项目提供完整的模型管理解决方案。通过继承该类，可以快速构建具有丰富功能的模型类，支持标准模式和灵活模式两种使用方式。
 
@@ -613,7 +745,7 @@ response.message = "success"
 response.data = user
 ```
 
-### 五、STBaseViewModel
+### 六、STBaseViewModel
 
 `STBaseViewModel` 是一个功能强大的 ViewModel 基类，提供了完整的 MVVM 架构支持。它基于 Combine 框架构建，提供了网络请求、状态管理、缓存、分页、数据验证等丰富的功能。
 
@@ -936,7 +1068,7 @@ override func st_onFailed(_ error: STBaseError) {
 }
 ```
 
-### 六、STHTTPSession
+### 七、STHTTPSession
 
 `STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
 

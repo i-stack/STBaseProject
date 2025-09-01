@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
-        STBaseConstants.shared.st_configBenchmarkDesign(size: CGSize.init(width: 375, height: 812))
+        STDeviceAdapter.shared.st_configBenchmarkDesign(size: CGSize.init(width: 375, height: 812))
         
         Bundle.st_setCusLanguage(language: "zh")
         let vc = ViewController()

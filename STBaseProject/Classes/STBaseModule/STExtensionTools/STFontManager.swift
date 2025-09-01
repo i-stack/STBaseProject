@@ -51,7 +51,7 @@ public extension UIFont {
     }
     
     private class func st_fontSize(size: CGFloat) -> CGFloat {
-        return STBaseConstants.st_handleFloat(float: size)
+        return STDeviceAdapter.st_handleFloat(float: size)
     }
     
     @objc class func st_systemFont(ofSize: CGFloat) -> UIFont {

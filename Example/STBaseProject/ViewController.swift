@@ -25,7 +25,7 @@ class ViewController: STBaseViewController {
         self.titleLabel.textColor = UIColor.black
         self.st_showNavBtnType(type: .onlyShowTitle)
         self.tableView.tableFooterView = UIView()
-        self.topConstraint.constant = STBaseConstants.st_navHeight()
+        self.topConstraint.constant = STDeviceAdapter.st_navHeight()
         self.viewModel?.loadData {[weak self] result in
             guard let strongSelf = self else { return }
             if result {

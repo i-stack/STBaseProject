@@ -26,7 +26,7 @@ extension NSLayoutConstraint {
             _autoConstant = newValue
             
             if newValue {
-                self.constant = STBaseConstants.st_handleFloat(float: self.constant)
+                self.constant = STDeviceAdapter.st_handleFloat(float: self.constant)
             }
         }
         get {
@@ -37,7 +37,7 @@ extension NSLayoutConstraint {
     open override func awakeFromNib() {
         super.awakeFromNib()
         if _autoConstant == true {
-            self.constant = STBaseConstants.st_handleFloat(float: self.constant)
+            self.constant = STDeviceAdapter.st_handleFloat(float: self.constant)
         }
     }
 }
