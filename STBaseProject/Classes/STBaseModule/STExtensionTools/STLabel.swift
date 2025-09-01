@@ -7,6 +7,11 @@
 
 import UIKit
 
+// MARK: - 标签本地化常量
+private struct STLabelLocalizationKey {
+    static var localizedTextKey: UInt8 = 0
+}
+
 public enum STLabelVerticalAlignment {
     case top
     case middle
@@ -16,13 +21,15 @@ public enum STLabelVerticalAlignment {
 public class STLabel: UILabel {
     
     private var verticalAlignment: STLabelVerticalAlignment?
-        
-    @IBInspectable open var localizedTitle: String {
-        set {
-            self.text = Bundle.st_localizedString(key: newValue)
-        }
+    
+    /// 本地化标题（支持 Storyboard 设置，支持动态语言切换）
+    @IBInspectable open var localizedText: String {
         get {
-            return self.text ?? ""
+            return objc_getAssociatedObject(self, &STLabelLocalizationKey.localizedTextKey) as? String ?? ""
+        }
+        set {
+            objc_setAssociatedObject(self, &STLabelLocalizationKey.localizedTextKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            self.text = newValue.localized
         }
     }
     
@@ -97,5 +104,12 @@ public class STLabel: UILabel {
     public override func draw(_ rect: CGRect) {
         let rect: CGRect = self.textRect(forBounds: rect, limitedToNumberOfLines: self.numberOfLines)
         super.drawText(in: rect)
+    }
+
+    /// 更新本地化文本（仅对 localizedText 有效）
+    public func st_updateLocalizedText() {
+        if !localizedText.isEmpty {
+            self.text = localizedText.localized
+        }
     }
 }

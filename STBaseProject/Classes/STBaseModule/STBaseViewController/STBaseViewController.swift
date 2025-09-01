@@ -441,3 +441,34 @@ public extension STBaseViewController {
         return currentVC
     }
 }
+
+public extension STBaseViewController {
+    
+    func st_updateLocalizedTexts() {
+        if let title = self.title, !title.isEmpty {
+            self.titleLabel.text = title.localized
+        }
+        
+        if let title = navigationItem.title, !title.isEmpty {
+            navigationItem.title = title.localized
+        }
+        if let prompt = navigationItem.prompt, !prompt.isEmpty {
+            navigationItem.prompt = prompt.localized
+        }
+        updateLocalizedTextsInView(self.view)
+    }
+    
+    private func updateLocalizedTextsInView(_ view: UIView?) {
+        guard let view = view else { return }
+        if let label = view as? STLabel {
+            label.st_updateLocalizedText()
+        } else if let button = view as? STBtn {
+            button.st_updateLocalizedText()
+        } else if let textField = view as? STTextField {
+            textField.st_updateLocalizedPlaceholder()
+        }
+        for subview in view.subviews {
+            updateLocalizedTextsInView(subview)
+        }
+    }
+}

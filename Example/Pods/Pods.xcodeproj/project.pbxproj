@@ -32,7 +32,7 @@
 		46EB2E00000670 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STJSONValue.swift */; };
 		46EB2E00000680 /* STKeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STKeychainHelper.swift */; };
 		46EB2E00000690 /* STLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002A0 /* STLabel.swift */; };
-		46EB2E000006A0 /* STLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* STLanguageManager.swift */; };
+		46EB2E000006A0 /* STLocalizationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002B0 /* STLocalizationManager.swift */; };
 		46EB2E000006B0 /* STLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002C0 /* STLocationManager.swift */; };
 		46EB2E000006C0 /* STLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002D0 /* STLogView.swift */; };
 		46EB2E000006D0 /* STNetworkMonitoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000002E0 /* STNetworkMonitoring.swift */; };
@@ -96,7 +96,7 @@
 		46EB2E00000280 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STJSONValue.swift; sourceTree = "<group>"; };
 		46EB2E00000290 /* STKeychainHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STKeychainHelper.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STKeychainHelper.swift; sourceTree = "<group>"; };
 		46EB2E000002A0 /* STLabel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLabel.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STLabel.swift; sourceTree = "<group>"; };
-		46EB2E000002B0 /* STLanguageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLanguageManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STLanguageManager.swift; sourceTree = "<group>"; };
+		46EB2E000002B0 /* STLocalizationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLocalizationManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STLocalizationManager.swift; sourceTree = "<group>"; };
 		46EB2E000002C0 /* STLocationManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLocationManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STLocationManager.swift; sourceTree = "<group>"; };
 		46EB2E000002D0 /* STLogView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STLogView.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STLogView.swift; sourceTree = "<group>"; };
 		46EB2E000002E0 /* STNetworkMonitoring.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STNetworkMonitoring.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STNetworkMonitoring.swift; sourceTree = "<group>"; };
@@ -285,7 +285,7 @@
 				46EB2E00000280 /* STJSONValue.swift */,
 				46EB2E00000290 /* STKeychainHelper.swift */,
 				46EB2E000002A0 /* STLabel.swift */,
-				46EB2E000002B0 /* STLanguageManager.swift */,
+				46EB2E000002B0 /* STLocalizationManager.swift */,
 				46EB2E000002C0 /* STLocationManager.swift */,
 				46EB2E000002D0 /* STLogView.swift */,
 				46EB2E000002E0 /* STNetworkMonitoring.swift */,
@@ -513,7 +513,7 @@
 				46EB2E00000670 /* STJSONValue.swift in Sources */,
 				46EB2E00000680 /* STKeychainHelper.swift in Sources */,
 				46EB2E00000690 /* STLabel.swift in Sources */,
-				46EB2E000006A0 /* STLanguageManager.swift in Sources */,
+				46EB2E000006A0 /* STLocalizationManager.swift in Sources */,
 				46EB2E000006B0 /* STLocationManager.swift in Sources */,
 				46EB2E000006C0 /* STLogView.swift in Sources */,
 				46EB2E000006D0 /* STNetworkMonitoring.swift in Sources */,

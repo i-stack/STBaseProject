@@ -7,6 +7,12 @@
 
 import UIKit
 
+// MARK: - 按钮本地化常量
+private struct STBtnLocalizationKey {
+    static var localizedTitleKey: UInt8 = 0
+    static var localizedSelectedTitleKey: UInt8 = 1
+}
+
 // MARK: - 按钮布局样式枚举
 public enum STBtnEdgeInsetsStyle {
     case top    // 图片在上，文字在下
@@ -53,13 +59,25 @@ open class STBtn: UIButton {
     private var btnSpacing: STBtnSpacing = STBtnSpacing()
     
     // MARK: - IBInspectable 属性
-    /// 本地化标题（支持 Storyboard 设置）
+    /// 本地化标题键（支持 Storyboard 设置，支持动态语言切换）
     @IBInspectable open var localizedTitle: String {
-        set {
-            self.setTitle(Bundle.st_localizedString(key: newValue), for: .normal)
-        }
         get {
-            return self.titleLabel?.text ?? ""
+            return objc_getAssociatedObject(self, &STBtnLocalizationKey.localizedTitleKey) as? String ?? ""
+        }
+        set {
+            objc_setAssociatedObject(self, &STBtnLocalizationKey.localizedTitleKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            self.setTitle(newValue.localized, for: .normal)
+        }
+    }
+    
+    /// 本地化选中状态标题键（支持 Storyboard 设置，支持动态语言切换）
+    @IBInspectable open var localizedSelectedTitle: String {
+        get {
+            return objc_getAssociatedObject(self, &STBtnLocalizationKey.localizedSelectedTitleKey) as? String ?? ""
+        }
+        set {
+            objc_setAssociatedObject(self, &STBtnLocalizationKey.localizedSelectedTitleKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            self.setTitle(newValue.localized, for: .selected)
         }
     }
     
@@ -388,6 +406,16 @@ open class STBtn: UIButton {
         self.defaultTitleFrame = .zero
         self.defaultImageFrame = .zero
         self.setNeedsLayout()
+    }
+    
+    /// 更新本地化文本
+    public func st_updateLocalizedText() {
+        if !localizedTitle.isEmpty {
+            self.setTitle(localizedTitle.localized, for: .normal)
+        }
+        if !localizedSelectedTitle.isEmpty {
+            self.setTitle(localizedSelectedTitle.localized, for: .selected)
+        }
     }
     
     // MARK: - 私有方法

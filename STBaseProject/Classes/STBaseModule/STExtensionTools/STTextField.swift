@@ -7,6 +7,11 @@
 
 import UIKit
 
+// MARK: - 文本框本地化常量
+private struct STTextFieldLocalizationKey {
+    static var localizedPlaceholderKey: UInt8 = 0
+}
+
 public protocol STTextFieldDelegate: NSObjectProtocol {
     func st_textFieldEditingChanged(textField: STTextField)
     func st_textFieldBackwardKeyPressed(textField: STTextField)
@@ -25,12 +30,14 @@ open class STTextField: UITextField {
     open var textIsCheck: Bool = false
     weak open var cusDelegate: STTextFieldDelegate?
     
+    /// 本地化占位符键（支持 Storyboard 设置，支持动态语言切换）
     @IBInspectable open var localizedPlaceholder: String {
-        set {
-            self.placeholder = Bundle.st_localizedString(key: newValue)
-        }
         get {
-            return self.placeholder ?? ""
+            return objc_getAssociatedObject(self, &STTextFieldLocalizationKey.localizedPlaceholderKey) as? String ?? ""
+        }
+        set {
+            objc_setAssociatedObject(self, &STTextFieldLocalizationKey.localizedPlaceholderKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            self.placeholder = newValue.localized
         }
     }
 
@@ -144,6 +151,13 @@ open class STTextField: UITextField {
             let placeholderAttributedString = NSMutableAttributedString(attributedString: NSAttributedString.init(string: text))
             placeholderAttributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: placeholderAttributedString.length))
             self.attributedPlaceholder = placeholderAttributedString
+        }
+    }
+    
+    /// 更新本地化占位符
+    public func st_updateLocalizedPlaceholder() {
+        if !localizedPlaceholder.isEmpty {
+            self.placeholder = localizedPlaceholder.localized
         }
     }
     

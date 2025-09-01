@@ -132,36 +132,36 @@ public class STParameterEncoder {
     
     // MARK: - URL 编码
     public static func st_encodeURL(_ parameters: [String: Any]) -> String {
-        var components: [(String, String)] = []
+       var components: [(String, String)] = []
         
-        for key in parameters.keys.sorted(by: <) {
-            let value = parameters[key]!
+       for key in parameters.keys.sorted(by: <) {
+           let value = parameters[key]!
             components += st_queryComponents(fromKey: key, value: value)
-        }
+       }
         
-        return components.map { "\($0)=\($1)" }.joined(separator: "&")
+       return components.map { "\($0)=\($1)" }.joined(separator: "&")
     }
     
     private static func st_queryComponents(fromKey key: String, value: Any) -> [(String, String)] {
-        var components: [(String, String)] = []
+       var components: [(String, String)] = []
         
-        if let dictionary = value as? [String: Any] {
+       if let dictionary = value as? [String: Any] {
             for (nestedKey, value) in dictionary {
                 components += st_queryComponents(fromKey: "\(key)[\(nestedKey)]", value: value)
             }
-        } else if let array = value as? [Any] {
+       } else if let array = value as? [Any] {
             for value in array {
                 components += st_queryComponents(fromKey: "\(key)[]", value: value)
             }
-        } else if let value = value as? NSNumber {
+       } else if let value = value as? NSNumber {
             components.append((st_escape(key), st_escape("\(value)")))
-        } else if let bool = value as? Bool {
+       } else if let bool = value as? Bool {
             components.append((st_escape(key), st_escape(bool ? "1" : "0")))
-        } else {
+       } else {
             components.append((st_escape(key), st_escape("\(value)")))
-        }
+       }
         
-        return components
+       return components
     }
     
     private static func st_escape(_ string: String) -> String {
@@ -573,7 +573,7 @@ open class STHTTPSession: NSObject {
             self.st_handleError(httpResponse, completion: completion)
             return
         }
-    
+        
         if let httpResponse = response as? HTTPURLResponse {
             if httpResponse.statusCode < 200 || httpResponse.statusCode >= 300 {
                 let error = STHTTPError.httpError(httpResponse.statusCode, "HTTP \(httpResponse.statusCode)")

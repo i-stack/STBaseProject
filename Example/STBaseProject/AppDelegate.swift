@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         STDeviceAdapter.shared.st_configBenchmarkDesign(size: CGSize.init(width: 375, height: 812))
         
-        Bundle.st_setCusLanguage(language: "zh")
+        Bundle.st_setCustomLanguage("zh-Hans")
         let vc = ViewController()
         vc.viewModel = ViewControllerViewModel()
         let nav = UINavigationController.init(rootViewController: vc)

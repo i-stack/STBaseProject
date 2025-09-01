@@ -285,9 +285,287 @@ class CustomButtonViewController: UIViewController {
         view.addSubview(button)
     }
 }
+
+### 三、STLocalizationManager
+
+`STLocalizationManager` 是一个功能强大的本地化管理器，支持多语言切换和 Storyboard 本地化。它提供了完整的国际化解决方案，包括语言切换、字符串本地化、UI 组件本地化等功能。
+
+#### 主要特性
+
+- **多语言支持**：支持多种语言的切换和管理
+- **Storyboard 支持**：支持在 Interface Builder 中直接设置本地化键
+- **自动更新**：语言切换时自动更新 UI 文本
+- **通知机制**：语言切换时发送通知，便于 UI 更新
+- **便捷扩展**：为常用 UI 组件提供本地化扩展
+
+#### 支持的语言
+
+```swift
+// 支持的语言结构（动态从项目的 .lproj 文件夹获取）
+public struct STSupportedLanguage {
+    public let languageCode: String      // 语言代码，如 "zh-Hans"
+    public let displayName: String       // 显示名称，如 "简体中文"
+    public let locale: Locale            // 语言环境
+    
+    // 获取项目中所有可用的语言
+    public static func getAvailableLanguages() -> [STSupportedLanguage]
+    
+    // 检查语言是否可用
+    public static func isLanguageAvailable(_ languageCode: String) -> Bool
+    
+    // 根据语言代码获取语言对象
+    public static func getLanguage(by languageCode: String) -> STSupportedLanguage?
+}
 ```
 
-### 三、STBaseViewController
+#### 基础使用
+
+```swift
+// 在 AppDelegate 中配置
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    // 配置本地化管理器
+    Bundle.st_configureLocalization()
+    return true
+}
+
+// 设置语言
+Bundle.st_setCustomLanguage("zh-Hans")
+
+// 获取可用语言并设置
+let availableLanguages = STSupportedLanguage.getAvailableLanguages()
+if let chineseLanguage = availableLanguages.first(where: { $0.languageCode == "zh-Hans" }) {
+    Bundle.st_setSupportedLanguage(chineseLanguage)
+}
+
+// 获取本地化字符串
+let text = Bundle.st_localizedString(key: "hello_world")
+let text2 = "hello_world".localized
+
+// 恢复系统语言
+Bundle.st_restoreSystemLanguage()
+```
+
+#### Storyboard 本地化
+
+在 Interface Builder 中可以设置以下属性：
+
+**STLabel:**
+- **Localized Text**：本地化文本键（支持动态切换）
+
+**STBtn:**
+- **Localized Title**：普通状态的本地化标题键（支持动态切换）
+- **Localized Selected Title**：选中状态的本地化标题键（支持动态切换）
+
+**STTextField:**
+- **Localized Placeholder**：占位符的本地化键（支持动态切换）
+
+#### 代码中的本地化
+
+```swift
+class LocalizedViewController: UIViewController {
+    
+    @IBOutlet weak var titleLabel: STLabel!
+    @IBOutlet weak var confirmButton: STBtn!
+    @IBOutlet weak var inputField: STTextField!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupLocalization()
+    }
+    
+    private func setupLocalization() {
+        // 设置本地化键（支持动态切换）
+        titleLabel.localizedText = "welcome_title"
+        confirmButton.localizedTitle = "confirm_button"
+        inputField.localizedPlaceholder = "input_placeholder"
+        
+        // 或者直接使用本地化字符串
+        titleLabel.text = "welcome_title".localized
+        confirmButton.setTitle("confirm_button".localized, for: .normal)
+        inputField.placeholder = "input_placeholder".localized
+    }
+    
+    // 语言切换时更新 UI
+    @objc private func languageDidChange() {
+        st_updateLocalizedTexts()
+    }
+}
+```
+
+#### 语言切换和通知
+
+```swift
+class LanguageSettingsViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupLanguageObserver()
+    }
+    
+    private func setupLanguageObserver() {
+        // 监听语言切换通知
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(languageDidChange),
+            name: .stLanguageDidChange,
+            object: nil
+        )
+    }
+    
+    @objc private func languageDidChange() {
+        // 更新当前页面的本地化文本
+        st_updateLocalizedTexts()
+    }
+    
+    @IBAction func switchToChinese() {
+        if let chineseLanguage = STSupportedLanguage.getLanguage(by: "zh-Hans") {
+            Bundle.st_setSupportedLanguage(chineseLanguage)
+        }
+    }
+    
+    @IBAction func switchToEnglish() {
+        if let englishLanguage = STSupportedLanguage.getLanguage(by: "en") {
+            Bundle.st_setSupportedLanguage(englishLanguage)
+        }
+    }
+    
+    @IBAction func switchToJapanese() {
+        if let japaneseLanguage = STSupportedLanguage.getLanguage(by: "ja") {
+            Bundle.st_setSupportedLanguage(japaneseLanguage)
+        }
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+}
+```
+
+#### 高级功能
+
+```swift
+// 检查语言包是否存在
+let isAvailable = Bundle.st_isLanguageAvailable("zh-Hans")
+
+// 获取所有可用的语言
+let availableLanguages = STSupportedLanguage.getAvailableLanguages()
+let availableLanguageCodes = Bundle.st_getAvailableLanguageCodes()
+
+// 获取当前语言
+let currentLanguage = Bundle.st_getCurrentLanguage()
+let currentLanguageObject = Bundle.st_getCurrentLanguageObject()
+
+// 获取系统语言
+let systemLanguage = Bundle.st_getSystemLanguage()
+```
+
+#### 实际应用示例
+
+```swift
+class MultiLanguageApp {
+    
+    static func configure() {
+        // 配置本地化管理器
+        Bundle.st_configureLocalization()
+        
+        // 设置默认语言（如果没有保存的设置）
+        if Bundle.st_getCurrentLanguage() == nil {
+            let systemLanguage = Bundle.st_getSystemLanguage()
+            let supportedLanguage = STSupportedLanguage(rawValue: systemLanguage) ?? .english
+            Bundle.st_setSupportedLanguage(supportedLanguage)
+        }
+    }
+    
+    static func switchLanguage(_ languageCode: String) {
+        if let language = STSupportedLanguage.getLanguage(by: languageCode) {
+            Bundle.st_setSupportedLanguage(language)
+            
+            // 发送语言切换通知，让所有页面更新
+            NotificationCenter.default.post(name: .stLanguageDidChange, object: nil)
+        }
+    }
+}
+
+// 在 AppDelegate 中使用
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    MultiLanguageApp.configure()
+    return true
+}
+
+#### 动态语言选择示例
+
+```swift
+class LanguageSelectionViewController: UIViewController {
+    
+    @IBOutlet weak var languageTableView: UITableView!
+    private var availableLanguages: [STSupportedLanguage] = []
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupLanguages()
+        setupTableView()
+    }
+    
+    private func setupLanguages() {
+        // 动态获取项目中所有可用的语言
+        availableLanguages = STSupportedLanguage.getAvailableLanguages()
+        
+        // 获取当前语言
+        let currentLanguage = Bundle.st_getCurrentLanguage()
+        
+        // 将当前语言移到列表顶部
+        if let currentIndex = availableLanguages.firstIndex(where: { $0.languageCode == currentLanguage }) {
+            let currentLanguage = availableLanguages.remove(at: currentIndex)
+            availableLanguages.insert(currentLanguage, at: 0)
+        }
+    }
+    
+    private func setupTableView() {
+        languageTableView.delegate = self
+        languageTableView.dataSource = self
+        languageTableView.register(UITableViewCell.self, forCellReuseIdentifier: "LanguageCell")
+    }
+}
+
+extension LanguageSelectionViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return availableLanguages.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "LanguageCell", for: indexPath)
+        let language = availableLanguages[indexPath.row]
+        
+        cell.textLabel?.text = language.displayName
+        cell.detailTextLabel?.text = language.languageCode
+        
+        // 标记当前选中的语言
+        if language.languageCode == Bundle.st_getCurrentLanguage() {
+            cell.accessoryType = .checkmark
+        } else {
+            cell.accessoryType = .none
+        }
+        
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let language = availableLanguages[indexPath.row]
+        Bundle.st_setSupportedLanguage(language)
+        
+        // 更新 UI
+        tableView.reloadData()
+        
+        // 显示切换成功提示
+        let alert = UIAlertController(title: "语言切换", message: "已切换到 \(language.displayName)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "确定", style: .default))
+        present(alert, animated: true)
+    }
+}
+```
+
+### 四、STBaseViewController
 
 `STBaseViewController` 是一个功能强大的基础视图控制器类，专门用于定制导航栏样式。所有继承自 `STBaseViewController` 的视图控制器都可以使用统一的导航栏样式，同时支持子类进行个性化定制。
 
@@ -361,7 +639,7 @@ self.st_setTitleView(titleView)
 self.st_setStatusBarHidden(true)
 ```
 
-### 四、STBaseWKViewController
+### 五、STBaseWKViewController
 
 `STBaseWKViewController` 是一个功能强大的 WebView 控制器类，专门用于全局样式的 WebView 加载。它基于 `STBaseViewController` 构建，提供了完整的 WebView 功能，包括加载状态管理、错误处理、JavaScript 交互等。
 
@@ -507,7 +785,7 @@ let script = "receiveDataFromNative(\(data))"
 self.st_evaluateJavaScript(script)
 ```
 
-### 五、STBaseView
+### 六、STBaseView
 
 `STBaseView` 是一个功能强大的基础视图类，提供了多种布局模式和自动滚动功能。它可以根据内容大小自动选择合适的布局方式，支持 ScrollView、TableView、CollectionView 等多种布局模式。
 
@@ -737,7 +1015,7 @@ let tableView = st_getTableView()
 let collectionView = st_getCollectionView()
 ```
 
-### 六、STBaseModel
+### 七、STBaseModel
 
 `STBaseModel` 是一个功能强大的统一iOS模型基类，为iOS项目提供完整的模型管理解决方案。通过继承该类，可以快速构建具有丰富功能的模型类，支持标准模式和灵活模式两种使用方式。
 
@@ -854,7 +1132,7 @@ response.message = "success"
 response.data = user
 ```
 
-### 七、STBaseViewModel
+### 八、STBaseViewModel
 
 `STBaseViewModel` 是一个功能强大的 ViewModel 基类，提供了完整的 MVVM 架构支持。它基于 Combine 框架构建，提供了网络请求、状态管理、缓存、分页、数据验证等丰富的功能。
 
@@ -1177,7 +1455,7 @@ override func st_onFailed(_ error: STBaseError) {
 }
 ```
 
-### 八、STHTTPSession
+### 九、STHTTPSession
 
 `STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
 
