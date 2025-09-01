@@ -286,6 +286,38 @@ class CustomButtonViewController: UIViewController {
     }
 }
 
+#### 统一弹窗 API（系统 / 自定义）
+
+```swift
+// 系统弹窗（UIAlertController）
+STAlertController.st_showSystemAlert(
+    on: self,
+    title: "标题",
+    message: "这是一条消息",
+    preferredStyle: .alert,
+    actions: [
+        STAlertActionItem(title: "取消", style: .cancel),
+        STAlertActionItem(title: "确定", titleColor: .systemRed, style: .default) {
+            print("点击确定")
+        }
+    ]
+)
+
+// 自定义弹窗（STAlertController）
+STAlertController.st_showCustomAlert(
+    on: self,
+    title: "自定义弹窗",
+    message: "支持字体/颜色/自定义按钮",
+    preferredStyle: .alert,
+    actions: [
+        STAlertActionItem(title: "取消", style: .cancel),
+        STAlertActionItem(title: "继续", titleColor: .systemBlue, font: .boldSystemFont(ofSize: 16)) {
+            print("继续操作")
+        }
+    ]
+)
+```
+
 ### 三、STLocalizationManager
 
 `STLocalizationManager` 是一个功能强大的本地化管理器，支持多语言切换和 Storyboard 本地化。它提供了完整的国际化解决方案，包括语言切换、字符串本地化、UI 组件本地化等功能。
