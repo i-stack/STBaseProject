@@ -18,6 +18,19 @@ public enum STFlexibleValue {
     case dictionary([String: STFlexibleValue])
     case null
     
+    /// 获取实际值
+    public var value: Any {
+        switch self {
+        case .string(let value): return value
+        case .int(let value): return value
+        case .double(let value): return value
+        case .bool(let value): return value
+        case .array(let value): return value
+        case .dictionary(let value): return value
+        case .null: return NSNull()
+        }
+    }
+    
     public init(_ value: Any) {
         switch value {
         case let string as String:
@@ -139,7 +152,19 @@ open class STBaseModel: NSObject {
     }
     
     public required init?(coder: NSCoder) {
-        super.init(coder: coder)
+        super.init()
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        super.init()
+        let container = try decoder.container(keyedBy: STCodingKeys.self)
+        let properties = self.st_propertyNames()
+        for propertyName in properties {
+            if container.contains(STCodingKeys(stringValue: propertyName)) {
+                let anyCodable = try container.decode(STAnyCodable.self, forKey: STCodingKeys(stringValue: propertyName))
+                self.setValue(anyCodable.value, forKey: propertyName)
+            }
+        }
     }
     
     /// 从字典初始化
@@ -392,7 +417,7 @@ open class STBaseModel: NSObject {
             var desc = "\(className) {\n"
             for key in keys {
                 let value = st_getValue(forKey: key)
-                desc += "  \(key): \(value)\n"
+                desc += "  \(key): \(value ?? "")\n"
             }
             desc += "}"
             return desc
@@ -417,7 +442,7 @@ open class STBaseModel: NSObject {
     
     // MARK: - 复制和相等性
     open func st_copy() -> Any {
-        let newInstance = type(of: self).init()
+        let newInstance = STBaseModel()
         if st_isFlexibleMode {
             newInstance.st_isFlexibleMode = true
             newInstance.st_update(from: st_toDictionary())
@@ -435,39 +460,44 @@ open class STBaseModel: NSObject {
     }
     
     open override var hash: Int {
-        return st_toDictionary().hashValue
+        let dict = st_toDictionary()
+        var hasher = Hasher()
+        for (key, value) in dict.sorted(by: { $0.key < $1.key }) {
+            hasher.combine(key)
+            if let hashable = value as? AnyHashable {
+                hasher.combine(hashable)
+            } else {
+                hasher.combine(String(describing: value))
+            }
+        }
+        return hasher.finalize()
     }
+}
+
+// MARK: - 响应模型协议
+public protocol STResponseModelProtocol: STBaseModel {
+    associatedtype DataType: STBaseModel
     
-    // MARK: - 测试和调试方法
-#if DEBUG
-    /// 测试数据清理功能（仅DEBUG模式可用）
-    open func st_testDataCleanup() {
-        print("=== 数据清理测试 ===")
-        
-        // 第一次更新
-        let data1 = ["name": "John", "age": 30, "city": "New York"]
-        st_update(from: data1)
-        print("第一次更新后键数量: \(st_getAllKeys().count)")
-        print("第一次更新后键: \(st_getAllKeys())")
-        
-        // 第二次更新
-        let data2 = ["title": "Developer", "salary": 50000, "experience": 5]
-        st_update(from: data2)
-        print("第二次更新后键数量: \(st_getAllKeys().count)")
-        print("第二次更新后键: \(st_getAllKeys())")
-        
-        // 验证旧数据是否被清理
-        let oldKeys = ["name", "age", "city"]
-        let hasOldData = oldKeys.contains { st_containsKey($0) }
-        print("是否包含旧数据: \(hasOldData)")
-        
-        print("=== 测试完成 ===\n")
-    }
-#endif
+    /// 响应状态码
+    var st_code: Int { get }
+    
+    /// 响应消息
+    var st_message: String { get }
+    
+    /// 响应数据
+    var st_data: DataType? { get }
+    
+    /// 时间戳
+    var st_timestamp: TimeInterval { get }
+    
+    /// 是否成功
+    var st_isSuccess: Bool { get }
 }
 
 // MARK: - 网络响应模型
-open class STBaseResponseModel<T: STBaseModel>: STBaseModel {
+open class STBaseResponseModel: STBaseModel, STResponseModelProtocol {
+    
+    public typealias DataType = STBaseModel
     
     /// 响应状态码
     open var st_code: Int {
@@ -486,10 +516,11 @@ open class STBaseResponseModel<T: STBaseModel>: STBaseModel {
     }
     
     /// 响应数据
-    open var st_data: T? {
+    open var st_data: DataType? {
         if st_isFlexibleMode {
-            if let dataDict = st_getDictionary(forKey: "data") {
-                let model = T()
+            let dataDict = st_getDictionary(forKey: "data")
+            if !dataDict.isEmpty {
+                let model = STBaseModel()
                 model.st_isFlexibleMode = true
                 var normalDict: [String: Any] = [:]
                 for (key, value) in dataDict {
@@ -516,8 +547,36 @@ open class STBaseResponseModel<T: STBaseModel>: STBaseModel {
     }
 }
 
+// MARK: - 分页响应模型协议
+public protocol STPaginationResponseModelProtocol: STResponseModelProtocol {
+    associatedtype ListItemType: STBaseModel
+    
+    /// 当前页码
+    var st_page: Int { get }
+    
+    /// 每页大小
+    var st_pageSize: Int { get }
+    
+    /// 总数量
+    var st_totalCount: Int { get }
+    
+    /// 总页数
+    var st_totalPages: Int { get }
+    
+    /// 是否有下一页
+    var st_hasNextPage: Bool { get }
+    
+    /// 是否有上一页
+    var st_hasPreviousPage: Bool { get }
+    
+    /// 数据列表
+    var st_list: [ListItemType] { get }
+}
+
 // MARK: - 分页响应模型
-open class STBasePaginationModel<T: STBaseModel>: STBaseResponseModel<T> {
+open class STBasePaginationModel: STBaseResponseModel, STPaginationResponseModelProtocol {
+    
+    public typealias ListItemType = STBaseModel
     
     /// 当前页码
     open var st_page: Int {
@@ -550,13 +609,14 @@ open class STBasePaginationModel<T: STBaseModel>: STBaseResponseModel<T> {
     }
     
     /// 数据列表
-    open var st_list: [T] {
-        if let listArray = st_getArray(forKey: "list") {
-            var items: [T] = []
+    open var st_list: [ListItemType] {
+        let listArray = st_getArray(forKey: "list")
+        if !listArray.isEmpty {
+            var items: [ListItemType] = []
             
             for item in listArray {
                 if case .dictionary(let dict) = item {
-                    let model = T()
+                    let model = STBaseModel()
                     model.st_isFlexibleMode = true
                     var normalDict: [String: Any] = [:]
                     for (key, value) in dict {
@@ -582,19 +642,7 @@ extension STBaseModel: Codable {
         
         for propertyName in properties {
             if let value = self.value(forKey: propertyName) {
-                try container.encode(STAnyCodable(value), forKey: STCodingKeys(stringValue: propertyName)!)
-            }
-        }
-    }
-    
-    public required init(from decoder: Decoder) throws {
-        super.init()
-        let container = try decoder.container(keyedBy: STCodingKeys.self)
-        let properties = self.st_propertyNames()
-        for propertyName in properties {
-            if container.contains(STCodingKeys(stringValue: propertyName)!) {
-                let anyCodable = try container.decode(STAnyCodable.self, forKey: STCodingKeys(stringValue: propertyName)!)
-                self.setValue(anyCodable.value, forKey: propertyName)
+                try container.encode(STAnyCodable(value), forKey: STCodingKeys(stringValue: propertyName))
             }
         }
     }

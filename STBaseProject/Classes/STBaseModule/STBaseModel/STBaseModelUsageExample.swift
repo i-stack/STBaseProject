@@ -16,12 +16,16 @@ class STStandardUserModel: STBaseModel {
     var isActive: Bool = false
     var createTime: Date = Date()
     
-    override init() {
+    required override init() {
         super.init()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
     }
 }
 
@@ -38,47 +42,27 @@ class STFlexibleUserModel: STBaseModel {
         return st_getString(forKey: "username", default: "")
     }
     
-    /// 年龄 - 可能是字符串或数字
+    /// 可能是字符串或数字
     var age: Int {
         return st_getInt(forKey: "age", default: 0)
     }
     
-    /// 是否激活 - 可能是布尔值、字符串或数字
+    /// 可能是布尔值、字符串或数字
     var isActive: Bool {
         return st_getBool(forKey: "isActive", default: false)
     }
     
-    /// 积分 - 可能是字符串、整数或浮点数
+    /// 可能是字符串、整数或浮点数
     var points: Double {
         return st_getDouble(forKey: "points", default: 0.0)
     }
     
-    /// 创建时间 - 可能是字符串或时间戳
+    /// 可能是字符串或时间戳
     var createTime: String {
         return st_getString(forKey: "createTime", default: "")
     }
     
-    /// 标签 - 可能是字符串、数组或null
-    var tags: [String] {
-        if let tagsArray = st_getArray(forKey: "tags") {
-            return tagsArray.compactMap { $0.st_asString() }
-        }
-        return []
-    }
-    
-    /// 元数据 - 可能是字典、字符串或null
-    var metadata: [String: Any] {
-        if let metaDict = st_getDictionary(forKey: "metadata") {
-            var result: [String: Any] = [:]
-            for (key, value) in metaDict {
-                result[key] = value.value
-            }
-            return result
-        }
-        return [:]
-    }
-    
-    override init() {
+    required override init() {
         super.init()
         // 启用灵活模式
         st_isFlexibleMode = true
@@ -87,6 +71,10 @@ class STFlexibleUserModel: STBaseModel {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         st_isFlexibleMode = true
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
     }
 }
 
@@ -99,19 +87,23 @@ class STProductModel: STBaseModel {
     var tags: [String] = []
     var metadata: [String: Any] = [:]
     
-    override init() {
+    required override init() {
         super.init()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        fatalError("init(from:) has not been implemented")
     }
 }
 
 // MARK: - 网络响应模型示例
-class STUserResponseModel: STBaseResponseModel<STFlexibleUserModel> {
+class STUserResponseModel: STBaseResponseModel {
     
-    override init() {
+    required override init() {
         super.init()
         st_isFlexibleMode = true
     }
@@ -119,12 +111,16 @@ class STUserResponseModel: STBaseResponseModel<STFlexibleUserModel> {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         st_isFlexibleMode = true
+    }
+    
+    required init(from decoder: any Decoder) throws {
+        fatalError("init(from:) has not been implemented")
     }
 }
 
-class STProductListResponseModel: STBasePaginationModel<STProductModel> {
+class STProductListResponseModel: STBasePaginationModel {
     
-    override init() {
+    required override init() {
         super.init()
         st_isFlexibleMode = true
     }
@@ -132,6 +128,10 @@ class STProductListResponseModel: STBasePaginationModel<STProductModel> {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         st_isFlexibleMode = true
+    }
+    
+    required init(from decoder: any Decoder) throws {
+        fatalError("init(from:) has not been implemented")
     }
 }
 
@@ -161,7 +161,7 @@ class STBaseModelUsageExample {
         print("用户描述: \(user)")
         
         // 5. 从字典更新
-        let updateDict = ["age": 31, "isActive": false]
+        let updateDict = ["age": 31, "isActive": false] as [String : Any]
         user.st_update(from: updateDict)
         print("更新后用户: \(user)")
         
@@ -219,14 +219,12 @@ class STBaseModelUsageExample {
         print("  年龄: \(user1.age) (类型: \(user1.st_getValueType(forKey: "age")))")
         print("  激活状态: \(user1.isActive) (类型: \(user1.st_getValueType(forKey: "isActive")))")
         print("  积分: \(user1.points) (类型: \(user1.st_getValueType(forKey: "points")))")
-        print("  标签: \(user1.tags) (类型: \(user1.st_getValueType(forKey: "tags")))")
         
         print("\n用户2:")
         print("  ID: \(user2.userId) (类型: \(user2.st_getValueType(forKey: "userId")))")
         print("  年龄: \(user2.age) (类型: \(user2.st_getValueType(forKey: "age")))")
         print("  激活状态: \(user2.isActive) (类型: \(user2.st_getValueType(forKey: "isActive")))")
         print("  积分: \(user2.points) (类型: \(user2.st_getValueType(forKey: "points")))")
-        print("  标签: \(user2.tags) (类型: \(user2.st_getValueType(forKey: "tags")))")
     }
     
     static func demonstrateNetworkResponse() {
@@ -250,7 +248,6 @@ class STBaseModelUsageExample {
         print("  状态码: \(response.st_code)")
         print("  消息: \(response.st_message)")
         print("  是否成功: \(response.st_isSuccess)")
-        print("  用户数据: \(response.st_data?.username ?? "无")")
         
         // 2. 模拟分页响应
         let paginationData: [String: Any] = [
@@ -325,13 +322,13 @@ class STBaseModelUsageExample {
         let model = STFlexibleUserModel()
         
         // 第一次更新
-        let data1 = ["name": "John", "age": 30, "city": "New York"]
+        let data1 = ["name": "John", "age": 30, "city": "New York"] as [String : Any]
         model.st_update(from: data1)
         print("第一次更新后键数量: \(model.st_getAllKeys().count)")
         print("第一次更新后键: \(model.st_getAllKeys())")
         
         // 第二次更新
-        let data2 = ["title": "Developer", "salary": 50000, "experience": 5]
+        let data2 = ["title": "Developer", "salary": 50000, "experience": 5] as [String : Any]
         model.st_update(from: data2)
         print("第二次更新后键数量: \(model.st_getAllKeys().count)")
         print("第二次更新后键: \(model.st_getAllKeys())")

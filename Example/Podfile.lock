@@ -26,15 +26,15 @@ PODS:
     - STBaseProject/STBaseModule/STExtensionTools
 
 DEPENDENCIES:
-  - STBaseProject
+  - STBaseProject (from `../`)
 
-SPEC REPOS:
-  trunk:
-    - STBaseProject
+EXTERNAL SOURCES:
+  STBaseProject:
+    :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: eab313cc6dfe9860f16871c25672f4d0d43ea7a9
+  STBaseProject: 8ab82dc050b0815c604ad306eb9d0e741088b7e5
 
-PODFILE CHECKSUM: 87a94b19ee60ce96144de9ab923cefa8732d70b6
+PODFILE CHECKSUM: d200dd0b62b8f335da9e3afd2393ff962636c0d9
 
 COCOAPODS: 1.16.2
