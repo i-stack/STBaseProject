@@ -6,10 +6,26 @@ install! 'cocoapods', :deterministic_uuids => false
 
 target 'STBaseProject_Example' do
   
+  # 完整引入（推荐用于快速开始）
   pod 'STBaseProject', :path => '../'
   
-  #pod 'STBaseProject/STBaseModule', :path => '../'
-  #pod 'STBaseProject/STDialog', :path => '../'
+  # 按需引入示例（推荐用于生产环境）
+  #pod 'STBaseProject/STKit/Core'           # 必选：核心工具
+  #pod 'STBaseProject/STKit/UI'             # 常用：UI组件
+  #pod 'STBaseProject/STKit/Network'        # 常用：网络工具
+  #pod 'STBaseProject/STKit/Localization'   # 常用：本地化
+  #pod 'STBaseProject/STKit/Security'       # 常用：安全工具
+  #pod 'STBaseProject/STKit/Media'          # 可选：媒体处理
+  #pod 'STBaseProject/STKit/Scan'           # 可选：扫码功能
+  #pod 'STBaseProject/STKit/Location'       # 可选：定位服务
+  #pod 'STBaseProject/STKit/Dialog'         # 对话框组件
+  
+  # 基础架构模块
+  #pod 'STBaseProject/STBaseModule'         # 基础 MVVM 架构
+  #pod 'STBaseProject/STConfig'             # 配置管理
+  
+  # 向后兼容
+  #pod 'STBaseProject/STDialog'             # 等同于 STKit/Dialog
 
   
 #  pod 'SnapKit'

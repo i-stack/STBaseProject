@@ -1,27 +1,141 @@
 {
   "name": "STBaseProject",
-  "version": "1.1.3",
-  "license": "MIT",
-  "summary": "Project infrastructure, common tools. The new project can inherit.",
+  "version": "2.0.0",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "summary": "A powerful iOS base project with modular architecture and rich UI components.",
+  "description": "STBaseProject is a comprehensive iOS development framework that provides:\n- Modular STKit toolset with Core/UI/Network/Media/Scan/Security/Localization/Location modules\n- Complete MVVM architecture with STBaseViewController, STBaseViewModel, STBaseModel, STBaseView\n- Rich UI components including custom buttons, labels, alerts, and scan views\n- Unified image management, network session, localization, and security tools\n- Easy integration with CocoaPods, supports selective module importing",
   "homepage": "https://github.com/i-stack/STBaseProject",
   "authors": {
     "i-stack": "songshoubing7664@163.com"
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "1.1.3"
+    "tag": "2.0.0"
   },
   "platforms": {
     "ios": "13.0"
   },
   "swift_versions": [
-    "5"
+    "5.0",
+    "5.1",
+    "5.2",
+    "5.3",
+    "5.4",
+    "5.5",
+    "5.6",
+    "5.7",
+    "5.8",
+    "5.9"
+  ],
+  "requires_arc": true,
+  "pod_target_xcconfig": {
+    "SWIFT_VERSION": "5.0",
+    "ENABLE_BITCODE": "NO"
+  },
+  "documentation_url": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
+  "readme": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
+  "default_subspecs": [
+    "STConfig",
+    "STKit/Core",
+    "STKit/UI",
+    "STKit/Network",
+    "STKit/Localization",
+    "STBaseModule"
   ],
   "subspecs": [
     {
       "name": "STConfig",
       "source_files": [
         "STBaseProject/Classes/STConfig/*.swift"
+      ]
+    },
+    {
+      "name": "STKit",
+      "subspecs": [
+        {
+          "name": "Core",
+          "source_files": [
+            "STBaseProject/Classes/STKit/Core/*.swift"
+          ]
+        },
+        {
+          "name": "UI",
+          "source_files": [
+            "STBaseProject/Classes/STKit/UI/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": [],
+            "STBaseProject/STKit/Localization": []
+          }
+        },
+        {
+          "name": "Network",
+          "source_files": [
+            "STBaseProject/Classes/STKit/Network/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Localization",
+          "source_files": [
+            "STBaseProject/Classes/STKit/Localization/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Security",
+          "source_files": [
+            "STBaseProject/Classes/STKit/Security/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Media",
+          "source_files": [
+            "STBaseProject/Classes/STKit/Media/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Scan",
+          "source_files": [
+            "STBaseProject/Classes/STKit/Scan/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": [],
+            "STBaseProject/STKit/Media": []
+          }
+        },
+        {
+          "name": "Location",
+          "source_files": [
+            "STBaseProject/Classes/STKit/Location/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Dialog",
+          "source_files": [
+            "STBaseProject/Classes/STKit/STDialog/*.swift"
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": [],
+            "STBaseProject/STKit/UI": []
+          }
+        }
       ]
     },
     {
@@ -36,7 +150,7 @@
             "STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift"
           ],
           "dependencies": {
-            "STBaseProject/STBaseModule/STExtensionTools": []
+            "STBaseProject/STKit/UI": []
           }
         },
         {
@@ -49,31 +163,20 @@
           "name": "STBaseViewModel",
           "source_files": [
             "STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift"
-          ]
+          ],
+          "dependencies": {
+            "STBaseProject/STKit/Core": [],
+            "STBaseProject/STKit/Network": []
+          }
         },
         {
           "name": "STBaseModel",
           "source_files": [
             "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift"
           ]
-        },
-        {
-          "name": "STExtensionTools",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STExtensionTools/*.swift"
-          ]
         }
       ]
-    },
-    {
-      "name": "STDialog",
-      "source_files": [
-        "STBaseProject/Classes/STDialog/*.swift"
-      ],
-      "dependencies": {
-        "STBaseProject/STBaseModule/STExtensionTools": []
-      }
     }
   ],
-  "swift_version": "5"
+  "swift_version": "5.9"
 }

@@ -1,29 +1,37 @@
 PODS:
-  - STBaseProject (1.1.3):
-    - STBaseProject/STBaseModule (= 1.1.3)
-    - STBaseProject/STConfig (= 1.1.3)
-    - STBaseProject/STDialog (= 1.1.3)
-  - STBaseProject/STBaseModule (1.1.3):
-    - STBaseProject/STBaseModule/STBaseModel (= 1.1.3)
-    - STBaseProject/STBaseModule/STBaseView (= 1.1.3)
-    - STBaseProject/STBaseModule/STBaseViewController (= 1.1.3)
-    - STBaseProject/STBaseModule/STBaseViewModel (= 1.1.3)
-    - STBaseProject/STBaseModule/STExtensionTools (= 1.1.3)
+  - STBaseProject (2.0.0):
+    - STBaseProject/STBaseModule (= 2.0.0)
+    - STBaseProject/STConfig (= 2.0.0)
+    - STBaseProject/STKit/Core (= 2.0.0)
+    - STBaseProject/STKit/Localization (= 2.0.0)
+    - STBaseProject/STKit/Network (= 2.0.0)
+    - STBaseProject/STKit/UI (= 2.0.0)
+  - STBaseProject/STBaseModule (2.0.0):
+    - STBaseProject/STBaseModule/STBaseModel (= 2.0.0)
+    - STBaseProject/STBaseModule/STBaseView (= 2.0.0)
+    - STBaseProject/STBaseModule/STBaseViewController (= 2.0.0)
+    - STBaseProject/STBaseModule/STBaseViewModel (= 2.0.0)
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseModel (1.1.3):
+  - STBaseProject/STBaseModule/STBaseModel (2.0.0):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseView (1.1.3):
+  - STBaseProject/STBaseModule/STBaseView (2.0.0):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseViewController (1.1.3):
-    - STBaseProject/STBaseModule/STExtensionTools
+  - STBaseProject/STBaseModule/STBaseViewController (2.0.0):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseViewModel (1.1.3):
+    - STBaseProject/STKit/UI
+  - STBaseProject/STBaseModule/STBaseViewModel (2.0.0):
     - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STExtensionTools (1.1.3):
-    - STBaseProject/STConfig
-  - STBaseProject/STConfig (1.1.3)
-  - STBaseProject/STDialog (1.1.3):
-    - STBaseProject/STBaseModule/STExtensionTools
+    - STBaseProject/STKit/Core
+    - STBaseProject/STKit/Network
+  - STBaseProject/STConfig (2.0.0)
+  - STBaseProject/STKit/Core (2.0.0)
+  - STBaseProject/STKit/Localization (2.0.0):
+    - STBaseProject/STKit/Core
+  - STBaseProject/STKit/Network (2.0.0):
+    - STBaseProject/STKit/Core
+  - STBaseProject/STKit/UI (2.0.0):
+    - STBaseProject/STKit/Core
+    - STBaseProject/STKit/Localization
 
 DEPENDENCIES:
   - STBaseProject (from `../`)
@@ -33,8 +41,8 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: 8ab82dc050b0815c604ad306eb9d0e741088b7e5
+  STBaseProject: 357389945affca5256ae1f516841fe42915a4e1d
 
-PODFILE CHECKSUM: d200dd0b62b8f335da9e3afd2393ff962636c0d9
+PODFILE CHECKSUM: 336b695c5a437ca874c6e31a6713e94effe71e36
 
 COCOAPODS: 1.16.2

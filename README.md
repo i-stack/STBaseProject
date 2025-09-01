@@ -11,6 +11,7 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 
 - 🎨 **自定义导航栏**：支持多种样式和配置选项
 - 🌐 **WebView 控制器**：完整的 WebView 功能，支持 JavaScript 交互
+- 🧰 **模块化设计**：STKit 工具集，支持按需引入（Core/UI/Network/Media/Scan/Security/Localization/Location）
 - 📱 **现代化设计**：支持深色模式，适配不同屏幕尺寸
 - 🔧 **高度可配置**：丰富的配置选项，满足不同需求
 - 🛡️ **错误处理**：完善的错误处理和状态管理
@@ -19,11 +20,37 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 - 📸 **统一图片管理**：整合相机、照片库和图片处理功能
 - 🌐 **本地化支持**：完整的国际化支持
 - 🎨 **自定义弹窗**：统一的弹窗 API，支持系统和自定义样式
+- 📱 **二维码扫描**：高度可配置的扫码界面和管理器
 
 ## Installation
 
+### 完整安装（推荐用于快速开始）
+
 ```ruby
 pod 'STBaseProject'
+```
+
+### 按需引入（推荐用于生产环境）
+
+STBaseProject 已重构为模块化设计，您可以根据项目需求按需引入：
+
+```ruby
+# 常用模块（推荐引入）：
+pod 'STBaseProject/STKit/Core'           # 必选：核心工具（数据处理、字符串、颜色等）
+pod 'STBaseProject/STKit/UI'             # 常用：UI 组件（按钮、标签、弹窗等）
+pod 'STBaseProject/STKit/Network'        # 常用：网络工具
+pod 'STBaseProject/STKit/Localization'   # 常用：本地化
+pod 'STBaseProject/STKit/Security'       # 常用：加密与安全存储
+
+# 可选模块（按需引入）：
+pod 'STBaseProject/STKit/Media'          # 可选：图片处理与截图
+pod 'STBaseProject/STKit/Scan'           # 可选：二维码扫描
+pod 'STBaseProject/STKit/Location'       # 可选：定位服务
+pod 'STBaseProject/STKit/Dialog'         # 可选：对话框组件
+
+# 基础架构模块：
+pod 'STBaseProject/STBaseModule'         # 基础 MVVM 架构
+pod 'STBaseProject/STConfig'             # 配置管理
 ```
 
 ## Basic Configuration
