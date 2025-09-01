@@ -176,9 +176,118 @@ class CustomView: UIView {
         addSubview(button)
     }
 }
+
+### 二、STBtn
+
+`STBtn` 是一个功能强大的自定义按钮类，支持图片和文字的不同位置布局以及圆角设置。它提供了灵活的布局选项和丰富的样式配置。
+
+#### 主要特性
+
+- **多种布局样式**：图片在上/下/左/右，文字在对应位置
+- **灵活的间距配置**：支持自定义图片和文字之间的间距
+- **圆角和边框**：支持圆角、边框宽度、边框颜色设置
+- **渐变背景**：支持渐变背景色设置
+- **阴影效果**：支持阴影颜色、偏移、半径、透明度设置
+- **Storyboard 支持**：支持在 Interface Builder 中直接设置属性
+
+#### 布局样式
+
+```swift
+// 图片在上，文字在下
+button.st_setImageTopTitleBottom(spacing: 8)
+
+// 图片在左，文字在右
+button.st_setImageLeftTitleRight(spacing: 8)
+
+// 图片在右，文字在左
+button.st_setImageRightTitleLeft(spacing: 8)
+
+// 图片在下，文字在上
+button.st_setImageBottomTitleTop(spacing: 8)
 ```
 
-### 二、STBaseViewController
+#### 高级布局配置
+
+```swift
+// 自定义间距配置
+let spacing = STBtnSpacing(
+    spacing: 10,           // 图片和文字之间的间距
+    topSpacing: 5,         // 顶部间距
+    leftSpacing: 15,       // 左侧间距
+    rightSpacing: 15       // 右侧间距
+)
+
+// 设置布局样式和间距
+button.st_layoutButtonWithEdgeInsets(style: .top, spacing: spacing)
+```
+
+#### 样式设置
+
+```swift
+// 设置圆角
+button.st_roundedButton(cornerRadius: 8)
+
+// 设置圆角和边框
+button.st_roundedButton(cornerRadius: 8, borderWidth: 1, borderColor: UIColor.blue)
+
+// 设置渐变背景
+button.st_setGradientBackground(
+    colors: [UIColor.blue, UIColor.purple],
+    startPoint: CGPoint(x: 0, y: 0),
+    endPoint: CGPoint(x: 1, y: 1)
+)
+
+// 设置阴影
+button.st_setShadow(
+    color: UIColor.black,
+    offset: CGSize(width: 0, height: 2),
+    radius: 4,
+    opacity: 0.3
+)
+```
+
+#### Storyboard 属性设置
+
+在 Interface Builder 中可以设置以下属性：
+
+- **Localized Title**：本地化标题
+- **Border Width**：边框宽度
+- **Corner Radius**：圆角半径
+- **Border Color**：边框颜色
+- **Auto Adapt Font Size**：是否自动适配字体大小
+
+#### 实际应用示例
+
+```swift
+class CustomButtonViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupButtons()
+    }
+    
+    private func setupButtons() {
+        // 创建按钮
+        let button = STBtn(frame: CGRect(x: 20, y: 100, width: 200, height: 60))
+        button.setTitle("自定义按钮", for: .normal)
+        button.setImage(UIImage(named: "icon"), for: .normal)
+        
+        // 设置图片在上、文字在下的布局
+        button.st_setImageTopTitleBottom(spacing: 8)
+        
+        // 设置圆角和渐变背景
+        button.st_roundedButton(cornerRadius: 12, borderWidth: 1, borderColor: UIColor.blue)
+        button.st_setGradientBackground(colors: [UIColor.systemBlue, UIColor.systemPurple])
+        
+        // 设置阴影
+        button.st_setShadow()
+        
+        view.addSubview(button)
+    }
+}
+```
+
+### 三、STBaseViewController
 
 `STBaseViewController` 是一个功能强大的基础视图控制器类，专门用于定制导航栏样式。所有继承自 `STBaseViewController` 的视图控制器都可以使用统一的导航栏样式，同时支持子类进行个性化定制。
 
@@ -252,7 +361,7 @@ self.st_setTitleView(titleView)
 self.st_setStatusBarHidden(true)
 ```
 
-### 三、STBaseWKViewController
+### 四、STBaseWKViewController
 
 `STBaseWKViewController` 是一个功能强大的 WebView 控制器类，专门用于全局样式的 WebView 加载。它基于 `STBaseViewController` 构建，提供了完整的 WebView 功能，包括加载状态管理、错误处理、JavaScript 交互等。
 
@@ -398,7 +507,7 @@ let script = "receiveDataFromNative(\(data))"
 self.st_evaluateJavaScript(script)
 ```
 
-### 四、STBaseView
+### 五、STBaseView
 
 `STBaseView` 是一个功能强大的基础视图类，提供了多种布局模式和自动滚动功能。它可以根据内容大小自动选择合适的布局方式，支持 ScrollView、TableView、CollectionView 等多种布局模式。
 
@@ -628,7 +737,7 @@ let tableView = st_getTableView()
 let collectionView = st_getCollectionView()
 ```
 
-### 五、STBaseModel
+### 六、STBaseModel
 
 `STBaseModel` 是一个功能强大的统一iOS模型基类，为iOS项目提供完整的模型管理解决方案。通过继承该类，可以快速构建具有丰富功能的模型类，支持标准模式和灵活模式两种使用方式。
 
@@ -745,7 +854,7 @@ response.message = "success"
 response.data = user
 ```
 
-### 六、STBaseViewModel
+### 七、STBaseViewModel
 
 `STBaseViewModel` 是一个功能强大的 ViewModel 基类，提供了完整的 MVVM 架构支持。它基于 Combine 框架构建，提供了网络请求、状态管理、缓存、分页、数据验证等丰富的功能。
 
@@ -1068,7 +1177,7 @@ override func st_onFailed(_ error: STBaseError) {
 }
 ```
 
-### 七、STHTTPSession
+### 八、STHTTPSession
 
 `STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
 
