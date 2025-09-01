@@ -49,7 +49,7 @@
 		46EB2E00000780 /* STVerificationCodeBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000390 /* STVerificationCodeBtn.swift */; };
 		46EB2E00000790 /* STView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003A0 /* STView.swift */; };
 		46EB2E000007A0 /* STBaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003C0 /* STBaseConfig.swift */; };
-		46EB2E000007B0 /* STBaseConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* STBaseConstants.swift */; };
+		46EB2E000007B0 /* STDeviceAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003D0 /* STDeviceAdapter.swift */; };
 		46EB2E000007C0 /* STHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000003F0 /* STHUD.swift */; };
 		46EB2E000007D0 /* STProgressHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000400 /* STProgressHUD.swift */; };
 		46EB2E000007E0 /* STProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000410 /* STProgressView.swift */; };
@@ -113,7 +113,7 @@
 		46EB2E00000390 /* STVerificationCodeBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STVerificationCodeBtn.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STVerificationCodeBtn.swift; sourceTree = "<group>"; };
 		46EB2E000003A0 /* STView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STView.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STView.swift; sourceTree = "<group>"; };
 		46EB2E000003C0 /* STBaseConfig.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseConfig.swift; path = STBaseProject/Classes/STConfig/STBaseConfig.swift; sourceTree = "<group>"; };
-		46EB2E000003D0 /* STBaseConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseConstants.swift; path = STBaseProject/Classes/STConfig/STBaseConstants.swift; sourceTree = "<group>"; };
+		46EB2E000003D0 /* STDeviceAdapter.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceAdapter.swift; path = STBaseProject/Classes/STConfig/STDeviceAdapter.swift; sourceTree = "<group>"; };
 		46EB2E000003F0 /* STHUD.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHUD.swift; path = STBaseProject/Classes/STDialog/STHUD.swift; sourceTree = "<group>"; };
 		46EB2E00000400 /* STProgressHUD.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STProgressHUD.swift; path = STBaseProject/Classes/STDialog/STProgressHUD.swift; sourceTree = "<group>"; };
 		46EB2E00000410 /* STProgressView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STProgressView.swift; path = STBaseProject/Classes/STDialog/STProgressView.swift; sourceTree = "<group>"; };
@@ -309,7 +309,7 @@
 			isa = PBXGroup;
 			children = (
 				46EB2E000003C0 /* STBaseConfig.swift */,
-				46EB2E000003D0 /* STBaseConstants.swift */,
+				46EB2E000003D0 /* STDeviceAdapter.swift */,
 			);
 			name = STConfig;
 			sourceTree = "<group>";
@@ -488,7 +488,6 @@
 				46EB2E00000570 /* STAlertAction.swift in Sources */,
 				46EB2E00000580 /* STAlertController.swift in Sources */,
 				46EB2E000007A0 /* STBaseConfig.swift in Sources */,
-				46EB2E000007B0 /* STBaseConstants.swift in Sources */,
 				46EB2E00000520 /* STBaseModel.swift in Sources */,
 				46EB2E00000880 /* STBaseProject-dummy.m in Sources */,
 				46EB2E00000530 /* STBaseView.swift in Sources */,
@@ -499,6 +498,7 @@
 				46EB2E000005A0 /* STCameraManager.swift in Sources */,
 				46EB2E000005B0 /* STData.swift in Sources */,
 				46EB2E000005C0 /* STDate.swift in Sources */,
+				46EB2E000007B0 /* STDeviceAdapter.swift in Sources */,
 				46EB2E000005D0 /* STDeviceInfo.swift in Sources */,
 				46EB2E000005E0 /* STDictionary.swift in Sources */,
 				46EB2E000005F0 /* STEncrypt.swift in Sources */,
