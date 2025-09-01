@@ -15,14 +15,22 @@ public enum STNavBtnShowType {
     case onlyShowTitle      // only show title
 }
 
+public enum STNavBarStyle {
+    case light              // 浅色导航栏
+    case dark               // 深色导航栏
+    case custom             // 自定义导航栏
+}
+
 open class STBaseViewController: UIViewController {
 
+    // MARK: - UI Components
     open var topBgView: UIView!
     open var navBgView: UIView!
     open var leftBtn: UIButton!
     open var rightBtn: UIButton!
     open var titleLabel: UILabel!
     
+    // MARK: - Layout Constraints
     private var defaultValue: CGFloat = 44
 
     open var leftBtnAttributeLeft: NSLayoutConstraint!
@@ -40,6 +48,27 @@ open class STBaseViewController: UIViewController {
     open var topViewAttributeHeight: NSLayoutConstraint!
     open var navBgViewAttributeHeight: NSLayoutConstraint!
 
+    // MARK: - Navigation Bar Configuration
+    open var navBarStyle: STNavBarStyle = .light
+    open var navBarBackgroundColor: UIColor = UIColor.white
+    open var navBarTitleColor: UIColor = UIColor.black
+    open var navBarTitleFont: UIFont = UIFont.boldSystemFont(ofSize: 20)
+    open var navBarHeight: CGFloat {
+        return navHeight()
+    }
+    
+    // MARK: - Button Configuration
+    open var leftButtonImage: UIImage?
+    open var rightButtonImage: UIImage?
+    open var leftButtonTitle: String?
+    open var rightButtonTitle: String?
+    open var buttonTitleColor: UIColor = UIColor.systemBlue
+    open var buttonTitleFont: UIFont = UIFont.systemFont(ofSize: 16)
+    
+    // MARK: - Status Bar Configuration
+    open var statusBarStyle: UIStatusBarStyle = .default
+    open var shouldHideStatusBar: Bool = false
+
     deinit {
         STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
@@ -48,6 +77,12 @@ open class STBaseViewController: UIViewController {
         super.viewDidLoad()
         self.st_baseConfig()
         self.st_navigationBarView()
+        self.st_configureNavigationBar()
+    }
+    
+    override open func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.st_updateStatusBarStyle()
     }
     
     private func st_baseConfig() -> Void {
@@ -70,23 +105,76 @@ open class STBaseViewController: UIViewController {
         
         self.titleLabel = UILabel()
         self.titleLabel.textAlignment = NSTextAlignment.center
-        self.titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        self.titleLabel.font = self.navBarTitleFont
+        self.titleLabel.textColor = self.navBarTitleColor
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.navBgView.addSubview(self.titleLabel)
     
         self.leftBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.leftBtn.isHidden = true
         self.leftBtn.translatesAutoresizingMaskIntoConstraints = false
+        self.leftBtn.titleLabel?.font = self.buttonTitleFont
+        self.leftBtn.setTitleColor(self.buttonTitleColor, for: .normal)
         self.leftBtn.addTarget(self, action: #selector(st_leftBarBtnClick), for: UIControl.Event.touchUpInside)
         self.navBgView.addSubview(self.leftBtn)
         
         self.rightBtn = UIButton.init(type: UIButton.ButtonType.custom)
         self.rightBtn.isHidden = true
         self.rightBtn.translatesAutoresizingMaskIntoConstraints = false
+        self.rightBtn.titleLabel?.font = self.buttonTitleFont
+        self.rightBtn.setTitleColor(self.buttonTitleColor, for: .normal)
         self.rightBtn.addTarget(self, action: #selector(st_rightBarBtnClick), for: UIControl.Event.touchUpInside)
         self.navBgView.addSubview(self.rightBtn)
         
         self.st_beginLayoutSubviews()
+    }
+    
+    // MARK: - Navigation Bar Configuration Methods
+    open func st_configureNavigationBar() {
+        self.st_applyNavBarStyle()
+        self.st_configureButtons()
+    }
+    
+    open func st_applyNavBarStyle() {
+        switch self.navBarStyle {
+        case .light:
+            self.navBarBackgroundColor = UIColor.white
+            self.navBarTitleColor = UIColor.black
+            self.buttonTitleColor = UIColor.systemBlue
+            self.statusBarStyle = .default
+        case .dark:
+            self.navBarBackgroundColor = UIColor.black
+            self.navBarTitleColor = UIColor.white
+            self.buttonTitleColor = UIColor.white
+            self.statusBarStyle = .lightContent
+        case .custom:
+            break
+        }
+        
+        self.navBgView.backgroundColor = self.navBarBackgroundColor
+        self.titleLabel.textColor = self.navBarTitleColor
+        self.titleLabel.font = self.navBarTitleFont
+        self.leftBtn.setTitleColor(self.buttonTitleColor, for: .normal)
+        self.rightBtn.setTitleColor(self.buttonTitleColor, for: .normal)
+    }
+    
+    open func st_configureButtons() {
+        if let leftImage = self.leftButtonImage {
+            self.leftBtn.setImage(leftImage, for: .normal)
+        }
+        if let rightImage = self.rightButtonImage {
+            self.rightBtn.setImage(rightImage, for: .normal)
+        }
+        if let leftTitle = self.leftButtonTitle {
+            self.leftBtn.setTitle(leftTitle, for: .normal)
+        }
+        if let rightTitle = self.rightButtonTitle {
+            self.rightBtn.setTitle(rightTitle, for: .normal)
+        }
+    }
+    
+    open func st_updateStatusBarStyle() {
+        self.setNeedsStatusBarAppearanceUpdate()
     }
     
     public func st_showNavBtnType(type: STNavBtnShowType) -> Void {
@@ -121,6 +209,86 @@ open class STBaseViewController: UIViewController {
             self.navBgView.isHidden = true
             break
         }
+    }
+    
+    // MARK: - Public Configuration Methods
+    open func st_setNavigationBarStyle(_ style: STNavBarStyle) {
+        self.navBarStyle = style
+        self.st_applyNavBarStyle()
+    }
+    
+    open func st_setNavigationBarBackgroundColor(_ color: UIColor) {
+        self.navBarBackgroundColor = color
+        self.navBgView.backgroundColor = color
+    }
+    
+    open func st_setNavigationBarTitleColor(_ color: UIColor) {
+        self.navBarTitleColor = color
+        self.titleLabel.textColor = color
+    }
+    
+    open func st_setNavigationBarTitleFont(_ font: UIFont) {
+        self.navBarTitleFont = font
+        self.titleLabel.font = font
+    }
+    
+    open func st_setButtonTitleColor(_ color: UIColor) {
+        self.buttonTitleColor = color
+        self.leftBtn.setTitleColor(color, for: .normal)
+        self.rightBtn.setTitleColor(color, for: .normal)
+    }
+    
+    open func st_setButtonTitleFont(_ font: UIFont) {
+        self.buttonTitleFont = font
+        self.leftBtn.titleLabel?.font = font
+        self.rightBtn.titleLabel?.font = font
+    }
+    
+    open func st_setLeftButton(image: UIImage?, title: String? = nil) {
+        self.leftButtonImage = image
+        self.leftButtonTitle = title
+        if let image = image {
+            self.leftBtn.setImage(image, for: .normal)
+        }
+        if let title = title {
+            self.leftBtn.setTitle(title, for: .normal)
+        }
+    }
+    
+    open func st_setRightButton(image: UIImage?, title: String? = nil) {
+        self.rightButtonImage = image
+        self.rightButtonTitle = title
+        if let image = image {
+            self.rightBtn.setImage(image, for: .normal)
+        }
+        if let title = title {
+            self.rightBtn.setTitle(title, for: .normal)
+        }
+    }
+    
+    open func st_setNavigationBarHeight(_ height: CGFloat) {
+        self.topViewAttributeHeight.constant = height
+        self.view.layoutIfNeeded()
+    }
+    
+    open func st_setStatusBarHidden(_ hidden: Bool) {
+        self.shouldHideStatusBar = hidden
+        self.setNeedsStatusBarAppearanceUpdate()
+    }
+    
+    open func st_setTitle(_ title: String) {
+        self.titleLabel.text = title
+    }
+    
+    open func st_setTitleView(_ titleView: UIView) {
+        self.titleLabel.removeFromSuperview()
+        titleView.translatesAutoresizingMaskIntoConstraints = false
+        self.navBgView.addSubview(titleView)
+        NSLayoutConstraint.activate([
+            titleView.centerXAnchor.constraint(equalTo: self.navBgView.centerXAnchor),
+            titleView.centerYAnchor.constraint(equalTo: self.navBgView.centerYAnchor),
+            titleView.heightAnchor.constraint(equalToConstant: self.defaultValue)
+        ])
     }
     
     private func st_beginLayoutSubviews() -> Void {
@@ -186,6 +354,15 @@ open class STBaseViewController: UIViewController {
             return 88.0
         }
         return 64.0
+    }
+    
+    // MARK: - Status Bar Override
+    override open var preferredStatusBarStyle: UIStatusBarStyle {
+        return self.statusBarStyle
+    }
+    
+    override open var prefersStatusBarHidden: Bool {
+        return self.shouldHideStatusBar
     }
 }
 
