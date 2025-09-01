@@ -9,7 +9,6 @@
 import UIKit
 import Photos
 import AVFoundation
-import AssetsLibrary
 
 public enum STScanType {
     case STScanTypeQrCode
@@ -19,8 +18,9 @@ public enum STScanType {
 
 public typealias STScanFinishBlock = (_ result: String) -> Void
 
-open class STScanManager: STImagePickerManager {
+open class STScanManager: NSObject {
     
+    weak var presentVC: UIViewController?
     var delayQRAction: Bool = false
     var delayBarAction: Bool = false
     var scanFinishBlock: STScanFinishBlock?
@@ -35,8 +35,9 @@ open class STScanManager: STImagePickerManager {
     private var output: AVCaptureMetadataOutput?
     private var preview: AVCaptureVideoPreviewLayer?
     
-    public override init(presentViewController: UIViewController) {
-        super.init(presentViewController: presentViewController)
+    public init(presentViewController: UIViewController) {
+        super.init()
+        self.presentVC = presentViewController
     }
     
     /// 初始化二维码扫描控制器
@@ -46,7 +47,8 @@ open class STScanManager: STImagePickerManager {
     ///  - Parameter onFinish: 扫描完成回调
     ///
     public init(qrType type: STScanType, presentViewController: UIViewController, onFinish: @escaping(STScanFinishBlock)) {
-        super.init(presentViewController: presentViewController)
+        super.init()
+        self.presentVC = presentViewController
         self.scanType = type
         self.scanFinishBlock = onFinish
         self.configScanManager()
@@ -87,7 +89,7 @@ open class STScanManager: STImagePickerManager {
             return
         }
         
-        if UIImage.st_imageIsEmpty(image: image) {
+        if UIImage.isEmpty(image) {
             DispatchQueue.main.async {
                 onFailed(NSError.init(domain: "image is empty", code: 0, userInfo: [:]))
             }
@@ -245,7 +247,7 @@ open class STScanManager: STImagePickerManager {
             return
         }
         
-        if UIImage.st_imageIsEmpty(image: waterImage) == true {
+        if UIImage.isEmpty(waterImage) == true {
             DispatchQueue.main.async {
                 onFinish(.failure(NSError.init(domain: "waterImageSize is nil!", code: 0, userInfo: [:])))
             }
@@ -291,13 +293,16 @@ open class STScanManager: STImagePickerManager {
         }
     }
     
-    public override func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        picker.dismiss(animated: true) {}
-        var image: UIImage? = info[UIImagePickerController.InfoKey.editedImage] as? UIImage
-        if image == nil {
-            image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage
+    // 使用系统相册选取图片并识别二维码
+    public func pickImageAndRecognize(from viewController: UIViewController? = nil) {
+        let hostVC = viewController ?? self.presentVC
+        guard let hostVC = hostVC else { return }
+        STImageManager.shared.selectImage(from: hostVC, source: .photoLibrary) { [weak self] model in
+            guard let strongSelf = self else { return }
+            if let image = model.editedImage ?? model.originalImage {
+                strongSelf.detailSelectPhoto(image: image)
+            }
         }
-        self.detailSelectPhoto(image: image ?? UIImage())
     }
     
     public func detailSelectPhoto(image: UIImage) -> Void {
@@ -324,25 +329,25 @@ open class STScanManager: STImagePickerManager {
     }
     
     private func st_scanDevice() -> Void {
-        self.st_isAvailableCamera {[weak self] (openSourceError) in
+        self.checkCameraPermission { [weak self] granted in
             guard let strongSelf = self else { return }
-            if openSourceError == .openSourceOK {
+            if granted {
                 strongSelf.device = AVCaptureDevice.default(for: .video)
-                strongSelf.input = try? AVCaptureDeviceInput.init(device: strongSelf.device!)
-                strongSelf.output = AVCaptureMetadataOutput.init()
+                strongSelf.input = try? AVCaptureDeviceInput(device: strongSelf.device!)
+                strongSelf.output = AVCaptureMetadataOutput()
                 strongSelf.output?.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
                 strongSelf.session = AVCaptureSession()
                 if let newSession = strongSelf.session {
                     newSession.canSetSessionPreset(AVCaptureSession.Preset.inputPriority)
-                    if let newInput = strongSelf.input, newSession.canAddInput(newInput) == true {
+                    if let newInput = strongSelf.input, newSession.canAddInput(newInput) {
                         newSession.addInput(newInput)
                     }
-                    if let newOutput = strongSelf.output, newSession.canAddOutput(newOutput) == true {
+                    if let newOutput = strongSelf.output, newSession.canAddOutput(newOutput) {
                         newSession.addOutput(newOutput)
                         newOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
                         newOutput.rectOfInterest = strongSelf.scanRect ?? CGRect.zero
                     }
-                    strongSelf.preview = AVCaptureVideoPreviewLayer.init(session: newSession)
+                    strongSelf.preview = AVCaptureVideoPreviewLayer(session: newSession)
                     if let newPreview = strongSelf.preview {
                         newPreview.videoGravity = .resizeAspectFill
                         newPreview.frame = UIScreen.main.bounds
@@ -350,8 +355,30 @@ open class STScanManager: STImagePickerManager {
                     }
                 }
                 strongSelf.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-                strongSelf.output?.rectOfInterest = NSCoder.cgRect(for: strongSelf.st_scanRectWithScale(scale: 1)[0] as! String)
+                if let roiString = strongSelf.st_scanRectWithScale(scale: 1)[0] as? String {
+                    strongSelf.output?.rectOfInterest = NSCoder.cgRect(for: roiString)
+                }
             }
+        }
+    }
+
+    private func checkCameraPermission(completion: @escaping (Bool) -> Void) {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            completion(false)
+            return
+        }
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        switch status {
+        case .authorized:
+            completion(true)
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async { completion(granted) }
+            }
+        case .denied, .restricted:
+            completion(false)
+        @unknown default:
+            completion(false)
         }
     }
 

@@ -13,21 +13,21 @@
 		46EB2E00000540 /* STBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000130 /* STBaseViewController.swift */; };
 		46EB2E00000550 /* STBaseWKViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000140 /* STBaseWKViewController.swift */; };
 		46EB2E00000560 /* STBaseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* STBaseViewModel.swift */; };
-		46EB2E00000570 /* STAlertAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000180 /* STAlertAction.swift */; };
-		46EB2E00000580 /* STAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* STAlertController.swift */; };
-		46EB2E00000590 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* STBtn.swift */; };
-		46EB2E000005A0 /* STCameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* STCameraManager.swift */; };
-		46EB2E000005B0 /* STData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STData.swift */; };
-		46EB2E000005C0 /* STDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STDate.swift */; };
-		46EB2E000005D0 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001E0 /* STDeviceInfo.swift */; };
-		46EB2E000005E0 /* STDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STDictionary.swift */; };
-		46EB2E000005F0 /* STEncrypt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* STEncrypt.swift */; };
-		46EB2E00000600 /* STFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* STFileManager.swift */; };
-		46EB2E00000610 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STFontManager.swift */; };
-		46EB2E00000620 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* STHexColor.swift */; };
-		46EB2E00000630 /* STHTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STHTTPSession.swift */; };
-		46EB2E00000640 /* STIBInspectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STIBInspectable.swift */; };
-		46EB2E00000650 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STImage.swift */; };
+		46EB2E00000570 /* STAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000180 /* STAlertController.swift */; };
+		46EB2E00000580 /* STBtn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000190 /* STBtn.swift */; };
+		46EB2E00000590 /* STCameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001A0 /* STCameraManager.swift */; };
+		46EB2E000005A0 /* STData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001B0 /* STData.swift */; };
+		46EB2E000005B0 /* STDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001C0 /* STDate.swift */; };
+		46EB2E000005C0 /* STDeviceInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* STDeviceInfo.swift */; };
+		46EB2E000005D0 /* STDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001E0 /* STDictionary.swift */; };
+		46EB2E000005E0 /* STEncrypt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STEncrypt.swift */; };
+		46EB2E000005F0 /* STFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* STFileManager.swift */; };
+		46EB2E00000600 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* STFontManager.swift */; };
+		46EB2E00000610 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STHexColor.swift */; };
+		46EB2E00000620 /* STHTTPSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* STHTTPSession.swift */; };
+		46EB2E00000630 /* STIBInspectable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STIBInspectable.swift */; };
+		46EB2E00000640 /* STImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STImage.swift */; };
+		46EB2E00000650 /* STImageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000260 /* STImageManager.swift */; };
 		46EB2E00000660 /* STImagePickerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000270 /* STImagePickerManager.swift */; };
 		46EB2E00000670 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000280 /* STJSONValue.swift */; };
 		46EB2E00000680 /* STKeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000290 /* STKeychainHelper.swift */; };
@@ -77,21 +77,21 @@
 		46EB2E00000130 /* STBaseViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewController.swift; path = STBaseProject/Classes/STBaseModule/STBaseViewController/STBaseViewController.swift; sourceTree = "<group>"; };
 		46EB2E00000140 /* STBaseWKViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseWKViewController.swift; path = STBaseProject/Classes/STBaseModule/STBaseViewController/STBaseWKViewController.swift; sourceTree = "<group>"; };
 		46EB2E00000160 /* STBaseViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBaseViewModel.swift; path = STBaseProject/Classes/STBaseModule/STBaseViewModel/STBaseViewModel.swift; sourceTree = "<group>"; };
-		46EB2E00000180 /* STAlertAction.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STAlertAction.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STAlertAction.swift; sourceTree = "<group>"; };
-		46EB2E00000190 /* STAlertController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STAlertController.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STAlertController.swift; sourceTree = "<group>"; };
-		46EB2E000001A0 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STBtn.swift; sourceTree = "<group>"; };
-		46EB2E000001B0 /* STCameraManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STCameraManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STCameraManager.swift; sourceTree = "<group>"; };
-		46EB2E000001C0 /* STData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STData.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STData.swift; sourceTree = "<group>"; };
-		46EB2E000001D0 /* STDate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDate.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STDate.swift; sourceTree = "<group>"; };
-		46EB2E000001E0 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceInfo.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STDeviceInfo.swift; sourceTree = "<group>"; };
-		46EB2E000001F0 /* STDictionary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDictionary.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STDictionary.swift; sourceTree = "<group>"; };
-		46EB2E00000200 /* STEncrypt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STEncrypt.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STEncrypt.swift; sourceTree = "<group>"; };
-		46EB2E00000210 /* STFileManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFileManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STFileManager.swift; sourceTree = "<group>"; };
-		46EB2E00000220 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STFontManager.swift; sourceTree = "<group>"; };
-		46EB2E00000230 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHexColor.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STHexColor.swift; sourceTree = "<group>"; };
-		46EB2E00000240 /* STHTTPSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHTTPSession.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STHTTPSession.swift; sourceTree = "<group>"; };
-		46EB2E00000250 /* STIBInspectable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STIBInspectable.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STIBInspectable.swift; sourceTree = "<group>"; };
-		46EB2E00000260 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STImage.swift; sourceTree = "<group>"; };
+		46EB2E00000180 /* STAlertController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STAlertController.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STAlertController.swift; sourceTree = "<group>"; };
+		46EB2E00000190 /* STBtn.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STBtn.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STBtn.swift; sourceTree = "<group>"; };
+		46EB2E000001A0 /* STCameraManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STCameraManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STCameraManager.swift; sourceTree = "<group>"; };
+		46EB2E000001B0 /* STData.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STData.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STData.swift; sourceTree = "<group>"; };
+		46EB2E000001C0 /* STDate.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDate.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STDate.swift; sourceTree = "<group>"; };
+		46EB2E000001D0 /* STDeviceInfo.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDeviceInfo.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STDeviceInfo.swift; sourceTree = "<group>"; };
+		46EB2E000001E0 /* STDictionary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDictionary.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STDictionary.swift; sourceTree = "<group>"; };
+		46EB2E000001F0 /* STEncrypt.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STEncrypt.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STEncrypt.swift; sourceTree = "<group>"; };
+		46EB2E00000200 /* STFileManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFileManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STFileManager.swift; sourceTree = "<group>"; };
+		46EB2E00000210 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STFontManager.swift; sourceTree = "<group>"; };
+		46EB2E00000220 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHexColor.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STHexColor.swift; sourceTree = "<group>"; };
+		46EB2E00000230 /* STHTTPSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHTTPSession.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STHTTPSession.swift; sourceTree = "<group>"; };
+		46EB2E00000240 /* STIBInspectable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STIBInspectable.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STIBInspectable.swift; sourceTree = "<group>"; };
+		46EB2E00000250 /* STImage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImage.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STImage.swift; sourceTree = "<group>"; };
+		46EB2E00000260 /* STImageManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImageManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STImageManager.swift; sourceTree = "<group>"; };
 		46EB2E00000270 /* STImagePickerManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STImagePickerManager.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STImagePickerManager.swift; sourceTree = "<group>"; };
 		46EB2E00000280 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STJSONValue.swift; sourceTree = "<group>"; };
 		46EB2E00000290 /* STKeychainHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STKeychainHelper.swift; path = STBaseProject/Classes/STBaseModule/STExtensionTools/STKeychainHelper.swift; sourceTree = "<group>"; };
@@ -266,21 +266,21 @@
 		46EB2E00000170 /* STExtensionTools */ = {
 			isa = PBXGroup;
 			children = (
-				46EB2E00000180 /* STAlertAction.swift */,
-				46EB2E00000190 /* STAlertController.swift */,
-				46EB2E000001A0 /* STBtn.swift */,
-				46EB2E000001B0 /* STCameraManager.swift */,
-				46EB2E000001C0 /* STData.swift */,
-				46EB2E000001D0 /* STDate.swift */,
-				46EB2E000001E0 /* STDeviceInfo.swift */,
-				46EB2E000001F0 /* STDictionary.swift */,
-				46EB2E00000200 /* STEncrypt.swift */,
-				46EB2E00000210 /* STFileManager.swift */,
-				46EB2E00000220 /* STFontManager.swift */,
-				46EB2E00000230 /* STHexColor.swift */,
-				46EB2E00000240 /* STHTTPSession.swift */,
-				46EB2E00000250 /* STIBInspectable.swift */,
-				46EB2E00000260 /* STImage.swift */,
+				46EB2E00000180 /* STAlertController.swift */,
+				46EB2E00000190 /* STBtn.swift */,
+				46EB2E000001A0 /* STCameraManager.swift */,
+				46EB2E000001B0 /* STData.swift */,
+				46EB2E000001C0 /* STDate.swift */,
+				46EB2E000001D0 /* STDeviceInfo.swift */,
+				46EB2E000001E0 /* STDictionary.swift */,
+				46EB2E000001F0 /* STEncrypt.swift */,
+				46EB2E00000200 /* STFileManager.swift */,
+				46EB2E00000210 /* STFontManager.swift */,
+				46EB2E00000220 /* STHexColor.swift */,
+				46EB2E00000230 /* STHTTPSession.swift */,
+				46EB2E00000240 /* STIBInspectable.swift */,
+				46EB2E00000250 /* STImage.swift */,
+				46EB2E00000260 /* STImageManager.swift */,
 				46EB2E00000270 /* STImagePickerManager.swift */,
 				46EB2E00000280 /* STJSONValue.swift */,
 				46EB2E00000290 /* STKeychainHelper.swift */,
@@ -485,8 +485,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				46EB2E00000570 /* STAlertAction.swift in Sources */,
-				46EB2E00000580 /* STAlertController.swift in Sources */,
+				46EB2E00000570 /* STAlertController.swift in Sources */,
 				46EB2E000007A0 /* STBaseConfig.swift in Sources */,
 				46EB2E00000520 /* STBaseModel.swift in Sources */,
 				46EB2E00000880 /* STBaseProject-dummy.m in Sources */,
@@ -494,21 +493,22 @@
 				46EB2E00000540 /* STBaseViewController.swift in Sources */,
 				46EB2E00000560 /* STBaseViewModel.swift in Sources */,
 				46EB2E00000550 /* STBaseWKViewController.swift in Sources */,
-				46EB2E00000590 /* STBtn.swift in Sources */,
-				46EB2E000005A0 /* STCameraManager.swift in Sources */,
-				46EB2E000005B0 /* STData.swift in Sources */,
-				46EB2E000005C0 /* STDate.swift in Sources */,
+				46EB2E00000580 /* STBtn.swift in Sources */,
+				46EB2E00000590 /* STCameraManager.swift in Sources */,
+				46EB2E000005A0 /* STData.swift in Sources */,
+				46EB2E000005B0 /* STDate.swift in Sources */,
 				46EB2E000007B0 /* STDeviceAdapter.swift in Sources */,
-				46EB2E000005D0 /* STDeviceInfo.swift in Sources */,
-				46EB2E000005E0 /* STDictionary.swift in Sources */,
-				46EB2E000005F0 /* STEncrypt.swift in Sources */,
-				46EB2E00000600 /* STFileManager.swift in Sources */,
-				46EB2E00000610 /* STFontManager.swift in Sources */,
-				46EB2E00000620 /* STHexColor.swift in Sources */,
-				46EB2E00000630 /* STHTTPSession.swift in Sources */,
+				46EB2E000005C0 /* STDeviceInfo.swift in Sources */,
+				46EB2E000005D0 /* STDictionary.swift in Sources */,
+				46EB2E000005E0 /* STEncrypt.swift in Sources */,
+				46EB2E000005F0 /* STFileManager.swift in Sources */,
+				46EB2E00000600 /* STFontManager.swift in Sources */,
+				46EB2E00000610 /* STHexColor.swift in Sources */,
+				46EB2E00000620 /* STHTTPSession.swift in Sources */,
 				46EB2E000007C0 /* STHUD.swift in Sources */,
-				46EB2E00000640 /* STIBInspectable.swift in Sources */,
-				46EB2E00000650 /* STImage.swift in Sources */,
+				46EB2E00000630 /* STIBInspectable.swift in Sources */,
+				46EB2E00000640 /* STImage.swift in Sources */,
+				46EB2E00000650 /* STImageManager.swift in Sources */,
 				46EB2E00000660 /* STImagePickerManager.swift in Sources */,
 				46EB2E00000670 /* STJSONValue.swift in Sources */,
 				46EB2E00000680 /* STKeychainHelper.swift in Sources */,

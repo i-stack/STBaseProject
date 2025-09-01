@@ -288,3 +288,96 @@ public enum STImageManagerError: LocalizedError {
 }
 
 public typealias STImageManagerCompletion = (STImageManagerModel) -> Void
+
+// MARK: - 上传能力
+public extension STImageManager {
+    /// 通过 STImageManagerModel 上传图片
+    func uploadImage(model: STImageManagerModel,
+                     toURL urlString: String,
+                     fieldName: String = "image",
+                     parameters: [String: String] = [:],
+                     completion: @escaping (Result<String, Error>) -> Void) {
+        guard let data = model.imageData,
+              let fileName = model.fileName,
+              let mimeType = model.mimeType else {
+            completion(.failure(NSError(domain: "STImageManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "invalid image model"])));
+            return
+        }
+        upload(data: data,
+               fileName: fileName,
+               mimeType: mimeType,
+               fieldName: fieldName,
+               toURL: urlString,
+               parameters: parameters,
+               completion: completion)
+    }
+
+    /// 直接通过 data 上传图片
+    func upload(data: Data,
+                fileName: String,
+                mimeType: String,
+                fieldName: String = "image",
+                toURL urlString: String,
+                parameters: [String: String] = [:],
+                completion: @escaping (Result<String, Error>) -> Void) {
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NSError(domain: "STImageManager", code: -2, userInfo: [NSLocalizedDescriptionKey: "invalid url"])));
+            return
+        }
+
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpBody = createFormDataBody(data: data,
+                                             fileName: fileName,
+                                             mimeType: mimeType,
+                                             fieldName: fieldName,
+                                             parameters: parameters,
+                                             boundary: boundary)
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+                if let data = data, let result = String(data: data, encoding: .utf8) {
+                    completion(.success(result))
+                } else {
+                    completion(.failure(NSError(domain: "STImageManager", code: -3, userInfo: [NSLocalizedDescriptionKey: "invalid response"])));
+                }
+            }
+        }
+        task.resume()
+    }
+
+    private func createFormDataBody(data: Data,
+                                    fileName: String,
+                                    mimeType: String,
+                                    fieldName: String,
+                                    parameters: [String: String],
+                                    boundary: String) -> Data {
+        var body = Data()
+        for (key, value) in parameters {
+            body.st_appendString("--\(boundary)\r\n")
+            body.st_appendString("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n")
+            body.st_appendString("\(value)\r\n")
+        }
+        body.st_appendString("--\(boundary)\r\n")
+        body.st_appendString("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n")
+        body.st_appendString("Content-Type: \(mimeType)\r\n\r\n")
+        body.append(data)
+        body.st_appendString("\r\n")
+        body.st_appendString("--\(boundary)--\r\n")
+        return body
+    }
+}
+
+private extension Data {
+    mutating func st_appendString(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}

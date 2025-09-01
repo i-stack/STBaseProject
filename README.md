@@ -16,6 +16,9 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 - 🛡️ **错误处理**：完善的错误处理和状态管理
 - 📐 **设备适配**：智能的设备判断和尺寸计算
 - 🎯 **比例缩放**：基于设计稿的精确比例缩放
+- 📸 **统一图片管理**：整合相机、照片库和图片处理功能
+- 🌐 **本地化支持**：完整的国际化支持
+- 🎨 **自定义弹窗**：统一的弹窗 API，支持系统和自定义样式
 
 ## Installation
 
@@ -2062,6 +2065,337 @@ override func st_handleLoadError(_ error: Error) {
 }
 ```
 
+### 5. 图片管理最佳实践
+```swift
+// 配置图片管理器
+var imageConfig = STImageManagerConfiguration()
+imageConfig.allowsEditing = true
+imageConfig.maxFileSize = 500
+STImageManager.shared.updateConfiguration(imageConfig)
+
+// 处理图片选择结果
+STImageManager.shared.selectImage(from: self, source: .photoLibrary) { model in
+    if let error = model.error {
+        // 显示错误提示
+        self.showErrorAlert(error.localizedDescription)
+        return
+    }
+    
+    if let image = model.editedImage {
+        // 更新 UI
+        DispatchQueue.main.async {
+            self.imageView.image = image
+        }
+    }
+}
+```
+
+#### 图片上传（统一 API）
+```swift
+// 使用 STImageManager 统一上传接口
+STImageManager.shared.uploadImage(
+    model: model, // 来自 selectImage 的回调 model
+    toURL: "https://api.example.com/upload",
+    fieldName: "avatar",
+    parameters: ["userId": "123"]
+) { result in
+    switch result {
+    case .success(let responseString):
+        print("上传成功: \(responseString)")
+    case .failure(let error):
+        print("上传失败: \(error.localizedDescription)")
+    }
+}
+
+// 也可直接上传 Data（自定义文件名与 mimeType）
+if let data = model.imageData {
+    STImageManager.shared.upload(
+        data: data,
+        fileName: model.fileName ?? "image.jpg",
+        mimeType: model.mimeType ?? "image/jpeg",
+        fieldName: "avatar",
+        toURL: "https://api.example.com/upload",
+        parameters: ["userId": "123"]
+    ) { result in
+        // 处理结果
+    }
+}
+```
+
+#### 迁移与废弃项
+
+- STImageManager 为统一图片选取与上传入口，推荐使用：
+  - 选取：`STImageManager.shared.selectImage(...)` / `showImagePicker(...)`
+  - 上传：`STImageManager.shared.uploadImage(...)` / `upload(data:...)`
+- 以下旧类已移除（v2.1.0+）：
+  - `STBaseProject/Classes/STBaseModule/STExtensionTools/STCameraManager.swift` **已删除**
+  - `STBaseProject/Classes/STBaseModule/STExtensionTools/STImagePickerManager.swift` **已删除**
+- STScanManager 已重构：移除对 STImagePickerManager 的依赖，现使用 STImageManager 进行图片选取
+- 如果你的项目使用了旧 API：
+  - `STCameraManager.openCamera/openPhotoLibrary` -> `STImageManager.selectImage`
+  - `STCameraManager.uploadImage(...)` -> `STImageManager.uploadImage(...)`
+  - `STImagePickerManager.openCamera/openPhotoLibrary` -> `STImageManager.selectImage`
+
+### 6. 扫码模块使用
+
+#### 基础扫码
+```swift
+import AVFoundation
+
+class ScanViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // 初始化扫码管理器
+        let scanManager = STScanManager(presentViewController: self)
+        
+        // 设置扫码回调
+        scanManager.scanResultCallBack = { [weak self] result in
+            print("扫码结果: \(result)")
+            // 处理扫码结果
+            self?.handleScanResult(result)
+        }
+        
+        // 开始扫码
+        scanManager.st_startScan()
+    }
+    
+    private func handleScanResult(_ result: String) {
+        // 处理二维码内容
+        if result.hasPrefix("http") {
+            // 是网址，可以打开浏览器
+            openWebView(url: result)
+        } else {
+            // 其他类型内容
+            showAlert(message: result)
+        }
+    }
+}
+```
+
+#### 从相册选择图片识别二维码
+```swift
+class ScanViewController: UIViewController {
+    private let scanManager = STScanManager(presentViewController: self)
+    
+    @IBAction func selectImageAndScan(_ sender: UIButton) {
+        // 使用 STScanManager 新增的方法从相册选择图片并识别二维码
+        scanManager.pickImageAndRecognize(
+            from: .photoLibrary,
+            viewController: self
+        ) { [weak self] result in
+            switch result {
+            case .success(let qrContent):
+                print("识别到二维码: \(qrContent)")
+                self?.handleScanResult(qrContent)
+            case .failure(let error):
+                print("识别失败: \(error.localizedDescription)")
+                self?.showError(error)
+            }
+        }
+    }
+    
+    private func showError(_ error: Error) {
+        let alert = UIAlertController(
+            title: "识别失败",
+            message: error.localizedDescription,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "确定", style: .default))
+        present(alert, animated: true)
+    }
+}
+```
+
+#### 权限处理和错误处理
+```swift
+class ScanViewController: UIViewController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        checkCameraPermission()
+    }
+    
+    private func checkCameraPermission() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            // 已授权，可以开始扫码
+            startScanning()
+        case .notDetermined:
+            // 请求权限
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        self?.startScanning()
+                    } else {
+                        self?.showPermissionDeniedAlert()
+                    }
+                }
+            }
+        case .denied, .restricted:
+            // 权限被拒绝
+            showPermissionDeniedAlert()
+        @unknown default:
+            break
+        }
+    }
+    
+    private func startScanning() {
+        let scanManager = STScanManager(presentViewController: self)
+        scanManager.scanResultCallBack = { [weak self] result in
+            // 处理扫码结果
+            self?.handleScanResult(result)
+        }
+        scanManager.st_startScan()
+    }
+    
+    private func showPermissionDeniedAlert() {
+        let alert = UIAlertController(
+            title: "需要相机权限",
+            message: "请在设置中允许相机权限以使用扫码功能",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "去设置", style: .default) { _ in
+            if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsURL)
+            }
+        })
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        present(alert, animated: true)
+    }
+}
+```
+
+#### 自定义扫码界面
+```swift
+class CustomScanViewController: UIViewController {
+    private let scanManager = STScanManager(presentViewController: self)
+    private var scanView: STScanView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupCustomScanView()
+        setupScanManager()
+    }
+    
+    private func setupCustomScanView() {
+        view.backgroundColor = .black
+        
+        // 使用自定义配置创建扫码视图
+        var customConfig = STScanViewConfiguration()
+        customConfig.tipText = "将二维码/条码放入框内，即可自动扫描"
+        customConfig.tipTextFont = UIFont.systemFont(ofSize: 16)
+        customConfig.cornerColor = UIColor.systemBlue
+        customConfig.maskAlpha = 0.5
+        customConfig.animationDuration = 2.0
+        
+        scanView = STScanView(frame: view.bounds, configuration: customConfig)
+        scanView.scanType = .STScanTypeQrCode
+        view.addSubview(scanView)
+        
+        // 也可以使用主题
+        // scanView = STScanView(frame: view.bounds, theme: .light)
+    }
+    
+    private func setupScanManager() {
+        scanManager.scanResultCallBack = { [weak self] result in
+            // 震动反馈
+            AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+            
+            // 停止扫码线动画
+            self?.scanView.st_stopAnimating()
+            
+            // 处理结果
+            self?.handleScanResult(result)
+        }
+        
+        // 开始扫码
+        scanManager.st_startScan()
+        
+        // 开始扫码线动画
+        scanView.st_startAnimating()
+    }
+}
+```
+
+#### STScanView 配置选项
+```swift
+// 创建自定义配置
+var config = STScanViewConfiguration()
+config.scanAreaMargin = 80.0           // 扫码区域边距
+config.scanLineHeight = 3.0            // 扫码线高度
+config.maskAlpha = 0.7                 // 遮罩透明度
+config.borderColor = .white            // 边框颜色
+config.cornerColor = .systemBlue       // 角标颜色
+config.cornerSize = CGSize(width: 20, height: 20)  // 角标尺寸
+config.cornerLineWidth = 5.0           // 角标线宽
+config.tipText = "自定义提示文字"        // 提示文字
+config.tipTextColor = .yellow          // 提示文字颜色
+config.tipTextFont = UIFont.boldSystemFont(ofSize: 14)  // 提示文字字体
+config.animationDuration = 1.0         // 动画持续时间
+config.animationInterval = 0.5         // 动画间隔
+config.automaticSafeAreaAdaptation = true  // 自动适配安全区域
+
+// 应用配置
+let scanView = STScanView(frame: view.bounds, configuration: config)
+
+// 或使用预设主题
+let lightScanView = STScanView(frame: view.bounds, theme: .light)
+let darkScanView = STScanView(frame: view.bounds, theme: .dark)
+
+// 动态更新
+scanView.updateTipText("请扫描二维码")
+scanView.theme = .light
+scanView.scanType = .STScanTypeBarCode
+
+// 安全区域适配控制
+scanView.setSafeAreaAdaptation(enabled: true)   // 启用自动适配（默认启用）
+scanView.setSafeAreaAdaptation(enabled: false)  // 禁用自动适配
+```
+
+### 7. 本地化配置
+```swift
+// 在 AppDelegate 中配置本地化
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    
+    // 设置默认语言
+    STLanguageManager.shared.st_setLanguage(.chinese)
+    
+    // 或者根据系统语言自动设置
+    let preferredLanguage = Locale.preferredLanguages.first ?? "zh-Hans"
+    if preferredLanguage.hasPrefix("zh") {
+        STLanguageManager.shared.st_setLanguage(.chinese)
+    } else {
+        STLanguageManager.shared.st_setLanguage(.english)
+    }
+    
+    return true
+}
+```
+
+### 7. 弹窗使用
+```swift
+// 使用统一的弹窗 API
+STAlertController.st_showSystemAlert(
+    title: "提示",
+    message: "操作成功",
+    actions: [
+        STAlertActionItem(title: "确定", style: .default)
+    ]
+)
+
+// 自定义弹窗
+STAlertController.st_showCustomAlert(
+    title: "自定义标题",
+    message: "自定义消息",
+    actions: [
+        STAlertActionItem(title: "取消", style: .cancel),
+        STAlertActionItem(title: "确定", style: .default) {
+            // 处理确定操作
+        }
+    ]
+)
+```
+
 ## 注意事项
 
 1. **继承关系**：确保你的视图控制器继承自 `STBaseViewController` 或 `STBaseWKViewController`
@@ -2071,6 +2405,16 @@ override func st_handleLoadError(_ error: Error) {
 5. **兼容性**：深色模式功能需要 iOS 13+ 支持
 
 ## 更新日志
+
+### v2.1.0
+- 新增统一图片管理器 (STImageManager)
+- 整合相机、照片库和图片处理功能
+- 新增图片压缩、裁剪、旋转等功能
+- 优化 STCameraManager 和 STImagePickerManager
+- 改进 STImage 扩展，添加更多图片处理功能
+- 新增本地化支持和错误处理机制
+- 统一弹窗 API，支持系统和自定义样式
+- 优化代码结构，提高可维护性
 
 ### v2.0.0
 - 新增完整的导航栏样式配置
