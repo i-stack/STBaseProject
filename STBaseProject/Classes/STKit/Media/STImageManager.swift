@@ -9,6 +9,27 @@ import UIKit
 import AVFoundation
 import Photos
 
+// MARK: - 图片来源枚举
+public enum STImageSource {
+    case camera
+    case photoLibrary
+    case simulator
+    case unknown
+    
+    public var description: String {
+        switch self {
+        case .camera:
+            return "camera"
+        case .photoLibrary:
+            return "photo_library"
+        case .simulator:
+            return "simulator"
+        case .unknown:
+            return "unknown"
+        }
+    }
+}
+
 // MARK: - 统一图片管理器
 /// 统一的图片管理器，整合相机、照片库和图片处理功能
 public class STImageManager: NSObject {

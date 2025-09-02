@@ -28,10 +28,6 @@ target 'STBaseProject_Example' do
   #pod 'STBaseProject/STBaseModule'         # 基础 MVVM 架构
   #pod 'STBaseProject/STConfig'             # 配置管理
   
-  # 向后兼容
-  #pod 'STBaseProject/STDialog'             # 等同于 STKit/Dialog
-
-  
 #  pod 'SnapKit'
 #  pod 'Alamofire'
 #  pod 'SDWebImage'

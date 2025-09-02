@@ -391,7 +391,7 @@ open class STBtn: UIButton {
     ///   - offset: 阴影偏移
     ///   - radius: 阴影半径
     ///   - opacity: 阴影透明度
-    public func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
+    public override func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
         layer.shadowColor = color.cgColor
         layer.shadowOffset = offset
         layer.shadowRadius = radius

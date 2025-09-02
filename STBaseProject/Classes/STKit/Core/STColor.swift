@@ -1,5 +1,5 @@
 //
-//  STHexColor.swift
+//  STColor.swift
 //  STBaseProject
 //
 //  Created by stack on 2018/10/9.

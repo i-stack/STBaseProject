@@ -131,7 +131,7 @@ public extension UIView {
     ///   - offset: 阴影偏移
     ///   - radius: 阴影半径
     ///   - opacity: 阴影透明度
-    func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
+    @objc func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
         layer.shadowColor = color.cgColor
         layer.shadowOffset = offset
         layer.shadowRadius = radius
@@ -388,7 +388,7 @@ public extension UIView {
     /// 设置背景色（支持十六进制）
     /// - Parameter hex: 十六进制颜色值
     func st_setBackgroundColor(hex: String) {
-        backgroundColor = UIColor(hex: hex)
+        backgroundColor = UIColor.st_color(hexString: hex)
     }
     
     /// 设置边框

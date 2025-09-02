@@ -21,7 +21,7 @@
 		46EB2E00000620 /* STDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E000001F0 /* STDictionary.swift */; };
 		46EB2E00000630 /* STFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000200 /* STFileManager.swift */; };
 		46EB2E00000640 /* STFontManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* STFontManager.swift */; };
-		46EB2E00000650 /* STHexColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STHexColor.swift */; };
+		46EB2E00000650 /* STColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000220 /* STColor.swift */; };
 		46EB2E00000660 /* STJSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000230 /* STJSONValue.swift */; };
 		46EB2E00000670 /* STPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000240 /* STPoint.swift */; };
 		46EB2E00000680 /* STPredicateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000250 /* STPredicateCheck.swift */; };
@@ -83,7 +83,7 @@
 		46EB2E000001F0 /* STDictionary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STDictionary.swift; path = STBaseProject/Classes/STKit/Core/STDictionary.swift; sourceTree = "<group>"; };
 		46EB2E00000200 /* STFileManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFileManager.swift; path = STBaseProject/Classes/STKit/Core/STFileManager.swift; sourceTree = "<group>"; };
 		46EB2E00000210 /* STFontManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STFontManager.swift; path = STBaseProject/Classes/STKit/Core/STFontManager.swift; sourceTree = "<group>"; };
-		46EB2E00000220 /* STHexColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STHexColor.swift; path = STBaseProject/Classes/STKit/Core/STHexColor.swift; sourceTree = "<group>"; };
+		46EB2E00000220 /* STColor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STColor.swift; path = STBaseProject/Classes/STKit/Core/STColor.swift; sourceTree = "<group>"; };
 		46EB2E00000230 /* STJSONValue.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STJSONValue.swift; path = STBaseProject/Classes/STKit/Core/STJSONValue.swift; sourceTree = "<group>"; };
 		46EB2E00000240 /* STPoint.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPoint.swift; path = STBaseProject/Classes/STKit/Core/STPoint.swift; sourceTree = "<group>"; };
 		46EB2E00000250 /* STPredicateCheck.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = STPredicateCheck.swift; path = STBaseProject/Classes/STKit/Core/STPredicateCheck.swift; sourceTree = "<group>"; };
@@ -292,7 +292,7 @@
 				46EB2E000001F0 /* STDictionary.swift */,
 				46EB2E00000200 /* STFileManager.swift */,
 				46EB2E00000210 /* STFontManager.swift */,
-				46EB2E00000220 /* STHexColor.swift */,
+				46EB2E00000220 /* STColor.swift */,
 				46EB2E00000230 /* STJSONValue.swift */,
 				46EB2E00000240 /* STPoint.swift */,
 				46EB2E00000250 /* STPredicateCheck.swift */,
@@ -560,7 +560,7 @@
 				46EB2E00000780 /* STEncrypt.swift in Sources */,
 				46EB2E00000630 /* STFileManager.swift in Sources */,
 				46EB2E00000640 /* STFontManager.swift in Sources */,
-				46EB2E00000650 /* STHexColor.swift in Sources */,
+				46EB2E00000650 /* STColor.swift in Sources */,
 				46EB2E00000740 /* STHTTPSession.swift in Sources */,
 				46EB2E000006C0 /* STHUD.swift in Sources */,
 				46EB2E000007C0 /* STIBInspectable.swift in Sources */,
