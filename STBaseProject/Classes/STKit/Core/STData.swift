@@ -89,6 +89,32 @@ public extension Data {
         return Data(base64Encoded: base64String, options: options)
     }
     
+    /// 转换为 Base64 字符串（URL 安全）
+    /// - Returns: URL 安全的 Base64 字符串
+    func toBase64URLSafeString() -> String {
+        return base64EncodedString(options: .endLineWithCarriageReturn)
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+    
+    /// 从 URL 安全的 Base64 字符串创建 Data
+    /// - Parameter base64URLSafeString: URL 安全的 Base64 字符串
+    /// - Returns: Data 对象，失败返回 nil
+    static func fromBase64URLSafeString(_ base64URLSafeString: String) -> Data? {
+        var base64String = base64URLSafeString
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        
+        // 添加填充
+        let remainder = base64String.count % 4
+        if remainder > 0 {
+            base64String += String(repeating: "=", count: 4 - remainder)
+        }
+        
+        return Data(base64Encoded: base64String)
+    }
+    
     // MARK: - JSON Operations (已迁移到 STJSONValue.swift)
     
     /// 转换为 JSON 对象
@@ -320,6 +346,92 @@ public extension Data {
         }
         
         return chunks
+    }
+}
+
+// MARK: - String 编码转换扩展
+
+public extension String {
+    
+    // MARK: - Base64 编码转换
+    
+    /// 转换为 Base64 编码字符串
+    /// - Parameter encoding: 字符编码，默认为 UTF-8
+    /// - Returns: Base64 编码字符串
+    func st_toBase64(encoding: String.Encoding = .utf8) -> String {
+        guard let data = data(using: encoding) else { return "" }
+        return data.toBase64String()
+    }
+    
+    /// 从 Base64 解码为字符串
+    /// - Parameter encoding: 字符编码，默认为 UTF-8
+    /// - Returns: 解码后的字符串
+    func st_fromBase64(encoding: String.Encoding = .utf8) -> String {
+        guard let data = Data.fromBase64String(self) else { return "" }
+        return data.toString(encoding: encoding) ?? ""
+    }
+    
+    /// 转换为 URL 安全的 Base64 编码字符串
+    /// - Parameter encoding: 字符编码，默认为 UTF-8
+    /// - Returns: URL 安全的 Base64 编码字符串
+    func st_toBase64URLSafe(encoding: String.Encoding = .utf8) -> String {
+        guard let data = data(using: encoding) else { return "" }
+        return data.toBase64URLSafeString()
+    }
+    
+    /// 从 URL 安全的 Base64 解码为字符串
+    /// - Parameter encoding: 字符编码，默认为 UTF-8
+    /// - Returns: 解码后的字符串
+    func st_fromBase64URLSafe(encoding: String.Encoding = .utf8) -> String {
+        guard let data = Data.fromBase64URLSafeString(self) else { return "" }
+        return data.toString(encoding: encoding) ?? ""
+    }
+    
+    // MARK: - 十六进制编码转换
+    
+    /// 转换为十六进制字符串
+    /// - Parameters:
+    ///   - encoding: 字符编码，默认为 UTF-8
+    ///   - uppercase: 是否使用大写字母，默认为 false
+    /// - Returns: 十六进制字符串
+    func st_toHex(encoding: String.Encoding = .utf8, uppercase: Bool = false) -> String {
+        guard let data = data(using: encoding) else { return "" }
+        return data.toHexString(uppercase: uppercase)
+    }
+    
+    /// 从十六进制字符串解码
+    /// - Parameter encoding: 字符编码，默认为 UTF-8
+    /// - Returns: 解码后的字符串
+    func st_fromHex(encoding: String.Encoding = .utf8) -> String {
+        guard let data = Data.fromHexString(self) else { return "" }
+        return data.toString(encoding: encoding) ?? ""
+    }
+    
+    // MARK: - 其他编码转换
+    
+    /// 转换为指定编码的 Data
+    /// - Parameter encoding: 字符编码，默认为 UTF-8
+    /// - Returns: Data 对象
+    func st_toData(encoding: String.Encoding = .utf8) -> Data? {
+        return data(using: encoding)
+    }
+    
+    /// 检查是否为有效的 Base64 字符串
+    /// - Returns: 是否为有效的 Base64 字符串
+    func st_isValidBase64() -> Bool {
+        return Data.fromBase64String(self) != nil
+    }
+    
+    /// 检查是否为有效的十六进制字符串
+    /// - Returns: 是否为有效的十六进制字符串
+    func st_isValidHex() -> Bool {
+        let cleanHex = replacingOccurrences(of: " ", with: "")
+        guard cleanHex.count % 2 == 0 else { return false }
+        
+        let hexPattern = "^[0-9A-Fa-f]+$"
+        let regex = try? NSRegularExpression(pattern: hexPattern)
+        let range = NSRange(location: 0, length: cleanHex.count)
+        return regex?.firstMatch(in: cleanHex, options: [], range: range) != nil
     }
 }
 

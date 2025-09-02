@@ -493,6 +493,51 @@ public class STJSONUtils {
               let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
         return data.st_decode(type)
     }
+    
+    /// 将 JSON 字符串转换为美化格式
+    /// - Parameter jsonString: JSON 字符串
+    /// - Returns: 美化后的 JSON 字符串
+    public static func st_jsonStringToPrettyPrintedJson(jsonString: String?) -> String {
+        guard let str = jsonString, !str.isEmpty else { return "" }
+        
+        do {
+            guard let jsonData = str.data(using: .utf8) else { return str }
+            let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: [])
+            let prettyJsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
+            return String(data: prettyJsonData, encoding: .utf8) ?? str
+        } catch {
+            return str
+        }
+    }
+    
+    /// 将字典转换为 JSON 字符串
+    /// - Parameter dict: 字典对象
+    /// - Returns: JSON 字符串
+    public static func st_dictToJSON(dict: [String: Any]) -> String {
+        guard !dict.isEmpty else { return "" }
+        
+        do {
+            let data = try JSONSerialization.data(withJSONObject: dict, options: [])
+            return String(data: data, encoding: .utf8) ?? ""
+        } catch {
+            return ""
+        }
+    }
+    
+    /// 将 NSDictionary 转换为 JSON 字符串（兼容旧版本）
+    /// - Parameter dict: NSDictionary 对象
+    /// - Returns: JSON 字符串
+    @available(*, deprecated, message: "请使用 st_dictToJSON(dict: [String: Any]) 方法")
+    public static func st_dictToJSON(dict: NSDictionary) -> String {
+        guard dict.count > 0 else { return "" }
+        
+        do {
+            let data = try JSONSerialization.data(withJSONObject: dict, options: [])
+            return String(data: data, encoding: .utf8) ?? ""
+        } catch {
+            return ""
+        }
+    }
 }
 
 // MARK: - JSON 错误类型

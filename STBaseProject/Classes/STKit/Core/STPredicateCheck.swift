@@ -425,10 +425,10 @@ public class STPredicateCheck: NSObject {
     public class func st_checkPasswordStrength(password: String) -> Int {
         var strength = 0
         
-        if st_checkMinLength(password, minLength: 8) { strength += 1 }
-        if st_checkLowercaseLetters(password) { strength += 1 }
-        if st_checkUppercaseLetters(password) { strength += 1 }
-        if st_checkIsDigit(password) { strength += 1 }
+        if st_checkMinLength(text: password, minLength: 8) { strength += 1 }
+        if st_checkLowercaseLetters(text: password) { strength += 1 }
+        if st_checkUppercaseLetters(text: password) { strength += 1 }
+        if st_checkIsDigit(text: password) { strength += 1 }
         if st_checkSpecialCharPassword(password: password) { strength += 1 }
         
         return strength
