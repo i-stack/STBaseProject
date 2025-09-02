@@ -1517,7 +1517,263 @@ override func st_onFailed(_ error: STBaseError) {
 }
 ```
 
-### 九、STHTTPSession
+### 九、STFileManager
+
+`STFileManager` 是一个功能强大的文件管理器类，提供了完整的文件操作功能。它基于 `FileManager` 构建，提供了文件读写、目录管理、文件监控、类型检查等丰富的功能。
+
+#### 主要特性
+
+- **文件操作**：读写、创建、删除、复制、移动文件
+- **目录管理**：创建目录、获取目录内容、计算目录大小
+- **路径管理**：获取各种系统目录路径（文档、缓存、临时等）
+- **文件监控**：监控文件变化，实时响应文件操作
+- **类型检查**：自动识别图片、视频、音频、文档等文件类型
+- **属性获取**：文件大小、创建时间、修改时间等详细信息
+- **错误处理**：完善的错误处理和返回值管理
+- **编码支持**：支持多种编码格式的文件操作
+
+#### 基础文件操作
+
+```swift
+// 写入文件
+let success = STFileManager.st_writeToFile(
+    content: "Hello World",
+    filePath: "/path/to/file.txt"
+)
+
+// 覆盖写入文件
+let success = STFileManager.st_overwriteToFile(
+    content: "New Content",
+    filePath: "/path/to/file.txt"
+)
+
+// 追加内容到文件
+let success = STFileManager.st_appendToFile(
+    content: "\nAdditional content",
+    filePath: "/path/to/file.txt"
+)
+
+// 读取文件内容
+let content = STFileManager.st_readFromFile(filePath: "/path/to/file.txt")
+
+// 读取文件数据
+if let data = STFileManager.st_readDataFromFile(filePath: "/path/to/file.txt") {
+    // 处理文件数据
+}
+```
+
+#### 路径管理
+
+```swift
+// 获取系统目录路径
+let homePath = STFileManager.st_getHomePath()
+let documentsPath = STFileManager.st_getDocumentsPath()
+let cachePath = STFileManager.st_getLibraryCachePath()
+let tempPath = STFileManager.st_getTmpPath()
+let appSupportPath = STFileManager.st_getApplicationSupportPath()
+
+// 创建文件路径
+let filePath = STFileManager.st_create(
+    filePath: documentsPath,
+    fileName: "example.txt"
+)
+
+// 创建临时文件
+let tempFilePath = STFileManager.st_createTempFile(fileName: "temp.txt")
+```
+
+#### 目录操作
+
+```swift
+// 创建目录
+let success = STFileManager.st_createDirectory(path: "/path/to/new/directory")
+
+// 获取目录内容
+let contents = STFileManager.st_getContentsOfDirectory(atPath: "/path/to/directory")
+
+// 获取完整路径列表
+let fullPaths = STFileManager.st_getFullPathsOfDirectory(atPath: "/path/to/directory")
+
+// 计算目录大小
+let directorySize = STFileManager.st_getDirectorySize(path: "/path/to/directory")
+
+// 清空目录内容
+let success = STFileManager.st_clearDirectory(path: "/path/to/directory")
+```
+
+#### 文件操作
+
+```swift
+// 复制文件
+let success = STFileManager.st_copyItem(
+    atPath: "/source/file.txt",
+    toPath: "/destination/file.txt"
+)
+
+// 移动文件
+let success = STFileManager.st_moveItem(
+    atPath: "/old/location/file.txt",
+    toPath: "/new/location/file.txt"
+)
+
+// 删除文件
+let success = STFileManager.st_removeItem(atPath: "/path/to/file.txt")
+
+// 检查文件是否存在
+let (exists, isDirectory) = STFileManager.st_fileExistAt(path: "/path/to/file.txt")
+```
+
+#### 文件属性获取
+
+```swift
+// 获取文件属性
+if let attributes = STFileManager.st_getFileAttributes(path: "/path/to/file.txt") {
+    // 处理文件属性
+}
+
+// 获取文件大小
+let fileSize = STFileManager.st_getFileSize(path: "/path/to/file.txt")
+
+// 获取文件创建时间
+if let creationDate = STFileManager.st_getFileCreationDate(path: "/path/to/file.txt") {
+    print("文件创建时间: \(creationDate)")
+}
+
+// 获取文件修改时间
+if let modificationDate = STFileManager.st_getFileModificationDate(path: "/path/to/file.txt") {
+    print("文件修改时间: \(modificationDate)")
+}
+```
+
+#### 文件类型检查
+
+```swift
+// 检查文件类型
+let isImage = STFileManager.st_isImageFile(path: "/path/to/image.jpg")
+let isVideo = STFileManager.st_isVideoFile(path: "/path/to/video.mp4")
+let isAudio = STFileManager.st_isAudioFile(path: "/path/to/audio.mp3")
+let isDocument = STFileManager.st_isDocumentFile(path: "/path/to/document.pdf")
+
+// 根据文件类型进行不同处理
+if STFileManager.st_isImageFile(path: filePath) {
+    // 处理图片文件
+    let image = UIImage(contentsOfFile: filePath)
+} else if STFileManager.st_isVideoFile(path: filePath) {
+    // 处理视频文件
+    let videoURL = URL(fileURLWithPath: filePath)
+}
+```
+
+#### 文件监控
+
+```swift
+// 监控文件变化
+let fileMonitor = STFileManager.st_monitorFile(path: "/path/to/file.txt") { filePath in
+    print("文件发生变化: \(filePath)")
+    // 处理文件变化事件
+}
+
+// 停止监控
+fileMonitor?.cancel()
+```
+
+#### URL 操作
+
+```swift
+// 从 URL 读取文件
+let url = URL(fileURLWithPath: "/path/to/file.txt")
+if let content = STFileManager.st_readFromURL(url: url) {
+    print("文件内容: \(content)")
+}
+
+// 写入内容到 URL
+let success = STFileManager.st_writeToURL(
+    content: "New content",
+    url: url
+)
+```
+
+#### 日志管理
+
+```swift
+// 写入日志到文件
+STFileManager.st_logWriteToFile()
+
+// 获取日志输出路径
+let logPath = STFileManager.st_outputLogPath()
+```
+
+#### 实际应用示例
+
+```swift
+class FileManagerExample {
+    
+    // 保存用户数据
+    static func saveUserData(_ userData: [String: Any]) {
+        let documentsPath = STFileManager.st_getDocumentsPath()
+        let userDataPath = "\(documentsPath)/UserData"
+        
+        // 确保目录存在
+        STFileManager.st_createDirectory(path: userDataPath)
+        
+        // 保存数据
+        let dataString = userData.description
+        let filePath = "\(userDataPath)/user_data.txt"
+        STFileManager.st_writeToFile(content: dataString, filePath: filePath)
+    }
+    
+    // 清理缓存
+    static func clearCache() {
+        let cachePath = STFileManager.st_getLibraryCachePath()
+        let success = STFileManager.st_clearDirectory(path: cachePath)
+        
+        if success {
+            print("缓存清理成功")
+        } else {
+            print("缓存清理失败")
+        }
+    }
+    
+    // 获取应用大小
+    static func getAppSize() -> String {
+        let documentsPath = STFileManager.st_getDocumentsPath()
+        let libraryPath = STFileManager.st_getLibraryPath()
+        
+        let documentsSize = STFileManager.st_getDirectorySize(path: documentsPath)
+        let librarySize = STFileManager.st_getDirectorySize(path: libraryPath)
+        
+        let totalSize = documentsSize + librarySize
+        let sizeInMB = Double(totalSize) / (1024 * 1024)
+        
+        return String(format: "%.2f MB", sizeInMB)
+    }
+    
+    // 备份重要文件
+    static func backupImportantFiles() {
+        let documentsPath = STFileManager.st_getDocumentsPath()
+        let backupPath = "\(documentsPath)/Backup"
+        
+        // 创建备份目录
+        STFileManager.st_createDirectory(path: backupPath)
+        
+        // 获取所有重要文件
+        let importantFiles = STFileManager.st_getContentsOfDirectory(atPath: documentsPath)
+            .filter { fileName in
+                // 过滤重要文件
+                return fileName.hasSuffix(".db") || fileName.hasSuffix(".json")
+            }
+        
+        // 复制到备份目录
+        for fileName in importantFiles {
+            let sourcePath = "\(documentsPath)/\(fileName)"
+            let backupFilePath = "\(backupPath)/\(fileName)"
+            STFileManager.st_copyItem(atPath: sourcePath, toPath: backupFilePath)
+        }
+    }
+}
+```
+
+### 十、STHTTPSession
 
 `STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
 
@@ -2432,6 +2688,45 @@ STAlertController.st_showCustomAlert(
 5. **兼容性**：深色模式功能需要 iOS 13+ 支持
 
 ## 更新日志
+
+### v2.1.3
+- **STFileManager.swift 全面优化**：重构文件管理功能，新增以下特性：
+  - 遵循项目命名规范：所有方法名添加 `st_` 前缀，确保代码一致性
+  - 新增多种文件写入模式：支持覆盖写入、追加写入、编码格式自定义
+  - 新增文件数据读取：支持读取文件为 Data 类型，便于二进制文件处理
+  - 新增应用支持目录路径：获取 ApplicationSupport 目录路径
+  - 新增文件属性管理：获取文件大小、创建时间、修改时间等详细信息
+  - 新增目录大小计算：递归计算目录总大小，支持大目录管理
+  - 新增文件类型检查：自动识别图片、视频、音频、文档等文件类型
+  - 新增文件监控功能：实时监控文件变化，支持回调处理
+  - 新增 URL 操作支持：从 URL 读取和写入文件内容
+  - 改进错误处理：所有方法返回操作结果，便于错误处理
+  - 优化代码结构：使用 MARK 注释分组，提高代码可读性
+  - 完善文档注释：为所有方法添加详细的参数说明和返回值说明
+
+### v2.1.2
+- **STDeviceInfo.swift 全面优化**：重构设备信息获取功能，新增以下特性：
+  - 移除使用苹果未开放API的代码（如CNCopySupportedInterfaces等），确保App Store审核通过
+  - 新增设备型号名称映射：支持iPhone 13/14/15系列、iPad Pro/Air等最新设备
+  - 新增设备类型和性能等级判断：自动识别设备类型并评估性能等级
+  - 优化网络信息获取：使用Network框架替代已废弃的API，支持WiFi/蜂窝网络检测
+  - 新增屏幕信息获取：屏幕尺寸、分辨率、比例、亮度、刘海屏检测等
+  - 新增存储和内存监控：总容量、可用空间、使用率等详细信息
+  - 改进设备安全检测：更全面的越狱检测和模拟器识别
+  - 优化隐私信息处理：支持iOS 14+ AppTrackingTransparency框架
+  - 新增运营商信息获取：支持双卡双待设备
+  - 提供完整的使用示例和最佳实践
+
+### v2.1.1
+- **STDate.swift 全面优化**：重构日期处理功能，新增以下特性：
+  - 新增 Date 扩展：提供丰富的日期操作方法（时间戳转换、格式化、比较、计算等）
+  - 优化字符串日期扩展：支持多种常见日期格式的智能解析
+  - 新增相对时间显示：提供"几分钟前"、"几小时前"等人性化时间显示
+  - 简化日期比较逻辑：使用更优雅和高效的实现
+  - 新增日期计算功能：支持日期加减、范围生成等操作
+  - 优化性能：使用 STDateManager 管理 DateFormatter 缓存，减少重复创建
+  - 添加时区和本地化支持：更好的国际化体验
+  - 提供使用示例：包含详细的 API 使用演示和最佳实践
 
 ### v2.1.0
 - 新增统一图片管理器 (STImageManager)
