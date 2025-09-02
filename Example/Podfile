@@ -9,6 +9,10 @@ target 'STBaseProject_Example' do
   # 完整引入（推荐用于快速开始）
   pod 'STBaseProject', :path => '../'
   pod 'STBaseProject/STKit/Security', :path => '../'
+  pod 'STBaseProject/STKit/Location', :path => '../'
+  pod 'STBaseProject/STKit/Dialog', :path => '../'
+  pod 'STBaseProject/STKit/Media', :path => '../'
+  pod 'STBaseProject/STKit/Scan', :path => '../'
   # 按需引入示例（推荐用于生产环境）
   #pod 'STBaseProject/STKit/Core'           # 必选：核心工具
   #pod 'STBaseProject/STKit/UI'             # 常用：UI组件

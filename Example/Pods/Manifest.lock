@@ -25,10 +25,20 @@ PODS:
     - STBaseProject/STKit/Network
   - STBaseProject/STConfig (2.0.0)
   - STBaseProject/STKit/Core (2.0.0)
+  - STBaseProject/STKit/Dialog (2.0.0):
+    - STBaseProject/STKit/Core
+    - STBaseProject/STKit/UI
   - STBaseProject/STKit/Localization (2.0.0):
+    - STBaseProject/STKit/Core
+  - STBaseProject/STKit/Location (2.0.0):
+    - STBaseProject/STKit/Core
+  - STBaseProject/STKit/Media (2.0.0):
     - STBaseProject/STKit/Core
   - STBaseProject/STKit/Network (2.0.0):
     - STBaseProject/STKit/Core
+  - STBaseProject/STKit/Scan (2.0.0):
+    - STBaseProject/STKit/Core
+    - STBaseProject/STKit/Media
   - STBaseProject/STKit/Security (2.0.0):
     - STBaseProject/STKit/Core
   - STBaseProject/STKit/UI (2.0.0):
@@ -37,6 +47,10 @@ PODS:
 
 DEPENDENCIES:
   - STBaseProject (from `../`)
+  - STBaseProject/STKit/Dialog (from `../`)
+  - STBaseProject/STKit/Location (from `../`)
+  - STBaseProject/STKit/Media (from `../`)
+  - STBaseProject/STKit/Scan (from `../`)
   - STBaseProject/STKit/Security (from `../`)
 
 EXTERNAL SOURCES:
@@ -46,6 +60,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   STBaseProject: 357389945affca5256ae1f516841fe42915a4e1d
 
-PODFILE CHECKSUM: a8e7c94ed6f85a4ca588c4d5df099c3a629cf23f
+PODFILE CHECKSUM: aff231694e2727863b9f6e80192f9f125b931f84
 
 COCOAPODS: 1.16.2
