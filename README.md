@@ -688,7 +688,284 @@ class CustomView: UIView {
 }
 ```
 
-### 五、STLocalizationManager
+### 五、STHUD
+
+`STHUD` 是一个功能强大的 HUD 提示组件，支持多种类型、主题和自定义配置。它提供了丰富的提示功能，包括成功、错误、警告、信息、加载等不同类型的提示，以及完整的主题系统和本地化支持。
+
+#### 主要特性
+
+- **多种 HUD 类型**：成功、错误、警告、信息、加载、进度、自定义
+- **主题系统**：支持默认、浅色、深色主题，可自定义主题配置
+- **本地化支持**：完整的国际化支持，与项目其他组件保持一致
+- **便捷方法**：提供丰富的便捷显示方法
+- **配置驱动**：使用配置结构体统一管理所有参数
+- **向后兼容**：保持与原有 API 的完全兼容
+- **自动图标**：根据类型自动生成对应的图标
+- **位置控制**：支持顶部、居中、底部三种显示位置
+
+#### 基础使用
+
+```swift
+// 使用原有方法（向后兼容）
+view.showAutoHidden(text: "操作成功")
+view.showLoadingManualHidden(text: "加载中...")
+view.hideHUD()
+
+// 使用新的便捷方法
+view.st_showSuccess(title: "操作成功")
+view.st_showError(title: "操作失败", detailText: "请检查网络连接")
+view.st_showWarning(title: "警告", detailText: "此操作不可撤销")
+view.st_showInfo(title: "提示", detailText: "新功能已上线")
+view.st_showLoading(text: "加载中...")
+view.st_hideHUD()
+```
+
+#### 使用配置显示
+
+```swift
+// 使用配置结构体
+let config = STHUDConfig(
+    type: .success,
+    title: "操作成功",
+    detailText: "数据已保存",
+    location: .center,
+    autoHide: true,
+    hideDelay: 2.0,
+    theme: .light,
+    isLocalized: true
+)
+view.st_showHUD(with: config)
+
+// 直接使用 STHUD 类
+let hud = STHUD.sharedHUD
+hud.showSuccess(title: "成功", detailText: "操作完成")
+hud.showError(title: "错误", detailText: "网络连接失败")
+hud.showLoading(title: "加载中...")
+hud.hide(animated: true)
+```
+
+#### 主题配置
+
+```swift
+// 使用预设主题
+let lightTheme = STHUDTheme.light
+let darkTheme = STHUDTheme.dark
+let defaultTheme = STHUDTheme.default
+
+// 自定义主题
+let customTheme = STHUDTheme(
+    backgroundColor: UIColor.systemBlue.withAlphaComponent(0.9),
+    textColor: .white,
+    detailTextColor: .lightGray,
+    successColor: .systemGreen,
+    errorColor: .systemRed,
+    warningColor: .systemOrange,
+    infoColor: .systemBlue,
+    loadingColor: .systemBlue,
+    cornerRadius: 12,
+    shadowEnabled: true
+)
+
+// 应用主题
+STHUD.sharedHUD.applyTheme(customTheme)
+```
+
+#### 位置控制
+
+```swift
+// 顶部显示
+view.st_showAutoHidden(text: "顶部提示", location: .top)
+
+// 居中显示（默认）
+view.st_showAutoHidden(text: "居中提示", location: .center)
+
+// 底部显示
+view.st_showAutoHidden(text: "底部提示", location: .bottom)
+```
+
+#### 本地化支持
+
+```swift
+// 自动本地化（默认）
+view.st_showSuccess(title: "hud_success_title") // 会自动调用 localized
+
+// 禁用本地化
+let config = STHUDConfig(
+    title: "Success",
+    isLocalized: false
+)
+view.st_showHUD(with: config)
+```
+
+#### 自定义图标和视图
+
+```swift
+// 使用自定义图标
+let config = STHUDConfig(
+    type: .custom,
+    title: "自定义提示",
+    iconName: "custom_icon",
+    theme: .default
+)
+view.st_showHUD(with: config)
+
+// 使用自定义视图
+let customView = UIView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+customView.backgroundColor = .systemPurple
+customView.layer.cornerRadius = 25
+
+let config = STHUDConfig(
+    type: .custom,
+    title: "自定义视图",
+    customView: customView
+)
+view.st_showHUD(with: config)
+```
+
+#### 回调处理
+
+```swift
+// 设置完成回调
+STHUD.sharedHUD.hudComplection { state in
+    if state {
+        print("HUD 显示完成")
+    } else {
+        print("HUD 隐藏完成")
+    }
+}
+```
+
+#### 实际应用示例
+
+```swift
+class NetworkViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+    }
+    
+    private func setupUI() {
+        // 设置主题
+        STHUD.sharedHUD.applyTheme(.light)
+    }
+    
+    // 网络请求示例
+    func performNetworkRequest() {
+        // 显示加载中
+        view.st_showLoading(text: "正在请求...")
+        
+        // 模拟网络请求
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            // 隐藏加载
+            self.view.st_hideHUD()
+            
+            // 显示结果
+            if Bool.random() {
+                self.view.st_showSuccess(title: "请求成功", detailText: "数据加载完成")
+            } else {
+                self.view.st_showError(title: "请求失败", detailText: "网络连接异常，请重试")
+            }
+        }
+    }
+    
+    // 表单验证示例
+    func validateForm() {
+        guard !usernameTextField.text!.isEmpty else {
+            view.st_showWarning(title: "用户名不能为空")
+            return
+        }
+        
+        guard passwordTextField.text!.count >= 6 else {
+            view.st_showWarning(title: "密码长度不足", detailText: "密码至少需要6位字符")
+            return
+        }
+        
+        // 验证通过
+        view.st_showSuccess(title: "验证通过")
+    }
+    
+    // 批量操作示例
+    func performBatchOperation() {
+        let config = STHUDConfig(
+            type: .loading,
+            title: "批量处理中...",
+            detailText: "正在处理 100 条数据",
+            autoHide: false,
+            theme: .dark
+        )
+        view.st_showHUD(with: config)
+        
+        // 模拟批量处理
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            self.view.st_hideHUD()
+            
+            let successConfig = STHUDConfig(
+                type: .success,
+                title: "批量处理完成",
+                detailText: "成功处理 95 条数据，失败 5 条",
+                hideDelay: 3.0
+            )
+            self.view.st_showHUD(with: successConfig)
+        }
+    }
+}
+```
+
+#### 高级配置示例
+
+```swift
+class AdvancedHUDExample {
+    
+    func showCustomHUD() {
+        // 创建自定义配置
+        let config = STHUDConfig(
+            type: .info,
+            title: "新功能上线",
+            detailText: "我们为您带来了全新的用户体验，快来体验吧！",
+            location: .top,
+            autoHide: true,
+            hideDelay: 4.0,
+            theme: STHUDTheme(
+                backgroundColor: UIColor.systemIndigo.withAlphaComponent(0.9),
+                textColor: .white,
+                detailTextColor: .lightGray,
+                cornerRadius: 16,
+                shadowEnabled: true
+            ),
+            isLocalized: true
+        )
+        
+        // 显示 HUD
+        if let window = UIApplication.shared.windows.first {
+            window.st_showHUD(with: config)
+        }
+    }
+    
+    func showProgressHUD() {
+        let hud = STHUD.sharedHUD
+        let targetView = UIApplication.shared.windows.first!
+        
+        hud.configManualHiddenHUD(showInView: targetView)
+        hud.show(text: "上传中...", detailText: "0%")
+        
+        // 模拟进度更新
+        var progress: Float = 0
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            progress += 0.1
+            hud.progressHUD?.progress = progress
+            hud.progressHUD?.detailsLabel?.text = "\(Int(progress * 100))%"
+            
+            if progress >= 1.0 {
+                timer.invalidate()
+                hud.hide(animated: true, afterDelay: 1.0)
+            }
+        }
+    }
+}
+```
+
+### 六、STLocalizationManager
 
 `STLocalizationManager` 是一个功能强大的本地化管理器，支持多语言切换和 Storyboard 本地化。它提供了完整的国际化解决方案，包括语言切换、字符串本地化、UI 组件本地化等功能。
 
