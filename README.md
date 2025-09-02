@@ -1773,7 +1773,241 @@ class FileManagerExample {
 }
 ```
 
-### 十、STHTTPSession
+### 十、STHexColor
+
+`STHexColor` 是一个功能强大的颜色管理扩展，提供了完整的颜色创建、转换和管理功能。它支持暗黑模式、多种颜色格式、动态颜色创建等特性，同时支持代码和 Interface Builder 两种使用方式。
+
+#### 主要特性
+
+- **多种颜色创建方式**：十六进制、RGB、颜色集等
+- **完整的暗黑模式支持**：iOS 13+ 动态颜色，iOS 11+ 颜色集
+- **Interface Builder 支持**：@IBInspectable 属性，支持在 Storyboard 中设置
+- **颜色操作工具**：透明度调整、颜色混合、对比色获取等
+- **向后兼容性**：保持旧版本 API 的兼容性
+- **系统颜色预设**：常用系统颜色的暗黑模式适配
+
+#### 基础颜色创建
+
+```swift
+// 从十六进制字符串创建颜色
+let color1 = UIColor.st_color(hexString: "#FF0000")
+let color2 = UIColor.st_color(hexString: "0xFF0000")
+let color3 = UIColor.st_color(hexString: "FF0000")
+
+// 带透明度的颜色
+let colorWithAlpha = UIColor.st_color(hexString: "#FF0000", alpha: 0.5)
+
+// 从 RGB 值创建颜色
+let rgbColor = UIColor.st_color(red: 255, green: 0, blue: 0)
+let rgbColorWithAlpha = UIColor.st_color(red: 255, green: 0, blue: 0, alpha: 0.8)
+
+// 从 0-1 范围的 RGB 值创建颜色
+let normalizedColor = UIColor.st_color(red: 1.0, green: 0.0, blue: 0.0)
+```
+
+#### 暗黑模式支持
+
+```swift
+// 创建支持暗黑模式的动态颜色
+if #available(iOS 13.0, *) {
+    let dynamicColor = UIColor.st_dynamicColor(
+        lightHex: "#FFFFFF",  // 浅色模式：白色
+        darkHex: "#000000"    // 暗黑模式：黑色
+    )
+    
+    // 带透明度的动态颜色
+    let dynamicColorWithAlpha = UIColor.st_dynamicColor(
+        lightHex: "#007AFF",
+        darkHex: "#0A84FF",
+        alpha: 0.8
+    )
+}
+
+// 兼容 iOS 13 以下的动态颜色
+let compatibleColor = UIColor.st_dynamicColor(
+    lightHex: "#FFFFFF",
+    darkHex: "#000000",
+    defaultHex: "#FFFFFF"  // iOS 13 以下使用的默认颜色
+)
+
+// 从 Assets 中的颜色集创建颜色
+if #available(iOS 11.0, *) {
+    let colorSetColor = UIColor.st_color(colorSet: "PrimaryColor")
+    let colorSetColorWithAlpha = UIColor.st_color(colorSet: "PrimaryColor", alpha: 0.8)
+}
+```
+
+#### 颜色操作工具
+
+```swift
+// 调整透明度
+let originalColor = UIColor.st_color(hexString: "#FF0000")
+let transparentColor = originalColor.st_withAlpha(0.5)
+
+// 混合两个颜色
+let redColor = UIColor.st_color(hexString: "#FF0000")
+let blueColor = UIColor.st_color(hexString: "#0000FF")
+let mixedColor = redColor.st_blend(with: blueColor, ratio: 0.5)
+
+// 获取对比色（用于文字等）
+let backgroundColor = UIColor.st_color(hexString: "#FFFFFF")
+let textColor = backgroundColor.st_contrastColor() // 返回黑色
+
+// 获取颜色亮度
+let brightness = backgroundColor.st_brightness()
+```
+
+#### 系统颜色预设
+
+```swift
+if #available(iOS 13.0, *) {
+    // 系统主色调
+    let primaryColor = UIColor.st_systemPrimary
+    
+    // 系统背景色
+    let backgroundColor = UIColor.st_systemBackground
+    
+    // 系统标签色
+    let labelColor = UIColor.st_systemLabel
+    
+    // 系统次要标签色
+    let secondaryLabelColor = UIColor.st_systemSecondaryLabel
+    
+    // 系统分隔线色
+    let separatorColor = UIColor.st_systemSeparator
+}
+```
+
+#### 便捷颜色创建
+
+```swift
+// 创建随机颜色
+let randomColor = UIColor.st_random()
+let randomColorWithAlpha = UIColor.st_random(alpha: 0.8)
+
+// 从图片获取主色调
+if let image = UIImage(named: "avatar") {
+    let dominantColor = UIColor.st_dominantColor(from: image)
+}
+```
+
+#### Interface Builder 支持
+
+```swift
+// 在 Storyboard 中使用 STDynamicColorView
+class CustomViewController: UIViewController {
+    
+    @IBOutlet weak var dynamicColorView: STDynamicColorView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // 代码中也可以动态设置
+        dynamicColorView.lightHexColor = "#FFFFFF"
+        dynamicColorView.darkHexColor = "#000000"
+        dynamicColorView.colorAlpha = 0.8
+    }
+}
+```
+
+在 Interface Builder 中可以设置以下属性：
+- **Light Hex Color**：浅色模式下的十六进制颜色
+- **Dark Hex Color**：暗黑模式下的十六进制颜色  
+- **Color Alpha**：透明度值
+
+#### 动态颜色管理
+
+```swift
+// 从 JSON 文件加载颜色配置
+UIColor.st_resolvedColor(jsonString: "/path/to/colors.json")
+
+// 使用配置中的动态颜色
+let dynamicColor = UIColor.st_color(dynamicProvider: "primary")
+
+// 清理关联对象
+UIColor.st_cleanColorAssociatedObject()
+```
+
+JSON 配置文件格式：
+```json
+{
+    "primary": {
+        "light": "#007AFF",
+        "dark": "#0A84FF"
+    },
+    "background": {
+        "light": "#FFFFFF",
+        "dark": "#000000"
+    }
+}
+```
+
+#### 实际应用示例
+
+```swift
+class ThemeManager {
+    
+    // 应用主题颜色
+    static func applyTheme() {
+        if #available(iOS 13.0, *) {
+            // 使用动态颜色
+            let primaryColor = UIColor.st_dynamicColor(
+                lightHex: "#007AFF",
+                darkHex: "#0A84FF"
+            )
+            
+            let backgroundColor = UIColor.st_dynamicColor(
+                lightHex: "#F2F2F7",
+                darkHex: "#1C1C1E"
+            )
+            
+            // 应用到全局样式
+            UINavigationBar.appearance().tintColor = primaryColor
+            UINavigationBar.appearance().backgroundColor = backgroundColor
+        } else {
+            // iOS 13 以下使用静态颜色
+            let primaryColor = UIColor.st_color(hexString: "#007AFF")
+            let backgroundColor = UIColor.st_color(hexString: "#F2F2F7")
+            
+            UINavigationBar.appearance().tintColor = primaryColor
+            UINavigationBar.appearance().backgroundColor = backgroundColor
+        }
+    }
+    
+    // 创建渐变颜色
+    static func createGradientColors() -> [UIColor] {
+        let startColor = UIColor.st_color(hexString: "#FF6B6B")
+        let endColor = UIColor.st_color(hexString: "#4ECDC4")
+        
+        return [startColor, endColor]
+    }
+}
+
+// 在视图控制器中使用
+class MyViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // 设置背景色（支持暗黑模式）
+        if #available(iOS 13.0, *) {
+            view.backgroundColor = UIColor.st_dynamicColor(
+                lightHex: "#FFFFFF",
+                darkHex: "#000000"
+            )
+        } else {
+            view.backgroundColor = UIColor.st_color(hexString: "#FFFFFF")
+        }
+        
+        // 设置标签颜色
+        let titleLabel = UILabel()
+        titleLabel.textColor = UIColor.st_color(hexString: "#333333")
+        titleLabel.backgroundColor = UIColor.st_color(hexString: "#F0F0F0", alpha: 0.8)
+    }
+}
+```
+
+### 十一、STHTTPSession
 
 `STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
 
@@ -2688,6 +2922,19 @@ STAlertController.st_showCustomAlert(
 5. **兼容性**：深色模式功能需要 iOS 13+ 支持
 
 ## 更新日志
+
+### v2.1.4
+- **STHexColor.swift 全面优化**：重构颜色管理功能，新增以下特性：
+  - 增强暗黑模式支持：新增 `st_dynamicColor` 方法，支持 iOS 13+ 动态颜色创建
+  - 新增 Interface Builder 支持：`STDynamicColorView` 类支持在 Storyboard 中设置暗黑模式颜色
+  - 新增多种颜色创建方式：RGB 值创建、随机颜色、图片主色调提取等
+  - 新增颜色操作工具：透明度调整、颜色混合、对比色获取、亮度计算等
+  - 新增系统颜色预设：常用系统颜色的暗黑模式适配版本
+  - 改进向后兼容性：保持旧版本 API 的兼容性，确保现有代码正常运行
+  - 优化代码结构：使用 MARK 注释分组，提高代码可读性和维护性
+  - 完善文档注释：为所有方法添加详细的参数说明、返回值说明和使用示例
+  - 新增 JSON 配置支持：支持从配置文件动态加载颜色主题
+  - 增强错误处理：改进颜色解析的健壮性和错误处理机制
 
 ### v2.1.3
 - **STFileManager.swift 全面优化**：重构文件管理功能，新增以下特性：
