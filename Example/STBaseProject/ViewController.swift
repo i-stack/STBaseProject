@@ -80,10 +80,10 @@ extension ViewController {
 
         do {
             let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
-            let outputPath = "\(STFileManager.getLibraryCachePath())/jsonData"
-            let pathIsExist = STFileManager.fileExistAt(path: outputPath)
+            let outputPath = "\(STFileManager.st_getLibraryCachePath())/jsonData"
+            let pathIsExist = STFileManager.st_fileExistAt(path: outputPath)
             if pathIsExist.0 {
-                let path = STFileManager.create(filePath: outputPath, fileName: "json.json")
+                let path = STFileManager.st_create(filePath: outputPath, fileName: "json.json")
                 print(outputPath)
                 try jsonData.write(to: URL.init(fileURLWithPath: path), options: .atomic)
             } else {

@@ -45,9 +45,6 @@ extension STNextViewController {
     }
     
     @objc func btnClick(sender: STBtn) {
-        STLocationManager.shared.st_startUpdatingLocation { info in
-            STLog(info)
-            STLocationManager.shared.st_stopUpdatingLocation()
-        }
+        
     }
 }

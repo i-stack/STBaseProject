@@ -22,12 +22,7 @@ class STCustomWebViewController: STBaseWKViewController {
     }
     
     func configWeb() {
-        let contentController = WKUserContentController()
-        contentController.add(self, name: "reneging")
-        let config = WKWebViewConfiguration()
-        config.userContentController = contentController
-        self.configWkWebView(config: config, showProgressView: true)
-        self.loadWebInfo()
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {

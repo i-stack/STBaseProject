@@ -209,10 +209,10 @@ public class STConstants: NSObject {
     }
     
     public class func st_outputLogPath() -> String {
-        let outputPath = "\(STFileManager.getLibraryCachePath())/outputLog"
-        let pathIsExist = STFileManager.fileExistAt(path: outputPath)
+        let outputPath = "\(STFileManager.st_getLibraryCachePath())/outputLog"
+        let pathIsExist = STFileManager.st_fileExistAt(path: outputPath)
         if !pathIsExist.0 {
-            let _ = STFileManager.create(filePath: outputPath, fileName: "log.txt")
+            let _ = STFileManager.st_create(filePath: outputPath, fileName: "log.txt")
         }
         return "\(outputPath)/log.txt"
     }

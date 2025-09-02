@@ -99,7 +99,7 @@ open class STLogView: UIView {
         let userDefault = UserDefaults.standard
         userDefault.removeObject(forKey: self.outputPath)
         userDefault.synchronize()
-        STFileManager.removeItem(atPath: self.outputPath)
+        STFileManager.st_removeItem(atPath: self.outputPath)
     }
     
     @objc private func outputLogBtnClick(sender: UIButton) {
@@ -175,10 +175,10 @@ extension STLogView: UITableViewDelegate, UITableViewDataSource {
 
 extension STLogView {
     public class func st_outputLogPath() -> String {
-        let outputPath = "\(STFileManager.getLibraryCachePath())/outputLog"
-        let pathIsExist = STFileManager.fileExistAt(path: outputPath)
+        let outputPath = "\(STFileManager.st_getLibraryCachePath())/outputLog"
+        let pathIsExist = STFileManager.st_fileExistAt(path: outputPath)
         if !pathIsExist.0 {
-            let _ = STFileManager.create(filePath: outputPath, fileName: "log.txt")
+            let _ = STFileManager.st_create(filePath: outputPath, fileName: "log.txt")
         }
         return "\(outputPath)/log.txt"
     }
@@ -186,8 +186,8 @@ extension STLogView {
     public class func st_logWriteToFile() -> Void {
         let userDefault = UserDefaults.standard
         if let origintContent = userDefault.object(forKey: STLogView.st_outputLogPath()) as? String {
-            let path = STFileManager.create(filePath: "\(STFileManager.getLibraryCachePath())/outputLog", fileName: "log.txt")
-            STFileManager.writeToFile(content: origintContent, filePath: path)
+            let path = STFileManager.st_create(filePath: "\(STFileManager.st_getLibraryCachePath())/outputLog", fileName: "log.txt")
+            STFileManager.st_writeToFile(content: origintContent, filePath: path)
         }
     }
 

@@ -29,12 +29,15 @@ PODS:
     - STBaseProject/STKit/Core
   - STBaseProject/STKit/Network (2.0.0):
     - STBaseProject/STKit/Core
+  - STBaseProject/STKit/Security (2.0.0):
+    - STBaseProject/STKit/Core
   - STBaseProject/STKit/UI (2.0.0):
     - STBaseProject/STKit/Core
     - STBaseProject/STKit/Localization
 
 DEPENDENCIES:
   - STBaseProject (from `../`)
+  - STBaseProject/STKit/Security (from `../`)
 
 EXTERNAL SOURCES:
   STBaseProject:
@@ -43,6 +46,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   STBaseProject: 357389945affca5256ae1f516841fe42915a4e1d
 
-PODFILE CHECKSUM: 336b695c5a437ca874c6e31a6713e94effe71e36
+PODFILE CHECKSUM: a8e7c94ed6f85a4ca588c4d5df099c3a629cf23f
 
 COCOAPODS: 1.16.2
