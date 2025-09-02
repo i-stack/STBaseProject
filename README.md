@@ -348,7 +348,347 @@ STAlertController.st_showCustomAlert(
 )
 ```
 
-### 三、STLocalizationManager
+### 三、STTabBarItem
+
+`STTabBarItem` 是一个功能强大的自定义 TabBarItem 类，支持本地化、徽章、多种配置选项。它提供了灵活的配置方式和丰富的功能特性。
+
+#### 主要特性
+
+- **本地化支持**：支持多语言切换和动态更新
+- **配置模型**：使用 `STTabBarItemConfig` 进行统一配置
+- **徽章功能**：支持设置和清除徽章
+- **批量创建**：支持批量创建多个 TabBarItem
+- **错误处理**：完善的错误处理和日志记录
+- **向后兼容**：保持与原有 API 的兼容性
+
+#### 基础使用
+
+```swift
+// 使用原有方法（向后兼容）
+let tabBarItem = STTabBarItem.st_setTabBarItem(
+    title: "首页",
+    titleSize: 12,
+    titleFontName: "PingFangSC-Regular",
+    normalImage: "home_normal",
+    selectedImage: "home_selected",
+    normalTitleColor: .systemGray,
+    selectedTitleColor: .systemBlue,
+    backgroundColor: .clear
+)
+
+// 使用配置模型（推荐）
+let config = STTabBarItemConfig(
+    title: "消息",
+    titleSize: 14,
+    titleFontName: "PingFangSC-Medium",
+    normalImage: "message_normal",
+    selectedImage: "message_selected",
+    normalTitleColor: .systemGray,
+    selectedTitleColor: .systemRed,
+    backgroundColor: .clear,
+    badgeValue: "99+",
+    badgeColor: .systemRed,
+    isLocalized: true
+)
+let tabBarItem = STTabBarItem.st_createTabBarItem(with: config)
+```
+
+#### 本地化支持
+
+```swift
+// 创建带本地化的 TabBarItem
+let localizedItem = STTabBarItem.st_createLocalizedTabBarItem(
+    localizedTitle: "tab_home", // 本地化键
+    normalImage: "home_normal",
+    selectedImage: "home_selected",
+    normalColor: .systemGray,
+    selectedColor: .systemBlue
+)
+
+// 动态更新本地化标题
+STTabBarItem.st_updateLocalizedTitle(for: tabBarItem, localizedTitle: "tab_updated")
+```
+
+#### 批量创建
+
+```swift
+let configs = [
+    STTabBarItemConfig(
+        title: "tab_home",
+        normalImage: "home_normal",
+        selectedImage: "home_selected",
+        isLocalized: true
+    ),
+    STTabBarItemConfig(
+        title: "tab_message",
+        normalImage: "message_normal",
+        selectedImage: "message_selected",
+        badgeValue: "5",
+        isLocalized: true
+    ),
+    STTabBarItemConfig(
+        title: "tab_profile",
+        normalImage: "profile_normal",
+        selectedImage: "profile_selected",
+        isLocalized: true
+    )
+]
+let tabBarItems = STTabBarItem.st_createTabBarItems(with: configs)
+```
+
+#### UITabBarItem 扩展
+
+```swift
+// 设置徽章
+tabBarItem.st_setBadge(value: "新", color: .systemOrange)
+
+// 清除徽章
+tabBarItem.st_clearBadge()
+
+// 更新图片
+tabBarItem.st_setCustomImages(normalImageName: "new_normal", selectedImageName: "new_selected")
+
+// 使用 UIImage 对象设置图片
+tabBarItem.st_setCustomImages(normalImage: normalImage, selectedImage: selectedImage)
+```
+
+#### 在 TabBarController 中使用
+
+```swift
+func setupTabBarController() -> UITabBarController {
+    let tabBarController = UITabBarController()
+    
+    // 创建视图控制器
+    let homeVC = UIViewController()
+    let messageVC = UIViewController()
+    let profileVC = UIViewController()
+    
+    // 设置 TabBarItems
+    homeVC.tabBarItem = STTabBarItem.st_createLocalizedTabBarItem(
+        localizedTitle: "tab_home",
+        normalImage: "home_normal",
+        selectedImage: "home_selected"
+    )
+    
+    messageVC.tabBarItem = STTabBarItem.st_createTabBarItem(with: STTabBarItemConfig(
+        title: "tab_message",
+        normalImage: "message_normal",
+        selectedImage: "message_selected",
+        badgeValue: "99+",
+        isLocalized: true
+    ))
+    
+    profileVC.tabBarItem = STTabBarItem.st_createLocalizedTabBarItem(
+        localizedTitle: "tab_profile",
+        normalImage: "profile_normal",
+        selectedImage: "profile_selected"
+    )
+    
+    // 设置视图控制器
+    tabBarController.viewControllers = [homeVC, messageVC, profileVC]
+    
+    return tabBarController
+}
+```
+
+### 四、STView (UIView 扩展)
+
+`STView` 提供了丰富的 UIView 扩展功能，包括圆角设置、阴影效果、渐变背景、动画效果、约束布局等。它大大简化了常见的 UI 操作，提高了开发效率。
+
+#### 主要特性
+
+- **圆角设置**：支持自定义圆角和统一圆角设置
+- **阴影效果**：灵活的阴影配置选项
+- **渐变背景**：支持多种渐变效果
+- **动画效果**：淡入淡出、缩放、弹性、震动等动画
+- **约束布局**：便捷的 AutoLayout 辅助方法
+- **视图控制器查找**：快速获取当前视图控制器
+- **便捷工具**：截图、样式清除等实用功能
+
+#### 圆角设置
+
+```swift
+// 设置统一圆角
+view.st_setCornerRadius(10)
+
+// 设置圆角和边框
+view.st_setCornerRadius(10, borderWidth: 1, borderColor: .systemBlue)
+
+// 设置自定义圆角
+view.st_setCustomCorners(topLeft: 10, topRight: 5, bottomLeft: 5, bottomRight: 10)
+
+// 使用配置结构
+let cornerRadius = STCornerRadius(all: 8)
+view.st_setCustomCorners(cornerRadius)
+```
+
+#### 阴影效果
+
+```swift
+// 基础阴影设置
+view.st_setShadow()
+
+// 自定义阴影
+view.st_setShadow(color: .black, offset: CGSize(width: 0, height: 4), radius: 8, opacity: 0.5)
+
+// 使用配置结构
+let shadowConfig = STShadowConfig(color: .systemBlue, offset: CGSize(width: 2, height: 2), radius: 6, opacity: 0.4)
+view.st_setShadow(shadowConfig)
+
+// 清除阴影
+view.st_clearShadow()
+```
+
+#### 渐变背景
+
+```swift
+// 基础渐变
+view.st_setGradientBackground(colors: [.systemBlue, .systemPurple])
+
+// 自定义渐变
+view.st_setGradientBackground(
+    colors: [.red, .orange, .yellow],
+    startPoint: CGPoint(x: 0, y: 0),
+    endPoint: CGPoint(x: 1, y: 1)
+)
+
+// 使用配置结构
+let gradientConfig = STGradientConfig(
+    colors: [.systemBlue, .systemTeal],
+    startPoint: CGPoint(x: 0, y: 0),
+    endPoint: CGPoint(x: 1, y: 0)
+)
+view.st_setGradientBackground(gradientConfig)
+
+// 清除渐变
+view.st_clearGradientBackground()
+```
+
+#### 动画效果
+
+```swift
+// 淡入动画
+view.st_fadeIn(duration: 0.5) {
+    print("淡入完成")
+}
+
+// 淡出动画
+view.st_fadeOut(duration: 0.3) {
+    print("淡出完成")
+}
+
+// 缩放动画
+view.st_scaleAnimation(scale: 1.2, duration: 0.3)
+
+// 弹性动画
+view.st_springAnimation(scale: 1.1, duration: 0.6) {
+    print("弹性动画完成")
+}
+
+// 震动动画
+view.st_shakeAnimation(intensity: 15, duration: 0.5)
+```
+
+#### 约束和布局
+
+```swift
+// 添加子视图并设置边距
+let subview = UIView()
+parentView.st_addSubview(subview, withInsets: UIEdgeInsets(top: 10, left: 20, bottom: 10, right: 20))
+
+// 居中添加子视图
+parentView.st_addSubviewCentered(subview, size: CGSize(width: 100, height: 100))
+
+// 设置固定尺寸
+view.st_setSize(CGSize(width: 200, height: 100))
+
+// 设置宽高比
+view.st_setAspectRatio(16.0/9.0) // 16:9 比例
+```
+
+#### 视图控制器查找
+
+```swift
+// 获取当前视图控制器
+if let currentVC = view.st_currentViewController() {
+    print("当前视图控制器: \(currentVC)")
+}
+
+// 获取关键窗口
+if let keyWindow = view.st_keyWindow() {
+    print("关键窗口: \(keyWindow)")
+}
+```
+
+#### 便捷工具方法
+
+```swift
+// 截图
+if let screenshot = view.st_screenshot() {
+    // 使用截图
+}
+
+// 移除所有子视图
+view.st_removeAllSubviews()
+
+// 设置十六进制背景色
+view.st_setBackgroundColor(hex: "#FF6B6B")
+
+// 设置边框
+view.st_setBorder(width: 2, color: .systemBlue)
+
+// 清除所有样式
+view.st_clearAllStyles()
+```
+
+#### 实际应用示例
+
+```swift
+class CustomView: UIView {
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        setupView()
+    }
+    
+    private func setupView() {
+        // 设置圆角和阴影
+        st_setCornerRadius(12)
+        st_setShadow(color: .black, offset: CGSize(width: 0, height: 2), radius: 8, opacity: 0.1)
+        
+        // 设置渐变背景
+        st_setGradientBackground(colors: [.systemBlue, .systemPurple])
+        
+        // 添加内容视图
+        let contentView = UIView()
+        st_addSubview(contentView, withInsets: UIEdgeInsets(top: 16, left: 16, bottom: 16, right: 16))
+        contentView.backgroundColor = .white
+        contentView.st_setCornerRadius(8)
+    }
+    
+    func showWithAnimation() {
+        alpha = 0
+        transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        
+        st_fadeIn(duration: 0.3) {
+            self.st_springAnimation(scale: 1.0, duration: 0.4)
+        }
+    }
+    
+    func hideWithAnimation() {
+        st_fadeOut(duration: 0.2) {
+            self.removeFromSuperview()
+        }
+    }
+}
+```
+
+### 五、STLocalizationManager
 
 `STLocalizationManager` 是一个功能强大的本地化管理器，支持多语言切换和 Storyboard 本地化。它提供了完整的国际化解决方案，包括语言切换、字符串本地化、UI 组件本地化等功能。
 
@@ -2251,7 +2591,1210 @@ let dict = data.st_toDictionary()
 let jsonString = dict.st_toJSONString()
 ```
 
-### 十二、STHTTPSession
+### 十二、STPredicateCheck
+
+`STPredicateCheck` 是一个功能强大的字符串验证工具类，提供了完整的正则表达式验证功能。它支持多种验证类型，包括密码、用户名、联系方式、数字、字符等，同时提供了便捷的 String 扩展方法。
+
+#### 主要特性
+
+- **多种验证类型**：密码、用户名、联系方式、数字、字符、网络地址、时间等
+- **正则表达式常量**：预定义常用正则表达式模式，便于维护和复用
+- **密码强度检测**：支持密码强度评估和描述
+- **组合验证**：支持表单数据的批量验证
+- **String 扩展**：为 String 类型提供便捷的验证属性
+- **代码结构优化**：使用 MARK 注释分组，提高代码可读性
+
+#### 正则表达式常量
+
+```swift
+// 使用预定义的正则表达式模式
+let emailPattern = STRegexPattern.email
+let phonePattern = STRegexPattern.phoneNumber
+let idCardPattern = STRegexPattern.idCard
+let strongPasswordPattern = STRegexPattern.strongPassword
+```
+
+#### 密码验证
+
+```swift
+// 基础密码验证
+let hasCapital = STPredicateCheck.st_checkCapitalPassword(password: "MyPassword123")
+let hasLowercase = STPredicateCheck.st_checkLowercasePassword(password: "MyPassword123")
+let hasNumber = STPredicateCheck.st_checkNumberPassword(password: "MyPassword123")
+let hasSpecialChar = STPredicateCheck.st_checkSpecialCharPassword(password: "MyPassword123")
+
+// 密码强度验证
+let strongPassword = STPredicateCheck.st_checkStrongPassword(password: "MyPassword123!")
+let mediumPassword = STPredicateCheck.st_checkMediumPassword(password: "MyPassword123")
+let weakPassword = STPredicateCheck.st_checkWeakPassword(password: "MyPass123")
+
+// 密码强度评估
+let strength = STPredicateCheck.st_checkPasswordStrength(password: "MyPassword123!")
+let description = STPredicateCheck.st_getPasswordStrengthDescription(password: "MyPassword123!")
+// 返回：强度等级（0-5）和描述（很弱、弱、中等、强、很强）
+```
+
+#### 用户名验证
+
+```swift
+// 基础用户名验证
+let isValidUsername = STPredicateCheck.st_checkUserName(userName: "张三123")
+
+// 包含空格的用户名验证
+let isValidUsernameWithSpace = STPredicateCheck.st_checkUserName(
+    userName: "张三 123", 
+    hasSpace: true
+)
+```
+
+#### 联系方式验证
+
+```swift
+// 邮箱验证
+let isValidEmail = STPredicateCheck.st_checkEmail(email: "user@example.com")
+
+// 手机号验证（中国大陆）
+let isValidPhone = STPredicateCheck.st_checkPhoneNum(phoneNum: "13800138000")
+
+// 身份证号验证（中国大陆）
+let isValidIdCard = STPredicateCheck.st_checkIdCard(idCard: "110101199001011234")
+
+// 邮政编码验证
+let isValidPostalCode = STPredicateCheck.st_checkPostalCode(postalCode: "100000")
+
+// 银行卡号验证
+let isValidBankCard = STPredicateCheck.st_checkBankCard(bankCard: "6222021234567890123")
+
+// 信用卡号验证
+let isValidCreditCard = STPredicateCheck.st_checkCreditCard(creditCard: "4000123456789012")
+```
+
+#### 数字验证
+
+```swift
+// 基础数字验证
+let isDigits = STPredicateCheck.st_checkIsDigit(text: "12345")
+let isInteger = STPredicateCheck.st_checkIsInteger(text: "-123")
+let isPositiveInteger = STPredicateCheck.st_checkIsPositiveInteger(text: "123")
+let isNonNegativeInteger = STPredicateCheck.st_checkIsNonNegativeInteger(text: "0")
+let isFloat = STPredicateCheck.st_checkIsFloat(text: "123.45")
+let isPositiveFloat = STPredicateCheck.st_checkIsPositiveFloat(text: "123.45")
+```
+
+#### 字符验证
+
+```swift
+// 中文字符验证
+let isChinese = STPredicateCheck.st_checkChinaChar(text: "中文")
+
+// 英文字母验证
+let isEnglish = STPredicateCheck.st_checkEnglishLetters(text: "English")
+let isUppercase = STPredicateCheck.st_checkUppercaseLetters(text: "ABC")
+let isLowercase = STPredicateCheck.st_checkLowercaseLetters(text: "abc")
+
+// 字母数字组合验证
+let isAlphanumeric = STPredicateCheck.st_checkAlphanumeric(text: "ABC123")
+
+// 标点符号验证
+let isPunctuation = STPredicateCheck.st_checkPunctuation(text: "!@#$%")
+
+// 中英文数字标点符号验证
+let isNormalWithPunctuation = STPredicateCheck.st_normalWithPunctuation(text: "中文ABC123!@#")
+```
+
+#### 网络相关验证
+
+```swift
+// URL 验证
+let isValidURL = STPredicateCheck.st_checkURL(url: "https://www.example.com")
+
+// IP 地址验证
+let isValidIPv4 = STPredicateCheck.st_checkIPv4(ip: "192.168.1.1")
+let isValidIPv6 = STPredicateCheck.st_checkIPv6(ip: "2001:0db8:85a3:0000:0000:8a2e:0370:7334")
+```
+
+#### 时间相关验证
+
+```swift
+// 日期格式验证
+let isValidDate = STPredicateCheck.st_checkDate(date: "2023-12-25")
+
+// 时间格式验证
+let isValidTime = STPredicateCheck.st_checkTime(time: "14:30:00")
+
+// 日期时间格式验证
+let isValidDateTime = STPredicateCheck.st_checkDateTime(dateTime: "2023-12-25 14:30:00")
+```
+
+#### 长度验证
+
+```swift
+// 长度范围验证
+let isValidLength = STPredicateCheck.st_checkLength(text: "Hello", minLength: 3, maxLength: 10)
+
+// 最小长度验证
+let hasMinLength = STPredicateCheck.st_checkMinLength(text: "Hello", minLength: 3)
+
+// 最大长度验证
+let hasMaxLength = STPredicateCheck.st_checkMaxLength(text: "Hello", maxLength: 10)
+```
+
+#### 组合验证
+
+```swift
+// 表单数据验证
+let formResult = STPredicateCheck.st_validateForm(
+    email: "user@example.com",
+    phone: "13800138000",
+    password: "MyPassword123"
+)
+
+if formResult.isValid {
+    print("表单验证通过")
+} else {
+    print("表单验证失败：\(formResult.errors)")
+}
+```
+
+#### String 扩展
+
+```swift
+let email = "user@example.com"
+let phone = "13800138000"
+let password = "MyPassword123"
+
+// 使用便捷属性验证
+if email.st_isValidEmail {
+    print("邮箱格式正确")
+}
+
+if phone.st_isValidPhone {
+    print("手机号格式正确")
+}
+
+if password.st_isValidPassword {
+    print("密码格式正确")
+}
+
+// 密码强度
+let strength = password.st_passwordStrength
+let description = password.st_passwordStrengthDescription
+print("密码强度：\(strength)，描述：\(description)")
+
+// 其他验证
+let text = "Hello123"
+if text.st_isAlphanumeric {
+    print("文本包含字母和数字")
+}
+
+let chineseText = "中文"
+if chineseText.st_isChinese {
+    print("文本为中文字符")
+}
+```
+
+#### 实际应用示例
+
+```swift
+class FormValidator {
+    
+    // 验证用户注册表单
+    static func validateRegistrationForm(
+        username: String,
+        email: String,
+        phone: String,
+        password: String,
+        confirmPassword: String
+    ) -> (isValid: Bool, errors: [String]) {
+        var errors: [String] = []
+        
+        // 用户名验证
+        if !STPredicateCheck.st_checkUserName(userName: username) {
+            errors.append("用户名格式不正确（1-32位中英文数字）")
+        }
+        
+        // 邮箱验证
+        if !STPredicateCheck.st_checkEmail(email: email) {
+            errors.append("邮箱格式不正确")
+        }
+        
+        // 手机号验证
+        if !STPredicateCheck.st_checkPhoneNum(phoneNum: phone) {
+            errors.append("手机号格式不正确")
+        }
+        
+        // 密码验证
+        if !STPredicateCheck.st_checkPassword(password: password) {
+            errors.append("密码格式不正确（8-32位，包含大小写字母和数字）")
+        }
+        
+        // 密码确认
+        if password != confirmPassword {
+            errors.append("两次输入的密码不一致")
+        }
+        
+        return (errors.isEmpty, errors)
+    }
+    
+    // 验证密码强度
+    static func validatePasswordStrength(_ password: String) -> String {
+        let strength = STPredicateCheck.st_checkPasswordStrength(password: password)
+        let description = STPredicateCheck.st_getPasswordStrengthDescription(password: password)
+        
+        switch strength {
+        case 0, 1:
+            return "密码强度过低，建议包含大小写字母、数字和特殊字符"
+        case 2:
+            return "密码强度较低，建议增加字符类型"
+        case 3:
+            return "密码强度中等，可以考虑增加特殊字符"
+        case 4:
+            return "密码强度良好"
+        case 5:
+            return "密码强度很强"
+        default:
+            return "密码强度未知"
+        }
+    }
+    
+    // 验证网络配置
+    static func validateNetworkConfig(
+        serverURL: String,
+        ipAddress: String
+    ) -> (isValid: Bool, errors: [String]) {
+        var errors: [String] = []
+        
+        if !STPredicateCheck.st_checkURL(url: serverURL) {
+            errors.append("服务器URL格式不正确")
+        }
+        
+        if !STPredicateCheck.st_checkIPv4(ip: ipAddress) && 
+           !STPredicateCheck.st_checkIPv6(ip: ipAddress) {
+            errors.append("IP地址格式不正确")
+        }
+        
+        return (errors.isEmpty, errors)
+    }
+}
+
+// 在视图控制器中使用
+class RegistrationViewController: UIViewController {
+    
+    @IBOutlet weak var usernameTextField: UITextField!
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var phoneTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
+    @IBOutlet weak var confirmPasswordTextField: UITextField!
+    
+    @IBAction func registerButtonTapped(_ sender: UIButton) {
+        let result = FormValidator.validateRegistrationForm(
+            username: usernameTextField.text ?? "",
+            email: emailTextField.text ?? "",
+            phone: phoneTextField.text ?? "",
+            password: passwordTextField.text ?? "",
+            confirmPassword: confirmPasswordTextField.text ?? ""
+        )
+        
+        if result.isValid {
+            // 注册逻辑
+            print("表单验证通过，开始注册")
+        } else {
+            // 显示错误信息
+            let errorMessage = result.errors.joined(separator: "\n")
+            showAlert(title: "验证失败", message: errorMessage)
+        }
+    }
+    
+    // 实时密码强度检测
+    @IBAction func passwordChanged(_ sender: UITextField) {
+        guard let password = sender.text else { return }
+        
+        let strengthDescription = FormValidator.validatePasswordStrength(password)
+        updatePasswordStrengthIndicator(strengthDescription)
+    }
+}
+```
+
+### 十三、STString
+
+`STString` 是一个功能强大的字符串处理工具类，提供了丰富的字符串操作、类型转换、格式化、URL 处理等功能。它通过 String 扩展的方式提供便捷的字符串处理方法。
+
+#### 主要特性
+
+- **类型转换**：支持任意对象到字符串的转换，包括 STJSONValue 类型
+- **数字格式化**：支持金额、百分比、文件大小等格式化
+- **URL 处理**：支持 URL 参数提取、添加、移除等操作
+- **掩码处理**：支持手机号、邮箱、身份证号等敏感信息掩码
+- **命名转换**：支持驼峰命名、蛇形命名等转换
+- **工具方法**：提供随机字符串生成、剪贴板操作等实用功能
+- **编码转换**：编码转换功能已迁移到 STData.swift 中，提供更专业的实现
+
+#### 类型转换
+
+```swift
+// 基础类型转换
+let number = String.st_returnStr(object: 123)           // "123"
+let bool = String.st_returnStr(object: true)            // "1"
+let string = String.st_returnStr(object: "Hello")       // "Hello"
+
+// STJSONValue 转换
+let jsonValue = STJSONValue.string("World")
+let result = String.st_returnStr(object: jsonValue)     // "World"
+
+// 复杂类型转换
+let array = [1, 2, 3]
+let arrayString = String.st_returnStr(object: array)    // "1,2,3"
+
+let dict = ["name": "张三", "age": 25]
+let dictString = String.st_returnStr(object: dict)      // "{name: 张三, age: 25}"
+```
+
+#### 模型转换
+
+```swift
+// 将模型转换为参数字典
+struct User {
+    let name: String
+    let age: Int
+    let email: String
+}
+
+let user = User(name: "张三", age: 25, email: "zhangsan@example.com")
+let params = String.st_convertModelToParams(user)
+// 结果: ["name": "张三", "age": "25", "email": "zhangsan@example.com"]
+
+// 将参数字典转换为 URL 编码的 Data
+let data = String.st_convertDictToURLEncoded(params: params)
+```
+
+#### 尺寸计算
+
+```swift
+let text = "Hello World"
+let font = UIFont.systemFont(ofSize: 16)
+
+// 计算字符串宽度
+let width = text.st_returnStrWidth(font: font)
+
+// 计算字符串高度
+let height = text.st_calculateHeight(font: font, maxWidth: 200)
+```
+
+#### 数字格式化
+
+```swift
+let amount = "1234567.89"
+
+// 金额格式化（添加千分位分隔符）
+let formattedAmount = amount.st_divideAmount()          // "1,234,567.89"
+
+// 转换为 Double
+let doubleValue = amount.st_stringToDouble()            // 1234567.89
+
+// 转换为 Int
+let intValue = "123".st_stringToInt()                   // 123
+
+// 货币格式
+let currency = "100".st_convertToCurrency(style: .currency)  // "$100.00"
+
+// 百分比格式
+let percentage = "75.5".st_convertToPercentage()        // "75.50%"
+
+// 文件大小格式
+let fileSize = "1048576".st_formatFileSize()            // "1 MB"
+```
+
+#### URL 处理
+
+```swift
+let urlString = "https://www.example.com/path?param1=value1&param2=value2"
+
+// 提取 URL 参数
+let parameters = urlString.st_parameterWithURL()
+// 结果: ["param1": "value1", "param2": "value2"]
+
+// 添加参数
+let newURL = urlString.st_appendParametersToURLUsingComponents(
+    parameters: ["param3": "value3"]
+)
+// 结果: "https://www.example.com/path?param1=value1&param2=value2&param3=value3"
+
+// 移除参数
+let cleanedURL = urlString.st_removeParametersFromURL(parameterNames: ["param1"])
+// 结果: "https://www.example.com/path?param2=value2"
+
+// URL 验证
+let isValid = urlString.st_isValidURL()                 // true
+
+// 获取域名
+let domain = urlString.st_getDomainFromURL()            // "www.example.com"
+
+// 获取路径
+let path = urlString.st_getPathFromURL()                // "/path"
+```
+
+#### 掩码处理
+
+```swift
+let phone = "13800138000"
+let email = "user@example.com"
+let idCard = "110101199001011234"
+
+// 手机号掩码
+let maskedPhone = phone.st_maskPhoneNumber(start: 3, end: 7)  // "138****8000"
+
+// 邮箱掩码
+let maskedEmail = email.st_maskEmail()                  // "u***r@example.com"
+
+// 身份证号掩码
+let maskedIdCard = idCard.st_maskIdCard()               // "1101**********1234"
+```
+
+#### 编码转换
+
+```swift
+let text = "Hello World"
+
+// 转换为 Data
+let data = text.st_toData()                            // Data 对象
+
+// Base64 编码（在 STData.swift 中实现）
+let base64 = text.st_toBase64()                        // "SGVsbG8gV29ybGQ="
+
+// Base64 解码
+let decoded = base64.st_fromBase64()                   // "Hello World"
+
+// URL 安全的 Base64 编码
+let urlSafeBase64 = text.st_toBase64URLSafe()          // "SGVsbG8gV29ybGQ"
+
+// 十六进制编码
+let hex = text.st_toHex()                              // "48656c6c6f20576f726c64"
+
+// 验证编码格式
+let isValidBase64 = base64.st_isValidBase64()          // true
+let isValidHex = hex.st_isValidHex()                   // true
+```
+
+#### 字符串处理
+
+```swift
+let text = "  Hello World  "
+
+// 移除首尾空白
+let trimmed = text.st_trim()                           // "Hello World"
+
+// 移除所有空白
+let noSpaces = text.st_removeAllWhitespaces()          // "HelloWorld"
+
+// 首字母大写
+let capitalized = "hello world".st_capitalizeFirstLetter()  // "Hello world"
+
+// 首字母小写
+let lowercased = "Hello World".st_lowercaseFirstLetter()    // "hello World"
+
+// 驼峰命名转换
+let camelCase = "hello world".st_toCamelCase()         // "helloWorld"
+
+// 蛇形命名转换
+let snakeCase = "helloWorld".st_toSnakeCase()          // "hello_world"
+```
+
+#### 工具方法
+
+```swift
+// 生成随机字符串
+let random1 = String.st_generateRandomString()         // 6-10位随机字符串
+let random2 = String.st_generateRandomString(length: 8) // 8位随机字符串
+let random3 = String.st_generateRandomString(
+    length: 12,
+    includeNumbers: true,
+    includeUppercase: true,
+    includeLowercase: true,
+    includeSymbols: true
+)                                                      // 12位包含特殊符号的随机字符串
+
+// 剪贴板操作
+"Hello World".st_copyToPasteboard()                   // 复制到剪贴板
+"".st_copyToPasteboard(pasteboardString: "Test")      // 复制指定字符串到剪贴板
+```
+
+#### 实际应用示例
+
+```swift
+class StringUtils {
+    
+    // 格式化用户信息显示
+    static func formatUserInfo(_ user: User) -> String {
+        let name = String.st_returnStr(object: user.name)
+        let age = String.st_returnStr(object: user.age)
+        let email = user.email.st_maskEmail()
+        
+        return "姓名: \(name), 年龄: \(age), 邮箱: \(email)"
+    }
+    
+    // 生成 API 请求参数
+    static func generateAPIParams(from model: Any) -> Data {
+        let params = String.st_convertModelToParams(model)
+        return String.st_convertDictToURLEncoded(params: params)
+    }
+    
+    // 格式化文件大小显示
+    static func formatFileSize(_ bytes: String) -> String {
+        return bytes.st_formatFileSize()
+    }
+    
+    // 验证和格式化 URL
+    static func processURL(_ urlString: String) -> String? {
+        guard urlString.st_isValidURL() else { return nil }
+        
+        // 移除敏感参数
+        return urlString.st_removeParametersFromURL(parameterNames: ["token", "key"])
+    }
+    
+    // 生成安全的随机密码
+    static func generateSecurePassword() -> String {
+        return String.st_generateRandomString(
+            length: 12,
+            includeNumbers: true,
+            includeUppercase: true,
+            includeLowercase: true,
+            includeSymbols: true
+        )
+    }
+}
+
+// 在视图控制器中使用
+class ProfileViewController: UIViewController {
+    
+    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var emailLabel: UILabel!
+    @IBOutlet weak var phoneLabel: UILabel!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUserInfo()
+    }
+    
+    private func setupUserInfo() {
+        let user = getCurrentUser()
+        
+        // 格式化显示
+        nameLabel.text = String.st_returnStr(object: user.name)
+        emailLabel.text = user.email.st_maskEmail()
+        phoneLabel.text = user.phone.st_maskPhoneNumber(start: 3, end: 7)
+    }
+    
+    @IBAction func shareButtonTapped(_ sender: UIButton) {
+        let userInfo = StringUtils.formatUserInfo(getCurrentUser())
+        userInfo.st_copyToPasteboard()
+        showAlert(title: "已复制", message: "用户信息已复制到剪贴板")
+    }
+}
+```
+
+### 十四、STData
+
+`STData` 是一个功能强大的数据处理工具类，提供了丰富的数据转换、编码解码、哈希计算、文件操作等功能。它通过 Data 扩展的方式提供便捷的数据处理方法。
+
+#### 主要特性
+
+- **字符串转换**：支持 Data 与 String 之间的双向转换
+- **十六进制操作**：支持十六进制字符串的编码解码
+- **Base64 操作**：支持标准 Base64 和 URL 安全的 Base64 编码解码
+- **哈希计算**：支持 MD5、SHA1、SHA256、SHA512 等哈希算法
+- **文件操作**：支持数据的文件读写操作
+- **数据压缩**：支持 LZFSE 压缩算法
+- **数据验证**：提供数据有效性检查功能
+- **编码转换**：为 String 提供便捷的编码转换扩展
+
+#### 字符串转换
+
+```swift
+let data = "Hello World".data(using: .utf8)!
+
+// 转换为字符串
+let string = data.toString()                              // "Hello World"
+let utf8String = data.toStringUTF8()                      // "Hello World"
+
+// 追加字符串到 Data
+var mutableData = Data()
+mutableData.append("Hello", encoding: .utf8)
+mutableData.append(" World", encoding: .utf8)
+```
+
+#### 十六进制操作
+
+```swift
+let data = "Hello".data(using: .utf8)!
+
+// 转换为十六进制字符串
+let hex = data.toHexString()                              // "48656c6c6f"
+let upperHex = data.toHexString(uppercase: true)          // "48656C6C6F"
+
+// 从十六进制字符串创建 Data
+let hexData = Data.fromHexString("48656c6c6f")            // Data 对象
+```
+
+#### Base64 操作
+
+```swift
+let data = "Hello World".data(using: .utf8)!
+
+// 标准 Base64 编码
+let base64 = data.toBase64String()                        // "SGVsbG8gV29ybGQ="
+
+// URL 安全的 Base64 编码
+let urlSafeBase64 = data.toBase64URLSafeString()          // "SGVsbG8gV29ybGQ"
+
+// 从 Base64 字符串创建 Data
+let decodedData = Data.fromBase64String("SGVsbG8gV29ybGQ=")
+let urlSafeDecodedData = Data.fromBase64URLSafeString("SGVsbG8gV29ybGQ")
+```
+
+#### 哈希计算
+
+```swift
+let data = "Hello World".data(using: .utf8)!
+
+// 各种哈希算法
+let md5 = data.md5()                                      // "b10a8db164e0754105b7a99be72e3fe5"
+let sha1 = data.sha1()                                    // "0a0a9f2a6772942557ab5355d76af442f8f65e01"
+let sha256 = data.sha256()                                // "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b277d9ad9f146e"
+let sha512 = data.sha512()                                // "2c74fd17edafd80e8447b0d46741ee243b7eb74dd2149a0ab1b9246fb30382f27e853d8585719e0e67cbda0daa8f51671064615d645ae27acb15bfb1447f459b"
+```
+
+#### 文件操作
+
+```swift
+let data = "Hello World".data(using: .utf8)!
+let url = URL(fileURLWithPath: "/path/to/file.txt")
+
+// 写入文件
+let success = data.writeToFile(at: url)
+
+// 从文件读取
+let fileData = Data.fromFile(at: url)
+let pathData = Data.fromFile(path: "/path/to/file.txt")
+```
+
+#### 数据大小
+
+```swift
+let data = Data(count: 1024 * 1024) // 1MB
+
+// 获取数据大小
+let bytes = data.sizeInBytes                              // 1048576
+let kb = data.sizeInKB                                    // 1024.0
+let mb = data.sizeInMB                                    // 1.0
+let gb = data.sizeInGB                                    // 0.0009765625
+
+// 格式化大小字符串
+let formatted = data.formattedSize()                      // "1.0 MB"
+```
+
+#### 数据压缩
+
+```swift
+let originalData = "Hello World".data(using: .utf8)!
+
+// 压缩数据
+if let compressedData = originalData.compressed() {
+    print("压缩后大小: \(compressedData.count)")
+    
+    // 解压数据
+    if let decompressedData = compressedData.decompressed(expectedSize: originalData.count) {
+        print("解压成功: \(String(data: decompressedData, encoding: .utf8)!)")
+    }
+}
+```
+
+#### 数据验证
+
+```swift
+let data = "Hello World".data(using: .utf8)!
+
+// 数据验证
+let isEmpty = data.isEmpty                                // false
+let isValidUTF8 = data.isValidUTF8                        // true
+let isValidJSON = data.isValidJSON                        // false
+```
+
+#### 数据操作
+
+```swift
+let data = "Hello World".data(using: .utf8)!
+
+// 截取子数据
+let subData = data.subdata(from: 6, length: 5)            // "World"
+
+// 分割数据
+let chunks = data.chunked(into: 3)                        // [Data, Data, Data, Data]
+```
+
+#### String 编码转换扩展
+
+```swift
+let text = "Hello World"
+
+// Base64 编码解码
+let base64 = text.st_toBase64()                           // "SGVsbG8gV29ybGQ="
+let decoded = base64.st_fromBase64()                      // "Hello World"
+
+// URL 安全的 Base64
+let urlSafeBase64 = text.st_toBase64URLSafe()             // "SGVsbG8gV29ybGQ"
+let urlSafeDecoded = urlSafeBase64.st_fromBase64URLSafe() // "Hello World"
+
+// 十六进制编码解码
+let hex = text.st_toHex()                                 // "48656c6c6f20576f726c64"
+let hexDecoded = hex.st_fromHex()                         // "Hello World"
+
+// 验证编码格式
+let isValidBase64 = base64.st_isValidBase64()             // true
+let isValidHex = hex.st_isValidHex()                      // true
+```
+
+#### 实际应用示例
+
+```swift
+class DataUtils {
+    
+    // 安全的文件传输
+    static func secureFileTransfer(data: Data, to url: URL) -> Bool {
+        // 计算校验和
+        let checksum = data.sha256()
+        
+        // 压缩数据
+        guard let compressedData = data.compressed() else { return false }
+        
+        // 写入文件
+        guard compressedData.writeToFile(at: url) else { return false }
+        
+        // 保存校验和
+        let checksumURL = url.appendingPathExtension("checksum")
+        return checksum.data(using: .utf8)?.writeToFile(at: checksumURL) ?? false
+    }
+    
+    // 验证文件完整性
+    static func verifyFileIntegrity(at url: URL) -> Bool {
+        guard let data = Data.fromFile(at: url),
+              let checksumData = Data.fromFile(at: url.appendingPathExtension("checksum")),
+              let expectedChecksum = checksumData.toString() else { return false }
+        
+        let actualChecksum = data.sha256()
+        return actualChecksum == expectedChecksum
+    }
+    
+    // 生成安全的随机令牌
+    static func generateSecureToken(length: Int = 32) -> String {
+        let randomData = STDataUtils.randomData(length: length)
+        return randomData.toBase64URLSafeString()
+    }
+    
+    // 数据加密传输
+    static func encryptAndEncode(data: Data) -> String {
+        // 这里可以添加实际的加密逻辑
+        return data.toBase64String()
+    }
+    
+    // 数据解密
+    static func decodeAndDecrypt(encodedString: String) -> Data? {
+        return Data.fromBase64String(encodedString)
+    }
+}
+
+// 在视图控制器中使用
+class FileViewController: UIViewController {
+    
+    @IBAction func uploadFile(_ sender: UIButton) {
+        guard let fileData = getSelectedFileData() else { return }
+        
+        // 生成上传 URL
+        let uploadURL = generateUploadURL()
+        
+        // 安全传输文件
+        if DataUtils.secureFileTransfer(data: fileData, to: uploadURL) {
+            showAlert(title: "上传成功", message: "文件已安全传输")
+        } else {
+            showAlert(title: "上传失败", message: "文件传输过程中出现错误")
+        }
+    }
+    
+    @IBAction func verifyFile(_ sender: UIButton) {
+        let fileURL = getSelectedFileURL()
+        
+        if DataUtils.verifyFileIntegrity(at: fileURL) {
+            showAlert(title: "验证成功", message: "文件完整性验证通过")
+        } else {
+            showAlert(title: "验证失败", message: "文件可能已损坏或被篡改")
+        }
+    }
+}
+```
+
+### 十五、STThreadSafe
+
+`STThreadSafe` 是一个功能强大的线程安全工具类，提供了各种线程安全的数据结构、操作和模式。它帮助开发者在多线程环境中安全地处理数据，避免竞态条件和数据竞争问题。
+
+#### 主要特性
+
+- **线程安全调用**：提供主线程和后台线程的安全调用方法
+- **属性包装器**：使用 `@propertyWrapper` 实现线程安全的属性
+- **线程安全集合**：提供线程安全的数组和字典实现
+- **线程安全单例**：提供线程安全的单例模式基类
+- **线程安全缓存**：提供带容量限制的线程安全缓存
+- **线程安全计数器**：提供线程安全的计数器实现
+- **延迟执行**：支持延迟执行和定时任务
+
+#### 线程安全调用
+
+```swift
+// 主线程安全调用
+STThreadSafe.dispatchMainAsyncSafe {
+    // 在主线程执行 UI 更新
+    self.updateUI()
+}
+
+// 主线程同步调用
+STThreadSafe.dispatchMainSyncSafe {
+    // 同步在主线程执行
+    self.syncUpdate()
+}
+
+// 主线程同步调用并返回结果
+let result = STThreadSafe.dispatchMainSyncSafe {
+    return self.calculateResult()
+}
+
+// 后台线程异步调用
+STThreadSafe.dispatchBackgroundAsync(qos: .userInitiated) {
+    // 在后台线程执行耗时操作
+    self.performHeavyTask()
+}
+
+// 指定队列调用
+let customQueue = DispatchQueue(label: "com.example.queue")
+STThreadSafe.dispatchAsync(on: customQueue) {
+    // 在指定队列执行
+    self.customTask()
+}
+
+// 延迟执行
+STThreadSafe.dispatchAfter(delay: 2.0) {
+    // 2秒后执行
+    self.delayedTask()
+}
+
+STThreadSafe.dispatchMainAfter(delay: 1.0) {
+    // 1秒后在主线程执行
+    self.delayedUITask()
+}
+```
+
+#### 线程安全属性包装器
+
+```swift
+class DataManager {
+    // 使用线程安全属性包装器
+    @STThreadSafeProperty var counter: Int = 0
+    @STThreadSafeProperty var data: [String] = []
+    @STThreadSafeProperty var settings: [String: Any] = [:]
+    
+    func updateData() {
+        // 线程安全地更新属性
+        counter += 1
+        data.append("新数据")
+        settings["lastUpdate"] = Date()
+        
+        // 使用 update 方法进行复杂更新
+        _data.update { data in
+            data.append("批量数据1")
+            data.append("批量数据2")
+        }
+    }
+}
+```
+
+#### 线程安全集合
+
+```swift
+// 线程安全数组
+let safeArray = STThreadSafeArray<String>()
+
+// 添加元素
+safeArray.append("元素1")
+safeArray.append("元素2")
+safeArray.insert("插入元素", at: 1)
+
+// 获取元素
+let count = safeArray.count
+let isEmpty = safeArray.isEmpty
+let firstElement = safeArray[0]
+let allElements = safeArray.getAll()
+
+// 查找和过滤
+let found = safeArray.first { $0.contains("元素") }
+let filtered = safeArray.filter { $0.count > 3 }
+let mapped = safeArray.map { $0.uppercased() }
+
+// 移除元素
+let removed = safeArray.remove(at: 0)
+safeArray.removeAll()
+
+// 线程安全字典
+let safeDict = STThreadSafeDictionary<String, Int>()
+
+// 设置和获取值
+safeDict.set(100, forKey: "score")
+safeDict.set(200, forKey: "level")
+
+let score = safeDict.get(forKey: "score")
+let allKeys = safeDict.keys
+let allValues = safeDict.values
+let allPairs = safeDict.getAll()
+
+// 检查包含
+let hasScore = safeDict.contains(key: "score")
+
+// 移除值
+let removedValue = safeDict.remove(forKey: "score")
+safeDict.removeAll()
+```
+
+#### 线程安全单例
+
+```swift
+// 创建线程安全单例类
+class UserManager: STThreadSafeSingleton {
+    var currentUser: User?
+    
+    func login(_ user: User) {
+        currentUser = user
+    }
+    
+    func logout() {
+        currentUser = nil
+    }
+}
+
+// 使用单例
+let userManager = STThreadSafeSingleton.shared(UserManager.self)
+userManager.login(User(name: "张三"))
+
+// 重置单例
+STThreadSafeSingleton.reset(UserManager.self)
+
+// 重置所有单例
+STThreadSafeSingleton.resetAll()
+```
+
+#### 线程安全缓存
+
+```swift
+// 创建线程安全缓存
+let cache = STThreadSafeCache<String, Data>(maxCount: 50)
+
+// 设置缓存
+let imageData = Data()
+cache.set(imageData, forKey: "image1")
+cache.set(imageData, forKey: "image2")
+
+// 获取缓存
+let cachedData = cache.get(forKey: "image1")
+
+// 检查缓存
+let hasImage = cache.contains(key: "image1")
+let cacheCount = cache.count
+let isEmpty = cache.isEmpty
+
+// 移除缓存
+let removedData = cache.remove(forKey: "image1")
+
+// 清空缓存
+cache.clear()
+```
+
+#### 线程安全计数器
+
+```swift
+// 创建线程安全计数器
+let counter = STThreadSafeCounter(initialValue: 0)
+
+// 增加计数
+let newValue1 = counter.increment()        // 1
+let newValue2 = counter.increment(by: 5)   // 6
+
+// 减少计数
+let newValue3 = counter.decrement()        // 5
+let newValue4 = counter.decrement(by: 2)   // 3
+
+// 获取当前值
+let currentValue = counter.value           // 3
+
+// 重置计数
+counter.reset()                            // 0
+```
+
+#### 实际应用示例
+
+```swift
+class NetworkManager: STThreadSafeSingleton {
+    private let cache = STThreadSafeCache<String, Data>(maxCount: 100)
+    private let requestCounter = STThreadSafeCounter()
+    
+    func downloadImage(from url: String, completion: @escaping (Data?) -> Void) {
+        // 检查缓存
+        if let cachedData = cache.get(forKey: url) {
+            STThreadSafe.dispatchMainAsyncSafe {
+                completion(cachedData)
+            }
+            return
+        }
+        
+        // 增加请求计数
+        let requestId = requestCounter.increment()
+        
+        // 在后台线程下载
+        STThreadSafe.dispatchBackgroundAsync(qos: .userInitiated) { [weak self] in
+            guard let self = self else { return }
+            
+            // 模拟网络请求
+            let imageData = self.performDownload(url: url)
+            
+            // 缓存数据
+            if let data = imageData {
+                self.cache.set(data, forKey: url)
+            }
+            
+            // 在主线程返回结果
+            STThreadSafe.dispatchMainAsyncSafe {
+                completion(imageData)
+            }
+        }
+    }
+    
+    private func performDownload(url: String) -> Data? {
+        // 模拟网络下载
+        return "模拟图片数据".data(using: .utf8)
+    }
+}
+
+// 在视图控制器中使用
+class ImageViewController: UIViewController {
+    private let networkManager = STThreadSafeSingleton.shared(NetworkManager.self)
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        loadImage()
+    }
+    
+    private func loadImage() {
+        let imageURL = "https://example.com/image.jpg"
+        
+        networkManager.downloadImage(from: imageURL) { [weak self] data in
+            guard let data = data else { return }
+            
+            // 更新 UI
+            self?.displayImage(data: data)
+        }
+    }
+    
+    private func displayImage(data: Data) {
+        // 显示图片
+        print("显示图片数据: \(data.count) 字节")
+    }
+}
+
+// 数据管理器示例
+class DataManager {
+    @STThreadSafeProperty var userData: [String: Any] = [:]
+    @STThreadSafeProperty var isLoaded: Bool = false
+    
+    private let dataArray = STThreadSafeArray<String>()
+    private let dataCache = STThreadSafeCache<String, String>(maxCount: 20)
+    
+    func loadData() {
+        // 在后台线程加载数据
+        STThreadSafe.dispatchBackgroundAsync { [weak self] in
+            guard let self = self else { return }
+            
+            // 模拟数据加载
+            let loadedData = ["数据1", "数据2", "数据3"]
+            
+            // 线程安全地更新数据
+            self._dataArray.update { array in
+                array.append(contentsOf: loadedData)
+            }
+            
+            self._userData.update { data in
+                data["loadedAt"] = Date()
+                data["count"] = loadedData.count
+            }
+            
+            self._isLoaded.update { isLoaded in
+                isLoaded = true
+            }
+            
+            // 缓存数据
+            for (index, item) in loadedData.enumerated() {
+                self.dataCache.set(item, forKey: "item_\(index)")
+            }
+            
+            // 在主线程通知完成
+            STThreadSafe.dispatchMainAsyncSafe {
+                NotificationCenter.default.post(name: .dataLoaded, object: nil)
+            }
+        }
+    }
+    
+    func getData(at index: Int) -> String? {
+        return dataArray[index]
+    }
+    
+    func getCachedData(for key: String) -> String? {
+        return dataCache.get(forKey: key)
+    }
+}
+
+extension Notification.Name {
+    static let dataLoaded = Notification.Name("dataLoaded")
+}
+```
+
+#### 性能优化建议
+
+```swift
+class OptimizedDataManager {
+    // 使用自定义队列优化性能
+    private let dataQueue = DispatchQueue(label: "com.example.data", attributes: .concurrent)
+    private let cacheQueue = DispatchQueue(label: "com.example.cache", attributes: .concurrent)
+    
+    @STThreadSafeProperty(queue: DispatchQueue(label: "com.example.userdata", attributes: .concurrent))
+    var userData: [String: Any] = [:]
+    
+    private let optimizedArray = STThreadSafeArray<String>(queue: dataQueue)
+    private let optimizedCache = STThreadSafeCache<String, Data>(maxCount: 50, queue: cacheQueue)
+    
+    // 批量操作优化
+    func batchUpdateData(_ items: [String]) {
+        optimizedArray.update { array in
+            array.append(contentsOf: items)
+        }
+    }
+    
+    // 异步批量缓存
+    func batchCacheData(_ data: [(String, Data)]) {
+        STThreadSafe.dispatchBackgroundAsync { [weak self] in
+            guard let self = self else { return }
+            
+            for (key, value) in data {
+                self.optimizedCache.set(value, forKey: key)
+            }
+        }
+    }
+}
+```
+
+### 十六、STHTTPSession
 
 `STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
 
@@ -2645,6 +4188,138 @@ STHTTPSession.shared.st_setCustomHeaders([
     "X-Request-ID": UUID().uuidString,
     "X-Timestamp": "\(Date().timeIntervalSince1970)"
 ])
+```
+
+### 十七、STTimer
+
+#### 主要特性
+
+- ⏰ **高精度计时**：使用 `DispatchSourceTimer` 和 `.strict` 标志，避免 runloop mode 影响
+- 🛡️ **内存安全**：使用 `weak self` 避免循环引用，自动资源释放
+- 🎯 **精确控制**：毫秒级精度，支持倒计时和重复任务
+- 🧹 **资源管理**：完善的定时器生命周期管理，防止内存泄露
+- 📱 **线程安全**：使用信号量保护共享资源，支持多线程环境
+
+#### 基础使用
+
+##### 倒计时功能
+
+```swift
+// 创建10秒倒计时，每秒更新一次
+let timer = STTimer(seconds: 10, repeating: 1.0)
+
+timer.st_countdownTimerStart { remaining, isFinished in
+    if isFinished {
+        print("倒计时完成！")
+    } else {
+        print("剩余时间：\(remaining) 秒")
+    }
+}
+
+// 手动取消倒计时
+timer.st_countdownTimerCancel()
+```
+
+##### 重复执行任务
+
+```swift
+// 创建每2秒执行一次的重复任务
+let timerName = STTimer.st_scheduledTimer(
+    withTimeInterval: 2,
+    repeats: true,
+    async: false
+) { name in
+    print("重复任务执行：\(name)")
+}
+
+// 取消指定任务
+STTimer.st_cancelTask(name: timerName)
+```
+
+##### 延迟执行任务
+
+```swift
+// 3秒后执行一次任务
+let timerName = STTimer.st_scheduledTimer(
+    afterDelay: 3,
+    withTimeInterval: 1,
+    repeats: false,
+    async: true
+) { name in
+    print("延迟任务执行：\(name)")
+}
+```
+
+#### 高级功能
+
+##### 批量管理
+
+```swift
+// 取消所有定时器任务
+STTimer.st_cancelAllTasks()
+```
+
+##### 内存安全特性
+
+```swift
+class MyViewController: UIViewController {
+    private var timer: STTimer?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // 创建定时器，会自动处理内存释放
+        timer = STTimer(seconds: 30, repeating: 1.0)
+        timer?.st_countdownTimerStart { remaining, isFinished in
+            // 处理倒计时逻辑
+        }
+    }
+    
+    // 无需手动释放，deinit 会自动调用
+    deinit {
+        timer?.st_countdownTimerCancel()
+    }
+}
+```
+
+#### 优化特性
+
+1. **高精度计时**：使用 `.strict` 标志和 `userInteractive` QoS，确保精确计时
+2. **内存安全**：所有闭包都使用 `[weak self]`，避免循环引用
+3. **资源管理**：提供 `deinit` 方法自动清理资源
+4. **线程安全**：使用信号量保护静态字典，支持并发访问
+5. **错误处理**：完善的参数验证和错误日志
+
+#### 实际应用示例
+
+```swift
+class CountdownViewController: UIViewController {
+    @IBOutlet weak var countdownLabel: UILabel!
+    @IBOutlet weak var startButton: UIButton!
+    
+    private var timer: STTimer?
+    
+    @IBAction func startCountdown(_ sender: UIButton) {
+        startButton.isEnabled = false
+        
+        timer = STTimer(seconds: 60, repeating: 1.0)
+        timer?.st_countdownTimerStart { [weak self] remaining, isFinished in
+            DispatchQueue.main.async {
+                if isFinished {
+                    self?.countdownLabel.text = "时间到！"
+                    self?.startButton.isEnabled = true
+                } else {
+                    self?.countdownLabel.text = "剩余：\(remaining) 秒"
+                }
+            }
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        timer?.st_countdownTimerCancel()
+    }
+}
 ```
 
 ### 七、STBtn
@@ -3167,6 +4842,48 @@ STAlertController.st_showCustomAlert(
 
 ## 更新日志
 
+### v2.1.8
+- **STThreadSafe.swift 全面重构**：优化线程安全功能，新增以下特性：
+  - 重构线程安全工具类：提供主线程和后台线程的安全调用方法
+  - 新增线程安全属性包装器：使用 `@propertyWrapper` 实现线程安全的属性访问
+  - 新增线程安全集合：提供 `STThreadSafeArray` 和 `STThreadSafeDictionary` 实现
+  - 新增线程安全单例：提供 `STThreadSafeSingleton` 基类，支持线程安全的单例模式
+  - 新增线程安全缓存：提供 `STThreadSafeCache` 类，支持容量限制的缓存机制
+  - 新增线程安全计数器：提供 `STThreadSafeCounter` 类，支持线程安全的计数操作
+  - 新增延迟执行功能：支持延迟执行和定时任务
+  - 保持向后兼容性：旧方法标记为废弃但保持可用，支持渐进式升级
+  - 优化代码结构：使用 MARK 注释分组，提高代码可读性和维护性
+  - 完善文档注释：为所有方法添加详细的参数说明、返回值说明和使用示例
+  - 提供性能优化建议：包含自定义队列、批量操作等优化方案
+
+### v2.1.7
+- **STString.swift 全面重构**：优化字符串处理功能，新增以下特性：
+  - 优化类型转换逻辑：重构 `st_returnStr` 方法，增强与 `STJSONValue` 的集成
+  - 新增多种类型支持：支持数组、字典、STJSONValue 等复杂类型的字符串转换
+  - 新增数字格式化功能：支持 Int 转换、百分比格式、文件大小格式化等
+  - 增强 URL 处理：新增 URL 验证、域名提取、路径获取、参数移除等功能
+  - 新增掩码处理：支持邮箱、身份证号掩码，增强手机号掩码功能
+  - 新增字符串处理：支持首字母大小写、驼峰命名、蛇形命名转换等
+  - 增强工具方法：优化随机字符串生成，新增剪贴板操作、空白字符处理等
+  - 移动 JSON 相关方法：将 `st_jsonStringToPrettyPrintedJson` 和 `st_dictToJSON` 迁移到 `STJSONValue` 类
+  - 移动编码转换功能：将 Base64 编码解码等编码转换功能迁移到 `STData.swift` 中，提供更专业的实现
+  - 优化代码结构：使用 MARK 注释分组，提高代码可读性和维护性
+  - 完善文档注释：为所有方法添加详细的参数说明、返回值说明和使用示例
+
+### v2.1.6
+- **STPredicateCheck.swift 全面重构**：优化字符串验证功能，新增以下特性：
+  - 新增正则表达式常量：`STRegexPattern` 结构体，预定义常用正则表达式模式
+  - 增强密码验证：新增强密码、中等密码、弱密码验证，支持特殊字符检测
+  - 新增多种验证类型：身份证号、邮政编码、银行卡号、信用卡号、URL、IP地址等
+  - 新增时间验证：支持日期、时间、日期时间格式验证
+  - 新增长度验证：支持字符串长度范围、最小长度、最大长度验证
+  - 新增密码强度检测：支持密码强度评估（0-5级）和描述获取
+  - 新增组合验证：支持表单数据的批量验证，返回详细错误信息
+  - 新增 String 扩展：为 String 类型提供便捷的验证属性
+  - 优化代码结构：使用 MARK 注释分组，提高代码可读性和维护性
+  - 完善文档注释：为所有方法添加详细的参数说明、返回值说明和使用示例
+  - 改进验证逻辑：统一使用私有验证方法，提高代码复用性和性能
+
 ### v2.1.5
 - **STJSONValue.swift 全面重构**：统一管理项目中所有 JSON 相关方法，新增以下特性：
   - 整合所有 JSON 方法：将 STData、STDictionary、STBaseViewModel 等类中的 JSON 相关方法统一迁移
@@ -3220,6 +4937,1097 @@ STAlertController.st_showCustomAlert(
   - 优化隐私信息处理：支持iOS 14+ AppTrackingTransparency框架
   - 新增运营商信息获取：支持双卡双待设备
   - 提供完整的使用示例和最佳实践
+
+## 十六、STEncrypt
+
+`STEncrypt` 是一个功能强大的加密工具类，提供了完整的加密、哈希、HMAC 和密钥派生功能。它基于 Apple 的 CryptoKit 框架，提供了安全可靠的加密解决方案。
+
+### 主要特性
+
+- **多种哈希算法**：支持 MD5、SHA1、SHA256、SHA384、SHA512
+- **HMAC 认证**：支持 HMAC-SHA256、HMAC-SHA384、HMAC-SHA512
+- **对称加密**：支持 AES-256-GCM 加密算法
+- **密钥派生**：支持 PBKDF2 密钥派生算法
+- **随机数生成**：提供安全的随机数和令牌生成
+- **密钥管理**：提供密钥强度验证和安全比较
+- **错误处理**：完善的错误处理机制
+- **向后兼容**：保持与旧版本的兼容性
+
+### 基本用法
+
+#### 哈希算法
+
+```swift
+let text = "Hello World"
+
+// 基本哈希
+let md5Hash = text.st_md5()                    // MD5 哈希
+let sha1Hash = text.st_sha1()                  // SHA1 哈希
+let sha256Hash = text.st_sha256()              // SHA256 哈希
+let sha384Hash = text.st_sha384()              // SHA384 哈希
+let sha512Hash = text.st_sha512()              // SHA512 哈希
+
+// 通用哈希方法
+let hash = text.st_hash(algorithm: .sha256)    // 指定算法哈希
+```
+
+#### HMAC 认证
+
+```swift
+let message = "Hello World"
+let key = "secret_key"
+
+// HMAC 计算
+let hmacSha256 = message.st_hmacSha256(key: key)    // HMAC-SHA256
+let hmacSha512 = message.st_hmacSha512(key: key)    // HMAC-SHA512
+
+// 通用 HMAC 方法
+let hmac = message.st_hmac(key: key, algorithm: .sha256)
+```
+
+#### 对称加密
+
+```swift
+let plaintext = "Hello World"
+let key = "12345678901234567890123456789012" // 32字节密钥
+
+do {
+    // 加密
+    let (ciphertext, nonce) = try plaintext.st_encryptAES256GCM(key: key)
+    
+    // 解密
+    let decrypted = try plaintext.st_decryptAES256GCM(
+        ciphertext: ciphertext, 
+        key: key, 
+        nonce: nonce
+    )
+    
+    print("解密结果: \(decrypted)") // "Hello World"
+} catch {
+    print("加密/解密失败: \(error)")
+}
+```
+
+#### 密码派生
+
+```swift
+let password = "my_password"
+let salt = "random_salt"
+
+do {
+    // PBKDF2 密钥派生
+    let derivedKey = try password.st_pbkdf2(
+        salt: salt, 
+        iterations: 10000, 
+        keyLength: 32
+    )
+    
+    print("派生密钥: \(derivedKey.toHexString())")
+} catch {
+    print("密钥派生失败: \(error)")
+}
+```
+
+#### 随机数生成
+
+```swift
+// 生成随机字符串
+let randomString = String.st_randomString(length: 16)
+let randomHex = String.st_randomHexString(length: 32)
+
+// 生成随机密钥和盐值
+let randomKey = STEncryptionUtils.st_generateRandomKey(length: 32)
+let randomSalt = STEncryptionUtils.st_generateRandomSalt(length: 16)
+
+// 生成安全令牌
+let secureToken = STEncryptionUtils.st_generateSecureToken(length: 32)
+```
+
+#### 密钥管理
+
+```swift
+let password = "MyPassword123!"
+
+// 验证密钥强度
+let strength = STEncryptionUtils.st_validateKeyStrength(password)
+print("密钥强度: \(strength)/100")
+
+// 安全字符串比较（防止时序攻击）
+let isEqual = STEncryptionUtils.st_secureCompare("password1", "password2")
+```
+
+### 实际应用示例
+
+```swift
+class SecurityManager {
+    
+    // 用户密码加密存储
+    static func encryptPassword(_ password: String) -> (encrypted: Data, salt: Data) {
+        let salt = STEncryptionUtils.st_generateRandomSalt()
+        
+        do {
+            let derivedKey = try password.st_pbkdf2(
+                salt: salt.toStringUTF8(), 
+                iterations: 10000, 
+                keyLength: 32
+            )
+            
+            let keyString = derivedKey.toHexString()
+            let (ciphertext, nonce) = try password.st_encryptAES256GCM(key: keyString)
+            
+            // 将 nonce 和 ciphertext 组合存储
+            var encryptedData = Data()
+            encryptedData.append(nonce.withUnsafeBytes { Data($0) })
+            encryptedData.append(ciphertext)
+            
+            return (encryptedData, salt)
+        } catch {
+            fatalError("密码加密失败: \(error)")
+        }
+    }
+    
+    // 验证用户密码
+    static func verifyPassword(_ password: String, encrypted: Data, salt: Data) -> Bool {
+        do {
+            let derivedKey = try password.st_pbkdf2(
+                salt: salt.toStringUTF8(), 
+                iterations: 10000, 
+                keyLength: 32
+            )
+            
+            let keyString = derivedKey.toHexString()
+            
+            // 分离 nonce 和 ciphertext
+            let nonceData = encrypted.prefix(12) // AES-GCM nonce 长度为 12 字节
+            let ciphertext = encrypted.dropFirst(12)
+            
+            let nonce = try AES.GCM.Nonce(data: nonceData)
+            let decrypted = try password.st_decryptAES256GCM(
+                ciphertext: ciphertext, 
+                key: keyString, 
+                nonce: nonce
+            )
+            
+            return STEncryptionUtils.st_secureCompare(password, decrypted)
+        } catch {
+            return false
+        }
+    }
+    
+    // 生成 API 签名
+    static func generateAPISignature(message: String, secretKey: String) -> String {
+        return message.st_hmacSha256(key: secretKey)
+    }
+    
+    // 验证 API 签名
+    static func verifyAPISignature(message: String, signature: String, secretKey: String) -> Bool {
+        let expectedSignature = generateAPISignature(message: message, secretKey: secretKey)
+        return STEncryptionUtils.st_secureCompare(signature, expectedSignature)
+    }
+}
+
+// 在视图控制器中使用
+class LoginViewController: UIViewController {
+    
+    @IBAction func loginButtonTapped(_ sender: UIButton) {
+        guard let password = passwordTextField.text else { return }
+        
+        // 加密密码
+        let (encrypted, salt) = SecurityManager.encryptPassword(password)
+        
+        // 存储到 Keychain
+        STKeychainHelper.st_save("user_password", value: encrypted.toBase64String())
+        STKeychainHelper.st_save("user_salt", value: salt.toBase64String())
+        
+        // 验证密码
+        if SecurityManager.verifyPassword(password, encrypted: encrypted, salt: salt) {
+            showAlert(title: "登录成功", message: "密码验证通过")
+        } else {
+            showAlert(title: "登录失败", message: "密码验证失败")
+        }
+    }
+}
+```
+
+### 安全建议
+
+1. **密钥管理**：
+   - 使用强密码（至少 12 位，包含大小写字母、数字和特殊字符）
+   - 定期更换密钥
+   - 使用安全的密钥存储方案（如 Keychain）
+
+2. **加密算法选择**：
+   - 优先使用 SHA256 或更高版本的哈希算法
+   - 使用 AES-256-GCM 进行对称加密
+   - 使用 PBKDF2 进行密钥派生
+
+3. **随机数生成**：
+   - 使用系统提供的安全随机数生成器
+   - 确保随机数的熵值足够高
+
+4. **错误处理**：
+   - 始终处理加密/解密过程中的异常
+   - 不要在错误信息中泄露敏感信息
+
+5. **性能考虑**：
+   - PBKDF2 迭代次数建议设置为 10000 或更高
+   - 对于大量数据，考虑使用流式加密
+
+## 十七、STKeychainHelper
+
+`STKeychainHelper` 是一个功能强大的 Keychain 工具类，提供了安全可靠的数据存储解决方案。它基于 iOS 的 Security 框架，支持多种数据类型、访问控制、生物识别保护和 iCloud 同步功能。
+
+### 主要特性
+
+- **多种数据类型支持**：支持 String、Data、Bool、Int、Double 等类型
+- **访问控制**：支持多种访问权限设置，包括生物识别保护
+- **生物识别集成**：支持 Touch ID 和 Face ID 保护
+- **iCloud 同步**：支持 Keychain 数据在设备间同步
+- **批量操作**：支持批量保存、删除和查询
+- **错误处理**：完善的错误处理机制
+- **向后兼容**：保持与旧版本的兼容性
+
+### 基本用法
+
+#### 字符串操作
+
+```swift
+// 保存字符串
+try STKeychainHelper.st_save("username", value: "john_doe")
+
+// 加载字符串
+let username = try STKeychainHelper.st_load("username")
+
+// 检查是否存在
+let exists = STKeychainHelper.st_exists("username")
+
+// 删除项目
+try STKeychainHelper.st_delete("username")
+```
+
+#### 数据类型操作
+
+```swift
+// 布尔值
+try STKeychainHelper.st_saveBool("isFirstLaunch", value: true)
+let isFirstLaunch = try STKeychainHelper.st_loadBool("isFirstLaunch", defaultValue: false)
+
+// 整数
+try STKeychainHelper.st_saveInt("userAge", value: 25)
+let userAge = try STKeychainHelper.st_loadInt("userAge", defaultValue: 0)
+
+// 浮点数
+try STKeychainHelper.st_saveDouble("userScore", value: 95.5)
+let userScore = try STKeychainHelper.st_loadDouble("userScore", defaultValue: 0.0)
+
+// 数据
+let imageData = UIImage(named: "avatar")?.jpegData(compressionQuality: 0.8)
+try STKeychainHelper.st_saveData("userAvatar", data: imageData!)
+let avatarData = try STKeychainHelper.st_loadData("userAvatar")
+```
+
+#### 访问控制
+
+```swift
+// 设备解锁时访问
+try STKeychainHelper.st_save("sensitiveData", 
+                            value: "secret", 
+                            accessControl: .whenUnlocked)
+
+// 仅本设备访问
+try STKeychainHelper.st_save("deviceOnlyData", 
+                            value: "device_specific", 
+                            accessControl: .whenUnlockedThisDeviceOnly)
+
+// 生物识别保护
+try STKeychainHelper.st_save("biometricData", 
+                            value: "protected", 
+                            accessControl: .biometricCurrentSet)
+```
+
+#### iCloud 同步
+
+```swift
+// 启用 iCloud 同步
+try STKeychainHelper.st_save("syncData", 
+                            value: "will_sync", 
+                            sync: .iCloud)
+
+// 不同步到 iCloud
+try STKeychainHelper.st_save("localData", 
+                            value: "local_only", 
+                            sync: .none)
+```
+
+#### 生物识别功能
+
+```swift
+// 检查生物识别是否可用
+let isBiometricAvailable = STKeychainHelper.st_isBiometricAvailable()
+
+// 获取生物识别类型
+let biometricType = STKeychainHelper.st_getBiometricType()
+switch biometricType {
+case .faceID:
+    print("支持 Face ID")
+case .touchID:
+    print("支持 Touch ID")
+case .none:
+    print("不支持生物识别")
+@unknown default:
+    print("未知生物识别类型")
+}
+
+// 使用生物识别保存数据
+let sensitiveData = "highly_sensitive_info".data(using: .utf8)!
+try STKeychainHelper.st_saveWithBiometric("secureData", 
+                                         data: sensitiveData, 
+                                         reason: "保护您的敏感数据")
+
+// 使用生物识别加载数据
+let loadedData = try STKeychainHelper.st_loadWithBiometric("secureData", 
+                                                          reason: "访问您的敏感数据")
+```
+
+#### 批量操作
+
+```swift
+// 批量保存
+let batchData: [String: Any] = [
+    "username": "john_doe",
+    "email": "john@example.com",
+    "isPremium": true,
+    "loginCount": 42,
+    "lastScore": 95.5
+]
+try STKeychainHelper.st_saveBatch(batchData)
+
+// 批量删除
+let keysToDelete = ["username", "email", "isPremium"]
+try STKeychainHelper.st_deleteBatch(keysToDelete)
+
+// 获取所有键名
+let allKeys = try STKeychainHelper.st_getAllKeys()
+print("所有 Keychain 键名: \(allKeys)")
+
+// 获取项目数量
+let itemCount = try STKeychainHelper.st_getItemCount()
+print("Keychain 项目数量: \(itemCount)")
+```
+
+### 实际应用示例
+
+```swift
+class UserManager {
+    
+    // 用户登录信息管理
+    static func saveUserCredentials(username: String, password: String) throws {
+        // 保存用户名（普通存储）
+        try STKeychainHelper.st_save("username", value: username)
+        
+        // 保存密码（生物识别保护）
+        let passwordData = password.data(using: .utf8)!
+        try STKeychainHelper.st_saveWithBiometric("password", 
+                                                 data: passwordData, 
+                                                 reason: "保护您的登录密码")
+    }
+    
+    static func loadUserCredentials() throws -> (username: String?, password: String?) {
+        let username = try STKeychainHelper.st_load("username")
+        let passwordData = try STKeychainHelper.st_loadWithBiometric("password", 
+                                                                    reason: "访问您的登录密码")
+        let password = passwordData?.toStringUTF8()
+        
+        return (username, password)
+    }
+    
+    // 用户偏好设置
+    static func saveUserPreferences(_ preferences: [String: Any]) throws {
+        try STKeychainHelper.st_saveBatch(preferences)
+    }
+    
+    static func loadUserPreferences() throws -> [String: Any] {
+        let allKeys = try STKeychainHelper.st_getAllKeys()
+        var preferences: [String: Any] = [:]
+        
+        for key in allKeys {
+            if key.hasPrefix("pref_") {
+                if let stringValue = try STKeychainHelper.st_load(key) {
+                    preferences[key] = stringValue
+                } else if let boolValue = try? STKeychainHelper.st_loadBool(key) {
+                    preferences[key] = boolValue
+                } else if let intValue = try? STKeychainHelper.st_loadInt(key) {
+                    preferences[key] = intValue
+                } else if let doubleValue = try? STKeychainHelper.st_loadDouble(key) {
+                    preferences[key] = doubleValue
+                }
+            }
+        }
+        
+        return preferences
+    }
+    
+    // 清除用户数据
+    static func clearUserData() throws {
+        try STKeychainHelper.st_clearAll()
+    }
+}
+
+// 在视图控制器中使用
+class LoginViewController: UIViewController {
+    
+    @IBAction func loginButtonTapped(_ sender: UIButton) {
+        guard let username = usernameTextField.text,
+              let password = passwordTextField.text else { return }
+        
+        do {
+            // 保存用户凭据
+            try UserManager.saveUserCredentials(username: username, password: password)
+            
+            // 保存登录状态
+            try STKeychainHelper.st_saveBool("isLoggedIn", value: true)
+            try STKeychainHelper.st_saveInt("loginCount", value: 1)
+            
+            showAlert(title: "登录成功", message: "用户凭据已安全保存")
+        } catch {
+            showAlert(title: "登录失败", message: "保存凭据时出错: \(error.localizedDescription)")
+        }
+    }
+    
+    @IBAction func autoLoginButtonTapped(_ sender: UIButton) {
+        do {
+            let (username, password) = try UserManager.loadUserCredentials()
+            
+            if let username = username, let password = password {
+                // 自动填充登录表单
+                usernameTextField.text = username
+                passwordTextField.text = password
+                
+                showAlert(title: "自动登录", message: "已加载保存的凭据")
+            } else {
+                showAlert(title: "自动登录失败", message: "未找到保存的凭据")
+            }
+        } catch {
+            showAlert(title: "自动登录失败", message: "加载凭据时出错: \(error.localizedDescription)")
+        }
+    }
+}
+
+// 设置页面
+class SettingsViewController: UIViewController {
+    
+    @IBAction func saveSettings(_ sender: UIButton) {
+        let settings: [String: Any] = [
+            "pref_notifications": true,
+            "pref_darkMode": false,
+            "pref_autoSync": true,
+            "pref_cacheSize": 100
+        ]
+        
+        do {
+            try UserManager.saveUserPreferences(settings)
+            showAlert(title: "设置已保存", message: "您的偏好设置已安全保存")
+        } catch {
+            showAlert(title: "保存失败", message: "保存设置时出错: \(error.localizedDescription)")
+        }
+    }
+    
+    @IBAction func clearAllData(_ sender: UIButton) {
+        let alert = UIAlertController(title: "清除数据", 
+                                    message: "确定要清除所有保存的数据吗？此操作不可撤销。", 
+                                    preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel))
+        alert.addAction(UIAlertAction(title: "确定", style: .destructive) { _ in
+            do {
+                try UserManager.clearUserData()
+                self.showAlert(title: "数据已清除", message: "所有用户数据已成功清除")
+            } catch {
+                self.showAlert(title: "清除失败", message: "清除数据时出错: \(error.localizedDescription)")
+            }
+        })
+        
+        present(alert, animated: true)
+    }
+}
+```
+
+### 安全建议
+
+1. **访问控制选择**：
+   - 敏感数据使用生物识别保护
+   - 设备特定数据使用 `.thisDeviceOnly` 选项
+   - 根据数据敏感程度选择合适的访问控制
+
+2. **数据类型选择**：
+   - 密码和令牌使用 Data 类型存储
+   - 用户偏好使用对应的类型化方法
+   - 避免存储大量数据到 Keychain
+
+3. **错误处理**：
+   - 始终处理 Keychain 操作可能出现的异常
+   - 提供用户友好的错误信息
+   - 考虑生物识别失败的情况
+
+4. **性能考虑**：
+   - 避免频繁的 Keychain 操作
+   - 使用批量操作处理多个项目
+   - 缓存经常访问的数据
+
+5. **隐私保护**：
+   - 不要在 Keychain 中存储明文密码
+   - 使用加密存储敏感信息
+   - 定期清理不需要的数据
+
+## 十八、STIBInspectable
+
+`STIBInspectable` 是一个专门用于 XIB/Storyboard 布局的约束自动适配工具。它允许开发者在 Interface Builder 中直接设置约束的自动适配属性，实现不同屏幕尺寸下的自动布局适配。
+
+### 主要特性
+
+- **XIB/Storyboard 集成**：直接在 Interface Builder 中设置适配属性
+- **多种适配类型**：支持宽度、高度、间距、边距、字体大小等适配
+- **自动适配**：根据屏幕尺寸自动调整约束值
+- **批量操作**：支持批量适配和重置约束
+- **递归适配**：支持整个视图层次结构的约束适配
+- **原始值保存**：自动保存原始约束值，支持重置
+
+### 基本用法
+
+#### 在 Interface Builder 中使用
+
+1. **选择约束**：在 XIB 或 Storyboard 中选择需要适配的约束
+2. **设置属性**：在 Attributes Inspector 中设置以下属性：
+   - `Auto Constant`：是否启用自动适配
+   - `Adapt Type`：适配类型（0-5）
+   - `Custom Adapt Ratio`：自定义适配比例
+
+#### 适配类型说明
+
+```swift
+// 适配类型枚举
+public enum STConstraintAdaptType {
+    case width           // 0 - 宽度适配
+    case height          // 1 - 高度适配
+    case both            // 2 - 宽高都适配
+    case spacing         // 3 - 间距适配
+    case margin          // 4 - 边距适配
+    case fontSize        // 5 - 字体大小适配
+    case custom(CGFloat) // 自定义比例适配
+}
+```
+
+#### 代码中使用
+
+```swift
+// 手动触发约束适配
+constraint.st_triggerAdapt()
+
+// 重置约束为原始值
+constraint.st_resetToOriginal()
+
+// 获取原始约束值
+let originalValue = constraint.st_getOriginalConstant()
+
+// 获取适配后的约束值
+let adaptedValue = constraint.st_getAdaptedConstant()
+
+// 检查是否已适配
+let isAdapted = constraint.st_isAdapted()
+```
+
+#### 批量操作
+
+```swift
+// 批量适配约束
+let constraints = [constraint1, constraint2, constraint3]
+STConstraintAdapter.st_adaptConstraints(constraints)
+
+// 批量重置约束
+STConstraintAdapter.st_resetConstraints(constraints)
+
+// 获取已适配的约束
+let adaptedConstraints = STConstraintAdapter.st_getAdaptedConstraints(constraints)
+
+// 获取未适配的约束
+let unadaptedConstraints = STConstraintAdapter.st_getUnadaptedConstraints(constraints)
+```
+
+#### 视图层次结构适配
+
+```swift
+// 适配所有子视图的约束
+view.st_adaptAllConstraints()
+
+// 重置所有子视图的约束
+view.st_resetAllConstraints()
+
+// 获取所有已适配的约束
+let allAdaptedConstraints = view.st_getAllAdaptedConstraints()
+```
+
+### 实际应用示例
+
+```swift
+class AdaptiveViewController: UIViewController {
+    
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var contentView: UIView!
+    @IBOutlet weak var button: UIButton!
+    
+    // 约束出口
+    @IBOutlet weak var titleTopConstraint: NSLayoutConstraint!
+    @IBOutlet weak var contentHeightConstraint: NSLayoutConstraint!
+    @IBOutlet weak var buttonWidthConstraint: NSLayoutConstraint!
+    @IBOutlet weak var buttonHeightConstraint: NSLayoutConstraint!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupAdaptiveConstraints()
+    }
+    
+    private func setupAdaptiveConstraints() {
+        // 手动设置约束适配
+        titleTopConstraint.st_triggerAdapt()
+        contentHeightConstraint.st_triggerAdapt()
+        buttonWidthConstraint.st_triggerAdapt()
+        buttonHeightConstraint.st_triggerAdapt()
+    }
+    
+    // 响应屏幕旋转
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { _ in
+            // 屏幕旋转时重新适配约束
+            self.view.st_adaptAllConstraints()
+        })
+    }
+    
+    // 动态调整约束
+    @IBAction func adjustConstraints(_ sender: UIButton) {
+        // 获取当前约束值
+        let currentHeight = contentHeightConstraint.st_getAdaptedConstant()
+        let originalHeight = contentHeightConstraint.st_getOriginalConstant()
+        
+        if currentHeight > originalHeight {
+            // 重置为原始值
+            contentHeightConstraint.st_resetToOriginal()
+        } else {
+            // 重新适配
+            contentHeightConstraint.st_triggerAdapt()
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+}
+
+// 约束管理工具类
+class ConstraintManager {
+    
+    /// 批量管理视图约束
+    static func manageConstraints(for view: UIView, adaptType: STConstraintAdaptType) {
+        let constraints = view.constraints
+        
+        for constraint in constraints {
+            // 根据约束类型设置适配
+            switch constraint.firstAttribute {
+            case .width:
+                if case .width = adaptType {
+                    constraint.st_triggerAdapt()
+                }
+            case .height:
+                if case .height = adaptType {
+                    constraint.st_triggerAdapt()
+                }
+            default:
+                if case .both = adaptType {
+                    constraint.st_triggerAdapt()
+                }
+            }
+        }
+    }
+    
+    /// 检查约束适配状态
+    static func checkAdaptationStatus(for view: UIView) -> (adapted: Int, total: Int) {
+        let allConstraints = view.st_getAllAdaptedConstraints()
+        let totalConstraints = view.constraints.count
+        
+        return (adapted: allConstraints.count, total: totalConstraints)
+    }
+    
+    /// 导出约束信息
+    static func exportConstraintInfo(for view: UIView) -> [String: Any] {
+        let constraints = view.constraints
+        var constraintInfo: [String: Any] = [:]
+        
+        for (index, constraint) in constraints.enumerated() {
+            let key = "constraint_\(index)"
+            constraintInfo[key] = [
+                "original": constraint.st_getOriginalConstant(),
+                "adapted": constraint.st_getAdaptedConstant(),
+                "isAdapted": constraint.st_isAdapted()
+            ]
+        }
+        
+        return constraintInfo
+    }
+}
+
+// 在视图控制器中使用
+class SettingsViewController: UIViewController {
+    
+    @IBOutlet weak var settingsView: UIView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // 检查约束适配状态
+        let status = ConstraintManager.checkAdaptationStatus(for: settingsView)
+        print("已适配约束: \(status.adapted)/\(status.total)")
+        
+        // 导出约束信息
+        let constraintInfo = ConstraintManager.exportConstraintInfo(for: settingsView)
+        print("约束信息: \(constraintInfo)")
+    }
+    
+    @IBAction func toggleAdaptation(_ sender: UISwitch) {
+        if sender.isOn {
+            // 启用适配
+            settingsView.st_adaptAllConstraints()
+        } else {
+            // 禁用适配
+            settingsView.st_resetAllConstraints()
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+}
+```
+
+### 使用建议
+
+1. **设计基准**：
+   - 在 `STDeviceAdapter` 中设置正确的设计基准尺寸
+   - 确保约束值基于设计稿的尺寸设置
+
+2. **适配类型选择**：
+   - 宽度约束使用 `.width` 类型
+   - 高度约束使用 `.height` 类型
+   - 间距和边距使用 `.spacing` 或 `.margin` 类型
+   - 字体大小约束使用 `.fontSize` 类型
+
+3. **性能考虑**：
+   - 避免在 `viewDidLoad` 中频繁调用适配方法
+   - 使用批量操作处理多个约束
+   - 在屏幕旋转时重新适配约束
+
+4. **调试技巧**：
+   - 使用 `st_getOriginalConstant()` 和 `st_getAdaptedConstant()` 检查适配结果
+   - 使用 `st_isAdapted()` 检查约束是否已适配
+   - 使用 `ConstraintManager` 工具类管理约束
+
+5. **最佳实践**：
+   - 在 Interface Builder 中设置适配属性
+   - 使用代码进行动态调整
+   - 保持约束的原始值，便于重置和调试
+
+## 十九、STLogView
+
+`STLogView` 是一个功能强大的日志查看和管理工具。它提供了现代化的日志显示界面，支持日志级别分类、搜索过滤、主题切换、导出分享等功能，是开发和调试过程中的得力助手。
+
+### 主要特性
+
+- **日志级别分类**：支持 DEBUG、INFO、WARNING、ERROR、FATAL 五个级别
+- **智能搜索**：支持按消息内容、文件名、函数名搜索
+- **级别过滤**：可按日志级别过滤显示
+- **主题切换**：支持明暗主题切换
+- **导出分享**：支持导出日志到文件或分享
+- **实时更新**：支持实时接收和显示新日志
+- **现代化 UI**：采用现代化的界面设计
+- **自定义 Cell**：美观的日志条目显示
+
+### 基本用法
+
+#### 创建日志视图
+
+```swift
+// 创建日志视图
+let logView = STLogView(frame: view.bounds)
+view.addSubview(logView)
+
+// 设置代理
+logView.mDelegate = self
+
+// 设置主题
+logView.st_setTheme(.dark) // 或 .light
+```
+
+#### 日志级别使用
+
+```swift
+// 使用不同级别的日志
+STLog("这是一条调试信息")           // DEBUG 级别
+STLogP("这是一条持久化日志")        // 持久化到文件
+
+// 日志会自动解析并显示在 STLogView 中
+```
+
+#### 搜索和过滤
+
+```swift
+// 设置搜索文本
+logView.st_setSearchText("error")
+
+// 设置日志级别过滤
+logView.st_setLogLevelFilter([.error, .fatal])
+
+// 获取当前过滤状态
+let isFiltering = logView.st_isFiltering()
+let searchText = logView.st_getSearchText()
+let selectedLevels = logView.st_getSelectedLogLevels()
+```
+
+#### 日志管理
+
+```swift
+// 获取日志数量
+let totalCount = logView.st_getAllLogCount()
+let filteredCount = logView.st_getFilteredLogCount()
+let currentCount = logView.st_getLogCount()
+
+// 清空所有日志
+logView.st_clearAllLogs()
+
+// 导出当前显示的日志
+logView.st_exportCurrentLogs()
+```
+
+### 实际应用示例
+
+```swift
+class LogViewController: UIViewController {
+    
+    private var logView: STLogView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupLogView()
+    }
+    
+    private func setupLogView() {
+        // 创建日志视图
+        logView = STLogView(frame: view.bounds)
+        logView.mDelegate = self
+        view.addSubview(logView)
+        
+        // 设置约束
+        logView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            logView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            logView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            logView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            logView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        // 设置主题
+        if traitCollection.userInterfaceStyle == .dark {
+            logView.st_setTheme(.dark)
+        } else {
+            logView.st_setTheme(.light)
+        }
+    }
+    
+    // 测试日志功能
+    @IBAction func testLogging(_ sender: UIButton) {
+        STLog("这是一条调试信息")
+        STLogP("这是一条持久化日志")
+        
+        // 模拟不同级别的日志
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            STLogP("网络请求开始")
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            STLogP("网络请求成功")
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            STLogP("用户登录失败")
+        }
+    }
+    
+    // 响应主题变化
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.userInterfaceStyle != previousTraitCollection?.userInterfaceStyle {
+            let newTheme: STLogViewTheme = traitCollection.userInterfaceStyle == .dark ? .dark : .light
+            logView.st_setTheme(newTheme)
+        }
+    }
+}
+
+// MARK: - STLogViewDelegate
+extension LogViewController: STLogViewDelegate {
+    
+    func logViewBackBtnClick() {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    func logViewShowDocumentInteractionController() {
+        // 显示文档交互控制器
+        let documentController = UIDocumentInteractionController(url: URL(fileURLWithPath: STLogView.st_outputLogPath()))
+        documentController.presentOpenInMenu(from: view.bounds, in: view, animated: true)
+    }
+    
+    func logViewDidSelectLog(_ logEntry: STLogEntry) {
+        // 显示日志详情
+        let alert = UIAlertController(title: "日志详情", message: logEntry.rawContent, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "确定", style: .default))
+        present(alert, animated: true)
+    }
+    
+    func logViewDidFilterLogs(with results: [STLogEntry]) {
+        // 过滤结果回调
+        print("过滤结果: \(results.count) 条日志")
+    }
+}
+
+// 日志管理工具类
+class LogManager {
+    
+    /// 配置日志系统
+    static func configureLogging() {
+        // 设置日志输出路径
+        let logPath = STLogView.st_outputLogPath()
+        print("日志文件路径: \(logPath)")
+    }
+    
+    /// 记录网络请求日志
+    static func logNetworkRequest(_ request: URLRequest) {
+        let message = """
+        网络请求: \(request.httpMethod ?? "GET") \(request.url?.absoluteString ?? "")
+        请求头: \(request.allHTTPHeaderFields ?? [:])
+        """
+        STLogP(message)
+    }
+    
+    /// 记录网络响应日志
+    static func logNetworkResponse(_ response: URLResponse?, data: Data?, error: Error?) {
+        if let error = error {
+            STLogP("网络请求失败: \(error.localizedDescription)")
+        } else if let httpResponse = response as? HTTPURLResponse {
+            let message = """
+            网络响应: \(httpResponse.statusCode)
+            响应头: \(httpResponse.allHeaderFields)
+            响应数据大小: \(data?.count ?? 0) 字节
+            """
+            STLogP(message)
+        }
+    }
+    
+    /// 记录用户操作日志
+    static func logUserAction(_ action: String, parameters: [String: Any]? = nil) {
+        var message = "用户操作: \(action)"
+        if let params = parameters {
+            message += "\n参数: \(params)"
+        }
+        STLogP(message)
+    }
+    
+    /// 记录错误日志
+    static func logError(_ error: Error, context: String = "") {
+        let message = """
+        错误: \(error.localizedDescription)
+        上下文: \(context)
+        错误详情: \(error)
+        """
+        STLogP(message)
+    }
+    
+    /// 记录性能日志
+    static func logPerformance(_ operation: String, duration: TimeInterval) {
+        let message = "性能: \(operation) 耗时 \(String(format: "%.3f", duration)) 秒"
+        STLogP(message)
+    }
+}
+
+// 在应用中使用
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        
+        // 配置日志系统
+        LogManager.configureLogging()
+        
+        // 记录应用启动
+        STLogP("应用启动完成")
+        
+        return true
+    }
+}
+```
+
+### 日志级别说明
+
+- **DEBUG** 🔍：调试信息，用于开发过程中的调试
+- **INFO** ℹ️：一般信息，记录程序运行状态
+- **WARNING** ⚠️：警告信息，表示可能的问题
+- **ERROR** ❌：错误信息，表示程序错误
+- **FATAL** 💀：致命错误，表示严重问题
+
+### 主题配置
+
+```swift
+// 浅色主题
+let lightTheme = STLogViewTheme.light
+
+// 深色主题
+let darkTheme = STLogViewTheme.dark
+
+// 自定义主题
+var customTheme = STLogViewTheme()
+customTheme.backgroundColor = .systemBackground
+customTheme.textColor = .label
+customTheme.buttonTintColor = .systemBlue
+// ... 其他配置
+
+logView.st_setTheme(customTheme)
+```
+
+### 使用建议
+
+1. **日志级别使用**：
+   - DEBUG：开发调试时使用
+   - INFO：记录重要的程序状态
+   - WARNING：记录可能的问题
+   - ERROR：记录程序错误
+   - FATAL：记录致命错误
+
+2. **性能考虑**：
+   - 避免在生产环境中使用过多的 DEBUG 日志
+   - 使用 STLogP 记录重要的持久化日志
+   - 定期清理日志文件
+
+3. **搜索技巧**：
+   - 使用关键词搜索特定功能的日志
+   - 结合日志级别过滤提高效率
+   - 利用文件名和函数名快速定位问题
+
+4. **导出分享**：
+   - 导出日志用于问题分析
+   - 分享给团队成员进行协作调试
+   - 保存重要的日志记录
+
+5. **主题选择**：
+   - 根据系统主题自动切换
+   - 根据个人喜好选择主题
+   - 考虑长时间使用的舒适度
 
 ### v2.1.1
 - **STDate.swift 全面优化**：重构日期处理功能，新增以下特性：
