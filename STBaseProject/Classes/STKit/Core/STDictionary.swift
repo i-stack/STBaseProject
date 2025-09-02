@@ -126,29 +126,22 @@ public extension Dictionary {
         return st_urlEncodedToString().data(using: .utf8)
     }
     
-    // MARK: - JSON Methods
+    // MARK: - JSON Methods (已迁移到 STJSONValue.swift)
     
     /// 将字典转换为JSON字符串
     /// - Parameter prettyPrinted: 是否美化输出
     /// - Returns: JSON字符串
+    @available(*, deprecated, message: "请使用 st_toJSONString 方法，已迁移到 STJSONValue.swift")
     func st_toJSONString(prettyPrinted: Bool = false) -> String? {
-        do {
-            let data = try JSONSerialization.data(withJSONObject: self, options: prettyPrinted ? .prettyPrinted : [])
-            return String(data: data, encoding: .utf8)
-        } catch {
-            return nil
-        }
+        return st_toJSONString(prettyPrinted: prettyPrinted)
     }
     
     /// 将字典转换为JSON数据
     /// - Parameter prettyPrinted: 是否美化输出
     /// - Returns: JSON数据
+    @available(*, deprecated, message: "请使用 st_toJSONData 方法，已迁移到 STJSONValue.swift")
     func st_toJSONData(prettyPrinted: Bool = false) -> Data? {
-        do {
-            return try JSONSerialization.data(withJSONObject: self, options: prettyPrinted ? .prettyPrinted : [])
-        } catch {
-            return nil
-        }
+        return st_toJSONData(prettyPrinted: prettyPrinted)
     }
     
     // MARK: - Dictionary Operations
@@ -392,30 +385,17 @@ public extension Dictionary {
     /// 从JSON字符串创建字典
     /// - Parameter jsonString: JSON字符串
     /// - Returns: 字典对象
+    @available(*, deprecated, message: "请使用 String.st_toDictionary 方法，已迁移到 STJSONValue.swift")
     static func st_fromJSON(_ jsonString: String) -> [String: Any]? {
-        guard let data = jsonString.data(using: .utf8) else { return nil }
-        do {
-            if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-                return json
-            }
-        } catch {
-            return nil
-        }
-        return nil
+        return jsonString.st_toDictionary()
     }
     
     /// 从JSON数据创建字典
     /// - Parameter jsonData: JSON数据
     /// - Returns: 字典对象
+    @available(*, deprecated, message: "请使用 Data.st_toDictionary 方法，已迁移到 STJSONValue.swift")
     static func st_fromJSONData(_ jsonData: Data) -> [String: Any]? {
-        do {
-            if let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-                return json
-            }
-        } catch {
-            return nil
-        }
-        return nil
+        return jsonData.st_toDictionary()
     }
     
     /// 从键值对数组创建字典

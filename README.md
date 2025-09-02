@@ -2007,7 +2007,251 @@ class MyViewController: UIViewController {
 }
 ```
 
-### 十一、STHTTPSession
+### 十一、STJSONValue
+
+`STJSONValue` 是一个功能强大的 JSON 处理扩展，提供了完整的 JSON 创建、解析、转换和管理功能。它整合了项目中所有 JSON 相关的方法，提供统一的 API 接口，支持多种数据类型和 Codable 协议。
+
+#### 主要特性
+
+- **统一的 JSON 处理**：整合项目中所有 JSON 相关方法，避免重复代码
+- **多种数据类型支持**：支持所有 JSON 数据类型，包括 null 值
+- **完整的 Codable 支持**：编码、解码、错误处理等完整功能
+- **扩展方法丰富**：为 Data、String、Dictionary、Array 等类型提供 JSON 扩展
+- **工具类支持**：提供 JSON 验证、比较、合并、文件操作等实用工具
+- **向后兼容性**：保持旧版本 API 的兼容性，渐进式升级
+
+#### 基础 JSON 值类型
+
+```swift
+// 创建 JSON 值
+let jsonString = STJSONValue.string("Hello")
+let jsonInt = STJSONValue.int(42)
+let jsonBool = STJSONValue.bool(true)
+let jsonArray = STJSONValue.array([.string("item1"), .int(123)])
+let jsonObject = STJSONValue.object(["name": .string("John"), "age": .int(30)])
+let jsonNull = STJSONValue.null
+
+// 获取值
+let stringValue = jsonString.stringValue        // "Hello"
+let intValue = jsonInt.intValue                // 42
+let boolValue = jsonBool.boolValue             // true
+let arrayValue = jsonArray.arrayValue          // [STJSONValue]
+let objectValue = jsonObject.objectValue       // [String: STJSONValue]
+let isNull = jsonNull.isNull                   // true
+```
+
+#### Data JSON 扩展
+
+```swift
+// 从 Data 解析 JSON
+let data: Data = // ... JSON 数据
+let jsonObject = data.st_toJSONObject()
+let dictionary = data.st_toDictionary()
+let array = data.st_toArray()
+
+// 检查是否为有效 JSON
+let isValid = data.st_isValidJSON
+
+// 从 JSON 对象创建 Data
+let newData = Data.st_fromJSONObject(["key": "value"])
+
+// Codable 支持
+let user: User? = data.st_decode(User.self)
+let result: Result<User, Error> = data.st_decodeWithError(User.self)
+```
+
+#### String JSON 扩展
+
+```swift
+// 从 JSON 字符串解析
+let jsonString = "{\"name\": \"John\", \"age\": 30}"
+let dictionary = jsonString.st_toDictionary()
+let array = jsonString.st_toArray()
+let jsonObject = jsonString.st_toJSONObject()
+
+// 检查是否为有效 JSON
+let isValid = jsonString.st_isValidJSON
+
+// Codable 支持
+let user: User? = jsonString.st_decode(User.self)
+let result: Result<User, Error> = jsonString.st_decodeWithError(User.self)
+```
+
+#### Dictionary JSON 扩展
+
+```swift
+let dict = ["name": "John", "age": 30, "city": "New York"]
+
+// 转换为 JSON 字符串
+let jsonString = dict.st_toJSONString()
+let prettyJsonString = dict.st_toJSONString(prettyPrinted: true)
+
+// 转换为 JSON 数据
+let jsonData = dict.st_toJSONData()
+let prettyJsonData = dict.st_toJSONData(prettyPrinted: true)
+
+// 检查是否为有效 JSON
+let isValid = dict.st_isValidJSON
+```
+
+#### Array JSON 扩展
+
+```swift
+let array = ["item1", "item2", "item3"]
+
+// 转换为 JSON 字符串
+let jsonString = array.st_toJSONString()
+let prettyJsonString = array.st_toJSONString(prettyPrinted: true)
+
+// 转换为 JSON 数据
+let jsonData = array.st_toJSONData()
+let prettyJsonData = array.st_toJSONData(prettyPrinted: true)
+
+// 检查是否为有效 JSON
+let isValid = array.st_isValidJSON
+```
+
+#### Codable 扩展
+
+```swift
+struct User: Codable {
+    let name: String
+    let age: Int
+    let email: String
+}
+
+let user = User(name: "John", age: 30, email: "john@example.com")
+
+// 编码为 JSON 数据
+let jsonData = user.st_toJSONData()
+let jsonString = user.st_toJSONString()
+
+// 带错误处理的编码
+let dataResult = user.st_toJSONDataWithError()
+let stringResult = user.st_toJSONStringWithError()
+
+switch dataResult {
+case .success(let data):
+    print("编码成功: \(data)")
+case .failure(let error):
+    print("编码失败: \(error)")
+}
+```
+
+#### JSON 工具类
+
+```swift
+// 创建美化的 JSON 字符串
+let prettyString = STJSONUtils.st_prettyJSONString(from: ["key": "value"])
+
+// 验证 JSON
+let isValidString = STJSONUtils.st_validateJSON(jsonString)
+let isValidData = STJSONUtils.st_validateJSONData(jsonData)
+
+// 比较两个 JSON 对象
+let areEqual = STJSONUtils.st_areEqual(obj1, obj2)
+
+// 深度合并 JSON 对象
+let merged = STJSONUtils.st_merge(dict1, dict2)
+
+// 文件操作
+let jsonFromFile = STJSONUtils.st_readJSONFromFile("/path/to/file.json")
+let success = STJSONUtils.st_writeJSONToFile(data, path: "/path/to/output.json", prettyPrinted: true)
+
+// 从 Bundle 读取
+let jsonFromBundle = STJSONUtils.st_readJSONFromBundle(name: "config")
+let user: User? = STJSONUtils.st_readJSONFromBundle(name: "users", type: User.self)
+```
+
+#### 实际应用示例
+
+```swift
+class JSONManager {
+    
+    // 解析网络响应
+    static func parseResponse<T: Codable>(_ data: Data, type: T.Type) -> T? {
+        return data.st_decode(type)
+    }
+    
+    // 保存用户配置
+    static func saveUserConfig(_ user: User) -> Bool {
+        let jsonString = user.st_toJSONString()
+        guard let jsonString = jsonString else { return false }
+        
+        return STJSONUtils.st_writeJSONToFile(
+            ["user": jsonString],
+            path: "/path/to/config.json",
+            prettyPrinted: true
+        )
+    }
+    
+    // 加载应用配置
+    static func loadAppConfig() -> [String: Any]? {
+        return STJSONUtils.st_readJSONFromBundle(name: "app_config")
+    }
+    
+    // 验证用户输入
+    static func validateUserInput(_ input: String) -> Bool {
+        return STJSONUtils.st_validateJSON(input)
+    }
+    
+    // 合并配置
+    static func mergeConfigs(_ defaultConfig: [String: Any], _ userConfig: [String: Any]) -> [String: Any] {
+        return STJSONUtils.st_merge(defaultConfig, userConfig)
+    }
+}
+
+// 在视图控制器中使用
+class SettingsViewController: UIViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        loadSettings()
+    }
+    
+    private func loadSettings() {
+        // 从 Bundle 加载默认配置
+        if let defaultConfig = STJSONUtils.st_readJSONFromBundle(name: "default_settings") {
+            print("默认配置: \(defaultConfig)")
+        }
+        
+        // 从文件加载用户配置
+        if let userConfig = STJSONUtils.st_readJSONFromFile("/path/to/user_settings.json") {
+            print("用户配置: \(userConfig)")
+        }
+    }
+    
+    private func saveSettings(_ settings: [String: Any]) {
+        let success = STJSONUtils.st_writeJSONToFile(
+            settings,
+            path: "/path/to/user_settings.json",
+            prettyPrinted: true
+        )
+        
+        if success {
+            print("设置保存成功")
+        } else {
+            print("设置保存失败")
+        }
+    }
+}
+```
+
+#### 迁移指南
+
+由于已经将项目中所有 JSON 相关方法统一到 `STJSONValue.swift`，旧的方法仍然可用但已被标记为废弃：
+
+```swift
+// 旧方法（已废弃，但仍然可用）
+let dict = data.toDictionary()
+let jsonString = dict.toJSONString()
+
+// 新方法（推荐使用）
+let dict = data.st_toDictionary()
+let jsonString = dict.st_toJSONString()
+```
+
+### 十二、STHTTPSession
 
 `STHTTPSession` 是一个功能完整的网络请求封装类，基于 `URLSession` 构建，提供了便捷的网络请求操作、参数编码、请求头管理等功能。
 
@@ -2922,6 +3166,19 @@ STAlertController.st_showCustomAlert(
 5. **兼容性**：深色模式功能需要 iOS 13+ 支持
 
 ## 更新日志
+
+### v2.1.5
+- **STJSONValue.swift 全面重构**：统一管理项目中所有 JSON 相关方法，新增以下特性：
+  - 整合所有 JSON 方法：将 STData、STDictionary、STBaseViewModel 等类中的 JSON 相关方法统一迁移
+  - 增强 STJSONValue 枚举：新增 null 值支持，完善编码解码功能，提供值获取方法
+  - 新增多类型扩展：为 Data、String、Dictionary、Array、Encodable 等类型提供完整的 JSON 扩展
+  - 新增 JSON 工具类：提供验证、比较、合并、文件操作等实用工具方法
+  - 新增 Codable 支持：完整的编码解码功能，支持错误处理和结果类型
+  - 改进向后兼容性：旧方法标记为废弃但保持可用，支持渐进式升级
+  - 优化代码结构：使用 MARK 注释分组，提高代码可读性和维护性
+  - 完善文档注释：为所有方法添加详细的参数说明、返回值说明和使用示例
+  - 新增文件操作支持：支持从文件、Bundle 读取和写入 JSON 数据
+  - 统一错误处理：提供 STJSONError 枚举，统一 JSON 相关错误类型
 
 ### v2.1.4
 - **STHexColor.swift 全面优化**：重构颜色管理功能，新增以下特性：

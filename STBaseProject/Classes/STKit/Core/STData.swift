@@ -89,42 +89,37 @@ public extension Data {
         return Data(base64Encoded: base64String, options: options)
     }
     
-    // MARK: - JSON Operations
+    // MARK: - JSON Operations (已迁移到 STJSONValue.swift)
     
     /// 转换为 JSON 对象
     /// - Parameter options: JSON 读取选项
     /// - Returns: JSON 对象，失败返回 nil
+    @available(*, deprecated, message: "请使用 st_toJSONObject 方法，已迁移到 STJSONValue.swift")
     func toJSONObject(options: JSONSerialization.ReadingOptions = []) -> Any? {
-        do {
-            return try JSONSerialization.jsonObject(with: self, options: options)
-        } catch {
-            return nil
-        }
+        return st_toJSONObject(options: options)
     }
     
     /// 转换为字典
     /// - Returns: 字典对象，失败返回 nil
+    @available(*, deprecated, message: "请使用 st_toDictionary 方法，已迁移到 STJSONValue.swift")
     func toDictionary() -> [String: Any]? {
-        return toJSONObject() as? [String: Any]
+        return st_toDictionary()
     }
     
     /// 转换为数组
     /// - Returns: 数组对象，失败返回 nil
+    @available(*, deprecated, message: "请使用 st_toArray 方法，已迁移到 STJSONValue.swift")
     func toArray() -> [Any]? {
-        return toJSONObject() as? [Any]
+        return st_toArray()
     }
     
     /// 从 JSON 对象创建 Data
     /// - Parameter jsonObject: JSON 对象
     /// - Parameter options: JSON 写入选项
     /// - Returns: Data 对象，失败返回 nil
+    @available(*, deprecated, message: "请使用 st_fromJSONObject 方法，已迁移到 STJSONValue.swift")
     static func fromJSONObject(_ jsonObject: Any, options: JSONSerialization.WritingOptions = []) -> Data? {
-        guard JSONSerialization.isValidJSONObject(jsonObject) else { return nil }
-        do {
-            return try JSONSerialization.data(withJSONObject: jsonObject, options: options)
-        } catch {
-            return nil
-        }
+        return st_fromJSONObject(jsonObject, options: options)
     }
     
     // MARK: - Hash Operations

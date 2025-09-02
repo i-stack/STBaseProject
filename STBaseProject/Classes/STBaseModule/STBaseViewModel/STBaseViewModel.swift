@@ -544,19 +544,21 @@ open class STBaseViewModel: NSObject {
     }
     
     open func st_parseJSON<T: Codable>(_ data: Data, type: T.Type) -> Result<T, STBaseError> {
-        do {
-            let result = try JSONDecoder().decode(type, from: data)
-            return .success(result)
-        } catch {
+        let result = data.st_decodeWithError(type)
+        switch result {
+        case .success(let decoded):
+            return .success(decoded)
+        case .failure(let error):
             return .failure(STBaseError.dataError("JSON解析失败: \(error.localizedDescription)"))
         }
     }
     
     open func st_toJSON<T: Codable>(_ object: T) -> Result<Data, STBaseError> {
-        do {
-            let data = try JSONEncoder().encode(object)
+        let result = object.st_toJSONDataWithError()
+        switch result {
+        case .success(let data):
             return .success(data)
-        } catch {
+        case .failure(let error):
             return .failure(STBaseError.dataError("JSON编码失败: \(error.localizedDescription)"))
         }
     }

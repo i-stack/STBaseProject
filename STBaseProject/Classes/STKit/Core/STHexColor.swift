@@ -400,20 +400,19 @@ public extension UIColor {
     /// - Parameter jsonString: JSON 文件路径
     static func st_resolvedColor(jsonString: String) {
         if jsonString.count > 0 {
-            if let data = try? Data(contentsOf: URL(fileURLWithPath: jsonString)) {
-                if let objc = try? JSONSerialization.jsonObject(with: data) as? Dictionary<String, Dictionary<String, String>> {
-                    var colorsInfo = STColorsInfo()
-                    for key in objc.keys {
-                        var colorModel = STColorModel()
-                        if let value = objc[key] {
-                            colorModel.light = String.st_returnStr(object: value["light"] ?? "")
-                            colorModel.dark = String.st_returnStr(object: value["dark"] ?? "")
-                        }
-                        colorsInfo.colors[key] = colorModel
+            if let jsonObject = STJSONUtils.st_readJSONFromFile(jsonString),
+               let objc = jsonObject as? Dictionary<String, Dictionary<String, String>> {
+                var colorsInfo = STColorsInfo()
+                for key in objc.keys {
+                    var colorModel = STColorModel()
+                    if let value = objc[key] {
+                        colorModel.light = String.st_returnStr(object: value["light"] ?? "")
+                        colorModel.dark = String.st_returnStr(object: value["dark"] ?? "")
                     }
-                    if colorsInfo.colors.count > 0 {
-                        objc_setAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey, colorsInfo, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-                    }
+                    colorsInfo.colors[key] = colorModel
+                }
+                if colorsInfo.colors.count > 0 {
+                    objc_setAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey, colorsInfo, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
                 }
             }
         }
