@@ -31,14 +31,6 @@ public struct STConstantBarHeightModel {
     }
 }
 
-// MARK: - 设备类型枚举
-public enum STDeviceType {
-    case iPhone
-    case iPad
-    case mac
-    case unknown
-}
-
 // MARK: - 设备适配管理类
 /// 设备适配管理类
 /// 负责设备判断、尺寸计算、比例缩放、界面适配等功能
@@ -147,20 +139,13 @@ public class STDeviceAdapter: NSObject {
         return self.st_apph() > 736
     }
     
-    /// 判断是否为 iPad
-    public class func st_isIPad() -> Bool {
-        return UIDevice.current.userInterfaceIdiom == .pad
-    }
-    
-    /// 获取设备类型
-    public class func st_deviceType() -> STDeviceType {
-        if st_isIPad() {
-            return .iPad
-        } else if st_isNotchScreen() {
-            return .iPhone
-        } else {
-            return .unknown
+    /// 获取安全区域
+    public static func st_getSafeAreaInsets() -> UIEdgeInsets {
+        if #available(iOS 11.0, *) {
+            let window = UIApplication.shared.windows.first
+            return window?.safeAreaInsets ?? .zero
         }
+        return .zero
     }
     
     // MARK: - 导航栏高度
