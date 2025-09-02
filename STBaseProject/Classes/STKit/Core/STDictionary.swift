@@ -126,24 +126,6 @@ public extension Dictionary {
         return st_urlEncodedToString().data(using: .utf8)
     }
     
-    // MARK: - JSON Methods (已迁移到 STJSONValue.swift)
-    
-    /// 将字典转换为JSON字符串
-    /// - Parameter prettyPrinted: 是否美化输出
-    /// - Returns: JSON字符串
-    @available(*, deprecated, message: "请使用 st_toJSONString 方法，已迁移到 STJSONValue.swift")
-    func st_toJSONString(prettyPrinted: Bool = false) -> String? {
-        return st_toJSONString(prettyPrinted: prettyPrinted)
-    }
-    
-    /// 将字典转换为JSON数据
-    /// - Parameter prettyPrinted: 是否美化输出
-    /// - Returns: JSON数据
-    @available(*, deprecated, message: "请使用 st_toJSONData 方法，已迁移到 STJSONValue.swift")
-    func st_toJSONData(prettyPrinted: Bool = false) -> Data? {
-        return st_toJSONData(prettyPrinted: prettyPrinted)
-    }
-    
     // MARK: - Dictionary Operations
     
     /// 合并另一个字典（不修改原字典）
