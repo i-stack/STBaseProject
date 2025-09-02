@@ -25,35 +25,47 @@ public enum STKeychainAccessControl {
     
     var secAccessControl: SecAccessControl? {
         var flags: SecAccessControlCreateFlags = []
+        var accessible: CFString = kSecAttrAccessibleWhenUnlocked
         
         switch self {
         case .whenUnlocked:
-            flags = .whenUnlocked
+            accessible = kSecAttrAccessibleWhenUnlocked
+            flags = []
         case .whenUnlockedThisDeviceOnly:
-            flags = [.whenUnlocked, .thisDeviceOnly]
+            accessible = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+            flags = []
         case .afterFirstUnlock:
-            flags = .afterFirstUnlock
+            accessible = kSecAttrAccessibleAfterFirstUnlock
+            flags = []
         case .afterFirstUnlockThisDeviceOnly:
-            flags = [.afterFirstUnlock, .thisDeviceOnly]
+            accessible = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+            flags = []
         case .whenPasscodeSetThisDeviceOnly:
-            flags = [.whenPasscodeSet, .thisDeviceOnly]
+            accessible = kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
+            flags = []
         case .biometricAny:
+            accessible = kSecAttrAccessibleWhenUnlocked
             flags = .biometryAny
         case .biometricCurrentSet:
+            accessible = kSecAttrAccessibleWhenUnlocked
             flags = .biometryCurrentSet
         case .devicePasscode:
+            accessible = kSecAttrAccessibleWhenUnlocked
             flags = .devicePasscode
         case .applicationPassword:
+            accessible = kSecAttrAccessibleWhenUnlocked
             flags = .applicationPassword
         case .biometricAnyOrDevicePasscode:
+            accessible = kSecAttrAccessibleWhenUnlocked
             flags = [.biometryAny, .or, .devicePasscode]
         case .biometricCurrentSetOrDevicePasscode:
+            accessible = kSecAttrAccessibleWhenUnlocked
             flags = [.biometryCurrentSet, .or, .devicePasscode]
         }
         
         return SecAccessControlCreateWithFlags(
             kCFAllocatorDefault,
-            kSecAttrAccessibleWhenUnlocked,
+            accessible,
             flags,
             nil
         )
@@ -185,7 +197,7 @@ public class STKeychainHelper {
         
         // 添加同步设置
         if sync != .none {
-            query[kSecAttrSynchronizable as String] = kCFBooleanTrue
+            query[kSecAttrSynchronizable as String] = kCFBooleanTrue!
         }
         
         // 添加访问组（如果设置了）
@@ -212,7 +224,7 @@ public class STKeychainHelper {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecAttrService as String: service,
-            kSecReturnData as String: kCFBooleanTrue,
+            kSecReturnData as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
         
@@ -234,7 +246,7 @@ public class STKeychainHelper {
             return result as? Data
         case errSecItemNotFound:
             return nil
-        case errSecUserCancel, errSecAuthFailed:
+        case errSecUserCanceled, errSecAuthFailed:
             throw STKeychainError.accessDenied
         default:
             throw STKeychainError.unhandledError(status: status)
@@ -266,7 +278,7 @@ public class STKeychainHelper {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecAttrService as String: service,
-            kSecReturnData as String: kCFBooleanFalse,
+            kSecReturnData as String: kCFBooleanFalse!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
         
@@ -410,7 +422,7 @@ public class STKeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecReturnAttributes as String: kCFBooleanTrue,
+            kSecReturnAttributes as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitAll
         ]
         
@@ -510,7 +522,7 @@ public class STKeychainHelper {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecReturnAttributes as String: kCFBooleanTrue,
+            kSecReturnAttributes as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitAll
         ]
         
