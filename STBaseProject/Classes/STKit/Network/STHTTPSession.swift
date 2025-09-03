@@ -37,6 +37,12 @@ public struct STRequestConfig {
     var headers: [String: String] = [:]
     var showLoading: Bool = true
     var showError: Bool = true
+    
+    // 新增：加密配置
+    var enableEncryption: Bool = false
+    var encryptionKey: String?
+    var enableRequestSigning: Bool = false
+    var signingSecret: String?
 
     public init(
         retryCount: Int = 0,
@@ -49,7 +55,11 @@ public struct STRequestConfig {
         cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
         headers: [String: String] = [:],
         showLoading: Bool = true,
-        showError: Bool = true) {
+        showError: Bool = true,
+        enableEncryption: Bool = false,
+        encryptionKey: String? = nil,
+        enableRequestSigning: Bool = false,
+        signingSecret: String? = nil) {
         self.cachePolicy = cachePolicy
         self.retryCount = retryCount
         self.retryDelay = retryDelay
@@ -61,6 +71,10 @@ public struct STRequestConfig {
         self.headers = headers
         self.showLoading = showLoading
         self.showError = showError
+        self.enableEncryption = enableEncryption
+        self.encryptionKey = encryptionKey
+        self.enableRequestSigning = enableRequestSigning
+        self.signingSecret = signingSecret
     }
 }
 
@@ -485,6 +499,8 @@ open class STHTTPSession: NSObject {
             request.setValue(value, forHTTPHeaderField: key)
         }
         if let parameters = parameters {
+            var requestData: Data?
+            
             switch encodingType {
             case .url:
                 if method == .get {
@@ -494,23 +510,45 @@ open class STHTTPSession: NSObject {
                         request.url = urlComponents.url
                     }
                 } else {
-                    if let data = STParameterEncoder.st_encodeFormData(parameters) {
-                        request.httpBody = data
-                        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-                    }
-                }
-            case .json:
-                if let data = STParameterEncoder.st_encodeJSON(parameters) {
-                    request.httpBody = data
-                    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                }
-            case .formData:
-                if let data = STParameterEncoder.st_encodeFormData(parameters) {
-                    request.httpBody = data
+                    requestData = STParameterEncoder.st_encodeFormData(parameters)
                     request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
                 }
+            case .json:
+                requestData = STParameterEncoder.st_encodeJSON(parameters)
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            case .formData:
+                requestData = STParameterEncoder.st_encodeFormData(parameters)
+                request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             case .multipart:
                 break
+            }
+            
+            // 处理数据加密和签名
+            if let data = requestData {
+                var finalData = data
+                
+                // 数据加密
+                if config.enableEncryption, let encryptionKey = config.encryptionKey {
+                    do {
+                        finalData = try st_encryptRequestData(data, key: encryptionKey)
+                        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+                        request.setValue("encrypted", forHTTPHeaderField: "X-Content-Encoding")
+                    } catch {
+                        let response = STHTTPResponse(data: nil, response: nil, error: error)
+                        completion(response)
+                        return
+                    }
+                }
+                
+                // 请求签名
+                if config.enableRequestSigning, let signingSecret = config.signingSecret {
+                    let timestamp = Date().timeIntervalSince1970
+                    let signature = st_generateRequestSignature(finalData, secret: signingSecret, timestamp: timestamp)
+                    request.setValue(signature, forHTTPHeaderField: "X-Request-Signature")
+                    request.setValue(String(Int(timestamp)), forHTTPHeaderField: "X-Timestamp")
+                }
+                
+                request.httpBody = finalData
             }
         }
         st_executeRequest(request, completion: completion)
@@ -582,7 +620,39 @@ open class STHTTPSession: NSObject {
                 return
             }
         }
-        let httpResponse = STHTTPResponse(data: data, response: response, error: nil)
+        
+        // 处理响应数据解密
+        var finalData = data
+        if let responseData = data, let httpResponse = response as? HTTPURLResponse {
+            // 检查是否需要解密
+            if httpResponse.allHeaderFields["X-Content-Encoding"] as? String == "encrypted" {
+                if let encryptionKey = currentRequestConfig?.encryptionKey {
+                    do {
+                        finalData = try st_decryptResponseData(responseData, key: encryptionKey)
+                    } catch {
+                        let errorResponse = STHTTPResponse(data: nil, response: response, error: error)
+                        completion(errorResponse)
+                        return
+                    }
+                }
+            }
+            
+            // 验证响应签名
+            if let signingSecret = currentRequestConfig?.signingSecret,
+               let signature = httpResponse.allHeaderFields["X-Response-Signature"] as? String,
+               let timestampString = httpResponse.allHeaderFields["X-Timestamp"] as? String,
+               let timestamp = TimeInterval(timestampString) {
+                
+                if !st_verifyResponseSignature(finalData ?? Data(), signature: signature, secret: signingSecret, timestamp: timestamp) {
+                    let error = STHTTPError.httpError(400, "响应签名验证失败")
+                    let errorResponse = STHTTPResponse(data: finalData, response: response, error: error)
+                    completion(errorResponse)
+                    return
+                }
+            }
+        }
+        
+        let httpResponse = STHTTPResponse(data: finalData, response: response, error: nil)
         completion(httpResponse)
     }
     
@@ -608,10 +678,128 @@ open class STHTTPSession: NSObject {
     public func st_clearCache() {
         URLCache.shared.removeAllCachedResponses()
     }
+    
+    // MARK: - 数据加密相关方法
+    
+    /// 加密请求数据
+    private func st_encryptRequestData(_ data: Data, key: String) throws -> Data {
+        return try STNetworkCrypto.st_encryptData(data, keyString: key)
+    }
+    
+    /// 解密响应数据
+    private func st_decryptResponseData(_ data: Data, key: String) throws -> Data {
+        return try STNetworkCrypto.st_decryptData(data, keyString: key)
+    }
+    
+    /// 生成请求签名
+    private func st_generateRequestSignature(_ data: Data, secret: String, timestamp: TimeInterval) -> String {
+        return STNetworkCrypto.st_signData(data, secret: secret, timestamp: timestamp)
+    }
+    
+    /// 验证响应签名
+    private func st_verifyResponseSignature(_ data: Data, signature: String, secret: String, timestamp: TimeInterval) -> Bool {
+        return STNetworkCrypto.st_verifySignature(data, signature: signature, secret: secret, timestamp: timestamp)
+    }
+}
+
+// MARK: - SSL证书绑定配置
+public struct STSSLPinningConfig {
+    let enabled: Bool
+    let certificates: [Data]
+    let publicKeyHashes: [String]
+    let validateHost: Bool
+    let allowInvalidCertificates: Bool
+    
+    public init(enabled: Bool = true,
+                certificates: [Data] = [],
+                publicKeyHashes: [String] = [],
+                validateHost: Bool = true,
+                allowInvalidCertificates: Bool = false) {
+        self.enabled = enabled
+        self.certificates = certificates
+        self.publicKeyHashes = publicKeyHashes
+        self.validateHost = validateHost
+        self.allowInvalidCertificates = allowInvalidCertificates
+    }
+}
+
+// MARK: - 网络安全检测
+public class STNetworkSecurityDetector {
+    
+    /// 检测是否使用了代理
+    public static func st_detectProxy() -> Bool {
+        guard let proxySettings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any] else {
+            return false
+        }
+        
+        // 检查HTTP代理
+        if let httpProxy = proxySettings["HTTPProxy"] as? String, !httpProxy.isEmpty {
+            return true
+        }
+        
+        // 检查HTTPS代理
+        if let httpsProxy = proxySettings["HTTPSProxy"] as? String, !httpsProxy.isEmpty {
+            return true
+        }
+        
+        // 检查SOCKS代理
+        if let socksProxy = proxySettings["SOCKSProxy"] as? String, !socksProxy.isEmpty {
+            return true
+        }
+        
+        return false
+    }
+    
+    /// 检测是否在调试环境
+    public static func st_detectDebugging() -> Bool {
+        #if DEBUG
+        return true
+        #else
+        // 检测调试器附加
+        var info = kinfo_proc()
+        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()]
+        var size = MemoryLayout<kinfo_proc>.stride
+        
+        let result = sysctl(&mib, u_int(mib.count), &info, &size, nil, 0)
+        if result != 0 {
+            return false
+        }
+        
+        return (info.kp_proc.p_flag & P_TRACED) != 0
+        #endif
+    }
+    
+    /// 检测是否越狱环境
+    public static func st_detectJailbreak() -> Bool {
+        let jailbreakPaths = [
+            "/Applications/Cydia.app",
+            "/Library/MobileSubstrate/MobileSubstrate.dylib",
+            "/bin/bash",
+            "/usr/sbin/sshd",
+            "/etc/apt",
+            "/private/var/lib/apt/"
+        ]
+        
+        for path in jailbreakPaths {
+            if FileManager.default.fileExists(atPath: path) {
+                return true
+            }
+        }
+        
+        // 检测是否可以写入系统目录
+        let testString = "jailbreak_test"
+        do {
+            try testString.write(toFile: "/private/jailbreak_test.txt", atomically: true, encoding: .utf8)
+            try FileManager.default.removeItem(atPath: "/private/jailbreak_test.txt")
+            return true
+        } catch {
+            return false
+        }
+    }
 }
 
 // MARK: - URLSession 代理
-extension STHTTPSession: URLSessionTaskDelegate {
+extension STHTTPSession: URLSessionTaskDelegate, URLSessionDelegate {
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let error = error {
@@ -622,6 +810,118 @@ extension STHTTPSession: URLSessionTaskDelegate {
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
         completionHandler(request)
+    }
+    
+    // MARK: - SSL证书验证
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        
+        if STNetworkSecurityDetector.st_detectProxy() {
+            print("⚠️ 检测到代理环境，可能存在抓包风险")
+        }
+        
+        if STNetworkSecurityDetector.st_detectDebugging() {
+            print("⚠️ 检测到调试环境，可能存在安全风险")
+        }
+        
+        if STNetworkSecurityDetector.st_detectJailbreak() {
+            print("⚠️ 检测到越狱环境，存在安全风险")
+        }
+        
+        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+        
+        if st_validateSSLPinning(serverTrust: serverTrust, host: challenge.protectionSpace.host) {
+            let credential = URLCredential(trust: serverTrust)
+            completionHandler(.useCredential, credential)
+        } else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
+        }
+    }
+    
+    /// SSL证书绑定验证
+    private func st_validateSSLPinning(serverTrust: SecTrust, host: String) -> Bool {
+        let sslConfig = st_getSSLPinningConfig()
+        if !sslConfig.enabled {
+            return true
+        }
+        
+        if sslConfig.validateHost {
+            let policy = SecPolicyCreateSSL(true, host as CFString)
+            SecTrustSetPolicies(serverTrust, policy)
+        }
+        
+        var result: SecTrustResultType = .invalid
+        let status = SecTrustEvaluate(serverTrust, &result)
+        guard status == errSecSuccess else {
+            return sslConfig.allowInvalidCertificates
+        }
+        
+        if !sslConfig.certificates.isEmpty {
+            return st_validateCertificatePinning(serverTrust: serverTrust, pinnedCertificates: sslConfig.certificates)
+        }
+        
+        if !sslConfig.publicKeyHashes.isEmpty {
+            return st_validatePublicKeyPinning(serverTrust: serverTrust, pinnedHashes: sslConfig.publicKeyHashes)
+        }
+        return true
+    }
+    
+    /// 验证证书绑定
+    private func st_validateCertificatePinning(serverTrust: SecTrust, pinnedCertificates: [Data]) -> Bool {
+        let serverCertificateCount = SecTrustGetCertificateCount(serverTrust)
+        for i in 0..<serverCertificateCount {
+            guard let serverCertificate = SecTrustGetCertificateAtIndex(serverTrust, i) else {
+                continue
+            }
+            let serverCertificateData = SecCertificateCopyData(serverCertificate)
+            let data = CFDataGetBytePtr(serverCertificateData)
+            let size = CFDataGetLength(serverCertificateData)
+            let serverCertData = Data(bytes: data!, count: size)
+            for pinnedCertificate in pinnedCertificates {
+                if serverCertData == pinnedCertificate {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    /// 验证公钥绑定
+    private func st_validatePublicKeyPinning(serverTrust: SecTrust, pinnedHashes: [String]) -> Bool {
+        guard let serverCertificate = SecTrustGetCertificateAtIndex(serverTrust, 0) else {
+            return false
+        }
+        
+        guard let publicKey = SecCertificateCopyKey(serverCertificate) else {
+            return false
+        }
+        
+        guard let publicKeyData = SecKeyCopyExternalRepresentation(publicKey, nil) else {
+            return false
+        }
+        
+        let data = CFDataGetBytePtr(publicKeyData)
+        let size = CFDataGetLength(publicKeyData)
+        let keyData = Data(bytes: data!, count: size)
+        
+        let publicKeyHash = keyData.st_sha256()
+        
+        return pinnedHashes.contains(publicKeyHash)
+    }
+    
+    /// 获取SSL绑定配置
+    private func st_getSSLPinningConfig() -> STSSLPinningConfig {
+        // 这里可以从配置文件或Keychain中读取SSL配置
+        // 示例配置
+        return STSSLPinningConfig(
+            enabled: true,
+            certificates: [], // 添加您的证书数据
+            publicKeyHashes: [], // 添加您的公钥哈希
+            validateHost: true,
+            allowInvalidCertificates: false
+        )
     }
 }
 

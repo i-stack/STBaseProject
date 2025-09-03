@@ -77,7 +77,8 @@
             "STBaseProject/Classes/STKit/Network/*.swift"
           ],
           "dependencies": {
-            "STBaseProject/STKit/Core": []
+            "STBaseProject/STKit/Core": [],
+            "STBaseProject/STKit/Security": []
           }
         },
         {

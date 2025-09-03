@@ -36,6 +36,7 @@ PODS:
     - STBaseProject/STKit/Core
   - STBaseProject/STKit/Network (2.0.0):
     - STBaseProject/STKit/Core
+    - STBaseProject/STKit/Security
   - STBaseProject/STKit/Scan (2.0.0):
     - STBaseProject/STKit/Core
     - STBaseProject/STKit/Media
@@ -58,7 +59,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: 357389945affca5256ae1f516841fe42915a4e1d
+  STBaseProject: 382ad2ab87f7c37c8c172c2e1c7e8917d5dc6478
 
 PODFILE CHECKSUM: a2396b17137c7c5b546c0e18789d7727128973ce
 

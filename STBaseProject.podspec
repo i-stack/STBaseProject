@@ -63,6 +63,7 @@ Pod::Spec.new do |s|
     kit.subspec 'Network' do |net|
       net.source_files = ['STBaseProject/Classes/STKit/Network/*.swift']
       net.dependency 'STBaseProject/STKit/Core'
+      net.dependency 'STBaseProject/STKit/Security'
     end
 
     # Internationalization support and language management

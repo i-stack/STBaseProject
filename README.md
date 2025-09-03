@@ -21,6 +21,7 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 - 🌐 **本地化支持**：完整的国际化支持
 - 🎨 **自定义弹窗**：统一的弹窗 API，支持系统和自定义样式
 - 📱 **二维码扫描**：高度可配置的扫码界面和管理器
+- 🔒 **网络安全**：SSL证书绑定、数据加密、反调试检测，全面防护抓包攻击
 
 ## Installation
 
@@ -4467,6 +4468,262 @@ STHTTPSession.shared.st_setCustomHeaders([
 ])
 ```
 
+#### 网络安全功能
+
+STBaseProject 提供了完整的网络安全解决方案，有效防止抓包攻击：
+
+##### SSL证书绑定 (SSL Pinning)
+
+```swift
+// 配置SSL证书绑定
+let sslConfig = STSSLPinningConfig(
+    enabled: true,
+    certificates: [certificateData], // 服务器证书数据
+    publicKeyHashes: [publicKeyHash], // 公钥哈希
+    validateHost: true,
+    allowInvalidCertificates: false
+)
+
+// 保存SSL配置
+try STNetworkSecurityConfig.shared.st_saveSSLPinningConfig(sslConfig)
+```
+
+##### 数据加密传输
+
+```swift
+// 配置加密请求
+let requestConfig = STRequestConfig(
+    enableEncryption: true,
+    encryptionKey: "your-encryption-key",
+    enableRequestSigning: true,
+    signingSecret: "your-signing-secret"
+)
+
+// 发送加密请求
+STHTTPSession.shared.st_post(
+    url: "https://api.example.com/secure",
+    parameters: ["data": "sensitive information"],
+    requestConfig: requestConfig
+) { response in
+    if response.isSuccess {
+        print("加密请求成功")
+    }
+}
+```
+
+##### 安全环境检测
+
+```swift
+// 执行完整的安全检测
+let result = STNetworkSecurityConfig.shared.st_performSecurityCheck()
+
+if result.isSecure {
+    print("✅ 环境安全")
+} else {
+    print("⚠️ 检测到安全问题:")
+    for issue in result.issues {
+        print("  - \(issue.description)")
+    }
+}
+
+// 检测特定威胁
+if STNetworkSecurityDetector.st_detectProxy() {
+    print("⚠️ 检测到代理环境")
+}
+
+if STNetworkSecurityDetector.st_detectDebugging() {
+    print("⚠️ 检测到调试环境")
+}
+
+if STNetworkSecurityDetector.st_detectJailbreak() {
+    print("⚠️ 检测到越狱环境")
+}
+```
+
+##### 反调试监控
+
+```swift
+// 启动反调试监控
+let monitor = STAntiDebugMonitor()
+monitor.st_startMonitoring()
+
+// 配置反调试
+let antiDebugConfig = STAntiDebugConfig(
+    enabled: true,
+    checkInterval: 5.0,
+    enableAntiDebugging: true,
+    enableAntiHooking: true,
+    enableAntiTampering: true
+)
+
+try STNetworkSecurityConfig.shared.st_saveAntiDebugConfig(antiDebugConfig)
+```
+
+##### 完整的安全初始化
+
+```swift
+// 一键初始化所有安全功能
+STNetworkSecurityExample.st_initializeSecurity()
+
+// 或分步配置
+STNetworkSecurityExample.st_setupSSLPinning()
+STNetworkSecurityExample.st_setupEncryption()
+STNetworkSecurityExample.st_setupAntiDebug()
+```
+
+##### 生物识别保护
+
+```swift
+// 使用生物识别保护敏感数据
+let sensitiveData = "敏感数据".data(using: .utf8)!
+
+try STKeychainHelper.st_saveWithBiometric(
+    "sensitive_data",
+    data: sensitiveData,
+    reason: "使用生物识别保护您的数据"
+)
+
+// 使用生物识别读取数据
+let data = try STKeychainHelper.st_loadWithBiometric(
+    "sensitive_data",
+    reason: "使用生物识别访问您的数据"
+)
+```
+
+##### 安全最佳实践
+
+```swift
+// 查看安全最佳实践指南
+STNetworkSecurityExample.st_securityBestPractices()
+
+// 生成安全的API密钥
+let apiKey = STEncryptionUtils.st_generateSecureToken(length: 32)
+
+// 验证数据完整性
+let isValid = STNetworkSecurityExample.st_verifyDataIntegrity(
+    data: responseData,
+    expectedHash: expectedHash
+)
+```
+
+##### 数据加密解密
+
+STBaseProject 在 Security 模块中提供了完整的端到端加密解决方案：
+
+```swift
+// 基础加密解密
+let testData = "敏感数据".data(using: .utf8)!
+let key = "your-encryption-key"
+
+// 加密数据
+let encryptedData = try STNetworkCrypto.st_encryptData(testData, keyString: key)
+
+// 解密数据
+let decryptedData = try STNetworkCrypto.st_decryptData(encryptedData, keyString: key)
+
+// 字符串加密解密
+let encryptedString = try STNetworkCrypto.st_encryptString("敏感字符串", keyString: key)
+let decryptedString = try STNetworkCrypto.st_decryptToString(encryptedString, keyString: key)
+
+// 字典加密解密
+let dictionary = ["username": "user123", "password": "password123"]
+let encryptedDict = try STNetworkCrypto.st_encryptDictionary(dictionary, keyString: key)
+let decryptedDict = try STNetworkCrypto.st_decryptToDictionary(encryptedDict, keyString: key)
+```
+
+##### 签名验证
+
+```swift
+// 生成数据签名
+let data = "需要签名的数据".data(using: .utf8)!
+let secret = "signing-secret"
+let timestamp = Date().timeIntervalSince1970
+
+let signature = STNetworkCrypto.st_signData(data, secret: secret, timestamp: timestamp)
+
+// 验证签名
+let isValid = STNetworkCrypto.st_verifySignature(data, signature: signature, secret: secret, timestamp: timestamp)
+```
+
+##### 异步加密解密
+
+```swift
+// 异步加密
+STNetworkCrypto.st_encryptDataAsync(testData, keyString: key) { result in
+    switch result {
+    case .success(let encryptedData):
+        print("加密成功: \(encryptedData.count) 字节")
+    case .failure(let error):
+        print("加密失败: \(error)")
+    }
+}
+
+// 异步解密
+STNetworkCrypto.st_decryptDataAsync(encryptedData, keyString: key) { result in
+    switch result {
+    case .success(let decryptedData):
+        print("解密成功")
+    case .failure(let error):
+        print("解密失败: \(error)")
+    }
+}
+```
+
+##### 服务器端配合使用
+
+```swift
+// 客户端发送加密请求
+let requestConfig = STRequestConfig(
+    enableEncryption: true,
+    encryptionKey: "shared-secret-key",
+    enableRequestSigning: true,
+    signingSecret: "signing-secret"
+)
+
+STHTTPSession.shared.st_post(
+    url: "https://api.example.com/secure-endpoint",
+    parameters: ["data": "sensitive information"],
+    requestConfig: requestConfig
+) { response in
+    // 响应数据已自动解密
+    if response.isSuccess {
+        print("加密通信成功")
+    }
+}
+```
+
+##### 批量加密解密
+
+```swift
+// 批量加密
+let dataArray = [
+    "数据1".data(using: .utf8)!,
+    "数据2".data(using: .utf8)!,
+    "数据3".data(using: .utf8)!
+]
+
+let encryptedArray = try STNetworkCrypto.st_encryptBatch(dataArray, keyString: key)
+
+// 批量解密
+let decryptedArray = try STNetworkCrypto.st_decryptBatch(encryptedArray, keyString: key)
+```
+
+##### 数据完整性验证
+
+```swift
+// 验证加密前后数据完整性
+let originalData = "原始数据".data(using: .utf8)!
+let encryptedData = try STNetworkCrypto.st_encryptData(originalData, keyString: key)
+
+let isIntegrityValid = STNetworkCrypto.st_verifyDataIntegrity(
+    originalData,
+    encryptedData,
+    keyString: key
+)
+
+print("数据完整性: \(isIntegrityValid ? "通过" : "失败")")
+```
+
 ### 十七、STTimer
 
 #### 主要特性
@@ -5450,7 +5707,171 @@ class LoginViewController: UIViewController {
    - PBKDF2 迭代次数建议设置为 10000 或更高
    - 对于大量数据，考虑使用流式加密
 
-## 十七、STKeychainHelper
+## 十七、STNetworkCrypto
+
+`STNetworkCrypto` 是一个专门用于网络通信加密的工具类，提供了完整的端到端加密解决方案。它支持多种加密算法、签名验证、批量操作和异步处理，确保网络传输数据的安全性。
+
+### 主要特性
+
+- **多种加密算法**：支持 AES-256-GCM 和 AES-256-CBC 算法
+- **签名验证**：支持 HMAC-SHA256 签名生成和验证
+- **批量操作**：支持批量加密解密操作
+- **异步处理**：支持异步加密解密，避免阻塞主线程
+- **数据完整性**：内置数据完整性验证功能
+- **密钥管理**：支持密钥生成、缓存和管理
+- **便捷方法**：提供字符串、字典等类型的便捷加密方法
+
+### 基本用法
+
+#### 数据加密解密
+
+```swift
+// 基础加密解密
+let testData = "敏感数据".data(using: .utf8)!
+let key = "your-encryption-key"
+
+// 加密数据
+let encryptedData = try STNetworkCrypto.st_encryptData(testData, keyString: key)
+
+// 解密数据
+let decryptedData = try STNetworkCrypto.st_decryptData(encryptedData, keyString: key)
+```
+
+#### 字符串加密解密
+
+```swift
+// 字符串加密
+let encryptedString = try STNetworkCrypto.st_encryptString("敏感字符串", keyString: key)
+
+// 字符串解密
+let decryptedString = try STNetworkCrypto.st_decryptToString(encryptedString, keyString: key)
+```
+
+#### 字典加密解密
+
+```swift
+// 字典加密
+let dictionary = ["username": "user123", "password": "password123"]
+let encryptedDict = try STNetworkCrypto.st_encryptDictionary(dictionary, keyString: key)
+
+// 字典解密
+let decryptedDict = try STNetworkCrypto.st_decryptToDictionary(encryptedDict, keyString: key)
+```
+
+#### 签名验证
+
+```swift
+// 生成数据签名
+let data = "需要签名的数据".data(using: .utf8)!
+let secret = "signing-secret"
+let timestamp = Date().timeIntervalSince1970
+
+let signature = STNetworkCrypto.st_signData(data, secret: secret, timestamp: timestamp)
+
+// 验证签名
+let isValid = STNetworkCrypto.st_verifySignature(data, signature: signature, secret: secret, timestamp: timestamp)
+```
+
+#### 异步处理
+
+```swift
+// 异步加密
+STNetworkCrypto.st_encryptDataAsync(testData, keyString: key) { result in
+    switch result {
+    case .success(let encryptedData):
+        print("加密成功: \(encryptedData.count) 字节")
+    case .failure(let error):
+        print("加密失败: \(error)")
+    }
+}
+
+// 异步解密
+STNetworkCrypto.st_decryptDataAsync(encryptedData, keyString: key) { result in
+    switch result {
+    case .success(let decryptedData):
+        print("解密成功")
+    case .failure(let error):
+        print("解密失败: \(error)")
+    }
+}
+```
+
+#### 批量操作
+
+```swift
+// 批量加密
+let dataArray = [
+    "数据1".data(using: .utf8)!,
+    "数据2".data(using: .utf8)!,
+    "数据3".data(using: .utf8)!
+]
+
+let encryptedArray = try STNetworkCrypto.st_encryptBatch(dataArray, keyString: key)
+
+// 批量解密
+let decryptedArray = try STNetworkCrypto.st_decryptBatch(encryptedArray, keyString: key)
+```
+
+#### 数据完整性验证
+
+```swift
+// 验证加密前后数据完整性
+let originalData = "原始数据".data(using: .utf8)!
+let encryptedData = try STNetworkCrypto.st_encryptData(originalData, keyString: key)
+
+let isIntegrityValid = STNetworkCrypto.st_verifyDataIntegrity(
+    originalData,
+    encryptedData,
+    keyString: key
+)
+
+print("数据完整性: \(isIntegrityValid ? "通过" : "失败")")
+```
+
+### 实际应用示例
+
+```swift
+class SecureAPIManager {
+    
+    // 发送加密请求
+    static func sendSecureRequest(url: String, parameters: [String: Any]) {
+        let requestConfig = STRequestConfig(
+            enableEncryption: true,
+            encryptionKey: "shared-secret-key",
+            enableRequestSigning: true,
+            signingSecret: "signing-secret"
+        )
+        
+        STHTTPSession.shared.st_post(
+            url: url,
+            parameters: parameters,
+            requestConfig: requestConfig
+        ) { response in
+            if response.isSuccess {
+                print("加密请求成功")
+            } else {
+                print("请求失败: \(response.error?.localizedDescription ?? "")")
+            }
+        }
+    }
+    
+    // 本地数据加密存储
+    static func encryptAndStoreData(_ data: [String: Any], key: String) throws {
+        let encryptedData = try STNetworkCrypto.st_encryptDictionary(data, keyString: key)
+        try STKeychainHelper.st_saveData("encrypted_data", data: encryptedData)
+    }
+    
+    // 本地数据解密读取
+    static func loadAndDecryptData(key: String) throws -> [String: Any]? {
+        guard let encryptedData = try STKeychainHelper.st_loadData("encrypted_data") else {
+            return nil
+        }
+        return try STNetworkCrypto.st_decryptToDictionary(encryptedData, keyString: key)
+    }
+}
+```
+
+## 十八、STKeychainHelper
 
 `STKeychainHelper` 是一个功能强大的 Keychain 工具类，提供了安全可靠的数据存储解决方案。它基于 iOS 的 Security 框架，支持多种数据类型、访问控制、生物识别保护和 iCloud 同步功能。
 

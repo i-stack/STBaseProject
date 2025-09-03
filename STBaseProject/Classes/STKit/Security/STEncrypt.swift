@@ -410,15 +410,3 @@ public struct STEncryptionUtils {
         return randomData.toBase64URLSafeString()
     }
 }
-
-// MARK: - 兼容性扩展（保持向后兼容）
-public extension String {
-    
-    /// SHA256 哈希（兼容旧版本）
-    /// - Parameter input: 输入字符串
-    /// - Returns: SHA256 哈希字符串
-    @available(*, deprecated, message: "请使用 st_sha256() 方法")
-    static func st_sha256Hash(for input: String) -> String {
-        return input.st_sha256()
-    }
-}
