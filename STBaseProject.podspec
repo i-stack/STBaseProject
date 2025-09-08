@@ -30,7 +30,9 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.pod_target_xcconfig = {
     'ENABLE_BITCODE' => 'NO',
-    'PRODUCT_BUNDLE_IDENTIFIER' => 'com.stbaseproject.framework'
+    'PRODUCT_BUNDLE_IDENTIFIER' => 'com.stbaseproject.framework',
+    'CODE_SIGNING_ALLOWED' => 'NO',
+    'CODE_SIGNING_REQUIRED' => 'NO'
   }
   
   # 确保 Info.plist 被正确生成
@@ -52,62 +54,61 @@ Pod::Spec.new do |s|
     ss.source_files = ['STBaseProject/Classes/STConfig/*.swift']
   end
 
-  # STKit 模块化工具集
+  # STKit 模块化工具集 - 优化后的依赖结构
   s.subspec 'STKit' do |kit|
     
-    # Essential utilities: data processing, strings, colors, device info
+    # 基础核心模块 - 无依赖，包含共享类型和基础工具
     kit.subspec 'Core' do |core|
       core.source_files = ['STBaseProject/Classes/STKit/Core/*.swift']
       core.dependency 'STBaseProject/STConfig'
     end
     
-    # UI components: buttons, labels, alerts, font manager
-    kit.subspec 'UI' do |ui|
-      ui.source_files = ['STBaseProject/Classes/STKit/UI/*.swift']
-      ui.dependency 'STBaseProject/STKit/Core'
-      ui.dependency 'STBaseProject/STKit/Localization'
-    end
-
-    # Network utilities: HTTP session, monitoring
-    kit.subspec 'Network' do |net|
-      net.source_files = ['STBaseProject/Classes/STKit/Network/*.swift']
-      net.dependency 'STBaseProject/STKit/Core'
-      net.dependency 'STBaseProject/STKit/Security'
-    end
-
-    # Internationalization support and language management
+    # 本地化模块 - 只依赖 Core
     kit.subspec 'Localization' do |loc|
       loc.source_files = ['STBaseProject/Classes/STKit/Localization/*.swift']
       loc.dependency 'STBaseProject/STKit/Core'
     end
 
-    # Security tools: encryption, keychain helper
+    # 安全模块 - 只依赖 Core，移除对 Network 的依赖
     kit.subspec 'Security' do |sec|
       sec.source_files = ['STBaseProject/Classes/STKit/Security/*.swift']
       sec.dependency 'STBaseProject/STKit/Core'
     end
+
+    # 网络模块 - 只依赖 Core，移除对 Security 的依赖
+    kit.subspec 'Network' do |net|
+      net.source_files = ['STBaseProject/Classes/STKit/Network/*.swift']
+      net.dependency 'STBaseProject/STKit/Core'
+    end
     
-    # Image processing, compression, and screenshot utilities
+    # UI 组件 - 依赖 Core 和 Localization
+    kit.subspec 'UI' do |ui|
+      ui.source_files = ['STBaseProject/Classes/STKit/UI/*.swift']
+      ui.dependency 'STBaseProject/STKit/Core'
+      ui.dependency 'STBaseProject/STKit/Localization'
+    end
+    
+    # 媒体处理 - 依赖 Core 和 Localization
     kit.subspec 'Media' do |media|
       media.source_files = ['STBaseProject/Classes/STKit/Media/*.swift']
       media.dependency 'STBaseProject/STKit/Core'
       media.dependency 'STBaseProject/STKit/Localization'
     end
 
-    # QR/Barcode scanning with customizable UI
+    # 位置服务 - 只依赖 Core
+    kit.subspec 'Location' do |location|
+      location.source_files = ['STBaseProject/Classes/STKit/Location/*.swift']
+      location.dependency 'STBaseProject/STKit/Core'
+    end
+
+    # 扫描功能 - 依赖 Core 和 Media
     kit.subspec 'Scan' do |scan|
       scan.source_files = ['STBaseProject/Classes/STKit/Scan/*.swift']
       scan.dependency 'STBaseProject/STKit/Core'
       scan.dependency 'STBaseProject/STKit/Media'
     end
 
-    # Location services and management
-    kit.subspec 'Location' do |location|
-      location.source_files = ['STBaseProject/Classes/STKit/Location/*.swift']
-      location.dependency 'STBaseProject/STKit/Core'
-    end
-
-    # Progress HUD and dialog components
+    # 对话框组件 - 依赖 Core 和 UI
     kit.subspec 'Dialog' do |dialog|
       dialog.source_files = ['STBaseProject/Classes/STKit/STDialog/*.swift']
       dialog.dependency 'STBaseProject/STKit/Core'
@@ -115,32 +116,33 @@ Pod::Spec.new do |s|
     end
   end
 
-  # Complete MVVM architecture base classes
+  # Complete MVVM architecture base classes - 优化后的依赖结构
   s.subspec 'STBaseModule' do |ss|
     
-    # Base view controller with navigation bar customization
-    ss.subspec 'STBaseViewController' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift']
-      sss.dependency 'STBaseProject/STKit/UI'
+    # Base model - 无依赖，最基础的数据模型
+    ss.subspec 'STBaseModel' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseModel/*.swift']
     end
 
-    # Base view with multiple layout modes and auto-scroll detection
+    # Base view - 无依赖，最基础的视图组件
     ss.subspec 'STBaseView' do |sss|
       sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseView/*.swift']
     end
 
-    # Base view model with network requests, caching, and state management
+    # Base view model - 依赖 Core 和 Network
     ss.subspec 'STBaseViewModel' do |sss|
       sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift']
       sss.dependency 'STBaseProject/STKit/Core'
       sss.dependency 'STBaseProject/STKit/Network'
     end
 
-    # Base model with standard and flexible modes, dictionary conversion
-    ss.subspec 'STBaseModel' do |sss|
-      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseModel/*.swift']
+    # Base view controller - 依赖 UI
+    ss.subspec 'STBaseViewController' do |sss|
+      sss.source_files = ['STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift']
+      sss.dependency 'STBaseProject/STKit/UI'
     end
     
+    # STBaseModule 整体依赖 STConfig
     ss.dependency 'STBaseProject/STConfig'
   end
 
