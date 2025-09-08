@@ -393,7 +393,7 @@ public class STKeychainHelper {
     public static func st_saveBatch(_ items: [String: Any]) throws {
         for (key, value) in items {
             if let stringValue = value as? String {
-                try st_save(key, value: stringValue)
+                try st_save(key, value: stringValue, accessControl: nil, sync: .none)
             } else if let dataValue = value as? Data {
                 try st_saveData(key, data: dataValue)
             } else if let boolValue = value as? Bool {
@@ -425,21 +425,17 @@ public class STKeychainHelper {
             kSecReturnAttributes as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitAll
         ]
-        
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        
         guard status == errSecSuccess else {
             if status == errSecItemNotFound {
                 return []
             }
             throw STKeychainError.unhandledError(status: status)
         }
-        
         guard let items = result as? [[String: Any]] else {
             return []
         }
-        
         return items.compactMap { $0[kSecAttrAccount as String] as? String }
     }
     
@@ -450,7 +446,6 @@ public class STKeychainHelper {
     public static func st_isBiometricAvailable() -> Bool {
         let context = LAContext()
         var error: NSError?
-        
         return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
     
@@ -459,11 +454,9 @@ public class STKeychainHelper {
     public static func st_getBiometricType() -> LABiometryType {
         let context = LAContext()
         var error: NSError?
-        
         if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
             return context.biometryType
         }
-        
         return .none
     }
     
@@ -479,7 +472,6 @@ public class STKeychainHelper {
         guard st_isBiometricAvailable() else {
             throw STKeychainError.biometricNotAvailable
         }
-        
         try st_saveData(key, data: data, accessControl: .biometricCurrentSet)
     }
     
@@ -494,7 +486,6 @@ public class STKeychainHelper {
         guard st_isBiometricAvailable() else {
             throw STKeychainError.biometricNotAvailable
         }
-        
         return try st_loadData(key, accessControl: .biometricCurrentSet)
     }
     
@@ -507,9 +498,7 @@ public class STKeychainHelper {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service
         ]
-        
         let status = SecItemDelete(query as CFDictionary)
-        
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw STKeychainError.unhandledError(status: status)
         }
@@ -525,49 +514,17 @@ public class STKeychainHelper {
             kSecReturnAttributes as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitAll
         ]
-        
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        
         guard status == errSecSuccess else {
             if status == errSecItemNotFound {
                 return 0
             }
             throw STKeychainError.unhandledError(status: status)
         }
-        
         guard let items = result as? [[String: Any]] else {
             return 0
         }
-        
         return items.count
-    }
-    
-    // MARK: - 兼容性方法（保持向后兼容）
-    
-    /// 保存字符串到 Keychain（兼容旧版本）
-    /// - Parameters:
-    ///   - key: 键名
-    ///   - value: 字符串值
-    @available(*, deprecated, message: "请使用 st_save(_:value:accessControl:sync:) 方法")
-    public static func st_save(_ key: String, value: String) {
-        do {
-            try st_save(key, value: value, accessControl: nil, sync: .none)
-        } catch {
-            print("Keychain 保存失败: \(error)")
-        }
-    }
-    
-    /// 从 Keychain 加载字符串（兼容旧版本）
-    /// - Parameter key: 键名
-    /// - Returns: 字符串值，如果不存在返回 nil
-    @available(*, deprecated, message: "请使用 st_load(_:accessControl:) 方法")
-    public static func st_load(_ key: String) -> String? {
-        do {
-            return try st_load(key, accessControl: nil)
-        } catch {
-            print("Keychain 加载失败: \(error)")
-            return nil
-        }
     }
 }

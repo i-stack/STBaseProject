@@ -419,8 +419,8 @@ public class STNetworkCryptoClientExample {
         // 发送加密请求
         STHTTPSession.shared.st_get(
             url: url,
-            requestHeaders: requestHeaders,
-            requestConfig: requestConfig
+            requestConfig: requestConfig,
+            requestHeaders: requestHeaders
         ) { response in
             if response.isSuccess {
                 print("✅ 加密用户信息请求成功")
@@ -450,7 +450,7 @@ public class STNetworkCryptoClientExample {
             // 验证数据完整性
             let isIntegrityValid = STNetworkCrypto.st_verifyDataIntegrity(
                 testData.data(using: .utf8)!,
-                encryptedData,
+                encryptedData: encryptedData,
                 keyString: key
             )
             print("✅ 数据完整性验证: \(isIntegrityValid ? "通过" : "失败")")

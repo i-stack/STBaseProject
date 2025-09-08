@@ -7,6 +7,7 @@
 
 import Foundation
 import CryptoKit
+import CommonCrypto
 
 // MARK: - 加密配置
 public struct STCryptoConfig {
@@ -108,8 +109,9 @@ public class STNetworkCrypto {
     ///   - config: 加密配置
     /// - Returns: 对称密钥
     public static func st_generateKey(from keyString: String, config: STCryptoConfig = .aes256GCM) throws -> SymmetricKey {
-        let keyData = keyString.st_sha256().prefix(config.keyLength)
-        return SymmetricKey(data: Data(keyData))
+        let keyString = keyString.st_sha256()
+        let keyData = Data(keyString.utf8.prefix(config.keyLength))
+        return SymmetricKey(data: keyData)
     }
     
     /// 获取缓存的密钥
@@ -166,8 +168,9 @@ public class STNetworkCrypto {
     /// AES-256-GCM 加密
     private static func st_encryptAES256GCM(_ data: Data, keyString: String, config: STCryptoConfig) throws -> Data {
         // 生成密钥
-        let keyData = keyString.st_sha256().prefix(config.keyLength)
-        let symmetricKey = SymmetricKey(data: Data(keyData))
+        let keyString = keyString.st_sha256()
+        let keyData = Data(keyString.utf8.prefix(config.keyLength))
+        let symmetricKey = SymmetricKey(data: keyData)
         
         // 生成随机nonce
         let nonce = AES.GCM.Nonce()
@@ -187,8 +190,9 @@ public class STNetworkCrypto {
     /// AES-256-CBC 加密
     private static func st_encryptAES256CBC(_ data: Data, keyString: String, config: STCryptoConfig) throws -> Data {
         // 生成密钥
-        let keyData = keyString.st_sha256().prefix(config.keyLength)
-        let key = Data(keyData)
+        let keyString = keyString.st_sha256()
+        let keyData = Data(keyString.utf8.prefix(config.keyLength))
+        let key = keyData
         
         // 生成随机IV
         let iv = STDataUtils.randomData(length: config.nonceLength)
@@ -280,8 +284,9 @@ public class STNetworkCrypto {
         let tag = encryptedData.suffix(config.tagLength)
         
         // 生成密钥
-        let keyData = keyString.st_sha256().prefix(config.keyLength)
-        let symmetricKey = SymmetricKey(data: Data(keyData))
+        let keyString = keyString.st_sha256()
+        let keyData = Data(keyString.utf8.prefix(config.keyLength))
+        let symmetricKey = SymmetricKey(data: keyData)
         
         // 创建SealedBox
         let nonce = try AES.GCM.Nonce(data: nonceData)
@@ -302,8 +307,9 @@ public class STNetworkCrypto {
         let ciphertext = encryptedData.dropFirst(config.nonceLength)
         
         // 生成密钥
-        let keyData = keyString.st_sha256().prefix(config.keyLength)
-        let key = Data(keyData)
+        let keyString = keyString.st_sha256()
+        let keyData = Data(keyString.utf8.prefix(config.keyLength))
+        let key = keyData
         
         // 使用CommonCrypto进行CBC解密
         return try st_decryptCBC(data: Data(ciphertext), key: key, iv: Data(iv))

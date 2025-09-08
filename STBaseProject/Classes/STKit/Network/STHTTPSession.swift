@@ -703,7 +703,7 @@ open class STHTTPSession: NSObject {
 }
 
 // MARK: - SSL证书绑定配置
-public struct STSSLPinningConfig {
+public struct STSSLPinningConfig: Codable {
     let enabled: Bool
     let certificates: [Data]
     let publicKeyHashes: [String]
@@ -906,7 +906,7 @@ extension STHTTPSession: URLSessionTaskDelegate, URLSessionDelegate {
         let size = CFDataGetLength(publicKeyData)
         let keyData = Data(bytes: data!, count: size)
         
-        let publicKeyHash = keyData.st_sha256()
+        let publicKeyHash = keyData.base64EncodedString().st_sha256()
         
         return pinnedHashes.contains(publicKeyHash)
     }

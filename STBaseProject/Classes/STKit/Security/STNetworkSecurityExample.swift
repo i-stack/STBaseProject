@@ -22,7 +22,7 @@ public class STNetworkSecurityExample {
         }
         
         // 计算公钥哈希
-        let publicKeyHash = certificateData.st_sha256()
+        let publicKeyHash = certificateData.base64EncodedString().st_sha256()
         
         // 配置SSL绑定
         let sslConfig = STSSLPinningConfig(
@@ -194,7 +194,7 @@ public class STNetworkSecurityExample {
     
     /// 验证数据完整性
     public static func st_verifyDataIntegrity(data: Data, expectedHash: String) -> Bool {
-        let actualHash = data.st_sha256()
+        let actualHash = data.base64EncodedString().st_sha256()
         let isValid = STEncryptionUtils.st_secureCompare(actualHash, expectedHash)
         
         if isValid {
