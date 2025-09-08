@@ -29,7 +29,16 @@ Pod::Spec.new do |s|
   
   s.requires_arc = true
   s.pod_target_xcconfig = {
-    'ENABLE_BITCODE' => 'NO'
+    'ENABLE_BITCODE' => 'NO',
+    'PRODUCT_BUNDLE_IDENTIFIER' => 'com.stbaseproject.framework'
+  }
+  
+  # 确保 Info.plist 被正确生成
+  s.info_plist = {
+    'CFBundlePackageType' => 'FMWK',
+    'CFBundleShortVersionString' => s.version.to_s,
+    'CFBundleVersion' => '1',
+    'CFBundleName' => s.name
   }
   
   s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
@@ -49,6 +58,7 @@ Pod::Spec.new do |s|
     # Essential utilities: data processing, strings, colors, device info
     kit.subspec 'Core' do |core|
       core.source_files = ['STBaseProject/Classes/STKit/Core/*.swift']
+      core.dependency 'STBaseProject/STConfig'
     end
     
     # UI components: buttons, labels, alerts, font manager
@@ -81,6 +91,7 @@ Pod::Spec.new do |s|
     kit.subspec 'Media' do |media|
       media.source_files = ['STBaseProject/Classes/STKit/Media/*.swift']
       media.dependency 'STBaseProject/STKit/Core'
+      media.dependency 'STBaseProject/STKit/Localization'
     end
 
     # QR/Barcode scanning with customizable UI

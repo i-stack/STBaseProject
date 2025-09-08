@@ -702,134 +702,7 @@ open class STHTTPSession: NSObject {
     }
 }
 
-// MARK: - SSL证书绑定配置
-public struct STSSLPinningConfig: Codable {
-    let enabled: Bool
-    let certificates: [Data]
-    let publicKeyHashes: [String]
-    let validateHost: Bool
-    let allowInvalidCertificates: Bool
-    
-    public init(enabled: Bool = true,
-                certificates: [Data] = [],
-                publicKeyHashes: [String] = [],
-                validateHost: Bool = true,
-                allowInvalidCertificates: Bool = false) {
-        self.enabled = enabled
-        self.certificates = certificates
-        self.publicKeyHashes = publicKeyHashes
-        self.validateHost = validateHost
-        self.allowInvalidCertificates = allowInvalidCertificates
-    }
-    
-    // MARK: - Codable 实现
-    private enum CodingKeys: String, CodingKey {
-        case enabled
-        case certificates
-        case publicKeyHashes
-        case validateHost
-        case allowInvalidCertificates
-    }
-    
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        enabled = try container.decode(Bool.self, forKey: .enabled)
-        validateHost = try container.decode(Bool.self, forKey: .validateHost)
-        allowInvalidCertificates = try container.decode(Bool.self, forKey: .allowInvalidCertificates)
-        publicKeyHashes = try container.decode([String].self, forKey: .publicKeyHashes)
-        
-        // 解码 Base64 编码的证书数据
-        let certificateStrings = try container.decode([String].self, forKey: .certificates)
-        certificates = certificateStrings.compactMap { Data(base64Encoded: $0) }
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(enabled, forKey: .enabled)
-        try container.encode(validateHost, forKey: .validateHost)
-        try container.encode(allowInvalidCertificates, forKey: .allowInvalidCertificates)
-        try container.encode(publicKeyHashes, forKey: .publicKeyHashes)
-        
-        // 将证书数据编码为 Base64 字符串
-        let certificateStrings = certificates.map { $0.base64EncodedString() }
-        try container.encode(certificateStrings, forKey: .certificates)
-    }
-}
 
-// MARK: - 网络安全检测
-public class STNetworkSecurityDetector {
-    
-    /// 检测是否使用了代理
-    public static func st_detectProxy() -> Bool {
-        guard let proxySettings = CFNetworkCopySystemProxySettings()?.takeRetainedValue() as? [String: Any] else {
-            return false
-        }
-        
-        // 检查HTTP代理
-        if let httpProxy = proxySettings["HTTPProxy"] as? String, !httpProxy.isEmpty {
-            return true
-        }
-        
-        // 检查HTTPS代理
-        if let httpsProxy = proxySettings["HTTPSProxy"] as? String, !httpsProxy.isEmpty {
-            return true
-        }
-        
-        // 检查SOCKS代理
-        if let socksProxy = proxySettings["SOCKSProxy"] as? String, !socksProxy.isEmpty {
-            return true
-        }
-        
-        return false
-    }
-    
-    /// 检测是否在调试环境
-    public static func st_detectDebugging() -> Bool {
-        #if DEBUG
-        return true
-        #else
-        // 检测调试器附加
-        var info = kinfo_proc()
-        var mib: [Int32] = [CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()]
-        var size = MemoryLayout<kinfo_proc>.stride
-        
-        let result = sysctl(&mib, u_int(mib.count), &info, &size, nil, 0)
-        if result != 0 {
-            return false
-        }
-        
-        return (info.kp_proc.p_flag & P_TRACED) != 0
-        #endif
-    }
-    
-    /// 检测是否越狱环境
-    public static func st_detectJailbreak() -> Bool {
-        let jailbreakPaths = [
-            "/Applications/Cydia.app",
-            "/Library/MobileSubstrate/MobileSubstrate.dylib",
-            "/bin/bash",
-            "/usr/sbin/sshd",
-            "/etc/apt",
-            "/private/var/lib/apt/"
-        ]
-        
-        for path in jailbreakPaths {
-            if FileManager.default.fileExists(atPath: path) {
-                return true
-            }
-        }
-        
-        // 检测是否可以写入系统目录
-        let testString = "jailbreak_test"
-        do {
-            try testString.write(toFile: "/private/jailbreak_test.txt", atomically: true, encoding: .utf8)
-            try FileManager.default.removeItem(atPath: "/private/jailbreak_test.txt")
-            return true
-        } catch {
-            return false
-        }
-    }
-}
 
 // MARK: - URLSession 代理
 extension STHTTPSession: URLSessionTaskDelegate, URLSessionDelegate {
@@ -848,17 +721,8 @@ extension STHTTPSession: URLSessionTaskDelegate, URLSessionDelegate {
     // MARK: - SSL证书验证
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         
-        if STNetworkSecurityDetector.st_detectProxy() {
-            print("⚠️ 检测到代理环境，可能存在抓包风险")
-        }
-        
-        if STNetworkSecurityDetector.st_detectDebugging() {
-            print("⚠️ 检测到调试环境，可能存在安全风险")
-        }
-        
-        if STNetworkSecurityDetector.st_detectJailbreak() {
-            print("⚠️ 检测到越狱环境，存在安全风险")
-        }
+        // 安全检测已移至 Security 模块
+        // 这里可以添加基本的安全检查逻辑
         
         guard let serverTrust = challenge.protectionSpace.serverTrust else {
             completionHandler(.performDefaultHandling, nil)
