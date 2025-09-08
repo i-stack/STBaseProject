@@ -525,30 +525,10 @@ open class STHTTPSession: NSObject {
             
             // 处理数据加密和签名
             if let data = requestData {
-                var finalData = data
+                // 数据加密和签名功能已移至 Security 模块
+                // 如需使用加密功能，请导入 STBaseProject/STKit/Security 模块
                 
-                // 数据加密
-                if config.enableEncryption, let encryptionKey = config.encryptionKey {
-                    do {
-                        finalData = try st_encryptRequestData(data, key: encryptionKey)
-                        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
-                        request.setValue("encrypted", forHTTPHeaderField: "X-Content-Encoding")
-                    } catch {
-                        let response = STHTTPResponse(data: nil, response: nil, error: error)
-                        completion(response)
-                        return
-                    }
-                }
-                
-                // 请求签名
-                if config.enableRequestSigning, let signingSecret = config.signingSecret {
-                    let timestamp = Date().timeIntervalSince1970
-                    let signature = st_generateRequestSignature(finalData, secret: signingSecret, timestamp: timestamp)
-                    request.setValue(signature, forHTTPHeaderField: "X-Request-Signature")
-                    request.setValue(String(Int(timestamp)), forHTTPHeaderField: "X-Timestamp")
-                }
-                
-                request.httpBody = finalData
+                request.httpBody = data
             }
         }
         st_executeRequest(request, completion: completion)
@@ -622,35 +602,9 @@ open class STHTTPSession: NSObject {
         }
         
         // 处理响应数据解密
-        var finalData = data
-        if let responseData = data, let httpResponse = response as? HTTPURLResponse {
-            // 检查是否需要解密
-            if httpResponse.allHeaderFields["X-Content-Encoding"] as? String == "encrypted" {
-                if let encryptionKey = currentRequestConfig?.encryptionKey {
-                    do {
-                        finalData = try st_decryptResponseData(responseData, key: encryptionKey)
-                    } catch {
-                        let errorResponse = STHTTPResponse(data: nil, response: response, error: error)
-                        completion(errorResponse)
-                        return
-                    }
-                }
-            }
-            
-            // 验证响应签名
-            if let signingSecret = currentRequestConfig?.signingSecret,
-               let signature = httpResponse.allHeaderFields["X-Response-Signature"] as? String,
-               let timestampString = httpResponse.allHeaderFields["X-Timestamp"] as? String,
-               let timestamp = TimeInterval(timestampString) {
-                
-                if !st_verifyResponseSignature(finalData ?? Data(), signature: signature, secret: signingSecret, timestamp: timestamp) {
-                    let error = STHTTPError.httpError(400, "响应签名验证失败")
-                    let errorResponse = STHTTPResponse(data: finalData, response: response, error: error)
-                    completion(errorResponse)
-                    return
-                }
-            }
-        }
+        // 响应解密和签名验证功能已移至 Security 模块
+        // 如需使用解密和签名验证功能，请导入 STBaseProject/STKit/Security 模块
+        let finalData = data
         
         let httpResponse = STHTTPResponse(data: finalData, response: response, error: nil)
         completion(httpResponse)
@@ -679,27 +633,6 @@ open class STHTTPSession: NSObject {
         URLCache.shared.removeAllCachedResponses()
     }
     
-    // MARK: - 数据加密相关方法
-    
-    /// 加密请求数据
-    private func st_encryptRequestData(_ data: Data, key: String) throws -> Data {
-        return try STNetworkCrypto.st_encryptData(data, keyString: key)
-    }
-    
-    /// 解密响应数据
-    private func st_decryptResponseData(_ data: Data, key: String) throws -> Data {
-        return try STNetworkCrypto.st_decryptData(data, keyString: key)
-    }
-    
-    /// 生成请求签名
-    private func st_generateRequestSignature(_ data: Data, secret: String, timestamp: TimeInterval) -> String {
-        return STNetworkCrypto.st_signData(data, secret: secret, timestamp: timestamp)
-    }
-    
-    /// 验证响应签名
-    private func st_verifyResponseSignature(_ data: Data, signature: String, secret: String, timestamp: TimeInterval) -> Bool {
-        return STNetworkCrypto.st_verifySignature(data, signature: signature, secret: secret, timestamp: timestamp)
-    }
 }
 
 
@@ -803,7 +736,8 @@ extension STHTTPSession: URLSessionTaskDelegate, URLSessionDelegate {
         let size = CFDataGetLength(publicKeyData)
         let keyData = Data(bytes: data!, count: size)
         
-        let publicKeyHash = keyData.base64EncodedString().st_sha256()
+        // 公钥哈希计算功能已移至 Security 模块
+        let publicKeyHash = keyData.base64EncodedString()
         
         return pinnedHashes.contains(publicKeyHash)
     }
