@@ -28,22 +28,12 @@ Pod::Spec.new do |s|
   s.swift_versions = ['5.0', '5.1', '5.2', '5.3', '5.4', '5.5', '5.6', '5.7', '5.8', '5.9']
   
   s.requires_arc = true
-  s.static_framework = true
   s.pod_target_xcconfig = {
     'ENABLE_BITCODE' => 'NO'
-  }
-  s.user_target_xcconfig = {
-    'SWIFT_VERSION' => '5.0',
-    'BUILD_LIBRARY_FOR_DISTRIBUTION' => 'YES'
   }
   
   s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
   s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
-  
-  # 资源文件处理
-  s.resource_bundles = {
-    'STBaseProject' => ['STBaseProject/Assets/**/*']
-  }
 
   # 默认引入（快速开始推荐配置）
   s.default_subspecs = ['STConfig', 'STKit/Core', 'STKit/UI', 'STKit/Network', 'STKit/Localization', 'STBaseModule']
