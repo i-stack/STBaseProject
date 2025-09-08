@@ -161,25 +161,6 @@ open class STAlertController: UIViewController {
         self.messageLabel.text = text
     }
     
-    @available(*, deprecated, message: "Use add(item:) instead.")
-    public func addAction(action: STAlertInfo.Action, handler: @escaping((Bool, String) -> Void)) {
-        // 兼容旧接口：同时填充新的统一模型
-        let item = STAlertActionItem(title: action.title, titleColor: action.titleColor, font: action.font, style: .default) {
-            handler(true, action.title)
-        }
-        self.actionItems.append(item)
-        if self.alertInfo.style == .alert {
-            if self.alertInfo.buttonActions.count < 2 {
-                self.alertInfo.buttonActions.append(action)
-            } else {
-                self.alertInfo.buttonActions[1] = action
-            }
-        } else {
-            self.alertInfo.buttonActions.append(action)
-        }
-        // 继续保留旧的 handlers 数组以确保完全兼容
-        self.alertInfo.buttonHandlers.append(handler)
-    }
 
     /// 推荐的新接口：添加统一按钮模型
     public func add(item: STAlertActionItem) {
@@ -582,10 +563,8 @@ public extension STAlertController {
         }
         
         let vc = STAlertController(info: info)
-        for (idx, item) in actions.enumerated() {
-            vc.addAction(action: info.buttonActions[idx]) { _, _ in
-                item.handler?()
-            }
+        for item in actions {
+            vc.add(item: item)
         }
         vc.setup()
         vc.show(in: presenter)

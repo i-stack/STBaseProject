@@ -2857,13 +2857,9 @@ class SettingsViewController: UIViewController {
 
 #### 迁移指南
 
-由于已经将项目中所有 JSON 相关方法统一到 `STJSONValue.swift`，旧的方法仍然可用但已被标记为废弃：
+由于已经将项目中所有 JSON 相关方法统一到 `STJSONValue.swift`，旧的方法已被移除，请使用新的方法：
 
 ```swift
-// 旧方法（已废弃，但仍然可用）
-let dict = data.toDictionary()
-let jsonString = dict.toJSONString()
-
 // 新方法（推荐使用）
 let dict = data.st_toDictionary()
 let jsonString = dict.st_toJSONString()

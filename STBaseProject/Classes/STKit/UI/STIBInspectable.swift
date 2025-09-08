@@ -22,10 +22,10 @@ public enum STConstraintAdaptType {
 extension NSLayoutConstraint {
     
     private struct AssociatedKeys {
-        static var autoConstantKey = "autoConstantKey"
-        static var adaptTypeKey = "adaptTypeKey"
-        static var originalConstantKey = "originalConstantKey"
-        static var isAdaptedKey = "isAdaptedKey"
+        static var autoConstantKey: UInt8 = 0
+        static var adaptTypeKey: UInt8 = 1
+        static var originalConstantKey: UInt8 = 2
+        static var isAdaptedKey: UInt8 = 3
     }
     
     /// 是否启用自动适配

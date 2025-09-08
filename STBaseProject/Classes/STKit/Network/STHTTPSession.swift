@@ -885,9 +885,9 @@ extension STHTTPSession: URLSessionTaskDelegate, URLSessionDelegate {
             SecTrustSetPolicies(serverTrust, policy)
         }
         
-        var result: SecTrustResultType = .invalid
-        let status = SecTrustEvaluate(serverTrust, &result)
-        guard status == errSecSuccess else {
+        var error: CFError?
+        let isValid = SecTrustEvaluateWithError(serverTrust, &error)
+        guard isValid else {
             return sslConfig.allowInvalidCertificates
         }
         

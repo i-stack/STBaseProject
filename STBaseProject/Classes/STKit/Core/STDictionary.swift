@@ -364,21 +364,6 @@ public extension Dictionary {
 // MARK: - Dictionary Initialization Extensions
 public extension Dictionary {
     
-    /// 从JSON字符串创建字典
-    /// - Parameter jsonString: JSON字符串
-    /// - Returns: 字典对象
-    @available(*, deprecated, message: "请使用 String.st_toDictionary 方法，已迁移到 STJSONValue.swift")
-    static func st_fromJSON(_ jsonString: String) -> [String: Any]? {
-        return jsonString.st_toDictionary()
-    }
-    
-    /// 从JSON数据创建字典
-    /// - Parameter jsonData: JSON数据
-    /// - Returns: 字典对象
-    @available(*, deprecated, message: "请使用 Data.st_toDictionary 方法，已迁移到 STJSONValue.swift")
-    static func st_fromJSONData(_ jsonData: Data) -> [String: Any]? {
-        return jsonData.st_toDictionary()
-    }
     
     /// 从键值对数组创建字典
     /// - Parameter elements: 键值对数组

@@ -524,20 +524,6 @@ public class STJSONUtils {
         }
     }
     
-    /// 将 NSDictionary 转换为 JSON 字符串（兼容旧版本）
-    /// - Parameter dict: NSDictionary 对象
-    /// - Returns: JSON 字符串
-    @available(*, deprecated, message: "请使用 st_dictToJSON(dict: [String: Any]) 方法")
-    public static func st_dictToJSON(dict: NSDictionary) -> String {
-        guard dict.count > 0 else { return "" }
-        
-        do {
-            let data = try JSONSerialization.data(withJSONObject: dict, options: [])
-            return String(data: data, encoding: .utf8) ?? ""
-        } catch {
-            return ""
-        }
-    }
 }
 
 // MARK: - JSON 错误类型
