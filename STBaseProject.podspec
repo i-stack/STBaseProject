@@ -30,8 +30,10 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   s.static_framework = true
   s.pod_target_xcconfig = {
+    'ENABLE_BITCODE' => 'NO'
+  }
+  s.user_target_xcconfig = {
     'SWIFT_VERSION' => '5.0',
-    'ENABLE_BITCODE' => 'NO',
     'BUILD_LIBRARY_FOR_DISTRIBUTION' => 'YES'
   }
   
@@ -49,10 +51,6 @@ Pod::Spec.new do |s|
   # 核心配置
   s.subspec 'STConfig' do |ss|
     ss.source_files = ['STBaseProject/Classes/STConfig/*.swift']
-    ss.pod_target_xcconfig = {
-      'SWIFT_VERSION' => '5.0',
-      'BUILD_LIBRARY_FOR_DISTRIBUTION' => 'YES'
-    }
   end
 
   # STKit 模块化工具集
