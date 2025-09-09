@@ -32,152 +32,16 @@
   ],
   "requires_arc": true,
   "pod_target_xcconfig": {
+    "ENABLE_BITCODE": "NO",
     "SWIFT_VERSION": "5.0",
-    "ENABLE_BITCODE": "NO"
+    "CODE_SIGNING_ALLOWED": "NO",
+    "CODE_SIGNING_REQUIRED": "NO",
+    "PRODUCT_BUNDLE_IDENTIFIER": "com.stbaseproject.framework"
   },
   "documentation_url": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
   "readme": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
-  "default_subspecs": [
-    "STConfig",
-    "STKit/Core",
-    "STKit/UI",
-    "STKit/Network",
-    "STKit/Localization",
-    "STBaseModule"
-  ],
-  "subspecs": [
-    {
-      "name": "STConfig",
-      "source_files": [
-        "STBaseProject/Classes/STConfig/*.swift"
-      ]
-    },
-    {
-      "name": "STKit",
-      "subspecs": [
-        {
-          "name": "Core",
-          "source_files": [
-            "STBaseProject/Classes/STKit/Core/*.swift"
-          ]
-        },
-        {
-          "name": "UI",
-          "source_files": [
-            "STBaseProject/Classes/STKit/UI/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": [],
-            "STBaseProject/STKit/Localization": []
-          }
-        },
-        {
-          "name": "Network",
-          "source_files": [
-            "STBaseProject/Classes/STKit/Network/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": [],
-            "STBaseProject/STKit/Security": []
-          }
-        },
-        {
-          "name": "Localization",
-          "source_files": [
-            "STBaseProject/Classes/STKit/Localization/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": []
-          }
-        },
-        {
-          "name": "Security",
-          "source_files": [
-            "STBaseProject/Classes/STKit/Security/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": []
-          }
-        },
-        {
-          "name": "Media",
-          "source_files": [
-            "STBaseProject/Classes/STKit/Media/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": []
-          }
-        },
-        {
-          "name": "Scan",
-          "source_files": [
-            "STBaseProject/Classes/STKit/Scan/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": [],
-            "STBaseProject/STKit/Media": []
-          }
-        },
-        {
-          "name": "Location",
-          "source_files": [
-            "STBaseProject/Classes/STKit/Location/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": []
-          }
-        },
-        {
-          "name": "Dialog",
-          "source_files": [
-            "STBaseProject/Classes/STKit/STDialog/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": [],
-            "STBaseProject/STKit/UI": []
-          }
-        }
-      ]
-    },
-    {
-      "name": "STBaseModule",
-      "dependencies": {
-        "STBaseProject/STConfig": []
-      },
-      "subspecs": [
-        {
-          "name": "STBaseViewController",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseViewController/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/UI": []
-          }
-        },
-        {
-          "name": "STBaseView",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseView/*.swift"
-          ]
-        },
-        {
-          "name": "STBaseViewModel",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseViewModel/*.swift"
-          ],
-          "dependencies": {
-            "STBaseProject/STKit/Core": [],
-            "STBaseProject/STKit/Network": []
-          }
-        },
-        {
-          "name": "STBaseModel",
-          "source_files": [
-            "STBaseProject/Classes/STBaseModule/STBaseModel/*.swift"
-          ]
-        }
-      ]
-    }
+  "source_files": [
+    "STBaseProject/Classes/**/*.swift"
   ],
   "swift_version": "5.9"
 }

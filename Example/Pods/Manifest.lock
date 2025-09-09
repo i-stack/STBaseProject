@@ -1,66 +1,16 @@
 PODS:
-  - STBaseProject (2.0.0):
-    - STBaseProject/STBaseModule (= 2.0.0)
-    - STBaseProject/STConfig (= 2.0.0)
-    - STBaseProject/STKit/Core (= 2.0.0)
-    - STBaseProject/STKit/Localization (= 2.0.0)
-    - STBaseProject/STKit/Network (= 2.0.0)
-    - STBaseProject/STKit/UI (= 2.0.0)
-  - STBaseProject/STBaseModule (2.0.0):
-    - STBaseProject/STBaseModule/STBaseModel (= 2.0.0)
-    - STBaseProject/STBaseModule/STBaseView (= 2.0.0)
-    - STBaseProject/STBaseModule/STBaseViewController (= 2.0.0)
-    - STBaseProject/STBaseModule/STBaseViewModel (= 2.0.0)
-    - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseModel (2.0.0):
-    - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseView (2.0.0):
-    - STBaseProject/STConfig
-  - STBaseProject/STBaseModule/STBaseViewController (2.0.0):
-    - STBaseProject/STConfig
-    - STBaseProject/STKit/UI
-  - STBaseProject/STBaseModule/STBaseViewModel (2.0.0):
-    - STBaseProject/STConfig
-    - STBaseProject/STKit/Core
-    - STBaseProject/STKit/Network
-  - STBaseProject/STConfig (2.0.0)
-  - STBaseProject/STKit/Core (2.0.0)
-  - STBaseProject/STKit/Dialog (2.0.0):
-    - STBaseProject/STKit/Core
-    - STBaseProject/STKit/UI
-  - STBaseProject/STKit/Localization (2.0.0):
-    - STBaseProject/STKit/Core
-  - STBaseProject/STKit/Location (2.0.0):
-    - STBaseProject/STKit/Core
-  - STBaseProject/STKit/Media (2.0.0):
-    - STBaseProject/STKit/Core
-  - STBaseProject/STKit/Network (2.0.0):
-    - STBaseProject/STKit/Core
-    - STBaseProject/STKit/Security
-  - STBaseProject/STKit/Scan (2.0.0):
-    - STBaseProject/STKit/Core
-    - STBaseProject/STKit/Media
-  - STBaseProject/STKit/Security (2.0.0):
-    - STBaseProject/STKit/Core
-  - STBaseProject/STKit/UI (2.0.0):
-    - STBaseProject/STKit/Core
-    - STBaseProject/STKit/Localization
+  - STBaseProject (2.0.0)
 
 DEPENDENCIES:
   - STBaseProject (from `../`)
-  - STBaseProject/STKit/Dialog (from `../`)
-  - STBaseProject/STKit/Location (from `../`)
-  - STBaseProject/STKit/Media (from `../`)
-  - STBaseProject/STKit/Scan (from `../`)
-  - STBaseProject/STKit/Security (from `../`)
 
 EXTERNAL SOURCES:
   STBaseProject:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: 382ad2ab87f7c37c8c172c2e1c7e8917d5dc6478
+  STBaseProject: 08f9c5076815bda03c06a475454f9f8d0157fdac
 
-PODFILE CHECKSUM: a2396b17137c7c5b546c0e18789d7727128973ce
+PODFILE CHECKSUM: 83abe57bbac826f8df3098f33171d8f59cd11e8f
 
 COCOAPODS: 1.16.2
