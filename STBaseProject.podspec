@@ -32,64 +32,78 @@ Pod::Spec.new do |s|
     s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
     s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
 
-    # 模块化设计 - 核心模块
+    # ==================== 默认模块 ====================
+    
+    # STBaseModule - 基础模块
     s.subspec 'STBaseModule' do |base|
-        base.source_files = [
-            'STBaseProject/Classes/STBaseModule/**/*.swift', 
-            'STBaseProject/Classes/STConfig/**/*.swift'
-        ]
+        base.source_files = 'STBaseProject/Classes/STBaseModule/**/*.swift'
     end
 
-    # STKit 工具集模块
+    # STConfig - 配置模块
+    s.subspec 'STConfig' do |config|
+        config.source_files = 'STBaseProject/Classes/STConfig/**/*.swift'
+    end
+
+    # STKit/Core - 核心工具模块
     s.subspec 'STKit' do |kit|
         kit.subspec 'Core' do |core|
             core.source_files = 'STBaseProject/Classes/STKit/Core/**/*.swift'
-            core.dependency 'STBaseProject/STBaseModule'
+            core.dependency 'STBaseProject/STConfig'
         end
 
+        # STKit/UI - UI组件模块
         kit.subspec 'UI' do |ui|
             ui.source_files = 'STBaseProject/Classes/STKit/UI/**/*.swift'
             ui.dependency 'STBaseProject/STBaseModule'
             ui.dependency 'STBaseProject/STKit/Core'
         end
 
+        # STKit/Network - 网络模块
         kit.subspec 'Network' do |network|
             network.source_files = 'STBaseProject/Classes/STKit/Network/**/*.swift'
             network.dependency 'STBaseProject/STBaseModule'
             network.dependency 'STBaseProject/STKit/Core'
         end
 
-        kit.subspec 'Media' do |media|
-            media.source_files = 'STBaseProject/Classes/STKit/Media/**/*.swift'
-            media.dependency 'STBaseProject/STBaseModule'
-            media.dependency 'STBaseProject/STKit/Core'
-        end
-
-        kit.subspec 'Scan' do |scan|
-            scan.source_files = 'STBaseProject/Classes/STKit/Scan/**/*.swift'
-            scan.dependency 'STBaseProject/STBaseModule'
-            scan.dependency 'STBaseProject/STKit/Core'
-        end
-
+        # STKit/Security - 安全模块
         kit.subspec 'Security' do |security|
             security.source_files = 'STBaseProject/Classes/STKit/Security/**/*.swift'
             security.dependency 'STBaseProject/STBaseModule'
             security.dependency 'STBaseProject/STKit/Core'
         end
 
+        # STKit/Localization - 本地化模块
         kit.subspec 'Localization' do |localization|
             localization.source_files = 'STBaseProject/Classes/STKit/Localization/**/*.swift'
             localization.dependency 'STBaseProject/STBaseModule'
             localization.dependency 'STBaseProject/STKit/Core'
         end
 
+        # ==================== 可选模块 ====================
+
+        # STKit/Location - 位置模块（可选）
         kit.subspec 'Location' do |location|
             location.source_files = 'STBaseProject/Classes/STKit/Location/**/*.swift'
             location.dependency 'STBaseProject/STBaseModule'
             location.dependency 'STBaseProject/STKit/Core'
         end
+
+        # STKit/Scan - 扫描模块（可选）
+        kit.subspec 'Scan' do |scan|
+            scan.source_files = 'STBaseProject/Classes/STKit/Scan/**/*.swift'
+            scan.dependency 'STBaseProject/STBaseModule'
+            scan.dependency 'STBaseProject/STKit/Core'
+        end
+
+        # STKit/Media - 媒体模块（可选）
+        kit.subspec 'Media' do |media|
+            media.source_files = 'STBaseProject/Classes/STKit/Media/**/*.swift'
+            media.dependency 'STBaseProject/STBaseModule'
+            media.dependency 'STBaseProject/STKit/Core'
+        end
     end
 
-    s.default_subspecs = ['STBaseModule', 'STKit']
+    # 默认包含所有默认模块
+    s.default_subspecs = ['STBaseModule', 'STConfig', 'STKit']
 
 end
