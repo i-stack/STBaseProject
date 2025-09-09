@@ -31,17 +31,94 @@
     "5.9"
   ],
   "requires_arc": true,
-  "pod_target_xcconfig": {
-    "ENABLE_BITCODE": "NO",
-    "SWIFT_VERSION": "5.0",
-    "CODE_SIGNING_ALLOWED": "NO",
-    "CODE_SIGNING_REQUIRED": "NO",
-    "PRODUCT_BUNDLE_IDENTIFIER": "com.stbaseproject.framework"
-  },
   "documentation_url": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
   "readme": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
-  "source_files": [
-    "STBaseProject/Classes/**/*.swift"
+  "default_subspecs": [
+    "STBaseModule",
+    "STConfig",
+    "STKit/Core",
+    "STKit/UI",
+    "STKit/Network",
+    "STKit/Security",
+    "STKit/Localization"
+  ],
+  "subspecs": [
+    {
+      "name": "STBaseModule",
+      "source_files": "STBaseProject/Classes/STBaseModule/**/*.swift"
+    },
+    {
+      "name": "STConfig",
+      "source_files": "STBaseProject/Classes/STConfig/**/*.swift"
+    },
+    {
+      "name": "STKit",
+      "subspecs": [
+        {
+          "name": "Core",
+          "source_files": "STBaseProject/Classes/STKit/Core/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STConfig": []
+          }
+        },
+        {
+          "name": "UI",
+          "source_files": "STBaseProject/Classes/STKit/UI/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STBaseModule": [],
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Network",
+          "source_files": "STBaseProject/Classes/STKit/Network/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STBaseModule": [],
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Security",
+          "source_files": "STBaseProject/Classes/STKit/Security/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STBaseModule": [],
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Localization",
+          "source_files": "STBaseProject/Classes/STKit/Localization/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STBaseModule": [],
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Location",
+          "source_files": "STBaseProject/Classes/STKit/Location/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STBaseModule": [],
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Scan",
+          "source_files": "STBaseProject/Classes/STKit/Scan/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STBaseModule": [],
+            "STBaseProject/STKit/Core": []
+          }
+        },
+        {
+          "name": "Media",
+          "source_files": "STBaseProject/Classes/STKit/Media/**/*.swift",
+          "dependencies": {
+            "STBaseProject/STBaseModule": [],
+            "STBaseProject/STKit/Core": []
+          }
+        }
+      ]
+    }
   ],
   "swift_version": "5.9"
 }
