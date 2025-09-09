@@ -16,7 +16,7 @@ import Foundation
 
 // MARK: - 版本信息
 public struct STBaseProjectInfo {
-    public static let version = "2.0.0"
+    public static let version = "1.1.4"
     public static let name = "STBaseProject"
     public static let description = "A powerful iOS base project with modular architecture and rich UI components."
 }
