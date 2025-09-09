@@ -60,7 +60,20 @@ pod 'STBaseProject/STKitLocation'
 dependencies: [
     .package(path: ".")
 ]
+
+// 在代码中使用 - 多种导入方式
+import STBaseProject        // 所有功能
+import STBaseModule         // 基础模块
+import STKitLocation        // 位置服务
+import STKitScan           // 扫描功能
+import STKitMedia          // 媒体处理
+import STKitDialog         // 对话框组件
 ```
+
+**模块化导入**：
+- `STBaseProject`：包含所有功能（推荐）
+- `STBaseModule`：基础架构模块
+- `STKit*`：专业功能模块（按需导入）
 
 ## ⚠️ 注意事项
 

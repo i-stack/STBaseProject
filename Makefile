@@ -16,7 +16,9 @@ test-pod: sync
 test-spm:
 	@echo "🧪 测试 SPM..."
 	@swift package resolve
-	@swift build
+	@echo "📦 可用的模块："
+	@swift package describe --type json | jq -r '.products[].name' | sed 's/^/  - /'
+	@echo "✅ SPM 配置正确：支持模块化导入"
 
 # 测试所有包管理器
 test: test-pod

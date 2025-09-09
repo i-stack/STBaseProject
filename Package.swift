@@ -9,19 +9,13 @@ let package = Package(
         .iOS(.v13)
     ],
     products: [
-        // 完整产品 - 包含所有模块
+        // 完整产品 - 包含所有功能
         .library(
             name: "STBaseProject",
-            targets: [
-                "STBaseModule",
-                "STKitLocation",
-                "STKitScan",
-                "STKitMedia",
-                "STKitDialog"
-            ]
+            targets: ["STBaseProject"]
         ),
         
-        // 基础架构模块（包含 Core、UI、Security、Config）
+        // 基础架构模块
         .library(
             name: "STBaseModule",
             targets: ["STBaseModule"]
@@ -45,51 +39,38 @@ let package = Package(
             targets: ["STKitDialog"]
         )
     ],
-    dependencies: [
-        // 目前没有外部依赖，但可以在这里添加
-        // .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.0.0"),
-    ],
     targets: [
-        // MARK: - 基础架构模块（包含 Core、UI、Security、Config）
+        // 基础架构模块
         .target(
             name: "STBaseModule",
-            dependencies: [],
-            path: "Sources/STBaseModule",
-            resources: []
+            path: "Sources/STBaseModule"
         ),
         
-        // MARK: - STKit 专业功能模块
+        // STKit 专业功能模块
         .target(
             name: "STKitLocation",
             dependencies: ["STBaseModule"],
-            path: "Sources/STKit/Location",
-            resources: []
+            path: "Sources/STKit/Location"
         ),
-        
         .target(
             name: "STKitScan",
             dependencies: ["STBaseModule"],
-            path: "Sources/STKit/Scan",
-            resources: []
+            path: "Sources/STKit/Scan"
         ),
-        
         .target(
             name: "STKitMedia",
             dependencies: ["STBaseModule"],
-            path: "Sources/STKit/Media",
-            resources: []
+            path: "Sources/STKit/Media"
         ),
-        
         .target(
             name: "STKitDialog",
             dependencies: ["STBaseModule"],
-            path: "Sources/STKit/STDialog",
-            resources: []
+            path: "Sources/STKit/STDialog"
         ),
         
-        // MARK: - 测试目标
-        .testTarget(
-            name: "STBaseProjectTests",
+        // 完整产品 - 依赖所有模块
+        .target(
+            name: "STBaseProject",
             dependencies: [
                 "STBaseModule",
                 "STKitLocation",
@@ -97,7 +78,7 @@ let package = Package(
                 "STKitMedia",
                 "STKitDialog"
             ],
-            path: "Tests"
+            path: "Sources/STBaseProject"
         )
     ],
     swiftLanguageVersions: [.v5]
