@@ -41,12 +41,62 @@ Pod::Spec.new do |s|
   s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
   s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
 
-  # 将所有模块作为核心引入，去除模块化设计
-  s.source_files = [
-    'STBaseProject/Classes/**/*.swift'
-  ]
-  
-  # 移除所有子模块依赖，将所有内容作为单一模块
-  # 不定义任何依赖，所有内容作为单一模块
+  # 模块化设计 - 核心模块
+  s.subspec 'STBaseModule' do |base|
+    base.source_files = 'STBaseProject/Classes/STBase/**/*.swift'
+  end
+
+  # STKit 工具集模块
+  s.subspec 'STKit' do |kit|
+    kit.subspec 'Core' do |core|
+      core.source_files = 'STBaseProject/Classes/STKit/Core/**/*.swift'
+      core.dependency 'STBaseProject/STBaseModule'
+    end
+
+    kit.subspec 'UI' do |ui|
+      ui.source_files = 'STBaseProject/Classes/STKit/UI/**/*.swift'
+      ui.dependency 'STBaseProject/STBaseModule'
+      ui.dependency 'STBaseProject/STKit/Core'
+    end
+
+    kit.subspec 'Network' do |network|
+      network.source_files = 'STBaseProject/Classes/STKit/Network/**/*.swift'
+      network.dependency 'STBaseProject/STBaseModule'
+      network.dependency 'STBaseProject/STKit/Core'
+    end
+
+    kit.subspec 'Media' do |media|
+      media.source_files = 'STBaseProject/Classes/STKit/Media/**/*.swift'
+      media.dependency 'STBaseProject/STBaseModule'
+      media.dependency 'STBaseProject/STKit/Core'
+    end
+
+    kit.subspec 'Scan' do |scan|
+      scan.source_files = 'STBaseProject/Classes/STKit/Scan/**/*.swift'
+      scan.dependency 'STBaseProject/STBaseModule'
+      scan.dependency 'STBaseProject/STKit/Core'
+    end
+
+    kit.subspec 'Security' do |security|
+      security.source_files = 'STBaseProject/Classes/STKit/Security/**/*.swift'
+      security.dependency 'STBaseProject/STBaseModule'
+      security.dependency 'STBaseProject/STKit/Core'
+    end
+
+    kit.subspec 'Localization' do |localization|
+      localization.source_files = 'STBaseProject/Classes/STKit/Localization/**/*.swift'
+      localization.dependency 'STBaseProject/STBaseModule'
+      localization.dependency 'STBaseProject/STKit/Core'
+    end
+
+    kit.subspec 'Location' do |location|
+      location.source_files = 'STBaseProject/Classes/STKit/Location/**/*.swift'
+      location.dependency 'STBaseProject/STBaseModule'
+      location.dependency 'STBaseProject/STKit/Core'
+    end
+  end
+
+  # 默认包含所有模块
+  s.default_subspecs = ['STBaseModule', 'STKit']
 
 end
