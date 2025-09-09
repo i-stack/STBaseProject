@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import STBaseModule
 
 // MARK: - HUD 位置枚举
 public enum STHUDLocation {

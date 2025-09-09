@@ -8,7 +8,6 @@
 import UIKit
 import AVFoundation
 import Photos
-import STBaseModule
 
 // MARK: - 图片来源枚举
 public enum STImageSource {

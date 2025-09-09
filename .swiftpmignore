@@ -1,5 +1,0 @@
-# Swift Package Manager ignore file
-# Files and directories to exclude from SPM package
-
-# Build and development files
-build-tools/

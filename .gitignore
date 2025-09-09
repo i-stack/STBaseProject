@@ -8,6 +8,7 @@ DerivedData/
 
 # Swift Package Manager
 .build/
+.swiftpm/
 
 ## Various settings
 *.pbxuser
@@ -46,11 +47,6 @@ xcuserdata/
 *.xcuserstate
 .DS_Store
 
-# Build and development files
-# These files are needed for CocoaPods but not for SPM
+# Project specific
+# These directories are not needed in version control
 build-tools/
-*.podspec
-
-# SPM specific ignores
-.swiftpm/
-.build/
