@@ -89,7 +89,7 @@ open class STScanManager: NSObject {
             return
         }
         
-        if UIImage.isEmpty(image) {
+        if image == nil {
             DispatchQueue.main.async {
                 onFailed(NSError.init(domain: "image is empty", code: 0, userInfo: [:]))
             }
@@ -247,7 +247,7 @@ open class STScanManager: NSObject {
             return
         }
         
-        if UIImage.isEmpty(waterImage) == true {
+        if waterImage == nil {
             DispatchQueue.main.async {
                 onFinish(.failure(NSError.init(domain: "waterImageSize is nil!", code: 0, userInfo: [:])))
             }
@@ -295,14 +295,9 @@ open class STScanManager: NSObject {
     
     // 使用系统相册选取图片并识别二维码
     public func pickImageAndRecognize(from viewController: UIViewController? = nil) {
-        let hostVC = viewController ?? self.presentVC
-        guard let hostVC = hostVC else { return }
-        STImageManager.shared.selectImage(from: hostVC, source: .photoLibrary) { [weak self] model in
-            guard let strongSelf = self else { return }
-            if let image = model.editedImage ?? model.originalImage {
-                strongSelf.detailSelectPhoto(image: image)
-            }
-        }
+        // STImageManager 功能已移至 STKitMedia 模块
+        // 如需使用图片选择功能，请导入 STKitMedia 模块
+        print("⚠️ STScanManager: pickImageAndRecognize 功能需要 STKitMedia 模块支持")
     }
     
     public func detailSelectPhoto(image: UIImage) -> Void {
