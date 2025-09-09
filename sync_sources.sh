@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # STBaseProject 源码同步脚本
-# 将 STBaseProject/Sources/ 目录同步到 STBaseProjectCocoaPods/Classes/
+# 将 Sources/ 目录同步到 STBaseProjectCocoaPods/Classes/
 
-echo "🔄 开始同步 STBaseProject/Sources/ 到 STBaseProjectCocoaPods/Classes/..."
+echo "🔄 开始同步 Sources/ 到 STBaseProjectCocoaPods/Classes/..."
 
 # 删除旧的 Classes 目录
 if [ -d "STBaseProjectCocoaPods/Classes" ]; then
@@ -12,11 +12,11 @@ if [ -d "STBaseProjectCocoaPods/Classes" ]; then
 fi
 
 # 复制 Sources 到 Classes
-cp -r STBaseProject/Sources STBaseProjectCocoaPods/Classes
-echo "✅ 已复制 STBaseProject/Sources/ 到 STBaseProjectCocoaPods/Classes/"
+cp -r Sources STBaseProjectCocoaPods/Classes
+echo "✅ 已复制 Sources/ 到 STBaseProjectCocoaPods/Classes/"
 
 # 验证文件数量
-sources_count=$(find STBaseProject/Sources -name "*.swift" | wc -l)
+sources_count=$(find Sources -name "*.swift" | wc -l)
 classes_count=$(find STBaseProjectCocoaPods/Classes -name "*.swift" | wc -l)
 
 if [ "$sources_count" -eq "$classes_count" ]; then

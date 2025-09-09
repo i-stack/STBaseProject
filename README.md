@@ -25,13 +25,48 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 
 ## Installation
 
-### 完整安装（推荐用于快速开始）
+### Swift Package Manager (SPM)
+
+#### 完整安装（推荐用于快速开始）
+
+在 Xcode 中：
+1. File → Add Package Dependencies
+2. 输入 URL：`https://github.com/i-stack/STBaseProject.git`
+3. 选择版本：`2.0.0` 或更高
+4. 点击 Add Package
+
+或在 `Package.swift` 中：
+```swift
+dependencies: [
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "2.0.0")
+]
+```
+
+#### 按需引入（推荐用于生产环境）
+
+STBaseProject 支持模块化导入，您可以根据项目需求按需引入：
+
+```swift
+// 完整功能（推荐）
+import STBaseProject
+
+// 按需导入
+import STBaseModule         // 基础架构模块
+import STKitLocation        // 位置服务
+import STKitScan           // 扫描功能
+import STKitMedia          // 媒体处理
+import STKitDialog         // 对话框组件
+```
+
+### CocoaPods
+
+#### 完整安装（推荐用于快速开始）
 
 ```ruby
 pod 'STBaseProject'
 ```
 
-### 按需引入（推荐用于生产环境）
+#### 按需引入（推荐用于生产环境）
 
 STBaseProject 已重构为模块化设计，您可以根据项目需求按需引入：
 

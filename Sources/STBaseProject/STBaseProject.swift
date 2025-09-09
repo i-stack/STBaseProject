@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: - 重新导出所有模块
+// MARK: - 导出所有模块
 @_exported import STBaseModule
 @_exported import STKitLocation
 @_exported import STKitScan

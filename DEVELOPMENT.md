@@ -3,14 +3,13 @@
 ## 📁 项目结构
 
 ```
-STBaseProject/                    # 项目根目录
-├── STBaseProject/               # SPM 包目录（主包）
-│   ├── Sources/                 # 主要源码目录
-│   │   ├── STBaseModule/        # 基础架构模块
-│   │   ├── STKit/               # 专业功能模块
-│   │   └── STBaseProject/       # 主模块文件
-│   ├── Tests/                   # 测试文件
-│   └── Package.swift            # SPM 配置
+STBaseProject/                    # 项目根目录（GitHub 仓库根目录）
+├── Sources/                     # SPM 源码目录（在根目录）
+│   ├── STBaseModule/            # 基础架构模块
+│   ├── STKit/                   # 专业功能模块
+│   └── STBaseProject/           # 主模块文件
+├── Tests/                       # SPM 测试文件（在根目录）
+├── Package.swift                # SPM 配置（在根目录）
 ├── STBaseProjectCocoaPods/      # CocoaPods 包目录
 │   └── Classes/                 # 自动同步的源码
 ├── Example/                     # 示例项目
@@ -63,7 +62,9 @@ pod 'STBaseProject/STKitLocation'
 ```swift
 // Package.swift
 dependencies: [
-    .package(path: "./STBaseProject")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "2.0.0")
+    // 或本地开发
+    // .package(path: "./STBaseProject")
 ]
 
 // 在代码中使用 - 多种导入方式
