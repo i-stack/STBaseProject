@@ -34,42 +34,42 @@ Pod::Spec.new do |s|
 
     # ==================== 基础架构模块 ====================
     
-    # STBaseModule - 基础架构模块（包含 Core、UI、Security、Config）
-    s.subspec 'STBaseModule' do |base|
-        base.source_files = 'Sources/STBaseModule/**/*.swift'
+    # STBaseProject - 基础架构模块（包含 Core、UI、Security、Config）
+    s.subspec 'STBaseProject' do |base|
+        base.source_files = 'Sources/STBaseProject/**/*.swift'
     end
 
-    # ==================== STKit 专业功能模块 ====================
+    # ==================== ST 专业功能模块 ====================
 
-    # STKitLocation - 位置服务模块
-    s.subspec 'STKitLocation' do |location|
-        location.source_files = 'Sources/STKitLocation/**/*.swift'
-        location.dependency 'STBaseProject/STBaseModule'
+    # STLocation - 位置服务模块
+    s.subspec 'STLocation' do |location|
+        location.source_files = 'Sources/STLocation/**/*.swift'
+        location.dependency 'STBaseProject/STBaseProject'
     end
 
-    # STKitScan - 扫描功能模块
-    s.subspec 'STKitScan' do |scan|
-        scan.source_files = 'Sources/STKitScan/**/*.swift'
-        scan.dependency 'STBaseProject/STBaseModule'
+    # STScan - 扫描功能模块
+    s.subspec 'STScan' do |scan|
+        scan.source_files = 'Sources/STScan/**/*.swift'
+        scan.dependency 'STBaseProject/STBaseProject'
     end
 
-    # STKitMedia - 媒体处理模块
-    s.subspec 'STKitMedia' do |media|
-        media.source_files = 'Sources/STKitMedia/**/*.swift'
-        media.dependency 'STBaseProject/STBaseModule'
-        media.pod_target_xcconfig = { 'SWIFT_INCLUDE_PATHS' => '$(PODS_TARGET_SRCROOT)/Sources/STBaseModule' }
+    # STMedia - 媒体处理模块
+    s.subspec 'STMedia' do |media|
+        media.source_files = 'Sources/STMedia/**/*.swift'
+        media.dependency 'STBaseProject/STBaseProject'
+        media.pod_target_xcconfig = { 'SWIFT_INCLUDE_PATHS' => '$(PODS_TARGET_SRCROOT)/Sources/STBaseProject' }
     end
 
-    # STKitDialog - 对话框组件模块
-    s.subspec 'STKitDialog' do |dialog|
-        dialog.source_files = 'Sources/STKitDialog/**/*.swift'
-        dialog.dependency 'STBaseProject/STBaseModule'
-        dialog.pod_target_xcconfig = { 'SWIFT_INCLUDE_PATHS' => '$(PODS_TARGET_SRCROOT)/Sources/STBaseModule' }
+    # STDialog - 对话框组件模块
+    s.subspec 'STDialog' do |dialog|
+        dialog.source_files = 'Sources/STDialog/**/*.swift'
+        dialog.dependency 'STBaseProject/STBaseProject'
+        dialog.pod_target_xcconfig = { 'SWIFT_INCLUDE_PATHS' => '$(PODS_TARGET_SRCROOT)/Sources/STBaseProject' }
     end
 
     # ==================== 默认配置 ====================
     
     # 默认包含基础架构模块
-    s.default_subspecs = ['STBaseModule']
+    s.default_subspecs = ['STBaseProject']
 
 end
