@@ -45,3 +45,12 @@ xcuserdata/
 # System files
 *.xcuserstate
 .DS_Store
+
+# Build and development files
+# These files are needed for CocoaPods but not for SPM
+build-tools/
+*.podspec
+
+# SPM specific ignores
+.swiftpm/
+.build/

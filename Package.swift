@@ -42,30 +42,25 @@ let package = Package(
     targets: [
         // 基础架构模块
         .target(
-            name: "STBaseModule",
-            path: "Sources/STBaseModule"
+            name: "STBaseModule"
         ),
         
         // STKit 专业功能模块
         .target(
             name: "STKitLocation",
-            dependencies: ["STBaseModule"],
-            path: "Sources/STKit/Location"
+            dependencies: ["STBaseModule"]
         ),
         .target(
             name: "STKitScan",
-            dependencies: ["STBaseModule"],
-            path: "Sources/STKit/Scan"
+            dependencies: ["STBaseModule"]
         ),
         .target(
             name: "STKitMedia",
-            dependencies: ["STBaseModule"],
-            path: "Sources/STKit/Media"
+            dependencies: ["STBaseModule"]
         ),
         .target(
             name: "STKitDialog",
-            dependencies: ["STBaseModule"],
-            path: "Sources/STKit/STDialog"
+            dependencies: ["STBaseModule"]
         ),
         
         // 完整产品 - 依赖所有模块
@@ -77,8 +72,7 @@ let package = Package(
                 "STKitScan",
                 "STKitMedia",
                 "STKitDialog"
-            ],
-            path: "Sources/STBaseProject"
+            ]
         )
     ],
     swiftLanguageVersions: [.v5]

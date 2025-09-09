@@ -32,15 +32,42 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 在 Xcode 中：
 1. File → Add Package Dependencies
 2. 输入 URL：`https://github.com/i-stack/STBaseProject.git`
-3. 选择版本：`2.0.0` 或更高
+3. 选择版本：`2.0.2` 或更高
 4. 点击 Add Package
 
 或在 `Package.swift` 中：
 ```swift
 dependencies: [
-    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "2.0.0")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "2.0.2")
 ]
 ```
+
+**注意**：如果显示 "unversioned"，请尝试以下解决方案：
+
+1. **清理 SPM 缓存**：
+   ```bash
+   # 在终端中运行
+   rm -rf ~/Library/Caches/org.swift.swiftpm
+   rm -rf ~/Library/Developer/Xcode/DerivedData
+   ```
+
+2. **在 Xcode 中**：
+   - File → Packages → Reset Package Caches
+   - 重启 Xcode
+
+3. **使用最新版本**：
+   ```swift
+   .package(url: "https://github.com/i-stack/STBaseProject.git", from: "2.0.2")
+   ```
+
+4. **确保版本标签格式正确**：
+   - ✅ 正确：`2.0.1`
+   - ❌ 错误：`v2.0.1`
+
+4. **确保网络连接**：
+   - 使用 GitHub URL 而不是本地路径
+   - 网络连接正常，能访问 GitHub
+   - 版本标签已正确推送到 GitHub
 
 #### 按需引入（推荐用于生产环境）
 

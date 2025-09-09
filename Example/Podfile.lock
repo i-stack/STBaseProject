@@ -1,28 +1,7 @@
 PODS:
   - STBaseProject (2.0.0):
     - STBaseProject/STBaseModule (= 2.0.0)
-    - STBaseProject/STConfig (= 2.0.0)
-    - STBaseProject/STKit/Core (= 2.0.0)
-    - STBaseProject/STKit/Localization (= 2.0.0)
-    - STBaseProject/STKit/Network (= 2.0.0)
-    - STBaseProject/STKit/Security (= 2.0.0)
-    - STBaseProject/STKit/UI (= 2.0.0)
   - STBaseProject/STBaseModule (2.0.0)
-  - STBaseProject/STConfig (2.0.0)
-  - STBaseProject/STKit/Core (2.0.0):
-    - STBaseProject/STConfig
-  - STBaseProject/STKit/Localization (2.0.0):
-    - STBaseProject/STBaseModule
-    - STBaseProject/STKit/Core
-  - STBaseProject/STKit/Network (2.0.0):
-    - STBaseProject/STBaseModule
-    - STBaseProject/STKit/Core
-  - STBaseProject/STKit/Security (2.0.0):
-    - STBaseProject/STBaseModule
-    - STBaseProject/STKit/Core
-  - STBaseProject/STKit/UI (2.0.0):
-    - STBaseProject/STBaseModule
-    - STBaseProject/STKit/Core
 
 DEPENDENCIES:
   - STBaseProject (from `../`)
@@ -32,7 +11,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  STBaseProject: dc9150b26d58e9c18f76dc30946d478c3c24512a
+  STBaseProject: 3632f25d24ad961efdfd199940d0348025939e7d
 
 PODFILE CHECKSUM: 83abe57bbac826f8df3098f33171d8f59cd11e8f
 
