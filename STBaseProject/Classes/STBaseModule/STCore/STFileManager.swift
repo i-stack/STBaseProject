@@ -521,7 +521,7 @@ public func STLogP<T>(_ message: T, file: String = #file, funcName: String = #fu
     let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
     print(content)
     var allContent = ""
-    let outputPath = STLogView.st_outputLogPath()
+    let outputPath = STLogManager.st_outputLogPath()
     let userDefault = UserDefaults.standard
     if let origintContent = userDefault.object(forKey: outputPath) as? String {
         allContent = "\(origintContent)\n\(content)"
@@ -530,6 +530,6 @@ public func STLogP<T>(_ message: T, file: String = #file, funcName: String = #fu
     }
     userDefault.setValue(allContent, forKey: outputPath)
     userDefault.synchronize()
-    NotificationCenter.default.post(name: NSNotification.Name(rawValue: STLogView.st_notificationQueryLogName()), object: content)
+    NotificationCenter.default.post(name: NSNotification.Name(rawValue: STLogManager.st_notificationQueryLogName()), object: content)
     #endif
 }

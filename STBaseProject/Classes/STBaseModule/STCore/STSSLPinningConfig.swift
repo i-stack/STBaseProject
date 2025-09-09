@@ -9,11 +9,11 @@ import Foundation
 
 // MARK: - SSL证书绑定配置
 public struct STSSLPinningConfig: Codable {
-    let enabled: Bool
-    let certificates: [Data]
-    let publicKeyHashes: [String]
-    let validateHost: Bool
-    let allowInvalidCertificates: Bool
+    public let enabled: Bool
+    public let certificates: [Data]
+    public let publicKeyHashes: [String]
+    public let validateHost: Bool
+    public let allowInvalidCertificates: Bool
     
     public init(enabled: Bool = true,
                 certificates: [Data] = [],

@@ -409,7 +409,7 @@ public struct STDataUtils {
     /// 创建随机数据
     /// - Parameter length: 数据长度
     /// - Returns: 随机数据
-    static func randomData(length: Int) -> Data {
+    public static func randomData(length: Int) -> Data {
         var data = Data(count: length)
         _ = data.withUnsafeMutableBytes { bytes in
             SecRandomCopyBytes(kSecRandomDefault, length, bytes.baseAddress!)
@@ -433,7 +433,7 @@ public struct STDataUtils {
     ///   - lhs: 第一个 Data
     ///   - rhs: 第二个 Data
     /// - Returns: 是否相等
-    static func constantTimeEquals(_ lhs: Data, _ rhs: Data) -> Bool {
+    public static func constantTimeEquals(_ lhs: Data, _ rhs: Data) -> Bool {
         guard lhs.count == rhs.count else { return false }
         
         var result: UInt8 = 0

@@ -8,6 +8,7 @@
 import Foundation
 import CryptoKit
 import CommonCrypto
+// STBaseModule 内部文件，不需要导入自己
 
 // MARK: - 加密配置
 public struct STCryptoConfig {

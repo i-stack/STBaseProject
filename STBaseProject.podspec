@@ -13,11 +13,11 @@ Pod::Spec.new do |s|
     s.summary = 'A powerful iOS base project with modular architecture and rich UI components.'
     s.description = <<-DESC
         STBaseProject is a comprehensive iOS development framework that provides:
-        - Modular STKit toolset with Core/UI/Network/Media/Scan/Security/Localization/Location modules
+        - Modular STBaseModule with Core/UI/Security/Config modules
         - Complete MVVM architecture with STBaseViewController, STBaseViewModel, STBaseModel, STBaseView
         - Rich UI components including custom buttons, labels, alerts, and scan views
         - Unified image management, network session, localization, and security tools
-        - Easy integration with CocoaPods, supports selective module importing
+        - Easy integration with CocoaPods and SPM, supports selective module importing
     DESC
     
     s.homepage = 'https://github.com/i-stack/STBaseProject'
@@ -32,78 +32,42 @@ Pod::Spec.new do |s|
     s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
     s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
 
-    # ==================== 默认模块 ====================
+    # ==================== 基础架构模块 ====================
     
-    # STBaseModule - 基础模块
+    # STBaseModule - 基础架构模块（包含 Core、UI、Security、Config）
     s.subspec 'STBaseModule' do |base|
         base.source_files = 'STBaseProject/Classes/STBaseModule/**/*.swift'
     end
 
-    # STConfig - 配置模块
-    s.subspec 'STConfig' do |config|
-        config.source_files = 'STBaseProject/Classes/STConfig/**/*.swift'
+    # ==================== STKit 专业功能模块 ====================
+
+    # STKitLocation - 位置服务模块
+    s.subspec 'STKitLocation' do |location|
+        location.source_files = 'STBaseProject/Classes/STKit/Location/**/*.swift'
+        location.dependency 'STBaseProject/STBaseModule'
     end
 
-    # STKit/Core - 核心工具模块
-    s.subspec 'STKit' do |kit|
-        kit.subspec 'Core' do |core|
-            core.source_files = 'STBaseProject/Classes/STKit/Core/**/*.swift'
-            core.dependency 'STBaseProject/STConfig'
-        end
-
-        # STKit/UI - UI组件模块
-        kit.subspec 'UI' do |ui|
-            ui.source_files = 'STBaseProject/Classes/STKit/UI/**/*.swift'
-            ui.dependency 'STBaseProject/STBaseModule'
-            ui.dependency 'STBaseProject/STKit/Core'
-        end
-
-        # STKit/Network - 网络模块
-        kit.subspec 'Network' do |network|
-            network.source_files = 'STBaseProject/Classes/STKit/Network/**/*.swift'
-            network.dependency 'STBaseProject/STBaseModule'
-            network.dependency 'STBaseProject/STKit/Core'
-        end
-
-        # STKit/Security - 安全模块
-        kit.subspec 'Security' do |security|
-            security.source_files = 'STBaseProject/Classes/STKit/Security/**/*.swift'
-            security.dependency 'STBaseProject/STBaseModule'
-            security.dependency 'STBaseProject/STKit/Core'
-        end
-
-        # STKit/Localization - 本地化模块
-        kit.subspec 'Localization' do |localization|
-            localization.source_files = 'STBaseProject/Classes/STKit/Localization/**/*.swift'
-            localization.dependency 'STBaseProject/STBaseModule'
-            localization.dependency 'STBaseProject/STKit/Core'
-        end
-
-        # ==================== 可选模块 ====================
-
-        # STKit/Location - 位置模块（可选）
-        kit.subspec 'Location' do |location|
-            location.source_files = 'STBaseProject/Classes/STKit/Location/**/*.swift'
-            location.dependency 'STBaseProject/STBaseModule'
-            location.dependency 'STBaseProject/STKit/Core'
-        end
-
-        # STKit/Scan - 扫描模块（可选）
-        kit.subspec 'Scan' do |scan|
-            scan.source_files = 'STBaseProject/Classes/STKit/Scan/**/*.swift'
-            scan.dependency 'STBaseProject/STBaseModule'
-            scan.dependency 'STBaseProject/STKit/Core'
-        end
-
-        # STKit/Media - 媒体模块（可选）
-        kit.subspec 'Media' do |media|
-            media.source_files = 'STBaseProject/Classes/STKit/Media/**/*.swift'
-            media.dependency 'STBaseProject/STBaseModule'
-            media.dependency 'STBaseProject/STKit/Core'
-        end
+    # STKitScan - 扫描功能模块
+    s.subspec 'STKitScan' do |scan|
+        scan.source_files = 'STBaseProject/Classes/STKit/Scan/**/*.swift'
+        scan.dependency 'STBaseProject/STBaseModule'
     end
 
-    # 默认只包含默认模块，不包含可选模块
-    s.default_subspecs = ['STBaseModule', 'STConfig', 'STKit/Core', 'STKit/UI', 'STKit/Network', 'STKit/Security', 'STKit/Localization']
+    # STKitMedia - 媒体处理模块
+    s.subspec 'STKitMedia' do |media|
+        media.source_files = 'STBaseProject/Classes/STKit/Media/**/*.swift'
+        media.dependency 'STBaseProject/STBaseModule'
+    end
+
+    # STKitDialog - 对话框组件模块
+    s.subspec 'STKitDialog' do |dialog|
+        dialog.source_files = 'STBaseProject/Classes/STKit/STDialog/**/*.swift'
+        dialog.dependency 'STBaseProject/STBaseModule'
+    end
+
+    # ==================== 默认配置 ====================
+    
+    # 默认包含基础架构模块
+    s.default_subspecs = ['STBaseModule']
 
 end

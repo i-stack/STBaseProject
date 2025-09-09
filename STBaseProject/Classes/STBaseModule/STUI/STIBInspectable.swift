@@ -7,6 +7,7 @@
 //
 
 import UIKit
+// STConfig 现在在 STBaseModule 内部，不需要单独导入
 
 // MARK: - 约束适配类型
 public enum STConstraintAdaptType {

@@ -106,10 +106,4 @@ public class STLabel: UILabel {
         super.drawText(in: rect)
     }
 
-    /// 更新本地化文本（仅对 localizedText 有效）
-    public func st_updateLocalizedText() {
-        if !localizedText.isEmpty {
-            self.text = localizedText.localized
-        }
-    }
 }

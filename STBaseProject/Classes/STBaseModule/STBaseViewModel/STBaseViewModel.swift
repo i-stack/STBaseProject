@@ -281,7 +281,7 @@ open class STBaseViewModel: NSObject {
             loadingState.send(.loading)
         }
         
-        httpSession.st_get(url: url, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
+        httpSession.st_request(url: url, method: .get, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
         }
     }
@@ -295,7 +295,7 @@ open class STBaseViewModel: NSObject {
             loadingState.send(.loading)
         }
         
-        httpSession.st_post(url: url, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
+        httpSession.st_request(url: url, method: .post, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
         }
     }
@@ -309,7 +309,7 @@ open class STBaseViewModel: NSObject {
             loadingState.send(.loading)
         }
         
-        httpSession.st_put(url: url, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
+        httpSession.st_request(url: url, method: .put, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
         }
     }
@@ -323,18 +323,23 @@ open class STBaseViewModel: NSObject {
             loadingState.send(.loading)
         }
         
-        httpSession.st_delete(url: url, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
+        httpSession.st_request(url: url, method: .delete, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
         }
     }
     
     // MARK: - 响应处理
+    private func st_decodeResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> T? {
+        guard let data = httpResponse.data else { return nil }
+        return try? JSONDecoder().decode(responseType, from: data)
+    }
+    
     private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse,
                                                  responseType: T.Type,
                                                  completion: @escaping (Result<T, STBaseError>) -> Void) {
         
         if httpResponse.isSuccess {
-            if let result = httpResponse.st_decode(responseType) {
+            if let result = st_decodeResponse(httpResponse, responseType: responseType) {
                 st_handleSuccess(result, completion: completion)
             } else {
                 let error = STBaseError.dataError("数据解析失败")
@@ -351,16 +356,18 @@ open class STBaseViewModel: NSObject {
             switch httpError {
             case .networkError(let networkError):
                 return STBaseError.networkError(networkError.localizedDescription)
-            case .httpError(let code, let message):
-                return STBaseError.businessError(code: code, message: message)
+            case .serverError(let code):
+                return STBaseError.networkError("服务器错误: \(code)")
             case .invalidURL:
                 return STBaseError.dataError("无效的 URL")
             case .noData:
                 return STBaseError.dataError("无数据返回")
-            case .encodingError:
-                return STBaseError.dataError("参数编码失败")
+            case .timeout:
+                return STBaseError.networkError("请求超时")
             case .decodingError:
                 return STBaseError.dataError("数据解码失败")
+            case .cancelled:
+                return STBaseError.networkError("请求已取消")
             }
         } else if let error = error {
             return STBaseError.origin(error: error)
@@ -575,7 +582,7 @@ open class STBaseViewModel: NSObject {
             loadingState.send(.loading)
         }
         
-        httpSession.st_upload(url: url, parameters: parameters, files: files, progress: progress, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
+        httpSession.st_upload(url: url, files: files, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders, progress: progress) { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
         }
     }
@@ -588,10 +595,20 @@ open class STBaseViewModel: NSObject {
             loadingState.send(.loading)
         }
         
-        httpSession.st_download(url: url, progress: progress, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] localURL, response in
-            if let localURL = localURL {
-                self?.loadingState.send(.loaded)
-                completion(localURL, nil)
+        // 简单的下载实现
+        httpSession.st_request(url: url, method: .get, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
+            if response.isSuccess, let data = response.data {
+                // 创建临时文件
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+                do {
+                    try data.write(to: tempURL)
+                    self?.loadingState.send(.loaded)
+                    completion(tempURL, nil)
+                } catch {
+                    let error = STBaseError.dataError("文件保存失败")
+                    self?.loadingState.send(.failed(error))
+                    completion(nil, error)
+                }
             } else {
                 let error = self?.st_convertHTTPError(response.error) ?? STBaseError.unknown
                 self?.loadingState.send(.failed(error))
@@ -669,6 +686,14 @@ extension STBaseViewModel {
     
     /// 等待网络可用
     public func st_waitForNetwork(completion: @escaping () -> Void) {
-        httpSession.st_waitForNetwork(completion: completion)
+        // 简单的网络等待实现
+        if httpSession.st_checkNetworkStatus() != .notReachable {
+            completion()
+        } else {
+            // 这里可以实现更复杂的网络等待逻辑
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.st_waitForNetwork(completion: completion)
+            }
+        }
     }
 }

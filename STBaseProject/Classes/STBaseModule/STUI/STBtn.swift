@@ -408,15 +408,6 @@ open class STBtn: UIButton {
         self.setNeedsLayout()
     }
     
-    /// 更新本地化文本
-    public func st_updateLocalizedText() {
-        if !localizedTitle.isEmpty {
-            self.setTitle(localizedTitle.localized, for: .normal)
-        }
-        if !localizedSelectedTitle.isEmpty {
-            self.setTitle(localizedSelectedTitle.localized, for: .selected)
-        }
-    }
     
     // MARK: - 私有方法
     private func updateFontSize() {

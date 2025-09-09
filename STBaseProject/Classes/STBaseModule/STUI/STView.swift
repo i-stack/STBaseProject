@@ -350,18 +350,6 @@ public extension UIView {
         return vc
     }
     
-    /// 获取关键窗口
-    /// - Returns: 关键窗口
-    func st_keyWindow() -> UIWindow? {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            for window in windowScene.windows {
-                if window.isKeyWindow {
-                    return window
-                }
-            }
-        }
-        return nil
-    }
 }
 
 // MARK: - UIView 便捷方法扩展

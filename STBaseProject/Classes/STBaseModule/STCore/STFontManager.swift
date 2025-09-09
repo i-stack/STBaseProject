@@ -6,6 +6,7 @@
 //
 
 import UIKit
+// STConfig 现在在 STBaseModule 内部，不需要单独导入
 
 public extension UIFont {
     class func initializeMethod() {

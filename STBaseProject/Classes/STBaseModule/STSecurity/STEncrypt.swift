@@ -9,6 +9,7 @@ import Foundation
 import CryptoKit
 import Security
 import CommonCrypto
+// STBaseModule 内部文件，不需要导入自己
 
 // MARK: - 加密算法类型
 public enum STEncryptionAlgorithm {
