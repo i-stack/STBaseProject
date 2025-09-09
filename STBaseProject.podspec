@@ -103,7 +103,7 @@ Pod::Spec.new do |s|
         end
     end
 
-    # 默认包含所有默认模块
-    s.default_subspecs = ['STBaseModule', 'STConfig', 'STKit']
+    # 默认只包含默认模块，不包含可选模块
+    s.default_subspecs = ['STBaseModule', 'STConfig', 'STKit/Core', 'STKit/UI', 'STKit/Network', 'STKit/Security', 'STKit/Localization']
 
 end
