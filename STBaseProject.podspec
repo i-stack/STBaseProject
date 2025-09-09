@@ -28,22 +28,16 @@ Pod::Spec.new do |s|
     s.swift_versions = ['5.0', '5.1', '5.2', '5.3', '5.4', '5.5', '5.6', '5.7', '5.8', '5.9']
     
     s.requires_arc = true
-    
-    # 优化的配置，避免沙盒权限问题
-    s.pod_target_xcconfig = {
-        'ENABLE_BITCODE' => 'NO',
-        'SWIFT_VERSION' => '5.0',
-        'CODE_SIGNING_ALLOWED' => 'NO',
-        'CODE_SIGNING_REQUIRED' => 'NO',
-        'PRODUCT_BUNDLE_IDENTIFIER' => 'com.stbaseproject.framework'
-    }
 
     s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
     s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
 
     # 模块化设计 - 核心模块
     s.subspec 'STBaseModule' do |base|
-        base.source_files = 'STBaseProject/Classes/STBase/**/*.swift'
+        base.source_files = [
+            'STBaseProject/Classes/STBaseModule/**/*.swift', 
+            'STBaseProject/Classes/STConfig/**/*.swift'
+        ]
     end
 
     # STKit 工具集模块
@@ -96,7 +90,6 @@ Pod::Spec.new do |s|
         end
     end
 
-    # 默认包含所有模块
     s.default_subspecs = ['STBaseModule', 'STKit']
 
 end
