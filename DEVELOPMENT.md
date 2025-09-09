@@ -3,15 +3,20 @@
 ## 📁 项目结构
 
 ```
-STBaseProject/
-├── Sources/                    # 主要源码目录（SPM 使用）
-│   ├── STBaseModule/          # 基础架构模块
-│   └── STKit/                 # 专业功能模块
-├── STBaseProject/
-│   └── Classes/               # CocoaPods 使用（自动同步）
-├── sync_sources.sh            # 同步脚本
-├── Makefile                   # 构建工具
-└── STBaseProject.podspec      # CocoaPods 配置
+STBaseProject/                    # 项目根目录
+├── STBaseProject/               # SPM 包目录（主包）
+│   ├── Sources/                 # 主要源码目录
+│   │   ├── STBaseModule/        # 基础架构模块
+│   │   ├── STKit/               # 专业功能模块
+│   │   └── STBaseProject/       # 主模块文件
+│   ├── Tests/                   # 测试文件
+│   └── Package.swift            # SPM 配置
+├── STBaseProjectCocoaPods/      # CocoaPods 包目录
+│   └── Classes/                 # 自动同步的源码
+├── Example/                     # 示例项目
+├── sync_sources.sh              # 同步脚本
+├── Makefile                     # 构建工具
+└── STBaseProject.podspec        # CocoaPods 配置
 ```
 
 ## 🔄 同步机制
@@ -58,7 +63,7 @@ pod 'STBaseProject/STKitLocation'
 ```swift
 // Package.swift
 dependencies: [
-    .package(path: ".")
+    .package(path: "./STBaseProject")
 ]
 
 // 在代码中使用 - 多种导入方式

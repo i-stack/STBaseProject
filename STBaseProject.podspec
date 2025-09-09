@@ -36,32 +36,32 @@ Pod::Spec.new do |s|
     
     # STBaseModule - 基础架构模块（包含 Core、UI、Security、Config）
     s.subspec 'STBaseModule' do |base|
-        base.source_files = 'STBaseProject/Classes/STBaseModule/**/*.swift'
+        base.source_files = 'STBaseProjectCocoaPods/Classes/STBaseModule/**/*.swift'
     end
 
     # ==================== STKit 专业功能模块 ====================
 
     # STKitLocation - 位置服务模块
     s.subspec 'STKitLocation' do |location|
-        location.source_files = 'STBaseProject/Classes/STKit/Location/**/*.swift'
+        location.source_files = 'STBaseProjectCocoaPods/Classes/STKit/Location/**/*.swift'
         location.dependency 'STBaseProject/STBaseModule'
     end
 
     # STKitScan - 扫描功能模块
     s.subspec 'STKitScan' do |scan|
-        scan.source_files = 'STBaseProject/Classes/STKit/Scan/**/*.swift'
+        scan.source_files = 'STBaseProjectCocoaPods/Classes/STKit/Scan/**/*.swift'
         scan.dependency 'STBaseProject/STBaseModule'
     end
 
     # STKitMedia - 媒体处理模块
     s.subspec 'STKitMedia' do |media|
-        media.source_files = 'STBaseProject/Classes/STKit/Media/**/*.swift'
+        media.source_files = 'STBaseProjectCocoaPods/Classes/STKit/Media/**/*.swift'
         media.dependency 'STBaseProject/STBaseModule'
     end
 
     # STKitDialog - 对话框组件模块
     s.subspec 'STKitDialog' do |dialog|
-        dialog.source_files = 'STBaseProject/Classes/STKit/STDialog/**/*.swift'
+        dialog.source_files = 'STBaseProjectCocoaPods/Classes/STKit/STDialog/**/*.swift'
         dialog.dependency 'STBaseProject/STBaseModule'
     end
 

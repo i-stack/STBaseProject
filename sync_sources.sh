@@ -1,23 +1,23 @@
 #!/bin/bash
 
 # STBaseProject 源码同步脚本
-# 将 Sources/ 目录同步到 STBaseProject/Classes/
+# 将 STBaseProject/Sources/ 目录同步到 STBaseProjectCocoaPods/Classes/
 
-echo "🔄 开始同步 Sources/ 到 STBaseProject/Classes/..."
+echo "🔄 开始同步 STBaseProject/Sources/ 到 STBaseProjectCocoaPods/Classes/..."
 
 # 删除旧的 Classes 目录
-if [ -d "STBaseProject/Classes" ]; then
-    rm -rf STBaseProject/Classes
-    echo "✅ 已删除旧的 STBaseProject/Classes 目录"
+if [ -d "STBaseProjectCocoaPods/Classes" ]; then
+    rm -rf STBaseProjectCocoaPods/Classes
+    echo "✅ 已删除旧的 STBaseProjectCocoaPods/Classes 目录"
 fi
 
 # 复制 Sources 到 Classes
-cp -r Sources STBaseProject/Classes
-echo "✅ 已复制 Sources/ 到 STBaseProject/Classes/"
+cp -r STBaseProject/Sources STBaseProjectCocoaPods/Classes
+echo "✅ 已复制 STBaseProject/Sources/ 到 STBaseProjectCocoaPods/Classes/"
 
 # 验证文件数量
-sources_count=$(find Sources -name "*.swift" | wc -l)
-classes_count=$(find STBaseProject/Classes -name "*.swift" | wc -l)
+sources_count=$(find STBaseProject/Sources -name "*.swift" | wc -l)
+classes_count=$(find STBaseProjectCocoaPods/Classes -name "*.swift" | wc -l)
 
 if [ "$sources_count" -eq "$classes_count" ]; then
     echo "✅ 同步成功！文件数量一致：$sources_count 个 Swift 文件"
