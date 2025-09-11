@@ -22,6 +22,7 @@ public enum STHUDType {
     case info         // 信息提示
     case loading      // 加载中
     case progress     // 进度显示
+    case text         // 纯文本
     case custom       // 自定义
 }
 
@@ -252,6 +253,12 @@ open class STHUD: NSObject {
         theme.hudSize = size
     }
     
+    /// 立即更新当前显示的HUD大小
+    /// - Parameter size: 目标大小
+    public func updateCurrentHudSize(_ size: CGSize) {
+        updateHudSize(size)
+    }
+    
     /// 设置标签字体
     /// - Parameter font: 字体
     public func setLabelFont(_ font: UIFont?) {
@@ -319,21 +326,7 @@ open class STHUD: NSObject {
         
         // 显示 HUD
         self.progressHUD?.show(animated: true)
-        
-        // 设置HUD大小
-        let hudSize = config.theme.hudSize
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            if let bezelView = self.progressHUD?.bezelView {
-                let currentFrame = bezelView.frame
-                bezelView.frame = CGRect(
-                    x: currentFrame.origin.x,
-                    y: currentFrame.origin.y,
-                    width: hudSize.width,
-                    height: hudSize.height
-                )
-            }
-        }
+    
         if config.autoHide {
             self.progressHUD?.hide(animated: true, afterDelay: config.hideDelay)
         }
@@ -419,6 +412,22 @@ open class STHUD: NSObject {
         )
         self.show(with: config)
     }
+    
+    /// 显示纯文本提示
+    /// - Parameters:
+    ///   - title: 标题
+    ///   - detailText: 详细文本
+    ///   - autoHide: 是否自动隐藏
+    internal func showText(title: String, detailText: String? = nil, autoHide: Bool = true) {
+        let config = STHUDConfig(
+            type: .text,
+            title: title,
+            detailText: detailText,
+            autoHide: autoHide,
+            hideDelay: 2.0
+        )
+        self.show(with: config)
+    }
         
     /// 配置手动隐藏的 HUD
     /// - Parameter showInView: 显示视图
@@ -469,16 +478,28 @@ open class STHUD: NSObject {
             }
         }
         
-        let hudSize = theme.hudSize
-        if let bezelView = self.progressHUD?.bezelView {
-            let currentFrame = bezelView.frame
-            bezelView.frame = CGRect(
-                x: currentFrame.origin.x,
-                y: currentFrame.origin.y,
-                width: hudSize.width,
-                height: hudSize.height
-            )
-        }
+//        let hudSize = theme.hudSize
+//        updateHudSize(hudSize)
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+//            if let bezelView = self.progressHUD?.bezelView {
+//                let currentFrame = bezelView.frame
+//                bezelView.frame = CGRect(
+//                    x: currentFrame.origin.x,
+//                    y: currentFrame.origin.y,
+//                    width: hudSize.width,
+//                    height: hudSize.height
+//                )
+//            }
+//        }
+//        if let bezelView = self.progressHUD?.bezelView {
+//            let currentFrame = bezelView.frame
+//            bezelView.frame = CGRect(
+//                x: currentFrame.origin.x,
+//                y: currentFrame.origin.y,
+//                width: hudSize.width,
+//                height: hudSize.height
+//            )
+//        }
         if let cusView = theme.customView {
             self.progressHUD?.customView = cusView
         }
@@ -503,6 +524,45 @@ open class STHUD: NSObject {
         }
     }
      
+    /// 更新 HUD 大小
+    /// - Parameter size: 目标大小
+    private func updateHudSize(_ size: CGSize) {
+        guard let progressHUD = self.progressHUD else { return }
+        
+        // 方法1：通过约束更新大小
+        if let bezelView = progressHUD.bezelView {
+            bezelView.translatesAutoresizingMaskIntoConstraints = false
+            
+            // 移除现有的大小约束
+            NSLayoutConstraint.deactivate(bezelView.constraints.filter { constraint in
+                constraint.firstAttribute == .width || constraint.firstAttribute == .height
+            })
+            
+            // 添加新的大小约束
+            NSLayoutConstraint.activate([
+                bezelView.widthAnchor.constraint(equalToConstant: size.width),
+                bezelView.heightAnchor.constraint(equalToConstant: size.height)
+            ])
+            
+            // 强制布局更新
+            bezelView.setNeedsLayout()
+            bezelView.layoutIfNeeded()
+        }
+        
+        // 方法2：如果约束不生效，直接设置 frame（作为备选）
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+//            if let bezelView = progressHUD.bezelView {
+//                let currentFrame = bezelView.frame
+//                bezelView.frame = CGRect(
+//                    x: currentFrame.origin.x,
+//                    y: currentFrame.origin.y,
+//                    width: size.width,
+//                    height: size.height
+//                )
+//            }
+//        }
+    }
+    
     /// 应用主题
     /// - Parameter theme: 主题配置
     internal func applyTheme(_ theme: STHUDTheme) {
@@ -529,6 +589,8 @@ open class STHUD: NSObject {
             self.progressHUD?.mode = .indeterminate
         case .progress:
             self.progressHUD?.mode = .determinate
+        case .text:
+            self.progressHUD?.mode = .text
         case .custom:
             self.progressHUD?.mode = .customView
         }
@@ -696,6 +758,22 @@ public extension UIView {
         }
     }
     
+    /// 显示纯文本提示
+    /// - Parameter text: 显示文本
+    func st_showText(_ text: String) {
+        self.st_showText(text, detailText: nil)
+    }
+    
+    /// 显示纯文本提示
+    /// - Parameters:
+    ///   - text: 主文本
+    ///   - detailText: 详细文本
+    func st_showText(_ text: String, detailText: String? = nil) {
+        DispatchQueue.main.async {
+            STHUD.sharedHUD.showText(title: text, detailText: detailText)
+        }
+    }
+    
     /// 显示手动隐藏的加载中 HUD
     /// - Parameter text: 加载文本
     func st_showManualLoading(_ text: String = "加载中...") {
@@ -728,6 +806,10 @@ public extension UIView {
         DispatchQueue.main.async {
             STHUD.sharedHUD.hide(animated: true)
         }
+    }
+    
+    func hideHud() {
+        self.st_hideHUD()
     }
     
     /// 使用配置显示 HUD
