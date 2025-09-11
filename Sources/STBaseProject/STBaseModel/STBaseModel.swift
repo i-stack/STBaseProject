@@ -474,10 +474,6 @@ open class STBaseModel: NSObject {
     }
 }
 
-// MARK: - 网络响应模型（已迁移到 STHTTPSession 中）
-// 请使用 STHTTPSession 中的 STBusinessResponse 和 STPaginationResponse
-// 这些新的响应模型更加轻量级，不依赖于 STBaseModel，更适合网络层使用
-
 // MARK: - Codable 支持
 extension STBaseModel: Codable {
     

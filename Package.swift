@@ -16,7 +16,16 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "STBaseProject"
+            name: "STBaseProject",
+            dependencies: [],
+            path: "Sources",
+            sources: [
+                "STBaseProject",
+                "STDialog",
+                "STLocation",
+                "STMedia",
+                "STScan"
+            ]
         )
     ],
     swiftLanguageVersions: [.v5]

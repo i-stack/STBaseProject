@@ -389,6 +389,17 @@ public extension Encodable {
             return .failure(error)
         }
     }
+    
+    func st_toDictionary() -> [String: Any]? {
+        do {
+            let data = try JSONEncoder().encode(self)  // struct -> Data
+            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+            return jsonObject as? [String: Any]
+        } catch {
+            print("❌ 转换失败: \(error)")
+            return nil
+        }
+    }
 }
 
 // MARK: - JSON 工具类

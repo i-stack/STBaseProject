@@ -587,7 +587,6 @@ extension STHUD: STProgressHUDDelegate {
         if let block = self.stCompletionBlock {
             block(false)
         }
-        STLog("✅ STHUD: 隐藏完成")
     }
 }
 
