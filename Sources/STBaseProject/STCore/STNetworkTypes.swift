@@ -32,11 +32,9 @@ public struct STRequestConfig {
     public var timeoutInterval: TimeInterval = 30
     public var cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy
     public var networkServiceType: URLRequest.NetworkServiceType = .default
-    public var headers: [String: String] = [:]
     public var showLoading: Bool = true
     public var showError: Bool = true
-    
-    // 新增：加密配置
+
     public var enableEncryption: Bool = false
     public var encryptionKey: String?
     public var enableRequestSigning: Bool = false
@@ -51,7 +49,6 @@ public struct STRequestConfig {
         httpShouldUsePipelining: Bool = true,
         networkServiceType: URLRequest.NetworkServiceType = .default,
         cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
-        headers: [String: String] = [:],
         showLoading: Bool = true,
         showError: Bool = true,
         enableEncryption: Bool = false,
@@ -66,7 +63,6 @@ public struct STRequestConfig {
         self.allowsCellularAccess = allowsCellularAccess
         self.httpShouldHandleCookies = httpShouldHandleCookies
         self.httpShouldUsePipelining = httpShouldUsePipelining
-        self.headers = headers
         self.showLoading = showLoading
         self.showError = showError
         self.enableEncryption = enableEncryption
@@ -77,76 +73,70 @@ public struct STRequestConfig {
 }
 
 // MARK: - 请求头管理
-public class STRequestHeaders {
-    private var headers: [String: String] = [:]
+public struct STRequestHeaders {
+    private var headers: [String: String]
     
-    public init() {
-        st_setupDefaultHeaders()
+    public init(headers: [String: String] = [:]) {
+        self.headers = headers
     }
     
-    private func st_setupDefaultHeaders() {
-        headers["Content-Type"] = "application/json; charset=utf-8"
-        headers["Accept"] = "application/json"
-        headers["User-Agent"] = "STBaseProject/1.0"
-    }
-    
-    // MARK: - 公共方法
-    public func st_setHeader(_ value: String, forKey key: String) {
+    public mutating func st_setHeader(_ value: String, forKey key: String) {
         headers[key] = value
     }
     
-    public func st_setHeaders(_ headers: [String: String]) {
-        for (key, value) in headers {
-            self.headers[key] = value
+    public mutating func st_setHeaders(_ newHeaders: [String: String]) {
+        for (key, value) in newHeaders {
+            headers[key] = value
         }
     }
     
-    public func st_removeHeader(forKey key: String) {
+    public mutating func st_removeHeader(forKey key: String) {
         headers.removeValue(forKey: key)
     }
     
-    public func st_clearHeaders() {
+    public mutating func st_clearHeaders() {
         headers.removeAll()
-        st_setupDefaultHeaders()
     }
     
     public func st_getHeaders() -> [String: String] {
         return headers
     }
     
-    // MARK: - 便捷方法
-    public func st_setAuthorization(_ token: String) {
+    public mutating func st_setAuthorization(_ token: String) {
         st_setHeader("Bearer \(token)", forKey: "Authorization")
     }
     
-    public func st_setContentType(_ contentType: String) {
+    public mutating func st_setContentType(_ contentType: String) {
         st_setHeader(contentType, forKey: "Content-Type")
     }
     
-    public func st_setAccept(_ accept: String) {
+    public mutating func st_setAccept(_ accept: String) {
         st_setHeader(accept, forKey: "Accept")
     }
     
-    public func st_setUserAgent(_ userAgent: String) {
+    public mutating func st_setUserAgent(_ userAgent: String) {
         st_setHeader(userAgent, forKey: "User-Agent")
     }
 }
 
-// MARK: - 统一响应处理
-public struct STHTTPResponse {
-    public let data: Data?
-    public let response: URLResponse?
-    public let error: Error?
+// MARK: - HTTP 响应基础协议
+public protocol STHTTPResponseProtocol {
+    var data: Data? { get }
+    var response: URLResponse? { get }
+    var error: Error? { get }
+}
+
+// MARK: - HTTP 响应扩展
+public extension STHTTPResponseProtocol {
     
-    // MARK: - HTTP 层面属性
-    public var statusCode: Int {
+    var statusCode: Int {
         if let httpResponse = response as? HTTPURLResponse {
             return httpResponse.statusCode
         }
         return 0
     }
     
-    public var headers: [String: String] {
+    var headers: [String: String] {
         if let httpResponse = response as? HTTPURLResponse {
             var result: [String: String] = [:]
             for (key, value) in httpResponse.allHeaderFields {
@@ -159,60 +149,60 @@ public struct STHTTPResponse {
         return [:]
     }
     
-    public var isSuccess: Bool {
-        return statusCode >= 200 && statusCode < 300
+    var isSuccess: Bool {
+        guard let httpResponse = response as? HTTPURLResponse else { return false }
+        return httpResponse.statusCode >= 200 && httpResponse.statusCode < 300 && error == nil
     }
     
-    // MARK: - 数据解析
-    public var json: Any? {
+    var isNetworkError: Bool {
+        return response == nil || error != nil
+    }
+    
+    var isHTTPError: Bool {
+        guard let httpResponse = response as? HTTPURLResponse else { return false }
+        return httpResponse.statusCode >= 400
+    }
+    
+    var hasData: Bool {
+        return data != nil && !(data?.isEmpty ?? true)
+    }
+    
+    var json: Any? {
         guard let data = data else { return nil }
         return try? JSONSerialization.jsonObject(with: data)
     }
     
-    public var string: String? {
+    var string: String? {
         guard let data = data else { return nil }
         return String(data: data, encoding: .utf8)
     }
-    
-    // MARK: - 业务层面属性
-    public var businessCode: Int {
-        guard let json = json as? [String: Any],
-              let code = json["code"] as? Int else { return -1 }
-        return code
-    }
-    
-    public var businessMessage: String {
-        guard let json = json as? [String: Any],
-              let message = json["message"] as? String else { return "" }
-        return message
-    }
-    
-    public var businessData: Any? {
-        guard let json = json as? [String: Any] else { return nil }
-        return json["data"]
-    }
-    
-    public var businessTimestamp: TimeInterval {
-        guard let json = json as? [String: Any],
-              let timestamp = json["timestamp"] as? TimeInterval else { return 0 }
-        return timestamp
-    }
-    
-    public var businessIsSuccess: Bool {
-        return businessCode == 200 || businessCode == 0
-    }
-    
-    // MARK: - 分页信息
-    public var paginationInfo: [String: Any]? {
-        guard let json = json as? [String: Any],
-              let pagination = json["pagination"] as? [String: Any] else { return nil }
-        return pagination
-    }
+}
+
+// MARK: - 统一响应处理
+public struct STHTTPResponse: STHTTPResponseProtocol {
+    public let data: Data?
+    public let response: URLResponse?
+    public let error: Error?
     
     public init(data: Data?, response: URLResponse?, error: Error?) {
         self.data = data
         self.response = response
         self.error = error
+    }
+}
+
+// MARK: - 泛型响应处理
+public struct STHTTPResponseWithModel<T: Codable>: STHTTPResponseProtocol {
+    public let data: Data?
+    public let response: URLResponse?
+    public let error: Error?
+    public let model: T?
+    
+    public init(data: Data?, response: URLResponse?, error: Error?, model: T? = nil) {
+        self.data = data
+        self.response = response
+        self.error = error
+        self.model = model
     }
 }
 

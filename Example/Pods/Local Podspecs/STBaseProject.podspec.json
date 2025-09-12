@@ -1,6 +1,6 @@
 {
   "name": "STBaseProject",
-  "version": "2.0.0",
+  "version": "1.1.4",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/i-stack/STBaseProject.git",
-    "tag": "2.0.0"
+    "tag": "1.1.4"
   },
   "platforms": {
     "ios": "13.0"
@@ -34,39 +34,45 @@
   "documentation_url": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
   "readme": "https://github.com/i-stack/STBaseProject/blob/main/README.md",
   "default_subspecs": [
-    "STBaseModule"
+    "STBaseProject"
   ],
   "subspecs": [
     {
-      "name": "STBaseModule",
-      "source_files": "STBaseProjectCocoaPods/Classes/STBaseModule/**/*.swift"
+      "name": "STBaseProject",
+      "source_files": "Sources/STBaseProject/**/*.swift"
     },
     {
-      "name": "STKitLocation",
-      "source_files": "STBaseProjectCocoaPods/Classes/STKit/Location/**/*.swift",
+      "name": "STLocation",
+      "source_files": "Sources/STLocation/**/*.swift",
       "dependencies": {
-        "STBaseProject/STBaseModule": []
+        "STBaseProject/STBaseProject": []
       }
     },
     {
-      "name": "STKitScan",
-      "source_files": "STBaseProjectCocoaPods/Classes/STKit/Scan/**/*.swift",
+      "name": "STScan",
+      "source_files": "Sources/STScan/**/*.swift",
       "dependencies": {
-        "STBaseProject/STBaseModule": []
+        "STBaseProject/STBaseProject": []
       }
     },
     {
-      "name": "STKitMedia",
-      "source_files": "STBaseProjectCocoaPods/Classes/STKit/Media/**/*.swift",
+      "name": "STMedia",
+      "source_files": "Sources/STMedia/**/*.swift",
       "dependencies": {
-        "STBaseProject/STBaseModule": []
+        "STBaseProject/STBaseProject": []
+      },
+      "pod_target_xcconfig": {
+        "SWIFT_INCLUDE_PATHS": "$(PODS_TARGET_SRCROOT)/Sources/STBaseProject"
       }
     },
     {
-      "name": "STKitDialog",
-      "source_files": "STBaseProjectCocoaPods/Classes/STKit/STDialog/**/*.swift",
+      "name": "STDialog",
+      "source_files": "Sources/STDialog/**/*.swift",
       "dependencies": {
-        "STBaseProject/STBaseModule": []
+        "STBaseProject/STBaseProject": []
+      },
+      "pod_target_xcconfig": {
+        "SWIFT_INCLUDE_PATHS": "$(PODS_TARGET_SRCROOT)/Sources/STBaseProject"
       }
     }
   ],

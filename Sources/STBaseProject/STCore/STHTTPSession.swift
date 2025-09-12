@@ -142,35 +142,22 @@ public class STNetworkReachabilityManager {
 
 // MARK: - HTTP 会话管理器
 open class STHTTPSession: NSObject {
-    
-    // MARK: - 属性
     public static let shared = STHTTPSession()
-    
-    // 全局默认配置
     public var defaultRequestConfig = STRequestConfig()
     public var defaultRequestHeaders = STRequestHeaders()
-    
-    // 网络状态监控
     public var networkReachability = STNetworkReachabilityManager()
-    
-    // Combine 订阅管理
     private var cancellables = Set<AnyCancellable>()
-    
-    // 当前请求的配置（每次请求时设置）
     private var currentRequestConfig: STRequestConfig?
     private var currentRequestHeaders: STRequestHeaders?
-    
     private var currentRetryCount = 0
     private var currentRequest: URLRequest?
     private var currentCompletion: ((STHTTPResponse) -> Void)?
     
-    // MARK: - 初始化
     private override init() {
         super.init()
         st_setupSession()
     }
     
-    // MARK: - 设置
     private func st_setupSession() {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = defaultRequestConfig.timeoutInterval
@@ -194,16 +181,53 @@ open class STHTTPSession: NSObject {
                           requestConfig: STRequestConfig? = nil,
                           requestHeaders: STRequestHeaders? = nil,
                           completion: @escaping (STHTTPResponse) -> Void) {
-        
         guard let url = URL(string: url) else {
             let response = STHTTPResponse(data: nil, response: nil, error: STHTTPError.invalidURL)
             completion(response)
             return
         }
+        let request = st_buildRequest(url: url, method: method, parameters: parameters, 
+                                    encodingType: encodingType, requestConfig: requestConfig, 
+                                    requestHeaders: requestHeaders)
+        currentRequestConfig = requestConfig ?? defaultRequestConfig
+        currentRequestHeaders = requestHeaders ?? defaultRequestHeaders
+        currentRequest = request
+        currentCompletion = completion
+        currentRetryCount = 0
+        st_executeRequest(request, config: requestConfig ?? defaultRequestConfig, completion: completion)
+    }
+    
+    // MARK: - 泛型请求方法（支持模型映射）
+    public func st_request<T: Codable>(url: String,
+                                      method: STHTTPMethod = .get,
+                                      parameters: [String: Any]? = nil,
+                                      encodingType: STParameterEncoder.EncodingType = .json,
+                                      requestConfig: STRequestConfig? = nil,
+                                      requestHeaders: STRequestHeaders? = nil,
+                                      modelType: T.Type,
+                                      completion: @escaping (STHTTPResponseWithModel<T>) -> Void) {
         
+        guard let url = URL(string: url) else {
+            let response = STHTTPResponseWithModel<T>(data: nil, response: nil, error: STHTTPError.invalidURL, model: nil)
+            completion(response)
+            return
+        }
+        let request = st_buildRequest(url: url, method: method, parameters: parameters, 
+                                    encodingType: encodingType, requestConfig: requestConfig, 
+                                    requestHeaders: requestHeaders)
+        st_executeRequestWithModel(request, config: requestConfig ?? defaultRequestConfig, 
+                                 modelType: modelType, completion: completion)
+    }
+    
+    // MARK: - 构建请求的公共方法
+    private func st_buildRequest(url: URL,
+                               method: STHTTPMethod,
+                               parameters: [String: Any]?,
+                               encodingType: STParameterEncoder.EncodingType,
+                               requestConfig: STRequestConfig?,
+                               requestHeaders: STRequestHeaders?) -> URLRequest {
         let config = requestConfig ?? defaultRequestConfig
         let headers = requestHeaders ?? defaultRequestHeaders
-        
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.timeoutInterval = config.timeoutInterval
@@ -212,17 +236,12 @@ open class STHTTPSession: NSObject {
         request.httpShouldHandleCookies = config.httpShouldHandleCookies
         request.httpShouldUsePipelining = config.httpShouldUsePipelining
         request.networkServiceType = config.networkServiceType
-        
-        // 设置请求头
         let headerDict = headers.st_getHeaders()
         for (key, value) in headerDict {
             request.setValue(value, forHTTPHeaderField: key)
         }
-        
-        // 处理参数
         if let parameters = parameters {
             var requestData: Data?
-            
             switch encodingType {
             case .url:
                 if method == .get {
@@ -244,19 +263,9 @@ open class STHTTPSession: NSObject {
             case .multipart:
                 break
             }
-            
             request.httpBody = requestData
         }
-        
-        // 存储当前请求信息用于重试
-        currentRequestConfig = config
-        currentRequestHeaders = headers
-        currentRequest = request
-        currentCompletion = completion
-        currentRetryCount = 0
-        
-        // 执行请求
-        st_executeRequest(request, config: config, completion: completion)
+        return request
     }
     
     // MARK: - 执行请求
@@ -264,8 +273,6 @@ open class STHTTPSession: NSObject {
         let task = session.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 let httpResponse = STHTTPResponse(data: data, response: response, error: error)
-                
-                // 检查是否需要重试
                 if let self = self, self.st_shouldRetry(response: httpResponse, config: config) {
                     self.st_retryRequest(completion: completion)
                 } else {
@@ -276,15 +283,34 @@ open class STHTTPSession: NSObject {
         task.resume()
     }
     
+    // MARK: - 执行泛型请求
+    private func st_executeRequestWithModel<T: Codable>(_ request: URLRequest, 
+                                                       config: STRequestConfig, 
+                                                       modelType: T.Type, 
+                                                       completion: @escaping (STHTTPResponseWithModel<T>) -> Void) {
+        let task = session.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                var model: T?
+                if let data = data {
+                    do {
+                        model = try JSONDecoder().decode(T.self, from: data)
+                    } catch {
+                        print("模型解析失败: \(error)")
+                    }
+                }
+                let httpResponse = STHTTPResponseWithModel<T>(data: data, response: response, error: error, model: model)
+                completion(httpResponse)
+            }
+        }
+        task.resume()
+    }
+    
     // MARK: - 重试逻辑
     private func st_shouldRetry(response: STHTTPResponse, config: STRequestConfig) -> Bool {
         guard currentRetryCount < config.retryCount else { return false }
-        
-        // 网络错误或服务器错误时重试
         if response.error != nil || (response.statusCode >= 500 && response.statusCode < 600) {
             return true
         }
-        
         return false
     }
     
@@ -292,9 +318,7 @@ open class STHTTPSession: NSObject {
         guard let request = currentRequest, let config = currentRequestConfig else {
             return
         }
-        
         currentRetryCount += 1
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + config.retryDelay) { [weak self] in
             self?.st_executeRequest(request, config: config, completion: completion)
         }
@@ -314,20 +338,13 @@ open class STHTTPSession: NSObject {
             completion(response)
             return
         }
-        
         let config = requestConfig ?? defaultRequestConfig
         let headers = requestHeaders ?? defaultRequestHeaders
-        
         var request = URLRequest(url: url)
         request.httpMethod = STHTTPMethod.post.rawValue
-        
-        // 创建 multipart 数据
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        
         var body = Data()
-        
-        // 添加文件数据
         for file in files {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.fileName)\"\r\n".data(using: .utf8)!)
@@ -335,8 +352,6 @@ open class STHTTPSession: NSObject {
             body.append(file.data)
             body.append("\r\n".data(using: .utf8)!)
         }
-        
-        // 添加其他参数
         if let parameters = parameters {
             for (key, value) in parameters {
                 body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -344,16 +359,12 @@ open class STHTTPSession: NSObject {
                 body.append("\(value)\r\n".data(using: .utf8)!)
             }
         }
-        
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
-        
-        // 设置请求头
         let headerDict = headers.st_getHeaders()
         for (key, value) in headerDict {
             request.setValue(value, forHTTPHeaderField: key)
         }
-        
         let task = session.uploadTask(with: request, from: body) { data, response, error in
             DispatchQueue.main.async {
                 let httpResponse = STHTTPResponse(data: data, response: response, error: error)

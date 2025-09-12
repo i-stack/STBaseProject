@@ -178,7 +178,12 @@ public class STTabBarItem: NSObject {
             return nil
         }
         if let size = imageSize {
-            image = image.imageResized(to: size) ?? image
+            UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+            image.draw(in: CGRect(origin: .zero, size: size))
+            if let resizedImage = UIGraphicsGetImageFromCurrentImageContext() {
+                image = resizedImage
+            }
+            UIGraphicsEndImageContext()
         }
         return image.withRenderingMode(.alwaysOriginal)
     }
