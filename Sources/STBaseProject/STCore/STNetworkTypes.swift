@@ -102,8 +102,23 @@ public struct STRequestHeaders {
         return headers
     }
     
-    public mutating func st_setAuthorization(_ token: String) {
-        st_setHeader("Bearer \(token)", forKey: "Authorization")
+    /// 设置自定义认证方式
+    public mutating func st_setAuthorization(_ token: String, type: STAuthorizationType) {
+        switch type {
+        case .bearer:
+            st_setHeader("Bearer \(token)", forKey: "Authorization")
+        case .basic:
+            st_setHeader("Basic \(token)", forKey: "Authorization")
+        case .custom(let prefix):
+            st_setHeader("\(prefix) \(token)", forKey: "Authorization")
+        case .tokenOnly:
+            st_setHeader(token, forKey: "Authorization")
+        }
+    }
+    
+    /// 设置自定义认证头
+    public mutating func st_setCustomAuthorization(_ value: String) {
+        st_setHeader(value, forKey: "Authorization")
     }
     
     public mutating func st_setContentType(_ contentType: String) {
@@ -232,6 +247,14 @@ public struct STUploadProgress {
         self.totalBytes = totalBytes
         self.progress = totalBytes > 0 ? Float(bytesWritten) / Float(totalBytes) : 0.0
     }
+}
+
+// MARK: - 认证类型
+public enum STAuthorizationType {
+    case bearer
+    case basic
+    case custom(String)  // 自定义前缀，如 "Token"
+    case tokenOnly       // 只发送 token，不加前缀
 }
 
 // MARK: - 网络可达性状态

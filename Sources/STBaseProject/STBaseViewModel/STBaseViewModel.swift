@@ -313,19 +313,44 @@ open class STBaseViewModel: NSObject {
     }
     
     // MARK: - 响应处理
-    private func st_decodeResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> T? {
-        guard let data = httpResponse.data else { return nil }
-        return try? JSONDecoder().decode(responseType, from: data)
+    private func st_decodeResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> Result<T, STBaseError> {
+        guard let data = httpResponse.data else {
+            return .failure(.dataError("响应数据为空"))
+        }
+        if data.isEmpty {
+            return .failure(.dataError("响应数据为空"))
+        }
+        do {
+            let decoder = JSONDecoder()
+            let result = try decoder.decode(responseType, from: data)
+            return .success(result)
+        } catch DecodingError.keyNotFound(let key, let context) {
+            let errorMessage = "JSON解析失败：缺少必需的字段 '\(key.stringValue)'，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
+            return .failure(.dataError(errorMessage))
+        } catch DecodingError.valueNotFound(let value, let context) {
+            let errorMessage = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 的值为空，期望类型：\(value)"
+            return .failure(.dataError(errorMessage))
+        } catch DecodingError.typeMismatch(let type, let context) {
+            let errorMessage = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 类型不匹配，期望：\(type)，实际：\(context.debugDescription)"
+            return .failure(.dataError(errorMessage))
+        } catch DecodingError.dataCorrupted(let context) {
+            let errorMessage = "JSON解析失败：数据损坏，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))，原因：\(context.debugDescription)"
+            return .failure(.dataError(errorMessage))
+        } catch {
+            let errorMessage = "JSON解析失败：\(error.localizedDescription)"
+            return .failure(.dataError(errorMessage))
+        }
     }
     
     private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse,
                                                  responseType: T.Type,
                                                  completion: @escaping (Result<T, STBaseError>) -> Void) {
         if httpResponse.isSuccess {
-            if let result = st_decodeResponse(httpResponse, responseType: responseType) {
+            let decodeResult = st_decodeResponse(httpResponse, responseType: responseType)
+            switch decodeResult {
+            case .success(let result):
                 st_handleSuccess(result, completion: completion)
-            } else {
-                let error = STBaseError.dataError("数据解析失败")
+            case .failure(let error):
                 st_handleError(error, completion: completion)
             }
         } else {
@@ -583,8 +608,37 @@ extension STBaseViewModel {
     }
     
     /// 设置认证 Token
-    public func st_setAuthToken(_ token: String) {
-        requestHeaders.st_setAuthorization(token)
+    public func st_setAuthToken(_ token: String, type: STAuthorizationType) {
+        requestHeaders.st_setAuthorization(token, type: type)
+    }
+    
+    /// 设置自定义认证头
+    public func st_setCustomAuth(_ value: String) {
+        requestHeaders.st_setCustomAuthorization(value)
+    }
+    
+    /// 调试方法：打印原始响应数据
+    public func st_debugResponse(_ response: STHTTPResponse) {
+        print("=== HTTP 响应调试信息 ===")
+        print("状态码: \(response.statusCode)")
+        print("是否成功: \(response.isSuccess)")
+        print("响应头: \(response.headers)")
+        
+        if let data = response.data {
+            print("数据大小: \(data.count) bytes")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("原始 JSON: \(jsonString)")
+            } else {
+                print("数据不是有效的 UTF-8 字符串")
+            }
+        } else {
+            print("响应数据为空")
+        }
+        
+        if let error = response.error {
+            print("错误信息: \(error.localizedDescription)")
+        }
+        print("========================")
     }
     
     /// 设置自定义请求头
