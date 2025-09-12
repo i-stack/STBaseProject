@@ -21,6 +21,7 @@ public struct STTabBarItemConfig {
     public var titleFontName: String
     public var normalImage: String
     public var selectedImage: String
+    public var imageSize: CGSize?
     public var normalTitleColor: UIColor
     public var selectedTitleColor: UIColor
     public var backgroundColor: UIColor
@@ -33,6 +34,7 @@ public struct STTabBarItemConfig {
                 titleFontName: String = "PingFangSC-Regular",
                 normalImage: String,
                 selectedImage: String,
+                imageSize: CGSize? = nil,
                 normalTitleColor: UIColor = .systemGray,
                 selectedTitleColor: UIColor = .systemBlue,
                 backgroundColor: UIColor = .clear,
@@ -44,6 +46,7 @@ public struct STTabBarItemConfig {
         self.titleFontName = titleFontName
         self.normalImage = normalImage
         self.selectedImage = selectedImage
+        self.imageSize = imageSize
         self.normalTitleColor = normalTitleColor
         self.selectedTitleColor = selectedTitleColor
         self.backgroundColor = backgroundColor
@@ -58,7 +61,6 @@ public struct STTabBarItemConfig {
 public class STTabBarItem: NSObject {
     
     // MARK: - 本地化标题属性
-    /// 本地化标题键（支持动态语言切换）
     public var localizedTitle: String {
         get {
             return objc_getAssociatedObject(self, &STTabBarItemLocalizationKey.localizedTitleKey) as? String ?? ""
@@ -76,6 +78,7 @@ public class STTabBarItem: NSObject {
     ///   - titleFontName: 标题字体名称
     ///   - normalImage: 普通状态图片名称
     ///   - selectedImage: 选中状态图片名称
+    ///   - imageSize: 图片大小
     ///   - normalTitleColor: 普通状态标题颜色
     ///   - selectedTitleColor: 选中状态标题颜色
     ///   - backgroundColor: 背景颜色
@@ -85,6 +88,7 @@ public class STTabBarItem: NSObject {
                                        titleFontName: String,
                                        normalImage: String,
                                        selectedImage: String,
+                                       imageSize: CGSize? = nil,
                                        normalTitleColor: UIColor,
                                        selectedTitleColor: UIColor,
                                        backgroundColor: UIColor) -> UITabBarItem {
@@ -94,6 +98,7 @@ public class STTabBarItem: NSObject {
             titleFontName: titleFontName,
             normalImage: normalImage,
             selectedImage: selectedImage,
+            imageSize: imageSize,
             normalTitleColor: normalTitleColor,
             selectedTitleColor: selectedTitleColor,
             backgroundColor: backgroundColor,
@@ -106,41 +111,26 @@ public class STTabBarItem: NSObject {
     /// - Parameter config: TabBarItem 配置模型
     /// - Returns: 配置好的 UITabBarItem
     public class func st_createTabBarItem(with config: STTabBarItemConfig) -> UITabBarItem {
-        // 处理标题本地化
         let finalTitle = config.isLocalized ? config.title.localized : config.title
-        
-        // 加载图片
-        let normalImage = st_loadImage(named: config.normalImage)
-        let selectedImage = st_loadImage(named: config.selectedImage)
-        
-        // 创建 TabBarItem
+        let normalImage = st_loadImage(named: config.normalImage, imageSize: config.imageSize)
+        let selectedImage = st_loadImage(named: config.selectedImage, imageSize: config.imageSize)
         let item = UITabBarItem(title: finalTitle, image: normalImage, selectedImage: selectedImage)
-        
-        // 设置字体
         let font = UIFont(name: config.titleFontName, size: config.titleSize) ?? UIFont.systemFont(ofSize: config.titleSize)
-        
-        // 设置普通状态属性
         item.setTitleTextAttributes([
             .foregroundColor: config.normalTitleColor,
             .backgroundColor: config.backgroundColor,
             .font: font
         ], for: .normal)
-        
-        // 设置选中状态属性
         item.setTitleTextAttributes([
             .foregroundColor: config.selectedTitleColor,
             .font: font
         ], for: .selected)
-        
-        // 设置徽章
         if let badgeValue = config.badgeValue {
             item.badgeValue = badgeValue
             if let badgeColor = config.badgeColor {
                 item.badgeColor = badgeColor
             }
         }
-        
-        STLog("✅ STTabBarItem: 创建成功 - 标题: \(finalTitle), 图片: \(config.normalImage)")
         return item
     }
     
@@ -149,18 +139,21 @@ public class STTabBarItem: NSObject {
     ///   - localizedTitle: 本地化标题键
     ///   - normalImage: 普通状态图片名称
     ///   - selectedImage: 选中状态图片名称
+    ///   - imageSize: 图片大小
     ///   - normalColor: 普通状态颜色
     ///   - selectedColor: 选中状态颜色
     /// - Returns: 配置好的 UITabBarItem
     public class func st_createLocalizedTabBarItem(localizedTitle: String,
                                                    normalImage: String,
                                                    selectedImage: String,
+                                                   imageSize: CGSize? = nil,
                                                    normalColor: UIColor = .systemGray,
                                                    selectedColor: UIColor = .systemBlue) -> UITabBarItem {
         let config = STTabBarItemConfig(
             title: localizedTitle,
             normalImage: normalImage,
             selectedImage: selectedImage,
+            imageSize: imageSize,
             normalTitleColor: normalColor,
             selectedTitleColor: selectedColor,
             isLocalized: true
@@ -179,10 +172,13 @@ public class STTabBarItem: NSObject {
     /// 安全加载图片
     /// - Parameter imageName: 图片名称
     /// - Returns: UIImage 对象
-    private class func st_loadImage(named imageName: String) -> UIImage? {
-        guard let image = UIImage(named: imageName) else {
+    private class func st_loadImage(named imageName: String, imageSize: CGSize? = nil) -> UIImage? {
+        guard var image = UIImage(named: imageName) else {
             STLog("⚠️ STTabBarItem: 图片加载失败 - \(imageName)")
             return nil
+        }
+        if let size = imageSize {
+            image = image.imageResized(to: size) ?? image
         }
         return image.withRenderingMode(.alwaysOriginal)
     }

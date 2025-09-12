@@ -59,6 +59,37 @@ public struct STGradientConfig {
     }
 }
 
+public class STView: UIView {
+    
+    @IBInspectable var cornerRadius: CGFloat {
+        set {
+            layer.cornerRadius = newValue
+            layer.masksToBounds = newValue > 0
+        }
+        get {
+            return layer.cornerRadius
+        }
+    }
+    
+    @IBInspectable var borderWidth: CGFloat {
+        set {
+            layer.borderWidth = newValue > 0 ? newValue : 0
+        }
+        get {
+            return layer.borderWidth
+        }
+    }
+    
+    @IBInspectable var borderColor: UIColor {
+        set {
+            layer.borderColor = newValue.cgColor
+        }
+        get {
+            return UIColor(cgColor: layer.borderColor!)
+        }
+    }
+}
+
 // MARK: - UIView 圆角扩展
 public extension UIView {
     

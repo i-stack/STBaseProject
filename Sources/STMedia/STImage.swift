@@ -118,6 +118,14 @@ public extension UIImage {
     }
     
     // MARK: - 图片处理
+    func imageResized(to size: CGSize) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(size, false, 0.0)
+        self.draw(in: CGRect(origin: .zero, size: size))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return resizedImage
+    }
+    
     /// 获取图片某一点的颜色
     func getColor(at point: CGPoint) -> UIColor {
         guard CGRect(origin: .zero, size: self.size).contains(point) else {
