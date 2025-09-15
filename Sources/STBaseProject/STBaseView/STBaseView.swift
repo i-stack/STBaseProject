@@ -173,12 +173,26 @@ open class STBaseView: UIView {
         ])
         let contentView = st_getContentView()
         scrollView.addSubview(contentView)
+        
+        // 设置contentView约束，确保紧贴ScrollView顶部
+        let topConstraint = contentView.topAnchor.constraint(equalTo: scrollView.topAnchor)
+        let leadingConstraint = contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
+        let trailingConstraint = contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
+        let bottomConstraint = contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
+        let widthConstraint = contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        
+        // 设置高优先级，确保contentView紧贴顶部
+        topConstraint.priority = UILayoutPriority(1000)
+        leadingConstraint.priority = UILayoutPriority(1000)
+        trailingConstraint.priority = UILayoutPriority(1000)
+        widthConstraint.priority = UILayoutPriority(1000)
+        
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+            topConstraint,
+            leadingConstraint,
+            trailingConstraint,
+            bottomConstraint,
+            widthConstraint
         ])
         if isFromXIB {
             for subview in xibSubviews {
@@ -315,11 +329,21 @@ open class STBaseView: UIView {
     // MARK: - ScrollView配置
     private func configureScrollView() {
         scrollView.bounces = true
-        scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.alwaysBounceVertical = scrollDirection == .vertical || scrollDirection == .both
         scrollView.alwaysBounceHorizontal = scrollDirection == .horizontal || scrollDirection == .both
         scrollView.showsVerticalScrollIndicator = scrollDirection == .vertical || scrollDirection == .both
         scrollView.showsHorizontalScrollIndicator = scrollDirection == .horizontal || scrollDirection == .both
+        
+        // 优化滚动体验：避免顶部空白
+        if isFromXIB {
+            // 禁用自动调整，手动控制内容偏移
+            scrollView.contentInsetAdjustmentBehavior = .never
+            scrollView.contentInset = UIEdgeInsets.zero
+            scrollView.scrollIndicatorInsets = UIEdgeInsets.zero
+            scrollView.automaticallyAdjustsScrollIndicatorInsets = false
+        } else {
+            scrollView.contentInsetAdjustmentBehavior = .automatic
+        }
     }
     
     // MARK: - 公共方法
