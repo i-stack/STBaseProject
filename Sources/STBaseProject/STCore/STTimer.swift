@@ -8,20 +8,16 @@
 import UIKit
 
 public class STTimer: NSObject {
-    
-    // MARK: - Static Properties
-    private static let semaphore = DispatchSemaphore(value: 1)
-    private static var timerDict: [String: DispatchSourceTimer] = [:]
-    
-    // MARK: - Private Properties
+
     private weak var target: AnyObject?
     private var timer: DispatchSourceTimer?
-    private var secondsRepeating: Double = 1.0
-    private var secondsRemaining: Int = 10
-    private let queue = DispatchQueue(label: "com.STBaseProject.timer", qos: .userInteractive)
     private var isTimerActive: Bool = false
-    
-    // MARK: - Initializers
+    private var secondsRemaining: Int = 10
+    private var secondsRepeating: Double = 1.0
+    private static let semaphore = DispatchSemaphore(value: 1)
+    private static var timerDict: [String: DispatchSourceTimer] = [:]
+    private let queue = DispatchQueue(label: "com.STBaseProject.timer", qos: .userInteractive)
+
     public init(aTarget: AnyObject) {
         super.init()
         self.target = aTarget
@@ -33,13 +29,10 @@ public class STTimer: NSObject {
         self.secondsRepeating = repeating
     }
     
-    // MARK: - Deinitializer
     deinit {
         st_countdownTimerCancel()
-        STLog("🗑 STTimer deinit - 资源已释放")
     }
     
-    // MARK: - Message Forwarding
     public override func forwardingTarget(for aSelector: Selector!) -> Any? {
         return self.target
     }
@@ -47,8 +40,6 @@ public class STTimer: NSObject {
     /// 开始倒计时
     public func st_countdownTimerStart(completion: @escaping (Int, Bool) -> Void) {
         st_countdownTimerCancel()
-        
-        // 创建高精度定时器，使用 .userInteractive QoS 确保精确计时
         timer = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
         timer?.schedule(deadline: .now(), repeating: .milliseconds(Int(secondsRepeating * 1000)))
         timer?.setEventHandler { [weak self] in
@@ -57,11 +48,9 @@ public class STTimer: NSObject {
                 DispatchQueue.main.async {
                     completion(strongSelf.secondsRemaining, false)
                 }
-                STLog("⏳ 倒计时：\(strongSelf.secondsRemaining) 秒")
                 strongSelf.secondsRemaining -= 1
             } else {
                 strongSelf.st_countdownTimerCancel()
-                STLog("✅ 倒计时结束，执行后续操作...")
                 DispatchQueue.main.async {
                     completion(0, true)
                 }
@@ -69,7 +58,6 @@ public class STTimer: NSObject {
         }
         isTimerActive = true
         timer?.resume()
-        STLog("🚀 倒计时开始，总时长：\(secondsRemaining) 秒，间隔：\(secondsRepeating) 秒")
     }
     
     /// 取消倒计时并释放资源
@@ -78,18 +66,17 @@ public class STTimer: NSObject {
         isTimerActive = false
         timer?.cancel()
         timer = nil
-        STLog("⏹ 倒计时取消，资源已释放")
     }
 
     /// 创建高精度定时器，避免 runloop mode 影响
     @discardableResult
-    public class func st_scheduledTimer(withTimeInterval interval: Int, repeats: Bool, async: Bool, block: @escaping (String) -> Void) -> String {
+    public class func st_scheduledTimer(withTimeInterval interval: Double, repeats: Bool, async: Bool, block: @escaping (String) -> Void) -> String {
         return self.st_scheduledTimer(afterDelay: 0, withTimeInterval: interval, repeats: repeats, async: async, block: block)
     }
     
     /// 创建延迟执行的高精度定时器
     @discardableResult
-    public class func st_scheduledTimer(afterDelay: Int, withTimeInterval interval: Int, repeats: Bool, async: Bool, block: @escaping (String) -> Void) -> String {
+    public class func st_scheduledTimer(afterDelay: Double, withTimeInterval interval: Double, repeats: Bool, async: Bool, block: @escaping (String) -> Void) -> String {
         guard interval > 0 else { 
             STLog("⚠️ 定时器间隔必须大于0")
             return "" 
@@ -100,9 +87,8 @@ public class STTimer: NSObject {
         let name = "timer_\(UUID().uuidString)"
         self.timerDict[name] = timer
         self.semaphore.signal()
-        // 使用毫秒级精度
-        timer.schedule(deadline: .now() + .milliseconds(afterDelay * 1000), 
-                      repeating: .milliseconds(interval * 1000))
+        timer.schedule(deadline: .now() + .milliseconds(Int(afterDelay * 1000)),
+                      repeating: .milliseconds(Int(interval * 1000)))
         timer.setEventHandler { [weak timer] in
             DispatchQueue.main.async {
                 block(name)
