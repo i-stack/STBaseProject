@@ -18,6 +18,18 @@ public class STMultiImageViewAnimation: STBaseAnimation {
         public var initialScale: CGFloat = 0.1  // 初始缩放比例
         
         public init() {}
+        
+        public init(
+            popupDuration: TimeInterval = 1.5,
+            individualDuration: TimeInterval = 0.3,
+            pulseDelay: TimeInterval = 0.5,
+            initialScale: CGFloat = 0.1
+        ) {
+            self.popupDuration = popupDuration
+            self.individualDuration = individualDuration
+            self.pulseDelay = pulseDelay
+            self.initialScale = initialScale
+        }
     }
     
     private let imageViews: [UIImageView]

@@ -20,6 +20,22 @@ public class STBaseAnimation {
         public var pulseOptions: UIView.AnimationOptions = [.repeat, .autoreverse, .curveEaseInOut]
         
         public init() {}
+        
+        public init(
+            fadeInDuration: TimeInterval = 1.0,
+            pulseDuration: TimeInterval = 0.8,
+            pulseScale: CGFloat = 1.05,
+            resetDuration: TimeInterval = 0.3,
+            animationOptions: UIView.AnimationOptions = [.curveEaseInOut],
+            pulseOptions: UIView.AnimationOptions = [.repeat, .autoreverse, .curveEaseInOut]
+        ) {
+            self.fadeInDuration = fadeInDuration
+            self.pulseDuration = pulseDuration
+            self.pulseScale = pulseScale
+            self.resetDuration = resetDuration
+            self.animationOptions = animationOptions
+            self.pulseOptions = pulseOptions
+        }
     }
     
     let config: BaseAnimationConfig

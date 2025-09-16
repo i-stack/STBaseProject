@@ -15,6 +15,10 @@ public class STImageViewAnimation: STBaseAnimation {
         public var initialDelay: TimeInterval = 0.3
         
         public init() {}
+        
+        public init(initialDelay: TimeInterval = 0.3) {
+            self.initialDelay = initialDelay
+        }
     }
     
     private let imageView: UIImageView
