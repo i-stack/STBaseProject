@@ -58,16 +58,27 @@ public class STDeviceAdapter: NSObject {
     
     // MARK: - 导航栏配置
     /// 配置自定义导航栏高度
-    /// - Parameter model: 导航栏高度模型
-    public func st_customNavHeight(model: STConstantBarHeightModel) {
-        self.barHeightModel = model
+    /// - Parameters:
+    ///   - normalHeight: 普通设备导航栏高度
+    ///   - safeHeight: 刘海屏设备导航栏高度
+    public func st_customNavHeight(normalHeight: CGFloat, safeHeight: CGFloat) {
+        self.barHeightModel.navNormalHeight = normalHeight
+        self.barHeightModel.navIsSafeHeight = safeHeight
     }
     
     /// 配置自定义 TabBar 高度
-    /// - Parameter model: TabBar 高度模型
-    public func st_customTabBarHeight(model: STConstantBarHeightModel) {
-        self.barHeightModel.tabBarNormalHeight = model.tabBarNormalHeight
-        self.barHeightModel.tabBarIsSafeHeight = model.tabBarIsSafeHeight
+    /// - Parameters:
+    ///   - normalHeight: 普通设备TabBar高度
+    ///   - safeHeight: 刘海屏设备TabBar高度
+    public func st_customTabBarHeight(normalHeight: CGFloat, safeHeight: CGFloat) {
+        self.barHeightModel.tabBarNormalHeight = normalHeight
+        self.barHeightModel.tabBarIsSafeHeight = safeHeight
+    }
+    
+    /// 配置完整的导航栏和TabBar高度模型
+    /// - Parameter model: 完整的高度模型
+    public func st_customBarHeightModel(_ model: STConstantBarHeightModel) {
+        self.barHeightModel = model
     }
     
     // MARK: - 比例计算
@@ -165,13 +176,18 @@ public class STDeviceAdapter: NSObject {
         return STDeviceAdapter.shared.barHeightModel.tabBarNormalHeight
     }
     
-    /// 获取安全区域高度
+    /// 获取底部安全区域高度
     public class func st_safeBarHeight() -> CGFloat {
         if #available(iOS 11.0, *) {
             let window = UIApplication.shared.windows.first { $0.isKeyWindow }
             return window?.safeAreaInsets.bottom ?? 0
         }
         return self.st_isNotchScreen() ? 34 : 0
+    }
+    
+    /// 获取 TabBar 安全区域高度（TabBar 高度 + 底部安全区域）
+    public class func st_tabBarSafeAreaHeight() -> CGFloat {
+        return st_tabBarHeight() + st_safeBarHeight()
     }
     
     /// 获取状态栏高度

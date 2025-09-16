@@ -42,52 +42,25 @@ public class STBaseConfig: NSObject {
         print("✅ STBaseConfig: 设计基准尺寸已设置为 \(size)")
     }
     
-    // MARK: - 导航栏配置
-    /// 配置自定义导航栏高度
+    // MARK: - 便捷配置方法
+    /// 配置自定义导航栏高度（便捷方法）
     /// - Parameters:
     ///   - normalHeight: 普通设备导航栏高度（默认64）
     ///   - safeHeight: 刘海屏设备导航栏高度（默认88）
     public func st_configCustomNavBar(normalHeight: CGFloat, safeHeight: CGFloat) {
-        guard normalHeight > 0 && safeHeight > 0 else {
-            print("⚠️ STBaseConfig: 导航栏高度无效，使用默认高度")
-            var model = STConstantBarHeightModel()
-            model.navNormalHeight = 64
-            model.navIsSafeHeight = 88
-            STDeviceAdapter.shared.st_customNavHeight(model: model)
-            return
-        }
-        
-        var model = STConstantBarHeightModel()
-        model.navNormalHeight = normalHeight
-        model.navIsSafeHeight = safeHeight
-        STDeviceAdapter.shared.st_customNavHeight(model: model)
-        print("✅ STBaseConfig: 导航栏高度已配置 - 普通: \(normalHeight), 刘海屏: \(safeHeight)")
+        STDeviceAdapter.shared.st_customNavHeight(normalHeight: normalHeight, safeHeight: safeHeight)
     }
     
-    // MARK: - TabBar 配置
-    /// 配置自定义 TabBar 高度
+    /// 配置自定义 TabBar 高度（便捷方法）
     /// - Parameters:
     ///   - normalHeight: 普通设备 TabBar 高度（默认49）
     ///   - safeHeight: 刘海屏设备 TabBar 高度（默认83）
     public func st_configCustomTabBar(normalHeight: CGFloat, safeHeight: CGFloat) {
-        guard normalHeight > 0 && safeHeight > 0 else {
-            print("⚠️ STBaseConfig: TabBar 高度无效，使用默认高度")
-            var model = STConstantBarHeightModel()
-            model.tabBarNormalHeight = 49
-            model.tabBarIsSafeHeight = 83
-            STDeviceAdapter.shared.st_customTabBarHeight(model: model)
-            return
-        }
-        
-        var model = STConstantBarHeightModel()
-        model.tabBarNormalHeight = normalHeight
-        model.tabBarIsSafeHeight = safeHeight
-        STDeviceAdapter.shared.st_customTabBarHeight(model: model)
-        print("✅ STBaseConfig: TabBar 高度已配置 - 普通: \(normalHeight), 刘海屏: \(safeHeight)")
+        STDeviceAdapter.shared.st_customTabBarHeight(normalHeight: normalHeight, safeHeight: safeHeight)
     }
     
-    // MARK: - 完整配置
-    /// 配置完整的界面尺寸
+    // MARK: - 高级配置方法
+    /// 配置完整的界面尺寸（推荐使用）
     /// - Parameters:
     ///   - designSize: 设计基准尺寸
     ///   - navNormalHeight: 普通设备导航栏高度
@@ -104,5 +77,33 @@ public class STBaseConfig: NSObject {
         st_configBenchmarkDesign(size: designSize)
         st_configCustomNavBar(normalHeight: navNormalHeight, safeHeight: navSafeHeight)
         st_configCustomTabBar(normalHeight: tabBarNormalHeight, safeHeight: tabBarSafeHeight)
+    }
+    
+    /// 使用完整的高度模型配置（高级用法）
+    /// - Parameter model: 完整的高度模型
+    public func st_configWithModel(_ model: STConstantBarHeightModel) {
+        STDeviceAdapter.shared.st_customBarHeightModel(model)
+    }
+    
+    /// 快速配置 iPhone X 设计基准（最常用）
+    public func st_configForIPhoneX() {
+        st_configCompleteUI(
+            designSize: CGSize(width: 375, height: 812),
+            navNormalHeight: 64,
+            navSafeHeight: 88,
+            tabBarNormalHeight: 49,
+            tabBarSafeHeight: 83
+        )
+    }
+    
+    /// 快速配置 iPhone 14 Pro 设计基准
+    public func st_configForIPhone14Pro() {
+        st_configCompleteUI(
+            designSize: CGSize(width: 393, height: 852),
+            navNormalHeight: 64,
+            navSafeHeight: 88,
+            tabBarNormalHeight: 49,
+            tabBarSafeHeight: 83
+        )
     }
 }
