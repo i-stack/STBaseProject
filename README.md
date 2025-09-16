@@ -411,105 +411,94 @@ STAlertController.st_showCustomAlert(
 )
 ```
 
-### 三、STTabBarItem
+### 三、STTabBarItemModel
 
-`STTabBarItem` 是一个功能强大的自定义 TabBarItem 类，支持本地化、徽章、多种配置选项。它提供了灵活的配置方式和丰富的功能特性。
+`STTabBarItemModel` 是统一的 TabBar Item 数据模型，支持系统 TabBar 和自定义 TabBar 的所有功能。它提供了灵活的配置方式和丰富的功能特性。
 
 #### 主要特性
 
+- **统一模型**：支持系统 TabBar 和自定义 TabBar
 - **本地化支持**：支持多语言切换和动态更新
-- **配置模型**：使用 `STTabBarItemConfig` 进行统一配置
 - **徽章功能**：支持设置和清除徽章
-- **批量创建**：支持批量创建多个 TabBarItem
-- **错误处理**：完善的错误处理和日志记录
-- **向后兼容**：保持与原有 API 的兼容性
+- **图片处理**：支持图片大小调整和渲染模式
+- **字体定制**：支持自定义字体和大小
+- **动画支持**：支持自定义 TabBar 的动画效果
 
 #### 基础使用
 
 ```swift
-// 使用原有方法（向后兼容）
-let tabBarItem = STTabBarItem.st_setTabBarItem(
+// 使用图片名称创建（推荐）
+let item = STTabBarItemModel.createWithImageNames(
     title: "首页",
+    normalImageName: "home_normal",
+    selectedImageName: "home_sel",
     titleSize: 12,
     titleFontName: "PingFangSC-Regular",
-    normalImage: "home_normal",
-    selectedImage: "home_selected",
     normalTitleColor: .systemGray,
     selectedTitleColor: .systemBlue,
-    backgroundColor: .clear
+    imageSize: CGSize(width: 24, height: 24),
+    badgeValue: "5"
 )
 
-// 使用配置模型（推荐）
-let config = STTabBarItemConfig(
-    title: "消息",
-    titleSize: 14,
-    titleFontName: "PingFangSC-Medium",
-    normalImage: "message_normal",
-    selectedImage: "message_selected",
+// 使用本地化创建
+let localizedItem = STTabBarItemModel.createLocalized(
+    localizedTitle: "tab_home",
+    normalImageName: "home_normal",
+    selectedImageName: "home_sel",
+    titleSize: 12,
     normalTitleColor: .systemGray,
-    selectedTitleColor: .systemRed,
-    backgroundColor: .clear,
-    badgeValue: "99+",
-    badgeColor: .systemRed,
-    isLocalized: true
-)
-let tabBarItem = STTabBarItem.st_createTabBarItem(with: config)
-```
-
-#### 本地化支持
-
-```swift
-// 创建带本地化的 TabBarItem
-let localizedItem = STTabBarItem.st_createLocalizedTabBarItem(
-    localizedTitle: "tab_home", // 本地化键
-    normalImage: "home_normal",
-    selectedImage: "home_selected",
-    normalColor: .systemGray,
-    selectedColor: .systemBlue
+    selectedTitleColor: .systemBlue
 )
 
-// 动态更新本地化标题
-STTabBarItem.st_updateLocalizedTitle(for: tabBarItem, localizedTitle: "tab_updated")
+// 从现有 UITabBarItem 转换
+let systemItem = UITabBarItem(title: "首页", image: UIImage(named: "home_normal"), selectedImage: UIImage(named: "home_sel"))
+let item = STTabBarItemModel.fromUITabBarItem(systemItem)
 ```
 
-#### 批量创建
+#### 在自定义 TabBar 中使用
 
 ```swift
-let configs = [
-    STTabBarItemConfig(
-        title: "tab_home",
-        normalImage: "home_normal",
-        selectedImage: "home_selected",
-        isLocalized: true
+let tabBarController = STCustomTabBarController()
+
+// 创建 ViewControllers
+let homeVC = HomeViewController()
+let messageVC = MessageViewController()
+let profileVC = ProfileViewController()
+
+// 创建 TabBar Items
+let itemModels = [
+    STTabBarItemModel.createWithImageNames(
+        title: "首页",
+        normalImageName: "home_normal",
+        selectedImageName: "home_sel",
+        badgeValue: "5"
     ),
-    STTabBarItemConfig(
-        title: "tab_message",
-        normalImage: "message_normal",
-        selectedImage: "message_selected",
-        badgeValue: "5",
-        isLocalized: true
+    STTabBarItemModel.createWithImageNames(
+        title: "消息",
+        normalImageName: "message_normal",
+        selectedImageName: "message_sel"
     ),
-    STTabBarItemConfig(
-        title: "tab_profile",
-        normalImage: "profile_normal",
-        selectedImage: "profile_selected",
-        isLocalized: true
+    STTabBarItemModel.createWithImageNames(
+        title: "我的",
+        normalImageName: "profile_normal",
+        selectedImageName: "profile_sel"
     )
 ]
-let tabBarItems = STTabBarItem.st_createTabBarItems(with: configs)
-```
 
-#### UITabBarItem 扩展
+// 创建 TabBar 配置
+let config = STTabBarConfig(
+    backgroundColor: .systemBackground,
+    height: 60.0,
+    showShadow: true,
+    enableAnimation: true
+)
 
-```swift
-// 设置徽章
-tabBarItem.st_setBadge(value: "新", color: .systemOrange)
-
-// 清除徽章
-tabBarItem.st_clearBadge()
-
-// 更新图片
-tabBarItem.st_setCustomImages(normalImageName: "new_normal", selectedImageName: "new_selected")
+// 设置 ViewControllers 和 TabBar
+tabBarController.setViewControllers(
+    [homeVC, messageVC, profileVC],
+    tabBarItems: itemModels,
+    config: config
+)
 
 // 使用 UIImage 对象设置图片
 tabBarItem.st_setCustomImages(normalImage: normalImage, selectedImage: selectedImage)

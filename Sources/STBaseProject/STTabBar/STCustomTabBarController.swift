@@ -10,22 +10,19 @@ import SnapKit
 
 // MARK: - 自定义 TabBar Controller
 /// 自定义 TabBar Controller
-public class STCustomTabBarController: UIViewController {
+/// 继承自 UIViewController 以实现完全自定义的 TabBar
+open class STCustomTabBarController: UIViewController {
     
-    // MARK: - 属性
     private var customTabBar: STCustomTabBar!
     private var contentView: UIView!
-    private var viewControllers: [UIViewController] = []
+    public var viewControllers: [UIViewController] = []
     private var currentViewController: UIViewController?
     
-    // MARK: - 初始化
-    public override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
     }
     
-    // MARK: - 设置方法
-    private func setupUI() {
+    open func setupUI() {
         view.backgroundColor = .systemBackground
         
         // 创建内容视图
@@ -46,7 +43,7 @@ public class STCustomTabBarController: UIViewController {
         
         customTabBar.snp.makeConstraints { make in
             make.left.right.bottom.equalToSuperview()
-            make.height.equalTo(49) // 默认高度，会被配置覆盖
+            // 高度约束将在配置时设置
         }
     }
     

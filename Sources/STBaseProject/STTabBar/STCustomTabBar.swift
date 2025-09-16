@@ -18,19 +18,16 @@ public protocol STCustomTabBarDelegate: AnyObject {
     func customTabBar(_ tabBar: STCustomTabBar, didSelectItemAt index: Int)
 }
 
-// MARK: - 自定义 TabBar
-/// 自定义 TabBar 类
 public class STCustomTabBar: UIView {
     
-    // MARK: - 属性
     public weak var delegate: STCustomTabBarDelegate?
     
     private var itemModels: [STTabBarItemModel] = []
     private var itemViews: [STTabBarItemView] = []
     private var selectedIndex: Int = 0
     private var config: STTabBarConfig = STTabBarConfig()
+    private var heightConstraint: Constraint?
     
-    // MARK: - UI 组件
     private lazy var contentView: UIView = {
         let view = UIView()
         return view
@@ -41,7 +38,6 @@ public class STCustomTabBar: UIView {
         return view
     }()
     
-    // MARK: - 初始化
     public override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -52,21 +48,16 @@ public class STCustomTabBar: UIView {
         setupUI()
     }
     
-    // MARK: - 设置方法
     private func setupUI() {
         addSubview(contentView)
         addSubview(topBorderView)
-        
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
         topBorderView.snp.makeConstraints { make in
             make.top.left.right.equalToSuperview()
             make.height.equalTo(0.5)
         }
-        
-        // 设置默认样式
         updateAppearance()
     }
     
@@ -78,7 +69,6 @@ public class STCustomTabBar: UIView {
     public func configure(items: [STTabBarItemModel], config: STTabBarConfig = STTabBarConfig()) {
         self.itemModels = items
         self.config = config
-        
         setupItems()
         updateAppearance()
     }
@@ -87,13 +77,9 @@ public class STCustomTabBar: UIView {
     /// - Parameter index: 索引
     public func setSelectedIndex(_ index: Int) {
         guard index >= 0 && index < itemViews.count else { return }
-        
-        // 更新之前选中的 Item
         if selectedIndex < itemViews.count {
             itemViews[selectedIndex].updateSelection(false)
         }
-        
-        // 设置新的选中项
         selectedIndex = index
         itemViews[selectedIndex].updateSelection(true)
     }
@@ -124,13 +110,9 @@ public class STCustomTabBar: UIView {
         return itemModels.count
     }
     
-    // MARK: - 私有方法
     private func setupItems() {
-        // 移除旧的 Item 视图
         itemViews.forEach { $0.removeFromSuperview() }
         itemViews.removeAll()
-        
-        // 创建新的 Item 视图
         for (index, model) in itemModels.enumerated() {
             let itemView = STTabBarItemView()
             itemView.configure(with: model, config: config, isSelected: index == selectedIndex) { [weak self] in
@@ -139,49 +121,61 @@ public class STCustomTabBar: UIView {
             contentView.addSubview(itemView)
             itemViews.append(itemView)
         }
-        
-        // 设置约束
         setupItemConstraints()
     }
     
     private func setupItemConstraints() {
         guard !itemViews.isEmpty else { return }
-        
         for (index, itemView) in itemViews.enumerated() {
-            itemView.snp.makeConstraints { make in
-                make.top.bottom.equalToSuperview()
-                
-                if index == 0 {
-                    make.left.equalToSuperview()
-                } else {
-                    make.left.equalTo(itemViews[index - 1].snp.right)
-                    make.width.equalTo(itemViews[index - 1])
+            let model = itemModels[index]
+            
+            if model.isIrregular {
+                // 不规则按钮：向上凸起
+                itemView.snp.makeConstraints { make in
+                    make.centerY.equalToSuperview().offset(-model.irregularHeight / 2)
+                    make.height.equalTo(config.height + model.irregularHeight)
+                    if index == 0 {
+                        make.left.equalToSuperview()
+                    } else {
+                        make.left.equalTo(itemViews[index - 1].snp.right)
+                        make.width.equalTo(itemViews[index - 1])
+                    }
+                    if index == itemViews.count - 1 {
+                        make.right.equalToSuperview()
+                    }
                 }
-                
-                if index == itemViews.count - 1 {
-                    make.right.equalToSuperview()
+            } else {
+                // 普通按钮：正常高度
+                itemView.snp.makeConstraints { make in
+                    make.top.bottom.equalToSuperview()
+                    if index == 0 {
+                        make.left.equalToSuperview()
+                    } else {
+                        make.left.equalTo(itemViews[index - 1].snp.right)
+                        make.width.equalTo(itemViews[index - 1])
+                    }
+                    if index == itemViews.count - 1 {
+                        make.right.equalToSuperview()
+                    }
                 }
             }
         }
     }
     
     private func updateAppearance() {
-        // 设置背景颜色
         backgroundColor = config.backgroundColor
-        
-        // 设置高度约束
-        snp.updateConstraints { make in
-            make.height.equalTo(config.height)
+        if let heightConstraint = heightConstraint {
+            heightConstraint.update(offset: config.height)
+        } else {
+            snp.makeConstraints { make in
+                heightConstraint = make.height.equalTo(config.height).constraint
+            }
         }
-        
-        // 设置顶部边框
         topBorderView.isHidden = !config.showTopBorder
         topBorderView.backgroundColor = config.topBorderColor
         topBorderView.snp.updateConstraints { make in
             make.height.equalTo(config.topBorderWidth)
         }
-        
-        // 设置阴影
         if config.showShadow {
             layer.shadowColor = config.shadowColor.cgColor
             layer.shadowOffset = config.shadowOffset
@@ -195,7 +189,6 @@ public class STCustomTabBar: UIView {
     
     private func handleItemTap(at index: Int) {
         guard index != selectedIndex else { return }
-        
         setSelectedIndex(index)
         delegate?.customTabBar(self, didSelectItemAt: index)
     }
@@ -224,7 +217,6 @@ extension STCustomTabBar {
         selectedImages: [UIImage?]
     ) -> STCustomTabBar {
         var items: [STTabBarItemModel] = []
-        
         for i in 0..<titles.count {
             let model = STTabBarItemModel(
                 title: titles[i],
@@ -233,7 +225,6 @@ extension STCustomTabBar {
             )
             items.append(model)
         }
-        
         return createDefault(with: items)
     }
 }
