@@ -7,7 +7,6 @@
 
 import UIKit
 
-// MARK: - 标签本地化常量
 private struct STLabelLocalizationKey {
     static var localizedTextKey: UInt8 = 0
 }
@@ -22,7 +21,14 @@ public class STLabel: UILabel {
     
     private var verticalAlignment: STLabelVerticalAlignment?
     
-    /// 本地化标题（支持 Storyboard 设置，支持动态语言切换）
+    /// 内边距支持
+    public var contentEdgeInsets: UIEdgeInsets = .zero {
+        didSet {
+            invalidateIntrinsicContentSize()
+            setNeedsLayout()
+        }
+    }
+    
     @IBInspectable open var localizedText: String {
         get {
             return objc_getAssociatedObject(self, &STLabelLocalizationKey.localizedTextKey) as? String ?? ""
@@ -87,23 +93,41 @@ public class STLabel: UILabel {
     }
     
     public override func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
-        var textRect: CGRect = super.textRect(forBounds: bounds, limitedToNumberOfLines: numberOfLines)
-        switch self.verticalAlignment {
-        case .top?:
-            textRect.origin.y = bounds.origin.y
-        case .bottom?:
-            textRect.origin.y = bounds.origin.y + bounds.size.height - textRect.size.height
-        case .middle?:
-            fallthrough
-        default:
-            textRect.origin.y = bounds.origin.y + (bounds.size.height - textRect.size.height) / 2.0
-        }
-        return textRect
+        let adjustedBounds = bounds.inset(by: contentEdgeInsets)
+        return super.textRect(forBounds: adjustedBounds, limitedToNumberOfLines: numberOfLines)
     }
     
     public override func draw(_ rect: CGRect) {
-        let rect: CGRect = self.textRect(forBounds: rect, limitedToNumberOfLines: self.numberOfLines)
-        super.drawText(in: rect)
+        let adjustedRect = rect.inset(by: contentEdgeInsets)
+        super.drawText(in: adjustedRect)
     }
-
+        
+    public override var intrinsicContentSize: CGSize {
+        let originalSize = super.intrinsicContentSize
+        if originalSize == .zero {
+            let textSize = self.text?.size(withAttributes: [.font: self.font]) ?? CGSize.zero
+            if let attributedText = self.attributedText {
+                let attributedSize = attributedText.size()
+                return CGSize(width: attributedSize.width + contentEdgeInsets.left + contentEdgeInsets.right,
+                             height: attributedSize.height + contentEdgeInsets.top + contentEdgeInsets.bottom)
+            }
+            return CGSize(width: textSize.width + contentEdgeInsets.left + contentEdgeInsets.right,
+                         height: textSize.height + contentEdgeInsets.top + contentEdgeInsets.bottom)
+        }
+        return CGSize(width: originalSize.width + contentEdgeInsets.left + contentEdgeInsets.right,
+                     height: originalSize.height + contentEdgeInsets.top + contentEdgeInsets.bottom)
+    }
+    
+    public override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let availableWidth = size.width - contentEdgeInsets.left - contentEdgeInsets.right
+        let availableHeight = size.height - contentEdgeInsets.top - contentEdgeInsets.bottom
+        if availableWidth <= 0 || availableHeight <= 0 {
+            return CGSize(width: contentEdgeInsets.left + contentEdgeInsets.right,
+                         height: contentEdgeInsets.top + contentEdgeInsets.bottom)
+        }
+        let adjustedSize = CGSize(width: availableWidth, height: availableHeight)
+        let originalSize = super.sizeThatFits(adjustedSize)
+        return CGSize(width: originalSize.width + contentEdgeInsets.left + contentEdgeInsets.right,
+                     height: originalSize.height + contentEdgeInsets.top + contentEdgeInsets.bottom)
+    }
 }
