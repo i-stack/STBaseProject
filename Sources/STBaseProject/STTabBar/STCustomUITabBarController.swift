@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SnapKit
 
 // MARK: - 自定义 UITabBarController
 /// 继承自 UITabBarController 的自定义 TabBar Controller
@@ -26,10 +25,13 @@ open class STCustomUITabBarController: UITabBarController {
         customTabBar = STCustomTabBar()
         customTabBar.delegate = self
         view.addSubview(customTabBar)
-        customTabBar.snp.makeConstraints { make in
-            make.left.right.bottom.equalToSuperview()
-            make.height.equalTo(49) // 默认高度，会被配置覆盖
-        }
+        customTabBar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            customTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            customTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            customTabBar.heightAnchor.constraint(equalToConstant: 49) // 默认高度，会被配置覆盖
+        ])
     }
     
     // MARK: - 公共方法

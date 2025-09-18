@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SnapKit
 
 /// 自定义 TabBar Item 视图
 public class STTabBarItemView: UIView {
@@ -51,6 +50,11 @@ public class STTabBarItemView: UIView {
     private var isSelected: Bool = false
     private var tapAction: (() -> Void)?
     
+    // 约束管理
+    private var iconImageViewConstraints: [NSLayoutConstraint] = []
+    private var titleLabelConstraints: [NSLayoutConstraint] = []
+    private var initialConstraints: [NSLayoutConstraint] = []
+    
     public override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -67,31 +71,53 @@ public class STTabBarItemView: UIView {
         addSubview(badgeLabel)
         addSubview(customContainerView)
         
-        iconImageView.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalToSuperview().offset(6)
-            make.width.height.equalTo(24) // 默认大小，会在 updateUI 中动态更新
-        }
+        // 设置所有视图的自动转换
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        badgeLabel.translatesAutoresizingMaskIntoConstraints = false
+        customContainerView.translatesAutoresizingMaskIntoConstraints = false
         
-        titleLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(iconImageView.snp.bottom).offset(2)
-            make.left.right.equalToSuperview().inset(4)
-            make.bottom.lessThanOrEqualToSuperview().offset(-6)
-        }
-        
-        badgeLabel.snp.makeConstraints { make in
-            make.top.equalTo(iconImageView.snp.top).offset(-4)
-            make.right.equalTo(iconImageView.snp.right).offset(4)
-            make.width.height.greaterThanOrEqualTo(16)
-        }
-        
-        customContainerView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        // 设置初始约束（默认图文模式）
+        setupInitialConstraints()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         addGestureRecognizer(tapGesture)
+    }
+    
+    private func setupInitialConstraints() {
+        // 清除现有约束
+        NSLayoutConstraint.deactivate(initialConstraints)
+        initialConstraints.removeAll()
+        
+        // 设置初始约束（默认图文模式）
+        initialConstraints = [
+            // iconImageView 初始约束
+            iconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            iconImageView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
+            iconImageView.widthAnchor.constraint(equalToConstant: 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: 24),
+            
+            // titleLabel 初始约束
+            titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            titleLabel.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 2),
+            titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 4),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -6),
+            
+            // badgeLabel 约束
+            badgeLabel.topAnchor.constraint(equalTo: iconImageView.topAnchor, constant: -4),
+            badgeLabel.trailingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 4),
+            badgeLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 16),
+            badgeLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 16),
+            
+            // customContainerView 约束
+            customContainerView.topAnchor.constraint(equalTo: topAnchor),
+            customContainerView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            customContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            customContainerView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ]
+        
+        NSLayoutConstraint.activate(initialConstraints)
     }
     
     // MARK: - 配置方法
@@ -135,6 +161,15 @@ public class STTabBarItemView: UIView {
     private func updateUI() {
         guard let model = itemModel else { return }
         
+        // 清除所有现有约束
+        NSLayoutConstraint.deactivate(initialConstraints)
+        NSLayoutConstraint.deactivate(iconImageViewConstraints)
+        NSLayoutConstraint.deactivate(titleLabelConstraints)
+        
+        initialConstraints.removeAll()
+        iconImageViewConstraints.removeAll()
+        titleLabelConstraints.removeAll()
+        
         // 根据显示模式设置UI
         switch model.displayMode {
         case .imageOnly:
@@ -163,16 +198,13 @@ public class STTabBarItemView: UIView {
         alpha = isSelected ? 1.0 : (config?.unselectedAlpha ?? 0.7)
         
         // 图片居中显示
-        iconImageView.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview()
-            if let imageSize = model.imageSize {
-                make.width.equalTo(imageSize.width)
-                make.height.equalTo(imageSize.height)
-            } else {
-                make.width.height.equalTo(24)
-            }
-        }
+        iconImageViewConstraints = [
+            iconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            iconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            iconImageView.widthAnchor.constraint(equalToConstant: model.imageSize?.width ?? 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: model.imageSize?.height ?? 24)
+        ]
+        NSLayoutConstraint.activate(iconImageViewConstraints)
     }
     
     private func setupTextOnlyMode(_ model: STTabBarItemModel) {
@@ -188,11 +220,13 @@ public class STTabBarItemView: UIView {
         alpha = isSelected ? 1.0 : (config?.unselectedAlpha ?? 0.7)
         
         // 文字居中显示
-        titleLabel.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview()
-            make.left.right.equalToSuperview().inset(4)
-        }
+        titleLabelConstraints = [
+            titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 4),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4)
+        ]
+        NSLayoutConstraint.activate(titleLabelConstraints)
     }
     
     private func setupImageAndTextMode(_ model: STTabBarItemModel) {
@@ -209,23 +243,22 @@ public class STTabBarItemView: UIView {
         alpha = isSelected ? 1.0 : (config?.unselectedAlpha ?? 0.7)
         
         // 图片在上，文字在下
-        iconImageView.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalToSuperview().offset(6)
-            if let imageSize = model.imageSize {
-                make.width.equalTo(imageSize.width)
-                make.height.equalTo(imageSize.height)
-            } else {
-                make.width.height.equalTo(24)
-            }
-        }
+        iconImageViewConstraints = [
+            iconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            iconImageView.topAnchor.constraint(equalTo: topAnchor, constant: 6),
+            iconImageView.widthAnchor.constraint(equalToConstant: model.imageSize?.width ?? 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: model.imageSize?.height ?? 24)
+        ]
+        NSLayoutConstraint.activate(iconImageViewConstraints)
         
-        titleLabel.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(iconImageView.snp.bottom).offset(2)
-            make.left.right.equalToSuperview().inset(4)
-            make.bottom.lessThanOrEqualToSuperview().offset(-6)
-        }
+        titleLabelConstraints = [
+            titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            titleLabel.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 2),
+            titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 4),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -6)
+        ]
+        NSLayoutConstraint.activate(titleLabelConstraints)
     }
     
     private func setupCustomMode(_ model: STTabBarItemModel) {
@@ -259,24 +292,23 @@ public class STTabBarItemView: UIView {
         alpha = 1.0
         
         // 图片在上方，向上超出 tabbar，向下移动一些
-        iconImageView.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalToSuperview().offset(-model.irregularHeight + 10) // 图片向上超出 tabbar，但向下移动10pt
-            if let imageSize = model.imageSize {
-                make.width.equalTo(imageSize.width)
-                make.height.equalTo(imageSize.height)
-            } else {
-                make.width.height.equalTo(24)
-            }
-        }
+        iconImageViewConstraints = [
+            iconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            iconImageView.topAnchor.constraint(equalTo: topAnchor, constant: -model.irregularHeight + 10),
+            iconImageView.widthAnchor.constraint(equalToConstant: model.imageSize?.width ?? 24),
+            iconImageView.heightAnchor.constraint(equalToConstant: model.imageSize?.height ?? 24)
+        ]
+        NSLayoutConstraint.activate(iconImageViewConstraints)
         
         // 文字在下方（在 tabbar 内部），向下移动一些
-        titleLabel.snp.remakeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(iconImageView.snp.bottom).offset(8) // 文字在图片下方，增加间距
-            make.left.right.equalToSuperview().inset(4)
-            make.bottom.lessThanOrEqualToSuperview().offset(-6)
-        }
+        titleLabelConstraints = [
+            titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            titleLabel.topAnchor.constraint(equalTo: iconImageView.bottomAnchor, constant: 8),
+            titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 4),
+            titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
+            titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -6)
+        ]
+        NSLayoutConstraint.activate(titleLabelConstraints)
     }
     
     private func updateBadgeUI() {
@@ -297,9 +329,13 @@ public class STTabBarItemView: UIView {
         if let customView = model.customView {
             customContainerView.isHidden = false
             customContainerView.addSubview(customView)
-            customView.snp.makeConstraints { make in
-                make.edges.equalToSuperview()
-            }
+            customView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                customView.topAnchor.constraint(equalTo: customContainerView.topAnchor),
+                customView.leadingAnchor.constraint(equalTo: customContainerView.leadingAnchor),
+                customView.trailingAnchor.constraint(equalTo: customContainerView.trailingAnchor),
+                customView.bottomAnchor.constraint(equalTo: customContainerView.bottomAnchor)
+            ])
         } else {
             customContainerView.isHidden = true
         }

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SnapKit
 
 // MARK: - 自定义 TabBar Controller
 /// 自定义 TabBar Controller
@@ -36,15 +35,21 @@ open class STCustomTabBarController: UIViewController {
         view.addSubview(customTabBar)
         
         // 设置约束
-        contentView.snp.makeConstraints { make in
-            make.top.left.right.equalToSuperview()
-            make.bottom.equalTo(customTabBar.snp.top)
-        }
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: view.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: customTabBar.topAnchor)
+        ])
         
-        customTabBar.snp.makeConstraints { make in
-            make.left.right.bottom.equalToSuperview()
+        customTabBar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            customTabBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            customTabBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            customTabBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             // 高度约束将在配置时设置
-        }
+        ])
     }
     
     // MARK: - 公共方法
@@ -110,9 +115,13 @@ open class STCustomTabBarController: UIViewController {
         let newVC = viewControllers[index]
         addChild(newVC)
         contentView.addSubview(newVC.view)
-        newVC.view.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        newVC.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            newVC.view.topAnchor.constraint(equalTo: contentView.topAnchor),
+            newVC.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            newVC.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            newVC.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
         newVC.didMove(toParent: self)
         
         currentViewController = newVC

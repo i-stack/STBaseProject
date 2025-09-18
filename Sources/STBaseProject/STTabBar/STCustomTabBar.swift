@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SnapKit
 
 // MARK: - 自定义 TabBar 协议
 /// 自定义 TabBar 代理协议
@@ -26,7 +25,7 @@ public class STCustomTabBar: UIView {
     private var itemViews: [STTabBarItemView] = []
     private var selectedIndex: Int = 0
     private var config: STTabBarConfig = STTabBarConfig()
-    private var heightConstraint: Constraint?
+    private var heightConstraint: NSLayoutConstraint?
     
     private lazy var contentView: UIView = {
         let view = UIView()
@@ -51,13 +50,25 @@ public class STCustomTabBar: UIView {
     private func setupUI() {
         addSubview(contentView)
         addSubview(topBorderView)
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        topBorderView.snp.makeConstraints { make in
-            make.top.left.right.equalToSuperview()
-            make.height.equalTo(0.5)
-        }
+        
+        // 设置 contentView 约束
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+        
+        // 设置 topBorderView 约束
+        topBorderView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            topBorderView.topAnchor.constraint(equalTo: topAnchor),
+            topBorderView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            topBorderView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            topBorderView.heightAnchor.constraint(equalToConstant: 0.5)
+        ])
+        
         updateAppearance()
     }
     
@@ -126,56 +137,73 @@ public class STCustomTabBar: UIView {
     
     private func setupItemConstraints() {
         guard !itemViews.isEmpty else { return }
+        
+        // 移除所有现有约束
+        itemViews.forEach { $0.removeFromSuperview() }
+        for itemView in itemViews {
+            contentView.addSubview(itemView)
+        }
+        
         for (index, itemView) in itemViews.enumerated() {
             let model = itemModels[index]
+            itemView.translatesAutoresizingMaskIntoConstraints = false
             
             if model.isIrregular {
                 // 不规则按钮：向上凸起
-                itemView.snp.makeConstraints { make in
-                    make.centerY.equalToSuperview().offset(-model.irregularHeight / 2)
-                    make.height.equalTo(config.height + model.irregularHeight)
-                    if index == 0 {
-                        make.left.equalToSuperview()
-                    } else {
-                        make.left.equalTo(itemViews[index - 1].snp.right)
-                        make.width.equalTo(itemViews[index - 1])
-                    }
-                    if index == itemViews.count - 1 {
-                        make.right.equalToSuperview()
-                    }
-                }
+                NSLayoutConstraint.activate([
+                    itemView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: -model.irregularHeight / 2),
+                    itemView.heightAnchor.constraint(equalToConstant: config.height + model.irregularHeight)
+                ])
             } else {
                 // 普通按钮：正常高度
-                itemView.snp.makeConstraints { make in
-                    make.top.bottom.equalToSuperview()
-                    if index == 0 {
-                        make.left.equalToSuperview()
-                    } else {
-                        make.left.equalTo(itemViews[index - 1].snp.right)
-                        make.width.equalTo(itemViews[index - 1])
-                    }
-                    if index == itemViews.count - 1 {
-                        make.right.equalToSuperview()
-                    }
-                }
+                NSLayoutConstraint.activate([
+                    itemView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                    itemView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+                ])
+            }
+            
+            // 设置水平约束
+            if index == 0 {
+                NSLayoutConstraint.activate([
+                    itemView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor)
+                ])
+            } else {
+                NSLayoutConstraint.activate([
+                    itemView.leadingAnchor.constraint(equalTo: itemViews[index - 1].trailingAnchor),
+                    itemView.widthAnchor.constraint(equalTo: itemViews[index - 1].widthAnchor)
+                ])
+            }
+            
+            if index == itemViews.count - 1 {
+                NSLayoutConstraint.activate([
+                    itemView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+                ])
             }
         }
     }
     
     private func updateAppearance() {
         backgroundColor = config.backgroundColor
+        
+        // 更新高度约束
         if let heightConstraint = heightConstraint {
-            heightConstraint.update(offset: config.height)
+            heightConstraint.constant = config.height
         } else {
-            snp.makeConstraints { make in
-                heightConstraint = make.height.equalTo(config.height).constraint
-            }
+            heightConstraint = heightAnchor.constraint(equalToConstant: config.height)
+            heightConstraint?.isActive = true
         }
+        
         topBorderView.isHidden = !config.showTopBorder
         topBorderView.backgroundColor = config.topBorderColor
-        topBorderView.snp.updateConstraints { make in
-            make.height.equalTo(config.topBorderWidth)
+        
+        // 更新 topBorderView 高度约束
+        for constraint in topBorderView.constraints {
+            if constraint.firstAttribute == .height {
+                constraint.constant = config.topBorderWidth
+                break
+            }
         }
+        
         if config.showShadow {
             layer.shadowColor = config.shadowColor.cgColor
             layer.shadowOffset = config.shadowOffset
