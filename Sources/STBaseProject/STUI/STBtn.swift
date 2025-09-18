@@ -49,7 +49,6 @@ public struct STBtnSpacing {
 /// 自定义按钮类，支持图片和文字的不同位置布局以及圆角设置
 open class STBtn: UIButton {
     
-    // MARK: - 属性
     open var identifier: Any?
     
     private var hasSetLayout: Bool = false
@@ -58,8 +57,6 @@ open class STBtn: UIButton {
     private var style: STBtnEdgeInsetsStyle = .reset
     private var btnSpacing: STBtnSpacing = STBtnSpacing()
     
-    // MARK: - IBInspectable 属性
-    /// 本地化标题键（支持 Storyboard 设置，支持动态语言切换）
     @IBInspectable open var localizedTitle: String {
         get {
             return objc_getAssociatedObject(self, &STBtnLocalizationKey.localizedTitleKey) as? String ?? ""
@@ -70,7 +67,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 本地化选中状态标题键（支持 Storyboard 设置，支持动态语言切换）
     @IBInspectable open var localizedSelectedTitle: String {
         get {
             return objc_getAssociatedObject(self, &STBtnLocalizationKey.localizedSelectedTitleKey) as? String ?? ""
@@ -81,7 +77,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 边框宽度
     @IBInspectable open var borderWidth: CGFloat {
         set {
             layer.borderWidth = newValue
@@ -91,7 +86,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 圆角半径
     @IBInspectable open var cornerRadius: CGFloat {
         set {
             layer.cornerRadius = newValue
@@ -102,7 +96,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 边框颜色
     @IBInspectable open var borderColor: UIColor? {
         set {
             guard let uiColor = newValue else { return }
@@ -114,7 +107,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 是否自动适配字体大小
     @IBInspectable open var autoAdaptFontSize: Bool = true {
         didSet {
             if autoAdaptFontSize {
@@ -123,7 +115,6 @@ open class STBtn: UIButton {
         }
     }
     
-    // MARK: - 初始化
     override public init(frame: CGRect) {
         super.init(frame: frame)
         setupButton()
@@ -134,7 +125,6 @@ open class STBtn: UIButton {
         setupButton()
     }
     
-    // MARK: - 设置
     private func setupButton() {
         titleLabel?.textAlignment = .center
         imageView?.contentMode = .scaleAspectFit
@@ -143,21 +133,15 @@ open class STBtn: UIButton {
         }
     }
     
-    // MARK: - 布局
     open override func layoutSubviews() {
         super.layoutSubviews()
-        
         guard let titleLabel = self.titleLabel,
               let imageView = self.imageView,
               self.hasSetLayout else { return }
-        
-        // 保存默认布局
         if self.defaultTitleFrame == .zero {
             self.defaultTitleFrame = titleLabel.frame
             self.defaultImageFrame = imageView.frame
         }
-        
-        // 根据样式重新布局
         switch self.style {
         case .top:
             layoutImageTopTitleBottom(titleLabel: titleLabel, imageView: imageView)
@@ -173,7 +157,6 @@ open class STBtn: UIButton {
         }
     }
     
-    // MARK: - 布局方法
     private func layoutImageTopTitleBottom(titleLabel: UILabel, imageView: UIImageView) {
         let titleWidth = titleLabel.intrinsicContentSize.width
         let imageWidth = imageView.intrinsicContentSize.width
@@ -408,8 +391,6 @@ open class STBtn: UIButton {
         self.setNeedsLayout()
     }
     
-    
-    // MARK: - 私有方法
     private func updateFontSize() {
         guard let fontName = self.titleLabel?.font.fontName,
               let fontSize = self.titleLabel?.font.pointSize else { return }
