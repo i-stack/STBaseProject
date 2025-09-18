@@ -98,7 +98,6 @@ public class STTimer: NSObject {
             }
         }
         timer.resume()
-        STLog("⏰ 定时器创建成功：\(name)，间隔：\(interval)秒，重复：\(repeats)")
         return name
     }
     
@@ -113,7 +112,6 @@ public class STTimer: NSObject {
         if let timer = self.timerDict[name] {
             timer.cancel()
             self.timerDict.removeValue(forKey: name)
-            STLog("🗑 定时器已取消：\(name)")
         } else {
             STLog("⚠️ 未找到指定定时器：\(name)")
         }
@@ -125,7 +123,6 @@ public class STTimer: NSObject {
         defer { self.semaphore.signal() }
         for (name, timer) in self.timerDict {
             timer.cancel()
-            STLog("🗑 取消定时器：\(name)")
         }
         self.timerDict.removeAll()
         STLog("🧹 所有定时器已清理完成")
