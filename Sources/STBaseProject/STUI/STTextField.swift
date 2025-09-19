@@ -289,16 +289,25 @@ open class STTextField: UITextField {
     @objc private func st_passwordToggleButtonTapped() {
         guard let button = passwordToggleButton else { return }
         self.savaText = self.text ?? ""
+        self.isChangingSecureTextEntry = true
         self.isSecureTextEntry = !self.isSecureTextEntry
         button.isSelected = !self.isSecureTextEntry
+        // 延迟重置标志，确保文本变化事件能正确处理
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.isChangingSecureTextEntry = false
+        }
     }
     
     @objc private func st_textFieldEditingChanged(textField: STTextField) {
         if isPasswordToggleEnabled {
-            if (textField.text?.isEmpty ?? true) && !savaText.isEmpty && !isChangingSecureTextEntry {
-                textField.text = savaText
-                return
+            // 只有在切换密码可见性时才恢复保存的文本，用户正常删除操作不应该恢复
+            if isChangingSecureTextEntry {
+                if (textField.text?.isEmpty ?? true) && !savaText.isEmpty {
+                    textField.text = savaText
+                    return
+                }
             }
+            // 更新保存的文本
             self.savaText = textField.text ?? ""
         }
         
