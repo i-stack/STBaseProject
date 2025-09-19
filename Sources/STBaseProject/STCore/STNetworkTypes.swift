@@ -224,7 +224,7 @@ public struct STHTTPResponseWithModel<T: Codable>: STHTTPResponseProtocol {
 // MARK: - 上传文件
 public struct STUploadFile {
     public let data: Data
-    public let name: String
+    public let name: String // 服务器定义：比如 file, jumped 等等
     public let fileName: String
     public let mimeType: String
     
