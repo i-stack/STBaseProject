@@ -42,18 +42,18 @@ open class STBaseView: UIView {
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setupBaseView()
+        self.setupBaseView()
     }
     
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
-        isFromXIB = true
-        setupBaseView()
+        self.isFromXIB = true
+        self.setupBaseView()
     }
     
     open override func awakeFromNib() {
         super.awakeFromNib()
-        preserveXIBContent()
+        self.preserveXIBContent()
         DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
             strongSelf.setupXIBLayout()
@@ -61,109 +61,106 @@ open class STBaseView: UIView {
     }
     
     private func preserveXIBContent() {
-        xibSubviews = subviews.map { $0 }
-        xibConstraints = constraints.map { $0 }
+        self.xibSubviews = subviews.map { $0 }
+        self.xibConstraints = constraints.map { $0 }
     }
     
     private func setupXIBLayout() {
-        if layoutMode == .auto {
-            layoutMode = .fixed
+        if self.layoutMode == .auto {
+            self.layoutMode = .fixed
         }
-        if layoutMode == .scroll {
-            setupScrollViewLayout()
+        if self.layoutMode == .scroll {
+            self.setupScrollViewLayout()
         }
     }
     
     
     private func setupBaseView() {
-        backgroundColor = .white
-        translatesAutoresizingMaskIntoConstraints = false
+        self.backgroundColor = .white
+        self.translatesAutoresizingMaskIntoConstraints = false
     }
     
-    // MARK: - 布局配置
     /// 设置布局模式
     open func st_setLayoutMode(_ mode: STLayoutMode) {
-        layoutMode = mode
-        if isFromXIB {
-            print("✅ XIB模式：布局模式设置为 \(mode)，保持原始布局")
-        } else {
-            updateLayout()
+        self.layoutMode = mode
+        if !isFromXIB {
+            self.updateLayout()
         }
     }
     
     /// 为XIB模式设置布局模式（推荐在viewDidLoad中调用）
     open func st_setLayoutModeForXIB(_ mode: STLayoutMode) {
-        guard isFromXIB else {
+        guard self.isFromXIB else {
             print("⚠️ 警告: 此方法仅适用于来自XIB的STBaseView")
             return
         }
-        layoutMode = mode
+        self.layoutMode = mode
         if mode == .scroll {
-            setupScrollViewLayout()
+            self.setupScrollViewLayout()
         }
     }
     
     /// 设置滚动方向
     open func st_setScrollDirection(_ direction: STScrollDirection) {
-        scrollDirection = direction
-        updateLayout()
+        self.scrollDirection = direction
+        self.updateLayout()
     }
     
     /// 启用/禁用自动布局
     open func st_setAutoLayoutEnabled(_ enabled: Bool) {
-        autoLayoutEnabled = enabled
-        updateLayout()
+        self.autoLayoutEnabled = enabled
+        self.updateLayout()
     }
     
     /// 设置TableView样式
     open func st_setTableViewStyle(_ style: UITableView.Style) {
-        tableViewStyle = style
-        if layoutMode == .table {
-            updateLayout()
+        self.tableViewStyle = style
+        if self.layoutMode == .table {
+            self.updateLayout()
         }
     }
     
     // MARK: - 布局更新
     private func updateLayout() {
-        if isFromXIB {
+        if self.isFromXIB {
             print("✅ XIB模式：保持原始布局，不进行更新")
             return
         }
-        clearExistingLayout()
-        switch layoutMode {
+        self.clearExistingLayout()
+        switch self.layoutMode {
         case .auto:
-            setupAutoLayout()
+            self.setupAutoLayout()
         case .scroll:
-            setupScrollViewLayout()
+            self.setupScrollViewLayout()
         case .fixed:
-            setupFixedLayout()
+            self.setupFixedLayout()
         case .table:
-            setupTableViewLayout()
+            self.setupTableViewLayout()
         case .collection:
-            setupCollectionViewLayout()
+            self.setupCollectionViewLayout()
         }
     }
     
     private func clearExistingLayout() {
-        subviews.forEach { $0.removeFromSuperview() }
-        constraints.forEach { removeConstraint($0) }
+        self.subviews.forEach { $0.removeFromSuperview() }
+        self.constraints.forEach { removeConstraint($0) }
     }
     
     // MARK: - 自动布局模式
     private func setupAutoLayout() {
-        addSubview(contentView)
+        self.addSubview(self.contentView)
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            self.contentView.topAnchor.constraint(equalTo: topAnchor),
+            self.contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            self.contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            self.contentView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
-        setupContentSizeObserver()
+        self.setupContentSizeObserver()
     }
     
     // MARK: - ScrollView布局模式
     private func setupScrollViewLayout() {
-        guard let scrollView = st_getScrollView() else { return }
+        guard let scrollView = self.st_getScrollView() else { return }
         addSubview(scrollView)
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: topAnchor),
@@ -171,17 +168,15 @@ open class STBaseView: UIView {
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
-        let contentView = st_getContentView()
+        let contentView = self.st_getContentView()
         scrollView.addSubview(contentView)
         
-        // 设置contentView约束，确保紧贴ScrollView顶部
         let topConstraint = contentView.topAnchor.constraint(equalTo: scrollView.topAnchor)
         let leadingConstraint = contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
         let trailingConstraint = contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
         let bottomConstraint = contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
         let widthConstraint = contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
         
-        // 设置高优先级，确保contentView紧贴顶部
         topConstraint.priority = UILayoutPriority(1000)
         leadingConstraint.priority = UILayoutPriority(1000)
         trailingConstraint.priority = UILayoutPriority(1000)
@@ -194,22 +189,22 @@ open class STBaseView: UIView {
             bottomConstraint,
             widthConstraint
         ])
-        if isFromXIB {
-            for subview in xibSubviews {
+        if self.isFromXIB {
+            for subview in self.xibSubviews {
                 if subview.superview == self {
-                    contentView.addSubview(subview)
+                    self.contentView.addSubview(subview)
                 }
             }
             // 重新设置约束，将原来相对于STBaseView的约束改为相对于contentView
-            updateXIBConstraintsForScrollView(contentView: contentView)
+            self.updateXIBConstraintsForScrollView(contentView: contentView)
             // 设置contentView的最小高度，确保ScrollView可以滚动
-            setupContentViewSizeForXIB(contentView: contentView)
+            self.setupContentViewSizeForXIB(contentView: contentView)
         }
-        configureScrollView()
+        self.configureScrollView()
     }
     
     private func updateXIBConstraintsForScrollView(contentView: UIView) {
-        for constraint in xibConstraints {
+        for constraint in self.xibConstraints {
             if let firstView = constraint.firstItem as? UIView,
                let secondView = constraint.secondItem as? UIView {
                 if firstView == self || secondView == self {
@@ -244,19 +239,17 @@ open class STBaseView: UIView {
     
     private func setupContentViewSizeForXIB(contentView: UIView) {
         var maxHeight: CGFloat = 0
-        for subview in xibSubviews {
+        for subview in self.xibSubviews {
             let frame = subview.frame
             maxHeight = max(maxHeight, frame.maxY)
         }
         let minHeight = max(maxHeight, bounds.height)
         contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: minHeight).isActive = true
-        print("📏 XIB ContentView尺寸设置: 最小高度 = \(minHeight)")
-        print("📊 XIB子视图最大Y坐标: \(maxHeight)")
     }
     
     // MARK: - 固定布局模式
     private func setupFixedLayout() {
-        let contentView = st_getContentView()
+        let contentView = self.st_getContentView()
         addSubview(contentView)
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: topAnchor),
@@ -268,8 +261,8 @@ open class STBaseView: UIView {
     
     // MARK: - TableView布局模式
     private func setupTableViewLayout() {
-        guard let tableView = st_getTableView() else { return }
-        addSubview(tableView)
+        guard let tableView = self.st_getTableView() else { return }
+        self.addSubview(tableView)
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: topAnchor),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -280,8 +273,8 @@ open class STBaseView: UIView {
     
     // MARK: - CollectionView布局模式
     private func setupCollectionViewLayout() {
-        guard let collectionView = st_getCollectionView() else { return }
-        addSubview(collectionView)
+        guard let collectionView = self.st_getCollectionView() else { return }
+        self.addSubview(collectionView)
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -299,17 +292,17 @@ open class STBaseView: UIView {
     }
     
     private func checkContentSize() {
-        guard autoLayoutEnabled else { return }
-        let contentSize = calculateContentSize()
+        guard self.autoLayoutEnabled else { return }
+        let contentSize = self.calculateContentSize()
         if contentSize.height > bounds.height || contentSize.width > bounds.width {
-            switchToScrollViewMode()
+            self.switchToScrollViewMode()
         }
     }
     
     private func calculateContentSize() -> CGSize {
         var maxX: CGFloat = 0
         var maxY: CGFloat = 0
-        for subview in contentView.subviews {
+        for subview in self.contentView.subviews {
             let frame = subview.frame
             maxX = max(maxX, frame.maxX)
             maxY = max(maxY, frame.maxY)
@@ -318,52 +311,48 @@ open class STBaseView: UIView {
     }
     
     private func switchToScrollViewMode() {
-        let currentContent = contentView.subviews
-        layoutMode = .scroll
-        updateLayout()
+        let currentContent = self.contentView.subviews
+        self.layoutMode = .scroll
+        self.updateLayout()
         for subview in currentContent {
-            contentView.addSubview(subview)
+            self.contentView.addSubview(subview)
         }
     }
     
     // MARK: - ScrollView配置
     private func configureScrollView() {
-        scrollView.bounces = true
-        scrollView.alwaysBounceVertical = scrollDirection == .vertical || scrollDirection == .both
-        scrollView.alwaysBounceHorizontal = scrollDirection == .horizontal || scrollDirection == .both
-        scrollView.showsVerticalScrollIndicator = scrollDirection == .vertical || scrollDirection == .both
-        scrollView.showsHorizontalScrollIndicator = scrollDirection == .horizontal || scrollDirection == .both
+        self.scrollView.bounces = true
+        self.scrollView.alwaysBounceVertical = self.scrollDirection == .vertical || self.scrollDirection == .both
+        self.scrollView.alwaysBounceHorizontal = self.scrollDirection == .horizontal || self.scrollDirection == .both
+        self.scrollView.showsVerticalScrollIndicator = self.scrollDirection == .vertical || self.scrollDirection == .both
+        self.scrollView.showsHorizontalScrollIndicator = self.scrollDirection == .horizontal || self.scrollDirection == .both
         
-        // 优化滚动体验：避免顶部空白
-        if isFromXIB {
-            // 禁用自动调整，手动控制内容偏移
-            scrollView.contentInsetAdjustmentBehavior = .never
-            scrollView.contentInset = UIEdgeInsets.zero
-            scrollView.scrollIndicatorInsets = UIEdgeInsets.zero
-            scrollView.automaticallyAdjustsScrollIndicatorInsets = false
+        if self.isFromXIB {
+            self.scrollView.contentInsetAdjustmentBehavior = .never
+            self.scrollView.contentInset = UIEdgeInsets.zero
+            self.scrollView.scrollIndicatorInsets = UIEdgeInsets.zero
+            self.scrollView.automaticallyAdjustsScrollIndicatorInsets = false
         } else {
-            scrollView.contentInsetAdjustmentBehavior = .automatic
+            self.scrollView.contentInsetAdjustmentBehavior = .automatic
         }
     }
-    
-    // MARK: - 公共方法
-    
+        
     /// 添加子视图到内容区域
     open func st_addSubviewToContent(_ subview: UIView) {
-        if isFromXIB {
-            if layoutMode == .scroll {
-                let contentView = st_getContentView()
-                contentView.addSubview(subview)
+        if self.isFromXIB {
+            if self.layoutMode == .scroll {
+                let contentView = self.st_getContentView()
+                self.contentView.addSubview(subview)
             } else {
-                addSubview(subview)
+                self.addSubview(subview)
             }
             return
         }
-        switch layoutMode {
+        switch self.layoutMode {
         case .auto, .scroll:
-            contentView.addSubview(subview)
+            self.contentView.addSubview(subview)
         case .fixed:
-            addSubview(subview)
+            self.addSubview(subview)
         case .table, .collection:
             print("⚠️ 警告: TableView/CollectionView模式不支持直接添加子视图")
         }
@@ -385,43 +374,43 @@ open class STBaseView: UIView {
     
     /// 更新内容大小
     open func st_updateContentSize() {
-        checkContentSize()
+        self.checkContentSize()
     }
     
     /// 获取当前布局模式
     open func st_getCurrentLayoutMode() -> STLayoutMode {
-        return layoutMode
+        return self.layoutMode
     }
     
     /// 获取ScrollView（如果存在）
     open func st_getScrollView() -> UIScrollView? {
-        return layoutMode == .scroll ? scrollView : nil
+        return self.layoutMode == .scroll ? self.scrollView : nil
     }
     
     /// 获取内容视图
     open func st_getContentView() -> UIView {
-        return contentView
+        return self.contentView
     }
     
     /// 获取TableView（如果存在）
     open func st_getTableView() -> UITableView? {
-        guard layoutMode == .table else { return nil }
-        return tableViewStyle == .grouped ? tableViewGrouped : tableViewPlain
+        guard self.layoutMode == .table else { return nil }
+        return self.tableViewStyle == .grouped ? self.tableViewGrouped : self.tableViewPlain
     }
     
     /// 获取CollectionView（如果存在）
     open func st_getCollectionView() -> UICollectionView? {
-        return layoutMode == .collection ? collectionView : nil
+        return self.layoutMode == .collection ? self.collectionView : nil
     }
     
     /// 检查是否来自XIB
     open func st_isFromXIB() -> Bool {
-        return isFromXIB
+        return self.isFromXIB
     }
     
     /// 获取XIB中的子视图
     open func st_getXIBSubviews() -> [UIView] {
-        return xibSubviews
+        return self.xibSubviews
     }
         
     /// 滚动视图
@@ -482,31 +471,31 @@ open class STBaseView: UIView {
 extension STBaseView {
     
     public func st_setupTableView(delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {
-        if tableViewStyle == .grouped {
-            tableViewGrouped.delegate = delegate
-            tableViewGrouped.dataSource = dataSource
+        if self.tableViewStyle == .grouped {
+            self.tableViewGrouped.delegate = delegate
+            self.tableViewGrouped.dataSource = dataSource
         } else {
-            tableViewPlain.delegate = delegate
-            tableViewPlain.dataSource = dataSource
+            self.tableViewPlain.delegate = delegate
+            self.tableViewPlain.dataSource = dataSource
         }
     }
     
     public func st_setupCollectionView(delegate: UICollectionViewDelegate, dataSource: UICollectionViewDataSource) {
-        collectionView.delegate = delegate
-        collectionView.dataSource = dataSource
+        self.collectionView.delegate = delegate
+        self.collectionView.dataSource = dataSource
     }
     
     public func st_registerTableViewCell<T: UITableViewCell>(_ cellClass: T.Type, identifier: String? = nil) {
         let cellId = identifier ?? String(describing: cellClass)
-        if tableViewStyle == .grouped {
-            tableViewGrouped.register(cellClass, forCellReuseIdentifier: cellId)
+        if self.tableViewStyle == .grouped {
+            self.tableViewGrouped.register(cellClass, forCellReuseIdentifier: cellId)
         } else {
-            tableViewPlain.register(cellClass, forCellReuseIdentifier: cellId)
+            self.tableViewPlain.register(cellClass, forCellReuseIdentifier: cellId)
         }
     }
     
     public func st_registerCollectionViewCell<T: UICollectionViewCell>(_ cellClass: T.Type, identifier: String? = nil) {
         let cellId = identifier ?? String(describing: cellClass)
-        collectionView.register(cellClass, forCellWithReuseIdentifier: cellId)
+        self.collectionView.register(cellClass, forCellWithReuseIdentifier: cellId)
     }
 }
