@@ -24,7 +24,7 @@ public enum STScrollDirection {
     case none           // 不滚动
 }
 
-open class STBaseView: UIView {
+open class STBaseView: UIView, UIScrollViewDelegate {
     
     private var layoutMode: STLayoutMode = .auto
     private var scrollDirection: STScrollDirection = .vertical
@@ -33,6 +33,7 @@ open class STBaseView: UIView {
     private var isFromXIB: Bool = false
     private var xibSubviews: [UIView] = []
     private var xibConstraints: [NSLayoutConstraint] = []
+    
     
     deinit {
 #if DEBUG
@@ -335,6 +336,24 @@ open class STBaseView: UIView {
         } else {
             self.scrollView.contentInsetAdjustmentBehavior = .automatic
         }
+        
+        self.configureScrollViewBounceBehavior()
+    }
+    
+    /// 配置滚动视图的弹性行为，防止顶部下拉空白
+    private func configureScrollViewBounceBehavior() {
+        // 保持 bounces = true 以维持流畅的滑动体验
+        // 但通过 alwaysBounceVertical = false 来防止顶部下拉空白
+        self.scrollView.alwaysBounceVertical = false
+        
+        // 设置内容偏移调整行为，防止顶部空白
+        if #available(iOS 11.0, *) {
+            self.scrollView.contentInsetAdjustmentBehavior = .never
+        }
+        
+        self.scrollView.contentInset = UIEdgeInsets.zero
+        self.scrollView.scrollIndicatorInsets = UIEdgeInsets.zero
+        self.scrollView.delegate = self
     }
         
     /// 添加子视图到内容区域
@@ -412,7 +431,7 @@ open class STBaseView: UIView {
     open func st_getXIBSubviews() -> [UIView] {
         return self.xibSubviews
     }
-        
+    
     /// 滚动视图
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -467,7 +486,6 @@ open class STBaseView: UIView {
     }()
 }
 
-// MARK: - 便捷扩展
 extension STBaseView {
     
     public func st_setupTableView(delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {
@@ -497,5 +515,53 @@ extension STBaseView {
     public func st_registerCollectionViewCell<T: UICollectionViewCell>(_ cellClass: T.Type, identifier: String? = nil) {
         let cellId = identifier ?? String(describing: cellClass)
         self.collectionView.register(cellClass, forCellWithReuseIdentifier: cellId)
+    }
+}
+
+// MARK: - UIScrollViewDelegate
+extension STBaseView {
+    
+    @objc open func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // 防止滚动到顶部时出现空白
+        if scrollView.contentOffset.y < 0 {
+            scrollView.contentOffset = CGPoint(x: scrollView.contentOffset.x, y: 0)
+        }
+    }
+    
+    @objc open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        // 子类可以重写此方法
+    }
+    
+    @objc open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        // 子类可以重写此方法
+    }
+    
+    @objc open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        // 子类可以重写此方法
+    }
+    
+    @objc open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+        // 子类可以重写此方法
+    }
+    
+    @objc open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        // 子类可以重写此方法
+    }
+    
+    @objc open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
+        // 子类可以重写此方法
+    }
+    
+    @objc open func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+        // 子类可以重写此方法
+        return true
+    }
+    
+    @objc open func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
+        // 子类可以重写此方法
+    }
+    
+    @objc open func scrollViewDidChangeAdjustedContentInset(_ scrollView: UIScrollView) {
+        // 子类可以重写此方法
     }
 }
