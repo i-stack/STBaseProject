@@ -776,7 +776,7 @@ public extension UIView {
     
     /// 显示手动隐藏的加载中 HUD
     /// - Parameter text: 加载文本
-    func st_showManualLoading(_ text: String = "加载中...") {
+    func st_showManualLoading(_ text: String = "") {
         self.st_showManual(text: text, detailText: nil)
     }
     
@@ -793,11 +793,11 @@ public extension UIView {
         }
     }
     
-    func showManualLoading(_ text: String = "加载中...") {
+    func showManualLoading(_ text: String = "") {
         self.st_showManual(text: text, detailText: nil)
     }
     
-    func showManualLoading(_ text: String = "加载中...", detailText: String? = nil) {
+    func showManualLoading(_ text: String = "", detailText: String? = nil) {
         self.st_showManual(text: text, detailText: detailText)
     }
     
