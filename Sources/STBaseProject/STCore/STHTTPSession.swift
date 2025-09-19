@@ -160,6 +160,8 @@ open class STHTTPSession: NSObject {
     
     private func st_setupSession() {
         let configuration = URLSessionConfiguration.default
+        configuration.httpCookieStorage = nil
+        configuration.httpCookieAcceptPolicy = .never
         configuration.timeoutIntervalForRequest = defaultRequestConfig.timeoutInterval
         configuration.timeoutIntervalForResource = defaultRequestConfig.timeoutInterval * 2
         configuration.allowsCellularAccess = defaultRequestConfig.allowsCellularAccess
@@ -365,7 +367,7 @@ open class STHTTPSession: NSObject {
         for (key, value) in headerDict {
             request.setValue(value, forHTTPHeaderField: key)
         }
-        let task = session.uploadTask(with: request, from: body) { data, response, error in
+        let task = session.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 let httpResponse = STHTTPResponse(data: data, response: response, error: error)
                 completion(httpResponse)
