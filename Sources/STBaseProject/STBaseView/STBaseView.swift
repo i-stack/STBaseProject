@@ -25,16 +25,16 @@ public enum STScrollDirection {
 }
 
 open class STBaseView: UIView, UIScrollViewDelegate {
-    
-    private var layoutMode: STLayoutMode = .auto
-    private var scrollDirection: STScrollDirection = .vertical
-    private var autoLayoutEnabled: Bool = true
-    private var tableViewStyle: UITableView.Style = .plain
+
     private var isFromXIB: Bool = false
     private var xibSubviews: [UIView] = []
     private var xibConstraints: [NSLayoutConstraint] = []
     
-    
+    private var autoLayoutEnabled: Bool = true
+    private var layoutMode: STLayoutMode = .auto
+    private var tableViewStyle: UITableView.Style = .plain
+    private var scrollDirection: STScrollDirection = .vertical
+
     deinit {
 #if DEBUG
         print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
@@ -75,10 +75,25 @@ open class STBaseView: UIView, UIScrollViewDelegate {
         }
     }
     
-    
     private func setupBaseView() {
         self.backgroundColor = .white
         self.translatesAutoresizingMaskIntoConstraints = false
+        self.setupDefaultAutoScroll()
+    }
+    
+    /// 默认自动滚动配置（子类可重写来自定义或禁用）
+    /// 
+    /// ⚠️ 重要提醒：
+    /// 1. 使用自动滚动时，请确保为最后一个子视图设置底部约束
+    /// 2. 将子视图添加到 contentView 而不是直接添加到 STBaseView
+    /// 3. 示例：make.bottom.equalTo(-20) // 设置底部约束
+    @objc open func setupDefaultAutoScroll() {
+        // 默认启用自动布局检测
+        self.st_setAutoLayoutEnabled(true)
+        // 默认使用自动模式，会根据内容高度自动决定是否滚动
+        self.st_setLayoutMode(.auto)
+        // 默认垂直滚动
+        self.st_setScrollDirection(.vertical)
     }
     
     /// 设置布局模式
@@ -162,7 +177,7 @@ open class STBaseView: UIView, UIScrollViewDelegate {
     // MARK: - ScrollView布局模式
     private func setupScrollViewLayout() {
         guard let scrollView = self.st_getScrollView() else { return }
-        addSubview(scrollView)
+        self.addSubview(scrollView)
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -251,7 +266,7 @@ open class STBaseView: UIView, UIScrollViewDelegate {
     // MARK: - 固定布局模式
     private func setupFixedLayout() {
         let contentView = self.st_getContentView()
-        addSubview(contentView)
+        self.addSubview(contentView)
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: topAnchor),
             contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -295,6 +310,11 @@ open class STBaseView: UIView, UIScrollViewDelegate {
     private func checkContentSize() {
         guard self.autoLayoutEnabled else { return }
         let contentSize = self.calculateContentSize()
+        
+        #if DEBUG
+        self.validateBottomConstraints()
+        #endif
+        
         if contentSize.height > bounds.height || contentSize.width > bounds.width {
             self.switchToScrollViewMode()
         }
@@ -330,33 +350,18 @@ open class STBaseView: UIView, UIScrollViewDelegate {
         
         if self.isFromXIB {
             self.scrollView.contentInsetAdjustmentBehavior = .never
-            self.scrollView.contentInset = UIEdgeInsets.zero
-            self.scrollView.scrollIndicatorInsets = UIEdgeInsets.zero
             self.scrollView.automaticallyAdjustsScrollIndicatorInsets = false
         } else {
             self.scrollView.contentInsetAdjustmentBehavior = .automatic
         }
-        
-        self.configureScrollViewBounceBehavior()
-    }
-    
-    /// 配置滚动视图的弹性行为，防止顶部下拉空白
-    private func configureScrollViewBounceBehavior() {
-        // 保持 bounces = true 以维持流畅的滑动体验
-        // 但通过 alwaysBounceVertical = false 来防止顶部下拉空白
-        self.scrollView.alwaysBounceVertical = false
-        
-        // 设置内容偏移调整行为，防止顶部空白
-        if #available(iOS 11.0, *) {
-            self.scrollView.contentInsetAdjustmentBehavior = .never
-        }
-        
-        self.scrollView.contentInset = UIEdgeInsets.zero
-        self.scrollView.scrollIndicatorInsets = UIEdgeInsets.zero
-        self.scrollView.delegate = self
     }
         
     /// 添加子视图到内容区域
+    /// 
+    /// ⚠️ 重要提醒：
+    /// 1. 添加子视图后，请确保设置正确的约束
+    /// 2. 最后一个子视图必须设置底部约束：make.bottom.equalTo(-20)
+    /// 3. 使用 st_validateConstraints() 检查约束设置
     open func st_addSubviewToContent(_ subview: UIView) {
         if self.isFromXIB {
             if self.layoutMode == .scroll {
@@ -370,6 +375,12 @@ open class STBaseView: UIView, UIScrollViewDelegate {
         switch self.layoutMode {
         case .auto, .scroll:
             self.contentView.addSubview(subview)
+            #if DEBUG
+            // 延迟检查，给约束设置一些时间
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                self?.validateBottomConstraints()
+            }
+            #endif
         case .fixed:
             self.addSubview(subview)
         case .table, .collection:
@@ -432,11 +443,94 @@ open class STBaseView: UIView, UIScrollViewDelegate {
         return self.xibSubviews
     }
     
+    /// 验证底部约束设置（仅在DEBUG模式下调用）
+    private func validateBottomConstraints() {
+        guard self.layoutMode == .auto || self.layoutMode == .scroll else { return }
+        
+        let contentView = self.st_getContentView()
+        let subviews = contentView.subviews
+        
+        if subviews.isEmpty {
+            print("⚠️ STBaseView 提醒：contentView 中没有子视图，请使用 st_getContentView() 添加子视图")
+            return
+        }
+        
+        // 检查是否有底部约束
+        var hasBottomConstraint = false
+        for subview in subviews {
+            for constraint in subview.constraints {
+                if constraint.firstAttribute == .bottom || constraint.secondAttribute == .bottom {
+                    hasBottomConstraint = true
+                    break
+                }
+            }
+            if hasBottomConstraint { break }
+        }
+        
+        // 检查 contentView 的约束
+        for constraint in contentView.constraints {
+            if constraint.firstAttribute == .bottom || constraint.secondAttribute == .bottom {
+                hasBottomConstraint = true
+                break
+            }
+        }
+        
+        if !hasBottomConstraint {
+            print("""
+            ⚠️ STBaseView 重要提醒：
+            📍 您可能忘记设置底部约束！
+            📍 这会导致自动滚动检测失效
+            📍 请为最后一个子视图添加底部约束：
+               make.bottom.equalTo(-20)
+            📍 或者使用 st_validateConstraints() 方法检查约束设置
+            """)
+        }
+    }
+    
+    /// 手动验证约束设置（公开方法，供开发者调用）
+    open func st_validateConstraints() {
+        #if DEBUG
+        self.validateBottomConstraints()
+        #else
+        print("⚠️ 约束验证仅在DEBUG模式下可用")
+        #endif
+    }
+    
+    /// 便捷方法：为最后一个子视图设置底部约束
+    /// 
+    /// 使用示例：
+    /// ```swift
+    /// let contentView = baseView.st_getContentView()
+    /// contentView.addSubview(myView)
+    /// baseView.st_setBottomConstraint(for: myView, offset: -20)
+    /// ```
+    open func st_setBottomConstraint(for subview: UIView, offset: CGFloat = -20) {
+        guard subview.superview == self.st_getContentView() else {
+            print("⚠️ 警告：子视图必须添加到 contentView 中")
+            return
+        }
+        
+        subview.snp.makeConstraints { make in
+            make.bottom.equalTo(offset)
+        }
+        
+        #if DEBUG
+        print("✅ 已为 \(String(describing: type(of: subview))) 设置底部约束，偏移量：\(offset)")
+        #endif
+    }
+    
     /// 滚动视图
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.delegate = self
         scrollView.backgroundColor = .clear
+        scrollView.alwaysBounceVertical = false
+        scrollView.contentInset = .zero
+        scrollView.scrollIndicatorInsets = .zero
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.contentInsetAdjustmentBehavior = .never
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
