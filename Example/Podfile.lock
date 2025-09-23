@@ -1,18 +1,3 @@
-PODS:
-  - STBaseProject (1.1.4):
-    - STBaseProject/STBaseProject (= 1.1.4)
-  - STBaseProject/STBaseProject (1.1.4)
-
-DEPENDENCIES:
-  - STBaseProject (from `../`)
-
-EXTERNAL SOURCES:
-  STBaseProject:
-    :path: "../"
-
-SPEC CHECKSUMS:
-  STBaseProject: cda3ba733dc04c7e1c2a979e2ea5d42c678eed0a
-
-PODFILE CHECKSUM: 83abe57bbac826f8df3098f33171d8f59cd11e8f
+PODFILE CHECKSUM: b35d426fde3631ede9f5dd149ced1fc2cec30c71
 
 COCOAPODS: 1.16.2

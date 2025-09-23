@@ -7,7 +7,7 @@ install! 'cocoapods', :deterministic_uuids => false
 target 'STBaseProject_Example' do
   
   # 完整引入（推荐用于快速开始）
-  pod 'STBaseProject', :path => '../'
+#  pod 'STBaseProject', :path => '../'
 #  pod 'STBaseProject/STKit/Security', :path => '../'
 #  pod 'STBaseProject/STKit/Location', :path => '../'
 #  pod 'STBaseProject/STKit/Dialog', :path => '../'

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -19,6 +19,8 @@
 		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
 		E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1E29AC558A00760473 /* ViewControllerModel.swift */; };
 		E438C4072D2690B10022AD20 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E438C4062D2690B10022AD20 /* NetworkExtension.framework */; };
+		E45802302E821BD500E3B669 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = E458022F2E821BD500E3B669 /* STBaseProject */; };
+		E45802332E821D9600E3B669 /* STMyScrollableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45802322E821D9600E3B669 /* STMyScrollableView.swift */; };
 		E48B26362D3CA50800BF3FC3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E48B26342D3CA50800BF3FC3 /* Localizable.strings */; };
 		E4F5D9192D6330FA00A6C212 /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */; };
 /* End PBXBuildFile section */
@@ -45,6 +47,7 @@
 		E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerViewModel.swift; sourceTree = "<group>"; };
 		E41AED1E29AC558A00760473 /* ViewControllerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerModel.swift; sourceTree = "<group>"; };
 		E438C4062D2690B10022AD20 /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
+		E45802322E821D9600E3B669 /* STMyScrollableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STMyScrollableView.swift; sourceTree = "<group>"; };
 		E48B26352D3CA50800BF3FC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E48B26372D3CA51D00BF3FC3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STNextViewController.xib; sourceTree = "<group>"; };
@@ -56,6 +59,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34CA454AA8FD1F60C7B63C3F /* Pods_STBaseProject_Example.framework in Frameworks */,
+				E45802302E821BD500E3B669 /* STBaseProject in Frameworks */,
 				E438C4072D2690B10022AD20 /* NetworkExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -157,6 +161,7 @@
 		E41AED2929AC96C700760473 /* HomePage */ = {
 			isa = PBXGroup;
 			children = (
+				E45802312E821D7900E3B669 /* View */,
 				E41AED2B29AC96E100760473 /* Model */,
 				E41AED1B29AC546400760473 /* ViewModel */,
 				E41AED2A29AC96D200760473 /* ViewController */,
@@ -181,6 +186,14 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
+		E45802312E821D7900E3B669 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				E45802322E821D9600E3B669 /* STMyScrollableView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -192,7 +205,6 @@
 				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
-				4DD406712617D165395F2F9E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -231,6 +243,9 @@
 				"zh-Hans",
 			);
 			mainGroup = 607FACC71AFB9204008FA782;
+			packageReferences = (
+				E458022E2E821BD500E3B669 /* XCLocalSwiftPackageReference "../../STBaseProject" */,
+			);
 			productRefGroup = 607FACD11AFB9204008FA782 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -257,23 +272,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		4DD406712617D165395F2F9E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		9D1CF60A12BEEDFC9FBE0A28 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -304,6 +302,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */,
+				E45802332E821D9600E3B669 /* STMyScrollableView.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */,
 				E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */,
@@ -528,6 +527,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E458022E2E821BD500E3B669 /* XCLocalSwiftPackageReference "../../STBaseProject" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../STBaseProject;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E458022F2E821BD500E3B669 /* STBaseProject */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = STBaseProject;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 607FACC81AFB9204008FA782 /* Project object */;
 }
