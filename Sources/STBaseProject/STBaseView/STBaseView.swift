@@ -509,11 +509,17 @@ open class STBaseView: UIView, UIScrollViewDelegate {
             print("⚠️ 警告：子视图必须添加到 contentView 中")
             return
         }
-        
-        subview.snp.makeConstraints { make in
-            make.bottom.equalTo(offset)
-        }
-        
+        subview.translatesAutoresizingMaskIntoConstraints = false
+        let bottomConstraint = NSLayoutConstraint(
+            item: subview,
+            attribute: .bottom,
+            relatedBy: .equal,
+            toItem: self.st_getContentView(),
+            attribute: .bottom,
+            multiplier: 1.0,
+            constant: offset
+        )
+        self.st_getContentView().addConstraint(bottomConstraint)
         #if DEBUG
         print("✅ 已为 \(String(describing: type(of: subview))) 设置底部约束，偏移量：\(offset)")
         #endif
