@@ -5,7 +5,9 @@
 //  Created by song on 2025/9/8.
 //
 
+#if canImport(UIKit)
 import UIKit
+#endif
 
 /// 动画基类，提供公共的动画功能
 public class STBaseAnimation {

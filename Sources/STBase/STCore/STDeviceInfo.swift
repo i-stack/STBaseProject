@@ -8,11 +8,8 @@
 import UIKit
 import Darwin
 import Network
-import Contacts
-import AdSupport
 import CoreTelephony
 import SystemConfiguration
-import AppTrackingTransparency
 
 // MARK: - STDeviceInfo
 public struct STDeviceInfo {
@@ -324,48 +321,10 @@ public struct STDeviceInfo {
         return total > 0 ? Double(used) / Double(total) * 100.0 : 0.0
     }
     
-    // MARK: - Privacy Information
-    /// 获取IDFA（广告标识符）
-    public static func st_getIDFA() -> String {
-        if #available(iOS 14.0, *) {
-            switch ATTrackingManager.trackingAuthorizationStatus {
-            case .authorized:
-                return ASIdentifierManager.shared().advertisingIdentifier.uuidString
-            case .denied, .restricted, .notDetermined:
-                return ""
-            @unknown default:
-                return ""
-            }
-        } else {
-            if ASIdentifierManager.shared().isAdvertisingTrackingEnabled {
-                return ASIdentifierManager.shared().advertisingIdentifier.uuidString
-            }
-            return ""
-        }
-    }
-    
-    /// 获取IDFV（供应商标识符）
-    public static func st_getIDFV() -> String {
+    // MARK: - Basic Device Information
+    /// 获取设备标识符（仅基础信息，不包含隐私敏感数据）
+    public static func st_getDeviceIdentifier() -> String {
         return UIDevice.current.identifierForVendor?.uuidString ?? ""
-    }
-    
-    /// 检查广告追踪是否启用
-    public static func st_isAdvertisingTrackingEnabled() -> Bool {
-        if #available(iOS 14.0, *) {
-            return ATTrackingManager.trackingAuthorizationStatus == .authorized
-        } else {
-            return ASIdentifierManager.shared().isAdvertisingTrackingEnabled
-        }
-    }
-    
-    /// 请求广告追踪权限
-    @available(iOS 14.0, *)
-    public static func st_requestTrackingAuthorization(completion: @escaping (ATTrackingManager.AuthorizationStatus) -> Void) {
-        ATTrackingManager.requestTrackingAuthorization { status in
-            DispatchQueue.main.async {
-                completion(status)
-            }
-        }
     }
     
     private static func st_deviceType(for identifier: String) -> STDeviceType {
@@ -409,37 +368,4 @@ public enum STDevicePerformanceLevel {
     case low
     case medium
     case high
-}
-
-// MARK: - Contact Permission Extension
-public extension STDeviceInfo {
-    func st_requestContactPermission(complete: @escaping((Bool, [CNContact], String) -> Void)) {
-        CNContactStore().requestAccess(for: .contacts) { (granted, error) in
-            if granted {
-                self.st_fetchContactInfo(complete: complete)
-            } else {
-                complete(false, [], "Access denied: \(error?.localizedDescription ?? "Unknown error")")
-            }
-        }
-    }
-
-    func st_fetchContactInfo(complete: @escaping((Bool, [CNContact], String) -> Void)) {
-        let contactStore = CNContactStore()
-        let keysDescriptor = [
-            CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
-            CNContactPhoneNumbersKey as CNKeyDescriptor
-        ]
-        do {
-            let containers = try contactStore.containers(matching: nil)
-            var allContacts: [CNContact] = []
-            for container in containers {
-                let fetchPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
-                let contacts = try contactStore.unifiedContacts(matching: fetchPredicate, keysToFetch: keysDescriptor)
-                allContacts.append(contentsOf: contacts)
-            }
-            complete(true, allContacts, "")
-        } catch {
-            complete(false, [], "Error fetching contacts: \(error.localizedDescription)")
-        }
-    }
 }
