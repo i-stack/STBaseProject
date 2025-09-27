@@ -440,5 +440,16 @@ public extension STBaseViewController {
         }
         return currentVC
     }
+
+    func st_getViewControllerFromClassName(name: String) -> UIViewController? {
+        guard let namespace = Bundle.main.infoDictionary?["CFBundleName"] as? String else {
+            return nil
+        }
+        let fullClassName = "\(namespace).\(name)"
+        guard let cls = NSClassFromString(fullClassName) as? UIViewController.Type else {
+            return nil
+        }
+        return cls.init()
+    }
 }
 
