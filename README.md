@@ -5,23 +5,39 @@
 [![Platform](https://img.shields.io/cocoapods/p/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
 [![Swift](https://img.shields.io/badge/Swift-5.9_5.10_6.0-orange?style=flat-square)](https://img.shields.io/badge/Swift-5.9_5.10_6.0-Orange?style=flat-square)
 
-STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 UI 组件和工具类，帮助开发者快速构建高质量的 iOS 应用。
+STBaseProject 是一个模块化的 iOS 基础组件库集合，包含多个独立的功能模块，帮助开发者快速构建高质量的 iOS 应用。
+
+## 📦 模块组成
+
+- **STBase** - 核心基础组件库，提供 UI 组件、工具类和基础架构
+- **STContacts** - 通讯录管理模块
+- **STLocation** - 位置服务模块  
+- **STMedia** - 媒体处理模块（图片、相机、扫描等）
 
 ## 主要特性
 
+### STBase 核心模块
 - 🎨 **自定义导航栏**：支持多种样式和配置选项
 - 🌐 **WebView 控制器**：完整的 WebView 功能，支持 JavaScript 交互
-- 🧰 **模块化设计**：STKit 工具集，支持按需引入（Core/UI/Network/Media/Scan/Security/Localization/Location）
+- 🧰 **模块化设计**：STKit 工具集，支持按需引入（Core/UI/Network/Security/Localization）
 - 📱 **现代化设计**：支持深色模式，适配不同屏幕尺寸
 - 🔧 **高度可配置**：丰富的配置选项，满足不同需求
 - 🛡️ **错误处理**：完善的错误处理和状态管理
 - 📐 **设备适配**：智能的设备判断和尺寸计算
 - 🎯 **比例缩放**：基于设计稿的精确比例缩放
-- 📸 **统一图片管理**：整合相机、照片库和图片处理功能
 - 🌐 **本地化支持**：完整的国际化支持
 - 🎨 **自定义弹窗**：统一的弹窗 API，支持系统和自定义样式
-- 📱 **二维码扫描**：高度可配置的扫码界面和管理器
 - 🔒 **网络安全**：SSL证书绑定、数据加密、反调试检测，全面防护抓包攻击
+
+### STMedia 媒体模块
+- 📸 **统一图片管理**：整合相机、照片库和图片处理功能
+- 📱 **二维码扫描**：高度可配置的扫码界面和管理器
+
+### STContacts 通讯录模块
+- 📞 **通讯录管理**：完整的通讯录访问和管理功能
+
+### STLocation 位置模块
+- 📍 **位置服务**：GPS定位、地理编码等功能
 
 ## Installation
 
@@ -39,6 +55,23 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 ```swift
 dependencies: [
     .package(url: "https://github.com/i-stack/STBaseProject.git", from: "2.0.2")
+]
+```
+
+#### 模块化安装（推荐用于生产环境）
+
+你可以根据需要选择安装特定的模块：
+
+```swift
+dependencies: [
+    // 核心基础模块（必需）
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "2.0.2"),
+    // 通讯录模块
+    .package(url: "https://github.com/i-stack/STContacts.git", from: "1.0.0"),
+    // 位置服务模块
+    .package(url: "https://github.com/i-stack/STLocation.git", from: "1.0.0"),
+    // 媒体处理模块
+    .package(url: "https://github.com/i-stack/STMedia.git", from: "1.0.0")
 ]
 ```
 
