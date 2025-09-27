@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
     s.name = 'STBaseProject'
-    s.version = '1.1.5'
+    s.version = '1.1.4'
     s.license = { :type => 'MIT', :file => 'LICENSE' }
     s.summary = 'A powerful iOS base project with modular architecture and rich UI components.'
     s.description = <<-DESC

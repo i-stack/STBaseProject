@@ -24,7 +24,7 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 在 `Podfile` 中添加：
 
 ```ruby
-pod 'STBaseProject', '~> 1.1.5'
+pod 'STBaseProject', '~> 1.1.4'
 ```
 
 然后运行：
@@ -40,13 +40,13 @@ pod install
 1. 打开 Xcode 项目
 2. 选择 `File` > `Add Package Dependencies...`
 3. 输入仓库 URL：`https://github.com/i-stack/STBaseProject.git`
-4. 选择版本 `1.1.5` 或更高版本并添加到项目
+4. 选择版本 `1.1.4` 或更高版本并添加到项目
 
 或在 `Package.swift` 中：
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.1.5")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.1.4")
 ]
 ```
 
