@@ -1,6 +1,11 @@
-# STBase
+# STBaseProject
 
-一个功能丰富的 iOS 基础组件库，提供常用的 UI 组件、工具类和基础架构支持。
+[![Version](https://img.shields.io/cocoapods/v/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![License](https://img.shields.io/cocoapods/l/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![Platform](https://img.shields.io/cocoapods/p/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![Swift](https://img.shields.io/badge/Swift-5.9_5.10_6.0-orange?style=flat-square)](https://img.shields.io/badge/Swift-5.9_5.10_6.0-Orange?style=flat-square)
+
+STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 UI 组件和工具类，帮助开发者快速构建高质量的 iOS 应用。
 
 ## 📋 目录
 
@@ -14,19 +19,41 @@
 
 ## 🚀 安装方式
 
+### CocoaPods
+
+在 `Podfile` 中添加：
+
+```ruby
+pod 'STBaseProject', '~> 1.1.5'
+```
+
+然后运行：
+
+```bash
+pod install
+```
+
 ### Swift Package Manager
 
 在 Xcode 中添加包依赖：
 
 1. 打开 Xcode 项目
 2. 选择 `File` > `Add Package Dependencies...`
-3. 输入仓库 URL：`https://github.com/your-username/STBase.git`
-4. 选择版本并添加到项目
+3. 输入仓库 URL：`https://github.com/i-stack/STBaseProject.git`
+4. 选择版本 `1.1.5` 或更高版本并添加到项目
+
+或在 `Package.swift` 中：
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.1.5")
+]
+```
 
 ### 手动集成
 
 1. 下载项目源码
-2. 将 `Sources/STBase` 文件夹拖入你的项目
+2. 将 `Sources` 文件夹拖入你的项目
 3. 确保所有文件都添加到 target 中
 
 ## ⚡ 快速开始
@@ -34,7 +61,7 @@
 ### 基础配置
 
 ```swift
-import STBase
+import STBaseProject
 
 // 在 AppDelegate 或 SceneDelegate 中配置
 func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -52,7 +79,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
 ### 基础视图控制器
 
 ```swift
-import STBase
+import STBaseProject
 
 class MyViewController: STBaseViewController {
     
@@ -78,7 +105,7 @@ class MyViewController: STBaseViewController {
 ### 自定义按钮
 
 ```swift
-import STBase
+import STBaseProject
 
 let button = STBtn()
 button.setTitle("按钮", for: .normal)
@@ -94,7 +121,7 @@ button.st_roundedButton(cornerRadius: 8)
 ### 颜色工具
 
 ```swift
-import STBase
+import STBaseProject
 
 // 从十六进制创建颜色
 let color = UIColor.st_color(hexString: "#FF6B6B")
@@ -109,7 +136,7 @@ let rgbColor = UIColor.st_color(red: 255, green: 107, blue: 107)
 ### HUD 提示
 
 ```swift
-import STBase
+import STBaseProject
 
 // 显示成功提示
 STHUD.showSuccess("操作成功")
@@ -239,7 +266,7 @@ STHUD.hide()
 ### 网络请求
 
 ```swift
-import STBase
+import STBaseProject
 
 // GET 请求
 STHTTPSession.shared.st_get(url: "https://api.example.com/users") { result in
@@ -261,7 +288,7 @@ STHTTPSession.shared.st_post(url: "https://api.example.com/users", parameters: p
 ### 本地化
 
 ```swift
-import STBase
+import STBaseProject
 
 // 设置本地化
 STLocalizationManager.shared.st_setLanguage("zh-Hans")
@@ -273,7 +300,7 @@ let localizedString = "hello_world".localized
 ### 文件操作
 
 ```swift
-import STBase
+import STBaseProject
 
 // 保存数据到文件
 let data = "Hello World".data(using: .utf8)!
@@ -304,8 +331,8 @@ if let fileData = STFileManager.shared.st_readData(fromFile: "test.txt") {
 
 如有问题或建议，请通过以下方式联系：
 
-- 提交 Issue
-- 发送邮件至：your-email@example.com
+- 提交 Issue: [GitHub Issues](https://github.com/i-stack/STBaseProject/issues)
+- 邮箱: songshoubing7664@163.com
 
 ---
 
