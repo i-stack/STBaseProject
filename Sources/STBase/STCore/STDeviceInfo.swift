@@ -322,11 +322,6 @@ public struct STDeviceInfo {
     }
     
     // MARK: - Basic Device Information
-    /// 获取设备标识符（仅基础信息，不包含隐私敏感数据）
-    public static func st_getDeviceIdentifier() -> String {
-        return UIDevice.current.identifierForVendor?.uuidString ?? ""
-    }
-    
     private static func st_deviceType(for identifier: String) -> STDeviceType {
         if identifier.hasPrefix("iPhone") {
             return .iPhone
