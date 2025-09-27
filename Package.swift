@@ -13,43 +13,12 @@ let package = Package(
             name: "STBase",
             targets: ["STBase"]
         ),
-        .library(
-            name: "STContacts",
-            targets: ["STContacts"]
-        ),
-        .library(
-            name: "STLocation",
-            targets: ["STLocation"]
-        ),
-        .library(
-            name: "STMedia",
-            targets: ["STMedia"]
-        ),
-        .library(
-            name: "STBaseProject",
-            targets: ["STBase", "STContacts", "STLocation", "STMedia"]
-        ),
     ],
     targets: [
         .target(
             name: "STBase",
             dependencies: [],
-            path: "STBase/Sources"
-        ),
-        .target(
-            name: "STContacts",
-            dependencies: ["STBase"],
-            path: "STContacts/Sources"
-        ),
-        .target(
-            name: "STLocation",
-            dependencies: ["STBase"],
-            path: "STLocation/Sources"
-        ),
-        .target(
-            name: "STMedia",
-            dependencies: ["STBase"],
-            path: "STMedia/Sources"
+            path: "Sources"
         ),
     ],
     swiftLanguageVersions: [.v5]
