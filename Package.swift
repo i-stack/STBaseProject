@@ -10,13 +10,13 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "STBase",
-            targets: ["STBase"]
+            name: "STBaseProject",
+            targets: ["STBaseProject"]
         ),
     ],
     targets: [
         .target(
-            name: "STBase",
+            name: "STBaseProject",
             dependencies: [],
             path: "Sources"
         ),
