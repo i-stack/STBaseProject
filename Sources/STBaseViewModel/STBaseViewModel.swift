@@ -315,9 +315,11 @@ open class STBaseViewModel: NSObject {
     // MARK: - 响应处理
     private func st_decodeResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> Result<T, STBaseError> {
         guard let data = httpResponse.data else {
+            print("==================== st_decodeResponse - 响应数据为空 ====================")
             return .failure(.dataError("响应数据为空"))
         }
         if data.isEmpty {
+            print("==================== st_decodeResponse - 响应数据为空 ====================")
             return .failure(.dataError("响应数据为空"))
         }
         do {
@@ -326,18 +328,53 @@ open class STBaseViewModel: NSObject {
             return .success(result)
         } catch DecodingError.keyNotFound(let key, let context) {
             let errorMessage = "JSON解析失败：缺少必需的字段 '\(key.stringValue)'，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
+            print("==================== st_decodeResponse - keyNotFound ====================")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("原始JSON数据:")
+                print(jsonString)
+            }
+            print("错误: \(errorMessage)")
+            print("======================================================")
             return .failure(.dataError(errorMessage))
         } catch DecodingError.valueNotFound(let value, let context) {
             let errorMessage = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 的值为空，期望类型：\(value)"
+            print("==================== st_decodeResponse - valueNotFound ====================")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("原始JSON数据:")
+                print(jsonString)
+            }
+            print("错误: \(errorMessage)")
+            print("======================================================")
             return .failure(.dataError(errorMessage))
         } catch DecodingError.typeMismatch(let type, let context) {
             let errorMessage = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 类型不匹配，期望：\(type)，实际：\(context.debugDescription)"
+            print("==================== st_decodeResponse - typeMismatch ====================")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("原始JSON数据:")
+                print(jsonString)
+            }
+            print("错误: \(errorMessage)")
+            print("======================================================")
             return .failure(.dataError(errorMessage))
         } catch DecodingError.dataCorrupted(let context) {
             let errorMessage = "JSON解析失败：数据损坏，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))，原因：\(context.debugDescription)"
+            print("==================== st_decodeResponse - dataCorrupted ====================")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("原始JSON数据:")
+                print(jsonString)
+            }
+            print("错误: \(errorMessage)")
+            print("======================================================")
             return .failure(.dataError(errorMessage))
         } catch {
             let errorMessage = "JSON解析失败：\(error.localizedDescription)"
+            print("==================== st_decodeResponse - 其他错误 ====================")
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("原始JSON数据:")
+                print(jsonString)
+            }
+            print("错误: \(errorMessage)")
+            print("======================================================")
             return .failure(.dataError(errorMessage))
         }
     }
