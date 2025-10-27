@@ -665,3 +665,64 @@ extension STBaseView {
         // 子类可以重写此方法
     }
 }
+
+// MARK: - ContentView 高度管理扩展
+extension STBaseView {
+    
+    /// 更新 contentView 的高度
+    /// - Parameter height: 新的高度值
+    open func st_updateContentViewHeight(_ height: CGFloat) {
+        let contentView = self.st_getContentView()
+        contentView.removeConstraints(contentView.constraints.filter { $0.firstAttribute == .height })
+        let heightConstraint = NSLayoutConstraint(
+            item: contentView,
+            attribute: .height,
+            relatedBy: .equal,
+            toItem: nil,
+            attribute: .notAnAttribute,
+            multiplier: 1.0,
+            constant: height
+        )
+        contentView.addConstraint(heightConstraint)
+        self.st_syncScrollViewContentSize()
+    }
+    
+    /// 同步滚动视图的内容大小
+    open func st_syncScrollViewContentSize() {
+        if let scrollView = self.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
+            let contentView = self.st_getContentView()
+            let contentSize = CGSize(width: scrollView.bounds.width, height: contentView.frame.height)
+            scrollView.contentSize = contentSize
+        }
+    }
+    
+    /// 根据最后一个子视图自动调整 contentView 高度
+    /// - Parameter margin: 底部边距，默认为 20
+    open func st_autoAdjustContentViewHeight(margin: CGFloat = 20) {
+        let contentView = self.st_getContentView()
+        var lastView: UIView?
+        var maxBottom: CGFloat = 0
+        for subview in contentView.subviews {
+            let bottom = subview.frame.maxY
+            if bottom > maxBottom {
+                maxBottom = bottom
+                lastView = subview
+            }
+        }
+        if let lastView = lastView {
+            let newHeight = lastView.frame.maxY + margin
+            self.st_updateContentViewHeight(newHeight)
+        }
+    }
+    
+    /// 清理 xib 布局模式下的冲突约束
+    private func st_cleanupXIBConstraints() {
+        let contentView = self.st_getContentView()
+        let minHeightConstraints = contentView.constraints.filter { constraint in
+            constraint.firstAttribute == .height && 
+            constraint.relation == .greaterThanOrEqual &&
+            constraint.constant > 1000
+        }
+        contentView.removeConstraints(minHeightConstraints)
+    }
+}
