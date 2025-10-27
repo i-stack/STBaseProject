@@ -6,7 +6,6 @@
 //
 import WebKit
 import StoreKit
-// 这些模块现在都在 STBaseModule 内部，不需要单独导入
 
 // MARK: - WebView 信息结构体
 public struct STWebInfo {
