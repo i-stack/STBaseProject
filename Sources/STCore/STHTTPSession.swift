@@ -297,7 +297,7 @@ open class STHTTPSession: NSObject {
                     do {
                         model = try JSONDecoder().decode(T.self, from: data)
                     } catch {
-                        print("模型解析失败: \(error)")
+                        // 解码错误由上层的 st_decodeResponse 处理并打印
                     }
                 }
                 let httpResponse = STHTTPResponseWithModel<T>(data: data, response: response, error: error, model: model)
@@ -371,6 +371,63 @@ open class STHTTPSession: NSObject {
             DispatchQueue.main.async {
                 let httpResponse = STHTTPResponse(data: data, response: response, error: error)
                 completion(httpResponse)
+            }
+        }
+        task.resume()
+    }
+    
+    // MARK: - 下载文件
+    public func st_download(
+        url: String,
+        destinationURL: URL,
+        progress: ((Double) -> Void)? = nil,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) {
+        guard let requestURL = URL(string: url) else {
+            completion(.failure(NSError(domain: "STHTTPSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "无效的URL"])))
+            return
+        }
+        let task = URLSession.shared.downloadTask(with: requestURL) { location, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
+                return
+            }
+            guard let location = location else {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "STHTTPSession", code: -2, userInfo: [NSLocalizedDescriptionKey: "临时文件不存在"])))
+                }
+                return
+            }
+            guard let httpResponse = response as? HTTPURLResponse else {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "STHTTPSession", code: -3, userInfo: [NSLocalizedDescriptionKey: "无效的HTTP响应"])))
+                }
+                return
+            }
+            guard (200...299).contains(httpResponse.statusCode) else {
+                DispatchQueue.main.async {
+                    completion(.failure(NSError(domain: "STHTTPSession", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP错误: \(httpResponse.statusCode)"])))
+                }
+                return
+            }
+            do {
+                let destinationDirectory = destinationURL.deletingLastPathComponent()
+                if !FileManager.default.fileExists(atPath: destinationDirectory.path) {
+                    try FileManager.default.createDirectory(at: destinationDirectory, withIntermediateDirectories: true, attributes: nil)
+                }
+                if FileManager.default.fileExists(atPath: destinationURL.path) {
+                    try FileManager.default.removeItem(at: destinationURL)
+                }
+                try FileManager.default.moveItem(at: location, to: destinationURL)
+                DispatchQueue.main.async {
+                    completion(.success(destinationURL))
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
             }
         }
         task.resume()
