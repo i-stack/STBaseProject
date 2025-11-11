@@ -535,14 +535,22 @@ public class STProgressHUD: UIView {
     func registerForNotifications() {
         #if !os(tvOS)
         let nc = NotificationCenter.default
-        nc.addObserver(self, selector: #selector(statusBarOrientationDidChange(_:)), name: UIApplication.didChangeStatusBarFrameNotification, object: nil)
+        if #available(iOS 13.0, *) {
+            nc.addObserver(self, selector: #selector(statusBarOrientationDidChange(_:)), name: UIDevice.orientationDidChangeNotification, object: nil)
+        } else {
+            nc.addObserver(self, selector: #selector(statusBarOrientationDidChange(_:)), name: UIApplication.didChangeStatusBarFrameNotification, object: nil)
+        }
         #endif
     }
     
     func unregisterFormNotifications() {
         #if !os(tvOS)
         let nc = NotificationCenter.default
-        nc.removeObserver(self, name: UIApplication.didChangeStatusBarFrameNotification, object: nil)
+        if #available(iOS 13.0, *) {
+            nc.removeObserver(self, name: UIDevice.orientationDidChangeNotification, object: nil)
+        } else {
+            nc.removeObserver(self, name: UIApplication.didChangeStatusBarFrameNotification, object: nil)
+        }
         #endif
     }
     

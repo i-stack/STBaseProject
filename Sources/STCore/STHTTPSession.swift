@@ -10,7 +10,6 @@ import Foundation
 import Combine
 import Network
 
-// MARK: - 参数编码器
 public class STParameterEncoder {
     
     public enum EncodingType {
@@ -23,18 +22,15 @@ public class STParameterEncoder {
     // MARK: - URL 编码
     public static func st_encodeURL(_ parameters: [String: Any]) -> String {
        var components: [(String, String)] = []
-        
        for key in parameters.keys.sorted(by: <) {
            let value = parameters[key]!
             components += st_queryComponents(fromKey: key, value: value)
        }
-        
        return components.map { "\($0)=\($1)" }.joined(separator: "&")
     }
     
     private static func st_queryComponents(fromKey key: String, value: Any) -> [(String, String)] {
        var components: [(String, String)] = []
-        
        if let dictionary = value as? [String: Any] {
             for (nestedKey, value) in dictionary {
                 components += st_queryComponents(fromKey: "\(key)[\(nestedKey)]", value: value)
@@ -50,7 +46,6 @@ public class STParameterEncoder {
        } else {
             components.append((st_escape(key), st_escape("\(value)")))
        }
-        
        return components
     }
     
@@ -59,7 +54,6 @@ public class STParameterEncoder {
         let subDelimitersToEncode = "!$&'()*+,;="
         var allowedCharacterSet = CharacterSet.urlQueryAllowed
         allowedCharacterSet.remove(charactersIn: "\(generalDelimitersToEncode)\(subDelimitersToEncode)")
-        
         return string.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet) ?? string
     }
     
@@ -109,7 +103,6 @@ public enum STHTTPError: Error, LocalizedError {
 public class STNetworkReachabilityManager {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
-    
     public var currentStatus: STNetworkReachabilityStatus = .unknown
     
     public init() {
@@ -155,7 +148,7 @@ open class STHTTPSession: NSObject {
     
     private override init() {
         super.init()
-        st_setupSession()
+        self.st_setupSession()
     }
     
     private func st_setupSession() {
@@ -167,12 +160,12 @@ open class STHTTPSession: NSObject {
         configuration.allowsCellularAccess = defaultRequestConfig.allowsCellularAccess
         configuration.httpShouldUsePipelining = defaultRequestConfig.httpShouldUsePipelining
         configuration.networkServiceType = defaultRequestConfig.networkServiceType
-        session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        self.session = URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
     }
     
     private lazy var session: URLSession = {
         let configuration = URLSessionConfiguration.default
-        return URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+        return URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
     }()
     
     // MARK: - 公共请求方法
@@ -344,6 +337,12 @@ open class STHTTPSession: NSObject {
         let headers = requestHeaders ?? defaultRequestHeaders
         var request = URLRequest(url: url)
         request.httpMethod = STHTTPMethod.post.rawValue
+        request.timeoutInterval = config.timeoutInterval
+        request.cachePolicy = config.cachePolicy
+        request.allowsCellularAccess = config.allowsCellularAccess
+        request.httpShouldHandleCookies = config.httpShouldHandleCookies
+        request.httpShouldUsePipelining = config.httpShouldUsePipelining
+        request.networkServiceType = config.networkServiceType
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         var body = Data()
@@ -436,13 +435,5 @@ open class STHTTPSession: NSObject {
     // MARK: - 网络状态检查
     public func st_checkNetworkStatus() -> STNetworkReachabilityStatus {
         return networkReachability.currentStatus
-    }
-}
-
-// MARK: - URLSessionDelegate
-extension STHTTPSession: URLSessionDelegate {
-    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        // SSL 证书验证逻辑可以在这里实现
-        completionHandler(.performDefaultHandling, nil)
     }
 }

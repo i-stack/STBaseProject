@@ -89,7 +89,7 @@ public class STTimer: NSObject {
         self.semaphore.signal()
         timer.schedule(deadline: .now() + .milliseconds(Int(afterDelay * 1000)),
                       repeating: .milliseconds(Int(interval * 1000)))
-        timer.setEventHandler { [weak timer] in
+        timer.setEventHandler {
             DispatchQueue.main.async {
                 block(name)
                 if !repeats {
@@ -121,7 +121,7 @@ public class STTimer: NSObject {
     public class func st_cancelAllTasks() {
         self.semaphore.wait()
         defer { self.semaphore.signal() }
-        for (name, timer) in self.timerDict {
+        for (_, timer) in self.timerDict {
             timer.cancel()
         }
         self.timerDict.removeAll()

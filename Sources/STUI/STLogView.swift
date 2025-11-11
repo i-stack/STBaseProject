@@ -56,7 +56,7 @@ public struct STLogEntry {
         if components.count >= 4 {
             // 解析时间戳
             let timestampString = components[0].trimmingCharacters(in: .whitespacesAndNewlines)
-            self.timestamp = Date() // 简化处理，实际应该解析时间戳
+            self.timestamp = timestampString.st_toDate() ?? Date()
             
             // 解析文件名
             self.file = components[1].trimmingCharacters(in: .whitespacesAndNewlines)

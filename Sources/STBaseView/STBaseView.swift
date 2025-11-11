@@ -365,7 +365,6 @@ open class STBaseView: UIView, UIScrollViewDelegate {
     open func st_addSubviewToContent(_ subview: UIView) {
         if self.isFromXIB {
             if self.layoutMode == .scroll {
-                let contentView = self.st_getContentView()
                 self.contentView.addSubview(subview)
             } else {
                 self.addSubview(subview)
@@ -671,7 +670,7 @@ extension STBaseView {
     
     /// 更新 contentView 的高度
     /// - Parameter height: 新的高度值
-    open func st_updateContentViewHeight(_ height: CGFloat) {
+    @objc open func st_updateContentViewHeight(_ height: CGFloat) {
         let contentView = self.st_getContentView()
         contentView.removeConstraints(contentView.constraints.filter { $0.firstAttribute == .height })
         let heightConstraint = NSLayoutConstraint(
@@ -688,7 +687,7 @@ extension STBaseView {
     }
     
     /// 同步滚动视图的内容大小
-    open func st_syncScrollViewContentSize() {
+    @objc open func st_syncScrollViewContentSize() {
         if let scrollView = self.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
             let contentView = self.st_getContentView()
             let contentSize = CGSize(width: scrollView.bounds.width, height: contentView.frame.height)
@@ -698,7 +697,7 @@ extension STBaseView {
     
     /// 根据最后一个子视图自动调整 contentView 高度
     /// - Parameter margin: 底部边距，默认为 20
-    open func st_autoAdjustContentViewHeight(margin: CGFloat = 20) {
+    @objc open func st_autoAdjustContentViewHeight(margin: CGFloat = 20) {
         let contentView = self.st_getContentView()
         var lastView: UIView?
         var maxBottom: CGFloat = 0

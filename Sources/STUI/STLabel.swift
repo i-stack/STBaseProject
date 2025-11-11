@@ -108,7 +108,8 @@ public class STLabel: UILabel {
         let originalSize = super.intrinsicContentSize
         // 如果原始尺寸为零，尝试手动计算
         if originalSize == .zero {
-            let textSize = self.text?.size(withAttributes: [.font: self.font]) ?? CGSize.zero
+            let currentFont = self.font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)
+            let textSize = self.text?.size(withAttributes: [.font: currentFont]) ?? CGSize.zero
             
             if let attributedText = self.attributedText {
                 let attributedSize = attributedText.size()

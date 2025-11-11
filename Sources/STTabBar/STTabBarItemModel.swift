@@ -348,7 +348,7 @@ public struct STTabBarItemModel {
     ///   - imageSize: 图片大小
     /// - Returns: UIImage 对象
     private static func loadImage(named imageName: String, imageSize: CGSize? = nil) -> UIImage? {
-        guard var image = UIImage(named: imageName) else {
+        guard let image = UIImage(named: imageName) else {
             print("⚠️ STTabBarItemModel: 图片加载失败 - \(imageName)")
             return nil
         }

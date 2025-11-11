@@ -23,7 +23,7 @@ public enum STHTTPMethod: String {
 }
 
 // MARK: - 请求配置
-public struct STRequestConfig {
+public struct STRequestConfig: Sendable {
     public var retryCount: Int = 0
     public var retryDelay: TimeInterval = 1.0
     public var allowsCellularAccess: Bool = true
