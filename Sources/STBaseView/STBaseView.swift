@@ -527,32 +527,36 @@ extension STBaseView {
         objc_setAssociatedObject(self, &StateKeys.empty, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
-    public func st_showError(_ text: String = "Load Failed") {
-        self.st_hideAllStates()
-        let v = self.st_makeStateView(text)
-        self.addSubview(v)
-        NSLayoutConstraint.activate([
-            v.topAnchor.constraint(equalTo: self.topAnchor),
-            v.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-        ])
-        objc_setAssociatedObject(self, &StateKeys.error, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-    }
+//    public func st_showError(_ text: String = "Load Failed") {
+//        self.st_hideAllStates()
+//        let v = self.st_makeStateView(text)
+//        self.addSubview(v)
+//        NSLayoutConstraint.activate([
+//            v.topAnchor.constraint(equalTo: self.topAnchor),
+//            v.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+//            v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+//            v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+//        ])
+//        objc_setAssociatedObject(self, &StateKeys.error, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+//    }
 
     public func st_hideAllStates() {
-        [StateKeys.loading, StateKeys.empty, StateKeys.error].forEach {
-            if let v = objc_getAssociatedObject(self, &$0) as? UIView {
-                v.removeFromSuperview()
-                objc_setAssociatedObject(self, &$0, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
+        self.st_removeStateView(with: &StateKeys.loading)
+        self.st_removeStateView(with: &StateKeys.empty)
+        self.st_removeStateView(with: &StateKeys.error)
+    }
+
+    private func st_removeStateView(with key: UnsafeRawPointer) {
+        if let v = objc_getAssociatedObject(self, key) as? UIView {
+            v.removeFromSuperview()
+            objc_setAssociatedObject(self, key, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }
 
 // MARK: - Dynamic Gradient Navigation Bar Support
-open class STGradientNavigationBar: UIView
-{
+open class STGradientNavigationBar: UIView {
+    
     public var startColor: UIColor = .clear { didSet { self.setNeedsLayout() } }
     public var endColor: UIColor = .black { didSet { self.setNeedsLayout() } }
     public var height: CGFloat = 88 { didSet { self.invalidateIntrinsicContentSize() } }
