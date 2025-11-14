@@ -10,8 +10,6 @@
 		46EB2E00000170 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46EB2E00000160 /* Foundation.framework */; };
 		46EB2E000001E0 /* Pods-STBaseProject_Example-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = 46EB2E000001D0 /* Pods-STBaseProject_Example-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		46EB2E00000220 /* Pods-STBaseProject_Example-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 46EB2E00000210 /* Pods-STBaseProject_Example-dummy.m */; };
-		E433A53C2E86203A005807F2 /* STBase in Frameworks */ = {isa = PBXBuildFile; productRef = E433A53B2E86203A005807F2 /* STBase */; };
-		E433A53E2E86203A005807F2 /* STMedia in Frameworks */ = {isa = PBXBuildFile; productRef = E433A53D2E86203A005807F2 /* STMedia */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,8 +31,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E433A53E2E86203A005807F2 /* STMedia in Frameworks */,
-				E433A53C2E86203A005807F2 /* STBase in Frameworks */,
 				46EB2E00000170 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -150,9 +146,6 @@
 				en,
 			);
 			mainGroup = 46EB2E00000010;
-			packageReferences = (
-				E433A53A2E86203A005807F2 /* XCLocalSwiftPackageReference "../../../STBaseProject" */,
-			);
 			productRefGroup = 46EB2E00000020 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -413,24 +406,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		E433A53A2E86203A005807F2 /* XCLocalSwiftPackageReference "../../../STBaseProject" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../../STBaseProject;
-		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		E433A53B2E86203A005807F2 /* STBase */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = STBase;
-		};
-		E433A53D2E86203A005807F2 /* STMedia */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = STMedia;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 46EB2E00000000 /* Project object */;
 }

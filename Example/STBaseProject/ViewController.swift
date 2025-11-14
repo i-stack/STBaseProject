@@ -1,136 +1,156 @@
-//
-//  ViewController.swift
-//  STBaseProject
-//
-//  Created by i-stack on 05/16/2017.
-//  Copyright (c) 2019 songMW. All rights reserved.
-//
+//  STBaseViewController_Usage_Template.swift
+//  Example usage combining STBaseViewController + STBaseView
+//  Provides 3 page templates:
+//  1. HomePage (sections + scroll)
+//  2. FormPage (inputs + keyboard handling)
+//  3. EmptyStatePage (loading/empty/error)
 
 import UIKit
-//import SnapKit
 import STBaseProject
-//import SDWebImage
 
+// MARK: - 1. Home Page Example (Sections + Scroll)
 class ViewController: STBaseViewController {
-        
-    @IBOutlet weak var topConstraint: NSLayoutConstraint!
-    @IBOutlet weak var tableView: UITableView!
-    private var networkManager = STNetworkMonitoring()
 
-    var viewModel: ViewControllerViewModel?
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.titleLabel.text = "ViewController"
-        self.titleLabel.textColor = UIColor.black
-        self.st_showNavBtnType(type: .onlyShowTitle)
-        self.tableView.tableFooterView = UIView()
-        self.topConstraint.constant = STDeviceAdapter.st_navHeight()
-        self.viewModel?.loadData {[weak self] result in
-            guard let strongSelf = self else { return }
-            if result {
-                strongSelf.tableView.reloadData()
-            }
+        self.st_setTitle("Home")
+        self.st_setLeftBtn(image: UIImage(systemName: "chevron.left"), title: "返回")
+        self.st_enableGradientNavigationBar(startColor: .clear, endColor: UIColor.black.withAlphaComponent(0.2))
+
+        self.buildUI()
+    }
+
+    private func buildUI() {
+        // Section 1
+        let section1 = STSection(inset: .init(top: 20, left: 16, bottom: 0, right: 16), spacing: 12)
+
+        let title = UILabel()
+        title.text = "Welcome"
+        title.font = .boldSystemFont(ofSize: 28)
+
+        let desc = UILabel()
+        desc.text = "This is a home page built with STBaseView + Sections system."
+        desc.numberOfLines = 0
+
+        section1.addViews([title, desc])
+
+        // Section 2: buttons row
+        let section2 = STSection(inset: .init(top: 30, left: 16, bottom: 0, right: 16), spacing: 16)
+
+        let btn1 = UIButton(type: .system)
+        btn1.setTitle("Go Profile", for: .normal)
+        btn1.heightAnchor.constraint(equalToConstant: 48).isActive = true
+
+        let btn2 = UIButton(type: .system)
+        btn2.setTitle("Load Data", for: .normal)
+        btn2.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        btn2.addTarget(self, action: #selector(self.loadData), for: .touchUpInside)
+
+        section2.addViews([btn1, btn2])
+
+        // Add sections into baseView
+        self.baseView
+            .st_addSection(section1)
+//            .st_addSection(section2)
+        
+        self.baseView.st_addSection(section2)
+    }
+
+    @objc private func loadData() {
+        self.baseView.st_showLoading()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.baseView.st_showEmpty("No items available")
         }
-        networkManager.st_startMonitoring { status, tip in
-            print(status, tip)
-        }
-        testParmAppent()
     }
     
-    func testParmAppent() {
+    override func onLeftBtnTap() {
         
     }
 }
 
-extension ViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.viewModel?.cellDateSources().count ?? 0
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let identifier = ""
-        var cell = tableView.dequeueReusableCell(withIdentifier: identifier)
-        if (cell == nil) {
-            cell = UITableViewCell.init(style: .default, reuseIdentifier: identifier)
-            cell?.selectionStyle = .none
-        }
-        let model = self.viewModel?.cellForRow(indexPath: indexPath)
-        cell?.textLabel?.text = model?.title
-        return cell ?? UITableViewCell()
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if let model = self.viewModel?.cellForRow(indexPath: indexPath) {
-            let namespace = Bundle.main.infoDictionary!["CFBundleName"] as! String
-            let classFromStr: AnyClass? = NSClassFromString(namespace + "." + model.className)
-            let viewControllerClass = classFromStr as! UIViewController.Type
-            let moushiVC = viewControllerClass.init(nibName: model.nibName, bundle: nil)
-            self.navigationController?.pushViewController(moushiVC, animated: true)
-        }
-    }
-}
 
-extension ViewController {
-    @objc func testRandomString() {
-        var dict: Dictionary<String, String> = Dictionary<String, String>()
-        for i in 0..<1000 {
-            dict["key\(i)"] = "\(i)"
-        }
+// MARK: - 2. Form Page Example (Input + Keyboard Handling)
+class FormPageController: STBaseViewController {
 
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
-            let outputPath = "\(STFileManager.st_getLibraryCachePath())/jsonData"
-            let pathIsExist = STFileManager.st_fileExistAt(path: outputPath)
-            if pathIsExist.0 {
-                let path = STFileManager.st_create(filePath: outputPath, fileName: "json.json")
-                print(outputPath)
-                try jsonData.write(to: URL.init(fileURLWithPath: path), options: .atomic)
-            } else {
-                print(outputPath + "not exist")
-            }
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
-    
-    func testBtn() {
-        let btn = STBtn()
-        btn.backgroundColor = UIColor.orange
-        btn.frame = CGRect.init(x: 10, y: 300, width: 380, height: 100)
-        btn.setTitle("test001", for: .normal)
-        btn.setTitleColor(UIColor.red, for: .normal)
-        btn.setImage(UIImage.init(named: "Image"), for: .normal)
-        btn.addTarget(self, action: #selector(btnClick(sender:)), for: .touchUpInside)
-        self.view.addSubview(btn)
-    }
-    
-    @objc func btnClick(sender: STBtn) {
+    private let nameField: UITextField = {
+        let field = UITextField()
+        field.placeholder = "Enter your name"
+        field.borderStyle = .roundedRect
+        return field
+    }()
+
+    private let emailField: UITextField = {
+        let field = UITextField()
+        field.placeholder = "Enter your email"
+        field.borderStyle = .roundedRect
+        return field
+    }()
+
+    private let submitButton: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setTitle("Submit", for: .normal)
+        btn.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        return btn
+    }()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.st_setTitle("Form")
+        self.st_setLeftBtn(image: UIImage(systemName: "xmark"), title: "返回")
         
+        self.buildFormUI()
+    }
+
+    private func buildFormUI() {
+        let section = STSection(inset: .init(top: 30, left: 16, bottom: 0, right: 16), spacing: 20)
+        section.addViews([self.nameField, self.emailField, self.submitButton])
+        self.baseView.st_addSection(section)
+
+        self.submitButton.addTarget(self, action: #selector(self.submit), for: .touchUpInside)
+    }
+
+    @objc private func submit() {
+        self.baseView.st_showLoading()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            self.baseView.st_showError("Submission failed. Try again later.")
+        }
     }
 }
 
-extension ViewController {
-    
-    struct JsonModel: Codable {
-        var posts: [PostModel] = [PostModel]()
+
+// MARK: - 3. Empty/Loading/Error Page Example
+class EmptyStateController: STBaseViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.st_setTitle("State Demo")
+        self.st_setLeftBtn(image: UIImage(systemName: "chevron.left"))
+
+        self.buildButtons()
     }
-    
-    struct PostModel: Codable {
-        var permalink: String = ""
+
+    private func buildButtons() {
+        let section = STSection(inset: .init(top: 40, left: 16, bottom: 0, right: 16), spacing: 20)
+
+        let btnLoading = self.makeButton(title: "Show Loading", action: #selector(self.showLoading))
+        let btnEmpty = self.makeButton(title: "Show Empty", action: #selector(self.showEmpty))
+        let btnError = self.makeButton(title: "Show Error", action: #selector(self.showErrorState))
+
+        section.addViews([btnLoading, btnEmpty, btnError])
+        self.baseView.st_addSection(section)
     }
-    
-    func parseJson() {
-        if let jsonString = Bundle.main.path(forResource: "content", ofType: "json") {
-            do {
-                let data = try Data(contentsOf: URL(fileURLWithPath: jsonString))
-                let jsonModel = try JSONDecoder().decode(JsonModel.self, from: data)
-                for post in jsonModel.posts {
-                    print(post.permalink)
-                }
-            } catch {
-                
-            }
-        }
+
+    private func makeButton(title: String, action: Selector) -> UIButton {
+        let btn = UIButton(type: .system)
+        btn.setTitle(title, for: .normal)
+        btn.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        btn.addTarget(self, action: action, for: .touchUpInside)
+        return btn
     }
+
+    // Actions
+    @objc private func showLoading() { self.baseView.st_showLoading() }
+    @objc private func showEmpty() { self.baseView.st_showEmpty("Nothing here.") }
+    @objc private func showErrorState() { self.baseView.st_showError("Something went wrong.") }
 }

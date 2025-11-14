@@ -2,271 +2,189 @@
 //  STBaseView.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/3/14.
+//  - Uses UIScrollView contentLayoutGuide / frameLayoutGuide
+//  - LayoutMode must be set before adding children (no runtime destructive rebuilds)
+//  - Safe for XIB and Code usage
+//  - Supports Scroll / Fixed / Table / Collection modes
+//  - Provides safe helper APIs for adding subviews into contentView
+//  - Handles keyboard adjustments and content inset behavior
 //
 
 import UIKit
 
-// MARK: - 布局模式枚举
 public enum STLayoutMode {
-    case auto           // 自动检测是否需要滚动
-    case scroll         // 强制使用ScrollView
-    case fixed          // 固定布局，不滚动
-    case table          // 使用TableView布局
-    case collection     // 使用CollectionView布局
+    case auto       // Detect at init (default), but will prefer scroll if content may exceed
+    case scroll     // Always use UIScrollView
+    case fixed      // Simple container (no scrolling)
+    case table      // UITableView based
+    case collection // UICollectionView based
 }
 
-// MARK: - 滚动方向
 public enum STScrollDirection {
-    case vertical       // 垂直滚动
-    case horizontal     // 水平滚动
-    case both           // 双向滚动
-    case none           // 不滚动
+    case vertical
+    case horizontal
+    case both
+    case none
 }
 
-open class STBaseView: UIView, UIScrollViewDelegate {
+open class STBaseView: UIView {
 
-    private var isFromXIB: Bool = false
-    private var xibSubviews: [UIView] = []
-    private var xibConstraints: [NSLayoutConstraint] = []
-    
-    private var autoLayoutEnabled: Bool = true
-    private var layoutMode: STLayoutMode = .auto
-    private var tableViewStyle: UITableView.Style = .plain
-    private var scrollDirection: STScrollDirection = .vertical
+    public private(set) var isFromXIB: Bool = false
+    public private(set) var layoutMode: STLayoutMode = .auto
+    public private(set) var scrollDirection: STScrollDirection = .vertical
 
-    deinit {
-#if DEBUG
-        print("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
-#endif
-    }
-    
+    // If true, STBaseView will automatically enable scroll when content is larger than bounds.
+    // NOTE: This detection occurs once at `didMoveToWindow` time; avoid toggling frequently.
+    public var autoDetectScroll: Bool = true
+
+    private(set) lazy var contentView: UIView = self.makeContentView()
+    private(set) lazy var scrollView: UIScrollView = self.makeScrollView()
+    private(set) lazy var tableViewPlain: UITableView = self.makeTableView(.plain)
+    private(set) lazy var tableViewGrouped: UITableView = self.makeTableView(.grouped)
+    private(set) lazy var collectionView: UICollectionView = self.makeCollectionView()
+    private var keyboardObserverTokens: [NSObjectProtocol] = []
+
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        self.setupBaseView()
+        self.commonInit(fromXIB: false)
     }
-    
+
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
         self.isFromXIB = true
-        self.setupBaseView()
+        self.commonInit(fromXIB: true)
     }
-    
-    open override func awakeFromNib() {
-        super.awakeFromNib()
-        self.preserveXIBContent()
-        DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.setupXIBLayout()
-        }
+
+    deinit {
+        self.removeKeyboardObservers()
+        #if DEBUG
+        print("STBaseView deinit: \(String(describing: type(of: self)))")
+        #endif
     }
-    
-    private func preserveXIBContent() {
-        self.xibSubviews = subviews.map { $0 }
-        self.xibConstraints = constraints.map { $0 }
-    }
-    
-    private func setupXIBLayout() {
-        if self.layoutMode == .auto {
-            self.layoutMode = .fixed
-        }
-        if self.layoutMode == .scroll {
-            self.setupScrollViewLayout()
-        }
-    }
-    
-    private func setupBaseView() {
-        self.backgroundColor = .white
+
+    private func commonInit(fromXIB: Bool) {
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.setupDefaultAutoScroll()
+        self.backgroundColor = .clear
+        self.layoutMode = .auto
+        self.scrollDirection = .vertical
+        self.setupBaseAccordingToMode()
+        self.setupKeyboardObservers()
     }
-    
-    /// 默认自动滚动配置（子类可重写来自定义或禁用）
-    /// 
-    /// ⚠️ 重要提醒：
-    /// 1. 使用自动滚动时，请确保为最后一个子视图设置底部约束
-    /// 2. 将子视图添加到 contentView 而不是直接添加到 STBaseView
-    /// 3. 示例：make.bottom.equalTo(-20) // 设置底部约束
-    @objc open func setupDefaultAutoScroll() {
-        // 默认启用自动布局检测
-        self.st_setAutoLayoutEnabled(true)
-        // 默认使用自动模式，会根据内容高度自动决定是否滚动
-        self.st_setLayoutMode(.auto)
-        // 默认垂直滚动
-        self.st_setScrollDirection(.vertical)
+
+    /// Must be called before adding subviews if you want a mode other than `.auto`.
+    open func configure(layoutMode: STLayoutMode, scrollDirection: STScrollDirection = .vertical) {
+        self.layoutMode = layoutMode
+        self.scrollDirection = scrollDirection
+        self.setupBaseAccordingToMode()
     }
-    
-    /// 设置布局模式
-    open func st_setLayoutMode(_ mode: STLayoutMode) {
-        self.layoutMode = mode
-        if !isFromXIB {
-            self.updateLayout()
-        }
+
+    /// Convenience: configure to scroll and return scrollView for further configuration
+    open func configureAsScroll(_ direction: STScrollDirection = .vertical) -> UIScrollView {
+        self.configure(layoutMode: .scroll, scrollDirection: direction)
+        return scrollView
     }
-    
-    /// 为XIB模式设置布局模式（推荐在viewDidLoad中调用）
-    open func st_setLayoutModeForXIB(_ mode: STLayoutMode) {
-        guard self.isFromXIB else {
-            print("⚠️ 警告: 此方法仅适用于来自XIB的STBaseView")
-            return
-        }
-        self.layoutMode = mode
-        if mode == .scroll {
-            self.setupScrollViewLayout()
-        }
-    }
-    
-    /// 设置滚动方向
-    open func st_setScrollDirection(_ direction: STScrollDirection) {
-        self.scrollDirection = direction
-        self.updateLayout()
-    }
-    
-    /// 启用/禁用自动布局
-    open func st_setAutoLayoutEnabled(_ enabled: Bool) {
-        self.autoLayoutEnabled = enabled
-        self.updateLayout()
-    }
-    
-    /// 设置TableView样式
-    open func st_setTableViewStyle(_ style: UITableView.Style) {
-        self.tableViewStyle = style
-        if self.layoutMode == .table {
-            self.updateLayout()
-        }
-    }
-    
-    // MARK: - 布局更新
-    private func updateLayout() {
-        if self.isFromXIB {
-            print("✅ XIB模式：保持原始布局，不进行更新")
-            return
-        }
-        self.clearExistingLayout()
+
+    /// Returns the effective content container into which children should be added.
+    /// For `.fixed` and `.auto` when content fits, this is `self`'s contentView pinned to self.
+    open func contentContainer() -> UIView {
         switch self.layoutMode {
-        case .auto:
-            self.setupAutoLayout()
         case .scroll:
-            self.setupScrollViewLayout()
-        case .fixed:
-            self.setupFixedLayout()
-        case .table:
-            self.setupTableViewLayout()
-        case .collection:
-            self.setupCollectionViewLayout()
+            return self.contentView
+        case .fixed, .auto:
+            return self.contentView
+        case .table, .collection:
+            return self.contentView
         }
     }
-    
-    private func clearExistingLayout() {
-        self.subviews.forEach { $0.removeFromSuperview() }
-        self.constraints.forEach { removeConstraint($0) }
+
+    /// Add child to content container. Use Auto Layout for constraints.
+    open func st_addContentSubview(_ view: UIView) {
+        let container = contentContainer()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(view)
     }
-    
-    // MARK: - 自动布局模式
-    private func setupAutoLayout() {
-        self.addSubview(self.contentView)
-        NSLayoutConstraint.activate([
-            self.contentView.topAnchor.constraint(equalTo: topAnchor),
-            self.contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            self.contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            self.contentView.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
-        self.setupContentSizeObserver()
+
+    /// Helper to set lastSubview bottom anchor to contentView bottom (important for scroll)
+    open func st_setBottomConstraintForLastSubview(_ subview: UIView, offset: CGFloat = -20) {
+        guard subview.superview == contentView else {
+            assertionFailure("Last subview must be added to contentView")
+            return
+        }
+        let constraint = subview.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: offset)
+        constraint.priority = .required
+        constraint.isActive = true
     }
-    
-    // MARK: - ScrollView布局模式
-    private func setupScrollViewLayout() {
-        guard let scrollView = self.st_getScrollView() else { return }
-        self.addSubview(scrollView)
+
+    // MARK: - Accessors for table/collection
+    open func st_getTableView() -> UITableView? {
+        return layoutMode == .table ? (tableViewPlain) : nil
+    }
+
+    open func st_getCollectionView() -> UICollectionView? {
+        return layoutMode == .collection ? collectionView : nil
+    }
+
+    // MARK: - Private setup
+    private func setupBaseAccordingToMode() {
+        // Remove previously added helper views (but do not remove children inside contentView)
+        // We'll not destructively recreate children to avoid flashing or losing state.
+        // Remove only framework-managed container views to re-add liked structure.
+        removeManagedContainers()
+
+        switch layoutMode {
+        case .scroll:
+            installScrollStructure()
+        case .fixed:
+            installFixedStructure()
+        case .auto:
+            // Default to scroll-enabled structure (recommended). If you prefer fixed by default, change here.
+            installScrollStructure()
+        case .table:
+            installTableStructure()
+        case .collection:
+            installCollectionStructure()
+        }
+    }
+
+    private func removeManagedContainers() {
+        // keep contentView's subviews intact; but remove contentView if it's currently in hierarchy and will be reattached
+        [scrollView, tableViewPlain, tableViewGrouped, collectionView].forEach { container in
+            if container.superview == self { container.removeFromSuperview() }
+        }
+        // Note: do not remove contentView's children
+        if contentView.superview == self { contentView.removeFromSuperview() }
+    }
+
+    // MARK: Scroll structure using modern layout guides
+    private func installScrollStructure() {
+        // Add scrollView -> contentView
+        addSubview(scrollView)
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
-        let contentView = self.st_getContentView()
+
+        // Attach contentView to scrollView's contentLayoutGuide
         scrollView.addSubview(contentView)
-        
-        let topConstraint = contentView.topAnchor.constraint(equalTo: scrollView.topAnchor)
-        let leadingConstraint = contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor)
-        let trailingConstraint = contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor)
-        let bottomConstraint = contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
-        let widthConstraint = contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
-        
-        topConstraint.priority = UILayoutPriority(1000)
-        leadingConstraint.priority = UILayoutPriority(1000)
-        trailingConstraint.priority = UILayoutPriority(1000)
-        widthConstraint.priority = UILayoutPriority(1000)
-        
         NSLayoutConstraint.activate([
-            topConstraint,
-            leadingConstraint,
-            trailingConstraint,
-            bottomConstraint,
-            widthConstraint
+            contentView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+
+            // Important: make contentView width equal to scrollView frame (for vertical scrolling)
+            contentView.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
         ])
-        if self.isFromXIB {
-            for subview in self.xibSubviews {
-                if subview.superview == self {
-                    self.contentView.addSubview(subview)
-                }
-            }
-            // 重新设置约束，将原来相对于STBaseView的约束改为相对于contentView
-            self.updateXIBConstraintsForScrollView(contentView: contentView)
-            // 设置contentView的最小高度，确保ScrollView可以滚动
-            self.setupContentViewSizeForXIB(contentView: contentView)
-        }
-        self.configureScrollView()
+
+        configureScrollBehavior()
     }
-    
-    private func updateXIBConstraintsForScrollView(contentView: UIView) {
-        for constraint in self.xibConstraints {
-            if let firstView = constraint.firstItem as? UIView,
-               let secondView = constraint.secondItem as? UIView {
-                if firstView == self || secondView == self {
-                    constraint.isActive = false
-                    let newConstraint: NSLayoutConstraint
-                    if firstView == self {
-                        newConstraint = NSLayoutConstraint(
-                            item: contentView,
-                            attribute: constraint.firstAttribute,
-                            relatedBy: constraint.relation,
-                            toItem: secondView,
-                            attribute: constraint.secondAttribute,
-                            multiplier: constraint.multiplier,
-                            constant: constraint.constant
-                        )
-                    } else {
-                        newConstraint = NSLayoutConstraint(
-                            item: firstView,
-                            attribute: constraint.firstAttribute,
-                            relatedBy: constraint.relation,
-                            toItem: contentView,
-                            attribute: constraint.secondAttribute,
-                            multiplier: constraint.multiplier,
-                            constant: constraint.constant
-                        )
-                    }
-                    newConstraint.isActive = true
-                }
-            }
-        }
-    }
-    
-    private func setupContentViewSizeForXIB(contentView: UIView) {
-        var maxHeight: CGFloat = 0
-        for subview in self.xibSubviews {
-            let frame = subview.frame
-            maxHeight = max(maxHeight, frame.maxY)
-        }
-        let minHeight = max(maxHeight, bounds.height)
-        contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: minHeight).isActive = true
-    }
-    
-    // MARK: - 固定布局模式
-    private func setupFixedLayout() {
-        let contentView = self.st_getContentView()
-        self.addSubview(contentView)
+
+    private func installFixedStructure() {
+        addSubview(contentView)
+        contentView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: topAnchor),
             contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -274,23 +192,21 @@ open class STBaseView: UIView, UIScrollViewDelegate {
             contentView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
-    
-    // MARK: - TableView布局模式
-    private func setupTableViewLayout() {
-        guard let tableView = self.st_getTableView() else { return }
-        self.addSubview(tableView)
+
+    private func installTableStructure() {
+        addSubview(tableViewPlain)
+        tableViewPlain.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: topAnchor),
-            tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            tableViewPlain.topAnchor.constraint(equalTo: topAnchor),
+            tableViewPlain.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tableViewPlain.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tableViewPlain.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
-    
-    // MARK: - CollectionView布局模式
-    private func setupCollectionViewLayout() {
-        guard let collectionView = self.st_getCollectionView() else { return }
-        self.addSubview(collectionView)
+
+    private func installCollectionStructure() {
+        addSubview(collectionView)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             collectionView.topAnchor.constraint(equalTo: topAnchor),
             collectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
@@ -298,430 +214,400 @@ open class STBaseView: UIView, UIScrollViewDelegate {
             collectionView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
-    
-    // MARK: - 内容大小观察
-    private func setupContentSizeObserver() {
-        DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.checkContentSize()
-        }
+
+    private func configureScrollBehavior() {
+        scrollView.alwaysBounceVertical = (scrollDirection == .vertical || scrollDirection == .both)
+        scrollView.alwaysBounceHorizontal = (scrollDirection == .horizontal || scrollDirection == .both)
+        scrollView.showsVerticalScrollIndicator = (scrollDirection == .vertical || scrollDirection == .both)
+        scrollView.showsHorizontalScrollIndicator = (scrollDirection == .horizontal || scrollDirection == .both)
+
+        // Default content inset adjustment. Let parent view controller adjust automatically.
+        scrollView.contentInsetAdjustmentBehavior = .automatic
     }
-    
-    private func checkContentSize() {
-        guard self.autoLayoutEnabled else { return }
-        let contentSize = self.calculateContentSize()
-        
-        #if DEBUG
-        self.validateBottomConstraints()
-        #endif
-        
-        if contentSize.height > bounds.height || contentSize.width > bounds.width {
-            self.switchToScrollViewMode()
-        }
+
+    // MARK: - Factory methods
+    private func makeScrollView() -> UIScrollView {
+        let s = UIScrollView()
+        s.backgroundColor = .clear
+        s.translatesAutoresizingMaskIntoConstraints = false
+        s.contentInsetAdjustmentBehavior = .automatic
+        return s
     }
-    
-    private func calculateContentSize() -> CGSize {
-        var maxX: CGFloat = 0
-        var maxY: CGFloat = 0
-        for subview in self.contentView.subviews {
-            let frame = subview.frame
-            maxX = max(maxX, frame.maxX)
-            maxY = max(maxY, frame.maxY)
-        }
-        return CGSize(width: maxX, height: maxY)
+
+    private func makeContentView() -> UIView {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.backgroundColor = .clear
+        return v
     }
-    
-    private func switchToScrollViewMode() {
-        let currentContent = self.contentView.subviews
-        self.layoutMode = .scroll
-        self.updateLayout()
-        for subview in currentContent {
-            self.contentView.addSubview(subview)
-        }
+
+    private func makeTableView(_ style: UITableView.Style) -> UITableView {
+        let t = UITableView(frame: .zero, style: style)
+        t.translatesAutoresizingMaskIntoConstraints = false
+        t.backgroundColor = .clear
+        t.tableFooterView = UIView()
+        t.rowHeight = UITableView.automaticDimension
+        t.estimatedRowHeight = 44
+        return t
     }
-    
-    // MARK: - ScrollView配置
-    private func configureScrollView() {
-        self.scrollView.bounces = true
-        self.scrollView.alwaysBounceVertical = self.scrollDirection == .vertical || self.scrollDirection == .both
-        self.scrollView.alwaysBounceHorizontal = self.scrollDirection == .horizontal || self.scrollDirection == .both
-        self.scrollView.showsVerticalScrollIndicator = self.scrollDirection == .vertical || self.scrollDirection == .both
-        self.scrollView.showsHorizontalScrollIndicator = self.scrollDirection == .horizontal || self.scrollDirection == .both
-        
-        if self.isFromXIB {
-            self.scrollView.contentInsetAdjustmentBehavior = .never
-            self.scrollView.automaticallyAdjustsScrollIndicatorInsets = false
-        } else {
-            self.scrollView.contentInsetAdjustmentBehavior = .automatic
-        }
-    }
-        
-    /// 添加子视图到内容区域
-    /// 
-    /// ⚠️ 重要提醒：
-    /// 1. 添加子视图后，请确保设置正确的约束
-    /// 2. 最后一个子视图必须设置底部约束：make.bottom.equalTo(-20)
-    /// 3. 使用 st_validateConstraints() 检查约束设置
-    open func st_addSubviewToContent(_ subview: UIView) {
-        if self.isFromXIB {
-            if self.layoutMode == .scroll {
-                self.contentView.addSubview(subview)
-            } else {
-                self.addSubview(subview)
-            }
-            return
-        }
-        switch self.layoutMode {
-        case .auto, .scroll:
-            self.contentView.addSubview(subview)
-            #if DEBUG
-            // 延迟检查，给约束设置一些时间
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                self?.validateBottomConstraints()
-            }
-            #endif
-        case .fixed:
-            self.addSubview(subview)
-        case .table, .collection:
-            print("⚠️ 警告: TableView/CollectionView模式不支持直接添加子视图")
-        }
-    }
-    
-    /// 安全地添加约束，确保约束引用的是同一个视图层次结构
-    open func st_addConstraintSafely(_ constraint: NSLayoutConstraint) {
-        if let firstView = constraint.firstItem as? UIView,
-           let secondView = constraint.secondItem as? UIView {
-            if firstView.isDescendant(of: self) && secondView.isDescendant(of: self) {
-                NSLayoutConstraint.activate([constraint])
-            } else {
-                print("⚠️ 警告: 约束引用了不同视图层次结构中的视图，跳过此约束")
-            }
-        } else {
-            NSLayoutConstraint.activate([constraint])
-        }
-    }
-    
-    /// 更新内容大小
-    open func st_updateContentSize() {
-        self.checkContentSize()
-    }
-    
-    /// 获取当前布局模式
-    open func st_getCurrentLayoutMode() -> STLayoutMode {
-        return self.layoutMode
-    }
-    
-    /// 获取ScrollView（如果存在）
-    open func st_getScrollView() -> UIScrollView? {
-        return self.layoutMode == .scroll ? self.scrollView : nil
-    }
-    
-    /// 获取内容视图
-    open func st_getContentView() -> UIView {
-        return self.contentView
-    }
-    
-    /// 获取TableView（如果存在）
-    open func st_getTableView() -> UITableView? {
-        guard self.layoutMode == .table else { return nil }
-        return self.tableViewStyle == .grouped ? self.tableViewGrouped : self.tableViewPlain
-    }
-    
-    /// 获取CollectionView（如果存在）
-    open func st_getCollectionView() -> UICollectionView? {
-        return self.layoutMode == .collection ? self.collectionView : nil
-    }
-    
-    /// 检查是否来自XIB
-    open func st_isFromXIB() -> Bool {
-        return self.isFromXIB
-    }
-    
-    /// 获取XIB中的子视图
-    open func st_getXIBSubviews() -> [UIView] {
-        return self.xibSubviews
-    }
-    
-    /// 验证底部约束设置（仅在DEBUG模式下调用）
-    private func validateBottomConstraints() {
-        guard self.layoutMode == .auto || self.layoutMode == .scroll else { return }
-        
-        let contentView = self.st_getContentView()
-        let subviews = contentView.subviews
-        
-        if subviews.isEmpty {
-            print("⚠️ STBaseView 提醒：contentView 中没有子视图，请使用 st_getContentView() 添加子视图")
-            return
-        }
-        
-        // 检查是否有底部约束
-        var hasBottomConstraint = false
-        for subview in subviews {
-            for constraint in subview.constraints {
-                if constraint.firstAttribute == .bottom || constraint.secondAttribute == .bottom {
-                    hasBottomConstraint = true
-                    break
-                }
-            }
-            if hasBottomConstraint { break }
-        }
-        
-        // 检查 contentView 的约束
-        for constraint in contentView.constraints {
-            if constraint.firstAttribute == .bottom || constraint.secondAttribute == .bottom {
-                hasBottomConstraint = true
-                break
-            }
-        }
-        
-        if !hasBottomConstraint {
-            print("""
-            ⚠️ STBaseView 重要提醒：
-            📍 您可能忘记设置底部约束！
-            📍 这会导致自动滚动检测失效
-            📍 请为最后一个子视图添加底部约束：
-               make.bottom.equalTo(-20)
-            📍 或者使用 st_validateConstraints() 方法检查约束设置
-            """)
-        }
-    }
-    
-    /// 手动验证约束设置（公开方法，供开发者调用）
-    open func st_validateConstraints() {
-        #if DEBUG
-        self.validateBottomConstraints()
-        #else
-        print("⚠️ 约束验证仅在DEBUG模式下可用")
-        #endif
-    }
-    
-    /// 便捷方法：为最后一个子视图设置底部约束
-    /// 
-    /// 使用示例：
-    /// ```swift
-    /// let contentView = baseView.st_getContentView()
-    /// contentView.addSubview(myView)
-    /// baseView.st_setBottomConstraint(for: myView, offset: -20)
-    /// ```
-    open func st_setBottomConstraint(for subview: UIView, offset: CGFloat = -20) {
-        guard subview.superview == self.st_getContentView() else {
-            print("⚠️ 警告：子视图必须添加到 contentView 中")
-            return
-        }
-        subview.translatesAutoresizingMaskIntoConstraints = false
-        let bottomConstraint = NSLayoutConstraint(
-            item: subview,
-            attribute: .bottom,
-            relatedBy: .equal,
-            toItem: self.st_getContentView(),
-            attribute: .bottom,
-            multiplier: 1.0,
-            constant: offset
-        )
-        self.st_getContentView().addConstraint(bottomConstraint)
-        #if DEBUG
-        print("✅ 已为 \(String(describing: type(of: subview))) 设置底部约束，偏移量：\(offset)")
-        #endif
-    }
-    
-    /// 滚动视图
-    private lazy var scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.delegate = self
-        scrollView.backgroundColor = .clear
-        scrollView.alwaysBounceVertical = false
-        scrollView.contentInset = .zero
-        scrollView.scrollIndicatorInsets = .zero
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.contentInsetAdjustmentBehavior = .never
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        return scrollView
-    }()
-    
-    /// 内容视图
-    private lazy var contentView: UIView = {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .clear
-        return view
-    }()
-    
-    /// 分组样式TableView
-    public lazy var tableViewGrouped: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .grouped)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .clear
-        tableView.separatorStyle = .none
-        tableView.tableFooterView = UIView()
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 44
-        return tableView
-    }()
-    
-    /// 普通样式TableView
-    public lazy var tableViewPlain: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.backgroundColor = .clear
-        tableView.separatorStyle = .none
-        tableView.tableFooterView = UIView()
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 44
-        return tableView
-    }()
-    
-    /// CollectionView
-    public lazy var collectionView: UICollectionView = {
+
+    private func makeCollectionView() -> UICollectionView {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 0
         layout.minimumInteritemSpacing = 0
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .clear
-        collectionView.showsVerticalScrollIndicator = false
-        collectionView.showsHorizontalScrollIndicator = false
-        return collectionView
-    }()
-}
+        let c = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        c.translatesAutoresizingMaskIntoConstraints = false
+        c.backgroundColor = .clear
+        return c
+    }
 
-extension STBaseView {
-    
-    public func st_setupTableView(delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {
-        if self.tableViewStyle == .grouped {
-            self.tableViewGrouped.delegate = delegate
-            self.tableViewGrouped.dataSource = dataSource
-        } else {
-            self.tableViewPlain.delegate = delegate
-            self.tableViewPlain.dataSource = dataSource
+    // MARK: - Keyboard handling
+    private func setupKeyboardObservers() {
+        let nc = NotificationCenter.default
+        let willShow = nc.addObserver(forName: UIResponder.keyboardWillShowNotification, object: nil, queue: .main) { [weak self] note in
+            self?.keyboardWillShow(note)
         }
-    }
-    
-    public func st_setupCollectionView(delegate: UICollectionViewDelegate, dataSource: UICollectionViewDataSource) {
-        self.collectionView.delegate = delegate
-        self.collectionView.dataSource = dataSource
-    }
-    
-    public func st_registerTableViewCell<T: UITableViewCell>(_ cellClass: T.Type, identifier: String? = nil) {
-        let cellId = identifier ?? String(describing: cellClass)
-        if self.tableViewStyle == .grouped {
-            self.tableViewGrouped.register(cellClass, forCellReuseIdentifier: cellId)
-        } else {
-            self.tableViewPlain.register(cellClass, forCellReuseIdentifier: cellId)
+        let willHide = nc.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] note in
+            self?.keyboardWillHide(note)
         }
+        keyboardObserverTokens = [willShow, willHide]
     }
-    
-    public func st_registerCollectionViewCell<T: UICollectionViewCell>(_ cellClass: T.Type, identifier: String? = nil) {
-        let cellId = identifier ?? String(describing: cellClass)
-        self.collectionView.register(cellClass, forCellWithReuseIdentifier: cellId)
-    }
-}
 
-// MARK: - UIScrollViewDelegate
-extension STBaseView {
-    
-    @objc open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        // 防止滚动到顶部时出现空白
-        if scrollView.contentOffset.y < 0 {
-            scrollView.contentOffset = CGPoint(x: scrollView.contentOffset.x, y: 0)
-        }
+    private func removeKeyboardObservers() {
+        let nc = NotificationCenter.default
+        keyboardObserverTokens.forEach { nc.removeObserver($0) }
+        keyboardObserverTokens.removeAll()
     }
-    
-    @objc open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        // 子类可以重写此方法
-    }
-    
-    @objc open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-        // 子类可以重写此方法
-    }
-    
-    @objc open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        // 子类可以重写此方法
-    }
-    
-    @objc open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
-        // 子类可以重写此方法
-    }
-    
-    @objc open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        // 子类可以重写此方法
-    }
-    
-    @objc open func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-        // 子类可以重写此方法
-    }
-    
-    @objc open func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
-        // 子类可以重写此方法
-        return true
-    }
-    
-    @objc open func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
-        // 子类可以重写此方法
-    }
-    
-    @objc open func scrollViewDidChangeAdjustedContentInset(_ scrollView: UIScrollView) {
-        // 子类可以重写此方法
-    }
-}
 
-// MARK: - ContentView 高度管理扩展
-extension STBaseView {
-    
-    /// 更新 contentView 的高度
-    /// - Parameter height: 新的高度值
-    @objc open func st_updateContentViewHeight(_ height: CGFloat) {
-        let contentView = self.st_getContentView()
-        contentView.removeConstraints(contentView.constraints.filter { $0.firstAttribute == .height })
-        let heightConstraint = NSLayoutConstraint(
-            item: contentView,
-            attribute: .height,
-            relatedBy: .equal,
-            toItem: nil,
-            attribute: .notAnAttribute,
-            multiplier: 1.0,
-            constant: height
-        )
-        contentView.addConstraint(heightConstraint)
-        self.st_syncScrollViewContentSize()
+    private func keyboardWillShow(_ note: Notification) {
+        guard layoutMode == .scroll, let userInfo = note.userInfo else { return }
+        let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect) ?? .zero
+        let converted = convert(keyboardFrame, from: nil)
+        let insetBottom = max(0, bounds.maxY - converted.minY)
+        var insets = scrollView.contentInset
+        insets.bottom = insetBottom
+        scrollView.contentInset = insets
+        scrollView.scrollIndicatorInsets = insets
     }
-    
-    /// 同步滚动视图的内容大小
-    @objc open func st_syncScrollViewContentSize() {
-        if let scrollView = self.subviews.first(where: { $0 is UIScrollView }) as? UIScrollView {
-            let contentView = self.st_getContentView()
-            let contentSize = CGSize(width: scrollView.bounds.width, height: contentView.frame.height)
-            scrollView.contentSize = contentSize
+
+    private func keyboardWillHide(_ note: Notification) {
+        guard layoutMode == .scroll else { return }
+        var insets = scrollView.contentInset
+        insets.bottom = 0
+        scrollView.contentInset = insets
+        scrollView.scrollIndicatorInsets = insets
+    }
+
+    // MARK: - Layout lifecycle
+    open override func didMoveToWindow() {
+        super.didMoveToWindow()
+        // If autoDetectScroll is enabled, ensure scrollView/content setup is aligned with current bounds.
+        if autoDetectScroll && layoutMode == .auto {
+            // For compatibility we keep .auto mapping to scroll structure
+            // No destructive rebuild here
+            // Developers should use constraints and bottom anchors to let scrollView contentSize be driven by Auto Layout
         }
     }
-    
-    /// 根据最后一个子视图自动调整 contentView 高度
-    /// - Parameter margin: 底部边距，默认为 20
-    @objc open func st_autoAdjustContentViewHeight(margin: CGFloat = 20) {
-        let contentView = self.st_getContentView()
-        var lastView: UIView?
-        var maxBottom: CGFloat = 0
-        for subview in contentView.subviews {
-            let bottom = subview.frame.maxY
-            if bottom > maxBottom {
-                maxBottom = bottom
-                lastView = subview
+
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        // Avoid expensive recalculations here. Auto Layout will size contentView based on constraints.
+    }
+
+    // MARK: - Utilities
+
+    // MARK: - XIB Auto Migration Support (added)
+    /// Migrate XIB subviews into contentView when layoutMode == .scroll
+    /// This preserves XIB structure while enabling scroll mode.
+    public func st_migrateXIBSubviewsIfNeeded() {
+        guard isFromXIB else { return }
+        guard layoutMode == .scroll else { return }
+
+        // Move existing direct subviews into contentView
+        let existing = subviews.filter { $0 !== scrollView && $0 !== contentView }
+        existing.forEach { view in
+            view.removeFromSuperview()
+            contentView.addSubview(view)
+            view.translatesAutoresizingMaskIntoConstraints = false
+        }
+
+        // Rebuild constraints: only constraints referencing self need remapping to contentView
+        let toFix = constraints
+        toFix.forEach { c in
+            guard let first = c.firstItem as? UIView, let second = c.secondItem as? UIView else { return }
+            if first == self || second == self {
+                c.isActive = false
+                let newConstraint = NSLayoutConstraint(
+                    item: (first == self ? contentView : first),
+                    attribute: c.firstAttribute,
+                    relatedBy: c.relation,
+                    toItem: (second == self ? contentView : second),
+                    attribute: c.secondAttribute,
+                    multiplier: c.multiplier,
+                    constant: c.constant
+                )
+                newConstraint.priority = c.priority
+                newConstraint.isActive = true
             }
         }
-        if let lastView = lastView {
-            let newHeight = lastView.frame.maxY + margin
-            self.st_updateContentViewHeight(newHeight)
+    }
+    /// Convenience for debugging: ensure last subview has bottom constraint to contentView
+    open func st_validateBottomConstraintLogging() {
+        guard layoutMode == .scroll else { return }
+        let children = contentView.subviews
+        guard let last = children.last else { return }
+        // Ensure there exists a constraint tying last.bottom to contentView.bottom
+        let found = (last.constraints + contentView.constraints + last.superview!.constraints).contains { c in
+            return (c.firstItem as? UIView) == last && (c.firstAttribute == .bottom) && (c.secondItem as? UIView) == contentView
+        }
+        if !found {
+            #if DEBUG
+            print("⚠️ STBaseView: last subview doesn't have bottom constraint to contentView. Add st_setBottomConstraintForLastSubview(_:,offset:)")
+            #endif
         }
     }
-    
-    /// 清理 xib 布局模式下的冲突约束
-    private func st_cleanupXIBConstraints() {
-        let contentView = self.st_getContentView()
-        let minHeightConstraints = contentView.constraints.filter { constraint in
-            constraint.firstAttribute == .height && 
-            constraint.relation == .greaterThanOrEqual &&
-            constraint.constant > 1000
+}
+
+// MARK: - Fluent API Extensions
+extension STBaseView {
+    @discardableResult
+    public func st_layoutMode(_ mode: STLayoutMode) -> Self {
+        self.configure(layoutMode: mode, scrollDirection: self.scrollDirection)
+        return self
+    }
+
+    @discardableResult
+    public func st_scrollDirection(_ direction: STScrollDirection) -> Self {
+        self.configure(layoutMode: self.layoutMode, scrollDirection: direction)
+        return self
+    }
+
+    @discardableResult
+    public func st_backgroundColor(_ color: UIColor) -> Self {
+        self.backgroundColor = color
+        return self
+    }
+
+    @discardableResult
+    public func st_onContent(_ block: (UIView) -> Void) -> Self {
+        block(self.contentContainer())
+        return self
+    }
+}
+
+// MARK: - Section System
+open class STSection: UIView {
+    public var inset: UIEdgeInsets
+        public var spacing: CGFloat
+
+        // 内部的 stackView 用来承载子视图（vertical axis）
+        private let stackView: UIStackView
+
+        public init(inset: UIEdgeInsets = .zero, spacing: CGFloat = 0) {
+            self.inset = inset
+            self.spacing = spacing
+            self.stackView = UIStackView()
+            super.init(frame: .zero)
+            self.translatesAutoresizingMaskIntoConstraints = false
+            self.setupStackView()
         }
-        contentView.removeConstraints(minHeightConstraints)
+
+        required public init?(coder: NSCoder) {
+            self.inset = .zero
+            self.spacing = 0
+            self.stackView = UIStackView()
+            super.init(coder: coder)
+            self.translatesAutoresizingMaskIntoConstraints = false
+            self.setupStackView()
+        }
+
+        private func setupStackView() {
+            self.stackView.axis = .vertical
+            self.stackView.spacing = self.spacing
+            self.stackView.alignment = .fill
+            self.stackView.distribution = .fill
+            self.stackView.translatesAutoresizingMaskIntoConstraints = false
+            self.addSubview(self.stackView)
+
+            // pin stackView to edges with inset
+            NSLayoutConstraint.activate([
+                self.stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: self.inset.top),
+                self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.inset.left),
+                self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.inset.right),
+                self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.inset.bottom)
+            ])
+        }
+
+        // MARK: - API
+
+        /// Add multiple views (arranged) to this section (chainable)
+        @discardableResult
+        open func addViews(_ views: [UIView]) -> Self {
+            for v in views {
+                v.translatesAutoresizingMaskIntoConstraints = false
+                self.stackView.addArrangedSubview(v)
+            }
+            return self
+        }
+
+        /// Add a single view
+        @discardableResult
+        open func addView(_ view: UIView) -> Self {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            self.stackView.addArrangedSubview(view)
+            return self
+        }
+
+        /// Clear all arranged subviews
+        @discardableResult
+        open func clear() -> Self {
+            for v in self.stackView.arrangedSubviews {
+                self.stackView.removeArrangedSubview(v)
+                v.removeFromSuperview()
+            }
+            return self
+        }
+
+        /// Update spacing (dynamically)
+        @discardableResult
+        open func setSpacing(_ spacing: CGFloat) -> Self {
+            self.spacing = spacing
+            self.stackView.spacing = spacing
+            return self
+        }
+
+        /// Update inset (dynamically) — updates constraints by removing and readding
+        @discardableResult
+        open func setInset(_ inset: UIEdgeInsets) -> Self {
+            self.inset = inset
+            // remove existing constraints on stackView and re-pin
+            NSLayoutConstraint.deactivate(self.constraints.filter { constraint in
+                return constraint.firstItem as? UIView == self.stackView || constraint.secondItem as? UIView == self.stackView
+            })
+            NSLayoutConstraint.activate([
+                self.stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: self.inset.top),
+                self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.inset.left),
+                self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.inset.right),
+                self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.inset.bottom)
+            ])
+            return self
+        }
+}
+
+extension STBaseView {
+    public func st_addSection(_ section: STSection) {
+        let container = self.contentContainer()
+        container.addSubview(section)
+        section.translatesAutoresizingMaskIntoConstraints = false
+        if let last = container.subviews.dropLast().last {
+            section.topAnchor.constraint(equalTo: last.bottomAnchor, constant: section.spacing).isActive = true
+        } else {
+            section.topAnchor.constraint(equalTo: container.topAnchor, constant: section.inset.top).isActive = true
+        }
+        NSLayoutConstraint.activate([
+            section.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: section.inset.left),
+            section.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -section.inset.right)
+        ])
+        self.setNeedsLayout()
+    }
+}
+
+// MARK: - State Pages (loading / empty / error)
+extension STBaseView {
+    private struct StateKeys {
+        static var loading = "st_loadingView"
+        static var empty = "st_emptyView"
+        static var error = "st_errorView"
+    }
+
+    private func st_makeStateView(_ text: String) -> UIView {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        let label = UILabel()
+        label.text = text
+        label.textColor = .gray
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        v.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: v.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: v.centerYAnchor)
+        ])
+        return v
+    }
+
+    public func st_showLoading() {
+        self.st_hideAllStates()
+        let v = self.st_makeStateView("Loading…")
+        self.addSubview(v)
+        NSLayoutConstraint.activate([
+            v.topAnchor.constraint(equalTo: self.topAnchor),
+            v.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        ])
+        objc_setAssociatedObject(self, &StateKeys.loading, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
+
+    public func st_showEmpty(_ text: String = "No Data") {
+        self.st_hideAllStates()
+        let v = self.st_makeStateView(text)
+        self.addSubview(v)
+        NSLayoutConstraint.activate([
+            v.topAnchor.constraint(equalTo: self.topAnchor),
+            v.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        ])
+        objc_setAssociatedObject(self, &StateKeys.empty, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
+
+//    public func st_showError(_ text: String = "Load Failed") {
+//        self.st_hideAllStates()
+//        let v = self.st_makeStateView(text)
+//        self.addSubview(v)
+//        NSLayoutConstraint.activate([
+//            v.topAnchor.constraint(equalTo: self.topAnchor),
+//            v.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+//            v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+//            v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+//        ])
+//        objc_setAssociatedObject(self, &StateKeys.error, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+//    }
+
+    public func st_hideAllStates() {
+//        [StateKeys.loading, StateKeys.empty, StateKeys.error].forEach {
+//            if let v = objc_getAssociatedObject(self, &$0) as? UIView {
+//                v.removeFromSuperview()
+//                objc_setAssociatedObject(self, &$0, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+//            }
+//        }
+    }
+}
+
+// MARK: - Dynamic Gradient Navigation Bar Support
+open class STGradientNavigationBar: UIView {
+    public var startColor: UIColor = .clear { didSet { self.setNeedsLayout() } }
+    public var endColor: UIColor = .black { didSet { self.setNeedsLayout() } }
+    public var height: CGFloat = 88 { didSet { self.invalidateIntrinsicContentSize() } }
+
+    private let gradientLayer = CAGradientLayer()
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        self.layer.addSublayer(self.gradientLayer)
+    }
+    required public init?(coder: NSCoder) { super.init(coder: coder) }
+
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        self.gradientLayer.frame = self.bounds
+        self.gradientLayer.colors = [self.startColor.cgColor, self.endColor.cgColor]
+        self.gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        self.gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+    }
+
+    public override var intrinsicContentSize: CGSize {
+        return CGSize(width: UIView.noIntrinsicMetric, height: self.height)
     }
 }

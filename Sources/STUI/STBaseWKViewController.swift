@@ -251,7 +251,7 @@ open class STBaseWKViewController: STBaseViewController {
             self.wkWebView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             self.wkWebView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STDeviceAdapter.st_navHeight()),
         ])
-        self.view.bringSubviewToFront(self.topBgView)
+//        self.view.bringSubviewToFront(self.topBgView)
     }
     
     private func st_configureWebView() {
@@ -312,13 +312,13 @@ open class STBaseWKViewController: STBaseViewController {
         self.view.addConstraints([
             NSLayoutConstraint.init(item: self.progressView, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0),
             NSLayoutConstraint.init(item: self.progressView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.progressView, attribute: .top, relatedBy: .equal, toItem: self.navBgView, attribute: .bottom, multiplier: 1, constant: 0),
+//            NSLayoutConstraint.init(item: self.progressView, attribute: .top, relatedBy: .equal, toItem: self.navBgView, attribute: .bottom, multiplier: 1, constant: 0),
         ])
         self.st_addProgressObserver()
     }
     
     private func st_updateNavigationBar() {
-        self.st_showNavBtnType(type: .showLeftBtn)
+//        self.st_showNavBtnType(type: .showLeftBtn)
         self.titleLabel.textAlignment = .center
         
         // 设置标题
@@ -458,7 +458,7 @@ open class STBaseWKViewController: STBaseViewController {
     }
     
     // MARK: - Override Methods
-    open override func st_leftBarBtnClick() {
+    open func st_leftBarBtnClick() {
         if self.wkWebView.canGoBack {
             self.wkWebView.goBack()
         } else {

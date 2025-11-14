@@ -143,18 +143,32 @@ public class STDeviceAdapter: NSObject {
     // MARK: - 设备判断
     /// 判断是否为刘海屏设备
     public class func st_isNotchScreen() -> Bool {
-        if #available(iOS 11.0, *) {
-            let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-            return window?.safeAreaInsets.top ?? 0 > 20
+        guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
+        if #available(iOS 13.0, *) {
+            let window = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }
+            return (window?.safeAreaInsets.top ?? 0) > 20
+        } else {
+            return (UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0) > 20
         }
-        return self.st_apph() > 736
     }
     
     /// 获取安全区域
     public static func st_getSafeAreaInsets() -> UIEdgeInsets {
-        if #available(iOS 11.0, *) {
-            let window = UIApplication.shared.windows.first
-            return window?.safeAreaInsets ?? .zero
+        guard #available(iOS 11.0, *) else {
+            return .zero
+        }
+        if #available(iOS 13.0, *) {
+            if let window = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first(where: { $0.isKeyWindow }) {
+                return window.safeAreaInsets
+            }
+        } else if let window = UIApplication.shared.keyWindow {
+            return window.safeAreaInsets
         }
         return .zero
     }
@@ -178,11 +192,20 @@ public class STDeviceAdapter: NSObject {
     
     /// 获取底部安全区域高度
     public class func st_safeBarHeight() -> CGFloat {
-        if #available(iOS 11.0, *) {
-            let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-            return window?.safeAreaInsets.bottom ?? 0
+        guard #available(iOS 11.0, *) else {
+            return 0
         }
-        return self.st_isNotchScreen() ? 34 : 0
+        if #available(iOS 13.0, *) {
+            if let window = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first(where: { $0.isKeyWindow }) {
+                return window.safeAreaInsets.bottom
+            }
+        } else if let window = UIApplication.shared.keyWindow {
+            return window.safeAreaInsets.bottom
+        }
+        return 0
     }
     
     /// 获取 TabBar 安全区域高度（TabBar 高度 + 底部安全区域）
@@ -193,8 +216,11 @@ public class STDeviceAdapter: NSObject {
     /// 获取状态栏高度
     public class func st_statusBarHeight() -> CGFloat {
         if #available(iOS 13.0, *) {
-            let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-            return window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
+            let keyWindow = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap { $0.windows }
+                .first { $0.isKeyWindow }
+            return keyWindow?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
         } else {
             return UIApplication.shared.statusBarFrame.height
         }
