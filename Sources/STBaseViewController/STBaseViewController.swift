@@ -1,7 +1,9 @@
-//  STBaseViewController_Modern_Revised.swift
-//  2025 – Modern Architecture
-//  Includes: STBaseView integration, full custom navigation bar,
-//  exposed constraints for subclasses to modify button/title positions.
+//
+//  STBaseViewController.swift
+//  STBaseProject
+//
+//  Created by stack on 2018/3/14.
+//
 
 import UIKit
 
@@ -14,6 +16,7 @@ public enum STNavBtnShowType {
 }
 
 public enum STNavBarStyle {
+    case system      // 跟随当前外观
     case light
     case dark
     case custom
@@ -35,7 +38,14 @@ open class STBaseViewController: UIViewController {
     public var titleLabelConstraints: [NSLayoutConstraint] = []
     public var navContainerHeightConstraint: NSLayoutConstraint?
 
-    public var navBarStyle: STNavBarStyle = .light
+    public var navBarStyle: STNavBarStyle = .system {
+        didSet {
+            guard oldValue != navBarStyle else { return }
+            if self.isViewLoaded {
+                self.st_refreshAppearance()
+            }
+        }
+    }
     public var navBarBackgroundColor: UIColor = .white
     public var navBarTitleColor: UIColor = .black
     public var buttonTitleColor: UIColor = .systemBlue
@@ -50,6 +60,7 @@ open class STBaseViewController: UIViewController {
     public var statusBarHidden: Bool = false
     public var statusBarStyle: UIStatusBarStyle = .default
     private var contentOffsetObservation: NSKeyValueObservation?
+    private var appearanceObserver: NSObjectProtocol?
 
     open override func loadView() {
         self.baseView = STBaseView()
@@ -59,7 +70,7 @@ open class STBaseViewController: UIViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.selfSetupNavigationBar()
-        self.selfApplyNavBarStyle()
+        self.st_setupAppearanceObservation()
         self.selfApplyNavButtons()
         self.selfFinalizeLayout()
     }
@@ -71,6 +82,9 @@ open class STBaseViewController: UIViewController {
 
     deinit {
         self.contentOffsetObservation?.invalidate()
+        if let observer = self.appearanceObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         #if DEBUG
         print("STBaseViewController deinit: \(String(describing: type(of: self)))")
         #endif
@@ -137,21 +151,18 @@ open class STBaseViewController: UIViewController {
         self.rightBtn.addTarget(self, action: #selector(self.onRightBtnTap), for: .touchUpInside)
     }
 
-    private func selfApplyNavBarStyle() {
+    private func selfApplyNavBarStyle(resolvedStyle: UIUserInterfaceStyle) {
         switch self.navBarStyle {
+        case .system:
+            self.applyPresetNavColors(isDark: resolvedStyle == .dark)
         case .light:
-            self.navBarBackgroundColor = .white
-            self.navBarTitleColor = .black
-            self.buttonTitleColor = .systemBlue
-            self.statusBarStyle = .default
+            self.applyPresetNavColors(isDark: false)
         case .dark:
-            self.navBarBackgroundColor = .black
-            self.navBarTitleColor = .white
-            self.buttonTitleColor = .white
-            self.statusBarStyle = .lightContent
+            self.applyPresetNavColors(isDark: true)
         case .custom:
             break
         }
+
         self.navBackgroundView.backgroundColor = self.navBarBackgroundColor
         self.titleLabel.textColor = self.navBarTitleColor
         self.titleLabel.font = self.navBarTitleFont
@@ -169,6 +180,71 @@ open class STBaseViewController: UIViewController {
     private func selfFinalizeLayout() {
         self.leftBtn.titleLabel?.font = self.buttonTitleFont
         self.rightBtn.titleLabel?.font = self.buttonTitleFont
+    }
+
+    private func applyPresetNavColors(isDark: Bool) {
+        if isDark {
+            self.navBarBackgroundColor = .black
+            self.navBarTitleColor = .white
+            self.buttonTitleColor = .white
+            self.statusBarStyle = .lightContent
+        } else {
+            self.navBarBackgroundColor = .white
+            self.navBarTitleColor = .black
+            self.buttonTitleColor = .systemBlue
+            if #available(iOS 13.0, *) {
+                self.statusBarStyle = .darkContent
+            } else {
+                self.statusBarStyle = .default
+            }
+        }
+    }
+
+    private func st_setupAppearanceObservation() {
+        self.appearanceObserver = NotificationCenter.default.addObserver(
+            forName: .stAppearanceDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.st_refreshAppearance(animated: true)
+        }
+        self.st_refreshAppearance()
+    }
+
+    private func st_refreshAppearance(animated: Bool = false) {
+        let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
+        if #available(iOS 13.0, *) {
+            switch STAppearanceManager.shared.currentMode {
+            case .system:
+                self.overrideUserInterfaceStyle = .unspecified
+            case .light:
+                self.overrideUserInterfaceStyle = .light
+            case .dark:
+                self.overrideUserInterfaceStyle = .dark
+            }
+        }
+
+        let applyBlock = { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.selfApplyNavBarStyle(resolvedStyle: style == .unspecified ? .light : style)
+            strongSelf.baseView?.st_applyAppearance(style == .unspecified ? .light : style)
+            strongSelf.setNeedsStatusBarAppearanceUpdate()
+        }
+
+        if animated {
+            UIView.transition(with: self.view, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction], animations: applyBlock, completion: nil)
+        } else {
+            applyBlock()
+        }
+    }
+
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard #available(iOS 13.0, *) else { return }
+        guard STAppearanceManager.shared.currentMode == .system else { return }
+        if previousTraitCollection?.userInterfaceStyle != self.traitCollection.userInterfaceStyle {
+            self.st_refreshAppearance()
+        }
     }
     
     public func st_showNavBtnType(type: STNavBtnShowType) -> Void {
