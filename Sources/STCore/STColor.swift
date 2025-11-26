@@ -8,9 +8,7 @@
 import UIKit
 
 public extension UIColor {
-    
-    // MARK: - 基础颜色创建
-    
+        
     /// 从十六进制字符串创建颜色
     /// - Parameter hexString: 十六进制字符串，支持 #、0x 前缀
     /// - Returns: UIColor 对象
@@ -42,7 +40,9 @@ public extension UIColor {
             return UIColor.clear
         }
         var rgbValue: UInt64 = 0
-        Scanner(string: cString).scanHexInt64(&rgbValue)
+        guard Scanner(string: cString).scanHexInt64(&rgbValue) else {
+            return UIColor.clear
+        }
         return UIColor(
             red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
             green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
@@ -78,40 +78,6 @@ public extension UIColor {
         return UIColor(red: red, green: green, blue: blue, alpha: alpha)
     }
     
-    // MARK: - 暗黑模式支持
-    
-    /// 创建支持暗黑模式的动态颜色
-    /// - Parameters:
-    ///   - lightHex: 浅色模式下的十六进制颜色
-    ///   - darkHex: 暗黑模式下的十六进制颜色
-    ///   - alpha: 透明度
-    /// - Returns: 动态颜色对象
-    @available(iOS 13.0, *)
-    static func st_dynamicColor(lightHex: String, darkHex: String, alpha: CGFloat = 1.0) -> UIColor {
-        return UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                return st_color(hexString: darkHex, alpha: alpha)
-            } else {
-                return st_color(hexString: lightHex, alpha: alpha)
-            }
-        }
-    }
-    
-    /// 创建支持暗黑模式的动态颜色（带默认值）
-    /// - Parameters:
-    ///   - lightHex: 浅色模式下的十六进制颜色
-    ///   - darkHex: 暗黑模式下的十六进制颜色
-    ///   - defaultHex: 默认颜色（iOS 13 以下使用）
-    ///   - alpha: 透明度
-    /// - Returns: 动态颜色对象
-    static func st_dynamicColor(lightHex: String, darkHex: String, defaultHex: String, alpha: CGFloat = 1.0) -> UIColor {
-        if #available(iOS 13.0, *) {
-            return st_dynamicColor(lightHex: lightHex, darkHex: darkHex, alpha: alpha)
-        } else {
-            return st_color(hexString: defaultHex, alpha: alpha)
-        }
-    }
-    
     /// 从 Assets 中的颜色集创建颜色（支持暗黑模式）
     /// - Parameters:
     ///   - colorSet: 颜色集名称
@@ -138,9 +104,6 @@ public extension UIColor {
         return st_color(colorSet: colorSet, alpha: 1.0)
     }
     
-    // MARK: - 兼容性方法（保持向后兼容）
-    
-    /// 兼容旧版本的暗黑模式颜色创建方法
     /// - Parameters:
     ///   - darkModeName: 颜色集名称
     ///   - hexString: 十六进制字符串（备用）
@@ -157,13 +120,10 @@ public extension UIColor {
                 }
                 return UIColor.clear
             }
-            return st_color(hexString: hexString, alpha: alpha)
-        } else {
-            return st_color(hexString: hexString, alpha: alpha)
         }
+        return st_color(hexString: hexString, alpha: alpha)
     }
     
-    /// 兼容旧版本的暗黑模式颜色创建方法
     /// - Parameters:
     ///   - darkModeName: 颜色集名称
     ///   - alpha: 透明度
@@ -172,15 +132,12 @@ public extension UIColor {
         return st_color(darkModeName: darkModeName, hexString: "", alpha: alpha)
     }
     
-    /// 兼容旧版本的暗黑模式颜色创建方法
     /// - Parameter darkModeName: 颜色集名称
     /// - Returns: UIColor 对象
     static func st_color(darkModeName: String) -> UIColor {
         return st_color(darkModeName: darkModeName, hexString: "", alpha: 1.0)
     }
-    
-    // MARK: - 颜色转换
-    
+        
     /// 将颜色转换为十六进制字符串
     /// - Returns: 十六进制字符串
     func st_colorToHex() -> String {
@@ -264,9 +221,7 @@ public extension UIColor {
         }
         return alpha
     }
-    
-    // MARK: - 颜色操作
-    
+        
     /// 调整颜色透明度
     /// - Parameter alpha: 新的透明度值
     /// - Returns: 调整后的颜色
@@ -286,10 +241,11 @@ public extension UIColor {
               color.getRed(&red2, green: &green2, blue: &blue2, alpha: &alpha2) else {
             return self
         }
-        let newRed = red1 * (1 - ratio) + red2 * ratio
-        let newGreen = green1 * (1 - ratio) + green2 * ratio
-        let newBlue = blue1 * (1 - ratio) + blue2 * ratio
-        let newAlpha = alpha1 * (1 - ratio) + alpha2 * ratio
+        let clampedRatio = min(max(ratio, 0), 1)
+        let newRed = red1 * (1 - clampedRatio) + red2 * clampedRatio
+        let newGreen = green1 * (1 - clampedRatio) + green2 * clampedRatio
+        let newBlue = blue1 * (1 - clampedRatio) + blue2 * clampedRatio
+        let newAlpha = alpha1 * (1 - clampedRatio) + alpha2 * clampedRatio
         return UIColor(red: newRed, green: newGreen, blue: newBlue, alpha: newAlpha)
     }
     
@@ -308,142 +264,6 @@ public extension UIColor {
             return 0.0
         }
         return (0.299 * red + 0.587 * green + 0.114 * blue)
-    }
-}
-
-// MARK: - 常用颜色预设
-
-public extension UIColor {
-    
-    /// 系统主色调（支持暗黑模式）
-    @available(iOS 13.0, *)
-    static var st_systemPrimary: UIColor {
-        return UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                return UIColor.systemBlue
-            } else {
-                return UIColor.systemBlue
-            }
-        }
-    }
-    
-    /// 系统背景色（支持暗黑模式）
-    @available(iOS 13.0, *)
-    static var st_systemBackground: UIColor {
-        return UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                return UIColor.systemBackground
-            } else {
-                return UIColor.systemBackground
-            }
-        }
-    }
-    
-    /// 系统标签色（支持暗黑模式）
-    @available(iOS 13.0, *)
-    static var st_systemLabel: UIColor {
-        return UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                return UIColor.label
-            } else {
-                return UIColor.label
-            }
-        }
-    }
-    
-    /// 系统次要标签色（支持暗黑模式）
-    @available(iOS 13.0, *)
-    static var st_systemSecondaryLabel: UIColor {
-        return UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                return UIColor.secondaryLabel
-            } else {
-                return UIColor.secondaryLabel
-            }
-        }
-    }
-    
-    /// 系统分隔线色（支持暗黑模式）
-    @available(iOS 13.0, *)
-    static var st_systemSeparator: UIColor {
-        return UIColor { traitCollection in
-            if traitCollection.userInterfaceStyle == .dark {
-                return UIColor.separator
-            } else {
-                return UIColor.separator
-            }
-        }
-    }
-}
-
-// MARK: - 颜色信息模型
-
-public struct STColorsInfo: Codable {
-    public var colors: Dictionary<String, STColorModel> = Dictionary<String, STColorModel>()
-}
-
-public struct STColorModel: Codable {
-    public var light: String = ""
-    public var dark: String = ""
-}
-
-// MARK: - 动态颜色管理
-
-@available(iOS 13, *)
-public extension UIColor {
-    
-    private struct STColorAssociatedKeys {
-        static var colorsInfoKey = true
-    }
-    
-    /// 从 JSON 文件加载颜色配置
-    /// - Parameter jsonString: JSON 文件路径
-    static func st_resolvedColor(jsonString: String) {
-        if jsonString.count > 0 {
-            if let jsonObject = STJSONUtils.st_readJSONFromFile(jsonString),
-               let objc = jsonObject as? Dictionary<String, Dictionary<String, String>> {
-                var colorsInfo = STColorsInfo()
-                for key in objc.keys {
-                    var colorModel = STColorModel()
-                    if let value = objc[key] {
-                        colorModel.light = String.st_returnStr(object: value["light"] ?? "")
-                        colorModel.dark = String.st_returnStr(object: value["dark"] ?? "")
-                    }
-                    colorsInfo.colors[key] = colorModel
-                }
-                if colorsInfo.colors.count > 0 {
-                    objc_setAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey, colorsInfo, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-                }
-            }
-        }
-    }
-    
-    /// 从配置中获取动态颜色
-    /// - Parameter key: 颜色键名
-    /// - Returns: 动态颜色对象
-    static func st_color(dynamicProvider key: String) -> UIColor {
-        if let colorsInfo = objc_getAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey) as? STColorsInfo {
-            if colorsInfo.colors.count > 0, key.count > 0 {
-                if let colorModel = colorsInfo.colors[key] {
-                    return UIColor { traitCollection in
-                        if traitCollection.userInterfaceStyle == .light {
-                            return UIColor.st_color(hexString: colorModel.light)
-                        }
-                        return UIColor.st_color(hexString: colorModel.dark)
-                    }
-                }
-            }
-        }
-        return UIColor.clear
-    }
-    
-    /// 清理关联对象
-    static func st_cleanColorAssociatedObject() {
-        if let colorsInfo = objc_getAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey) as? STColorsInfo {
-            if colorsInfo.colors.count > 0 {
-                objc_setAssociatedObject(self, &STColorAssociatedKeys.colorsInfoKey, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-            }
-        }
     }
 }
 
