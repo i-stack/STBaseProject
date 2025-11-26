@@ -138,17 +138,6 @@ public class STCountdownTimer {
     public func st_getRemainingTimeString() -> String {
         return self.st_formatTime(self.st_getRemainingTime())
     }
-    
-    /// 测量并打印一段代码块的执行时间
-    /// - Parameters:
-    ///   - label: 日志前缀，便于区分
-    ///   - block: 需要测量的代码块
-    public func st_logExecutionTime(label: String = "STCountdownTimer", block: () -> Void) {
-        let start = CFAbsoluteTimeGetCurrent()
-        block()
-        let elapsed = CFAbsoluteTimeGetCurrent() - start
-        STLog("⏱️ \(label) 执行耗时: \(String(format: "%.4f", elapsed)) 秒")
-    }
         
     private func st_startTimer() {
         self.timer?.invalidate()
