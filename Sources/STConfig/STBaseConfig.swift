@@ -9,7 +9,6 @@ import UIKit
 import Foundation
 
 /// 基础配置管理类
-/// 负责管理设计基准尺寸和自定义导航栏配置
 public class STBaseConfig: NSObject {
     
     public static let shared: STBaseConfig = STBaseConfig()
@@ -104,5 +103,26 @@ public class STBaseConfig: NSObject {
             tabBarNormalHeight: 49,
             tabBarSafeHeight: 83
         )
+    }
+    
+    // MARK: - 生命周期监控
+    /// 启用应用生命周期监控（可选）
+    /// - Parameters:
+    ///   - timeoutInterval: 后台超时时间，默认沿用 STAppLifecycleManager 的设定
+    ///   - onBackgroundTimeout: 超时回调，参数为后台停留秒数
+    ///   - onDidEnterBackground: 进入后台回调
+    ///   - onWillEnterForeground: 进入前台回调
+    public func st_enableAppLifecycleMonitoring(
+        timeoutInterval: TimeInterval = STAppLifecycleManager.shared.backgroundTimeoutInterval,
+        onBackgroundTimeout: ((TimeInterval) -> Void)? = nil,
+        onDidEnterBackground: (() -> Void)? = nil,
+        onWillEnterForeground: (() -> Void)? = nil
+    ) {
+        let manager = STAppLifecycleManager.shared
+        manager.backgroundTimeoutInterval = timeoutInterval
+        manager.onBackgroundTimeout = onBackgroundTimeout
+        manager.onDidEnterBackground = onDidEnterBackground
+        manager.onWillEnterForeground = onWillEnterForeground
+        manager.st_restoreBackgroundTimestampIfNeeded()
     }
 }
