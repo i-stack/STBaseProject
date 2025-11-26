@@ -37,7 +37,6 @@ public class STBaseConfig: NSObject {
             STDeviceAdapter.shared.st_configBenchmarkDesign(size: CGSize(width: 375, height: 812))
             return
         }
-        
         STDeviceAdapter.shared.st_configBenchmarkDesign(size: size)
         print("✅ STBaseConfig: 设计基准尺寸已设置为 \(size)")
     }

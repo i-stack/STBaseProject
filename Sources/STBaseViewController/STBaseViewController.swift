@@ -58,7 +58,6 @@ open class STBaseViewController: UIViewController {
 
     open override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.selfSetupNavigationBar()
         self.selfApplyNavBarStyle()
         self.selfApplyNavButtons()
@@ -78,6 +77,7 @@ open class STBaseViewController: UIViewController {
     }
 
     private func selfSetupNavigationBar() {
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.navContainerView.translatesAutoresizingMaskIntoConstraints = false
         self.navBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false

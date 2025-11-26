@@ -36,7 +36,7 @@ open class STBaseView: UIView {
     // If true, STBaseView will automatically enable scroll when content is larger than bounds.
     // NOTE: This detection occurs once at `didMoveToWindow` time; avoid toggling frequently.
     public var autoDetectScroll: Bool = true
-
+    public private(set) var tableViewStyle: UITableView.Style = .plain
     private(set) lazy var contentView: UIView = self.makeContentView()
     private(set) lazy var scrollView: UIScrollView = self.makeScrollView()
     private(set) lazy var tableViewPlain: UITableView = self.makeTableView(.plain)
@@ -117,7 +117,15 @@ open class STBaseView: UIView {
 
     // MARK: - Accessors for table/collection
     open func st_getTableView() -> UITableView? {
-        return self.layoutMode == .table ? (self.tableViewPlain) : nil
+        if self.layoutMode == .table {
+            if self.tableViewStyle == .plain {
+                return self.tableViewPlain
+            }
+            if self.tableViewStyle == .grouped {
+                return self.tableViewGrouped
+            }
+        }
+        return nil
     }
 
     open func st_getCollectionView() -> UICollectionView? {
@@ -344,6 +352,11 @@ extension STBaseView {
     public func st_layoutMode(_ mode: STLayoutMode) -> Self {
         self.configure(layoutMode: mode, scrollDirection: self.scrollDirection)
         return self
+    }
+    
+    @discardableResult
+    public func st_tableView(_ style: UITableView.Style) {
+        self.tableViewStyle = style
     }
 
     @discardableResult

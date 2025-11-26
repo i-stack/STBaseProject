@@ -32,7 +32,6 @@ public struct STConstantBarHeightModel {
 }
 
 // MARK: - 设备适配管理类
-/// 设备适配管理类
 /// 负责设备判断、尺寸计算、比例缩放、界面适配等功能
 public class STDeviceAdapter: NSObject {
     
