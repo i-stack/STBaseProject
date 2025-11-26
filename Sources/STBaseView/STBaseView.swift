@@ -2,12 +2,7 @@
 //  STBaseView.swift
 //  STBaseProject
 //
-//  - Uses UIScrollView contentLayoutGuide / frameLayoutGuide
-//  - LayoutMode must be set before adding children (no runtime destructive rebuilds)
-//  - Safe for XIB and Code usage
-//  - Supports Scroll / Fixed / Table / Collection modes
-//  - Provides safe helper APIs for adding subviews into contentView
-//  - Handles keyboard adjustments and content inset behavior
+//  Created by stack on 2018/3/14.
 //
 
 import UIKit
@@ -43,6 +38,7 @@ open class STBaseView: UIView {
     private(set) lazy var tableViewGrouped: UITableView = self.makeTableView(.grouped)
     private(set) lazy var collectionView: UICollectionView = self.makeCollectionView()
     private var keyboardObserverTokens: [NSObjectProtocol] = []
+    private var appearanceObserver: NSObjectProtocol?
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -57,6 +53,9 @@ open class STBaseView: UIView {
 
     deinit {
         self.removeKeyboardObservers()
+        if let observer = self.appearanceObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
         #if DEBUG
         print("STBaseView deinit: \(String(describing: type(of: self)))")
         #endif
@@ -69,6 +68,7 @@ open class STBaseView: UIView {
         self.scrollDirection = .vertical
         self.setupBaseAccordingToMode()
         self.setupKeyboardObservers()
+        self.setupAppearanceObservation()
     }
 
     /// Must be called before adding subviews if you want a mode other than `.auto`.
@@ -225,6 +225,74 @@ open class STBaseView: UIView {
 
         // Default content inset adjustment. Let parent view controller adjust automatically.
         self.scrollView.contentInsetAdjustmentBehavior = .automatic
+    }
+
+    // MARK: - Appearance
+    private func setupAppearanceObservation() {
+        self.appearanceObserver = NotificationCenter.default.addObserver(
+            forName: .stAppearanceDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.refreshAppearance(animated: true)
+        }
+        self.refreshAppearance()
+    }
+
+    private func refreshAppearance(animated: Bool = false) {
+        let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
+        if #available(iOS 13.0, *) {
+            switch STAppearanceManager.shared.currentMode {
+            case .system:
+                self.overrideUserInterfaceStyle = .unspecified
+            case .light:
+                self.overrideUserInterfaceStyle = .light
+            case .dark:
+                self.overrideUserInterfaceStyle = .dark
+            }
+        }
+
+        let action = { [weak self] in
+            guard let strongSelf = self else { return }
+            let resolved = style == .unspecified ? .light : style
+            strongSelf.st_applyAppearance(resolved)
+        }
+
+        if animated {
+            UIView.transition(with: self, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction], animations: action, completion: nil)
+        } else {
+            action()
+        }
+    }
+
+    /// 外部可手动触发，保证在自定义属性变动后立即响应
+    public func st_forceAppearanceRefresh(animated: Bool = false) {
+        self.refreshAppearance(animated: animated)
+    }
+
+    open func st_applyAppearance(_ style: UIUserInterfaceStyle) {
+        if #available(iOS 13.0, *) {
+            switch style {
+            case .dark:
+                self.backgroundColor = UIColor.systemBackground
+                self.contentView.backgroundColor = UIColor.secondarySystemBackground
+            default:
+                self.backgroundColor = UIColor.systemBackground
+                self.contentView.backgroundColor = UIColor.secondarySystemBackground
+            }
+        } else {
+            self.backgroundColor = .white
+            self.contentView.backgroundColor = .white
+        }
+    }
+
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard #available(iOS 13.0, *) else { return }
+        guard STAppearanceManager.shared.currentMode == .system else { return }
+        if previousTraitCollection?.userInterfaceStyle != self.traitCollection.userInterfaceStyle {
+            self.refreshAppearance()
+        }
     }
 
     // MARK: - Factory methods
