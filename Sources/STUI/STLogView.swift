@@ -188,7 +188,7 @@ open class STLogView: UIView {
         
         // 过滤视图约束
         self.addConstraints([
-            NSLayoutConstraint(item: self.filterView, attribute: .top, relatedBy: .equal, toItem: self.searchBar, attribute: .bottom, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self.filterView, attribute: .top, relatedBy: .equal, toItem: self.searchBar, attribute: .bottom, multiplier: 1, constant: 8),
             NSLayoutConstraint(item: self.filterView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
             NSLayoutConstraint(item: self.filterView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1, constant: 0),
             NSLayoutConstraint(item: self.filterView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)
@@ -196,10 +196,10 @@ open class STLogView: UIView {
         
         // 表格视图约束
         self.addConstraints([
-            NSLayoutConstraint(item: self.tableView, attribute: .top, relatedBy: .equal, toItem: self.filterView, attribute: .bottom, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self.tableView, attribute: .top, relatedBy: .equal, toItem: self.filterView, attribute: .bottom, multiplier: 1, constant: 8),
             NSLayoutConstraint(item: self.tableView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
             NSLayoutConstraint(item: self.tableView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: self.tableView, attribute: .bottom, relatedBy: .equal, toItem: self.bottomToolbar, attribute: .top, multiplier: 1, constant: 0)
+            NSLayoutConstraint(item: self.tableView, attribute: .bottom, relatedBy: .equal, toItem: self.bottomToolbar, attribute: .top, multiplier: 1, constant: -8)
         ])
         
         // 底部工具栏约束
@@ -221,26 +221,14 @@ open class STLogView: UIView {
     }
     
     private func loadInitialLogs() {
-        let userDefault = UserDefaults.standard
-        if let originalContent = userDefault.object(forKey: self.outputPath) as? String {
-            if originalContent.count > 0 {
-                self.parseLogContent(originalContent)
-            }
-        }
+        self.loadLogsFromFile()
     }
     
     private func applySystemAppearance() {
         self.backgroundColor = .systemBackground
         self.tintColor = .systemBlue
-        self.searchBar.barTintColor = .systemBackground
-        self.searchBar.tintColor = .systemBlue
-        if #available(iOS 13.0, *) {
-            self.searchBar.searchTextField.backgroundColor = .secondarySystemBackground
-            self.searchBar.searchTextField.textColor = .label
-        } else if let textField = self.searchBar.value(forKey: "searchField") as? UITextField {
-            textField.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
-            textField.textColor = .darkText
-        }
+        self.searchBar.barTintColor = .clear
+        self.searchBar.tintColor = .systemGray
         self.filterView.backgroundColor = .systemBackground
         self.tableView.backgroundColor = .systemBackground
         self.tableView.separatorColor = .separator
@@ -274,12 +262,7 @@ open class STLogView: UIView {
     }
     
     private func loadAllLogs() {
-        let userDefault = UserDefaults.standard
-        if let originalContent = userDefault.object(forKey: self.outputPath) as? String {
-            if originalContent.count > 0 {
-                self.parseLogContent(originalContent)
-            }
-        }
+        self.loadLogsFromFile()
     }
     
     private func parseLogContent(_ content: String) {
@@ -293,6 +276,25 @@ open class STLogView: UIView {
         }
         
         self.reloadTableView()
+    }
+
+    private func loadLogsFromFile() {
+        DispatchQueue.global(qos: .utility).async {
+            let path = STLogManager.st_outputLogPath()
+            guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+                  let content = String(data: data, encoding: .utf8),
+                  !content.isEmpty else {
+                DispatchQueue.main.async {
+                    self.allLogEntries.removeAll()
+                    self.filteredLogEntries.removeAll()
+                    self.tableView.reloadData()
+                }
+                return
+            }
+            DispatchQueue.main.async {
+                self.parseLogContent(content)
+            }
+        }
     }
     
     private func reloadTableView() {
@@ -373,10 +375,8 @@ open class STLogView: UIView {
         self.allLogEntries.removeAll()
         self.filteredLogEntries.removeAll()
         self.clearFilter()
-        let userDefault = UserDefaults.standard
-        userDefault.removeObject(forKey: self.outputPath)
-        userDefault.synchronize()
         STFileManager.st_removeItem(atPath: self.outputPath)
+        self.loadLogsFromFile()
     }
     
     private func showFilterOptions() {
@@ -419,15 +419,11 @@ open class STLogView: UIView {
 
     private func exportLogFile() {
         let filePath = STLogManager.st_outputLogPath()
-        let userDefault = UserDefaults.standard
-        guard let originalContent = userDefault.object(forKey: filePath) as? String,
-              originalContent.isEmpty == false else {
+        guard FileManager.default.fileExists(atPath: filePath),
+              let attributes = try? FileManager.default.attributesOfItem(atPath: filePath),
+              let fileSize = attributes[.size] as? NSNumber,
+              fileSize.intValue > 0 else {
             self.presentAlert(title: "暂无日志", message: "当前没有可导出的日志内容。")
-            return
-        }
-        STLogView.st_logWriteToFile()
-        guard FileManager.default.fileExists(atPath: filePath) else {
-            self.presentAlert(title: "导出失败", message: "未找到日志文件。")
             return
         }
         let fileURL = URL(fileURLWithPath: filePath)
@@ -476,9 +472,29 @@ open class STLogView: UIView {
     
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
-        searchBar.placeholder = "搜索日志..."
+        searchBar.placeholder = "搜索日志"
         searchBar.delegate = self
         searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.searchBarStyle = .minimal
+        if #available(iOS 13.0, *) {
+            let textField = searchBar.searchTextField
+            textField.backgroundColor = UIColor.secondarySystemBackground
+            textField.textColor = .label
+            textField.layer.cornerRadius = 10
+            textField.clipsToBounds = true
+            textField.clearButtonMode = .whileEditing
+            textField.tintColor = .systemGray
+            if let iconView = textField.leftView as? UIImageView {
+                iconView.tintColor = .systemGray
+                iconView.image = UIImage(systemName: "magnifyingglass")
+            }
+        } else if let textField = searchBar.value(forKey: "searchField") as? UITextField {
+            textField.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
+            textField.layer.cornerRadius = 10
+            textField.clipsToBounds = true
+            textField.clearButtonMode = .whileEditing
+            textField.tintColor = .darkGray
+        }
         return searchBar
     }()
     
@@ -574,7 +590,7 @@ open class STLogView: UIView {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .singleLine
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
         tableView.tableFooterView = UIView()
         tableView.estimatedRowHeight = 80
         tableView.rowHeight = UITableView.automaticDimension
@@ -733,11 +749,7 @@ extension STLogView {
     
     /// 将日志写入文件
     public class func st_logWriteToFile() {
-        let userDefault = UserDefaults.standard
-        let path = STLogManager.st_outputLogPath()
-        if let originalContent = userDefault.object(forKey: path) as? String {
-            STFileManager.st_writeToFile(content: originalContent, filePath: path)
-        }
+        // 日志已经由 STLogP 直接写入文件，这里保留空实现以保证兼容
     }
 
     /// 获取日志查询通知名称

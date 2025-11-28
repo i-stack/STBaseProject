@@ -506,17 +506,8 @@ public class STFileManager: NSObject {
 // MARK: - 日志函数
 
 /// 调试日志输出
-public func STLog<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
-    #if DEBUG
-    let file = (file as NSString).lastPathComponent
-    let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
-    print(content)
-    #endif
-}
-
-/// 持久化日志输出
-public func STLogP<T>(_ message: T, level: STLogLevel = .info, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
-    #if DEBUG
+public func STLog<T>(_ message: T, level: STLogLevel = .info, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
+#if DEBUG
     let fileName = (file as NSString).lastPathComponent
     let formattedMessage = "\(level.rawValue): \(message)"
     let content = """
@@ -528,16 +519,24 @@ level: \(level.rawValue)
 message: \(formattedMessage)
 """
     print(content)
-    var allContent = ""
-    let outputPath = STLogManager.st_outputLogPath()
-    let userDefault = UserDefaults.standard
-    if let origintContent = userDefault.object(forKey: outputPath) as? String {
-        allContent = "\(origintContent)\n\(content)"
-    } else {
-        allContent = content
-    }
-    userDefault.setValue(allContent, forKey: outputPath)
-    userDefault.synchronize()
+#endif
+}
+
+/// 持久化日志输出
+public func STLogP<T>(_ message: T, level: STLogLevel = .info, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
+#if DEBUG
+    let fileName = (file as NSString).lastPathComponent
+    let formattedMessage = "\(level.rawValue): \(message)"
+    let content = """
+    
+\("".st_currentSystemTimestamp()) \(fileName)
+funcName: \(funcName)
+lineNum: (\(lineNum))
+level: \(level.rawValue)
+message: \(formattedMessage)
+"""
+    print(content)
+    STLogFileWriter.shared.append(content)
     NotificationCenter.default.post(name: NSNotification.Name(rawValue: STLogManager.st_notificationQueryLogName()), object: content)
-    #endif
+#endif
 }

@@ -2,7 +2,7 @@
 //  STLogLevel.swift
 //  STBaseProject
 //
-//  定义统一的日志级别，在 Core 层即可复用。
+//  Created by stack on 2018/10/10.
 //
 
 import UIKit

@@ -2,7 +2,7 @@
 //  STLogManager.swift
 //  STBaseProject
 //
-//  Created by stack on 2024/01/01.
+//  Created by stack on 2018/10/10.
 //
 
 import Foundation
