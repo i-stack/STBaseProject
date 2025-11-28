@@ -16,15 +16,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        STDeviceAdapter.shared.st_configBenchmarkDesign(size: CGSize.init(width: 375, height: 812))
-        self.window = UIWindow(frame: UIScreen.main.bounds)
+        STDeviceAdapter.shared.st_configBenchmarkDesign(size: CGSize(width: 375, height: 812))
         Bundle.st_setCustomLanguage("zh-Hans")
-        let vc = STTestViewController()
-        // let nav = UINavigationController.init(rootViewController: vc)
-        self.window?.rootViewController = vc
-        self.window?.makeKeyAndVisible()
+
+        if #available(iOS 13.0, *) {
+            // window setup handled in SceneDelegate
+        } else {
+            let window = UIWindow(frame: UIScreen.main.bounds)
+            window.rootViewController = AppDelegate.makeRootNavigationController()
+            self.window = window
+            window.makeKeyAndVisible()
+        }
         return true
+    }
+
+    static func makeRootNavigationController() -> UINavigationController {
+        let logDemo = STLogDemoViewController()
+        return UINavigationController(rootViewController: logDemo)
+    }
+
+    @available(iOS 13.0, *)
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        configuration.delegateClass = SceneDelegate.self
+        return configuration
+    }
+
+    @available(iOS 13.0, *)
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+        // No-op for now
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

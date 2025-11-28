@@ -7,69 +7,37 @@
 
 import UIKit
 
-// MARK: - 日志级别
-public enum STLogLevel: String, CaseIterable {
-    case debug = "DEBUG"
-    case info = "INFO"
-    case warning = "WARNING"
-    case error = "ERROR"
-    case fatal = "FATAL"
-    
-    var color: UIColor {
-        switch self {
-        case .debug: return .systemBlue
-        case .info: return .systemGreen
-        case .warning: return .systemOrange
-        case .error: return .systemRed
-        case .fatal: return .systemPurple
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .debug: return "🔍"
-        case .info: return "ℹ️"
-        case .warning: return "⚠️"
-        case .error: return "❌"
-        case .fatal: return "💀"
-        }
-    }
-}
-
 // MARK: - 日志条目模型
 public struct STLogEntry {
-    let id: String
-    let timestamp: Date
-    let level: STLogLevel
-    let file: String
-    let function: String
-    let line: Int
-    let message: String
-    let rawContent: String
+    public let id: String
+    public let timestamp: Date
+    public let level: STLogLevel
+    public let file: String
+    public let function: String
+    public let line: Int
+    public let message: String
+    public let rawContent: String
     
     init(content: String) {
         self.id = UUID().uuidString
         self.rawContent = content
         
         // 解析日志内容
-        let components = content.components(separatedBy: "\n")
+        let components = content
+            .components(separatedBy: "\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        
         if components.count >= 4 {
-            // 解析时间戳
-            let timestampString = components[0].trimmingCharacters(in: .whitespacesAndNewlines)
+            let timestampString = components[0]
             self.timestamp = timestampString.st_toDate() ?? Date()
-            
-            // 解析文件名
             self.file = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            // 解析函数名
             let functionLine = components[2]
             if functionLine.contains("funcName:") {
                 self.function = functionLine.components(separatedBy: "funcName: ").last ?? ""
             } else {
                 self.function = ""
             }
-            
-            // 解析行号
             let lineLine = components[3]
             if lineLine.contains("lineNum:") {
                 let lineString = lineLine.components(separatedBy: "lineNum: (").last?.components(separatedBy: ")").first ?? "0"
@@ -77,23 +45,54 @@ public struct STLogEntry {
             } else {
                 self.line = 0
             }
-            
-            // 解析消息
-            if components.count > 4 {
-                self.message = components[4].components(separatedBy: "message: ").last ?? ""
+            var levelFromContent: STLogLevel?
+            var messageLineIndex = 4
+            if components.count > messageLineIndex {
+                let levelLine = components[messageLineIndex].trimmingCharacters(in: .whitespacesAndNewlines)
+                if levelLine.lowercased().hasPrefix("level:") {
+                    let value = levelLine.components(separatedBy: "level:").last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    levelFromContent = STLogLevel(rawValue: value.uppercased())
+                    messageLineIndex += 1
+                }
+            }
+            if components.count > messageLineIndex {
+                var messageComponents = Array(components[messageLineIndex...])
+                if !messageComponents.isEmpty {
+                    let firstLine = messageComponents[0]
+                    let cleanedFirstLine = firstLine.components(separatedBy: "message: ").last ?? firstLine
+                    messageComponents[0] = cleanedFirstLine
+                }
+                self.message = STLogEntry.prettyMessage(from: messageComponents.joined(separator: "\n"))
             } else {
                 self.message = ""
+            }
+            if let parsedLevel = levelFromContent {
+                self.level = parsedLevel
+            } else {
+                self.level = STLogEntry.detectLogLevel(from: self.message)
             }
         } else {
             self.timestamp = Date()
             self.file = ""
             self.function = ""
             self.line = 0
-            self.message = content
+            self.message = STLogEntry.prettyMessage(from: content)
+            self.level = STLogEntry.detectLogLevel(from: self.message)
         }
-        
-        // 根据消息内容判断日志级别
-        self.level = STLogEntry.detectLogLevel(from: self.message)
+    }
+    
+    private static func prettyMessage(from content: String) -> String {
+        let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "" }
+        if let data = trimmed.data(using: .utf8),
+           let object = try? JSONSerialization.jsonObject(with: data, options: []),
+           JSONSerialization.isValidJSONObject(object),
+           let prettyData = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted]),
+           let prettyString = String(data: prettyData, encoding: .utf8),
+           content.count != prettyString.count {
+            return prettyString
+        }
+        return trimmed
     }
     
     private static func detectLogLevel(from message: String) -> STLogLevel {
@@ -116,49 +115,12 @@ public struct STLogEntry {
 public protocol STLogViewDelegate: NSObjectProtocol {
     func logViewBackBtnClick()
     func logViewShowDocumentInteractionController()
-    func logViewDidSelectLog(_ logEntry: STLogEntry)
     func logViewDidFilterLogs(with results: [STLogEntry])
-}
-
-// MARK: - 日志视图主题
-public struct STLogViewTheme {
-    public var backgroundColor: UIColor = .systemBackground
-    public var textColor: UIColor = .label
-    public var secondaryTextColor: UIColor = .secondaryLabel
-    public var separatorColor: UIColor = .separator
-    public var buttonTintColor: UIColor = .systemBlue
-    public var searchBarTintColor: UIColor = .systemBlue
-    public var cellBackgroundColor: UIColor = .secondarySystemBackground
-    public var selectedCellBackgroundColor: UIColor = .systemBlue.withAlphaComponent(0.1)
-    
-    public static let dark = STLogViewTheme(
-        backgroundColor: .black,
-        textColor: .white,
-        secondaryTextColor: .lightGray,
-        separatorColor: .darkGray,
-        buttonTintColor: .systemOrange,
-        searchBarTintColor: .systemOrange,
-        cellBackgroundColor: .darkGray,
-        selectedCellBackgroundColor: .systemOrange.withAlphaComponent(0.2)
-    )
-    
-    public static let light = STLogViewTheme(
-        backgroundColor: .white,
-        textColor: .black,
-        secondaryTextColor: .darkGray,
-        separatorColor: .lightGray,
-        buttonTintColor: .systemBlue,
-        searchBarTintColor: .systemBlue,
-        cellBackgroundColor: .systemGray6,
-        selectedCellBackgroundColor: .systemBlue.withAlphaComponent(0.1)
-    )
 }
 
 // MARK: - 日志视图
 open class STLogView: UIView {
-    
-    // MARK: - 属性
-    
+
     private var outputPath: String = ""
     open weak var mDelegate: STLogViewDelegate?
     private var allLogEntries: [STLogEntry] = []
@@ -172,15 +134,7 @@ open class STLogView: UIView {
     private var searchText: String = ""
     private var currentPage: Int = 0
     private let pageSize: Int = 100
-    
-    private var theme: STLogViewTheme = .light {
-        didSet {
-            applyTheme()
-        }
-    }
-    
-    // MARK: - 初始化
-    
+        
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -188,7 +142,7 @@ open class STLogView: UIView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.configUI()
-        self.outputPath = STLogView.st_outputLogPath()
+        self.outputPath = STLogManager.st_outputLogPath()
         self.setupNotifications()
         self.loadInitialLogs()
     }
@@ -196,29 +150,30 @@ open class STLogView: UIView {
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
         self.configUI()
-        self.outputPath = STLogView.st_outputLogPath()
+        self.outputPath = STLogManager.st_outputLogPath()
         self.setupNotifications()
         self.loadInitialLogs()
     }
-    
-    // MARK: - 配置方法
-    
-    private func configUI() {
-        self.backgroundColor = theme.backgroundColor
+
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if #available(iOS 13.0, *) {
+            if previousTraitCollection?.hasDifferentColorAppearance(comparedTo: traitCollection) == true {
+                self.applySystemAppearance()
+            }
+        } else {
+            self.applySystemAppearance()
+        }
+    }
         
-        // 添加子视图
+    private func configUI() {
+        self.backgroundColor = .systemBackground
         self.addSubview(self.searchBar)
         self.addSubview(self.filterView)
         self.addSubview(self.tableView)
         self.addSubview(self.bottomToolbar)
-        
-        // 设置约束
         self.setupConstraints()
-        
-        // 应用主题
-        self.applyTheme()
-        
-        // 注册自定义 cell
+        self.applySystemAppearance()
         self.tableView.register(STLogTableViewCell.self, forCellReuseIdentifier: "STLogTableViewCell")
     }
     
@@ -260,7 +215,7 @@ open class STLogView: UIView {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(beginQueryLogP(notification:)),
-            name: NSNotification.Name(rawValue: STLogView.st_notificationQueryLogName()),
+            name: NSNotification.Name(rawValue: STLogManager.st_notificationQueryLogName()),
             object: nil
         )
     }
@@ -274,18 +229,26 @@ open class STLogView: UIView {
         }
     }
     
-    private func applyTheme() {
-        self.backgroundColor = theme.backgroundColor
-        self.searchBar.backgroundColor = theme.backgroundColor
-        self.searchBar.tintColor = theme.searchBarTintColor
-        self.filterView.backgroundColor = theme.backgroundColor
-        self.tableView.backgroundColor = theme.backgroundColor
-        self.tableView.separatorColor = theme.separatorColor
-        self.bottomToolbar.backgroundColor = theme.backgroundColor
+    private func applySystemAppearance() {
+        self.backgroundColor = .systemBackground
+        self.tintColor = .systemBlue
+        self.searchBar.barTintColor = .systemBackground
+        self.searchBar.tintColor = .systemBlue
+        if #available(iOS 13.0, *) {
+            self.searchBar.searchTextField.backgroundColor = .secondarySystemBackground
+            self.searchBar.searchTextField.textColor = .label
+        } else if let textField = self.searchBar.value(forKey: "searchField") as? UITextField {
+            textField.backgroundColor = UIColor(white: 0.92, alpha: 1.0)
+            textField.textColor = .darkText
+        }
+        self.filterView.backgroundColor = .systemBackground
+        self.tableView.backgroundColor = .systemBackground
+        self.tableView.separatorColor = .separator
+        self.bottomToolbar.barTintColor = .systemBackground
+        self.bottomToolbar.tintColor = .systemBlue
+        self.bottomToolbar.backgroundColor = .systemBackground
     }
-    
-    // MARK: - 日志处理方法
-    
+        
     @objc private func beginQueryLogP(notification: Notification) {
         if let content = notification.object as? String {
             self.addLogEntry(content: content)
@@ -303,9 +266,7 @@ open class STLogView: UIView {
     private func addLogEntry(content: String) {
         let logEntry = STLogEntry(content: content)
         self.allLogEntries.append(logEntry)
-        
-        // 如果当前在过滤状态，需要重新过滤
-        if isFiltering {
+        if self.isFiltering {
             self.performFilter()
         } else {
             self.reloadTableView()
@@ -324,7 +285,6 @@ open class STLogView: UIView {
     private func parseLogContent(_ content: String) {
         let logComponents = content.components(separatedBy: "\n\n")
         self.allLogEntries.removeAll()
-        
         for component in logComponents {
             if component.trimmingCharacters(in: .whitespacesAndNewlines).count > 0 {
                 let logEntry = STLogEntry(content: component)
@@ -344,29 +304,25 @@ open class STLogView: UIView {
             }
         }
     }
-    
-    // MARK: - 过滤和搜索方法
-    
+        
     private func performFilter() {
-        var filtered = allLogEntries
+        var filtered = self.allLogEntries
         
         // 按日志级别过滤
-        if selectedLogLevels.count < STLogLevel.allCases.count {
-            filtered = filtered.filter { selectedLogLevels.contains($0.level) }
+        if self.selectedLogLevels.count < STLogLevel.allCases.count {
+            filtered = filtered.filter { self.selectedLogLevels.contains($0.level) }
         }
         
         // 按搜索文本过滤
-        if !searchText.isEmpty {
+        if !self.searchText.isEmpty {
             filtered = filtered.filter { logEntry in
-                logEntry.message.lowercased().contains(searchText.lowercased()) ||
-                logEntry.file.lowercased().contains(searchText.lowercased()) ||
-                logEntry.function.lowercased().contains(searchText.lowercased())
+                logEntry.message.lowercased().contains(self.searchText.lowercased()) ||
+                logEntry.file.lowercased().contains(self.searchText.lowercased()) ||
+                logEntry.function.lowercased().contains(self.searchText.lowercased())
             }
         }
-        
         self.filteredLogEntries = filtered
         self.isFiltering = true
-        
         DispatchQueue.main.async {
             self.tableView.reloadData()
             self.mDelegate?.logViewDidFilterLogs(with: filtered)
@@ -378,57 +334,45 @@ open class STLogView: UIView {
         self.filteredLogEntries.removeAll()
         self.searchText = ""
         self.selectedLogLevels = Set(STLogLevel.allCases)
-        
         DispatchQueue.main.async {
             self.searchBar.text = ""
             self.updateFilterButtons()
             self.tableView.reloadData()
+            self.mDelegate?.logViewDidFilterLogs(with: self.allLogEntries)
         }
     }
-    
-    // MARK: - 按钮点击事件
-    
+        
     @objc private func backBtnClick() {
         self.mDelegate?.logViewBackBtnClick()
     }
     
     @objc private func cleanLogBtnClick() {
         let alert = UIAlertController(title: "清除日志", message: "确定要清除所有日志吗？此操作不可撤销。", preferredStyle: .alert)
-        
         alert.addAction(UIAlertAction(title: "取消", style: .cancel))
         alert.addAction(UIAlertAction(title: "确定", style: .destructive) { _ in
             self.clearAllLogs()
         })
-        
         if let topViewController = self.getTopViewController() {
             topViewController.present(alert, animated: true)
         }
     }
     
     @objc private func outputLogBtnClick() {
-        STLogView.st_logWriteToFile()
-        self.mDelegate?.logViewShowDocumentInteractionController()
+        self.exportLogFile()
     }
     
     @objc private func filterBtnClick() {
         self.showFilterOptions()
     }
     
-    @objc private func themeBtnClick() {
-        self.toggleTheme()
-    }
-    
     @objc private func exportBtnClick() {
         self.exportLogs()
     }
-    
-    // MARK: - 辅助方法
-    
+        
     private func clearAllLogs() {
         self.allLogEntries.removeAll()
         self.filteredLogEntries.removeAll()
         self.clearFilter()
-        
         let userDefault = UserDefaults.standard
         userDefault.removeObject(forKey: self.outputPath)
         userDefault.synchronize()
@@ -437,7 +381,6 @@ open class STLogView: UIView {
     
     private func showFilterOptions() {
         let alert = UIAlertController(title: "过滤选项", message: "选择要显示的日志级别", preferredStyle: .actionSheet)
-        
         for level in STLogLevel.allCases {
             let isSelected = selectedLogLevels.contains(level)
             let action = UIAlertAction(title: "\(level.icon) \(level.rawValue)", style: .default) { _ in
@@ -460,35 +403,57 @@ open class STLogView: UIView {
         })
         
         alert.addAction(UIAlertAction(title: "取消", style: .cancel))
-        
         if let topViewController = self.getTopViewController() {
             topViewController.present(alert, animated: true)
         }
     }
     
-    private func toggleTheme() {
-        self.theme = (self.theme.backgroundColor == STLogViewTheme.dark.backgroundColor) ? .light : .dark
-    }
-    
     private func exportLogs() {
         let logsToExport = currentLogEntries
         let logText = logsToExport.map { $0.rawContent }.joined(separator: "\n\n")
-        
         let activityViewController = UIActivityViewController(activityItems: [logText], applicationActivities: nil)
-        
         if let topViewController = self.getTopViewController() {
             topViewController.present(activityViewController, animated: true)
         }
     }
+
+    private func exportLogFile() {
+        let filePath = STLogManager.st_outputLogPath()
+        let userDefault = UserDefaults.standard
+        guard let originalContent = userDefault.object(forKey: filePath) as? String,
+              originalContent.isEmpty == false else {
+            self.presentAlert(title: "暂无日志", message: "当前没有可导出的日志内容。")
+            return
+        }
+        STLogView.st_logWriteToFile()
+        guard FileManager.default.fileExists(atPath: filePath) else {
+            self.presentAlert(title: "导出失败", message: "未找到日志文件。")
+            return
+        }
+        let fileURL = URL(fileURLWithPath: filePath)
+        let activityController = UIActivityViewController(activityItems: [fileURL], applicationActivities: nil)
+        activityController.completionWithItemsHandler = { [weak self] _, _, _, _ in
+            guard let strongSelf = self else { return }
+            strongSelf.mDelegate?.logViewShowDocumentInteractionController()
+        }
+        if let topVC = self.getTopViewController() {
+            if let popover = activityController.popoverPresentationController {
+                popover.sourceView = topVC.view
+                popover.sourceRect = CGRect(x: topVC.view.bounds.midX, y: topVC.view.bounds.midY, width: 1, height: 1)
+            }
+            topVC.present(activityController, animated: true)
+        } else {
+            self.presentAlert(title: "导出失败", message: "无法找到可展示分享界面的视图控制器。")
+        }
+    }
     
     private func updateFilterButtons() {
-        // 更新过滤按钮状态
         for (index, level) in STLogLevel.allCases.enumerated() {
-            if index < filterButtons.count {
-                let button = filterButtons[index]
-                button.isSelected = selectedLogLevels.contains(level)
-                button.backgroundColor = button.isSelected ? level.color.withAlphaComponent(0.3) : .clear
-            }
+            guard index < self.filterButtons.count else { continue }
+            let button = self.filterButtons[index]
+            let isSelected = self.selectedLogLevels.contains(level)
+            button.isSelected = isSelected
+            self.applyStyle(to: button, level: level, selected: isSelected)
         }
     }
     
@@ -498,6 +463,13 @@ open class STLogView: UIView {
             topController = presentedController
         }
         return topController
+    }
+
+    private func presentAlert(title: String, message: String) {
+        guard let topVC = self.getTopViewController() else { return }
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "好的", style: .default))
+        topVC.present(alert, animated: true)
     }
         
     // MARK: - UI 组件
@@ -514,27 +486,88 @@ open class STLogView: UIView {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         
-        // 添加过滤按钮
-        for (index, level) in STLogLevel.allCases.enumerated() {
-            let button = UIButton(type: .system)
-            button.setTitle("\(level.icon) \(level.rawValue)", for: .normal)
-            button.setTitleColor(level.color, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 12)
-            button.layer.cornerRadius = 15
-            button.layer.borderWidth = 1
-            button.layer.borderColor = level.color.cgColor
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.addTarget(self, action: #selector(filterLevelButtonTapped(_:)), for: .touchUpInside)
-            button.tag = index
+        self.filterScrollView.translatesAutoresizingMaskIntoConstraints = false
+        self.filterScrollView.showsHorizontalScrollIndicator = false
+        self.filterScrollView.contentInset = UIEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
+        view.addSubview(self.filterScrollView)
+        self.filterScrollView.addSubview(self.filterStackView)
+        NSLayoutConstraint.activate([
+            self.filterScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            self.filterScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            self.filterScrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            self.filterScrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            view.addSubview(button)
-            filterButtons.append(button)
-        }
-        
+            self.filterStackView.leadingAnchor.constraint(equalTo: self.filterScrollView.contentLayoutGuide.leadingAnchor),
+            self.filterStackView.trailingAnchor.constraint(equalTo: self.filterScrollView.contentLayoutGuide.trailingAnchor),
+            self.filterStackView.topAnchor.constraint(equalTo: self.filterScrollView.contentLayoutGuide.topAnchor, constant: 8),
+            self.filterStackView.bottomAnchor.constraint(equalTo: self.filterScrollView.contentLayoutGuide.bottomAnchor, constant: -8),
+            self.filterStackView.heightAnchor.constraint(equalTo: self.filterScrollView.frameLayoutGuide.heightAnchor, constant: -16)
+        ])
         return view
+    }()
+
+    private lazy var filterScrollView: UIScrollView = UIScrollView()
+
+    private lazy var filterStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 12
+        stack.alignment = .center
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        STLogLevel.allCases.enumerated().forEach { index, level in
+            let button = self.makeFilterButton(for: level, index: index)
+            stack.addArrangedSubview(button)
+            self.filterButtons.append(button)
+        }
+        return stack
     }()
     
     private var filterButtons: [UIButton] = []
+
+    private func makeFilterButton(for level: STLogLevel, index: Int) -> UIButton {
+        let button = UIButton(type: .system)
+        button.tag = index
+        button.addTarget(self, action: #selector(filterLevelButtonTapped(_:)), for: .touchUpInside)
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.required, for: .horizontal)
+        button.layer.cornerRadius = 0
+        button.layer.masksToBounds = false
+        button.isSelected = true
+        self.applyStyle(to: button, level: level, selected: true)
+        return button
+    }
+
+    private func applyStyle(to button: UIButton, level: STLogLevel, selected: Bool) {
+        if #available(iOS 15.0, *) {
+            var config = UIButton.Configuration.tinted()
+            config.title = "\(level.icon) \(level.rawValue)"
+            config.imagePadding = 4
+            config.cornerStyle = .capsule
+            config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 14, bottom: 6, trailing: 14)
+            let foregroundColor: UIColor = selected ? .white : level.color
+            let backgroundColor = selected ? level.color : level.color.withAlphaComponent(0.12)
+            let titleText = "\(level.icon) \(level.rawValue)"
+            let attributedTitle = AttributedString(titleText, attributes: AttributeContainer([
+                .font: UIFont.systemFont(ofSize: 13, weight: selected ? .semibold : .medium),
+                .foregroundColor: foregroundColor
+            ]))
+            config.attributedTitle = attributedTitle
+            config.baseForegroundColor = foregroundColor
+            config.baseBackgroundColor = backgroundColor
+            config.background.strokeColor = selected ? level.color : level.color.withAlphaComponent(0.2)
+            config.background.strokeWidth = selected ? 0 : 1
+            button.configuration = config
+        } else {
+            button.setTitle("\(level.icon) \(level.rawValue)", for: .normal)
+            button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+            button.layer.cornerRadius = 16
+            button.layer.borderWidth = selected ? 0 : 1
+            button.layer.borderColor = level.color.withAlphaComponent(0.4).cgColor
+            button.backgroundColor = selected ? level.color : level.color.withAlphaComponent(0.1)
+            button.setTitleColor(selected ? .white : level.color, for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: selected ? .semibold : .regular)
+        }
+    }
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
@@ -552,52 +585,43 @@ open class STLogView: UIView {
     private lazy var bottomToolbar: UIToolbar = {
         let toolbar = UIToolbar()
         toolbar.translatesAutoresizingMaskIntoConstraints = false
-        
         let backItem = UIBarButtonItem(title: "返回", style: .plain, target: self, action: #selector(backBtnClick))
         let cleanItem = UIBarButtonItem(title: "清除", style: .plain, target: self, action: #selector(cleanLogBtnClick))
         let filterItem = UIBarButtonItem(title: "过滤", style: .plain, target: self, action: #selector(filterBtnClick))
-        let themeItem = UIBarButtonItem(title: "主题", style: .plain, target: self, action: #selector(themeBtnClick))
         let exportItem = UIBarButtonItem(title: "导出", style: .plain, target: self, action: #selector(exportBtnClick))
         let outputItem = UIBarButtonItem(title: "输出", style: .plain, target: self, action: #selector(outputLogBtnClick))
-        
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        
-        toolbar.items = [backItem, flexibleSpace, cleanItem, flexibleSpace, filterItem, flexibleSpace, themeItem, flexibleSpace, exportItem, flexibleSpace, outputItem]
-        
+        toolbar.items = [backItem, flexibleSpace, cleanItem, flexibleSpace, filterItem, flexibleSpace, exportItem, flexibleSpace, outputItem]
         return toolbar
     }()
     
     @objc private func filterLevelButtonTapped(_ sender: UIButton) {
         let level = STLogLevel.allCases[sender.tag]
-        
-        if selectedLogLevels.contains(level) {
-            selectedLogLevels.remove(level)
+        if self.selectedLogLevels.contains(level) {
+            self.selectedLogLevels.remove(level)
         } else {
-            selectedLogLevels.insert(level)
+            self.selectedLogLevels.insert(level)
         }
-        
-        updateFilterButtons()
-        performFilter()
+        self.updateFilterButtons()
+        self.performFilter()
     }
 }
 
 // MARK: - TableView 代理方法
 extension STLogView: UITableViewDelegate, UITableViewDataSource {
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return currentLogEntries.count
+        return self.currentLogEntries.count
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "STLogTableViewCell", for: indexPath) as! STLogTableViewCell
-        let logEntry = currentLogEntries[indexPath.row]
-        cell.configure(with: logEntry, theme: theme)
+        let logEntry = self.currentLogEntries[indexPath.row]
+        cell.configure(with: logEntry)
         return cell
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let logEntry = currentLogEntries[indexPath.row]
-        mDelegate?.logViewDidSelectLog(logEntry)
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -634,72 +658,68 @@ private class STLogTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
+        self.setupUI()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setupUI()
+        self.setupUI()
     }
     
     private func setupUI() {
         selectionStyle = .none
         
         // 配置标签
-        levelLabel.font = UIFont.boldSystemFont(ofSize: 12)
-        levelLabel.textAlignment = .center
-        levelLabel.layer.cornerRadius = 8
-        levelLabel.clipsToBounds = true
+        self.levelLabel.font = UIFont.boldSystemFont(ofSize: 12)
+        self.levelLabel.textAlignment = .center
+        self.levelLabel.layer.cornerRadius = 8
+        self.levelLabel.clipsToBounds = true
         
-        timestampLabel.font = UIFont.systemFont(ofSize: 10)
-        timestampLabel.textColor = .secondaryLabel
+        self.timestampLabel.font = UIFont.systemFont(ofSize: 10)
+        self.timestampLabel.textColor = .secondaryLabel
         
-        fileLabel.font = UIFont.systemFont(ofSize: 11)
-        fileLabel.textColor = .secondaryLabel
+        self.fileLabel.font = UIFont.systemFont(ofSize: 11)
+        self.fileLabel.textColor = .secondaryLabel
         
-        messageLabel.font = UIFont.systemFont(ofSize: 13)
-        messageLabel.numberOfLines = 0
+        self.messageLabel.font = UIFont.systemFont(ofSize: 13)
+        self.messageLabel.numberOfLines = 0
         
         // 配置堆栈视图
-        stackView.axis = .vertical
-        stackView.spacing = 4
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        stackView.addArrangedSubview(levelLabel)
-        stackView.addArrangedSubview(timestampLabel)
-        stackView.addArrangedSubview(fileLabel)
-        stackView.addArrangedSubview(messageLabel)
-        
-        contentView.addSubview(stackView)
+        self.stackView.axis = .vertical
+        self.stackView.spacing = 4
+        self.stackView.translatesAutoresizingMaskIntoConstraints = false
+        self.stackView.addArrangedSubview(self.levelLabel)
+        self.stackView.addArrangedSubview(self.timestampLabel)
+        self.stackView.addArrangedSubview(self.fileLabel)
+        self.stackView.addArrangedSubview(self.messageLabel)
+        self.contentView.addSubview(self.stackView)
         
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
-            
-            levelLabel.heightAnchor.constraint(equalToConstant: 20)
+            self.stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            self.stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            self.stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            self.stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            self.levelLabel.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
     
-    func configure(with logEntry: STLogEntry, theme: STLogViewTheme) {
-        levelLabel.text = "\(logEntry.level.icon) \(logEntry.level.rawValue)"
-        levelLabel.backgroundColor = logEntry.level.color.withAlphaComponent(0.2)
-        levelLabel.textColor = logEntry.level.color
+    func configure(with logEntry: STLogEntry) {
+        self.levelLabel.text = "\(logEntry.level.icon) \(logEntry.level.rawValue)"
+        self.levelLabel.backgroundColor = logEntry.level.color.withAlphaComponent(0.2)
+        self.levelLabel.textColor = logEntry.level.color
         
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"
-        timestampLabel.text = formatter.string(from: logEntry.timestamp)
+        self.timestampLabel.text = formatter.string(from: logEntry.timestamp)
         
-        fileLabel.text = "\(logEntry.file):\(logEntry.line) - \(logEntry.function)"
-        messageLabel.text = logEntry.message
+        self.fileLabel.text = "\(logEntry.file):\(logEntry.line) - \(logEntry.function)"
+        self.messageLabel.text = logEntry.message
         
-        // 应用主题
-        backgroundColor = theme.cellBackgroundColor
-        levelLabel.backgroundColor = logEntry.level.color.withAlphaComponent(0.2)
-        timestampLabel.textColor = theme.secondaryTextColor
-        fileLabel.textColor = theme.secondaryTextColor
-        messageLabel.textColor = theme.textColor
+        self.backgroundColor = .secondarySystemBackground
+        self.levelLabel.backgroundColor = logEntry.level.color.withAlphaComponent(0.2)
+        self.timestampLabel.textColor = .secondaryLabel
+        self.fileLabel.textColor = .secondaryLabel
+        self.messageLabel.textColor = .label
     }
 }
 
@@ -708,56 +728,46 @@ extension STLogView {
     
     /// 获取日志输出路径
     public class func st_outputLogPath() -> String {
-        let outputPath = "\(STFileManager.st_getLibraryCachePath())/outputLog"
-        let pathIsExist = STFileManager.st_fileExistAt(path: outputPath)
-        if !pathIsExist.0 {
-            let _ = STFileManager.st_create(filePath: outputPath, fileName: "log.txt")
-        }
-        return "\(outputPath)/log.txt"
+        return STLogManager.st_outputLogPath()
     }
     
     /// 将日志写入文件
     public class func st_logWriteToFile() {
         let userDefault = UserDefaults.standard
-        if let originalContent = userDefault.object(forKey: STLogView.st_outputLogPath()) as? String {
-            let path = STFileManager.st_create(filePath: "\(STFileManager.st_getLibraryCachePath())/outputLog", fileName: "log.txt")
+        let path = STLogManager.st_outputLogPath()
+        if let originalContent = userDefault.object(forKey: path) as? String {
             STFileManager.st_writeToFile(content: originalContent, filePath: path)
         }
     }
 
     /// 获取日志查询通知名称
     public class func st_notificationQueryLogName() -> String {
-        return "com.notification.queryLog"
-    }
-    
-    /// 设置主题
-    public func st_setTheme(_ theme: STLogViewTheme) {
-        self.theme = theme
+        return STLogManager.st_notificationQueryLogName()
     }
     
     /// 获取当前日志数量
     public func st_getLogCount() -> Int {
-        return currentLogEntries.count
+        return self.currentLogEntries.count
     }
     
     /// 获取过滤后的日志数量
     public func st_getFilteredLogCount() -> Int {
-        return filteredLogEntries.count
+        return self.filteredLogEntries.count
     }
     
     /// 获取所有日志数量
     public func st_getAllLogCount() -> Int {
-        return allLogEntries.count
+        return self.allLogEntries.count
     }
     
     /// 清空所有日志
     public func st_clearAllLogs() {
-        clearAllLogs()
+        self.clearAllLogs()
     }
     
     /// 导出当前显示的日志
     public func st_exportCurrentLogs() {
-        exportLogs()
+        self.exportLogs()
     }
     
     /// 设置日志级别过滤
@@ -776,16 +786,16 @@ extension STLogView {
     
     /// 获取当前过滤状态
     public func st_isFiltering() -> Bool {
-        return isFiltering
+        return self.isFiltering
     }
     
     /// 获取当前选中的日志级别
     public func st_getSelectedLogLevels() -> Set<STLogLevel> {
-        return selectedLogLevels
+        return self.selectedLogLevels
     }
     
     /// 获取当前搜索文本
     public func st_getSearchText() -> String {
-        return searchText
+        return self.searchText
     }
 }

@@ -515,10 +515,18 @@ public func STLog<T>(_ message: T, file: String = #file, funcName: String = #fun
 }
 
 /// 持久化日志输出
-public func STLogP<T>(_ message: T, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
+public func STLogP<T>(_ message: T, level: STLogLevel = .info, file: String = #file, funcName: String = #function, lineNum: Int = #line) {
     #if DEBUG
-    let file = (file as NSString).lastPathComponent
-    let content = "\n\("".st_currentSystemTimestamp()) \(file)\nfuncName: \(funcName)\nlineNum: (\(lineNum))\nmessage: \(message)"
+    let fileName = (file as NSString).lastPathComponent
+    let formattedMessage = "\(level.rawValue): \(message)"
+    let content = """
+    
+\("".st_currentSystemTimestamp()) \(fileName)
+funcName: \(funcName)
+lineNum: (\(lineNum))
+level: \(level.rawValue)
+message: \(formattedMessage)
+"""
     print(content)
     var allContent = ""
     let outputPath = STLogManager.st_outputLogPath()
