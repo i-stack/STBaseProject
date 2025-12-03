@@ -116,7 +116,7 @@ import SwiftUI
 
 @available(iOS 13.0, *)
 public extension Color {
-    /// SwiftUI 快捷方法：根据 SDK 外观生成 Color
+    /// 根据 SDK 外观生成 Color
     static func st_dynamic(light: UIColor, dark: UIColor) -> Color {
         let uiColor = STAppearanceManager.shared.dynamicColor(light: light, dark: dark)
         return Color(uiColor)
