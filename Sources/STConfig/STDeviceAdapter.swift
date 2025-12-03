@@ -8,7 +8,6 @@
 import UIKit
 import Foundation
 
-// MARK: - 导航栏高度模型
 /// 自定义导航栏和 TabBar 高度模型
 public struct STConstantBarHeightModel {
     public var navNormalHeight: CGFloat = 64.0
@@ -31,8 +30,7 @@ public struct STConstantBarHeightModel {
     }
 }
 
-// MARK: - 设备适配管理类
-/// 负责设备判断、尺寸计算、比例缩放、界面适配等功能
+/// 设备判断、尺寸计算、比例缩放、界面适配等功能
 public class STDeviceAdapter: NSObject {
     
     public static let shared: STDeviceAdapter = STDeviceAdapter()
@@ -43,7 +41,6 @@ public class STDeviceAdapter: NSObject {
         super.init()
     }
     
-    // MARK: - 设计基准配置
     /// 配置设计基准尺寸
     /// - Parameter size: 设计图的基准尺寸
     public func st_configBenchmarkDesign(size: CGSize) {
@@ -55,7 +52,6 @@ public class STDeviceAdapter: NSObject {
         return benchmarkDesignSize
     }
     
-    // MARK: - 导航栏配置
     /// 配置自定义导航栏高度
     /// - Parameters:
     ///   - normalHeight: 普通设备导航栏高度
@@ -80,7 +76,6 @@ public class STDeviceAdapter: NSObject {
         self.barHeightModel = model
     }
     
-    // MARK: - 比例计算
     /// 获取当前屏幕与设计基准的比例
     /// - Returns: 比例值，基于屏幕宽度计算
     public class func st_multiplier() -> CGFloat {
@@ -123,7 +118,6 @@ public class STDeviceAdapter: NSObject {
         return (result * scale).rounded(.up) / scale
     }
     
-    // MARK: - 屏幕尺寸
     /// 获取屏幕宽度
     public class func st_appw() -> CGFloat {
         return UIScreen.main.bounds.size.width
@@ -139,7 +133,6 @@ public class STDeviceAdapter: NSObject {
         return UIScreen.main.bounds.size
     }
     
-    // MARK: - 设备判断
     /// 判断是否为刘海屏设备
     public class func st_isNotchScreen() -> Bool {
         guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
@@ -172,7 +165,6 @@ public class STDeviceAdapter: NSObject {
         return .zero
     }
     
-    // MARK: - 导航栏高度
     /// 获取导航栏高度
     public class func st_navHeight() -> CGFloat {
         if self.st_isNotchScreen() {
@@ -225,7 +217,6 @@ public class STDeviceAdapter: NSObject {
         }
     }
     
-    // MARK: - 实用方法
     /// 获取可用内容区域高度（屏幕高度 - 导航栏 - 状态栏）
     public class func st_contentHeight() -> CGFloat {
         return st_apph() - st_navHeight() - st_statusBarHeight()
@@ -251,7 +242,6 @@ public class STDeviceAdapter: NSObject {
         return UIDevice.current.orientation
     }
     
-    // MARK: - 尺寸适配
     /// 根据设计稿尺寸适配宽度
     /// - Parameter width: 设计稿宽度
     /// - Returns: 适配后的宽度

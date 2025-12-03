@@ -17,7 +17,6 @@ public class STBaseConfig: NSObject {
         super.init()
     }
     
-    // MARK: - 默认配置
     /// 设置默认基础配置
     /// 使用 iPhone X 的设计基准尺寸 (375x812)
     /// 使用默认导航栏高度
@@ -26,7 +25,6 @@ public class STBaseConfig: NSObject {
         st_configCustomNavBar(normalHeight: 64, safeHeight: 88)
     }
     
-    // MARK: - 设计基准配置
     /// 配置设计基准尺寸
     /// - Parameter size: 设计图的基准尺寸，通常为设计稿的尺寸
     /// - Note: 建议使用 iPhone X 的尺寸 (375x812) 作为基准
@@ -40,8 +38,7 @@ public class STBaseConfig: NSObject {
         print("✅ STBaseConfig: 设计基准尺寸已设置为 \(size)")
     }
     
-    // MARK: - 便捷配置方法
-    /// 配置自定义导航栏高度（便捷方法）
+    /// 配置自定义导航栏高度
     /// - Parameters:
     ///   - normalHeight: 普通设备导航栏高度（默认64）
     ///   - safeHeight: 刘海屏设备导航栏高度（默认88）
@@ -49,7 +46,7 @@ public class STBaseConfig: NSObject {
         STDeviceAdapter.shared.st_customNavHeight(normalHeight: normalHeight, safeHeight: safeHeight)
     }
     
-    /// 配置自定义 TabBar 高度（便捷方法）
+    /// 配置自定义 TabBar 高度
     /// - Parameters:
     ///   - normalHeight: 普通设备 TabBar 高度（默认49）
     ///   - safeHeight: 刘海屏设备 TabBar 高度（默认83）
@@ -57,8 +54,7 @@ public class STBaseConfig: NSObject {
         STDeviceAdapter.shared.st_customTabBarHeight(normalHeight: normalHeight, safeHeight: safeHeight)
     }
     
-    // MARK: - 高级配置方法
-    /// 配置完整的界面尺寸（推荐使用）
+    /// 配置完整的界面尺寸
     /// - Parameters:
     ///   - designSize: 设计基准尺寸
     ///   - navNormalHeight: 普通设备导航栏高度
@@ -77,13 +73,13 @@ public class STBaseConfig: NSObject {
         st_configCustomTabBar(normalHeight: tabBarNormalHeight, safeHeight: tabBarSafeHeight)
     }
     
-    /// 使用完整的高度模型配置（高级用法）
+    /// 使用完整的高度模型配置
     /// - Parameter model: 完整的高度模型
     public func st_configWithModel(_ model: STConstantBarHeightModel) {
         STDeviceAdapter.shared.st_customBarHeightModel(model)
     }
     
-    /// 快速配置 iPhone X 设计基准（最常用）
+    /// 快速配置 iPhone X 设计基准
     public func st_configForIPhoneX() {
         st_configCompleteUI(
             designSize: CGSize(width: 375, height: 812),
@@ -105,8 +101,7 @@ public class STBaseConfig: NSObject {
         )
     }
     
-    // MARK: - 生命周期监控
-    /// 启用应用生命周期监控（可选）
+    /// 启用应用生命周期监控
     /// - Parameters:
     ///   - timeoutInterval: 后台超时时间，默认沿用 STAppLifecycleManager 的设定
     ///   - onBackgroundTimeout: 超时回调，参数为后台停留秒数

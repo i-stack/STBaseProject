@@ -11,10 +11,8 @@ import Network
 import CoreTelephony
 import SystemConfiguration
 
-// MARK: - STDeviceInfo
 public struct STDeviceInfo {
     
-    // MARK: - App Information
     /// 获取当前应用版本号
     public static func st_currentAppVersion() -> String {
         let info = st_appInfo()
@@ -66,7 +64,6 @@ public struct STDeviceInfo {
         return .unknown
     }
     
-    // MARK: - System Information
     /// 获取系统版本
     public static func st_getSystemVersion() -> String {
         return UIDevice.current.systemVersion
@@ -100,7 +97,6 @@ public struct STDeviceInfo {
         return st_deviceType(for: identifier)
     }
     
-    // MARK: - Battery Information
     /// 获取设备电池状态信息
     public static func st_getDeviceBatteryStatusInfo() -> [String: Any] {
         let device = UIDevice.current
@@ -140,87 +136,7 @@ public struct STDeviceInfo {
         device.isBatteryMonitoringEnabled = true
         return device.batteryState == .charging
     }
-    
-    // MARK: - Network Information
-    /// 获取网络连接类型
-    public static func st_getNetworkConnectionType() -> STNetworkConnectionType {
-        let monitor = NWPathMonitor()
-        var connectionType: STNetworkConnectionType = .unknown
-        let group = DispatchGroup()
-        group.enter()
-        monitor.pathUpdateHandler = { path in
-            if path.usesInterfaceType(.wifi) {
-                connectionType = .wifi
-            } else if path.usesInterfaceType(.cellular) {
-                connectionType = .cellular
-            } else if path.usesInterfaceType(.wiredEthernet) {
-                connectionType = .ethernet
-            } else {
-                connectionType = .unknown
-            }
-            group.leave()
-        }
-        let queue = DispatchQueue(label: "NetworkMonitor")
-        monitor.start(queue: queue)
-        _ = group.wait(timeout: .now() + 1.0)
-        monitor.cancel()
-        return connectionType
-    }
-    
-    /// 获取运营商信息
-    public static func st_getCarrierInfo() -> [String: String] {
-        let networkInfo = CTTelephonyNetworkInfo()
-        var carrierInfo: [String: String] = [:]
-        if #available(iOS 12.0, *) {
-            if let carriers = networkInfo.serviceSubscriberCellularProviders {
-                for (_, carrier) in carriers {
-                    carrierInfo["carrier_name"] = carrier.carrierName ?? ""
-                    carrierInfo["mobile_country_code"] = carrier.mobileCountryCode ?? ""
-                    carrierInfo["mobile_network_code"] = carrier.mobileNetworkCode ?? ""
-                    carrierInfo["iso_country_code"] = carrier.isoCountryCode ?? ""
-                    carrierInfo["allows_voip"] = carrier.allowsVOIP ? "true" : "false"
-                    break
-                }
-            }
-        } else {
-            if let carrier = networkInfo.subscriberCellularProvider {
-                carrierInfo["carrier_name"] = carrier.carrierName ?? ""
-                carrierInfo["mobile_country_code"] = carrier.mobileCountryCode ?? ""
-                carrierInfo["mobile_network_code"] = carrier.mobileNetworkCode ?? ""
-                carrierInfo["iso_country_code"] = carrier.isoCountryCode ?? ""
-                carrierInfo["allows_voip"] = carrier.allowsVOIP ? "true" : "false"
-            }
-        }
-        return carrierInfo
-    }
-    
-    /// 获取设备IP地址（仅WiFi）
-    public static func st_getDeviceIPAddress() -> String {
-        var address: String = ""
-        var ifaddr: UnsafeMutablePointer<ifaddrs>? = nil
-        guard getifaddrs(&ifaddr) == 0 else { return "" }
-        defer { freeifaddrs(ifaddr) }
-        guard let firstAddr = ifaddr else { return "" }
-        for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
-            let interface = ifptr.pointee
-            let addrFamily = interface.ifa_addr.pointee.sa_family
-            if addrFamily == UInt8(AF_INET) {
-                let name = String(cString: interface.ifa_name)
-                if name == "en0" { // Wi-Fi
-                    var addr = interface.ifa_addr.pointee
-                    var hostname = [CChar](repeating: 0, count: Int(NI_MAXHOST))
-                    getnameinfo(&addr, socklen_t(interface.ifa_addr.pointee.sa_len),
-                               &hostname, socklen_t(hostname.count),
-                               nil, socklen_t(0), NI_NUMERICHOST)
-                    address = String(cString: hostname)
-                    break
-                }
-            }
-        }
-        return address
-    }
-    
-    // MARK: - Device Security
+
     /// 判断是否运行在模拟器上
     public static func st_isRunningOnSimulator() -> Bool {
         #if targetEnvironment(simulator)
@@ -259,7 +175,6 @@ public struct STDeviceInfo {
         }
     }
     
-    // MARK: - Storage Information
     /// 获取总存储空间（字节）
     public static func st_getTotalStorage() -> Int64 {
         if let attributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory()),
