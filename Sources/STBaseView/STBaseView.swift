@@ -31,6 +31,24 @@ open class STBaseView: UIView {
     // If true, STBaseView will automatically enable scroll when content is larger than bounds.
     // NOTE: This detection occurs once at `didMoveToWindow` time; avoid toggling frequently.
     public var autoDetectScroll: Bool = true
+    
+    /// 是否启用外观模式管理（默认 true）
+    /// 当 STBaseView 在 STBaseViewController 中使用时，建议设置为 false，由 STBaseViewController 统一管理外观
+    public var enableAppearanceManagement: Bool = true {
+        didSet {
+            if !enableAppearanceManagement && oldValue {
+                // 如果从启用变为禁用，移除观察者
+                if let observer = self.appearanceObserver {
+                    NotificationCenter.default.removeObserver(observer)
+                    self.appearanceObserver = nil
+                }
+            } else if enableAppearanceManagement && !oldValue {
+                // 如果从禁用变为启用，设置观察者
+                self.setupAppearanceObservation()
+            }
+        }
+    }
+    
     public private(set) var tableViewStyle: UITableView.Style = .plain
     private(set) lazy var contentView: UIView = self.makeContentView()
     private(set) lazy var scrollView: UIScrollView = self.makeScrollView()
@@ -66,9 +84,10 @@ open class STBaseView: UIView {
         self.backgroundColor = .clear
         self.layoutMode = .auto
         self.scrollDirection = .vertical
-        self.setupBaseAccordingToMode()
         self.setupKeyboardObservers()
-        self.setupAppearanceObservation()
+        if self.enableAppearanceManagement {
+            self.setupAppearanceObservation()
+        }
     }
 
     /// Must be called before adding subviews if you want a mode other than `.auto`.
@@ -81,7 +100,7 @@ open class STBaseView: UIView {
     /// Convenience: configure to scroll and return scrollView for further configuration
     open func configureAsScroll(_ direction: STScrollDirection = .vertical) -> UIScrollView {
         self.configure(layoutMode: .scroll, scrollDirection: direction)
-        return scrollView
+        return self.scrollView
     }
 
     /// Returns the effective content container into which children should be added.
@@ -196,14 +215,16 @@ open class STBaseView: UIView {
     }
 
     private func installTableStructure() {
-        self.addSubview(self.tableViewPlain)
-        self.tableViewPlain.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            self.tableViewPlain.topAnchor.constraint(equalTo: topAnchor),
-            self.tableViewPlain.leadingAnchor.constraint(equalTo: leadingAnchor),
-            self.tableViewPlain.trailingAnchor.constraint(equalTo: trailingAnchor),
-            self.tableViewPlain.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
+        if let table = self.st_getTableView() {
+            self.addSubview(table)
+            table.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                table.topAnchor.constraint(equalTo: topAnchor),
+                table.leadingAnchor.constraint(equalTo: leadingAnchor),
+                table.trailingAnchor.constraint(equalTo: trailingAnchor),
+                table.bottomAnchor.constraint(equalTo: bottomAnchor)
+            ])
+        }
     }
 
     private func installCollectionStructure() {
@@ -229,12 +250,15 @@ open class STBaseView: UIView {
 
     // MARK: - Appearance
     private func setupAppearanceObservation() {
+        guard self.enableAppearanceManagement else { return }
+        
         self.appearanceObserver = NotificationCenter.default.addObserver(
             forName: .stAppearanceDidChange,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.refreshAppearance(animated: true)
+            guard let strongSelf = self, strongSelf.enableAppearanceManagement else { return }
+            strongSelf.refreshAppearance(animated: true)
         }
         self.refreshAppearance()
     }
@@ -251,11 +275,10 @@ open class STBaseView: UIView {
                 self.overrideUserInterfaceStyle = .dark
             }
         }
-
+        let resolvedStyle = style == .unspecified ? .light : style
         let action = { [weak self] in
             guard let strongSelf = self else { return }
-            let resolved = style == .unspecified ? .light : style
-            strongSelf.st_applyAppearance(resolved)
+            strongSelf.st_appearanceDidChange(resolvedStyle: resolvedStyle)
         }
 
         if animated {
@@ -270,29 +293,34 @@ open class STBaseView: UIView {
         self.refreshAppearance(animated: animated)
     }
 
-    open func st_applyAppearance(_ style: UIUserInterfaceStyle) {
-        if #available(iOS 13.0, *) {
-            switch style {
-            case .dark:
-                self.backgroundColor = UIColor.systemBackground
-                self.contentView.backgroundColor = UIColor.secondarySystemBackground
-            default:
-                self.backgroundColor = UIColor.systemBackground
-                self.contentView.backgroundColor = UIColor.secondarySystemBackground
-            }
-        } else {
-            self.backgroundColor = .white
-            self.contentView.backgroundColor = .white
-        }
-    }
-
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+        guard self.enableAppearanceManagement else { return }
         guard #available(iOS 13.0, *) else { return }
+        
+        // 监听系统深浅模式切换
+        // 只有当 STAppearanceManager 的模式为 .system（跟随系统）时，才响应系统切换
         guard STAppearanceManager.shared.currentMode == .system else { return }
-        if previousTraitCollection?.userInterfaceStyle != self.traitCollection.userInterfaceStyle {
-            self.refreshAppearance()
+        
+        // 检查系统用户界面风格是否发生变化
+        let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
+        let currentStyle = self.traitCollection.userInterfaceStyle
+        if previousStyle != currentStyle && previousStyle != .unspecified {
+            // 系统深浅模式切换，自动更新外观
+            self.refreshAppearance(animated: true)
         }
+    }
+    
+    /// 外观模式变化时的回调方法（可重写）
+    /// SDK 只负责设置 overrideUserInterfaceStyle，具体的颜色设置由使用者在外界或重写此方法时处理
+    /// - Parameter resolvedStyle: 解析后的外观样式（.light 或 .dark）
+    /// 
+    /// 默认实现为空，使用者可以：
+    /// 1. 在外界通过属性（如 backgroundColor、contentView.backgroundColor）设置颜色
+    /// 2. 重写此方法来自定义外观变化时的颜色设置逻辑
+    open func st_appearanceDidChange(resolvedStyle: UIUserInterfaceStyle) {
+        // 默认不自动设置颜色，保持使用者在外界设置的颜色
+        // 使用者可以重写此方法来自定义处理逻辑
     }
 
     // MARK: - Factory methods
@@ -418,18 +446,19 @@ open class STBaseView: UIView {
 extension STBaseView {
     @discardableResult
     public func st_layoutMode(_ mode: STLayoutMode) -> Self {
-        self.configure(layoutMode: mode, scrollDirection: self.scrollDirection)
+        self.layoutMode = mode
         return self
     }
     
     @discardableResult
-    public func st_tableView(_ style: UITableView.Style) {
+    public func st_tableView(_ style: UITableView.Style) -> Self {
         self.tableViewStyle = style
+        return self
     }
 
     @discardableResult
     public func st_scrollDirection(_ direction: STScrollDirection) -> Self {
-        self.configure(layoutMode: self.layoutMode, scrollDirection: direction)
+        self.scrollDirection = direction
         return self
     }
 
@@ -442,6 +471,12 @@ extension STBaseView {
     @discardableResult
     public func st_onContent(_ block: (UIView) -> Void) -> Self {
         block(self.contentContainer())
+        return self
+    }
+    
+    @discardableResult
+    public func st_done() -> Self {
+        self.setupBaseAccordingToMode()
         return self
     }
 }
