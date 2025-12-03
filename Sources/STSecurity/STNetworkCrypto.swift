@@ -2,7 +2,7 @@
 //  STNetworkCrypto.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/12/10.
+//  Created by 寒江孤影 on 2018/12/10.
 //
 
 import Foundation

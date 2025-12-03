@@ -2,7 +2,7 @@
 //  STString.swift
 //  STBaseProject
 //
-//  Created by stack on 2017/10/23.
+//  Created by 寒江孤影 on 2017/10/23.
 //
 
 import UIKit

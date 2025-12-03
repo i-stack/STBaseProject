@@ -2,7 +2,7 @@
 //  STDictionary.swift
 //  STBaseProject
 //
-//  Created by stack on 2019/1/21.
+//  Created by 寒江孤影 on 2019/1/21.
 //
 
 import Foundation

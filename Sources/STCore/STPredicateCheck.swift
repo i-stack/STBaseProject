@@ -2,7 +2,7 @@
 //  STPredicateCheck.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/06/12.
+//  Created by 寒江孤影 on 2018/06/12.
 //
 
 import Foundation

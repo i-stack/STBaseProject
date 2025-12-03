@@ -2,7 +2,7 @@
 //  STLoadingHUD.swift
 //  STBaseProject
 //
-//  Created by stack on 2024/01/01.
+//  Created by 寒江孤影 on 2024/01/01.
 //
 
 import UIKit

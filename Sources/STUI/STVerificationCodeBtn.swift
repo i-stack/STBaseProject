@@ -2,7 +2,7 @@
 //  STVerificationCodeBtn.swift
 //  STBaseProject
 //
-//  Created by stack on 2020/2/8.
+//  Created by 寒江孤影 on 2020/2/8.
 //
 
 import UIKit

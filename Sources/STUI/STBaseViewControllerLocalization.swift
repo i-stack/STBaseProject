@@ -2,7 +2,7 @@
 //  STBaseViewControllerLocalization.swift
 //  STBaseProject
 //
-//  Created by stack on 2017/10/4.
+//  Created by 寒江孤影 on 2017/10/4.
 //
 
 import UIKit

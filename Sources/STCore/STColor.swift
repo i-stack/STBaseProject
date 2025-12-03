@@ -2,7 +2,7 @@
 //  STColor.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/10/9.
+//  Created by 寒江孤影 on 2018/10/9.
 //
 
 import UIKit

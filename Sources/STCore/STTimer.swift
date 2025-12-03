@@ -2,7 +2,7 @@
 //  STTimer.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/01/22.
+//  Created by 寒江孤影 on 2018/01/22.
 //
 
 import UIKit

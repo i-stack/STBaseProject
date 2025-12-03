@@ -2,7 +2,7 @@
 //  STEncrypt.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/12/22.
+//  Created by 寒江孤影 on 2018/12/22.
 //
 
 import Foundation

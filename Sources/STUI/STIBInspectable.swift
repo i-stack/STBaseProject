@@ -2,7 +2,7 @@
 //  STIBInspectable.swift
 //  STBaseProject
 //
-//  Created by stack on 2017/02/24.
+//  Created by 寒江孤影 on 2017/02/24.
 //  Updated for STBaseProject 2.0.0
 //
 

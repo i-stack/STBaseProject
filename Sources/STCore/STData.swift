@@ -2,7 +2,7 @@
 //  STData.swift
 //  STBaseProject
 //
-//  Created by song on 2019/1/21.
+//  Created by 寒江孤影 on 2019/1/21.
 //  Updated for STBaseProject 2.0.0
 //
 

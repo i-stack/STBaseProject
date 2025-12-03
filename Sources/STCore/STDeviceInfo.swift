@@ -2,7 +2,7 @@
 //  STDeviceInfo.swift
 //  STBaseProject
 //
-//  Created by stack on 2019/02/10.
+//  Created by 寒江孤影 on 2019/02/10.
 //
 
 import UIKit

@@ -2,7 +2,7 @@
 //  STMultiImageViewAnimation.swift
 //  STBaseProject
 //
-//  Created by song on 2025/9/8.
+//  Created by 寒江孤影 on 2025/9/8.
 //
 
 import UIKit

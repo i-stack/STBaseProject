@@ -2,7 +2,7 @@
 //  STLogView.swift
 //  STBaseProject
 //
-//  Created by stack on 2018/3/14.
+//  Created by 寒江孤影 on 2018/3/14.
 //
 
 import UIKit

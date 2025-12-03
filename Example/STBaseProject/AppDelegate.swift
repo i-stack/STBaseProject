@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  STBaseProject
 //
-//  Created by stackMW on 05/16/2017.
+//  Created by 寒江孤影MW on 05/16/2017.
 //  Copyright (c) 2019 songMW. All rights reserved.
 //
 

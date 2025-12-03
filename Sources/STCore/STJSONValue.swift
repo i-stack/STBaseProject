@@ -2,7 +2,7 @@
 //  STJSONValue.swift
 //  STBaseProject
 //
-//  Created by song on 2020/5/26.
+//  Created by 寒江孤影 on 2020/5/26.
 //
 
 import Foundation
@@ -64,9 +64,7 @@ public enum STJSONValue: Codable {
             try container.encode(value)
         }
     }
-    
-    // MARK: - 值获取
-    
+        
     /// 获取字符串值
     public var stringValue: String? {
         switch self {
@@ -106,7 +104,7 @@ public enum STJSONValue: Codable {
         case .bool(let value): return value
         case .int(let value): return value != 0
         case .double(let value): return value != 0.0
-        case .string(let value): return value.lowercased() == "true"
+        case .string(let value): return value.lowercased() == "true" || value == "1"
         default: return nil
         }
     }
@@ -134,10 +132,119 @@ public enum STJSONValue: Codable {
         default: return false
         }
     }
+    
+    /// 获取实际值
+    public var value: Any {
+        switch self {
+        case .string(let value): return value
+        case .int(let value): return value
+        case .double(let value): return value
+        case .bool(let value): return value
+        case .array(let value): return value
+        case .object(let value): return value
+        case .null: return NSNull()
+        }
+    }
+}
+
+// MARK: - 兼容 STFlexibleValue API 扩展
+public extension STJSONValue {
+    
+    /// 转换为字符串（兼容 STFlexibleValue API）
+    func st_asString() -> String? {
+        return self.stringValue
+    }
+    
+    /// 转换为整数（兼容 STFlexibleValue API）
+    func st_asInt() -> Int? {
+        return self.intValue
+    }
+    
+    /// 转换为双精度（兼容 STFlexibleValue API）
+    func st_asDouble() -> Double? {
+        return self.doubleValue
+    }
+    
+    /// 转换为布尔值（兼容 STFlexibleValue API，支持 "1" 检查）
+    func st_asBool() -> Bool? {
+        switch self {
+        case .bool(let value): return value
+        case .int(let value): return value != 0
+        case .string(let value): return value.lowercased() == "true" || value == "1"
+        case .double(let value): return value != 0.0
+        default: return nil
+        }
+    }
+    
+    /// 转换为数组（兼容 STFlexibleValue API）
+    func st_asArray() -> [STJSONValue]? {
+        return self.arrayValue
+    }
+    
+    /// 转换为字典（兼容 STFlexibleValue API）
+    func st_asDictionary() -> [String: STJSONValue]? {
+        return self.objectValue
+    }
+    
+    /// 安全获取字符串值，提供默认值
+    func st_stringValue(default defaultValue: String = "") -> String {
+        return self.st_asString() ?? defaultValue
+    }
+    
+    /// 安全获取整数值，提供默认值
+    func st_intValue(default defaultValue: Int = 0) -> Int {
+        return self.st_asInt() ?? defaultValue
+    }
+    
+    /// 安全获取双精度值，提供默认值
+    func st_doubleValue(default defaultValue: Double = 0.0) -> Double {
+        return self.st_asDouble() ?? defaultValue
+    }
+    
+    /// 安全获取布尔值，提供默认值
+    func st_boolValue(default defaultValue: Bool = false) -> Bool {
+        return self.st_asBool() ?? defaultValue
+    }
+    
+    /// 安全获取数组值，提供默认值
+    func st_arrayValue(default defaultValue: [STJSONValue] = []) -> [STJSONValue] {
+        return self.st_asArray() ?? defaultValue
+    }
+    
+    /// 安全获取字典值，提供默认值
+    func st_dictionaryValue(default defaultValue: [String: STJSONValue] = [:]) -> [String: STJSONValue] {
+        return self.st_asDictionary() ?? defaultValue
+    }
+}
+
+// MARK: - 从 Any 初始化扩展
+public extension STJSONValue {
+    
+    /// 从任意值创建 STJSONValue
+    /// - Parameter value: 任意值
+    init(_ value: Any) {
+        switch value {
+        case let string as String:
+            self = .string(string)
+        case let int as Int:
+            self = .int(int)
+        case let double as Double:
+            self = .double(double)
+        case let bool as Bool:
+            self = .bool(bool)
+        case let array as [Any]:
+            self = .array(array.map { STJSONValue($0) })
+        case let dict as [String: Any]:
+            self = .object(dict.mapValues { STJSONValue($0) })
+        case is NSNull:
+            self = .null
+        default:
+            self = .string(String(describing: value))
+        }
+    }
 }
 
 // MARK: - 可选值扩展
-
 extension Optional {
     func or(_ other: Optional) -> Optional {
         switch self {
@@ -198,9 +305,7 @@ public extension Data {
     var st_isValidJSON: Bool {
         return st_toJSONObject() != nil
     }
-    
-    // MARK: - Codable 支持
-    
+        
     /// 解码为指定类型
     /// - Parameter type: 目标类型
     /// - Returns: 解码结果
@@ -253,9 +358,7 @@ public extension String {
     var st_isValidJSON: Bool {
         return st_toJSONObject() != nil
     }
-    
-    // MARK: - Codable 支持
-    
+        
     /// 解码为指定类型
     /// - Parameter type: 目标类型
     /// - Returns: 解码结果
@@ -534,11 +637,9 @@ public class STJSONUtils {
             return ""
         }
     }
-    
 }
 
 // MARK: - JSON 错误类型
-
 public enum STJSONError: Error, LocalizedError {
     case invalidJSON
     case encodingFailed

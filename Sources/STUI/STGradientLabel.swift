@@ -2,7 +2,7 @@
 //  STGradientLabel.swift
 //  STBaseProject
 //
-//  Created by stack on 2025/09/15.
+//  Created by 寒江孤影 on 2025/09/15.
 //
 
 import UIKit
