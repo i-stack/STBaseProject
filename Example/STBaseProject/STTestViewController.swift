@@ -28,7 +28,6 @@ class STTestViewController: STBaseViewController {
     private var currentMode: TestMode = .scrollVertical
     private var dataSource: [String] = (0..<30).map { "数据项 \($0)" }
     override func viewDidLoad() {
-        self.navBarStyle = .custom
         self.navBarBackgroundColor = UIColor.systemIndigo.withAlphaComponent(0.2)
         self.navBarTitleFont = UIFont.systemFont(ofSize: 18, weight: .semibold)
         self.navBarTitleColor = .systemPurple
