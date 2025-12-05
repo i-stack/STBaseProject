@@ -6,60 +6,85 @@
 //
 
 import UIKit
+import CoreGraphics
 
+// MARK: - 颜色创建方法
 public extension UIColor {
-        
-    /// 从十六进制字符串创建颜色
-    /// - Parameter hexString: 十六进制字符串，支持 #、0x 前缀
+    
+    /// 从十六进制字符串创建颜色（sRGB 色彩空间）
+    /// - Parameter hexString: 十六进制字符串，支持 #、0x 前缀，支持 3位(#FFF)、6位(#FFFFFF)、8位(#FFFFFFFF)格式
+    ///   如果使用 8 位格式，alpha 值将从 hexString 中读取；否则 alpha 默认为 1.0
     /// - Returns: UIColor 对象
     static func st_color(hexString: String) -> UIColor {
-        return st_color(hexString: hexString, alpha: 1.0)
+        return st_colorInternal(hexString: hexString, alpha: nil)
     }
     
-    /// 从十六进制字符串创建颜色（带透明度）
+    /// 从十六进制字符串创建颜色（sRGB 色彩空间，可指定透明度）
     /// - Parameters:
-    ///   - hexString: 十六进制字符串，支持 #、0x 前缀
-    ///   - alpha: 透明度 (0.0 - 1.0)
+    ///   - hexString: 十六进制字符串，支持 #、0x 前缀，支持 3位(#FFF)、6位(#FFFFFF)、8位(#FFFFFFFF)格式
+    ///   - alpha: 透明度 (0.0-1.0)，如果指定则覆盖 hexString 中的 alpha 值
     /// - Returns: UIColor 对象
     static func st_color(hexString: String, alpha: CGFloat) -> UIColor {
-        if hexString.count < 1 {
+        return st_colorInternal(hexString: hexString, alpha: alpha)
+    }
+    
+    /// 内部实现方法
+    private static func st_colorInternal(hexString: String, alpha: CGFloat?) -> UIColor {
+        guard !hexString.isEmpty else {
             return UIColor.clear
         }
+        
         var cString = hexString.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).uppercased()
-        if cString.count < 6 {
-            return UIColor.clear
-        }
         if cString.hasPrefix("#") {
             cString = String(cString.dropFirst())
+        } else if cString.hasPrefix("0X") {
+            cString = String(cString.dropFirst(2))
         }
-        if cString.hasPrefix("0X") {
-            let start = cString.index(cString.startIndex, offsetBy: 2)
-            cString = String(cString[start...])
+        
+        // 支持 3 位简写格式（如 FFF -> FFFFFF）
+        if cString.count == 3 {
+            cString = cString.map { "\($0)\($0)" }.joined()
         }
-        if cString.count != 6 {
-            return UIColor.clear
-        }
+        
         var rgbValue: UInt64 = 0
         guard Scanner(string: cString).scanHexInt64(&rgbValue) else {
             return UIColor.clear
         }
-        return UIColor(
-            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
-            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
-            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
-            alpha: alpha
-        )
+        
+        var finalAlpha: CGFloat = 1.0
+        // 如果用户明确指定了 alpha，使用用户指定的值；否则从 hexString 中读取
+        if let userAlpha = alpha {
+            finalAlpha = userAlpha
+            // 如果 hexString 是 8 位格式但用户指定了 alpha，需要清除 alpha 位
+            if cString.count == 8 {
+                rgbValue = rgbValue & 0x00FFFFFF
+            }
+        } else if cString.count == 8 {
+            // 8 位格式（RRGGBBAA），alpha 从 hexString 中读取
+            finalAlpha = CGFloat((rgbValue & 0xFF000000) >> 24) / 255.0
+            rgbValue = rgbValue & 0x00FFFFFF
+        }
+        
+        if cString.count != 6 && cString.count != 8 {
+            return UIColor.clear
+        }
+        
+        // 显式使用 sRGB 色彩空间，确保与设计图一致
+        let red = CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0
+        let green = CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0
+        let blue = CGFloat(rgbValue & 0x0000FF) / 255.0
+        return st_colorInSRGB(red: red, green: green, blue: blue, alpha: finalAlpha)
     }
     
-    /// 从 RGB 值创建颜色
+    /// 从 RGB 值创建颜色（sRGB 色彩空间，确保与设计图一致）
     /// - Parameters:
     ///   - red: 红色值 (0-255)
     ///   - green: 绿色值 (0-255)
     ///   - blue: 蓝色值 (0-255)
-    ///   - alpha: 透明度 (0.0-1.0)
+    ///   - alpha: 透明度 (0.0-1.0)，默认 1.0
     /// - Returns: UIColor 对象
     static func st_color(red: Int, green: Int, blue: Int, alpha: CGFloat = 1.0) -> UIColor {
-        return UIColor(
+        return st_colorInSRGB(
             red: CGFloat(red) / 255.0,
             green: CGFloat(green) / 255.0,
             blue: CGFloat(blue) / 255.0,
@@ -67,260 +92,50 @@ public extension UIColor {
         )
     }
     
-    /// 从 RGB 值创建颜色（0-1 范围）
+    /// 从 HSB 值创建颜色
+    /// - Parameters:
+    ///   - hue: 色相 (0.0-1.0)
+    ///   - saturation: 饱和度 (0.0-1.0)
+    ///   - brightness: 亮度 (0.0-1.0)
+    ///   - alpha: 透明度 (0.0-1.0)，默认 1.0
+    /// - Returns: UIColor 对象
+    static func st_color(hue: CGFloat, saturation: CGFloat, brightness: CGFloat, alpha: CGFloat = 1.0) -> UIColor {
+        return UIColor(hue: hue, saturation: saturation, brightness: brightness, alpha: alpha)
+    }
+    
+    /// 从 Assets 中的颜色集创建颜色（支持暗黑模式）
+    /// 注意：颜色和透明度都从 Assets 中读取，如需调整透明度请使用 withAlphaComponent 方法
+    /// - Parameter colorSet: 颜色集名称
+    /// - Returns: UIColor 对象，如果找不到颜色集则返回 clear
+    @available(iOS 11.0, *)
+    static func st_color(colorSet: String) -> UIColor {
+        guard !colorSet.isEmpty else {
+            return UIColor.clear
+        }
+        return UIColor(named: colorSet) ?? UIColor.clear
+    }
+}
+
+// MARK: - 私有辅助方法
+private extension UIColor {
+    /// 在 sRGB 色彩空间中创建颜色
+    /// 此方法显式使用 sRGB 色彩空间，避免在支持 Display P3 的设备上出现颜色偏差
     /// - Parameters:
     ///   - red: 红色值 (0.0-1.0)
     ///   - green: 绿色值 (0.0-1.0)
     ///   - blue: 蓝色值 (0.0-1.0)
     ///   - alpha: 透明度 (0.0-1.0)
     /// - Returns: UIColor 对象
-    static func st_color(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat = 1.0) -> UIColor {
-        return UIColor(red: red, green: green, blue: blue, alpha: alpha)
-    }
-    
-    /// 从 Assets 中的颜色集创建颜色（支持暗黑模式）
-    /// - Parameters:
-    ///   - colorSet: 颜色集名称
-    ///   - alpha: 透明度
-    /// - Returns: UIColor 对象
-    @available(iOS 11.0, *)
-    static func st_color(colorSet: String, alpha: CGFloat = 1.0) -> UIColor {
-        if colorSet.count > 0 {
-            if let color = UIColor(named: colorSet) {
-                if alpha < 1.0 {
-                    return color.withAlphaComponent(alpha)
-                }
-                return color
-            }
+    static func st_colorInSRGB(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) -> UIColor {
+        // 使用 CGColor 和 sRGB 色彩空间显式创建颜色
+        guard let sRGBColorSpace = CGColorSpace(name: CGColorSpace.sRGB) else {
+            return UIColor(red: red, green: green, blue: blue, alpha: alpha)
         }
-        return UIColor.clear
-    }
-    
-    /// 从 Assets 中的颜色集创建颜色（支持暗黑模式）
-    /// - Parameter colorSet: 颜色集名称
-    /// - Returns: UIColor 对象
-    @available(iOS 11.0, *)
-    static func st_color(colorSet: String) -> UIColor {
-        return st_color(colorSet: colorSet, alpha: 1.0)
-    }
-    
-    /// - Parameters:
-    ///   - darkModeName: 颜色集名称
-    ///   - hexString: 十六进制字符串（备用）
-    ///   - alpha: 透明度
-    /// - Returns: UIColor 对象
-    static func st_color(darkModeName: String, hexString: String = "", alpha: CGFloat = 1.0) -> UIColor {
-        if #available(iOS 11.0, *) {
-            if darkModeName.count > 0 {
-                if let color = UIColor(named: darkModeName) {
-                    if alpha < 1.0 {
-                        return color.withAlphaComponent(alpha)
-                    }
-                    return color
-                }
-                return UIColor.clear
-            }
-        }
-        return st_color(hexString: hexString, alpha: alpha)
-    }
-    
-    /// - Parameters:
-    ///   - darkModeName: 颜色集名称
-    ///   - alpha: 透明度
-    /// - Returns: UIColor 对象
-    static func st_color(darkModeName: String, alpha: CGFloat) -> UIColor {
-        return st_color(darkModeName: darkModeName, hexString: "", alpha: alpha)
-    }
-    
-    /// - Parameter darkModeName: 颜色集名称
-    /// - Returns: UIColor 对象
-    static func st_color(darkModeName: String) -> UIColor {
-        return st_color(darkModeName: darkModeName, hexString: "", alpha: 1.0)
-    }
         
-    /// 将颜色转换为十六进制字符串
-    /// - Returns: 十六进制字符串
-    func st_colorToHex() -> String {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        let multiplier = CGFloat(255.999999)
-        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return ""
+        let components = [red, green, blue, alpha]
+        guard let cgColor = CGColor(colorSpace: sRGBColorSpace, components: components) else {
+            return UIColor(red: red, green: green, blue: blue, alpha: alpha)
         }
-        if alpha == 1.0 {
-            return String(
-                format: "#%02lX%02lX%02lX",
-                Int(red * multiplier),
-                Int(green * multiplier),
-                Int(blue * multiplier)
-            )
-        } else {
-            return String(
-                format: "#%02lX%02lX%02lX%02lX",
-                Int(red * multiplier),
-                Int(green * multiplier),
-                Int(blue * multiplier),
-                Int(alpha * multiplier)
-            )
-        }
-    }
-    
-    /// 获取颜色的红色分量
-    /// - Returns: 红色值 (0-255)
-    func st_getColorR() -> Int {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        let multiplier = CGFloat(255.0)
-        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0
-        }
-        return Int(red * multiplier) <= 255 ? Int(red * multiplier) : 255
-    }
-    
-    /// 获取颜色的绿色分量
-    /// - Returns: 绿色值 (0-255)
-    func st_getColorG() -> Int {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        let multiplier = CGFloat(255.0)
-        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0
-        }
-        return Int(green * multiplier) <= 255 ? Int(green * multiplier) : 255
-    }
-    
-    /// 获取颜色的蓝色分量
-    /// - Returns: 蓝色值 (0-255)
-    func st_getColorB() -> Int {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        let multiplier = CGFloat(255.0)
-        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0
-        }
-        return Int(blue * multiplier) <= 255 ? Int(blue * multiplier) : 255
-    }
-    
-    /// 获取颜色的透明度分量
-    /// - Returns: 透明度值 (0.0-1.0)
-    func st_getColorA() -> CGFloat {
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0.0
-        }
-        return alpha
-    }
-        
-    /// 调整颜色透明度
-    /// - Parameter alpha: 新的透明度值
-    /// - Returns: 调整后的颜色
-    func st_withAlpha(_ alpha: CGFloat) -> UIColor {
-        return self.withAlphaComponent(alpha)
-    }
-    
-    /// 混合两个颜色
-    /// - Parameters:
-    ///   - color: 要混合的颜色
-    ///   - ratio: 混合比例 (0.0-1.0)
-    /// - Returns: 混合后的颜色
-    func st_blend(with color: UIColor, ratio: CGFloat) -> UIColor {
-        var red1: CGFloat = 0, green1: CGFloat = 0, blue1: CGFloat = 0, alpha1: CGFloat = 0
-        var red2: CGFloat = 0, green2: CGFloat = 0, blue2: CGFloat = 0, alpha2: CGFloat = 0
-        guard self.getRed(&red1, green: &green1, blue: &blue1, alpha: &alpha1),
-              color.getRed(&red2, green: &green2, blue: &blue2, alpha: &alpha2) else {
-            return self
-        }
-        let clampedRatio = min(max(ratio, 0), 1)
-        let newRed = red1 * (1 - clampedRatio) + red2 * clampedRatio
-        let newGreen = green1 * (1 - clampedRatio) + green2 * clampedRatio
-        let newBlue = blue1 * (1 - clampedRatio) + blue2 * clampedRatio
-        let newAlpha = alpha1 * (1 - clampedRatio) + alpha2 * clampedRatio
-        return UIColor(red: newRed, green: newGreen, blue: newBlue, alpha: newAlpha)
-    }
-    
-    /// 获取颜色的对比色（用于文字等）
-    /// - Returns: 对比色
-    func st_contrastColor() -> UIColor {
-        let brightness = self.st_brightness()
-        return brightness > 0.5 ? UIColor.black : UIColor.white
-    }
-    
-    /// 获取颜色的亮度
-    /// - Returns: 亮度值 (0.0-1.0)
-    func st_brightness() -> CGFloat {
-        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
-        guard self.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return 0.0
-        }
-        return (0.299 * red + 0.587 * green + 0.114 * blue)
-    }
-}
-
-// MARK: - 便捷的颜色创建方法
-public extension UIColor {
-    
-    /// 创建随机颜色
-    /// - Parameter alpha: 透明度
-    /// - Returns: 随机颜色
-    static func st_random(alpha: CGFloat = 1.0) -> UIColor {
-        let red = CGFloat.random(in: 0...1)
-        let green = CGFloat.random(in: 0...1)
-        let blue = CGFloat.random(in: 0...1)
-        return UIColor(red: red, green: green, blue: blue, alpha: alpha)
-    }
-    
-    /// 从图片获取主色调
-    /// - Parameter image: 图片
-    /// - Returns: 主色调
-    static func st_dominantColor(from image: UIImage) -> UIColor? {
-        guard let cgImage = image.cgImage else { return nil }
-        let width = cgImage.width
-        let height = cgImage.height
-        let totalPixels = width * height
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bytesPerPixel = 4
-        let bytesPerRow = bytesPerPixel * width
-        let bitsPerComponent = 8
-        guard let context = CGContext(
-            data: nil,
-            width: width,
-            height: height,
-            bitsPerComponent: bitsPerComponent,
-            bytesPerRow: bytesPerRow,
-            space: colorSpace,
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        ) else { return nil }
-        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-        guard let data = context.data else { return nil }
-        let buffer = data.bindMemory(to: UInt8.self, capacity: totalPixels * bytesPerPixel)
-        var redSum: CGFloat = 0
-        var greenSum: CGFloat = 0
-        var blueSum: CGFloat = 0
-        for i in stride(from: 0, to: totalPixels * bytesPerPixel, by: bytesPerPixel) {
-            let red = CGFloat(buffer[i]) / 255.0
-            let green = CGFloat(buffer[i + 1]) / 255.0
-            let blue = CGFloat(buffer[i + 2]) / 255.0
-            redSum += red
-            greenSum += green
-            blueSum += blue
-        }
-        let pixelCount = CGFloat(totalPixels)
-        return UIColor(
-            red: redSum / pixelCount,
-            green: greenSum / pixelCount,
-            blue: blueSum / pixelCount,
-            alpha: 1.0
-        )
+        return UIColor(cgColor: cgColor)
     }
 }
