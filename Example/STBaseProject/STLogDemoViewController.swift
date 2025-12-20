@@ -67,10 +67,10 @@ final class STLogDemoViewController: UIViewController {
     }
 
     private func makeNavButton(title: String, action: Selector) -> UIBarButtonItem {
-        let button = UIButton(type: .system)
+        let button = STIconButton()
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+//        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
         button.layer.cornerRadius = 16
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.3).cgColor

@@ -31,7 +31,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     static func makeRootNavigationController() -> UINavigationController {
-        let logDemo = STLogDemoViewController()
+        let logDemo = STNextViewController()//STLogDemoViewController()
         return UINavigationController(rootViewController: logDemo)
     }
 

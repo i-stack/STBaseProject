@@ -13,49 +13,42 @@ private struct STBtnLocalizationKey {
     static var localizedSelectedTitleKey: UInt8 = 1
 }
 
-// MARK: - 按钮布局样式枚举
-public enum STBtnEdgeInsetsStyle {
-    case top    // 图片在上，文字在下
-    case left   // 图片在左，文字在右
-    case right  // 图片在右，文字在左
-    case bottom // 图片在下，文字在上
-    case reset  // 恢复默认布局
-}
-
-// MARK: - 按钮间距配置
-public struct STBtnSpacing {
-    public var spacing: CGFloat = 0
-    public var topSpacing: CGFloat?
-    public var leftSpacing: CGFloat?
-    public var rightSpacing: CGFloat?
-    public var bottomSpacing: CGFloat?
-    
-    public init() {}
-    
-    public init(spacing: CGFloat) {
-        self.spacing = spacing
-    }
-    
-    public init(spacing: CGFloat, topSpacing: CGFloat? = nil, leftSpacing: CGFloat? = nil, rightSpacing: CGFloat? = nil, bottomSpacing: CGFloat? = nil) {
-        self.spacing = spacing
-        self.topSpacing = topSpacing
-        self.leftSpacing = leftSpacing
-        self.rightSpacing = rightSpacing
-        self.bottomSpacing = bottomSpacing
-    }
-}
-
 // MARK: - 自定义按钮类
-/// 自定义按钮类，支持图片和文字的不同位置布局以及圆角设置
 open class STBtn: UIButton {
     
     open var identifier: Any?
     
-    private var hasSetLayout: Bool = false
-    private var defaultTitleFrame: CGRect = .zero
-    private var defaultImageFrame: CGRect = .zero
-    private var style: STBtnEdgeInsetsStyle = .reset
-    private var btnSpacing: STBtnSpacing = STBtnSpacing()
+    /// 字符串标识符（类型安全，推荐使用）
+    /// 使用示例：
+    /// ```
+    /// button.stringIdentifier = "home_button"
+    /// if button.stringIdentifier == "home_button" { ... }
+    /// ```
+    /// 注意：对于整数标识符，请使用 `tag` 属性：
+    /// ```
+    /// button.tag = 100
+    /// if button.tag == 100 { ... }
+    /// ```
+    open var stringIdentifier: String?
+    
+    /// 类型安全的标识符访问（泛型方法）
+    /// 使用示例：
+    /// ```
+    /// button.setIdentifier(STAlertBtnClickType.leftBtnClick)
+    /// if let type: STAlertBtnClickType = button.getIdentifier() {
+    ///     // 使用 type
+    /// }
+    /// ```
+    /// - Parameter value: 要设置的标识符值
+    public func setIdentifier<T>(_ value: T) {
+        self.identifier = value
+    }
+    
+    /// 类型安全的标识符获取（泛型方法）
+    /// - Returns: 转换后的标识符值，如果类型不匹配则返回 nil
+    public func getIdentifier<T>() -> T? {
+        return self.identifier as? T
+    }
     
     @IBInspectable open var localizedTitle: String {
         get {
@@ -79,259 +72,248 @@ open class STBtn: UIButton {
     
     @IBInspectable open var borderWidth: CGFloat {
         set {
-            layer.borderWidth = newValue
+            self.layer.borderWidth = newValue
         }
         get {
-            return layer.borderWidth
+            return self.layer.borderWidth
         }
     }
     
     @IBInspectable open var cornerRadius: CGFloat {
         set {
-            layer.cornerRadius = newValue
-            layer.masksToBounds = newValue > 0
+            self.layer.cornerRadius = newValue
+            self.layer.masksToBounds = newValue > 0
         }
         get {
-            return layer.cornerRadius
+            return self.layer.cornerRadius
         }
     }
     
     @IBInspectable open var borderColor: UIColor? {
         set {
             guard let uiColor = newValue else { return }
-            layer.borderColor = uiColor.cgColor
+            self.layer.borderColor = uiColor.cgColor
         }
         get {
-            guard let color = layer.borderColor else { return nil }
+            guard let color = self.layer.borderColor else { return nil }
             return UIColor(cgColor: color)
         }
     }
     
     @IBInspectable open var autoAdaptFontSize: Bool = true {
         didSet {
-            if autoAdaptFontSize {
-                updateFontSize()
+            if self.autoAdaptFontSize {
+                self.updateFontSize()
             }
+        }
+    }
+    
+    /// 高亮时是否自动调整图片（IBInspectable）
+    /// 当为 true 时，按钮高亮时会自动调整图片的亮度
+    @IBInspectable open override var adjustsImageWhenHighlighted: Bool {
+        get {
+            return super.adjustsImageWhenHighlighted
+        }
+        set {
+            super.adjustsImageWhenHighlighted = newValue
+        }
+    }
+    
+    /// 禁用时是否自动调整图片（IBInspectable）
+    /// 当为 true 时，按钮禁用时会自动调整图片的亮度
+    @IBInspectable open override var adjustsImageWhenDisabled: Bool {
+        get {
+            return super.adjustsImageWhenDisabled
+        }
+        set {
+            super.adjustsImageWhenDisabled = newValue
+        }
+    }
+    
+    /// 高亮时是否显示触摸效果（IBInspectable）
+    /// 当为 true 时，按钮高亮时会显示一个圆形的高亮效果
+    @IBInspectable open override var showsTouchWhenHighlighted: Bool {
+        get {
+            return super.showsTouchWhenHighlighted
+        }
+        set {
+            super.showsTouchWhenHighlighted = newValue
+        }
+    }
+    
+    /// 阴影颜色（IBInspectable）
+    @IBInspectable open var shadowColor: UIColor? {
+        get {
+            guard let cgColor = self.layer.shadowColor else { return nil }
+            return UIColor(cgColor: cgColor)
+        }
+        set {
+            self.layer.shadowColor = newValue?.cgColor
+        }
+    }
+    
+    /// 阴影偏移宽度（IBInspectable）
+    @IBInspectable open var shadowOffsetWidth: CGFloat {
+        get {
+            return self.layer.shadowOffset.width
+        }
+        set {
+            self.layer.shadowOffset = CGSize(width: newValue, height: self.layer.shadowOffset.height)
+        }
+    }
+    
+    /// 阴影偏移高度（IBInspectable）
+    @IBInspectable open var shadowOffsetHeight: CGFloat {
+        get {
+            return self.layer.shadowOffset.height
+        }
+        set {
+            self.layer.shadowOffset = CGSize(width: self.layer.shadowOffset.width, height: newValue)
+        }
+    }
+    
+    /// 阴影半径（IBInspectable）
+    @IBInspectable open var shadowRadius: CGFloat {
+        get {
+            return self.layer.shadowRadius
+        }
+        set {
+            self.layer.shadowRadius = newValue
+        }
+    }
+    
+    /// 阴影透明度（IBInspectable，范围 0.0-1.0）
+    @IBInspectable open var shadowOpacity: Float {
+        get {
+            return self.layer.shadowOpacity
+        }
+        set {
+            self.layer.shadowOpacity = newValue
         }
     }
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        setupButton()
+        self.setupButton()
     }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        setupButton()
+        self.setupButton()
     }
     
+    /// 内容水平对齐时的边距（IBInspectable）
+    /// 当 contentHorizontalAlignment 为 .left 或 .right 时，此属性控制内容与边缘的间距
+    /// 使用示例：
+    /// ```
+    /// button.contentHorizontalAlignment = .left
+    /// button.contentHorizontalPadding = 16  // 左边距 16
+    /// ```
+    /// 注意：布局更新会在下一个布局周期自动生效，无需手动调用 `setNeedsLayout()`
+    /// `layoutSubviews` 方法会在系统需要时自动调用，并更新边距
+    @IBInspectable open var contentHorizontalPadding: CGFloat = 0
+    
     private func setupButton() {
-        titleLabel?.textAlignment = .center
-        imageView?.contentMode = .scaleAspectFit
-        if autoAdaptFontSize {
-            updateFontSize()
+        self.titleLabel?.textAlignment = .natural
+        self.imageView?.contentMode = .scaleAspectFit
+        if self.autoAdaptFontSize {
+            self.updateFontSize()
         }
     }
     
     open override func layoutSubviews() {
         super.layoutSubviews()
-        guard let titleLabel = self.titleLabel,
-              let imageView = self.imageView,
-              self.hasSetLayout else { return }
-        if self.defaultTitleFrame == .zero {
-            self.defaultTitleFrame = titleLabel.frame
-            self.defaultImageFrame = imageView.frame
+        self.updateContentHorizontalPadding()
+    }
+    
+    /// 更新内容水平对齐时的边距
+    private func updateContentHorizontalPadding() {
+        guard self.contentHorizontalPadding > 0 else {
+            // 如果边距为 0，清除水平方向的边距，保留垂直方向的边距
+            let currentInsets = self.contentEdgeInsets
+            if currentInsets.left != 0 || currentInsets.right != 0 {
+                self.contentEdgeInsets = UIEdgeInsets(
+                    top: currentInsets.top,
+                    left: 0,
+                    bottom: currentInsets.bottom,
+                    right: 0
+                )
+            }
+            return
         }
-        switch self.style {
-        case .top:
-            layoutImageTopTitleBottom(titleLabel: titleLabel, imageView: imageView)
+        
+        // 保存当前的垂直边距
+        let currentInsets = self.contentEdgeInsets
+        let top = currentInsets.top
+        let bottom = currentInsets.bottom
+        
+        // 根据 contentHorizontalAlignment 设置水平边距
+        switch self.contentHorizontalAlignment {
         case .left:
-            layoutImageLeftTitleRight(titleLabel: titleLabel, imageView: imageView)
+            // 左对齐时，只设置左边距
+            self.contentEdgeInsets = UIEdgeInsets(
+                top: top,
+                left: self.contentHorizontalPadding,
+                bottom: bottom,
+                right: 0
+            )
         case .right:
-            layoutImageRightTitleLeft(titleLabel: titleLabel, imageView: imageView)
-        case .bottom:
-            layoutImageBottomTitleTop(titleLabel: titleLabel, imageView: imageView)
-        case .reset:
-            titleLabel.frame = self.defaultTitleFrame
-            imageView.frame = self.defaultImageFrame
-        }
-    }
-    
-    private func layoutImageTopTitleBottom(titleLabel: UILabel, imageView: UIImageView) {
-        let titleWidth = titleLabel.intrinsicContentSize.width
-        let imageWidth = imageView.intrinsicContentSize.width
-        let totalWidth = self.bounds.width
-        let spacing = self.btnSpacing.spacing
-        let topSpacing = self.btnSpacing.topSpacing ?? 0
-        
-        // 图片居中
-        imageView.frame = CGRect(
-            x: (totalWidth - imageWidth) / 2,
-            y: topSpacing,
-            width: imageWidth,
-            height: imageView.frame.height
-        )
-        
-        // 文字居中，在图片下方
-        titleLabel.frame = CGRect(
-            x: (totalWidth - titleWidth) / 2,
-            y: imageView.frame.maxY + spacing,
-            width: titleWidth,
-            height: titleLabel.frame.height
-        )
-    }
-    
-    private func layoutImageLeftTitleRight(titleLabel: UILabel, imageView: UIImageView) {
-        let titleWidth = titleLabel.intrinsicContentSize.width
-        let imageWidth = imageView.intrinsicContentSize.width
-        let totalWidth = self.bounds.width
-        let spacing = self.btnSpacing.spacing
-        
-        let (imageViewX, titleLabelX) = calculateHorizontalPositions(
-            totalWidth: totalWidth,
-            imageWidth: imageWidth,
-            titleWidth: titleWidth,
-            spacing: spacing,
-            imageFirst: true
-        )
-        
-        titleLabel.frame = CGRect(
-            x: titleLabelX,
-            y: titleLabel.frame.origin.y,
-            width: titleWidth,
-            height: titleLabel.frame.height
-        )
-        
-        imageView.frame = CGRect(
-            x: imageViewX,
-            y: imageView.frame.origin.y,
-            width: imageWidth,
-            height: imageView.frame.height
-        )
-    }
-    
-    private func layoutImageRightTitleLeft(titleLabel: UILabel, imageView: UIImageView) {
-        let titleWidth = titleLabel.intrinsicContentSize.width
-        let imageWidth = imageView.intrinsicContentSize.width
-        let totalWidth = self.bounds.width
-        let spacing = self.btnSpacing.spacing
-        
-        let (titleLabelX, imageViewX) = calculateHorizontalPositions(
-            totalWidth: totalWidth,
-            imageWidth: imageWidth,
-            titleWidth: titleWidth,
-            spacing: spacing,
-            imageFirst: false
-        )
-        
-        titleLabel.frame = CGRect(
-            x: titleLabelX,
-            y: titleLabel.frame.origin.y,
-            width: titleWidth,
-            height: titleLabel.frame.height
-        )
-        
-        imageView.frame = CGRect(
-            x: imageViewX,
-            y: imageView.frame.origin.y,
-            width: imageWidth,
-            height: imageView.frame.height
-        )
-    }
-    
-    private func layoutImageBottomTitleTop(titleLabel: UILabel, imageView: UIImageView) {
-        let titleWidth = titleLabel.intrinsicContentSize.width
-        let imageWidth = imageView.intrinsicContentSize.width
-        let totalWidth = self.bounds.width
-        let spacing = self.btnSpacing.spacing
-        let topSpacing = self.btnSpacing.topSpacing ?? 0
-        
-        // 文字居中
-        titleLabel.frame = CGRect(
-            x: (totalWidth - titleWidth) / 2,
-            y: topSpacing,
-            width: titleWidth,
-            height: titleLabel.frame.height
-        )
-        
-        // 图片居中，在文字下方
-        imageView.frame = CGRect(
-            x: (totalWidth - imageWidth) / 2,
-            y: titleLabel.frame.maxY + spacing,
-            width: imageWidth,
-            height: imageView.frame.height
-        )
-    }
-    
-    // MARK: - 辅助方法
-    private func calculateHorizontalPositions(
-        totalWidth: CGFloat,
-        imageWidth: CGFloat,
-        titleWidth: CGFloat,
-        spacing: CGFloat,
-        imageFirst: Bool
-    ) -> (CGFloat, CGFloat) {
-        let leftSpacing = self.btnSpacing.leftSpacing
-        let rightSpacing = self.btnSpacing.rightSpacing
-        
-        if let leftSpacing = leftSpacing, let rightSpacing = rightSpacing {
-            // 左右间距都指定
-            if imageFirst {
-                let imageViewX = leftSpacing
-                let titleLabelX = totalWidth - titleWidth - rightSpacing
-                return (imageViewX, titleLabelX)
+            // 右对齐时，只设置右边距
+            self.contentEdgeInsets = UIEdgeInsets(
+                top: top,
+                left: 0,
+                bottom: bottom,
+                right: self.contentHorizontalPadding
+            )
+        case .leading:
+            // Leading 对齐时，根据布局方向设置
+            if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
+                // RTL 布局，设置右边距
+                self.contentEdgeInsets = UIEdgeInsets(
+                    top: top,
+                    left: 0,
+                    bottom: bottom,
+                    right: self.contentHorizontalPadding
+                )
             } else {
-                let titleLabelX = leftSpacing
-                let imageViewX = totalWidth - imageWidth - rightSpacing
-                return (titleLabelX, imageViewX)
+                // LTR 布局，设置左边距
+                self.contentEdgeInsets = UIEdgeInsets(
+                    top: top,
+                    left: self.contentHorizontalPadding,
+                    bottom: bottom,
+                    right: 0
+                )
             }
-        } else if let leftSpacing = leftSpacing {
-            // 只指定左间距
-            if imageFirst {
-                let imageViewX = leftSpacing
-                let titleLabelX = imageViewX + imageWidth + spacing
-                return (imageViewX, titleLabelX)
+        case .trailing:
+            // Trailing 对齐时，根据布局方向设置
+            if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
+                // RTL 布局，设置左边距
+                self.contentEdgeInsets = UIEdgeInsets(
+                    top: top,
+                    left: self.contentHorizontalPadding,
+                    bottom: bottom,
+                    right: 0
+                )
             } else {
-                let titleLabelX = leftSpacing
-                let imageViewX = titleLabelX + titleWidth + spacing
-                return (titleLabelX, imageViewX)
+                // LTR 布局，设置右边距
+                self.contentEdgeInsets = UIEdgeInsets(
+                    top: top,
+                    left: 0,
+                    bottom: bottom,
+                    right: self.contentHorizontalPadding
+                )
             }
-        } else if let rightSpacing = rightSpacing {
-            // 只指定右间距
-            if imageFirst {
-                let titleLabelX = totalWidth - rightSpacing - titleWidth
-                let imageViewX = titleLabelX - spacing - imageWidth
-                return (imageViewX, titleLabelX)
-            } else {
-                let imageViewX = totalWidth - imageWidth - rightSpacing
-                let titleLabelX = imageViewX - spacing - titleWidth
-                return (titleLabelX, imageViewX)
-            }
-        } else {
-            // 居中布局
-            let centerX = (totalWidth - titleWidth - imageWidth - spacing) / 2
-            if imageFirst {
-                let imageViewX = centerX
-                let titleLabelX = imageViewX + imageWidth + spacing
-                return (imageViewX, titleLabelX)
-            } else {
-                let titleLabelX = centerX
-                let imageViewX = titleLabelX + titleWidth + spacing
-                return (titleLabelX, imageViewX)
+        default:
+            // 居中对齐等其他情况，清除水平边距
+            if currentInsets.left != 0 || currentInsets.right != 0 {
+                self.contentEdgeInsets = UIEdgeInsets(
+                    top: top,
+                    left: 0,
+                    bottom: bottom,
+                    right: 0
+                )
             }
         }
-    }
-    
-    // MARK: - 公共方法
-    /// 设置按钮布局样式和间距
-    /// - Parameters:
-    ///   - style: 布局样式
-    ///   - spacing: 间距配置
-    public func st_layoutButtonWithEdgeInsets(style: STBtnEdgeInsetsStyle, spacing: STBtnSpacing) {
-        self.style = style
-        self.btnSpacing = spacing
-        self.hasSetLayout = true
-        self.setNeedsLayout()
     }
     
     /// 设置圆角按钮
@@ -362,10 +344,8 @@ open class STBtn: UIButton {
         gradientLayer.colors = colors.map { $0.cgColor }
         gradientLayer.startPoint = startPoint
         gradientLayer.endPoint = endPoint
-        
-        // 移除之前的渐变层
-        layer.sublayers?.removeAll { $0 is CAGradientLayer }
-        layer.insertSublayer(gradientLayer, at: 0)
+        self.layer.sublayers?.removeAll { $0 is CAGradientLayer }
+        self.layer.insertSublayer(gradientLayer, at: 0)
     }
     
     /// 设置阴影
@@ -382,51 +362,9 @@ open class STBtn: UIButton {
         layer.masksToBounds = false
     }
     
-    /// 重置为默认布局
-    public func st_resetLayout() {
-        self.style = .reset
-        self.hasSetLayout = false
-        self.defaultTitleFrame = .zero
-        self.defaultImageFrame = .zero
-        self.setNeedsLayout()
-    }
-    
     private func updateFontSize() {
         guard let fontName = self.titleLabel?.font.fontName,
               let fontSize = self.titleLabel?.font.pointSize else { return }
-        
         self.titleLabel?.font = UIFont.st_systemFont(ofSize: fontSize, fontName: fontName)
-    }
-}
-
-// MARK: - 便捷扩展
-public extension STBtn {
-    
-    /// 快速设置图片在上、文字在下的布局
-    /// - Parameter spacing: 图片和文字之间的间距
-    func st_setImageTopTitleBottom(spacing: CGFloat = 8) {
-        let btnSpacing = STBtnSpacing(spacing: spacing)
-        st_layoutButtonWithEdgeInsets(style: .top, spacing: btnSpacing)
-    }
-    
-    /// 快速设置图片在左、文字在右的布局
-    /// - Parameter spacing: 图片和文字之间的间距
-    func st_setImageLeftTitleRight(spacing: CGFloat = 8) {
-        let btnSpacing = STBtnSpacing(spacing: spacing)
-        st_layoutButtonWithEdgeInsets(style: .left, spacing: btnSpacing)
-    }
-    
-    /// 快速设置图片在右、文字在左的布局
-    /// - Parameter spacing: 图片和文字之间的间距
-    func st_setImageRightTitleLeft(spacing: CGFloat = 8) {
-        let btnSpacing = STBtnSpacing(spacing: spacing)
-        st_layoutButtonWithEdgeInsets(style: .right, spacing: btnSpacing)
-    }
-    
-    /// 快速设置图片在下、文字在上的布局
-    /// - Parameter spacing: 图片和文字之间的间距
-    func st_setImageBottomTitleTop(spacing: CGFloat = 8) {
-        let btnSpacing = STBtnSpacing(spacing: spacing)
-        st_layoutButtonWithEdgeInsets(style: .bottom, spacing: btnSpacing)
     }
 }

@@ -35,10 +35,17 @@ extension STNextViewController {
     }
     
     func timerBtn() {
-        let btn = STBtn()
+        let btn = STIconButton()
         btn.backgroundColor = UIColor.orange
         btn.frame = CGRect.init(x: 10, y: 300, width: 380, height: 100)
         btn.setTitle("begin", for: .normal)
+        btn.setImage(UIImage.init(named: "left_arrow"), for: .normal)
+        btn.contentHorizontalAlignment = .left
+        btn.contentHorizontalPadding = 10
+        btn.configure()
+            .iconPosition(.left)
+            .spacing(4)
+            .done()
         btn.setTitleColor(UIColor.red, for: .normal)
         btn.addTarget(self, action: #selector(btnClick(sender:)), for: .touchUpInside)
         self.view.addSubview(btn)
