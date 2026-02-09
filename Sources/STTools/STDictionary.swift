@@ -125,9 +125,7 @@ public extension Dictionary {
     func st_urlEncodedToData() -> Data? {
         return st_urlEncodedToString().data(using: .utf8)
     }
-    
-    // MARK: - Dictionary Operations
-    
+        
     /// 合并另一个字典（不修改原字典）
     /// - Parameter other: 要合并的字典
     /// - Returns: 合并后的新字典
@@ -228,9 +226,7 @@ public extension Dictionary {
     var st_randomValue: Value? {
         return self.values.randomElement()
     }
-    
-    // MARK: - Sorting Methods
-    
+        
     /// 按键排序（升序）
     /// - Returns: 排序后的键值对数组
     func st_sortedByKey() -> [(Key, Value)] where Key: Comparable {
@@ -261,9 +257,7 @@ public extension Dictionary {
     func st_sorted(by areInIncreasingOrder: (Key, Value, Key, Value) throws -> Bool) rethrows -> [(Key, Value)] {
         return try self.sorted { try areInIncreasingOrder($0.key, $0.value, $1.key, $1.value) }
     }
-    
-    // MARK: - Subscript Methods
-    
+        
     /// 安全的下标访问，带默认值
     /// - Parameters:
     ///   - key: 键
@@ -272,9 +266,7 @@ public extension Dictionary {
     subscript(key: Key, default defaultValue: Value) -> Value {
         return self[key] ?? defaultValue
     }
-    
-    // MARK: - Validation Methods
-    
+        
     /// 检查是否包含指定的键
     /// - Parameter key: 要检查的键
     /// - Returns: 是否包含
@@ -302,9 +294,7 @@ public extension Dictionary {
     func st_anySatisfy(_ predicate: (Value) throws -> Bool) rethrows -> Bool {
         return try self.values.contains { try predicate($0) }
     }
-    
-    // MARK: - Grouping Methods
-    
+        
     /// 按条件分组
     /// - Parameter predicate: 分组条件
     /// - Returns: 分组后的字典
@@ -319,9 +309,7 @@ public extension Dictionary {
         }
         return result
     }
-    
-    // MARK: - Statistics Methods
-    
+        
     /// 获取值的总和（适用于数值类型）
     /// - Returns: 总和
     func st_sum() -> Double where Value: BinaryFloatingPoint {
@@ -361,10 +349,8 @@ public extension Dictionary {
     }
 }
 
-// MARK: - Dictionary Initialization Extensions
 public extension Dictionary {
-    
-    
+
     /// 从键值对数组创建字典
     /// - Parameter elements: 键值对数组
     /// - Returns: 字典对象
@@ -377,7 +363,6 @@ public extension Dictionary {
     }
 }
 
-// MARK: - Dictionary Comparison Extensions
 public extension Dictionary where Value: Equatable {
     
     /// 检查两个字典是否相等（忽略键的顺序）
@@ -396,8 +381,6 @@ public extension Dictionary where Value: Equatable {
     /// - Returns: 差异字典
     func st_differences(from other: [Key: Value]) -> [Key: Value] {
         var differences: [Key: Value] = [:]
-        
-        // 检查当前字典中的差异
         for (key, value) in self {
             if let otherValue = other[key] {
                 if value != otherValue {
@@ -407,19 +390,15 @@ public extension Dictionary where Value: Equatable {
                 differences[key] = value
             }
         }
-        
-        // 检查另一个字典中的差异
         for (key, value) in other {
             if self[key] == nil {
                 differences[key] = value
             }
         }
-        
         return differences
     }
 }
 
-// MARK: - Dictionary Performance Extensions
 public extension Dictionary {
     
     /// 批量更新字典（性能优化）

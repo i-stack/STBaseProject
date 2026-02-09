@@ -8,7 +8,6 @@
 import UIKit
 import CoreGraphics
 
-// MARK: - 颜色创建方法
 public extension UIColor {
     
     /// 从十六进制字符串创建颜色（sRGB 色彩空间）
@@ -116,7 +115,6 @@ public extension UIColor {
     }
 }
 
-// MARK: - 私有辅助方法
 private extension UIColor {
     /// 在 sRGB 色彩空间中创建颜色
     /// 此方法显式使用 sRGB 色彩空间，避免在支持 Display P3 的设备上出现颜色偏差

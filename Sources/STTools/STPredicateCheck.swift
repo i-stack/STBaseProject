@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 常用正则表达式模式
 public struct STRegexPattern {
         
     /// 邮箱验证
@@ -27,9 +26,7 @@ public struct STRegexPattern {
     
     /// 信用卡号验证
     public static let creditCard = "^\\d{13,19}$"
-    
-    // MARK: - 密码验证模式
-    
+        
     /// 强密码验证（8-32位，包含大小写字母、数字、特殊字符）
     public static let strongPassword = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,32}$"
     
@@ -38,9 +35,7 @@ public struct STRegexPattern {
     
     /// 弱密码验证（6-32位，包含字母和数字）
     public static let weakPassword = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,32}$"
-    
-    // MARK: - 数字验证模式
-    
+        
     /// 纯数字
     public static let digits = "^[0-9]*$"
     
@@ -58,9 +53,7 @@ public struct STRegexPattern {
     
     /// 正浮点数
     public static let positiveFloat = "^([1-9]\\d*\\.\\d*|0\\.\\d*[1-9]\\d*)$"
-    
-    // MARK: - 字符验证模式
-    
+        
     /// 中文字符
     public static let chineseCharacters = "^[\\p{Han}]*$"
     
@@ -78,9 +71,7 @@ public struct STRegexPattern {
     
     /// 标点符号
     public static let punctuation = "^[\\p{P}]*$"
-    
-    // MARK: - 网络相关模式
-    
+        
     /// URL 验证
     public static let url = "^(https?:\\/\\/)?([\\da-z\\.-]+)\\.([a-z\\.]{2,6})([\\/\\w \\.-]*)*\\/?$"
     
@@ -89,9 +80,7 @@ public struct STRegexPattern {
     
     /// IPv6 地址验证
     public static let ipv6 = "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"
-    
-    // MARK: - 时间相关模式
-    
+        
     /// 日期格式（YYYY-MM-DD）
     public static let date = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
     
@@ -102,11 +91,8 @@ public struct STRegexPattern {
     public static let dateTime = "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])\\s([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)$"
 }
 
-// MARK: - 谓词检查类
-
 /// 谓词检查类，提供各种字符串验证功能
 public class STPredicateCheck: NSObject {
-        
     /// 使用正则表达式验证字符串
     /// - Parameters:
     ///   - text: 要验证的文本
@@ -117,9 +103,7 @@ public class STPredicateCheck: NSObject {
         let predicate = NSPredicate(format: "SELF MATCHES %@", pattern)
         return predicate.evaluate(with: text)
     }
-    
-    // MARK: - 密码验证
-    
+        
     /// 检查密码是否包含大写字母
     /// - Parameter password: 输入字符串
     /// - Returns: 匹配结果
@@ -176,9 +160,7 @@ public class STPredicateCheck: NSObject {
     public class func st_checkPassword(password: String) -> Bool {
         return st_checkMediumPassword(password: password)
     }
-    
-    // MARK: - 用户名验证
-    
+        
     /// 验证用户名（1-32位中英文数字）
     /// - Parameter userName: 输入用户名
     /// - Returns: 匹配结果
@@ -198,9 +180,7 @@ public class STPredicateCheck: NSObject {
         }
         return st_validate(userName, with: pattern)
     }
-    
-    // MARK: - 联系方式验证
-    
+        
     /// 验证邮箱
     /// - Parameter email: 输入邮箱
     /// - Returns: 匹配结果
@@ -286,9 +266,7 @@ public class STPredicateCheck: NSObject {
     public class func st_checkIsPositiveFloat(text: String) -> Bool {
         return st_validate(text, with: STRegexPattern.positiveFloat)
     }
-    
-    // MARK: - 字符验证
-    
+        
     /// 验证是否为中文字符
     /// - Parameter text: 输入字符串
     /// - Returns: 匹配结果
@@ -338,9 +316,7 @@ public class STPredicateCheck: NSObject {
         let pattern = "^([\\p{Han}\\p{P}A-Za-z0-9])*$"
         return st_validate(text, with: pattern)
     }
-    
-    // MARK: - 网络相关验证
-    
+        
     /// 验证 URL
     /// - Parameter url: 输入 URL
     /// - Returns: 匹配结果
@@ -361,9 +337,7 @@ public class STPredicateCheck: NSObject {
     public class func st_checkIPv6(ip: String) -> Bool {
         return st_validate(ip, with: STRegexPattern.ipv6)
     }
-    
-    // MARK: - 时间相关验证
-    
+        
     /// 验证日期格式（YYYY-MM-DD）
     /// - Parameter date: 输入日期
     /// - Returns: 匹配结果
@@ -384,9 +358,7 @@ public class STPredicateCheck: NSObject {
     public class func st_checkDateTime(dateTime: String) -> Bool {
         return st_validate(dateTime, with: STRegexPattern.dateTime)
     }
-    
-    // MARK: - 长度验证
-    
+        
     /// 验证字符串长度范围
     /// - Parameters:
     ///   - text: 输入字符串
@@ -416,21 +388,17 @@ public class STPredicateCheck: NSObject {
     public class func st_checkMaxLength(text: String, maxLength: Int) -> Bool {
         return text.count <= maxLength
     }
-    
-    // MARK: - 组合验证
-    
+        
     /// 验证密码强度
     /// - Parameter password: 输入密码
     /// - Returns: 密码强度等级（0-4）
     public class func st_checkPasswordStrength(password: String) -> Int {
         var strength = 0
-        
         if st_checkMinLength(text: password, minLength: 8) { strength += 1 }
         if st_checkLowercaseLetters(text: password) { strength += 1 }
         if st_checkUppercaseLetters(text: password) { strength += 1 }
         if st_checkIsDigit(text: password) { strength += 1 }
         if st_checkSpecialCharPassword(password: password) { strength += 1 }
-        
         return strength
     }
     
@@ -476,17 +444,11 @@ public class STPredicateCheck: NSObject {
         if !st_checkPassword(password: password) {
             errors.append("密码格式不正确（8-32位，包含大小写字母和数字）")
         }
-        
         return (errors.isEmpty, errors)
     }
 }
 
-// MARK: - String 扩展
-
 public extension String {
-    
-    // MARK: - 便捷验证方法
-    
     /// 验证是否为有效邮箱
     var st_isValidEmail: Bool {
         return STPredicateCheck.st_checkEmail(email: self)

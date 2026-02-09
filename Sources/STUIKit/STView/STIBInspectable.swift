@@ -3,11 +3,9 @@
 //  STBaseProject
 //
 //  Created by 寒江孤影 on 2017/02/24.
-//  Updated for STBaseProject 2.0.0
 //
 
 import UIKit
-// STConfig 现在在 STBaseModule 内部，不需要单独导入
 
 // MARK: - 约束适配类型
 public enum STConstraintAdaptType {
@@ -77,7 +75,7 @@ extension NSLayoutConstraint {
             _autoConstant = newValue
             if newValue && !_isAdapted {
                 _originalConstant = self.constant
-                st_adaptConstraint()
+                self.st_adaptConstraint()
             } else if !newValue && _isAdapted {
                 self.constant = _originalConstant
                 _isAdapted = false
@@ -103,7 +101,7 @@ extension NSLayoutConstraint {
             }
             _adaptType = type
             if _autoConstant && !_isAdapted {
-                st_adaptConstraint()
+                self.st_adaptConstraint()
             }
         }
         get {
@@ -125,7 +123,7 @@ extension NSLayoutConstraint {
             _adaptType = .custom(newValue)
             
             if _autoConstant && !_isAdapted {
-                st_adaptConstraint()
+                self.st_adaptConstraint()
             }
         }
         get {
@@ -168,7 +166,7 @@ extension NSLayoutConstraint {
     public func st_triggerAdapt() {
         if _autoConstant {
             _isAdapted = false
-            st_adaptConstraint()
+            self.st_adaptConstraint()
         }
     }
     
@@ -200,7 +198,7 @@ extension NSLayoutConstraint {
         super.awakeFromNib()
         if _autoConstant && !_isAdapted {
             _originalConstant = self.constant
-            st_adaptConstraint()
+            self.st_adaptConstraint()
         }
     }
 }
@@ -241,9 +239,8 @@ public struct STConstraintAdapter {
 
 // MARK: - UIView 约束适配扩展
 public extension UIView {
-    
     func st_adaptAllConstraints() {
-        st_adaptConstraintsRecursively(in: self)
+        self.st_adaptConstraintsRecursively(in: self)
     }
     
     /// 适配约束
@@ -253,13 +250,13 @@ public extension UIView {
         }
         
         for subview in view.subviews {
-            st_adaptConstraintsRecursively(in: subview)
+            self.st_adaptConstraintsRecursively(in: subview)
         }
     }
     
     /// 重置所有子视图的约束
     func st_resetAllConstraints() {
-        st_resetConstraintsRecursively(in: self)
+        self.st_resetConstraintsRecursively(in: self)
     }
     
     /// 重置约束
@@ -269,14 +266,14 @@ public extension UIView {
         }
         
         for subview in view.subviews {
-            st_resetConstraintsRecursively(in: subview)
+            self.st_resetConstraintsRecursively(in: subview)
         }
     }
     
     /// 获取所有已适配的约束
     func st_getAllAdaptedConstraints() -> [NSLayoutConstraint] {
         var adaptedConstraints: [NSLayoutConstraint] = []
-        st_collectAdaptedConstraintsRecursively(in: self, result: &adaptedConstraints)
+        self.st_collectAdaptedConstraintsRecursively(in: self, result: &adaptedConstraints)
         return adaptedConstraints
     }
     
@@ -289,7 +286,7 @@ public extension UIView {
         }
         
         for subview in view.subviews {
-            st_collectAdaptedConstraintsRecursively(in: subview, result: &result)
+            self.st_collectAdaptedConstraintsRecursively(in: subview, result: &result)
         }
     }
 }

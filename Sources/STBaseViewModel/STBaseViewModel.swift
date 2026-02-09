@@ -120,36 +120,36 @@ open class STBaseViewModel: NSObject {
     private var retryCount = 0
     
     deinit {
-        cancellables.removeAll()
-        cache.removeAllObjects()
+        self.cancellables.removeAll()
+        self.cache.removeAllObjects()
         STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
     
     public override init() {
         super.init()
-        st_setupBindings()
+        self.st_setupBindings()
     }
     
     private func st_setupBindings() {
-        loadingState.sink { [weak self] state in
+        self.loadingState.sink { [weak self] state in
             self?.st_handleLoadingStateChange(state)
-        }.store(in: &cancellables)
+        }.store(in: &self.cancellables)
         
-        refreshState.sink { [weak self] state in
+        self.refreshState.sink { [weak self] state in
             self?.st_handleRefreshStateChange(state)
-        }.store(in: &cancellables)
+        }.store(in: &self.cancellables)
     }
     
     private func st_handleLoadingStateChange(_ state: STLoadingState) {
         switch state {
         case .loading:
-            st_onLoading()
+            self.st_onLoading()
         case .loaded:
-            st_onLoaded()
+            self.st_onLoaded()
         case .failed(let error):
-            st_onFailed(error)
+            self.st_onFailed(error)
         case .empty:
-            st_onEmpty()
+            self.st_onEmpty()
         case .idle:
             break
         }
@@ -158,11 +158,11 @@ open class STBaseViewModel: NSObject {
     private func st_handleRefreshStateChange(_ state: STRefreshState) {
         switch state {
         case .refreshing:
-            st_onRefreshing()
+            self.st_onRefreshing()
         case .noMoreData:
-            st_onNoMoreData()
+            self.st_onNoMoreData()
         case .failed(let error):
-            st_onRefreshFailed(error)
+            self.st_onRefreshFailed(error)
         case .idle:
             break
         }
@@ -206,11 +206,11 @@ open class STBaseViewModel: NSObject {
                                    encodingType: STParameterEncoder.EncodingType = .json,
                                    responseType: T.Type,
                                    completion: @escaping (Result<T, STBaseError>) -> Void) {
-        if requestConfig.showLoading {
-            loadingState.send(.loading)
+        if self.requestConfig.showLoading {
+            self.loadingState.send(.loading)
         }
-        httpSession.st_request(url: url, 
-                              method: method, 
+        self.httpSession.st_request(url: url,
+                              method: method,
                               parameters: parameters, 
                               encodingType: encodingType, 
                               requestConfig: requestConfig, 
@@ -224,28 +224,28 @@ open class STBaseViewModel: NSObject {
                                 parameters: [String: Any]? = nil,
                                 responseType: T.Type,
                                 completion: @escaping (Result<T, STBaseError>) -> Void) {
-        st_request(url: url, method: .get, parameters: parameters, responseType: responseType, completion: completion)
+        self.st_request(url: url, method: .get, parameters: parameters, responseType: responseType, completion: completion)
     }
     
     open func st_post<T: Codable>(url: String,
                                  parameters: [String: Any]? = nil,
                                  responseType: T.Type,
                                  completion: @escaping (Result<T, STBaseError>) -> Void) {
-        st_request(url: url, method: .post, parameters: parameters, responseType: responseType, completion: completion)
+        self.st_request(url: url, method: .post, parameters: parameters, responseType: responseType, completion: completion)
     }
     
     open func st_put<T: Codable>(url: String,
                                 parameters: [String: Any]? = nil,
                                 responseType: T.Type,
                                 completion: @escaping (Result<T, STBaseError>) -> Void) {
-        st_request(url: url, method: .put, parameters: parameters, responseType: responseType, completion: completion)
+        self.st_request(url: url, method: .put, parameters: parameters, responseType: responseType, completion: completion)
     }
     
     open func st_delete<T: Codable>(url: String,
                                    parameters: [String: Any]? = nil,
                                    responseType: T.Type,
                                    completion: @escaping (Result<T, STBaseError>) -> Void) {
-        st_request(url: url, method: .delete, parameters: parameters, responseType: responseType, completion: completion)
+        self.st_request(url: url, method: .delete, parameters: parameters, responseType: responseType, completion: completion)
     }
     
     open func st_request<T: Codable>(_ request: URLRequest, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
@@ -255,8 +255,8 @@ open class STBaseViewModel: NSObject {
         }
         let method = STHTTPMethod(rawValue: request.httpMethod ?? "GET") ?? .get
         let parameters = st_extractParameters(from: request)
-        st_request(url: url, 
-                  method: method, 
+        self.st_request(url: url,
+                  method: method,
                   parameters: parameters, 
                   responseType: responseType, 
                   completion: completion)
@@ -265,10 +265,10 @@ open class STBaseViewModel: NSObject {
     // MARK: - 参数提取（用于 URLRequest）
     private func st_extractParameters(from request: URLRequest) -> [String: Any]? {
         if let httpMethod = request.httpMethod, httpMethod.uppercased() == "GET" {
-            return st_extractQueryParameters(from: request.url)
+            return self.st_extractQueryParameters(from: request.url)
         }
         if let httpBody = request.httpBody {
-            return st_extractBodyParameters(from: httpBody)
+            return self.st_extractBodyParameters(from: httpBody)
         }
         return nil
     }
@@ -292,7 +292,7 @@ open class STBaseViewModel: NSObject {
             return json as? [String: Any]
         } catch {
             if let string = String(data: data, encoding: .utf8) {
-                return st_parseFormData(string)
+                return self.st_parseFormData(string)
             }
         }
         return nil
@@ -383,16 +383,16 @@ open class STBaseViewModel: NSObject {
                                                  responseType: T.Type,
                                                  completion: @escaping (Result<T, STBaseError>) -> Void) {
         if httpResponse.isSuccess {
-            let decodeResult = st_decodeResponse(httpResponse, responseType: responseType)
+            let decodeResult = self.st_decodeResponse(httpResponse, responseType: responseType)
             switch decodeResult {
             case .success(let result):
-                st_handleSuccess(result, completion: completion)
+                self.st_handleSuccess(result, completion: completion)
             case .failure(let error):
-                st_handleError(error, completion: completion)
+                self.st_handleError(error, completion: completion)
             }
         } else {
-            let error = st_convertHTTPError(httpResponse.error)
-            st_handleError(error, completion: completion)
+            let error = self.st_convertHTTPError(httpResponse.error)
+            self.st_handleError(error, completion: completion)
         }
     }
     
@@ -422,51 +422,51 @@ open class STBaseViewModel: NSObject {
     }
     
     private func st_handleSuccess<T>(_ result: T, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        loadingState.send(.loaded)
+        self.loadingState.send(.loaded)
         completion(.success(result))
-        dataUpdated.send()
+        self.dataUpdated.send()
     }
     
     private func st_handleError<T>(_ error: STBaseError, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        loadingState.send(.failed(error))
+        self.loadingState.send(.failed(error))
         completion(.failure(error))
-        if retryCount < requestConfig.retryCount {
-            retryCount += 1
+        if self.retryCount < self.requestConfig.retryCount {
+            self.retryCount += 1
         }
     }
     
     // MARK: - 缓存管理
     open func st_setCache(_ object: Any, forKey key: String) {
         let cacheKey = NSString(string: key)
-        cache.setObject(object as AnyObject, forKey: cacheKey)
-        if cacheConfig.cachePolicy == .disk || cacheConfig.cachePolicy == .both {
-            st_saveToDisk(object: object, forKey: key)
+        self.cache.setObject(object as AnyObject, forKey: cacheKey)
+        if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
+            self.st_saveToDisk(object: object, forKey: key)
         }
     }
     
     open func st_getCache(forKey key: String) -> Any? {
         let cacheKey = NSString(string: key)
-        if let cachedObject = cache.object(forKey: cacheKey) {
+        if let cachedObject = self.cache.object(forKey: cacheKey) {
             return cachedObject
         }
-        if cacheConfig.cachePolicy == .disk || cacheConfig.cachePolicy == .both {
-            return st_loadFromDisk(forKey: key)
+        if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
+            return self.st_loadFromDisk(forKey: key)
         }
         return nil
     }
     
     open func st_removeCache(forKey key: String) {
         let cacheKey = NSString(string: key)
-        cache.removeObject(forKey: cacheKey)
-        if cacheConfig.cachePolicy == .disk || cacheConfig.cachePolicy == .both {
-            st_removeFromDisk(forKey: key)
+        self.cache.removeObject(forKey: cacheKey)
+        if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
+            self.st_removeFromDisk(forKey: key)
         }
     }
     
     open func st_clearCache() {
-        cache.removeAllObjects()
-        if cacheConfig.cachePolicy == .disk || cacheConfig.cachePolicy == .both {
-            st_clearDiskCache()
+        self.cache.removeAllObjects()
+        if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
+            self.st_clearDiskCache()
         }
     }
     
@@ -525,13 +525,13 @@ open class STBaseViewModel: NSObject {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.httpBody = body
-        request.timeoutInterval = requestConfig.timeoutInterval
-        request.cachePolicy = requestConfig.cachePolicy
-        request.allowsCellularAccess = requestConfig.allowsCellularAccess
-        request.httpShouldHandleCookies = requestConfig.httpShouldHandleCookies
-        request.httpShouldUsePipelining = requestConfig.httpShouldUsePipelining
-        request.networkServiceType = requestConfig.networkServiceType
-        let headers = requestHeaders.st_getHeaders()
+        request.timeoutInterval = self.requestConfig.timeoutInterval
+        request.cachePolicy = self.requestConfig.cachePolicy
+        request.allowsCellularAccess = self.requestConfig.allowsCellularAccess
+        request.httpShouldHandleCookies = self.requestConfig.httpShouldHandleCookies
+        request.httpShouldUsePipelining = self.requestConfig.httpShouldUsePipelining
+        request.networkServiceType = self.requestConfig.networkServiceType
+        let headers = self.requestHeaders.st_getHeaders()
         for (key, value) in headers {
             request.setValue(value, forHTTPHeaderField: key)
         }
@@ -566,11 +566,11 @@ open class STBaseViewModel: NSObject {
                                    progress: ((STUploadProgress) -> Void)? = nil,
                                    completion: @escaping (Result<T, STBaseError>) -> Void) {
         
-        if requestConfig.showLoading {
-            loadingState.send(.loading)
+        if self.requestConfig.showLoading {
+            self.loadingState.send(.loading)
         }
         
-        httpSession.st_upload(url: url, files: files, parameters: parameters, requestConfig: requestConfig, requestHeaders: requestHeaders, progress: progress) { [weak self] response in
+        self.httpSession.st_upload(url: url, files: files, parameters: parameters, requestConfig: self.requestConfig, requestHeaders: self.requestHeaders, progress: progress) { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
         }
     }
@@ -578,10 +578,10 @@ open class STBaseViewModel: NSObject {
     open func st_download(url: String,
                          progress: ((STUploadProgress) -> Void)? = nil,
                          completion: @escaping (URL?, STBaseError?) -> Void) {
-        if requestConfig.showLoading {
-            loadingState.send(.loading)
+        if self.requestConfig.showLoading {
+            self.loadingState.send(.loading)
         }
-        httpSession.st_request(url: url, method: .get, parameters: nil, encodingType: .json, requestConfig: requestConfig, requestHeaders: requestHeaders) { [weak self] response in
+        self.httpSession.st_request(url: url, method: .get, parameters: nil, encodingType: .json, requestConfig: self.requestConfig, requestHeaders: self.requestHeaders) { [weak self] response in
             if response.isSuccess, let data = response.data {
                 let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
                 do {
@@ -603,18 +603,18 @@ open class STBaseViewModel: NSObject {
     
     // MARK: - 内存管理
     open func st_cleanup() {
-        cancellables.removeAll()
-        cache.removeAllObjects()
-        retryCount = 0
-        loadingState.send(.idle)
-        refreshState.send(.idle)
+        self.cancellables.removeAll()
+        self.cache.removeAllObjects()
+        self.retryCount = 0
+        self.loadingState.send(.idle)
+        self.refreshState.send(.idle)
     }
 }
 
 // MARK: - 便捷扩展
 extension STBaseViewModel {
     public func st_bindLoadingState<T: AnyObject>(to object: T, keyPath: ReferenceWritableKeyPath<T, Bool>) {
-        loadingState
+        self.loadingState
             .map { state in
                 switch state {
                 case .loading:
@@ -624,34 +624,34 @@ extension STBaseViewModel {
                 }
             }
             .assign(to: keyPath, on: object)
-            .store(in: &cancellables)
+            .store(in: &self.cancellables)
     }
     
     public func st_bindError<T: AnyObject>(to object: T, keyPath: ReferenceWritableKeyPath<T, String?>) {
         error
             .map { $0.errorDescription }
             .assign(to: keyPath, on: object)
-            .store(in: &cancellables)
+            .store(in: &self.cancellables)
     }
     
     public func st_bindDataUpdate<T: AnyObject>(to object: T, action: @escaping (T) -> Void) {
-        dataUpdated
+        self.dataUpdated
             .sink { [weak object] _ in
                 if let object = object {
                     action(object)
                 }
             }
-            .store(in: &cancellables)
+            .store(in: &self.cancellables)
     }
     
     /// 设置认证 Token
     public func st_setAuthToken(_ token: String, type: STAuthorizationType) {
-        requestHeaders.st_setAuthorization(token, type: type)
+        self.requestHeaders.st_setAuthorization(token, type: type)
     }
     
     /// 设置自定义认证头
     public func st_setCustomAuth(_ value: String) {
-        requestHeaders.st_setCustomAuthorization(value)
+        self.requestHeaders.st_setCustomAuthorization(value)
     }
     
     /// 调试方法：打印原始响应数据
@@ -680,22 +680,22 @@ extension STBaseViewModel {
     
     /// 设置自定义请求头
     public func st_setCustomHeaders(_ headers: [String: String]) {
-        requestHeaders.st_setHeaders(headers)
+        self.requestHeaders.st_setHeaders(headers)
     }
     
     /// 清除认证信息
     public func st_clearAuth() {
-        requestHeaders.st_removeHeader(forKey: "Authorization")
+        self.requestHeaders.st_removeHeader(forKey: "Authorization")
     }
     
     /// 检查网络状态
     public func st_checkNetworkStatus() -> STNetworkReachabilityStatus {
-        return httpSession.st_checkNetworkStatus()
+        return self.httpSession.st_checkNetworkStatus()
     }
     
     /// 等待网络可用
     public func st_waitForNetwork(completion: @escaping () -> Void) {
-        if httpSession.st_checkNetworkStatus() != .notReachable {
+        if self.httpSession.st_checkNetworkStatus() != .notReachable {
             completion()
         } else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {

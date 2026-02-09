@@ -53,17 +53,11 @@ public class STBaseAnimation {
     ///   - imageView: 要执行动画的图片视图
     ///   - completion: 动画完成回调
     public func performFadeInAnimation(for imageView: UIImageView, completion: (() -> Void)? = nil) {
-        UIView.animate(
-            withDuration: config.fadeInDuration,
-            delay: 0.0,
-            options: config.animationOptions,
-            animations: {
-                imageView.alpha = 1.0
-            },
-            completion: { _ in
-                completion?()
-            }
-        )
+        UIView.animate(withDuration: config.fadeInDuration, delay: 0.0, options: config.animationOptions, animations: {
+            imageView.alpha = 1.0
+        }, completion: { _ in
+            completion?()
+        })
     }
     
     /// 执行脉冲动画
@@ -71,17 +65,11 @@ public class STBaseAnimation {
     ///   - imageView: 要执行动画的图片视图
     ///   - completion: 动画完成回调
     public func performPulseAnimation(for imageView: UIImageView, completion: (() -> Void)? = nil) {
-        UIView.animate(
-            withDuration: config.pulseDuration,
-            delay: 0.0,
-            options: config.pulseOptions,
-            animations: {
-                imageView.transform = CGAffineTransform(scaleX: self.config.pulseScale, y: self.config.pulseScale)
-            },
-            completion: { _ in
-                completion?()
-            }
-        )
+        UIView.animate(withDuration: config.pulseDuration, delay: 0.0, options: config.pulseOptions, animations: {
+            imageView.transform = CGAffineTransform(scaleX: self.config.pulseScale, y: self.config.pulseScale)
+        }, completion: { _ in
+            completion?()
+        })
     }
     
     /// 执行重置动画
@@ -89,15 +77,11 @@ public class STBaseAnimation {
     ///   - imageView: 要执行动画的图片视图
     ///   - completion: 动画完成回调
     public func performResetAnimation(for imageView: UIImageView, completion: (() -> Void)? = nil) {
-        UIView.animate(
-            withDuration: config.resetDuration,
-            animations: {
-                imageView.transform = CGAffineTransform.identity
-            },
-            completion: { _ in
-                completion?()
-            }
-        )
+        UIView.animate(withDuration: config.resetDuration, animations: {
+            imageView.transform = CGAffineTransform.identity
+        }, completion: { _ in
+            completion?()
+        })
     }
     
     /// 设置初始状态
@@ -138,7 +122,6 @@ public class STBaseAnimation {
 }
 
 // MARK: - 便捷方法
-
 extension STBaseAnimation {
     
     /// 创建默认配置的基类实例
@@ -153,16 +136,8 @@ extension STBaseAnimation {
     ///   - pulseDuration: 脉冲动画时间
     ///   - pulseScale: 脉冲缩放比例
     /// - Returns: 配置好的基类实例
-    public static func createCustom(
-        fadeInDuration: TimeInterval = 1.0,
-        pulseDuration: TimeInterval = 0.8,
-        pulseScale: CGFloat = 1.05
-    ) -> STBaseAnimation {
-        let config = BaseAnimationConfig(
-            fadeInDuration: fadeInDuration,
-            pulseDuration: pulseDuration,
-            pulseScale: pulseScale
-        )
+    public static func createCustom(fadeInDuration: TimeInterval = 1.0, pulseDuration: TimeInterval = 0.8, pulseScale: CGFloat = 1.05) -> STBaseAnimation {
+        let config = BaseAnimationConfig(fadeInDuration: fadeInDuration, pulseDuration: pulseDuration, pulseScale: pulseScale)
         return STBaseAnimation(config: config)
     }
 }

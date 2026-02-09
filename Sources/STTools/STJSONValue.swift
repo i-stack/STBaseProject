@@ -7,9 +7,7 @@
 
 import Foundation
 
-/// JSON 值类型枚举，支持所有 JSON 数据类型
 public enum STJSONValue: Codable {
-    
     case int(Int)
     case bool(Bool)
     case double(Double)

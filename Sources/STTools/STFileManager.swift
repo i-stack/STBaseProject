@@ -8,11 +8,8 @@
 import UIKit
 import Foundation
 
-/// 文件管理器类，提供完整的文件操作功能
 public class STFileManager: NSObject {
-    
-    // MARK: - 文件写入操作
-    
+        
     /// 写入内容到文件
     /// - Parameters:
     ///   - content: 要写入的内容
@@ -84,9 +81,7 @@ public class STFileManager: NSObject {
         }
         return false
     }
-    
-    // MARK: - 文件读取操作
-    
+        
     /// 从文件读取内容
     /// - Parameters:
     ///   - filePath: 文件路径
@@ -119,9 +114,7 @@ public class STFileManager: NSObject {
         }
         return nil
     }
-    
-    // MARK: - 路径获取
-    
+        
     /// 获取主目录路径
     /// - Returns: 主目录路径
     public static func st_getHomePath() -> String {
@@ -161,8 +154,6 @@ public class STFileManager: NSObject {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
         return paths.first ?? ""
     }
-
-    // MARK: - 文件状态检查
     
     /// 检查文件是否存在
     /// - Parameter path: 文件路径
@@ -219,8 +210,6 @@ public class STFileManager: NSObject {
         }
         return nil
     }
-
-    // MARK: - 目录操作
     
     /// 创建目录
     /// - Parameter path: 目录路径
@@ -268,8 +257,6 @@ public class STFileManager: NSObject {
         fileManager.createFile(atPath: tempPath.path, contents: nil, attributes: nil)
         return tempPath.path
     }
-
-    // MARK: - 文件操作
     
     /// 复制文件
     /// - Parameters:
@@ -380,9 +367,7 @@ public class STFileManager: NSObject {
         
         return totalSize
     }
-    
-    // MARK: - 文件类型检查
-    
+        
     /// 检查是否为图片文件
     /// - Parameter path: 文件路径
     /// - Returns: 是否为图片
@@ -439,9 +424,7 @@ public class STFileManager: NSObject {
         }
         return "\(outputPath)/log.txt"
     }
-    
-    // MARK: - 文件URL操作
-    
+        
     /// 从URL读取文件内容
     /// - Parameters:
     ///   - url: 文件URL
@@ -483,27 +466,21 @@ public class STFileManager: NSObject {
     public static func st_monitorFile(path: String, handler: @escaping (String) -> Void) -> DispatchSourceFileSystemObject? {
         let fileDescriptor = open(path, O_EVTONLY)
         if fileDescriptor == -1 { return nil }
-        
         let source = DispatchSource.makeFileSystemObjectSource(
             fileDescriptor: fileDescriptor,
             eventMask: .write,
             queue: DispatchQueue.global()
         )
-        
         source.setEventHandler {
             handler(path)
         }
-        
         source.setCancelHandler {
             close(fileDescriptor)
         }
-        
         source.resume()
         return source
     }
 }
-
-// MARK: - 日志函数
 
 /// 调试日志输出
 public func STLog<T>(_ message: T, level: STLogLevel = .info, file: String = #file, funcName: String = #function, lineNum: Int = #line) {

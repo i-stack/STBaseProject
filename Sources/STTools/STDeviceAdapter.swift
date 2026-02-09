@@ -30,7 +30,6 @@ public struct STConstantBarHeightModel {
     }
 }
 
-/// 设备判断、尺寸计算、比例缩放、界面适配等功能
 public class STDeviceAdapter: NSObject {
     
     public static let shared: STDeviceAdapter = STDeviceAdapter()

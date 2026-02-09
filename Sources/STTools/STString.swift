@@ -10,8 +10,6 @@ import Foundation
 
 public extension String {
     
-    // MARK: - 模型转换
-    
     /// 将模型转换为参数字典
     /// - Parameter model: 要转换的模型对象
     /// - Returns: 参数字典
@@ -119,8 +117,6 @@ public extension String {
     }
 }
 
-// MARK: - 数字格式化扩展
-
 public extension String {
     
     /// 格式化金额显示（添加千分位分隔符）
@@ -199,7 +195,6 @@ public extension String {
     }
 }
 
-// MARK: - URL 处理扩展
 public extension String {
     
     /// 从 URL 中提取参数
@@ -263,7 +258,6 @@ public extension String {
     }
 }
 
-// MARK: - 工具方法扩展
 public extension String {
     
     /// 生成随机字符串

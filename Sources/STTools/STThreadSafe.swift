@@ -5,10 +5,9 @@
 //  Created by 寒江孤影 on 2019/03/16.
 //
 
-import Foundation
 import Dispatch
+import Foundation
 
-// MARK: - 线程安全工具类
 public class STThreadSafe {
         
     /// 安全地在主线程执行代码
@@ -41,9 +40,7 @@ public class STThreadSafe {
             return DispatchQueue.main.sync { callback() }
         }
     }
-    
-    // MARK: - 后台线程安全调用
-    
+        
     /// 在后台队列异步执行代码
     /// - Parameters:
     ///   - qos: 服务质量等级
@@ -67,9 +64,7 @@ public class STThreadSafe {
     public static func dispatchSync(on queue: DispatchQueue, _ callback: @escaping () -> Void) {
         queue.sync { callback() }
     }
-    
-    // MARK: - 延迟执行
-    
+        
     /// 延迟执行代码
     /// - Parameters:
     ///   - delay: 延迟时间（秒）

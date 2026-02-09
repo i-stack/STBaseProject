@@ -21,7 +21,6 @@ open class STBaseViewController: UIViewController {
     public private(set) var navBackgroundView = UIView()
     public private(set) lazy var baseView: STBaseView = {
         let view = STBaseView()
-        // 禁用 baseView 的外观管理，由 STBaseViewController 统一管理
         view.enableAppearanceManagement = false
         return view
     }()
@@ -169,7 +168,6 @@ open class STBaseViewController: UIViewController {
     }
 
     private func setupAppearanceObservation() {
-        // 监听当通过 st_setAppearanceMode 设置时
         self.appearanceObserver = NotificationCenter.default.addObserver(
             forName: .stAppearanceDidChange,
             object: nil,
@@ -197,7 +195,6 @@ open class STBaseViewController: UIViewController {
     @available(iOS 13.0, *)
     private func checkSystemThemeChange() {
         guard STAppearanceManager.shared.currentMode == .system else { return }
-        // 这里主要用于应用回到前台时的同步
         self.st_refreshAppearance(animated: false)
     }
 
