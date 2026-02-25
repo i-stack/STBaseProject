@@ -9,7 +9,7 @@ import UIKit
 
 public class STShimmerController {
 
-    enum State {
+    public enum State {
         case idle
         case streaming
         case finished
@@ -17,28 +17,30 @@ public class STShimmerController {
 
     private weak var renderer: STShimmerTextView?
     private weak var cursor: STShimmerCursorView?
-    private(set) var state: State = .idle
+    public private(set) var state: State = .idle
 
-    func bind(renderer: STShimmerTextView, cursor: STShimmerCursorView) {
+    public init() {}
+
+    public func bind(renderer: STShimmerTextView, cursor: STShimmerCursorView) {
         self.renderer = renderer
         self.cursor = cursor
     }
 
-    func onTextUpdated() {
+    public func onTextUpdated() {
         if self.state == .idle {
             self.state = .streaming
             self.cursor?.startBlink()
         }
     }
 
-    func finish() {
+    public func finish() {
         guard self.state == .streaming else { return }
         self.state = .finished
         self.renderer?.finishAnimations()
         self.cursor?.fadeOut()
     }
 
-    func reset() {
+    public func reset() {
         self.state = .idle
         self.cursor?.stopBlink()
         self.cursor?.isHidden = true

@@ -14,7 +14,7 @@ public class STShimmerTextView: UITextView {
         let startTime: CFTimeInterval
     }
 
-    var tokenFadeDuration: TimeInterval = 0.3
+    public var tokenFadeDuration: TimeInterval = 0.3
     private var displayLink: CADisplayLink?
     private var animatingTokens: [AnimatingToken] = []
     private var buildingAttributedString: NSMutableAttributedString = NSMutableAttributedString()
@@ -26,12 +26,12 @@ public class STShimmerTextView: UITextView {
         ]
     }
 
-    override init(frame: CGRect, textContainer: NSTextContainer?) {
+    public override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.setup()
     }
 
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setup()
     }
@@ -48,11 +48,11 @@ public class STShimmerTextView: UITextView {
         self.textColor = .label
     }
 
-    func append(_ text: String) {
+    public func append(_ text: String) {
         let startLocation = self.buildingAttributedString.length
         let attrs: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 16),
-            .foregroundColor: UIColor.label.withAlphaComponent(0)
+            .font: self.font ?? .systemFont(ofSize: 16),
+            .foregroundColor: (self.textColor ?? .label).withAlphaComponent(0)
         ]
         let tokenAttr = NSAttributedString(string: text, attributes: attrs)
         self.buildingAttributedString.append(tokenAttr)
@@ -65,7 +65,7 @@ public class STShimmerTextView: UITextView {
         self.startDisplayLinkIfNeeded()
     }
 
-    func reset() {
+    public func reset() {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
         self.buildingAttributedString = NSMutableAttributedString()
@@ -73,21 +73,21 @@ public class STShimmerTextView: UITextView {
         self.text = ""
     }
 
-    func finishAnimations() {
+    public func finishAnimations() {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
         let fullRange = NSRange(location: 0, length: self.buildingAttributedString.length)
         if fullRange.length > 0 {
             self.buildingAttributedString.addAttribute(
                 .foregroundColor,
-                value: UIColor.label,
+                value: self.textColor ?? .label,
                 range: fullRange
             )
             self.attributedText = self.buildingAttributedString
         }
     }
 
-    func caretRect() -> CGRect? {
+    public func caretRect() -> CGRect? {
         guard self.buildingAttributedString.length > 0 else { return nil }
         let rect = self.caretRect(for: self.endOfDocument)
         if rect.isEmpty || rect.origin.x.isInfinite || rect.origin.y.isInfinite {
@@ -116,7 +116,7 @@ public class STShimmerTextView: UITextView {
             let elapsed = now - token.startTime
             let progress = min(1.0, elapsed / self.tokenFadeDuration)
             let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
-            let color = UIColor.label.withAlphaComponent(CGFloat(easedProgress))
+            let color = (self.textColor ?? .label).withAlphaComponent(CGFloat(easedProgress))
             self.buildingAttributedString.addAttribute(.foregroundColor, value: color, range: token.range)
             needsUpdate = true
             if progress >= 1.0 {

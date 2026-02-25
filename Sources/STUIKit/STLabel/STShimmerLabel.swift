@@ -111,13 +111,13 @@ public class STShimmerLabel: UILabel {
         }
     }
 
-    func startShimmer() {
+    public func startShimmer() {
         guard self.gradientLayer.animation(forKey: self.shimmerKey) == nil else { return }
         self.gradientLayer.isHidden = false
         self.gradientLayer.add(self.makeAnimation(), forKey: self.shimmerKey)
     }
 
-    func stopShimmer(_ animated: Bool = true) {
+    public func stopShimmer(_ animated: Bool = true) {
         guard self.gradientLayer.animation(forKey: self.shimmerKey) != nil else { return }
         let finish = {
             self.gradientLayer.removeAnimation(forKey: self.shimmerKey)

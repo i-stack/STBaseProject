@@ -7,11 +7,11 @@
 
 import UIKit
 
-final class STShimmerCursorView: UIView {
+public final class STShimmerCursorView: UIView {
 
     private var blinkAnimation: CABasicAnimation?
 
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .label
         self.layer.cornerRadius = 1
@@ -19,7 +19,7 @@ final class STShimmerCursorView: UIView {
         self.isHidden = true
     }
 
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.backgroundColor = .label
         self.layer.cornerRadius = 1
@@ -27,7 +27,7 @@ final class STShimmerCursorView: UIView {
         self.isHidden = true
     }
 
-    func updateFrame(_ rect: CGRect) {
+    public func updateFrame(_ rect: CGRect) {
         let newFrame = CGRect(
             x: rect.maxX + 1,
             y: rect.minY + 2,
@@ -43,7 +43,7 @@ final class STShimmerCursorView: UIView {
         }
     }
 
-    func startBlink() {
+    public func startBlink() {
         self.isHidden = false
         self.alpha = 1
         guard self.blinkAnimation == nil else { return }
@@ -58,13 +58,13 @@ final class STShimmerCursorView: UIView {
         self.blinkAnimation = anim
     }
 
-    func stopBlink() {
+    public func stopBlink() {
         self.layer.removeAnimation(forKey: "blink")
         self.blinkAnimation = nil
         self.alpha = 1
     }
 
-    func fadeOut(completion: (() -> Void)? = nil) {
+    public func fadeOut(completion: (() -> Void)? = nil) {
         self.stopBlink()
         UIView.animate(withDuration: 0.3, animations: {
             self.alpha = 0
