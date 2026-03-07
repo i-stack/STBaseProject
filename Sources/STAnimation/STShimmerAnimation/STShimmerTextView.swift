@@ -7,7 +7,7 @@
 
 import UIKit
 
-public class STShimmerTextView: UITextView {
+open class STShimmerTextView: UITextView {
 
     private struct AnimatingToken {
         let range: NSRange
@@ -17,12 +17,11 @@ public class STShimmerTextView: UITextView {
     public var tokenFadeDuration: TimeInterval = 0.3
     private var displayLink: CADisplayLink?
     private var animatingTokens: [AnimatingToken] = []
-    private var buildingAttributedString: NSMutableAttributedString = NSMutableAttributedString()
 
-    var defaultTextAttributes: [NSAttributedString.Key: Any] {
+    open var defaultTextAttributes: [NSAttributedString.Key: Any] {
         return [
-            .font: UIFont.systemFont(ofSize: 16),
-            .foregroundColor: UIColor.label
+            .font: self.font ?? UIFont.systemFont(ofSize: 16),
+            .foregroundColor: self.textColor ?? UIColor.label,
         ]
     }
 
@@ -44,19 +43,22 @@ public class STShimmerTextView: UITextView {
         self.backgroundColor = .clear
         self.textContainerInset = .zero
         self.textContainer.lineFragmentPadding = 0
+        self.layoutManager.allowsNonContiguousLayout = false
         self.font = .systemFont(ofSize: 16)
         self.textColor = .label
     }
 
     public func append(_ text: String) {
-        let startLocation = self.buildingAttributedString.length
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: self.font ?? .systemFont(ofSize: 16),
-            .foregroundColor: (self.textColor ?? .label).withAlphaComponent(0)
-        ]
+        guard !text.isEmpty else { return }
+        let startLocation = self.textStorage.length
+        var attrs = self.defaultTextAttributes
+        let baseColor = self.baseForegroundColor(from: attrs)
+        attrs[.foregroundColor] = baseColor.withAlphaComponent(self.tokenFadeDuration > 0 ? 0 : 1)
         let tokenAttr = NSAttributedString(string: text, attributes: attrs)
-        self.buildingAttributedString.append(tokenAttr)
-        self.attributedText = self.buildingAttributedString
+        self.textStorage.beginEditing()
+        self.textStorage.append(tokenAttr)
+        self.textStorage.endEditing()
+        guard self.tokenFadeDuration > 0 else { return }
         let token = AnimatingToken(
             range: NSRange(location: startLocation, length: text.utf16.count),
             startTime: CACurrentMediaTime()
@@ -68,27 +70,21 @@ public class STShimmerTextView: UITextView {
     public func reset() {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
-        self.buildingAttributedString = NSMutableAttributedString()
-        self.attributedText = nil
-        self.text = ""
+        self.textStorage.beginEditing()
+        self.textStorage.setAttributedString(NSAttributedString())
+        self.textStorage.endEditing()
     }
 
     public func finishAnimations() {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
-        let fullRange = NSRange(location: 0, length: self.buildingAttributedString.length)
-        if fullRange.length > 0 {
-            self.buildingAttributedString.addAttribute(
-                .foregroundColor,
-                value: self.textColor ?? .label,
-                range: fullRange
-            )
-            self.attributedText = self.buildingAttributedString
-        }
+        let fullRange = NSRange(location: 0, length: self.textStorage.length)
+        guard fullRange.length > 0 else { return }
+        self.applyForegroundColor(self.baseForegroundColor(from: self.defaultTextAttributes), range: fullRange)
     }
 
     public func caretRect() -> CGRect? {
-        guard self.buildingAttributedString.length > 0 else { return nil }
+        guard self.textStorage.length > 0 else { return nil }
         let rect = self.caretRect(for: self.endOfDocument)
         if rect.isEmpty || rect.origin.x.isInfinite || rect.origin.y.isInfinite {
             return nil
@@ -109,30 +105,56 @@ public class STShimmerTextView: UITextView {
     }
 
     @objc private func handleDisplayLink() {
+        guard !self.animatingTokens.isEmpty else {
+            self.stopDisplayLink()
+            return
+        }
         let now = CACurrentMediaTime()
-        var needsUpdate = false
+        let baseColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         var completedIndices: [Int] = []
+        self.textStorage.beginEditing()
         for (index, token) in self.animatingTokens.enumerated() {
             let elapsed = now - token.startTime
             let progress = min(1.0, elapsed / self.tokenFadeDuration)
             let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
-            let color = (self.textColor ?? .label).withAlphaComponent(CGFloat(easedProgress))
-            self.buildingAttributedString.addAttribute(.foregroundColor, value: color, range: token.range)
-            needsUpdate = true
+            let color = baseColor.withAlphaComponent(CGFloat(easedProgress))
+            self.textStorage.addAttribute(.foregroundColor, value: color, range: token.range)
             if progress >= 1.0 {
                 completedIndices.append(index)
             }
         }
+        self.textStorage.endEditing()
         for index in completedIndices.reversed() {
             self.animatingTokens.remove(at: index)
-        }
-        if needsUpdate {
-            let offset = self.contentOffset
-            self.attributedText = self.buildingAttributedString
-            self.setContentOffset(offset, animated: false)
         }
         if self.animatingTokens.isEmpty {
             self.stopDisplayLink()
         }
+    }
+
+    private func baseForegroundColor(from attrs: [NSAttributedString.Key: Any]) -> UIColor {
+        return (attrs[.foregroundColor] as? UIColor) ?? self.textColor ?? .label
+    }
+
+    private func applyForegroundColor(_ color: UIColor, range: NSRange) {
+        let offset = self.contentOffset
+        self.textStorage.beginEditing()
+        self.textStorage.addAttribute(.foregroundColor, value: color, range: range)
+        self.textStorage.endEditing()
+        if self.contentOffset != offset {
+            self.setContentOffset(offset, animated: false)
+        }
+    }
+
+    /// 子类可重写：禁止系统长按复制/粘贴菜单，仅使用自定义 popupMenuItems（如 Bajoseek 回复区）
+    open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(UIResponderStandardEditActions.copy(_:))
+            || action == #selector(UIResponderStandardEditActions.cut(_:))
+            || action == #selector(UIResponderStandardEditActions.paste(_:))
+            || action == #selector(UIResponderStandardEditActions.select(_:))
+            || action == #selector(UIResponderStandardEditActions.selectAll(_:)) {
+            return false
+        }
+        return super.canPerformAction(action, withSender: sender)
     }
 }
