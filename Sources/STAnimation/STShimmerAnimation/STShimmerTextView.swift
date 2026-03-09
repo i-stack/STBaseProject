@@ -43,9 +43,9 @@ open class STShimmerTextView: UITextView {
         self.backgroundColor = .clear
         self.textContainerInset = .zero
         self.textContainer.lineFragmentPadding = 0
-        self.layoutManager.allowsNonContiguousLayout = false
         self.font = .systemFont(ofSize: 16)
         self.textColor = .label
+        self.layoutManager.allowsNonContiguousLayout = false
     }
 
     public func append(_ text: String) {
