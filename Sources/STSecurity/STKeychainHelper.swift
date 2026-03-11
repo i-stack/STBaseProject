@@ -9,7 +9,6 @@ import UIKit
 import Security
 import LocalAuthentication
 
-// MARK: - Keychain 访问控制类型
 public enum STKeychainAccessControl {
     case whenUnlocked
     case whenUnlockedThisDeviceOnly
@@ -72,7 +71,6 @@ public enum STKeychainAccessControl {
     }
 }
 
-// MARK: - Keychain 同步类型
 public enum STKeychainSync {
     case none
     case iCloud
@@ -87,7 +85,6 @@ public enum STKeychainSync {
     }
 }
 
-// MARK: - Keychain 错误类型
 public enum STKeychainError: Error, LocalizedError {
     case itemNotFound
     case duplicateItem
@@ -126,16 +123,11 @@ public enum STKeychainError: Error, LocalizedError {
     }
 }
 
-// MARK: - Keychain 工具类
 public class STKeychainHelper {
-    
-    // MARK: - 私有属性
     
     private static let service = Bundle.main.bundleIdentifier ?? "com.STBaseProject.app"
     private static let accessGroup: String? = nil // 可以设置为 App Group 标识符
-    
-    // MARK: - 基本操作
-    
+        
     /// 保存字符串到 Keychain
     /// - Parameters:
     ///   - key: 键名
@@ -143,14 +135,10 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     ///   - sync: 同步设置（可选）
     /// - Throws: STKeychainError
-    public static func st_save(_ key: String, 
-                              value: String, 
-                              accessControl: STKeychainAccessControl? = nil,
-                              sync: STKeychainSync = .none) throws {
+    public static func st_save(_ key: String, value: String, accessControl: STKeychainAccessControl? = nil, sync: STKeychainSync = .none) throws {
         guard let data = value.data(using: .utf8) else {
             throw STKeychainError.invalidData
         }
-        
         try st_saveData(key, data: data, accessControl: accessControl, sync: sync)
     }
     
@@ -160,12 +148,10 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     /// - Returns: 字符串值，如果不存在返回 nil
     /// - Throws: STKeychainError
-    public static func st_load(_ key: String, 
-                              accessControl: STKeychainAccessControl? = nil) throws -> String? {
+    public static func st_load(_ key: String, accessControl: STKeychainAccessControl? = nil) throws -> String? {
         guard let data = try st_loadData(key, accessControl: accessControl) else {
             return nil
         }
-        
         return String(data: data, encoding: .utf8)
     }
     
@@ -176,37 +162,24 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     ///   - sync: 同步设置（可选）
     /// - Throws: STKeychainError
-    public static func st_saveData(_ key: String, 
-                                  data: Data, 
-                                  accessControl: STKeychainAccessControl? = nil,
-                                  sync: STKeychainSync = .none) throws {
-        // 先删除已存在的项目
+    public static func st_saveData(_ key: String, data: Data, accessControl: STKeychainAccessControl? = nil, sync: STKeychainSync = .none) throws {
         try? st_delete(key)
-        
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecAttrService as String: service,
             kSecValueData as String: data
         ]
-        
-        // 添加访问控制
         if let accessControl = accessControl {
             query[kSecAttrAccessControl as String] = accessControl.secAccessControl
         }
-        
-        // 添加同步设置
         if sync != .none {
             query[kSecAttrSynchronizable as String] = kCFBooleanTrue!
         }
-        
-        // 添加访问组（如果设置了）
         if let accessGroup = accessGroup {
             query[kSecAttrAccessGroup as String] = accessGroup
         }
-        
         let status = SecItemAdd(query as CFDictionary, nil)
-        
         guard status == errSecSuccess else {
             throw STKeychainError.unhandledError(status: status)
         }
@@ -218,8 +191,7 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     /// - Returns: 数据，如果不存在返回 nil
     /// - Throws: STKeychainError
-    public static func st_loadData(_ key: String, 
-                                  accessControl: STKeychainAccessControl? = nil) throws -> Data? {
+    public static func st_loadData(_ key: String, accessControl: STKeychainAccessControl? = nil) throws -> Data? {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
@@ -227,20 +199,14 @@ public class STKeychainHelper {
             kSecReturnData as String: kCFBooleanTrue!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
-        
-        // 添加访问控制
         if let accessControl = accessControl {
             query[kSecAttrAccessControl as String] = accessControl.secAccessControl
         }
-        
-        // 添加访问组（如果设置了）
         if let accessGroup = accessGroup {
             query[kSecAttrAccessGroup as String] = accessGroup
         }
-        
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        
         switch status {
         case errSecSuccess:
             return result as? Data
@@ -262,9 +228,7 @@ public class STKeychainHelper {
             kSecAttrAccount as String: key,
             kSecAttrService as String: service
         ]
-        
         let status = SecItemDelete(query as CFDictionary)
-        
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw STKeychainError.unhandledError(status: status)
         }
@@ -281,13 +245,10 @@ public class STKeychainHelper {
             kSecReturnData as String: kCFBooleanFalse!,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
-        
         let status = SecItemCopyMatching(query as CFDictionary, nil)
         return status == errSecSuccess
     }
-    
-    // MARK: - 类型化操作
-    
+        
     /// 保存布尔值到 Keychain
     /// - Parameters:
     ///   - key: 键名
@@ -295,10 +256,7 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     ///   - sync: 同步设置（可选）
     /// - Throws: STKeychainError
-    public static func st_saveBool(_ key: String, 
-                                  value: Bool, 
-                                  accessControl: STKeychainAccessControl? = nil,
-                                  sync: STKeychainSync = .none) throws {
+    public static func st_saveBool(_ key: String, value: Bool, accessControl: STKeychainAccessControl? = nil, sync: STKeychainSync = .none) throws {
         let data = Data([value ? 1 : 0])
         try st_saveData(key, data: data, accessControl: accessControl, sync: sync)
     }
@@ -310,13 +268,10 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     /// - Returns: 布尔值
     /// - Throws: STKeychainError
-    public static func st_loadBool(_ key: String, 
-                                  defaultValue: Bool = false,
-                                  accessControl: STKeychainAccessControl? = nil) throws -> Bool {
+    public static func st_loadBool(_ key: String, defaultValue: Bool = false, accessControl: STKeychainAccessControl? = nil) throws -> Bool {
         guard let data = try st_loadData(key, accessControl: accessControl) else {
             return defaultValue
         }
-        
         return data.first == 1
     }
     
@@ -327,10 +282,7 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     ///   - sync: 同步设置（可选）
     /// - Throws: STKeychainError
-    public static func st_saveInt(_ key: String, 
-                                 value: Int, 
-                                 accessControl: STKeychainAccessControl? = nil,
-                                 sync: STKeychainSync = .none) throws {
+    public static func st_saveInt(_ key: String, value: Int, accessControl: STKeychainAccessControl? = nil, sync: STKeychainSync = .none) throws {
         let data = withUnsafeBytes(of: value.bigEndian) { Data($0) }
         try st_saveData(key, data: data, accessControl: accessControl, sync: sync)
     }
@@ -342,13 +294,10 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     /// - Returns: 整数值
     /// - Throws: STKeychainError
-    public static func st_loadInt(_ key: String, 
-                                 defaultValue: Int = 0,
-                                 accessControl: STKeychainAccessControl? = nil) throws -> Int {
+    public static func st_loadInt(_ key: String, defaultValue: Int = 0, accessControl: STKeychainAccessControl? = nil) throws -> Int {
         guard let data = try st_loadData(key, accessControl: accessControl) else {
             return defaultValue
         }
-        
         return data.withUnsafeBytes { $0.load(as: Int.self).bigEndian }
     }
     
@@ -359,10 +308,7 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     ///   - sync: 同步设置（可选）
     /// - Throws: STKeychainError
-    public static func st_saveDouble(_ key: String, 
-                                    value: Double, 
-                                    accessControl: STKeychainAccessControl? = nil,
-                                    sync: STKeychainSync = .none) throws {
+    public static func st_saveDouble(_ key: String, value: Double, accessControl: STKeychainAccessControl? = nil, sync: STKeychainSync = .none) throws {
         let data = withUnsafeBytes(of: value.bitPattern.bigEndian) { Data($0) }
         try st_saveData(key, data: data, accessControl: accessControl, sync: sync)
     }
@@ -374,19 +320,14 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     /// - Returns: 浮点数值
     /// - Throws: STKeychainError
-    public static func st_loadDouble(_ key: String, 
-                                    defaultValue: Double = 0.0,
-                                    accessControl: STKeychainAccessControl? = nil) throws -> Double {
+    public static func st_loadDouble(_ key: String, defaultValue: Double = 0.0, accessControl: STKeychainAccessControl? = nil) throws -> Double {
         guard let data = try st_loadData(key, accessControl: accessControl) else {
             return defaultValue
         }
-        
         let bitPattern = data.withUnsafeBytes { $0.load(as: UInt64.self).bigEndian }
         return Double(bitPattern: bitPattern)
     }
-    
-    // MARK: - 批量操作
-    
+        
     /// 批量保存数据到 Keychain
     /// - Parameter items: 键值对字典
     /// - Throws: STKeychainError
@@ -438,9 +379,7 @@ public class STKeychainHelper {
         }
         return items.compactMap { $0[kSecAttrAccount as String] as? String }
     }
-    
-    // MARK: - 生物识别相关
-    
+        
     /// 检查生物识别是否可用
     /// - Returns: 是否可用
     public static func st_isBiometricAvailable() -> Bool {
@@ -466,9 +405,7 @@ public class STKeychainHelper {
     ///   - data: 数据
     ///   - reason: 生物识别提示原因
     /// - Throws: STKeychainError
-    public static func st_saveWithBiometric(_ key: String, 
-                                           data: Data, 
-                                           reason: String = "使用生物识别保护您的数据") throws {
+    public static func st_saveWithBiometric(_ key: String, data: Data, reason: String = "使用生物识别保护您的数据") throws {
         guard st_isBiometricAvailable() else {
             throw STKeychainError.biometricNotAvailable
         }
@@ -481,8 +418,7 @@ public class STKeychainHelper {
     ///   - reason: 生物识别提示原因
     /// - Returns: 数据
     /// - Throws: STKeychainError
-    public static func st_loadWithBiometric(_ key: String, 
-                                           reason: String = "使用生物识别访问您的数据") throws -> Data? {
+    public static func st_loadWithBiometric(_ key: String, reason: String = "使用生物识别访问您的数据") throws -> Data? {
         guard st_isBiometricAvailable() else {
             throw STKeychainError.biometricNotAvailable
         }
