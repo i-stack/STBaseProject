@@ -8,7 +8,6 @@
 import UIKit
 import Foundation
 
-/// 基础配置管理类
 public class STBaseConfig: NSObject {
     
     public static let shared: STBaseConfig = STBaseConfig()
@@ -30,12 +29,12 @@ public class STBaseConfig: NSObject {
     /// - Note: 建议使用 iPhone X 的尺寸 (375x812) 作为基准
     public func configureDesignSize(_ size: CGSize) {
         guard size.width > 0 && size.height > 0 else {
-            print("⚠️ STBaseConfig: 设计基准尺寸无效，使用默认尺寸")
+            STLog("⚠️ STBaseConfig: 设计基准尺寸无效，使用默认尺寸")
             STDeviceAdapter.shared.configure(designSize: CGSize(width: 375, height: 812))
             return
         }
         STDeviceAdapter.shared.configure(designSize: size)
-        print("✅ STBaseConfig: 设计基准尺寸已设置为 \(size)")
+        STLog("✅ STBaseConfig: 设计基准尺寸已设置为 \(size)")
     }
     
     /// 配置自定义导航栏高度
@@ -68,9 +67,9 @@ public class STBaseConfig: NSObject {
         tabBarRegularHeight: CGFloat = 49,
         tabBarSafeAreaHeight: CGFloat = 83
     ) {
-        configureDesignSize(designSize)
-        configureNavigationBar(regularHeight: navigationBarRegularHeight, safeAreaHeight: navigationBarSafeAreaHeight)
-        configureTabBar(regularHeight: tabBarRegularHeight, safeAreaHeight: tabBarSafeAreaHeight)
+        self.configureDesignSize(designSize)
+        self.configureNavigationBar(regularHeight: navigationBarRegularHeight, safeAreaHeight: navigationBarSafeAreaHeight)
+        self.configureTabBar(regularHeight: tabBarRegularHeight, safeAreaHeight: tabBarSafeAreaHeight)
     }
     
     /// 使用完整的高度模型配置
@@ -81,7 +80,7 @@ public class STBaseConfig: NSObject {
     
     /// 快速配置 iPhone X 设计基准
     public func configureForIPhoneX() {
-        configureInterface(
+        self.configureInterface(
             designSize: CGSize(width: 375, height: 812),
             navigationBarRegularHeight: 64,
             navigationBarSafeAreaHeight: 88,
@@ -92,7 +91,7 @@ public class STBaseConfig: NSObject {
     
     /// 快速配置 iPhone 14 Pro 设计基准
     public func configureForIPhone14Pro() {
-        configureInterface(
+        self.configureInterface(
             designSize: CGSize(width: 393, height: 852),
             navigationBarRegularHeight: 64,
             navigationBarSafeAreaHeight: 88,
