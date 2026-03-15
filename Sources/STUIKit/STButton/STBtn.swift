@@ -365,6 +365,6 @@ open class STBtn: UIButton {
     private func updateFontSize() {
         guard let fontName = self.titleLabel?.font.fontName,
               let fontSize = self.titleLabel?.font.pointSize else { return }
-        self.titleLabel?.font = UIFont.st_systemFont(ofSize: fontSize, fontName: fontName)
+        self.titleLabel?.font = UIFont.adaptiveSystemFont(ofSize: fontSize, fontName: fontName)
     }
 }

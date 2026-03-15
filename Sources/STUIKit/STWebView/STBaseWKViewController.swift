@@ -7,7 +7,6 @@
 import WebKit
 import StoreKit
 
-// MARK: - WebView 信息结构体
 public struct STWebInfo {
     var url: String?
     var titleText: String?
@@ -119,7 +118,6 @@ open class STBaseWKViewController: STBaseViewController {
         self.progressObserver = nil
         self.progressView.removeFromSuperview()
         self.webInfo = nil
-        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
     
     open override func viewDidLoad() {
@@ -168,7 +166,7 @@ open class STBaseWKViewController: STBaseViewController {
             self.wkWebView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             self.wkWebView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.wkWebView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.wkWebView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STDeviceAdapter.st_navHeight()),
+            self.wkWebView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STDeviceAdapter.navigationBarHeight),
         ])
     }
     
@@ -212,7 +210,7 @@ open class STBaseWKViewController: STBaseViewController {
         // 添加错误视图
         self.view.addSubview(self.errorView)
         NSLayoutConstraint.activate([
-            self.errorView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STDeviceAdapter.st_navHeight()),
+            self.errorView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: STDeviceAdapter.navigationBarHeight),
             self.errorView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.errorView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             self.errorView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
@@ -308,7 +306,6 @@ open class STBaseWKViewController: STBaseViewController {
         self.progressObserver = self.wkWebView.observe(\.estimatedProgress, options: .new) { [weak self] _, change in
             guard let self = self else { return }
             let progress = change.newValue ?? 0
-            STLog("Progress: \(progress)")
             self.progressView.setProgress(Float(progress), animated: true)
             if progress >= 1.0 {
                 UIView.animate(withDuration: 0.3, animations: {
@@ -349,7 +346,6 @@ open class STBaseWKViewController: STBaseViewController {
     }
     
     private func st_handleLoadError(_ error: Error) {
-        STLog("WebView load error: \(error.localizedDescription)")
         self.st_updateLoadState(.failed(error))
     }
     
@@ -528,6 +524,6 @@ extension STBaseWKViewController: WKUIDelegate, WKNavigationDelegate, WKScriptMe
     }
     
     private func st_handleScriptMessage(_ message: WKScriptMessage) {
-        STLog("Received script message: \(message.name) - \(message.body)")
+        
     }
 }

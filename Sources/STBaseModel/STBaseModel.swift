@@ -201,37 +201,37 @@ open class STBaseModel: NSObject {
     /// 安全获取字符串值
     open func st_getString(forKey key: String, default: String = "") -> String {
         guard self.st_isFlexibleMode else { return `default` }
-        return self.st_rawData[key]?.st_stringValue(default: `default`) ?? `default`
+        return self.st_rawData[key]?.string(or: `default`) ?? `default`
     }
     
     /// 安全获取整数值
     open func st_getInt(forKey key: String, default: Int = 0) -> Int {
         guard self.st_isFlexibleMode else { return `default` }
-        return self.st_rawData[key]?.st_intValue(default: `default`) ?? `default`
+        return self.st_rawData[key]?.int(or: `default`) ?? `default`
     }
     
     /// 安全获取双精度值
     open func st_getDouble(forKey key: String, default: Double = 0.0) -> Double {
         guard self.st_isFlexibleMode else { return `default` }
-        return self.st_rawData[key]?.st_doubleValue(default: `default`) ?? `default`
+        return self.st_rawData[key]?.double(or: `default`) ?? `default`
     }
     
     /// 安全获取布尔值
     open func st_getBool(forKey key: String, default: Bool = false) -> Bool {
         guard self.st_isFlexibleMode else { return `default` }
-        return self.st_rawData[key]?.st_boolValue(default: `default`) ?? `default`
+        return self.st_rawData[key]?.bool(or: `default`) ?? `default`
     }
     
     /// 安全获取数组值
     open func st_getArray(forKey key: String, default: [STJSONValue] = []) -> [STJSONValue] {
         guard self.st_isFlexibleMode else { return `default` }
-        return self.st_rawData[key]?.st_arrayValue(default: `default`) ?? `default`
+        return self.st_rawData[key]?.array(or: `default`) ?? `default`
     }
     
     /// 安全获取字典值
     open func st_getDictionary(forKey key: String, default: [String: STJSONValue] = [:]) -> [String: STJSONValue] {
         guard self.st_isFlexibleMode else { return `default` }
-        return self.st_rawData[key]?.st_dictionaryValue(default: `default`) ?? `default`
+        return self.st_rawData[key]?.object(or: `default`) ?? `default`
     }
         
     /// 转换为原始数据字典

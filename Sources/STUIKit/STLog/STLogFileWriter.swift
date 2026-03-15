@@ -21,11 +21,11 @@ final class STLogFileWriter {
     }
     
     private func write(content: String) {
-        let path = STLogManager.st_outputLogPath()
+        let path = STLogManager.logFilePath()
         let directory = (path as NSString).deletingLastPathComponent
-        let exist = STFileManager.st_fileExistAt(path: directory)
-        if !exist.0 {
-            _ = STFileManager.st_create(filePath: directory, fileName: (path as NSString).lastPathComponent)
+        let status = STFileSystem.fileStatus(at: directory)
+        if !status.exists {
+            _ = STFileSystem.createFileIfNeeded(in: directory, fileName: (path as NSString).lastPathComponent)
         }
         
         guard let data = (content.hasSuffix("\n\n") ? content : "\(content)\n\n").data(using: .utf8) else {

@@ -1,0 +1,81 @@
+//
+//  STMarkdownRenderAST.swift
+//  STBaseProject
+//
+//  Created by 寒江孤影 on 2019/03/16.
+//
+
+import Foundation
+
+public struct STMarkdownRenderDocument: Hashable {
+    public let blocks: [STMarkdownRenderBlock]
+
+    public init(blocks: [STMarkdownRenderBlock]) {
+        self.blocks = blocks
+    }
+}
+
+public enum STMarkdownRenderBlock: Hashable {
+    case paragraph([STMarkdownInlineNode])
+    case heading(level: Int, content: [STMarkdownInlineNode])
+    case quote([STMarkdownRenderBlock])
+    case list([STMarkdownRenderListItem])
+    case codeBlock(language: String?, code: String)
+    case table(STMarkdownTableModel)
+    case mathBlock(String)
+    case image(url: String, altText: String, title: String?)
+    case thematicBreak
+}
+
+public struct STMarkdownRenderListItem: Hashable {
+    public let blocks: [STMarkdownRenderBlock]
+    public let ordered: Bool
+    public let level: Int
+    public let orderedIndex: Int?
+
+    public init(
+        blocks: [STMarkdownRenderBlock],
+        ordered: Bool,
+        level: Int,
+        orderedIndex: Int?
+    ) {
+        self.blocks = blocks
+        self.ordered = ordered
+        self.level = level
+        self.orderedIndex = orderedIndex
+    }
+
+    public init(
+        content: [STMarkdownInlineNode],
+        ordered: Bool,
+        level: Int,
+        orderedIndex: Int?,
+        childBlocks: [STMarkdownRenderBlock]
+    ) {
+        var blocks: [STMarkdownRenderBlock] = []
+        if content.isEmpty == false {
+            blocks.append(.paragraph(content))
+        }
+        blocks.append(contentsOf: childBlocks)
+        self.init(
+            blocks: blocks,
+            ordered: ordered,
+            level: level,
+            orderedIndex: orderedIndex
+        )
+    }
+
+    public var content: [STMarkdownInlineNode] {
+        guard case .paragraph(let inlines)? = self.blocks.first else {
+            return []
+        }
+        return inlines
+    }
+
+    public var childBlocks: [STMarkdownRenderBlock] {
+        guard case .paragraph? = self.blocks.first else {
+            return self.blocks
+        }
+        return Array(self.blocks.dropFirst())
+    }
+}

@@ -16,7 +16,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        STDeviceAdapter.shared.st_configBenchmarkDesign(size: CGSize(width: 375, height: 812))
+        STDeviceAdapter.shared.configure(designSize: CGSize(width: 375, height: 812))
         Bundle.st_setCustomLanguage("zh-Hans")
 
         if #available(iOS 13.0, *) {

@@ -5,10 +5,9 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
-import Foundation
 import CryptoKit
+import Foundation
 import CommonCrypto
-// STBaseModule 内部文件，不需要导入自己
 
 // MARK: - 加密配置
 public struct STCryptoConfig {

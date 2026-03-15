@@ -407,7 +407,7 @@ public extension UIView {
     /// 设置背景色（支持十六进制）
     /// - Parameter hex: 十六进制颜色值
     func st_setBackgroundColor(hex: String) {
-        backgroundColor = UIColor.st_color(hexString: hex)
+        backgroundColor = UIColor.color(hex: hex)
     }
     
     /// 设置边框

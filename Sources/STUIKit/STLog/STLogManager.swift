@@ -12,20 +12,15 @@ public class STLogManager {
     
     private static let directoryName = "outputLog"
     private static let fileName = "log.txt"
-    private static let notificationName = "com.notification.queryLog"
-    
+    public static let queryNotificationName = "com.notification.queryLog"
+
     /// 获取日志输出路径（若不存在则自动创建）
-    public class func st_outputLogPath() -> String {
-        let directory = "\(STFileManager.st_getLibraryCachePath())/\(directoryName)"
-        let exists = STFileManager.st_fileExistAt(path: directory)
-        if !exists.0 {
-            _ = STFileManager.st_create(filePath: directory, fileName: fileName)
+    public class func logFilePath() -> String {
+        let directory = "\(STFileSystem.cachesDirectoryPath)/\(directoryName)"
+        let exists = STFileSystem.fileStatus(at: directory)
+        if !exists.exists {
+            _ = STFileSystem.createFileIfNeeded(in: directory, fileName: fileName)
         }
         return "\(directory)/\(fileName)"
-    }
-    
-    /// 获取日志查询通知名称
-    public class func st_notificationQueryLogName() -> String {
-        return notificationName
     }
 }

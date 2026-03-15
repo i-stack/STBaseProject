@@ -8,264 +8,167 @@
 import UIKit
 import Foundation
 
-/// 自定义导航栏和 TabBar 高度模型
-public struct STConstantBarHeightModel {
-    public var navNormalHeight: CGFloat = 64.0
-    public var navIsSafeHeight: CGFloat = 88.0
-    public var tabBarNormalHeight: CGFloat = 49.0
-    public var tabBarIsSafeHeight: CGFloat = 83.0
-    
+public struct STBarHeightsConfiguration {
+    public var navigationBarRegularHeight: CGFloat = 64.0
+    public var navigationBarSafeAreaHeight: CGFloat = 88.0
+    public var tabBarRegularHeight: CGFloat = 49.0
+    public var tabBarSafeAreaHeight: CGFloat = 83.0
+
     public init() {}
-    
+
     public init(
-        navNormalHeight: CGFloat = 64.0,
-        navIsSafeHeight: CGFloat = 88.0,
-        tabBarNormalHeight: CGFloat = 49.0,
-        tabBarIsSafeHeight: CGFloat = 83.0
+        navigationBarRegularHeight: CGFloat = 64.0,
+        navigationBarSafeAreaHeight: CGFloat = 88.0,
+        tabBarRegularHeight: CGFloat = 49.0,
+        tabBarSafeAreaHeight: CGFloat = 83.0
     ) {
-        self.navNormalHeight = navNormalHeight
-        self.navIsSafeHeight = navIsSafeHeight
-        self.tabBarNormalHeight = tabBarNormalHeight
-        self.tabBarIsSafeHeight = tabBarIsSafeHeight
+        self.navigationBarRegularHeight = navigationBarRegularHeight
+        self.navigationBarSafeAreaHeight = navigationBarSafeAreaHeight
+        self.tabBarRegularHeight = tabBarRegularHeight
+        self.tabBarSafeAreaHeight = tabBarSafeAreaHeight
     }
 }
 
-public class STDeviceAdapter: NSObject {
+public final class STDeviceAdapter {
     
-    public static let shared: STDeviceAdapter = STDeviceAdapter()
-    private var benchmarkDesignSize = CGSize.zero
-    private var barHeightModel: STConstantBarHeightModel = STConstantBarHeightModel()
-    
-    private override init() {
-        super.init()
+    public static let shared = STDeviceAdapter()
+    public private(set) var designSize = CGSize.zero
+    public private(set) var barHeights = STBarHeightsConfiguration()
+
+    private init() {}
+
+    public func configure(designSize: CGSize) {
+        self.designSize = designSize
     }
-    
-    /// 配置设计基准尺寸
-    /// - Parameter size: 设计图的基准尺寸
-    public func st_configBenchmarkDesign(size: CGSize) {
-        self.benchmarkDesignSize = size
+
+    public func configureNavigationBar(regularHeight: CGFloat, safeAreaHeight: CGFloat) {
+        self.barHeights.navigationBarRegularHeight = regularHeight
+        self.barHeights.navigationBarSafeAreaHeight = safeAreaHeight
     }
-    
-    /// 获取当前设计基准尺寸
-    public func st_getBenchmarkDesignSize() -> CGSize {
-        return benchmarkDesignSize
+
+    public func configureTabBar(regularHeight: CGFloat, safeAreaHeight: CGFloat) {
+        self.barHeights.tabBarRegularHeight = regularHeight
+        self.barHeights.tabBarSafeAreaHeight = safeAreaHeight
     }
-    
-    /// 配置自定义导航栏高度
-    /// - Parameters:
-    ///   - normalHeight: 普通设备导航栏高度
-    ///   - safeHeight: 刘海屏设备导航栏高度
-    public func st_customNavHeight(normalHeight: CGFloat, safeHeight: CGFloat) {
-        self.barHeightModel.navNormalHeight = normalHeight
-        self.barHeightModel.navIsSafeHeight = safeHeight
+
+    public func applyBarHeights(_ configuration: STBarHeightsConfiguration) {
+        self.barHeights = configuration
     }
-    
-    /// 配置自定义 TabBar 高度
-    /// - Parameters:
-    ///   - normalHeight: 普通设备TabBar高度
-    ///   - safeHeight: 刘海屏设备TabBar高度
-    public func st_customTabBarHeight(normalHeight: CGFloat, safeHeight: CGFloat) {
-        self.barHeightModel.tabBarNormalHeight = normalHeight
-        self.barHeightModel.tabBarIsSafeHeight = safeHeight
+
+    public static var widthScale: CGFloat {
+        let designSize = shared.designSize
+        guard designSize != .zero else { return 1.0 }
+        return screenWidth / designSize.width
     }
-    
-    /// 配置完整的导航栏和TabBar高度模型
-    /// - Parameter model: 完整的高度模型
-    public func st_customBarHeightModel(_ model: STConstantBarHeightModel) {
-        self.barHeightModel = model
+
+    public static var heightScale: CGFloat {
+        let designSize = shared.designSize
+        guard designSize != .zero else { return 1.0 }
+        return screenHeight / designSize.height
     }
-    
-    /// 获取当前屏幕与设计基准的比例
-    /// - Returns: 比例值，基于屏幕宽度计算
-    public class func st_multiplier() -> CGFloat {
-        let size = STDeviceAdapter.shared.benchmarkDesignSize
-        if size == .zero {
-            return 1.0
+
+    public static func scaledValue(_ value: CGFloat) -> CGFloat {
+        self.scaled(value, multiplier: widthScale)
+    }
+
+    public static func scaledHeightValue(_ value: CGFloat) -> CGFloat {
+        self.scaled(value, multiplier: heightScale)
+    }
+
+    public static func scaledWidth(_ value: CGFloat) -> CGFloat {
+        self.scaledValue(value)
+    }
+
+    public static func scaledHeight(_ value: CGFloat) -> CGFloat {
+        self.scaledHeightValue(value)
+    }
+
+    public static func scaledFontSize(_ value: CGFloat) -> CGFloat {
+        self.scaledValue(value)
+    }
+
+    public static func scaledSpacing(_ value: CGFloat) -> CGFloat {
+        self.scaledValue(value)
+    }
+
+    public static var screenWidth: CGFloat {
+        UIScreen.main.bounds.width
+    }
+
+    public static var screenHeight: CGFloat {
+        UIScreen.main.bounds.height
+    }
+
+    public static var screenSize: CGSize {
+        UIScreen.main.bounds.size
+    }
+
+    public static var safeAreaInsets: UIEdgeInsets {
+        self.currentKeyWindow?.safeAreaInsets ?? .zero
+    }
+
+    public static var isNotchScreen: Bool {
+        UIDevice.current.userInterfaceIdiom == .phone && safeAreaInsets.top > 20
+    }
+
+    public static var navigationBarHeight: CGFloat {
+        self.isNotchScreen
+        ? self.shared.barHeights.navigationBarSafeAreaHeight
+        : self.shared.barHeights.navigationBarRegularHeight
+    }
+
+    public static var tabBarHeight: CGFloat {
+        self.isNotchScreen
+        ? self.shared.barHeights.tabBarSafeAreaHeight
+        : self.shared.barHeights.tabBarRegularHeight
+    }
+
+    public static var bottomSafeAreaHeight: CGFloat {
+        self.safeAreaInsets.bottom
+    }
+
+    public static var safeTabBarHeight: CGFloat {
+        self.tabBarHeight + self.bottomSafeAreaHeight
+    }
+
+    public static var statusBarHeight: CGFloat {
+        self.currentKeyWindow?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
+    }
+
+    public static var contentHeight: CGFloat {
+        self.screenHeight - self.navigationBarHeight - self.statusBarHeight
+    }
+
+    public static var contentHeightWithTabBar: CGFloat {
+        self.screenHeight - self.navigationBarHeight - self.statusBarHeight - self.tabBarHeight
+    }
+
+    public static var isLandscape: Bool {
+        UIDevice.current.orientation.isLandscape
+    }
+
+    public static var isPortrait: Bool {
+        UIDevice.current.orientation.isPortrait
+    }
+
+    public static var orientation: UIDeviceOrientation {
+        UIDevice.current.orientation
+    }
+
+    private static var currentKeyWindow: UIWindow? {
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap(\.windows)
+                .first(where: \.isKeyWindow)
+        } else {
+            return UIApplication.shared.keyWindow
         }
-        let screenWidth = UIScreen.main.bounds.width
-        return screenWidth / size.width
     }
-    
-    /// 获取高度比例
-    /// - Returns: 基于屏幕高度的比例值
-    public class func st_heightMultiplier() -> CGFloat {
-        let size = STDeviceAdapter.shared.benchmarkDesignSize
-        if size == .zero {
-            return 1.0
-        }
-        let screenHeight = UIScreen.main.bounds.height
-        return screenHeight / size.height
-    }
-    
-    /// 根据设计稿尺寸计算实际尺寸
-    /// - Parameter float: 设计稿上的尺寸值
-    /// - Returns: 适配后的实际尺寸
-    public class func st_handleFloat(float: CGFloat) -> CGFloat {
-        let multiplier = self.st_multiplier()
-        let result = float * multiplier
+
+    private static func scaled(_ value: CGFloat, multiplier: CGFloat) -> CGFloat {
+        let result = value * multiplier
         let scale = UIScreen.main.scale
         return (result * scale).rounded(.up) / scale
-    }
-    
-    /// 根据设计稿尺寸计算实际尺寸（基于高度）
-    /// - Parameter float: 设计稿上的尺寸值
-    /// - Returns: 适配后的实际尺寸
-    public class func st_handleHeightFloat(float: CGFloat) -> CGFloat {
-        let multiplier = self.st_heightMultiplier()
-        let result = float * multiplier
-        let scale = UIScreen.main.scale
-        return (result * scale).rounded(.up) / scale
-    }
-    
-    /// 获取屏幕宽度
-    public class func st_appw() -> CGFloat {
-        return UIScreen.main.bounds.size.width
-    }
-    
-    /// 获取屏幕高度
-    public class func st_apph() -> CGFloat {
-        return UIScreen.main.bounds.size.height
-    }
-    
-    /// 获取屏幕尺寸
-    public class func st_screenSize() -> CGSize {
-        return UIScreen.main.bounds.size
-    }
-    
-    /// 判断是否为刘海屏设备
-    public class func st_isNotchScreen() -> Bool {
-        guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
-        if #available(iOS 13.0, *) {
-            let window = UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-                .flatMap { $0.windows }
-                .first { $0.isKeyWindow }
-            return (window?.safeAreaInsets.top ?? 0) > 20
-        } else {
-            return (UIApplication.shared.keyWindow?.safeAreaInsets.top ?? 0) > 20
-        }
-    }
-    
-    /// 获取安全区域
-    public static func st_getSafeAreaInsets() -> UIEdgeInsets {
-        guard #available(iOS 11.0, *) else {
-            return .zero
-        }
-        if #available(iOS 13.0, *) {
-            if let window = UIApplication.shared.connectedScenes
-                .compactMap({ $0 as? UIWindowScene })
-                .flatMap({ $0.windows })
-                .first(where: { $0.isKeyWindow }) {
-                return window.safeAreaInsets
-            }
-        } else if let window = UIApplication.shared.keyWindow {
-            return window.safeAreaInsets
-        }
-        return .zero
-    }
-    
-    /// 获取导航栏高度
-    public class func st_navHeight() -> CGFloat {
-        if self.st_isNotchScreen() {
-            return STDeviceAdapter.shared.barHeightModel.navIsSafeHeight
-        }
-        return STDeviceAdapter.shared.barHeightModel.navNormalHeight
-    }
-    
-    /// 获取 TabBar 高度
-    public class func st_tabBarHeight() -> CGFloat {
-        if self.st_isNotchScreen() {
-            return STDeviceAdapter.shared.barHeightModel.tabBarIsSafeHeight
-        }
-        return STDeviceAdapter.shared.barHeightModel.tabBarNormalHeight
-    }
-    
-    /// 获取底部安全区域高度
-    public class func st_safeBarHeight() -> CGFloat {
-        guard #available(iOS 11.0, *) else {
-            return 0
-        }
-        if #available(iOS 13.0, *) {
-            if let window = UIApplication.shared.connectedScenes
-                .compactMap({ $0 as? UIWindowScene })
-                .flatMap({ $0.windows })
-                .first(where: { $0.isKeyWindow }) {
-                return window.safeAreaInsets.bottom
-            }
-        } else if let window = UIApplication.shared.keyWindow {
-            return window.safeAreaInsets.bottom
-        }
-        return 0
-    }
-    
-    /// 获取 TabBar 安全区域高度（TabBar 高度 + 底部安全区域）
-    public class func st_tabBarSafeAreaHeight() -> CGFloat {
-        return st_tabBarHeight() + st_safeBarHeight()
-    }
-    
-    /// 获取状态栏高度
-    public class func st_statusBarHeight() -> CGFloat {
-        if #available(iOS 13.0, *) {
-            let keyWindow = UIApplication.shared.connectedScenes
-                .compactMap { $0 as? UIWindowScene }
-                .flatMap { $0.windows }
-                .first { $0.isKeyWindow }
-            return keyWindow?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
-        } else {
-            return UIApplication.shared.statusBarFrame.height
-        }
-    }
-    
-    /// 获取可用内容区域高度（屏幕高度 - 导航栏 - 状态栏）
-    public class func st_contentHeight() -> CGFloat {
-        return st_apph() - st_navHeight() - st_statusBarHeight()
-    }
-    
-    /// 获取可用内容区域高度（屏幕高度 - 导航栏 - 状态栏 - TabBar）
-    public class func st_contentHeightWithTabBar() -> CGFloat {
-        return st_apph() - st_navHeight() - st_statusBarHeight() - st_tabBarHeight()
-    }
-    
-    /// 判断是否为横屏
-    public class func st_isLandscape() -> Bool {
-        return UIDevice.current.orientation.isLandscape
-    }
-    
-    /// 判断是否为竖屏
-    public class func st_isPortrait() -> Bool {
-        return UIDevice.current.orientation.isPortrait
-    }
-    
-    /// 获取当前方向
-    public class func st_orientation() -> UIDeviceOrientation {
-        return UIDevice.current.orientation
-    }
-    
-    /// 根据设计稿尺寸适配宽度
-    /// - Parameter width: 设计稿宽度
-    /// - Returns: 适配后的宽度
-    public class func st_adaptWidth(_ width: CGFloat) -> CGFloat {
-        return st_handleFloat(float: width)
-    }
-    
-    /// 根据设计稿尺寸适配高度
-    /// - Parameter height: 设计稿高度
-    /// - Returns: 适配后的高度
-    public class func st_adaptHeight(_ height: CGFloat) -> CGFloat {
-        return st_handleHeightFloat(float: height)
-    }
-    
-    /// 根据设计稿尺寸适配字体大小
-    /// - Parameter fontSize: 设计稿字体大小
-    /// - Returns: 适配后的字体大小
-    public class func st_adaptFontSize(_ fontSize: CGFloat) -> CGFloat {
-        return st_handleFloat(float: fontSize)
-    }
-    
-    /// 根据设计稿尺寸适配间距
-    /// - Parameter spacing: 设计稿间距
-    /// - Returns: 适配后的间距
-    public class func st_adaptSpacing(_ spacing: CGFloat) -> CGFloat {
-        return st_handleFloat(float: spacing)
     }
 }

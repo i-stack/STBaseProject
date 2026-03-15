@@ -75,7 +75,7 @@ extension NSLayoutConstraint {
             _autoConstant = newValue
             if newValue && !_isAdapted {
                 _originalConstant = self.constant
-                self.st_adaptConstraint()
+                self.adaptConstraintIfNeeded()
             } else if !newValue && _isAdapted {
                 self.constant = _originalConstant
                 _isAdapted = false
@@ -101,7 +101,7 @@ extension NSLayoutConstraint {
             }
             _adaptType = type
             if _autoConstant && !_isAdapted {
-                self.st_adaptConstraint()
+                self.adaptConstraintIfNeeded()
             }
         }
         get {
@@ -123,7 +123,7 @@ extension NSLayoutConstraint {
             _adaptType = .custom(newValue)
             
             if _autoConstant && !_isAdapted {
-                self.st_adaptConstraint()
+                self.adaptConstraintIfNeeded()
             }
         }
         get {
@@ -137,25 +137,25 @@ extension NSLayoutConstraint {
     // MARK: - 适配方法
     
     /// 执行约束适配
-    private func st_adaptConstraint() {
+    private func adaptConstraintIfNeeded() {
         guard _autoConstant && !_isAdapted else { return }
         let originalValue = _originalConstant
         let adaptedValue: CGFloat
         switch _adaptType {
         case .width:
-            adaptedValue = STDeviceAdapter.st_adaptWidth(originalValue)
+            adaptedValue = STDeviceAdapter.scaledWidth(originalValue)
         case .height:
-            adaptedValue = STDeviceAdapter.st_adaptHeight(originalValue)
+            adaptedValue = STDeviceAdapter.scaledHeight(originalValue)
         case .both:
-            adaptedValue = STDeviceAdapter.st_handleFloat(float: originalValue)
+            adaptedValue = STDeviceAdapter.scaledValue(originalValue)
         case .spacing:
-            adaptedValue = STDeviceAdapter.st_adaptSpacing(originalValue)
+            adaptedValue = STDeviceAdapter.scaledSpacing(originalValue)
         case .margin:
-            adaptedValue = STDeviceAdapter.st_adaptSpacing(originalValue)
+            adaptedValue = STDeviceAdapter.scaledSpacing(originalValue)
         case .fontSize:
-            adaptedValue = STDeviceAdapter.st_adaptFontSize(originalValue)
+            adaptedValue = STDeviceAdapter.scaledFontSize(originalValue)
         case .custom(let ratio):
-            adaptedValue = originalValue * ratio * STDeviceAdapter.st_multiplier()
+            adaptedValue = originalValue * ratio * STDeviceAdapter.widthScale
         }
         
         self.constant = adaptedValue
@@ -163,15 +163,15 @@ extension NSLayoutConstraint {
     }
     
     /// 手动触发适配
-    public func st_triggerAdapt() {
+    public func applyAdaptiveConstant() {
         if _autoConstant {
             _isAdapted = false
-            self.st_adaptConstraint()
+            self.adaptConstraintIfNeeded()
         }
     }
     
     /// 重置为原始值
-    public func st_resetToOriginal() {
+    public func resetAdaptiveConstant() {
         if _isAdapted {
             self.constant = _originalConstant
             _isAdapted = false
@@ -179,18 +179,18 @@ extension NSLayoutConstraint {
     }
     
     /// 获取原始约束值
-    public func st_getOriginalConstant() -> CGFloat {
+    public var originalConstant: CGFloat {
         return _originalConstant
     }
     
     /// 获取适配后的约束值
-    public func st_getAdaptedConstant() -> CGFloat {
-        return self.constant
+    public var adaptedConstant: CGFloat {
+        self.constant
     }
     
     /// 检查是否已适配
-    public func st_isAdapted() -> Bool {
-        return _isAdapted
+    public var hasAdaptiveConstantApplied: Bool {
+        _isAdapted
     }
     
     // MARK: - 生命周期方法
@@ -198,7 +198,7 @@ extension NSLayoutConstraint {
         super.awakeFromNib()
         if _autoConstant && !_isAdapted {
             _originalConstant = self.constant
-            self.st_adaptConstraint()
+            self.adaptConstraintIfNeeded()
         }
     }
 }
@@ -208,85 +208,85 @@ public struct STConstraintAdapter {
     
     /// 批量适配约束
     /// - Parameter constraints: 约束数组
-    public static func st_adaptConstraints(_ constraints: [NSLayoutConstraint]) {
+    public static func adaptConstraints(_ constraints: [NSLayoutConstraint]) {
         for constraint in constraints {
-            constraint.st_triggerAdapt()
+            constraint.applyAdaptiveConstant()
         }
     }
     
     /// 批量重置约束
     /// - Parameter constraints: 约束数组
-    public static func st_resetConstraints(_ constraints: [NSLayoutConstraint]) {
+    public static func resetConstraints(_ constraints: [NSLayoutConstraint]) {
         for constraint in constraints {
-            constraint.st_resetToOriginal()
+            constraint.resetAdaptiveConstant()
         }
     }
     
     /// 获取所有已适配的约束
     /// - Parameter constraints: 约束数组
     /// - Returns: 已适配的约束数组
-    public static func st_getAdaptedConstraints(_ constraints: [NSLayoutConstraint]) -> [NSLayoutConstraint] {
-        return constraints.filter { $0.st_isAdapted() }
+    public static func adaptedConstraints(from constraints: [NSLayoutConstraint]) -> [NSLayoutConstraint] {
+        return constraints.filter(\.hasAdaptiveConstantApplied)
     }
     
     /// 获取所有未适配的约束
     /// - Parameter constraints: 约束数组
     /// - Returns: 未适配的约束数组
-    public static func st_getUnadaptedConstraints(_ constraints: [NSLayoutConstraint]) -> [NSLayoutConstraint] {
-        return constraints.filter { !$0.st_isAdapted() }
+    public static func unadaptedConstraints(from constraints: [NSLayoutConstraint]) -> [NSLayoutConstraint] {
+        return constraints.filter { !$0.hasAdaptiveConstantApplied }
     }
 }
 
 // MARK: - UIView 约束适配扩展
 public extension UIView {
-    func st_adaptAllConstraints() {
-        self.st_adaptConstraintsRecursively(in: self)
+    func adaptAllConstraints() {
+        self.adaptConstraintsRecursively(in: self)
     }
     
     /// 适配约束
-    private func st_adaptConstraintsRecursively(in view: UIView) {
+    private func adaptConstraintsRecursively(in view: UIView) {
         for constraint in view.constraints {
-            constraint.st_triggerAdapt()
+            constraint.applyAdaptiveConstant()
         }
         
         for subview in view.subviews {
-            self.st_adaptConstraintsRecursively(in: subview)
+            self.adaptConstraintsRecursively(in: subview)
         }
     }
     
     /// 重置所有子视图的约束
-    func st_resetAllConstraints() {
-        self.st_resetConstraintsRecursively(in: self)
+    func resetAllConstraints() {
+        self.resetConstraintsRecursively(in: self)
     }
     
     /// 重置约束
-    private func st_resetConstraintsRecursively(in view: UIView) {
+    private func resetConstraintsRecursively(in view: UIView) {
         for constraint in view.constraints {
-            constraint.st_resetToOriginal()
+            constraint.resetAdaptiveConstant()
         }
         
         for subview in view.subviews {
-            self.st_resetConstraintsRecursively(in: subview)
+            self.resetConstraintsRecursively(in: subview)
         }
     }
     
     /// 获取所有已适配的约束
-    func st_getAllAdaptedConstraints() -> [NSLayoutConstraint] {
+    func allAdaptedConstraints() -> [NSLayoutConstraint] {
         var adaptedConstraints: [NSLayoutConstraint] = []
-        self.st_collectAdaptedConstraintsRecursively(in: self, result: &adaptedConstraints)
+        self.collectAdaptedConstraintsRecursively(in: self, result: &adaptedConstraints)
         return adaptedConstraints
     }
     
     /// 收集已适配的约束
-    private func st_collectAdaptedConstraintsRecursively(in view: UIView, result: inout [NSLayoutConstraint]) {
+    private func collectAdaptedConstraintsRecursively(in view: UIView, result: inout [NSLayoutConstraint]) {
         for constraint in view.constraints {
-            if constraint.st_isAdapted() {
+            if constraint.hasAdaptiveConstantApplied {
                 result.append(constraint)
             }
         }
         
         for subview in view.subviews {
-            self.st_collectAdaptedConstraintsRecursively(in: subview, result: &result)
+            self.collectAdaptedConstraintsRecursively(in: subview, result: &result)
         }
     }
 }

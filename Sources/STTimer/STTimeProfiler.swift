@@ -60,7 +60,7 @@ public class STTimeProfiler {
     /// - Parameters:
     ///   - tag: 计时任务标识，默认为 "default"
     ///   - message: 自定义消息
-    public class func st_STLogElapsed(tag: String = "default", message: String? = nil) {
+    public class func st_logElapsed(tag: String = "default", message: String? = nil) {
         guard let elapsed = self.st_elapsedTime(tag: tag) else {
             STLog("⚠️ [\(tag)] 未找到对应的开始时间，请先调用 st_start(tag:)")
             return

@@ -5,11 +5,10 @@
 //  Created by 寒江孤影 on 2018/12/22.
 //
 
+import Security
 import Foundation
 import CryptoKit
-import Security
 import CommonCrypto
-// STBaseModule 内部文件，不需要导入自己
 
 // MARK: - 加密算法类型
 public enum STEncryptionAlgorithm {
@@ -62,9 +61,7 @@ public enum STEncryptionError: Error, LocalizedError {
 
 // MARK: - String 加密扩展
 public extension String {
-    
-    // MARK: - 哈希算法
-    
+        
     /// 计算字符串的哈希值
     /// - Parameter algorithm: 哈希算法
     /// - Returns: 哈希值字符串
@@ -102,9 +99,7 @@ public extension String {
     func st_sha512() -> String {
         return st_hash(algorithm: .sha512)
     }
-    
-    // MARK: - HMAC 算法
-    
+        
     /// 计算 HMAC
     /// - Parameters:
     ///   - key: 密钥字符串
@@ -129,9 +124,7 @@ public extension String {
     func st_hmacSha512(key: String) -> String {
         return st_hmac(key: key, algorithm: .sha512)
     }
-    
-    // MARK: - 对称加密
-    
+        
     /// AES-256-GCM 加密
     /// - Parameters:
     ///   - key: 密钥字符串
@@ -177,9 +170,7 @@ public extension String {
             throw STEncryptionError.decryptionFailed
         }
     }
-    
-    // MARK: - 密码派生
-    
+        
     /// PBKDF2 密钥派生
     /// - Parameters:
     ///   - salt: 盐值字符串
@@ -191,9 +182,7 @@ public extension String {
         let saltData = Data(salt.utf8)
         return try passwordData.st_pbkdf2(salt: saltData, iterations: iterations, keyLength: keyLength)
     }
-    
-    // MARK: - 随机数生成
-    
+        
     /// 生成随机字符串
     /// - Parameters:
     ///   - length: 字符串长度
@@ -208,15 +197,13 @@ public extension String {
     /// - Returns: 随机十六进制字符串
     static func st_randomHexString(length: Int) -> String {
         let randomData = STDataUtils.randomData(length: length / 2)
-        return randomData.toHexString()
+        return randomData.hexEncodedString()
     }
 }
 
 // MARK: - Data 加密扩展
 public extension Data {
-    
-    // MARK: - 哈希算法
-    
+        
     /// 计算数据的哈希值
     /// - Parameter algorithm: 哈希算法
     /// - Returns: 哈希值字符串
@@ -239,9 +226,7 @@ public extension Data {
             return digest.map { String(format: "%02x", $0) }.joined()
         }
     }
-    
-    // MARK: - HMAC 算法
-    
+        
     /// 计算 HMAC
     /// - Parameters:
     ///   - key: 密钥数据
@@ -253,22 +238,20 @@ public extension Data {
         switch algorithm {
         case .sha256:
             let hmac = HMAC<SHA256>.authenticationCode(for: self, using: symmetricKey)
-            return Data(hmac).toHexString()
+            return Data(hmac).hexEncodedString()
         case .sha384:
             let hmac = HMAC<SHA384>.authenticationCode(for: self, using: symmetricKey)
-            return Data(hmac).toHexString()
+            return Data(hmac).hexEncodedString()
         case .sha512:
             let hmac = HMAC<SHA512>.authenticationCode(for: self, using: symmetricKey)
-            return Data(hmac).toHexString()
+            return Data(hmac).hexEncodedString()
         default:
             // 对于不支持的算法，使用 SHA256
             let hmac = HMAC<SHA256>.authenticationCode(for: self, using: symmetricKey)
-            return Data(hmac).toHexString()
+            return Data(hmac).hexEncodedString()
         }
     }
-    
-    // MARK: - 对称加密
-    
+        
     /// AES-256-GCM 加密
     /// - Parameters:
     ///   - key: 密钥数据
@@ -310,9 +293,7 @@ public extension Data {
             throw STEncryptionError.decryptionFailed
         }
     }
-    
-    // MARK: - 密码派生
-    
+        
     /// PBKDF2 密钥派生
     /// - Parameters:
     ///   - salt: 盐值数据
@@ -408,6 +389,6 @@ public struct STEncryptionUtils {
     /// - Returns: 随机令牌字符串
     public static func st_generateSecureToken(length: Int = 32) -> String {
         let randomData = STDataUtils.randomData(length: length)
-        return randomData.toBase64URLSafeString()
+        return randomData.base64URLSafeEncodedString()
     }
 }

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Foundation
 
 public class STCountdownTimer {
     
@@ -109,7 +108,6 @@ public class STCountdownTimer {
             guard let self = self, self.state == .running else { return }
             self.timer?.suspend()
             self.state = .paused
-            // 暂停时，我们需要固化当前的剩余时间，以免 resume 时 calculation 出错
             if let startDate = self.startDate {
                 let elapsed = Date().timeIntervalSince(startDate)
                 self.remainingTime = max(0, self.totalTime - elapsed)
@@ -232,13 +230,18 @@ public class STCountdownTimer {
     private func handleBackgroundTaskExpiration() {
         self.queue.async { [weak self] in
             guard let self = self else { return }
-            if self.state == .running {
-                self.pause()
-                DispatchQueue.main.async {
-                    self.errorHandler?(STCountdownTimerError.systemInterruption)
-                }
+            guard self.state == .running else { return }
+            if let startDate = self.startDate {
+                let elapsed = Date().timeIntervalSince(startDate)
+                self.remainingTime = max(0, self.totalTime - elapsed)
             }
+            self.timer?.suspend()
+            self.state = .paused
             self.endBackgroundTask()
+            STLog("⏸️ (GCD) 后台时间耗尽，倒计时暂停，剩余: \(self.formatTime(self.remainingTime))")
+            DispatchQueue.main.async { [weak self] in
+                self?.errorHandler?(STCountdownTimerError.systemInterruption)
+            }
         }
     }
     
@@ -251,7 +254,6 @@ public class STCountdownTimer {
     }
     
     @objc private func appWillEnterForeground() {
-        // App 回到前台，GCD Timer 会自动继续触发，但我们重新校准一下时间以防万一
         self.queue.async { [weak self] in
             guard let self = self, self.state == .running, let start = self.startDate else { return }
             let elapsed = Date().timeIntervalSince(start)

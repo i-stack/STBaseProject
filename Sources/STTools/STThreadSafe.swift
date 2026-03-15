@@ -8,77 +8,63 @@
 import Dispatch
 import Foundation
 
-public class STThreadSafe {
-        
-    /// 安全地在主线程执行代码
-    /// - Parameter callback: 要执行的代码块
-    public static func dispatchMainAsyncSafe(_ callback: @escaping () -> Void) {
+public enum STThreading {
+    /// 在主线程异步执行；如果当前已经在主线程则立即执行
+    public static func runOnMain(_ work: @escaping () -> Void) {
         if Thread.isMainThread {
-            callback()
+            work()
         } else {
-            DispatchQueue.main.async { callback() }
+            DispatchQueue.main.async(execute: work)
         }
     }
-    
-    /// 安全地在主线程同步执行代码
-    /// - Parameter callback: 要执行的代码块
-    public static func dispatchMainSyncSafe(_ callback: @escaping () -> Void) {
+
+    /// 在主线程同步执行
+    public static func runOnMainSynchronously(_ work: @escaping () -> Void) {
         if Thread.isMainThread {
-            callback()
+            work()
         } else {
-            DispatchQueue.main.sync { callback() }
+            DispatchQueue.main.sync(execute: work)
         }
     }
-    
-    /// 安全地在主线程执行代码并返回结果
-    /// - Parameter callback: 要执行的代码块
-    /// - Returns: 执行结果
-    public static func dispatchMainSyncSafe<T>(_ callback: @escaping () -> T) -> T {
+
+    /// 在主线程同步执行并返回结果
+    public static func runOnMainSynchronously<T>(_ work: @escaping () -> T) -> T {
         if Thread.isMainThread {
-            return callback()
+            return work()
         } else {
-            return DispatchQueue.main.sync { callback() }
+            return DispatchQueue.main.sync(execute: work)
         }
     }
-        
-    /// 在后台队列异步执行代码
-    /// - Parameters:
-    ///   - qos: 服务质量等级
-    ///   - callback: 要执行的代码块
-    public static func dispatchBackgroundAsync(qos: DispatchQoS.QoSClass = .default, _ callback: @escaping () -> Void) {
-        DispatchQueue.global(qos: qos).async { callback() }
+
+    /// 在全局后台队列异步执行
+    public static func runInBackground(
+        qos: DispatchQoS.QoSClass = .default,
+        _ work: @escaping () -> Void
+    ) {
+        DispatchQueue.global(qos: qos).async(execute: work)
     }
-    
-    /// 在指定队列异步执行代码
-    /// - Parameters:
-    ///   - queue: 目标队列
-    ///   - callback: 要执行的代码块
-    public static func dispatchAsync(on queue: DispatchQueue, _ callback: @escaping () -> Void) {
-        queue.async { callback() }
+
+    /// 在指定队列异步执行
+    public static func runAsync(on queue: DispatchQueue, _ work: @escaping () -> Void) {
+        queue.async(execute: work)
     }
-    
-    /// 在指定队列同步执行代码
-    /// - Parameters:
-    ///   - queue: 目标队列
-    ///   - callback: 要执行的代码块
-    public static func dispatchSync(on queue: DispatchQueue, _ callback: @escaping () -> Void) {
-        queue.sync { callback() }
+
+    /// 在指定队列同步执行
+    public static func runSync(on queue: DispatchQueue, _ work: @escaping () -> Void) {
+        queue.sync(execute: work)
     }
-        
-    /// 延迟执行代码
-    /// - Parameters:
-    ///   - delay: 延迟时间（秒）
-    ///   - queue: 执行队列，默认为主队列
-    ///   - callback: 要执行的代码块
-    public static func dispatchAfter(delay: TimeInterval, queue: DispatchQueue = .main, _ callback: @escaping () -> Void) {
-        queue.asyncAfter(deadline: .now() + delay) { callback() }
+
+    /// 在指定队列延迟执行
+    public static func run(
+        after delay: TimeInterval,
+        on queue: DispatchQueue = .main,
+        _ work: @escaping () -> Void
+    ) {
+        queue.asyncAfter(deadline: .now() + delay, execute: work)
     }
-    
-    /// 延迟在主线程执行代码
-    /// - Parameters:
-    ///   - delay: 延迟时间（秒）
-    ///   - callback: 要执行的代码块
-    public static func dispatchMainAfter(delay: TimeInterval, _ callback: @escaping () -> Void) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { callback() }
+
+    /// 在主线程延迟执行
+    public static func runOnMain(after delay: TimeInterval, _ work: @escaping () -> Void) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
     }
 }

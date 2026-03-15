@@ -139,7 +139,7 @@ final class STLogDemoViewController: UIViewController {
         
         if let jsonData = try? JSONSerialization.data(withJSONObject: sampleResponse, options: [.prettyPrinted]),
            let jsonString = String(data: jsonData, encoding: .utf8) {
-            STLogP("网络请求返回：\n\(jsonString)", level: .info)
+            STPersistentLog("网络请求返回：\n\(jsonString)", level: .info)
         }
     }
 
@@ -159,7 +159,7 @@ extension STLogDemoViewController: STLogViewDelegate {
     }
 
     func logViewDidFilterLogs(with results: [STLogEntry]) {
-        if !logView.st_isFiltering() || results.count == logView.st_getAllLogCount() {
+        if !logView.st_isFiltering() || results.count == logView.allLogCount() {
             title = baseTitle
             return
         }
@@ -204,7 +204,7 @@ private struct STDemoLogGenerator {
     func randomLog() -> String {
         guard let level = STLogLevel.allCases.randomElement() else { return "" }
         let message = sampleMessages[level]?.randomElement() ?? "未知日志"
-        STLogP(message, level: level)
+        STPersistentLog(message, level: level)
         return makeLog(level: level, message: message)
     }
 

@@ -14,11 +14,23 @@ let package = Package(
             targets: ["STBaseProject"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/swiftlang/swift-markdown.git", branch: "main"),
+        .package(url: "https://github.com/mgriebling/SwiftMath.git", branch: "main")
+    ],
     targets: [
         .target(
             name: "STBaseProject",
-            dependencies: [],
+            dependencies: [
+                .product(name: "Markdown", package: "swift-markdown"),
+                .product(name: "SwiftMath", package: "SwiftMath")
+            ],
             path: "Sources"
+        ),
+        .testTarget(
+            name: "STBaseProjectTests",
+            dependencies: ["STBaseProject"],
+            path: "Tests"
         ),
     ],
     swiftLanguageVersions: [.v5]

@@ -30,7 +30,7 @@ public struct STLogEntry {
         
         if components.count >= 4 {
             let timestampString = components[0]
-            self.timestamp = timestampString.st_toDate() ?? Date()
+            self.timestamp = timestampString.date() ?? Date()
             self.file = components[1].trimmingCharacters(in: .whitespacesAndNewlines)
             let functionLine = components[2]
             if functionLine.contains("funcName:") {
@@ -142,7 +142,7 @@ open class STLogView: UIView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.configUI()
-        self.outputPath = STLogManager.st_outputLogPath()
+        self.outputPath = STLogManager.logFilePath()
         self.setupNotifications()
         self.loadInitialLogs()
     }
@@ -150,18 +150,15 @@ open class STLogView: UIView {
     required public init?(coder: NSCoder) {
         super.init(coder: coder)
         self.configUI()
-        self.outputPath = STLogManager.st_outputLogPath()
+        self.outputPath = STLogManager.logFilePath()
         self.setupNotifications()
         self.loadInitialLogs()
     }
 
+    @available(iOS, introduced: 2.0, deprecated: 17.0)
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        if #available(iOS 13.0, *) {
-            if previousTraitCollection?.hasDifferentColorAppearance(comparedTo: traitCollection) == true {
-                self.applySystemAppearance()
-            }
-        } else {
+        if previousTraitCollection?.hasDifferentColorAppearance(comparedTo: traitCollection) == true {
             self.applySystemAppearance()
         }
     }
@@ -173,8 +170,17 @@ open class STLogView: UIView {
         self.addSubview(self.tableView)
         self.addSubview(self.bottomToolbar)
         self.setupConstraints()
+        self.setupAppearanceObservation()
         self.applySystemAppearance()
         self.tableView.register(STLogTableViewCell.self, forCellReuseIdentifier: "STLogTableViewCell")
+    }
+
+    private func setupAppearanceObservation() {
+        if #available(iOS 17.0, *) {
+            self.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: Self, _) in
+                view.applySystemAppearance()
+            }
+        }
     }
     
     private func setupConstraints() {
@@ -215,7 +221,7 @@ open class STLogView: UIView {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(beginQueryLogP(notification:)),
-            name: NSNotification.Name(rawValue: STLogManager.st_notificationQueryLogName()),
+            name: NSNotification.Name(rawValue: STLogManager.queryNotificationName),
             object: nil
         )
     }
@@ -280,7 +286,7 @@ open class STLogView: UIView {
 
     private func loadLogsFromFile() {
         DispatchQueue.global(qos: .utility).async {
-            let path = STLogManager.st_outputLogPath()
+            let path = STLogManager.logFilePath()
             guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
                   let content = String(data: data, encoding: .utf8),
                   !content.isEmpty else {
@@ -375,7 +381,7 @@ open class STLogView: UIView {
         self.allLogEntries.removeAll()
         self.filteredLogEntries.removeAll()
         self.clearFilter()
-        STFileManager.st_removeItem(atPath: self.outputPath)
+        STFileSystem.removeItem(at: self.outputPath)
         self.loadLogsFromFile()
     }
     
@@ -418,7 +424,7 @@ open class STLogView: UIView {
     }
 
     private func exportLogFile() {
-        let filePath = STLogManager.st_outputLogPath()
+        let filePath = STLogManager.logFilePath()
         guard FileManager.default.fileExists(atPath: filePath),
               let attributes = try? FileManager.default.attributesOfItem(atPath: filePath),
               let fileSize = attributes[.size] as? NSNumber,
@@ -454,11 +460,18 @@ open class STLogView: UIView {
     }
     
     private func getTopViewController() -> UIViewController? {
-        var topController = UIApplication.shared.windows.first?.rootViewController
+        var topController = currentKeyWindow()?.rootViewController
         while let presentedController = topController?.presentedViewController {
             topController = presentedController
         }
         return topController
+    }
+
+    private func currentKeyWindow() -> UIWindow? {
+        UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
     }
 
     private func presentAlert(title: String, message: String) {
@@ -743,37 +756,37 @@ private class STLogTableViewCell: UITableViewCell {
 extension STLogView {
     
     /// 获取日志输出路径
-    public class func st_outputLogPath() -> String {
-        return STLogManager.st_outputLogPath()
+    public class func logFilePath() -> String {
+        return STLogManager.logFilePath()
     }
     
     /// 将日志写入文件
-    public class func st_logWriteToFile() {
-        // 日志已经由 STLogP 直接写入文件，这里保留空实现以保证兼容
+    public class func flushPersistentLogs() {
+        // 日志已经由 STPersistentLog 直接写入文件，这里保留空实现
     }
 
     /// 获取日志查询通知名称
-    public class func st_notificationQueryLogName() -> String {
-        return STLogManager.st_notificationQueryLogName()
+    public class func queryNotificationName() -> String {
+        return STLogManager.queryNotificationName
     }
     
     /// 获取当前日志数量
-    public func st_getLogCount() -> Int {
+    public func logCount() -> Int {
         return self.currentLogEntries.count
     }
     
     /// 获取过滤后的日志数量
-    public func st_getFilteredLogCount() -> Int {
+    public func filteredLogCount() -> Int {
         return self.filteredLogEntries.count
     }
     
     /// 获取所有日志数量
-    public func st_getAllLogCount() -> Int {
+    public func allLogCount() -> Int {
         return self.allLogEntries.count
     }
     
     /// 清空所有日志
-    public func st_clearAllLogs() {
+    public func clearLogs() {
         self.clearAllLogs()
     }
     

@@ -539,7 +539,7 @@ open class STBaseViewModel: NSObject {
     }
     
     open func st_parseJSON<T: Codable>(_ data: Data, type: T.Type) -> Result<T, STBaseError> {
-        let result = data.st_decodeWithError(type)
+        let result = data.decodeResult(type)
         switch result {
         case .success(let decoded):
             return .success(decoded)
@@ -549,7 +549,7 @@ open class STBaseViewModel: NSObject {
     }
     
     open func st_toJSON<T: Codable>(_ object: T) -> Result<Data, STBaseError> {
-        let result = object.st_toJSONDataWithError()
+        let result = object.encodeToJSONData()
         switch result {
         case .success(let data):
             return .success(data)

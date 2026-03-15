@@ -143,83 +143,44 @@ public enum STJSONValue: Codable {
         case .null: return NSNull()
         }
     }
-}
 
-// MARK: - 兼容 STFlexibleValue API 扩展
-public extension STJSONValue {
-    
-    /// 转换为字符串（兼容 STFlexibleValue API）
-    func st_asString() -> String? {
-        return self.stringValue
-    }
-    
-    /// 转换为整数（兼容 STFlexibleValue API）
-    func st_asInt() -> Int? {
-        return self.intValue
-    }
-    
-    /// 转换为双精度（兼容 STFlexibleValue API）
-    func st_asDouble() -> Double? {
-        return self.doubleValue
-    }
-    
-    /// 转换为布尔值（兼容 STFlexibleValue API，支持 "1" 检查）
-    func st_asBool() -> Bool? {
+    public func bool(or defaultValue: Bool = false) -> Bool {
         switch self {
-        case .bool(let value): return value
-        case .int(let value): return value != 0
-        case .string(let value): return value.lowercased() == "true" || value == "1"
-        case .double(let value): return value != 0.0
-        default: return nil
+        case .bool(let value):
+            return value
+        case .int(let value):
+            return value != 0
+        case .string(let value):
+            return value.lowercased() == "true" || value == "1"
+        case .double(let value):
+            return value != 0.0
+        default:
+            return defaultValue
         }
     }
-    
-    /// 转换为数组（兼容 STFlexibleValue API）
-    func st_asArray() -> [STJSONValue]? {
-        return self.arrayValue
+
+    public func string(or defaultValue: String = "") -> String {
+        stringValue ?? defaultValue
     }
-    
-    /// 转换为字典（兼容 STFlexibleValue API）
-    func st_asDictionary() -> [String: STJSONValue]? {
-        return self.objectValue
+
+    public func int(or defaultValue: Int = 0) -> Int {
+        intValue ?? defaultValue
     }
-    
-    /// 安全获取字符串值，提供默认值
-    func st_stringValue(default defaultValue: String = "") -> String {
-        return self.st_asString() ?? defaultValue
+
+    public func double(or defaultValue: Double = 0.0) -> Double {
+        doubleValue ?? defaultValue
     }
-    
-    /// 安全获取整数值，提供默认值
-    func st_intValue(default defaultValue: Int = 0) -> Int {
-        return self.st_asInt() ?? defaultValue
+
+    public func array(or defaultValue: [STJSONValue] = []) -> [STJSONValue] {
+        arrayValue ?? defaultValue
     }
-    
-    /// 安全获取双精度值，提供默认值
-    func st_doubleValue(default defaultValue: Double = 0.0) -> Double {
-        return self.st_asDouble() ?? defaultValue
-    }
-    
-    /// 安全获取布尔值，提供默认值
-    func st_boolValue(default defaultValue: Bool = false) -> Bool {
-        return self.st_asBool() ?? defaultValue
-    }
-    
-    /// 安全获取数组值，提供默认值
-    func st_arrayValue(default defaultValue: [STJSONValue] = []) -> [STJSONValue] {
-        return self.st_asArray() ?? defaultValue
-    }
-    
-    /// 安全获取字典值，提供默认值
-    func st_dictionaryValue(default defaultValue: [String: STJSONValue] = [:]) -> [String: STJSONValue] {
-        return self.st_asDictionary() ?? defaultValue
+
+    public func object(or defaultValue: [String: STJSONValue] = [:]) -> [String: STJSONValue] {
+        objectValue ?? defaultValue
     }
 }
 
-// MARK: - 从 Any 初始化扩展
 public extension STJSONValue {
-    
-    /// 从任意值创建 STJSONValue
-    /// - Parameter value: 任意值
     init(_ value: Any) {
         switch value {
         case let string as String:
@@ -242,85 +203,47 @@ public extension STJSONValue {
     }
 }
 
-// MARK: - 可选值扩展
-extension Optional {
-    func or(_ other: Optional) -> Optional {
-        switch self {
-        case .none: return other
-        case .some: return self
-        }
-    }
-    
-    func resolve(with error: @autoclosure () -> Error) throws -> Wrapped {
-        switch self {
-        case .none: throw error()
-        case .some(let wrapped): return wrapped
-        }
-    }
-}
-
-// MARK: - Data JSON 扩展
 public extension Data {
-        
-    /// 转换为 JSON 对象
-    /// - Parameter options: JSON 读取选项
-    /// - Returns: JSON 对象，失败返回 nil
-    func st_toJSONObject(options: JSONSerialization.ReadingOptions = []) -> Any? {
+    func jsonObject(options: JSONSerialization.ReadingOptions = []) -> Any? {
         do {
             return try JSONSerialization.jsonObject(with: self, options: options)
         } catch {
             return nil
         }
     }
-    
-    /// 转换为字典
-    /// - Returns: 字典对象，失败返回 nil
-    func st_toDictionary() -> [String: Any]? {
-        return st_toJSONObject() as? [String: Any]
+
+    var jsonDictionary: [String: Any]? {
+        jsonObject() as? [String: Any]
     }
-    
-    /// 转换为数组
-    /// - Returns: 数组对象，失败返回 nil
-    func st_toArray() -> [Any]? {
-        return st_toJSONObject() as? [Any]
+
+    var jsonArray: [Any]? {
+        jsonObject() as? [Any]
     }
-    
-    /// 从 JSON 对象创建 Data
-    /// - Parameters:
-    ///   - jsonObject: JSON 对象
-    ///   - options: JSON 写入选项
-    /// - Returns: Data 对象，失败返回 nil
-    static func st_fromJSONObject(_ jsonObject: Any, options: JSONSerialization.WritingOptions = []) -> Data? {
-        guard JSONSerialization.isValidJSONObject(jsonObject) else { return nil }
+
+    static func jsonData(from object: Any, options: JSONSerialization.WritingOptions = []) -> Data? {
+        guard JSONSerialization.isValidJSONObject(object) else { return nil }
         do {
-            return try JSONSerialization.data(withJSONObject: jsonObject, options: options)
+            return try JSONSerialization.data(withJSONObject: object, options: options)
         } catch {
             return nil
         }
     }
-    
-    /// 是否为有效的 JSON 数据
-    var st_isValidJSON: Bool {
-        return st_toJSONObject() != nil
+
+    var isJSONData: Bool {
+        jsonObject() != nil
     }
-        
-    /// 解码为指定类型
-    /// - Parameter type: 目标类型
-    /// - Returns: 解码结果
-    func st_decode<T: Codable>(_ type: T.Type) -> T? {
+
+    func decoded<T: Codable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) -> T? {
         do {
-            return try JSONDecoder().decode(type, from: self)
+            return try decoder.decode(type, from: self)
         } catch {
             return nil
         }
     }
-    
-    /// 解码为指定类型（带错误处理）
-    /// - Parameter type: 目标类型
-    /// - Returns: 解码结果
-    func st_decodeWithError<T: Codable>(_ type: T.Type) -> Result<T, Error> {
+
+    func decodeResult<T: Codable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) -> Result<T, Error> {
         do {
-            let result = try JSONDecoder().decode(type, from: self)
+            let result = try decoder.decode(type, from: self)
             return .success(result)
         } catch {
             return .failure(error)
@@ -328,144 +251,87 @@ public extension Data {
     }
 }
 
-// MARK: - String JSON 扩展
 public extension String {
-        
-    /// 从 JSON 字符串创建字典
-    /// - Returns: 字典对象，失败返回 nil
-    func st_toDictionary() -> [String: Any]? {
-        guard let data = self.data(using: .utf8) else { return nil }
-        return data.st_toDictionary()
+    var jsonDictionary: [String: Any]? {
+        data(using: .utf8)?.jsonDictionary
     }
-    
-    /// 从 JSON 字符串创建数组
-    /// - Returns: 数组对象，失败返回 nil
-    func st_toArray() -> [Any]? {
-        guard let data = self.data(using: .utf8) else { return nil }
-        return data.st_toArray()
+
+    var jsonArray: [Any]? {
+        data(using: .utf8)?.jsonArray
     }
-    
-    /// 从 JSON 字符串创建任意对象
-    /// - Returns: JSON 对象，失败返回 nil
-    func st_toJSONObject() -> Any? {
-        guard let data = self.data(using: .utf8) else { return nil }
-        return data.st_toJSONObject()
+
+    var jsonObject: Any? {
+        data(using: .utf8)?.jsonObject()
     }
-    
-    /// 检查是否为有效的 JSON 字符串
-    var st_isValidJSON: Bool {
-        return st_toJSONObject() != nil
+
+    var isJSONText: Bool {
+        jsonObject != nil
     }
-        
-    /// 解码为指定类型
-    /// - Parameter type: 目标类型
-    /// - Returns: 解码结果
-    func st_decode<T: Codable>(_ type: T.Type) -> T? {
-        guard let data = self.data(using: .utf8) else { return nil }
-        return data.st_decode(type)
+
+    func decoded<T: Codable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) -> T? {
+        guard let data = data(using: .utf8) else { return nil }
+        return data.decoded(type, using: decoder)
     }
-    
-    /// 解码为指定类型（带错误处理）
-    /// - Parameter type: 目标类型
-    /// - Returns: 解码结果
-    func st_decodeWithError<T: Codable>(_ type: T.Type) -> Result<T, Error> {
-        guard let data = self.data(using: .utf8) else {
+
+    func decodeResult<T: Codable>(_ type: T.Type, using decoder: JSONDecoder = JSONDecoder()) -> Result<T, Error> {
+        guard let data = data(using: .utf8) else {
             return .failure(NSError(domain: "STJSONValue", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid string encoding"]))
         }
-        return data.st_decodeWithError(type)
+        return data.decodeResult(type, using: decoder)
     }
 }
 
-// MARK: - Dictionary JSON 扩展
 public extension Dictionary {
-        
-    /// 将字典转换为 JSON 字符串
-    /// - Parameter prettyPrinted: 是否美化输出
-    /// - Returns: JSON 字符串
-    func st_toJSONString(prettyPrinted: Bool = false) -> String? {
-        do {
-            let data = try JSONSerialization.data(withJSONObject: self, options: prettyPrinted ? .prettyPrinted : [])
-            return String(data: data, encoding: .utf8)
-        } catch {
-            return nil
-        }
+    func jsonString(prettyPrinted: Bool = false) -> String? {
+        jsonData(prettyPrinted: prettyPrinted).flatMap { String(data: $0, encoding: .utf8) }
     }
-    
-    /// 将字典转换为 JSON 数据
-    /// - Parameter prettyPrinted: 是否美化输出
-    /// - Returns: JSON 数据
-    func st_toJSONData(prettyPrinted: Bool = false) -> Data? {
+
+    func jsonData(prettyPrinted: Bool = false) -> Data? {
         do {
             return try JSONSerialization.data(withJSONObject: self, options: prettyPrinted ? .prettyPrinted : [])
         } catch {
             return nil
         }
     }
-    
-    /// 检查字典是否为有效的 JSON 对象
-    var st_isValidJSON: Bool {
-        return JSONSerialization.isValidJSONObject(self)
+
+    var isJSONCompatible: Bool {
+        JSONSerialization.isValidJSONObject(self)
     }
 }
 
-// MARK: - Array JSON 扩展
 public extension Array {
-        
-    /// 将数组转换为 JSON 字符串
-    /// - Parameter prettyPrinted: 是否美化输出
-    /// - Returns: JSON 字符串
-    func st_toJSONString(prettyPrinted: Bool = false) -> String? {
-        do {
-            let data = try JSONSerialization.data(withJSONObject: self, options: prettyPrinted ? .prettyPrinted : [])
-            return String(data: data, encoding: .utf8)
-        } catch {
-            return nil
-        }
+    func jsonString(prettyPrinted: Bool = false) -> String? {
+        jsonData(prettyPrinted: prettyPrinted).flatMap { String(data: $0, encoding: .utf8) }
     }
-    
-    /// 将数组转换为 JSON 数据
-    /// - Parameter prettyPrinted: 是否美化输出
-    /// - Returns: JSON 数据
-    func st_toJSONData(prettyPrinted: Bool = false) -> Data? {
+
+    func jsonData(prettyPrinted: Bool = false) -> Data? {
         do {
             return try JSONSerialization.data(withJSONObject: self, options: prettyPrinted ? .prettyPrinted : [])
         } catch {
             return nil
         }
     }
-    
-    /// 检查数组是否为有效的 JSON 对象
-    var st_isValidJSON: Bool {
-        return JSONSerialization.isValidJSONObject(self)
+
+    var isJSONCompatible: Bool {
+        JSONSerialization.isValidJSONObject(self)
     }
 }
 
-// MARK: - Codable 扩展
 public extension Encodable {
-    
-    /// 编码为 JSON 数据
-    /// - Parameter encoder: JSON 编码器
-    /// - Returns: JSON 数据
-    func st_toJSONData(encoder: JSONEncoder = JSONEncoder()) -> Data? {
+    func jsonData(using encoder: JSONEncoder = JSONEncoder()) -> Data? {
         do {
             return try encoder.encode(self)
         } catch {
             return nil
         }
     }
-    
-    /// 编码为 JSON 字符串
-    /// - Parameter encoder: JSON 编码器
-    /// - Returns: JSON 字符串
-    func st_toJSONString(encoder: JSONEncoder = JSONEncoder()) -> String? {
-        guard let data = st_toJSONData(encoder: encoder) else { return nil }
+
+    func jsonString(using encoder: JSONEncoder = JSONEncoder()) -> String? {
+        guard let data = jsonData(using: encoder) else { return nil }
         return String(data: data, encoding: .utf8)
     }
-    
-    /// 编码为 JSON 数据（带错误处理）
-    /// - Parameter encoder: JSON 编码器
-    /// - Returns: 编码结果
-    func st_toJSONDataWithError(encoder: JSONEncoder = JSONEncoder()) -> Result<Data, Error> {
+
+    func encodeToJSONData(using encoder: JSONEncoder = JSONEncoder()) -> Result<Data, Error> {
         do {
             let data = try encoder.encode(self)
             return .success(data)
@@ -473,12 +339,9 @@ public extension Encodable {
             return .failure(error)
         }
     }
-    
-    /// 编码为 JSON 字符串（带错误处理）
-    /// - Parameter encoder: JSON 编码器
-    /// - Returns: 编码结果
-    func st_toJSONStringWithError(encoder: JSONEncoder = JSONEncoder()) -> Result<String, Error> {
-        let dataResult = st_toJSONDataWithError(encoder: encoder)
+
+    func encodeToJSONString(using encoder: JSONEncoder = JSONEncoder()) -> Result<String, Error> {
+        let dataResult = encodeToJSONData(using: encoder)
         switch dataResult {
         case .success(let data):
             if let string = String(data: data, encoding: .utf8) {
@@ -490,92 +353,60 @@ public extension Encodable {
             return .failure(error)
         }
     }
-    
-    func st_toDictionary() -> [String: Any]? {
+
+    func dictionaryRepresentation() -> [String: Any]? {
         do {
-            let data = try JSONEncoder().encode(self)  // struct -> Data
+            let data = try JSONEncoder().encode(self)
             let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
             return jsonObject as? [String: Any]
         } catch {
-            print("❌ 转换失败: \(error)")
             return nil
         }
     }
 }
 
-// MARK: - JSON 工具类
-public class STJSONUtils {
-        
-    /// 创建美化的 JSON 字符串
-    /// - Parameter object: 要转换的对象
-    /// - Returns: 美化的 JSON 字符串
-    public static func st_prettyJSONString(from object: Any) -> String? {
-        guard let data = Data.st_fromJSONObject(object, options: .prettyPrinted) else { return nil }
+public enum STJSONUtils {
+    public static func prettyPrintedString(from object: Any) -> String? {
+        guard let data = Data.jsonData(from: object, options: .prettyPrinted) else { return nil }
         return String(data: data, encoding: .utf8)
     }
-    
-    /// 验证 JSON 字符串
-    /// - Parameter jsonString: JSON 字符串
-    /// - Returns: 是否有效
-    public static func st_validateJSON(_ jsonString: String) -> Bool {
-        return jsonString.st_isValidJSON
+
+    public static func isValid(jsonString: String) -> Bool {
+        jsonString.isJSONText
     }
-    
-    /// 验证 JSON 数据
-    /// - Parameter data: JSON 数据
-    /// - Returns: 是否有效
-    public static func st_validateJSONData(_ data: Data) -> Bool {
-        return data.st_isValidJSON
+
+    public static func isValid(data: Data) -> Bool {
+        data.isJSONData
     }
-    
-    /// 比较两个 JSON 对象是否相等
-    /// - Parameters:
-    ///   - lhs: 左操作数
-    ///   - rhs: 右操作数
-    /// - Returns: 是否相等
-    public static func st_areEqual(_ lhs: Any, _ rhs: Any) -> Bool {
-        guard let lhsData = Data.st_fromJSONObject(lhs),
-              let rhsData = Data.st_fromJSONObject(rhs) else {
+
+    public static func areEqual(_ lhs: Any, _ rhs: Any) -> Bool {
+        guard let lhsData = Data.jsonData(from: lhs), let rhsData = Data.jsonData(from: rhs) else {
             return false
         }
         return lhsData == rhsData
     }
-    
-    /// 深度合并两个 JSON 对象
-    /// - Parameters:
-    ///   - lhs: 左操作数
-    ///   - rhs: 右操作数
-    /// - Returns: 合并后的对象
-    public static func st_merge(_ lhs: [String: Any], _ rhs: [String: Any]) -> [String: Any] {
+
+    public static func merge(_ lhs: [String: Any], _ rhs: [String: Any]) -> [String: Any] {
         var result = lhs
         for (key, value) in rhs {
             if let existingValue = result[key] as? [String: Any],
                let newValue = value as? [String: Any] {
-                result[key] = st_merge(existingValue, newValue)
+                result[key] = merge(existingValue, newValue)
             } else {
                 result[key] = value
             }
         }
         return result
     }
-    
-    /// 从文件读取 JSON
-    /// - Parameter path: 文件路径
-    /// - Returns: JSON 对象
-    public static func st_readJSONFromFile(_ path: String) -> Any? {
+
+    public static func readJSON(fromFile path: String) -> Any? {
         guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
-        return data.st_toJSONObject()
+        return data.jsonObject()
     }
-    
-    /// 将 JSON 写入文件
-    /// - Parameters:
-    ///   - object: JSON 对象
-    ///   - path: 文件路径
-    ///   - prettyPrinted: 是否美化输出
-    /// - Returns: 是否成功
+
     @discardableResult
-    public static func st_writeJSONToFile(_ object: Any, path: String, prettyPrinted: Bool = false) -> Bool {
-        guard let data = Data.st_fromJSONObject(object, options: prettyPrinted ? .prettyPrinted : []) else { return false }
+    public static func writeJSON(_ object: Any, toFile path: String, prettyPrinted: Bool = false) -> Bool {
+        guard let data = Data.jsonData(from: object, options: prettyPrinted ? .prettyPrinted : []) else { return false }
         do {
             try data.write(to: URL(fileURLWithPath: path))
             return true
@@ -583,61 +414,35 @@ public class STJSONUtils {
             return false
         }
     }
-    
-    /// 从 Bundle 读取 JSON 文件
-    /// - Parameters:
-    ///   - name: 文件名（不含扩展名）
-    ///   - bundle: Bundle 对象
-    /// - Returns: JSON 对象
-    public static func st_readJSONFromBundle(name: String, bundle: Bundle = Bundle.main) -> Any? {
+
+    public static func readJSONFromBundle(named name: String, bundle: Bundle = .main) -> Any? {
         guard let path = bundle.path(forResource: name, ofType: "json") else { return nil }
-        return st_readJSONFromFile(path)
+        return readJSON(fromFile: path)
     }
-    
-    /// 从 Bundle 读取 JSON 文件并解码为指定类型
-    /// - Parameters:
-    ///   - name: 文件名（不含扩展名）
-    ///   - type: 目标类型
-    ///   - bundle: Bundle 对象
-    /// - Returns: 解码结果
-    public static func st_readJSONFromBundle<T: Codable>(name: String, type: T.Type, bundle: Bundle = Bundle.main) -> T? {
+
+    public static func decodeBundleJSON<T: Codable>(named name: String, as type: T.Type, bundle: Bundle = .main) -> T? {
         guard let path = bundle.path(forResource: name, ofType: "json"),
               let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
-        return data.st_decode(type)
+        return data.decoded(type)
     }
-    
-    /// 将 JSON 字符串转换为美化格式
-    /// - Parameter jsonString: JSON 字符串
-    /// - Returns: 美化后的 JSON 字符串
-    public static func st_jsonStringToPrettyPrintedJson(jsonString: String?) -> String {
-        guard let str = jsonString, !str.isEmpty else { return "" }
-        
+
+    public static func prettyPrintedJSONString(from jsonString: String?) -> String {
+        guard let string = jsonString, !string.isEmpty else { return "" }
         do {
-            guard let jsonData = str.data(using: .utf8) else { return str }
+            guard let jsonData = string.data(using: .utf8) else { return string }
             let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: [])
             let prettyJsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
-            return String(data: prettyJsonData, encoding: .utf8) ?? str
+            return String(data: prettyJsonData, encoding: .utf8) ?? string
         } catch {
-            return str
+            return string
         }
     }
-    
-    /// 将字典转换为 JSON 字符串
-    /// - Parameter dict: 字典对象
-    /// - Returns: JSON 字符串
-    public static func st_dictToJSON(dict: [String: Any]) -> String {
-        guard !dict.isEmpty else { return "" }
-        
-        do {
-            let data = try JSONSerialization.data(withJSONObject: dict, options: [])
-            return String(data: data, encoding: .utf8) ?? ""
-        } catch {
-            return ""
-        }
+
+    public static func jsonString(from dictionary: [String: Any]) -> String {
+        dictionary.jsonString() ?? ""
     }
 }
 
-// MARK: - JSON 错误类型
 public enum STJSONError: Error, LocalizedError {
     case invalidJSON
     case encodingFailed

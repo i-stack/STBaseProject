@@ -5,37 +5,28 @@
 //  Created by AI Assistant on 2024/12/19.
 //
 
-import Foundation
 import Security
-// STBaseModule 内部文件，不需要导入自己
+import Foundation
 
-// MARK: - 网络安全配置
 public class STNetworkSecurityConfig {
     
-    // MARK: - 单例
     public static let shared = STNetworkSecurityConfig()
-    
-    // MARK: - 属性
     private var sslPinningConfig: STSSLPinningConfig
     private var encryptionConfig: STEncryptionConfig
     private var antiDebugConfig: STAntiDebugConfig
     
-    // MARK: - 初始化
     private init() {
         self.sslPinningConfig = STSSLPinningConfig()
         self.encryptionConfig = STEncryptionConfig()
         self.antiDebugConfig = STAntiDebugConfig()
-        st_loadConfiguration()
+        self.st_loadConfiguration()
     }
-    
-    // MARK: - 配置管理
-    
+        
     /// 加载安全配置
     private func st_loadConfiguration() {
-        // 从Keychain或配置文件加载安全配置
-        st_loadSSLPinningConfig()
-        st_loadEncryptionConfig()
-        st_loadAntiDebugConfig()
+        self.st_loadSSLPinningConfig()
+        self.st_loadEncryptionConfig()
+        self.st_loadAntiDebugConfig()
     }
     
     /// 加载SSL绑定配置
@@ -46,7 +37,6 @@ public class STNetworkSecurityConfig {
                 sslPinningConfig = try decoder.decode(STSSLPinningConfig.self, from: configData)
             }
         } catch {
-            // 使用默认配置
             sslPinningConfig = STSSLPinningConfig()
         }
     }
@@ -59,7 +49,6 @@ public class STNetworkSecurityConfig {
                 encryptionConfig = try decoder.decode(STEncryptionConfig.self, from: configData)
             }
         } catch {
-            // 使用默认配置
             encryptionConfig = STEncryptionConfig()
         }
     }
@@ -72,7 +61,6 @@ public class STNetworkSecurityConfig {
                 antiDebugConfig = try decoder.decode(STAntiDebugConfig.self, from: configData)
             }
         } catch {
-            // 使用默认配置
             antiDebugConfig = STAntiDebugConfig()
         }
     }
@@ -100,9 +88,7 @@ public class STNetworkSecurityConfig {
         try STKeychainHelper.st_saveData("anti_debug_config", data: configData)
         self.antiDebugConfig = config
     }
-    
-    // MARK: - 获取配置
-    
+        
     /// 获取SSL绑定配置
     public func st_getSSLPinningConfig() -> STSSLPinningConfig {
         return sslPinningConfig
@@ -117,9 +103,7 @@ public class STNetworkSecurityConfig {
     public func st_getAntiDebugConfig() -> STAntiDebugConfig {
         return antiDebugConfig
     }
-    
-    // MARK: - 安全检测
-    
+        
     /// 执行完整的安全检测
     public func st_performSecurityCheck() -> STSecurityCheckResult {
         var issues: [STSecurityIssue] = []
@@ -145,7 +129,7 @@ public class STNetworkSecurityConfig {
         }
         
         // 检测模拟器
-        if STDeviceInfo.st_isRunningOnSimulator() {
+        if STDeviceInfo.isRunningOnSimulator {
             issues.append(.simulatorDetected)
         }
         
@@ -154,7 +138,6 @@ public class STNetworkSecurityConfig {
     
     /// 检测Hook
     private func st_detectHooking() -> Bool {
-        // 检测常见的Hook框架
         let hookFrameworks = [
             "Substrate",
             "CydiaSubstrate",

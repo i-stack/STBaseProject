@@ -37,7 +37,7 @@ class STCustomWebViewController: STBaseWKViewController {
     override func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         self.wkWebView.evaluateJavaScript("document.title") { result, error in
             if let text = result {
-                self.titleLabel.text = String.st_returnStr(object: text)
+                self.titleLabel.text = String.string(from: text)
             }
         }
     }

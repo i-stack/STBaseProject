@@ -88,7 +88,7 @@ public class STLabel: UILabel {
     
     private func updateFontSize() {
         let fontName = self.font.fontName
-        self.font = UIFont.st_systemFont(ofSize: self.font.pointSize, fontName: fontName)
+        self.font = UIFont.adaptiveSystemFont(ofSize: self.font.pointSize, fontName: fontName)
     }
     
     public override func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
