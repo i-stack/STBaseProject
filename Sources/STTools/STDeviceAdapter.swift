@@ -34,6 +34,7 @@ public final class STDeviceAdapter {
     public static let shared = STDeviceAdapter()
     public private(set) var designSize = CGSize.zero
     public private(set) var barHeights = STBarHeightsConfiguration()
+    public private(set) var fontFamily = STFontFamilyConfig.pingFangSC
 
     private init() {}
 
@@ -53,6 +54,10 @@ public final class STDeviceAdapter {
 
     public func applyBarHeights(_ configuration: STBarHeightsConfiguration) {
         self.barHeights = configuration
+    }
+
+    public func configureFontFamily(_ config: STFontFamilyConfig) {
+        self.fontFamily = config
     }
 
     public static var widthScale: CGFloat {

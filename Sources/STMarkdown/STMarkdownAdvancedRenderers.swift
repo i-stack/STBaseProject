@@ -138,11 +138,20 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
         paragraphStyle.minimumLineHeight = max(style.lineHeight, image.size.height)
         paragraphStyle.maximumLineHeight = max(style.lineHeight, image.size.height)
         paragraphStyle.paragraphSpacing = style.paragraphSpacing
+        paragraphStyle.paragraphSpacingBefore = style.lineHeight / 2
         paragraphStyle.alignment = .center
 
-        let result = NSMutableAttributedString(string: "\n", attributes: [.paragraphStyle: paragraphStyle])
-        result.append(NSAttributedString(attachment: attachment))
-        result.append(NSAttributedString(string: "\n", attributes: [.paragraphStyle: paragraphStyle]))
+        let attachmentStr = NSMutableAttributedString(attachment: attachment)
+        attachmentStr.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: attachmentStr.length))
+
+        let trailingStyle = NSMutableParagraphStyle()
+        trailingStyle.minimumLineHeight = 2
+        trailingStyle.maximumLineHeight = 2
+        trailingStyle.paragraphSpacing = style.paragraphSpacing
+
+        let result = NSMutableAttributedString()
+        result.append(attachmentStr)
+        result.append(NSAttributedString(string: "\n", attributes: [.paragraphStyle: trailingStyle]))
         return result
     }
 }
@@ -178,7 +187,14 @@ private extension STMarkdownHighFidelityMathRenderer {
         format.scale = UIScreen.main.scale
         let renderer = UIGraphicsImageRenderer(size: label.bounds.size, format: format)
         let image = renderer.image { context in
-            label.layer.render(in: context.cgContext)
+            let cgContext = context.cgContext
+            // MTMathUILabel 内部使用 Core Graphics 坐标系（Y 轴向上）绘制公式。
+            // UIGraphicsImageRenderer 提供的是 UIKit 坐标系（Y 轴向下）。
+            // layer.render(in:) 不会自动处理 isGeometryFlipped=true 导致的坐标翻转，
+            // 因此需要手动翻转 Y 轴，与 SwiftMath 官方 MathImage.asImage() 的做法一致。
+            cgContext.translateBy(x: 0, y: label.bounds.size.height)
+            cgContext.scaleBy(x: 1, y: -1)
+            label.layer.render(in: cgContext)
         }
 
         return image.size.width > 0 && image.size.height > 0 ? image : nil

@@ -7,7 +7,6 @@
 
 import UIKit
 
-/// 应用生命周期管理器
 public class STAppLifecycleManager {
     
     private enum STAppLifecycleKeys {
@@ -22,22 +21,15 @@ public class STAppLifecycleManager {
         return formatter
     }()
     
-    // 单例模式
     public static let shared = STAppLifecycleManager()
-    
-    /// 后台超时时间（秒），默认15分钟
     public var backgroundTimeoutInterval: TimeInterval = 900 // 15分钟
-    
-    /// 后台超时回调
     public var onBackgroundTimeout: ((TimeInterval) -> Void)?
-    
-    /// 应用进入后台回调
     public var onDidEnterBackground: (() -> Void)?
-    
-    /// 应用进入前台回调
     public var onWillEnterForeground: (() -> Void)?
     
-    private init() {
+    private init() {}
+    
+    public func start() {
         self.st_setupNotifications()
     }
         
@@ -93,7 +85,6 @@ public class STAppLifecycleManager {
         } else {
             STLog("✅ 应用在后台未超过 \(self.backgroundTimeoutInterval / 60) 分钟")
         }
-        // 清除保存的时间戳
         UserDefaults.standard.removeObject(forKey: STAppLifecycleKeys.backgroundTimestamp)
     }
     

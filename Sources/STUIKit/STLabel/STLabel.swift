@@ -69,16 +69,19 @@ public class STLabel: UILabel {
     public init(frame: CGRect, type: STLabelVerticalAlignment) {
         super.init(frame: frame)
         self.verticalAlignment = type
+        self.adjustsFontForContentSizeCategory = true
     }
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.verticalAlignment = STLabelVerticalAlignment.middle
+        self.adjustsFontForContentSizeCategory = true
     }
-    
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.verticalAlignment = STLabelVerticalAlignment.middle
+        self.adjustsFontForContentSizeCategory = true
         self.updateFontSize()
     }
     
@@ -88,7 +91,7 @@ public class STLabel: UILabel {
     
     private func updateFontSize() {
         let fontName = self.font.fontName
-        self.font = UIFont.adaptiveSystemFont(ofSize: self.font.pointSize, fontName: fontName)
+        self.font = UIFont.st_font(name: fontName, size: self.font.pointSize)
     }
     
     public override func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {

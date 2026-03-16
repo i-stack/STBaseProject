@@ -113,6 +113,12 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         return CGSize(width: UIView.noIntrinsicMetric, height: ceil(fitting.height))
     }
 
+    /// 直接委托给内部 UITextView 的 sizeThatFits，使调用方能在 UIKit layout pass 执行前
+    /// 即可拿到基于 TextKit LayoutManager 的真实文字高度，而非陈旧的 bounds.size。
+    public override func sizeThatFits(_ size: CGSize) -> CGSize {
+        return self.textView.sizeThatFits(size)
+    }
+
     public func reset() {
         self.rawMarkdown = ""
         self.textView.reset()
