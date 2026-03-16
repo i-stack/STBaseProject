@@ -24,6 +24,9 @@ open class STShimmerTextView: UITextView {
     public var suppressSystemTextMenu: Bool = false
     private var displayLink: CADisplayLink?
     private var animatingTokens: [AnimatingToken] = []
+    /// 最终目标态的 attributed text（全不透明），不含任何动画中间状态的 alpha 值。
+    /// 供外部做 "已渲染前缀" 比较时使用，避免因动画过渡期 alpha < 1 导致前缀比较误判。
+    private var _baseAttributedText: NSMutableAttributedString = NSMutableAttributedString()
 
     open var defaultTextAttributes: [NSAttributedString.Key: Any] {
         return [
@@ -33,7 +36,7 @@ open class STShimmerTextView: UITextView {
     }
 
     public var renderedAttributedText: NSAttributedString {
-        self.attributedText ?? NSAttributedString()
+        return _baseAttributedText
     }
 
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
@@ -62,8 +65,18 @@ open class STShimmerTextView: UITextView {
     public func append(_ text: String) {
         guard !text.isEmpty else { return }
         let startLocation = self.textStorage.length
+        let baseColor = self.baseForegroundColor(from: self.defaultTextAttributes)
+        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画
+        if self.tokenFadeDuration > 0 {
+            self.finishAnimationsBeforeLastNewline()
+        }
+        // _baseAttributedText 记录全不透明最终态
+        let baseAttr = NSAttributedString(
+            string: text,
+            attributes: [.font: self.font ?? UIFont.systemFont(ofSize: 16), .foregroundColor: baseColor]
+        )
+        _baseAttributedText.append(baseAttr)
         var attrs = self.defaultTextAttributes
-        let baseColor = self.baseForegroundColor(from: attrs)
         attrs[.foregroundColor] = baseColor.withAlphaComponent(self.tokenFadeDuration > 0 ? 0 : 1)
         let tokenAttr = NSAttributedString(string: text, attributes: attrs)
         self.textStorage.beginEditing()
@@ -90,6 +103,14 @@ open class STShimmerTextView: UITextView {
         let appended = NSMutableAttributedString(attributedString: attributedText)
         let defaultColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         self.ensureForegroundColor(in: appended, defaultColor: defaultColor)
+        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画：
+        // 新字符只要属于下一行，先前行的 fade-in 就不应再悬挂，立即置为全不透明。
+        if animated, self.tokenFadeDuration > 0 {
+            self.finishAnimationsBeforeLastNewline()
+        }
+        // _baseAttributedText 记录全不透明的最终态，供 tryAppendRenderedDelta 做稳定前缀比较。
+        // 必须在 applyTransparentForegroundColors 之前执行，保留原始 alpha=1 颜色。
+        _baseAttributedText.append(appended)
         let colorRuns = self.animatingColorRuns(in: appended, offset: startLocation)
         if animated {
             self.applyTransparentForegroundColors(to: appended, defaultColor: defaultColor)
@@ -110,6 +131,7 @@ open class STShimmerTextView: UITextView {
     public func setRenderedAttributedText(_ attributedText: NSAttributedString) {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
+        _baseAttributedText = NSMutableAttributedString(attributedString: attributedText)
         self.textStorage.beginEditing()
         self.textStorage.setAttributedString(attributedText)
         self.textStorage.endEditing()
@@ -119,6 +141,15 @@ open class STShimmerTextView: UITextView {
         let clampedLocation = max(0, min(location, self.textStorage.length))
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
+        // 同步更新 _baseAttributedText：保留 [0, clampedLocation) 前缀 + 新尾部
+        let clampedBaseLocation = max(0, min(location, _baseAttributedText.length))
+        let newBase = NSMutableAttributedString(
+            attributedString: _baseAttributedText.attributedSubstring(
+                from: NSRange(location: 0, length: clampedBaseLocation)
+            )
+        )
+        newBase.append(attributedText)
+        _baseAttributedText = newBase
         self.textStorage.beginEditing()
         self.textStorage.replaceCharacters(
             in: NSRange(location: clampedLocation, length: self.textStorage.length - clampedLocation),
@@ -130,6 +161,7 @@ open class STShimmerTextView: UITextView {
     public func reset() {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
+        _baseAttributedText = NSMutableAttributedString()
         self.textStorage.beginEditing()
         self.textStorage.setAttributedString(NSAttributedString())
         self.textStorage.endEditing()
@@ -249,6 +281,42 @@ open class STShimmerTextView: UITextView {
         self.textStorage.endEditing()
         if self.contentOffset != offset {
             self.setContentOffset(offset, animated: false)
+        }
+    }
+
+    /// 立即完成"当前行"之前所有行的 fade-in 动画。
+    ///
+    /// 原则：_baseAttributedText 中最后一个 \n 之前的字符已属于已完成的行，
+    /// 它们的 animatingToken 应立即置为全不透明，不应继续半透明地悬挂在屏幕上。
+    /// 调用时机：在每次 append 新字符 **之前**（_baseAttributedText 尚未追加新内容），
+    /// 以 _baseAttributedText 的当前末尾搜索最后一个换行符。
+    private func finishAnimationsBeforeLastNewline() {
+        guard !self.animatingTokens.isEmpty else { return }
+        let str = _baseAttributedText.string as NSString
+        let len = str.length
+        guard len > 0 else { return }
+        // 在 [0, len) 范围内倒序查找最后一个换行符
+        let lastNLRange = str.range(of: "\n", options: .backwards, range: NSRange(location: 0, length: len))
+        guard lastNLRange.location != NSNotFound else { return }
+        // boundary：最后一个 \n 之后的第一个字符位置；此位置之前的 token 全部立即完成
+        let boundary = lastNLRange.location + lastNLRange.length
+
+        var completedIndices: [Int] = []
+        self.textStorage.beginEditing()
+        for (idx, token) in self.animatingTokens.enumerated() {
+            guard token.range.location + token.range.length <= boundary else { continue }
+            for run in token.colorRuns {
+                self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
+            }
+            completedIndices.append(idx)
+        }
+        self.textStorage.endEditing()
+        guard !completedIndices.isEmpty else { return }
+        for idx in completedIndices.reversed() {
+            self.animatingTokens.remove(at: idx)
+        }
+        if self.animatingTokens.isEmpty {
+            self.stopDisplayLink()
         }
     }
 
