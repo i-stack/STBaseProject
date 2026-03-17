@@ -40,6 +40,10 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         set { self.textView.tokenFadeDuration = newValue }
     }
 
+    /// 自定义文档渲染闭包：若设置，则 render 时使用此闭包代替默认的 STMarkdownAttributedStringRenderer，
+    /// 使流式渲染和 AST 最终渲染使用同一套样式，避免流式结束切换时出现样式跳变。
+    public var customDocumentRenderer: ((STMarkdownRenderDocument) -> NSAttributedString)?
+
     public var engine: STMarkdownEngine
     public var onLinkTap: ((URL) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
@@ -166,6 +170,9 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
     private func render(_ markdown: String) -> NSAttributedString {
         let result = self.engine.process(markdown)
+        if let customRenderer = self.customDocumentRenderer {
+            return customRenderer(result.renderDocument)
+        }
         return self.renderer.render(document: result.renderDocument)
     }
 
