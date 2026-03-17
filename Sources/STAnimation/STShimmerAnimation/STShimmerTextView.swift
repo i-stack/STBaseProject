@@ -9,6 +9,10 @@ import UIKit
 
 open class STShimmerTextView: UITextView {
 
+    /// 在 NSAttributedString 中标记此 key 的 range 不参与 fade-in 动画，
+    /// 直接以最终颜色渲染。用于 list marker、block separator、heading 等结构元素。
+    public static let skipFadeInAttributeKey = NSAttributedString.Key("STShimmerTextView.skipFadeIn")
+
     private struct AnimatingColorRun {
         let range: NSRange
         let targetColor: UIColor
@@ -139,9 +143,25 @@ open class STShimmerTextView: UITextView {
 
     public func replaceTrailingAttributedText(from location: Int, with attributedText: NSAttributedString) {
         let clampedLocation = max(0, min(location, self.textStorage.length))
-        self.stopDisplayLink()
+
+        // 1. 立即完成前缀区域内仍在动画的 token，丢弃与尾部重叠的 token
+        if !self.animatingTokens.isEmpty {
+            self.textStorage.beginEditing()
+            for token in self.animatingTokens {
+                let tokenEnd = token.range.location + token.range.length
+                if tokenEnd <= clampedLocation {
+                    // token 在前缀区域内 → 立即完成动画
+                    for run in token.colorRuns {
+                        self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
+                    }
+                }
+                // token 与尾部重叠 → 丢弃（即将被替换）
+            }
+            self.textStorage.endEditing()
+        }
         self.animatingTokens.removeAll()
-        // 同步更新 _baseAttributedText：保留 [0, clampedLocation) 前缀 + 新尾部
+
+        // 2. 同步更新 _baseAttributedText：保留 [0, clampedLocation) 前缀 + 新尾部
         let clampedBaseLocation = max(0, min(location, _baseAttributedText.length))
         let newBase = NSMutableAttributedString(
             attributedString: _baseAttributedText.attributedSubstring(
@@ -150,12 +170,17 @@ open class STShimmerTextView: UITextView {
         )
         newBase.append(attributedText)
         _baseAttributedText = newBase
+
+        // 3. 直接替换 textStorage 中的尾部内容（不做 fade-in 动画）。
+        //    replaceTrailing 通常在 markdown 重解析后调用，属性变化但文本大致相同，
+        //    此处不做淡入以避免频繁替换时反复从 alpha=0 开始导致闪烁。
         self.textStorage.beginEditing()
         self.textStorage.replaceCharacters(
             in: NSRange(location: clampedLocation, length: self.textStorage.length - clampedLocation),
             with: attributedText
         )
         self.textStorage.endEditing()
+        self.stopDisplayLink()
     }
 
     public func reset() {
@@ -244,7 +269,22 @@ open class STShimmerTextView: UITextView {
         let range = NSRange(location: 0, length: attributedText.length)
         guard range.length > 0 else { return }
         attributedText.enumerateAttribute(.foregroundColor, in: range, options: []) { value, subrange, _ in
+            // 跳过含 NSTextAttachment 的字符（如 citation 圆圈），
+            // 它们的视觉由 attachment image 决定，不应被 alpha 动画影响。
+            if attributedText.attribute(.attachment, at: subrange.location, effectiveRange: nil) != nil {
+                return
+            }
+            // 跳过标记了 skipFadeIn 的 range（list marker、block separator 等结构元素），
+            // 它们需要直接以最终颜色渲染，不做 alpha 渐变。
+            if attributedText.attribute(Self.skipFadeInAttributeKey, at: subrange.location, effectiveRange: nil) != nil {
+                return
+            }
             let color = (value as? UIColor) ?? defaultColor
+            // 跳过已经透明的颜色（如 blockSeparator 的 UIColor.clear），
+            // 避免 withAlphaComponent(0) 将 (0,0,0,0) 变为 (0,0,0,0) 后在动画中渐变为 (0,0,0,progress)。
+            var alpha: CGFloat = 0
+            color.getWhite(nil, alpha: &alpha)
+            if alpha < 0.01 { return }
             attributedText.addAttribute(
                 .foregroundColor,
                 value: color.withAlphaComponent(self.tokenFadeDuration > 0 ? 0 : 1),
@@ -260,6 +300,18 @@ open class STShimmerTextView: UITextView {
         var runs: [AnimatingColorRun] = []
         attributedText.enumerateAttribute(.foregroundColor, in: range, options: []) { value, subrange, _ in
             guard let color = value as? UIColor else { return }
+            // 跳过 NSTextAttachment 字符，不参与 fade-in 动画
+            if attributedText.attribute(.attachment, at: subrange.location, effectiveRange: nil) != nil {
+                return
+            }
+            // 跳过标记了 skipFadeIn 的 range
+            if attributedText.attribute(Self.skipFadeInAttributeKey, at: subrange.location, effectiveRange: nil) != nil {
+                return
+            }
+            // 跳过已透明的颜色（blockSeparator 等），它们不需要 fade-in
+            var alpha: CGFloat = 0
+            color.getWhite(nil, alpha: &alpha)
+            if alpha < 0.01 { return }
             runs.append(
                 AnimatingColorRun(
                     range: NSRange(location: offset + subrange.location, length: subrange.length),
