@@ -34,7 +34,7 @@ open class STShimmerTextView: UITextView {
 
     open var defaultTextAttributes: [NSAttributedString.Key: Any] {
         return [
-            .font: self.font ?? UIFont.systemFont(ofSize: 16),
+            .font: self.font ?? UIFont.st_systemFont(ofSize: 16),
             .foregroundColor: self.textColor ?? UIColor.label,
         ]
     }
@@ -61,7 +61,7 @@ open class STShimmerTextView: UITextView {
         self.backgroundColor = .clear
         self.textContainerInset = .zero
         self.textContainer.lineFragmentPadding = 0
-        self.font = .systemFont(ofSize: 16)
+        self.font = .st_systemFont(ofSize: 16)
         self.textColor = .label
         self.layoutManager.allowsNonContiguousLayout = false
     }
@@ -77,7 +77,7 @@ open class STShimmerTextView: UITextView {
         // _baseAttributedText 记录全不透明最终态
         let baseAttr = NSAttributedString(
             string: text,
-            attributes: [.font: self.font ?? UIFont.systemFont(ofSize: 16), .foregroundColor: baseColor]
+            attributes: [.font: self.font ?? UIFont.st_systemFont(ofSize: 16), .foregroundColor: baseColor]
         )
         _baseAttributedText.append(baseAttr)
         var attrs = self.defaultTextAttributes

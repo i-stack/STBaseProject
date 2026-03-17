@@ -299,7 +299,7 @@ public class STProgressHUD: UIView {
         label?.adjustsFontSizeToFitWidth = false
         label?.textAlignment = .center
         label?.textColor = defaultColor
-        label?.font = UIFont.boldSystemFont(ofSize: defaultLabelFontSize)
+        label?.font = UIFont.st_boldSystemFont(ofSize: defaultLabelFontSize)
         label?.isOpaque = false
         label?.backgroundColor = UIColor.clear
         
@@ -307,13 +307,13 @@ public class STProgressHUD: UIView {
         detailsLabel?.adjustsFontSizeToFitWidth = false
         detailsLabel?.textAlignment = .center
         detailsLabel?.textColor = defaultColor
-        detailsLabel?.font = UIFont.boldSystemFont(ofSize: defaultDetailsLabelFontSize)
+        detailsLabel?.font = UIFont.st_boldSystemFont(ofSize: defaultDetailsLabelFontSize)
         detailsLabel?.isOpaque = false
         detailsLabel?.backgroundColor = UIColor.clear
         
         button = STProgressHUDRoundedButton()
         button?.titleLabel?.textAlignment = .center
-        button?.titleLabel?.font = UIFont.boldSystemFont(ofSize: defaultDetailsLabelFontSize)
+        button?.titleLabel?.font = UIFont.st_boldSystemFont(ofSize: defaultDetailsLabelFontSize)
         button?.setTitleColor(defaultColor, for: .normal)
         
         for view: UIView in [label!, detailsLabel!, button!] {

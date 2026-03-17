@@ -39,9 +39,9 @@ open class STBaseViewController: UIViewController {
     public var navBarBackgroundColor: UIColor = .white
     public var navBarTitleColor: UIColor = .black
     public var buttonTitleColor: UIColor = .systemBlue
-    public var buttonTitleFont: UIFont = .systemFont(ofSize: 16)
+    public var buttonTitleFont: UIFont = .st_systemFont(ofSize: 16)
     public var navBarHeight: CGFloat = 88  // default for Notch devices
-    public var navBarTitleFont: UIFont = .boldSystemFont(ofSize: 20)
+    public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20)
 
     public var leftBtnImage: UIImage?
     public var rightBtnImage: UIImage?

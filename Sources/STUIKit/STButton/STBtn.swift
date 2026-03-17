@@ -217,9 +217,6 @@ open class STBtn: UIButton {
         self.titleLabel?.adjustsFontForContentSizeCategory = true
         self.titleLabel?.textAlignment = .natural
         self.imageView?.contentMode = .scaleAspectFit
-        if self.autoAdaptFontSize {
-            self.updateFontSize()
-        }
     }
     
     open override func layoutSubviews() {
@@ -364,8 +361,7 @@ open class STBtn: UIButton {
     }
     
     private func updateFontSize() {
-        guard let fontName = self.titleLabel?.font.fontName,
-              let fontSize = self.titleLabel?.font.pointSize else { return }
-        self.titleLabel?.font = UIFont.st_font(name: fontName, size: fontSize)
+        guard let fontSize = self.titleLabel?.font.pointSize else { return }
+        self.titleLabel?.font = UIFont.st_systemFont(ofSize: fontSize)
     }
 }

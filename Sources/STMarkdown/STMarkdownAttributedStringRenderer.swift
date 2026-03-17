@@ -121,7 +121,7 @@ private extension STMarkdownAttributedStringRenderer {
 
     func renderCodeBlock(language: String?, code: String) -> NSAttributedString {
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.monospacedSystemFont(ofSize: 14, weight: .regular),
+            .font: UIFont.st_monospacedSystemFont(ofSize: 14, weight: .regular),
             .foregroundColor: self.style.textColor,
             .paragraphStyle: self.bodyParagraphStyle(),
         ]
@@ -222,7 +222,7 @@ private extension STMarkdownAttributedStringRenderer {
                 ))
             case .code(let code):
                 var codeAttributes = attributes
-                codeAttributes[.font] = UIFont.monospacedSystemFont(ofSize: max(baseFont.pointSize - 1, 12), weight: .regular)
+                codeAttributes[.font] = UIFont.st_monospacedSystemFont(ofSize: max(baseFont.pointSize - 1, 12), weight: .regular)
                 codeAttributes[.foregroundColor] = self.style.inlineCodeTextColor ?? textColor
                 result.append(NSAttributedString(string: code, attributes: codeAttributes))
             case .link(let destination, let children):
@@ -332,15 +332,15 @@ private extension STMarkdownAttributedStringRenderer {
     func headingFont(for level: Int) -> UIFont {
         switch level {
         case 1:
-            return .systemFont(ofSize: 22, weight: .bold)
+            return .st_systemFont(ofSize: 22, weight: .bold)
         case 2:
-            return .systemFont(ofSize: 20, weight: .semibold)
+            return .st_systemFont(ofSize: 20, weight: .semibold)
         case 3:
-            return .systemFont(ofSize: 18, weight: .semibold)
+            return .st_systemFont(ofSize: 18, weight: .semibold)
         case 4:
-            return .systemFont(ofSize: 17, weight: .semibold)
+            return .st_systemFont(ofSize: 17, weight: .semibold)
         default:
-            return .systemFont(ofSize: 16, weight: .medium)
+            return .st_systemFont(ofSize: 16, weight: .medium)
         }
     }
 
@@ -352,7 +352,7 @@ private extension STMarkdownAttributedStringRenderer {
         let baselineOffset: CGFloat
 
         if item.ordered {
-            markerFont = UIFont.monospacedDigitSystemFont(ofSize: self.style.font.pointSize, weight: .medium)
+            markerFont = UIFont.st_monospacedDigitSystemFont(ofSize: self.style.font.pointSize, weight: .medium)
             let orderedIndex = item.orderedIndex ?? 1
             markerText = "\(orderedIndex).\t"
             let markerWidth = ceil(("\(orderedIndex)." as NSString).size(withAttributes: [.font: markerFont]).width)
@@ -360,7 +360,7 @@ private extension STMarkdownAttributedStringRenderer {
             baselineOffset = 0
         } else {
             markerText = item.level == 0 ? "\t●\t" : "\t○\t"
-            markerFont = .systemFont(ofSize: 7, weight: .regular)
+            markerFont = .st_systemFont(ofSize: 7, weight: .regular)
             contentIndent = firstLineIndent + 13
             let baseMidline = (self.style.font.ascender + self.style.font.descender) / 2
             let markerMidline = (markerFont.ascender + markerFont.descender) / 2

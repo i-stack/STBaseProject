@@ -438,7 +438,7 @@ open class STAlertController: UIViewController {
         label.textColor = UIColor.black
         label.backgroundColor = UIColor.white
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont.st_font(style: .headline, size: 15, weight: .medium)
+        label.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .headline, weight: .medium)
         return label
     }()
     
@@ -449,7 +449,7 @@ open class STAlertController: UIViewController {
         label.textColor = UIColor.black
         label.backgroundColor = UIColor.white
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont.st_font(style: .subheadline, size: 15, weight: .regular)
+        label.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .subheadline, weight: .regular)
         return label
     }()
     
@@ -465,7 +465,7 @@ open class STAlertController: UIViewController {
         if let font = action.font {
             btn.titleLabel?.font = font
         } else {
-            btn.titleLabel?.font = UIFont.st_font(style: .footnote, size: 14, weight: .regular)
+            btn.titleLabel?.font = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .footnote, weight: .regular)
         }
         if let titleColor = action.titleColor {
             btn.setTitleColor(titleColor, for: .normal)
@@ -508,13 +508,13 @@ public extension STAlertController {
         // 可选：设置富文本标题/消息
         if let title = title, !title.isEmpty {
             let attributed = NSAttributedString(string: title, attributes: [
-                .font: UIFont.st_font(style: .headline, size: 17, weight: .medium)
+                .font: UIFont.st_preferredFont(ofSize: 17, forTextStyle: .headline, weight: .medium)
             ])
             alert.setValue(attributed, forKey: "attributedTitle")
         }
         if let message = message, !message.isEmpty {
             let attributed = NSAttributedString(string: message, attributes: [
-                .font: UIFont.st_font(style: .footnote, size: 14, weight: .regular)
+                .font: UIFont.st_preferredFont(ofSize: 14, forTextStyle: .footnote, weight: .regular)
             ])
             alert.setValue(attributed, forKey: "attributedMessage")
         }

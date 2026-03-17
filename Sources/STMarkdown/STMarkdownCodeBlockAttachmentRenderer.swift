@@ -29,8 +29,8 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
         code: String,
         style: STMarkdownStyle
     ) -> UIImage {
-        let headerFont = UIFont.monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold)
-        let codeFont = UIFont.monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular)
+        let headerFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold)
+        let codeFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular)
         let horizontalPadding: CGFloat = 12
         let verticalPadding: CGFloat = 10
         let contentWidth: CGFloat = 280

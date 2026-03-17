@@ -103,7 +103,7 @@ private extension STMarkdownDefaultTableRenderer {
         isHeader: Bool,
         style: STMarkdownStyle
     ) -> NSAttributedString {
-        let font = UIFont.monospacedSystemFont(
+        let font = UIFont.st_monospacedSystemFont(
             ofSize: max(style.font.pointSize - 1, 12),
             weight: isHeader ? .semibold : .regular
         )
@@ -129,7 +129,7 @@ private extension STMarkdownDefaultTableRenderer {
         style: STMarkdownStyle
     ) -> NSAttributedString {
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular),
+            .font: UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular),
             .foregroundColor: style.tableBorderColor ?? style.textColor.withAlphaComponent(0.55),
             .backgroundColor: style.tableBackgroundColor ?? UIColor.secondarySystemBackground,
         ]

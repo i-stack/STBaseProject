@@ -26,7 +26,7 @@ public struct STToastStyle {
     
     public init(backgroundColor: UIColor = UIColor.black.withAlphaComponent(0.8),
                 textColor: UIColor = .white,
-                font: UIFont = UIFont.systemFont(ofSize: 16, weight: .semibold),
+                font: UIFont = UIFont.st_systemFont(ofSize: 16, weight: .semibold),
                 cornerRadius: CGFloat = 18,
                 horizontalPadding: CGFloat = 18,
                 verticalPadding: CGFloat = 20,

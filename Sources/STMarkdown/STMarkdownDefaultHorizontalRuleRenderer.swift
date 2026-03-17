@@ -19,7 +19,7 @@ public struct STMarkdownDefaultHorizontalRuleRenderer: STMarkdownHorizontalRuleR
 
         let color = style.horizontalRuleColor ?? style.textColor.withAlphaComponent(0.28)
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .regular),
+            .font: UIFont.st_systemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .regular),
             .foregroundColor: color,
             .paragraphStyle: paragraphStyle,
         ]

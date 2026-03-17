@@ -141,7 +141,7 @@ public struct STMarkdownAsyncImageRenderer: STMarkdownImageRendering {
                 NSAttributedString(
                     string: "\n\(caption)",
                     attributes: [
-                        .font: UIFont.systemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .regular),
+                        .font: UIFont.st_systemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .regular),
                         .foregroundColor: style.imagePlaceholderCaptionColor ?? style.textColor.withAlphaComponent(0.72),
                         .paragraphStyle: paragraphStyle,
                     ]

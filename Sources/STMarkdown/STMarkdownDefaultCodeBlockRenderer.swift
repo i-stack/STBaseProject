@@ -23,14 +23,14 @@ public struct STMarkdownDefaultCodeBlockRenderer: STMarkdownCodeBlockRendering {
         paragraphStyle.lineBreakMode = .byCharWrapping
 
         let headerAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold),
+            .font: UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold),
             .foregroundColor: style.codeBlockHeaderTextColor ?? style.textColor.withAlphaComponent(0.72),
             .backgroundColor: style.codeBlockBackgroundColor ?? UIColor.secondarySystemBackground,
             .paragraphStyle: paragraphStyle,
         ]
 
         let bodyAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular),
+            .font: UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular),
             .foregroundColor: style.codeBlockTextColor ?? style.textColor,
             .backgroundColor: style.codeBlockBackgroundColor ?? UIColor.secondarySystemBackground,
             .paragraphStyle: paragraphStyle,

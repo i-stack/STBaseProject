@@ -98,7 +98,7 @@ public struct STMarkdownStyle {
     }
 
     public static let `default` = STMarkdownStyle(
-        font: .systemFont(ofSize: 16, weight: .regular),
+        font: .st_systemFont(ofSize: 16, weight: .regular),
         textColor: .label,
         lineHeight: 24,
         kern: 0.12
@@ -123,7 +123,7 @@ enum STMarkdownFontResolver {
                 return resolved
             }
         }
-        return .systemFont(ofSize: font.pointSize, weight: .bold)
+        return .st_systemFont(ofSize: font.pointSize, weight: .bold)
     }
 
     static func boldItalicFont(from font: UIFont) -> UIFont {

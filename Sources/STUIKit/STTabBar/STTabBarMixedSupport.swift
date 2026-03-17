@@ -79,7 +79,7 @@ public class STTabBarMixedSupport {
         let item = UITabBarItem(title: customItem.title, image: customItem.normalImage, selectedImage: customItem.selectedImage)
         
         // 设置文字属性
-        let font = UIFont(name: customItem.titleFontName, size: customItem.titleSize) ?? UIFont.systemFont(ofSize: customItem.titleSize)
+        let font = UIFont(name: customItem.titleFontName, size: customItem.titleSize) ?? UIFont.st_systemFont(ofSize: customItem.titleSize)
         item.setTitleTextAttributes([
             .foregroundColor: customItem.normalTextColor,
             .font: font

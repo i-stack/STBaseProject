@@ -26,7 +26,7 @@ public class STShimmerRendererView: UIView {
     
     var animatesHeightChanges: Bool = true
 
-    var font: UIFont = .systemFont(ofSize: 16) {
+    var font: UIFont = .st_systemFont(ofSize: 16) {
         didSet {
             self.renderer.font = self.font
         }

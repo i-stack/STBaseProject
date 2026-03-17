@@ -29,7 +29,7 @@ public struct STMarkdownDefaultMathRenderer: STMarkdownInlineMathRendering, STMa
         formula: String,
         style: STMarkdownStyle
     ) -> NSAttributedString? {
-        let baseFont = UIFont.monospacedSystemFont(ofSize: max(style.font.pointSize, 16), weight: .regular)
+        let baseFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize, 16), weight: .regular)
         return self.renderMath(
             formula: formula,
             style: style,

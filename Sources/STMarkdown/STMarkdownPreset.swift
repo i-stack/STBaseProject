@@ -19,7 +19,7 @@ public enum STMarkdownPresets {
     )
 
     public static let article = STMarkdownStyle(
-        font: .systemFont(ofSize: 17, weight: .regular),
+        font: .st_systemFont(ofSize: 17, weight: .regular),
         textColor: .label,
         lineHeight: 26,
         kern: 0.1,
@@ -46,7 +46,7 @@ public enum STMarkdownPresets {
     )
 
     public static let compact = STMarkdownStyle(
-        font: .systemFont(ofSize: 14, weight: .regular),
+        font: .st_systemFont(ofSize: 14, weight: .regular),
         textColor: .label,
         lineHeight: 20,
         kern: 0.08,

@@ -66,8 +66,8 @@ private extension STMarkdownTableAttachmentRenderer {
             row + Array(repeating: "", count: max(0, columnCount - row.count))
         }
 
-        let headerFont = UIFont.systemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .semibold)
-        let bodyFont = UIFont.systemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular)
+        let headerFont = UIFont.st_systemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .semibold)
+        let bodyFont = UIFont.st_systemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular)
         let horizontalPadding: CGFloat = 10
         let verticalPadding: CGFloat = 8
         let minimumColumnWidth: CGFloat = 56

@@ -58,15 +58,16 @@ public struct STFontFamilyConfig {
     }
 }
 
-// MARK: - UIFontMetrics 方案（推荐）
+// MARK: - UIFontMetrics 方案（支持 Dynamic Type）
 public extension UIFont {
-    /// 使用自定义字体 + UIFontMetrics 缩放，支持 Dynamic Type
-    static func st_font(
-        style: UIFont.TextStyle = .body,
-        size: CGFloat,
-        weight: UIFont.Weight = .regular,
-        maxSize: CGFloat? = nil
-    ) -> UIFont {
+    /// 使用自定义字体族 + UIFontMetrics 缩放，支持 Dynamic Type
+    /// 迁移时只需: UIFont.preferredFont(forTextStyle: .body) → UIFont.st_preferredFont(ofSize: 14, forTextStyle: .body)
+    /// - Parameters:
+    ///   - size: 基准字号（设计稿尺寸）
+    ///   - style: 文本样式，用于 UIFontMetrics 缩放（默认 .body）
+    ///   - weight: 字重（默认 .regular）
+    ///   - maxSize: 最大字号限制（可选）
+    static func st_preferredFont(ofSize size: CGFloat, forTextStyle style: UIFont.TextStyle = .body, weight: UIFont.Weight = .regular, maxSize: CGFloat? = nil) -> UIFont {
         let config = STDeviceAdapter.shared.fontFamily
         let baseFont: UIFont
         if let name = config.fontName(for: weight),
@@ -82,13 +83,13 @@ public extension UIFont {
         return metrics.scaledFont(for: baseFont)
     }
 
-    /// 使用指定字体名 + UIFontMetrics 缩放
-    static func st_font(
-        name: String,
-        style: UIFont.TextStyle = .body,
-        size: CGFloat,
-        maxSize: CGFloat? = nil
-    ) -> UIFont {
+    /// 使用指定字体名 + UIFontMetrics 缩放，支持 Dynamic Type
+    /// - Parameters:
+    ///   - name: 字体名称
+    ///   - size: 基准字号
+    ///   - style: 文本样式，用于 UIFontMetrics 缩放（默认 .body）
+    ///   - maxSize: 最大字号限制（可选）
+    static func st_preferredFont(name: String, ofSize size: CGFloat, forTextStyle style: UIFont.TextStyle = .body, maxSize: CGFloat? = nil) -> UIFont {
         let baseFont = UIFont(name: name, size: size) ?? .systemFont(ofSize: size)
         let metrics = UIFontMetrics(forTextStyle: style)
         if let maxSize = maxSize {
@@ -98,91 +99,76 @@ public extension UIFont {
     }
 }
 
-// MARK: - Swizzle 方案（已废弃，保留向后兼容）
+// MARK: - 便捷方法（与 UIFont.systemFont 签名一致，方便替换）
 public extension UIFont {
-    @available(*, deprecated, message: "Use UIFont.st_font() instead")
-    class func activateAdaptiveFonts() {
-        self.activateSystemFontSwizzle()
-        self.activateWeightedSystemFontSwizzle()
-        self.activateBoldSystemFontSwizzle()
-    }
 
-    private class func activateSystemFontSwizzle() {
-        let originalSelector = #selector(UIFont.systemFont(ofSize:))
-        let swizzledSelector = #selector(UIFont.adaptiveSystemFont(ofSize:))
-        self.applySwizzle(originalSelector: originalSelector, swizzledSelector: swizzledSelector)
-    }
-    
-    private class func activateWeightedSystemFontSwizzle() {
-        let originalSelector = #selector(UIFont.systemFont(ofSize:weight:))
-        let swizzledSelector = #selector(UIFont.adaptiveSystemFont(ofSize:weight:))
-        self.applySwizzle(originalSelector: originalSelector, swizzledSelector: swizzledSelector)
-    }
-    
-    private class func activateBoldSystemFontSwizzle() {
-        let originalSelector = #selector(UIFont.boldSystemFont(ofSize:))
-        let swizzledSelector = #selector(UIFont.adaptiveBoldSystemFont(ofSize:))
-        self.applySwizzle(originalSelector: originalSelector, swizzledSelector: swizzledSelector)
-    }
-    
-    private class func applySwizzle(originalSelector: Selector, swizzledSelector: Selector) {
-        guard let metaClass = object_getClass(self) else { return }
-        guard let originalMethod = class_getInstanceMethod(metaClass, originalSelector),
-              let swizzledMethod = class_getInstanceMethod(metaClass, swizzledSelector) else {
-            return
-        }
-        let didAddMethod = class_addMethod(
-            metaClass,
-            originalSelector,
-            method_getImplementation(swizzledMethod),
-            method_getTypeEncoding(swizzledMethod)
-        )
-        if didAddMethod {
-            class_replaceMethod(
-                metaClass,
-                swizzledSelector,
-                method_getImplementation(originalMethod),
-                method_getTypeEncoding(originalMethod)
-            )
-        } else {
-            method_exchangeImplementations(originalMethod, swizzledMethod)
-        }
-    }
-    
-    private class func scaledFontSize(for size: CGFloat) -> CGFloat {
-        return STDeviceAdapter.scaledValue(size)
-    }
-    
-    /// 查找自定义字体的内部方法，不经过 swizzle 链路
-    private class func resolveFont(size: CGFloat, weight: UIFont.Weight) -> UIFont? {
+    /// 替换 UIFont.systemFont(ofSize:)
+    /// 使用自定义字体族 + 屏幕适配缩放
+    /// 迁移时只需: UIFont.systemFont(ofSize: 14) → UIFont.st_systemFont(ofSize: 14)
+    static func st_systemFont(ofSize size: CGFloat) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledValue(size)
         let config = STDeviceAdapter.shared.fontFamily
-        guard let name = config.fontName(for: weight) else { return nil }
-        return UIFont(name: name, size: size)
-    }
-
-    @objc class func adaptiveSystemFont(ofSize: CGFloat) -> UIFont {
-        let size = UIFont.scaledFontSize(for: ofSize)
-        if let font = resolveFont(size: size, weight: .regular) {
+        if let name = config.fontName(for: .regular),
+           let font = UIFont(name: name, size: scaledSize) {
             return font
         }
-        // swizzle 后调用的是原始 systemFont(ofSize:)
-        return self.adaptiveSystemFont(ofSize: size)
+        return .systemFont(ofSize: scaledSize)
     }
 
-    @objc class func adaptiveSystemFont(ofSize: CGFloat, weight: UIFont.Weight) -> UIFont {
-        let size = UIFont.scaledFontSize(for: ofSize)
-        if let font = resolveFont(size: size, weight: weight) {
+    /// 替换 UIFont.systemFont(ofSize:weight:)
+    /// 迁移时只需: UIFont.systemFont(ofSize: 14, weight: .medium) → UIFont.st_systemFont(ofSize: 14, weight: .medium)
+    static func st_systemFont(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledValue(size)
+        let config = STDeviceAdapter.shared.fontFamily
+        if let name = config.fontName(for: weight),
+           let font = UIFont(name: name, size: scaledSize) {
             return font
         }
-        // swizzle 后调用的是原始 systemFont(ofSize:weight:)
-        return self.adaptiveSystemFont(ofSize: size, weight: weight)
+        return .systemFont(ofSize: scaledSize, weight: weight)
     }
 
-    @objc class func adaptiveBoldSystemFont(ofSize: CGFloat) -> UIFont {
-        let size = UIFont.scaledFontSize(for: ofSize)
-        if let font = resolveFont(size: size, weight: .semibold) {
+    /// 替换 UIFont.boldSystemFont(ofSize:)
+    /// 迁移时只需: UIFont.boldSystemFont(ofSize: 14) → UIFont.st_boldSystemFont(ofSize: 14)
+    static func st_boldSystemFont(ofSize size: CGFloat) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledValue(size)
+        let config = STDeviceAdapter.shared.fontFamily
+        if let name = config.fontName(for: .semibold),
+           let font = UIFont(name: name, size: scaledSize) {
             return font
         }
-        return self.adaptiveBoldSystemFont(ofSize: size)
+        return .boldSystemFont(ofSize: scaledSize)
+    }
+
+    /// 替换 UIFont.italicSystemFont(ofSize:)
+    /// 迁移时只需: UIFont.italicSystemFont(ofSize: 14) → UIFont.st_italicSystemFont(ofSize: 14)
+    static func st_italicSystemFont(ofSize size: CGFloat) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledValue(size)
+        return .italicSystemFont(ofSize: scaledSize)
+    }
+
+    /// 替换 UIFont.preferredFont(forTextStyle:)
+    /// 使用自定义字体族 + UIFontMetrics 缩放，支持 Dynamic Type
+    /// 字号由系统 TextStyle 自动决定，无需手动传入
+    /// 迁移时只需: UIFont.preferredFont(forTextStyle: .body) → UIFont.st_preferredFont(forTextStyle: .body)
+    static func st_preferredFont(forTextStyle style: UIFont.TextStyle, weight: UIFont.Weight = .regular) -> UIFont {
+        let descriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: style)
+        let pointSize = descriptor.pointSize
+        return st_preferredFont(ofSize: pointSize, forTextStyle: style, weight: weight)
+    }
+
+    /// 替换 UIFont.monospacedDigitSystemFont(ofSize:weight:)
+    /// 等宽数字字体，适用于计时器、价格等需要数字对齐的场景
+    /// 迁移时只需: UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular) → UIFont.st_monospacedDigitSystemFont(ofSize: 14, weight: .regular)
+    static func st_monospacedDigitSystemFont(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledValue(size)
+        return .monospacedDigitSystemFont(ofSize: scaledSize, weight: weight)
+    }
+
+    /// 替换 UIFont.monospacedSystemFont(ofSize:weight:)
+    /// 等宽字体，适用于代码块、终端等需要等宽排列的场景
+    /// 迁移时只需: UIFont.monospacedSystemFont(ofSize: 14, weight: .regular) → UIFont.st_monospacedSystemFont(ofSize: 14, weight: .regular)
+    static func st_monospacedSystemFont(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledValue(size)
+        return .monospacedSystemFont(ofSize: scaledSize, weight: weight)
     }
 }

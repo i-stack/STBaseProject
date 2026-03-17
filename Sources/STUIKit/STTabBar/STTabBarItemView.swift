@@ -20,7 +20,7 @@ public class STTabBarItemView: UIView {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 10, weight: .medium)
+        label.font = UIFont.st_systemFont(ofSize: 10, weight: .medium)
         label.isUserInteractionEnabled = false
         return label
     }()
@@ -28,7 +28,7 @@ public class STTabBarItemView: UIView {
     private lazy var badgeLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 10, weight: .bold)
+        label.font = UIFont.st_systemFont(ofSize: 10, weight: .bold)
         label.textColor = .white
         label.backgroundColor = .systemRed
         label.layer.cornerRadius = 8
@@ -214,11 +214,11 @@ public class STTabBarItemView: UIView {
         
         titleLabel.text = model.title
         titleLabel.textColor = isSelected ? model.selectedTextColor : model.normalTextColor
-        let font = UIFont(name: model.titleFontName, size: model.titleSize) ?? UIFont.systemFont(ofSize: model.titleSize, weight: .medium)
+        let font = UIFont(name: model.titleFontName, size: model.titleSize) ?? UIFont.st_systemFont(ofSize: model.titleSize, weight: .medium)
         titleLabel.font = font
         backgroundColor = isSelected ? model.selectedBackgroundColor : model.normalBackgroundColor
         alpha = isSelected ? 1.0 : (config?.unselectedAlpha ?? 0.7)
-        
+
         // 文字居中显示
         titleLabelConstraints = [
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -237,11 +237,11 @@ public class STTabBarItemView: UIView {
         iconImageView.image = isSelected ? model.selectedImage : model.normalImage
         titleLabel.text = model.title
         titleLabel.textColor = isSelected ? model.selectedTextColor : model.normalTextColor
-        let font = UIFont(name: model.titleFontName, size: model.titleSize) ?? UIFont.systemFont(ofSize: model.titleSize, weight: .medium)
+        let font = UIFont(name: model.titleFontName, size: model.titleSize) ?? UIFont.st_systemFont(ofSize: model.titleSize, weight: .medium)
         titleLabel.font = font
         backgroundColor = isSelected ? model.selectedBackgroundColor : model.normalBackgroundColor
         alpha = isSelected ? 1.0 : (config?.unselectedAlpha ?? 0.7)
-        
+
         // 图片在上，文字在下
         iconImageViewConstraints = [
             iconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
@@ -279,9 +279,9 @@ public class STTabBarItemView: UIView {
         iconImageView.image = isSelected ? model.selectedImage : model.normalImage
         titleLabel.text = model.title
         titleLabel.textColor = model.normalTextColor
-        let font = UIFont(name: model.titleFontName, size: model.titleSize) ?? UIFont.systemFont(ofSize: model.titleSize, weight: .medium)
+        let font = UIFont(name: model.titleFontName, size: model.titleSize) ?? UIFont.st_systemFont(ofSize: model.titleSize, weight: .medium)
         titleLabel.font = font
-        
+
         // 设置不规则按钮样式（去掉背景颜色）
         backgroundColor = .clear
         layer.cornerRadius = 0

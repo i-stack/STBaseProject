@@ -71,8 +71,8 @@ public struct STHUDTheme {
                 loadingIconName: String? = nil,
                 iconSize: CGSize = CGSize(width: 28, height: 28),
                 hudSize: CGSize = CGSize(width: 120, height: 120),
-                labelFont: UIFont? = UIFont.systemFont(ofSize: 16, weight: .medium),
-                detailLabelFont: UIFont? = UIFont.systemFont(ofSize: 14, weight: .regular),
+                labelFont: UIFont? = UIFont.st_systemFont(ofSize: 16, weight: .medium),
+                detailLabelFont: UIFont? = UIFont.st_systemFont(ofSize: 14, weight: .regular),
                 customView: UIView? = nil,
                 customBgColor: UIColor? = nil,
                 activityViewColor: UIColor? = nil) {
@@ -451,13 +451,13 @@ open class STHUD: NSObject {
         if let font = theme.labelFont {
             self.progressHUD?.label?.font = font
         } else {
-            self.progressHUD?.label?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+            self.progressHUD?.label?.font = UIFont.st_systemFont(ofSize: 16, weight: .medium)
         }
         
         if let detailsLabelFont = theme.detailLabelFont {
             self.progressHUD?.detailsLabel?.font = detailsLabelFont
         } else {
-            self.progressHUD?.detailsLabel?.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+            self.progressHUD?.detailsLabel?.font = UIFont.st_systemFont(ofSize: 14, weight: .regular)
         }
         
         self.progressHUD?.label?.textColor = theme.textColor
@@ -669,7 +669,7 @@ open class STHUD: NSObject {
         let loading = UILabel(frame: iconView.bounds)
         loading.text = text
         loading.textColor = .white
-        loading.font = UIFont.systemFont(ofSize: iconWidth * 0.6, weight: .bold)
+        loading.font = UIFont.st_systemFont(ofSize: iconWidth * 0.6, weight: .bold)
         loading.textAlignment = .center
         iconView.addSubview(loading)
         return iconView

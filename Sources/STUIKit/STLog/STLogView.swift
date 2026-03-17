@@ -577,7 +577,7 @@ open class STLogView: UIView {
             let backgroundColor = selected ? level.color : level.color.withAlphaComponent(0.12)
             let titleText = "\(level.icon) \(level.rawValue)"
             let attributedTitle = AttributedString(titleText, attributes: AttributeContainer([
-                .font: UIFont.systemFont(ofSize: 13, weight: selected ? .semibold : .medium),
+                .font: UIFont.st_systemFont(ofSize: 13, weight: selected ? .semibold : .medium),
                 .foregroundColor: foregroundColor
             ]))
             config.attributedTitle = attributedTitle
@@ -594,7 +594,7 @@ open class STLogView: UIView {
             button.layer.borderColor = level.color.withAlphaComponent(0.4).cgColor
             button.backgroundColor = selected ? level.color : level.color.withAlphaComponent(0.1)
             button.setTitleColor(selected ? .white : level.color, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: selected ? .semibold : .regular)
+            button.titleLabel?.font = UIFont.st_systemFont(ofSize: 13, weight: selected ? .semibold : .regular)
         }
     }
     
@@ -699,18 +699,18 @@ private class STLogTableViewCell: UITableViewCell {
         selectionStyle = .none
         
         // 配置标签
-        self.levelLabel.font = UIFont.boldSystemFont(ofSize: 12)
+        self.levelLabel.font = UIFont.st_boldSystemFont(ofSize: 12)
         self.levelLabel.textAlignment = .center
         self.levelLabel.layer.cornerRadius = 8
         self.levelLabel.clipsToBounds = true
         
-        self.timestampLabel.font = UIFont.systemFont(ofSize: 10)
+        self.timestampLabel.font = UIFont.st_systemFont(ofSize: 10)
         self.timestampLabel.textColor = .secondaryLabel
         
-        self.fileLabel.font = UIFont.systemFont(ofSize: 11)
+        self.fileLabel.font = UIFont.st_systemFont(ofSize: 11)
         self.fileLabel.textColor = .secondaryLabel
         
-        self.messageLabel.font = UIFont.systemFont(ofSize: 13)
+        self.messageLabel.font = UIFont.st_systemFont(ofSize: 13)
         self.messageLabel.numberOfLines = 0
         
         // 配置堆栈视图
