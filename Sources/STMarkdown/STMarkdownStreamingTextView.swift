@@ -112,7 +112,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
     public override var intrinsicContentSize: CGSize {
         let fitting = self.textView.sizeThatFits(
-            CGSize(width: self.bounds.width > 0 ? self.bounds.width : UIScreen.main.bounds.width, height: .greatestFiniteMagnitude)
+            CGSize(width: self.bounds.width > 0 ? self.bounds.width : (self.window?.bounds.width ?? UIView.layoutFittingExpandedSize.width), height: .greatestFiniteMagnitude)
         )
         return CGSize(width: UIView.noIntrinsicMetric, height: ceil(fitting.height))
     }
@@ -136,10 +136,12 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
         let rendered = self.render(markdown)
         if animated, self.tryAppendRenderedDelta(for: markdown, rendered: rendered) {
+            self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             return
         }
         self.rawMarkdown = markdown
         self.textView.setRenderedAttributedText(rendered)
+        self.textView.accessibilityValue = self.textView.renderedAttributedText.string
         self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
         self.invalidateIntrinsicContentSize()
     }
@@ -155,8 +157,10 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
     private func setup() {
         self.backgroundColor = .clear
+        self.isAccessibilityElement = false
         self.textView.font = self.markdownStyle.font
         self.textView.textColor = self.markdownStyle.textColor
+        self.textView.accessibilityTraits = [.staticText, .updatesFrequently]
         self.textView.delegate = self
         self.addSubview(self.textView)
         self.textView.translatesAutoresizingMaskIntoConstraints = false

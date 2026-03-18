@@ -26,7 +26,7 @@ public struct STMarkdownPipelineConfiguration {
     }
 }
 
-public struct STMarkdownPipelineResult {
+public struct STMarkdownPipelineResult: Sendable {
     public let rawMarkdown: String
     public let sanitizedMarkdown: String
     public let appliedRules: [String]

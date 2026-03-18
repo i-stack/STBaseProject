@@ -249,6 +249,23 @@ private extension STMarkdownAttributedStringRenderer {
                 }
             case .softBreak:
                 result.append(NSAttributedString(string: "\n", attributes: attributes))
+            case .strikethrough(let children):
+                let strikethroughRendered = self.renderInline(
+                    nodes: children,
+                    baseFont: baseFont,
+                    textColor: textColor,
+                    paragraphStyle: style,
+                    italic: italic,
+                    bold: bold,
+                    linkDestination: linkDestination
+                )
+                let mutable = NSMutableAttributedString(attributedString: strikethroughRendered)
+                let strikeColor = self.style.strikethroughColor ?? textColor
+                mutable.addAttributes([
+                    .strikethroughStyle: NSUnderlineStyle.single.rawValue,
+                    .strikethroughColor: strikeColor,
+                ], range: NSRange(location: 0, length: mutable.length))
+                result.append(mutable)
             }
         }
 
@@ -351,7 +368,14 @@ private extension STMarkdownAttributedStringRenderer {
         let contentIndent: CGFloat
         let baselineOffset: CGFloat
 
-        if item.ordered {
+        if let checkbox = item.checkbox {
+            let checkboxMarker = checkbox == .checked ? "☑ " : "☐ "
+            markerFont = .st_systemFont(ofSize: self.style.font.pointSize, weight: .regular)
+            markerText = "\(checkboxMarker)\t"
+            let markerWidth = ceil((checkboxMarker as NSString).size(withAttributes: [.font: markerFont]).width)
+            contentIndent = firstLineIndent + markerWidth + 5
+            baselineOffset = 0
+        } else if item.ordered {
             markerFont = UIFont.st_monospacedDigitSystemFont(ofSize: self.style.font.pointSize, weight: .medium)
             let orderedIndex = item.orderedIndex ?? 1
             markerText = "\(orderedIndex).\t"

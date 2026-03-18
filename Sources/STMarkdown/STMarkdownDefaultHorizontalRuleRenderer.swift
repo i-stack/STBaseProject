@@ -15,7 +15,8 @@ public struct STMarkdownDefaultHorizontalRuleRenderer: STMarkdownHorizontalRuleR
         paragraphStyle.minimumLineHeight = style.lineHeight
         paragraphStyle.maximumLineHeight = style.lineHeight
         paragraphStyle.paragraphSpacing = style.paragraphSpacing
-        paragraphStyle.alignment = .center
+        paragraphStyle.alignment = .natural
+        paragraphStyle.lineBreakMode = .byClipping
 
         let color = style.horizontalRuleColor ?? style.textColor.withAlphaComponent(0.28)
         let attributes: [NSAttributedString.Key: Any] = [

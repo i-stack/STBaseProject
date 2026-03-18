@@ -12,7 +12,7 @@ public protocol STMarkdownStructureParsing {
     func parse(_ markdown: String) -> STMarkdownDocument
 }
 
-public struct STMarkdownStructureParser: STMarkdownStructureParsing {
+public struct STMarkdownStructureParser: STMarkdownStructureParsing, Sendable {
     public init() {}
 
     public func parse(_ markdown: String) -> STMarkdownDocument {
@@ -24,15 +24,15 @@ public struct STMarkdownStructureParser: STMarkdownStructureParsing {
 }
 
 private extension STMarkdownStructureParser {
+    static let mathBlockRegex = try! NSRegularExpression(pattern: #"\{\{ST_MATH_BLOCK:(\d+)\}\}"#)
+
     func makeBlocks(from markups: [Markup], mathMap: [Int: String]) -> [STMarkdownBlockNode] {
-        let mathPattern = #"\{\{ST_MATH_BLOCK:(\d+)\}\}"#
-        let mathRegex = try! NSRegularExpression(pattern: mathPattern)
         var blocks: [STMarkdownBlockNode] = []
 
         for block in markups {
             if let paragraph = block as? Paragraph {
                 let plain = self.plainText(from: paragraph).trimmingCharacters(in: .whitespacesAndNewlines)
-                if let match = mathRegex.firstMatch(
+                if let match = Self.mathBlockRegex.firstMatch(
                     in: plain,
                     range: NSRange(location: 0, length: plain.utf16.count)
                 ), let range = Range(match.range(at: 1), in: plain),
@@ -113,15 +113,24 @@ private extension STMarkdownStructureParser {
     func listItems(from markups: [Markup], mathMap: [Int: String]) -> [STMarkdownListItemNode] {
         markups.compactMap { markup in
             guard let item = markup as? ListItem else { return nil }
+            let checkbox: STMarkdownCheckbox?
+            if let cb = item.checkbox {
+                switch cb {
+                case .checked:   checkbox = .checked
+                case .unchecked: checkbox = .unchecked
+                }
+            } else {
+                checkbox = nil
+            }
             let childBlocks = self.makeBlocks(from: Array(item.children), mathMap: mathMap)
             if childBlocks.isEmpty {
                 let fallback = self.plainText(from: item)
                 if fallback.isEmpty {
-                    return STMarkdownListItemNode(blocks: [])
+                    return STMarkdownListItemNode(blocks: [], checkbox: checkbox)
                 }
-                return STMarkdownListItemNode(blocks: [.paragraph([.text(fallback)])])
+                return STMarkdownListItemNode(blocks: [.paragraph([.text(fallback)])], checkbox: checkbox)
             }
-            return STMarkdownListItemNode(blocks: childBlocks)
+            return STMarkdownListItemNode(blocks: childBlocks, checkbox: checkbox)
         }
     }
 
@@ -159,6 +168,9 @@ private extension STMarkdownStructureParser {
         }
         if markup is SoftBreak || markup is LineBreak {
             return [.softBreak]
+        }
+        if let strikethrough = markup as? Strikethrough {
+            return [.strikethrough(strikethrough.children.flatMap { self.inlineNodes(from: $0) })]
         }
         return markup.children.flatMap { self.inlineNodes(from: $0) }
     }

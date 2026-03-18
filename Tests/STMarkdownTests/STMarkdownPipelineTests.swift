@@ -442,7 +442,7 @@ final class STMarkdownPipelineTests: XCTestCase {
         let document = STMarkdownRenderDocument(
             blocks: [
                 .paragraph([
-                    .image(url: "https://example.com/a.png", altText: "示意图", title: nil)
+                    .image(source: "https://example.com/a.png", alt: "示意图", title: nil)
                 ])
             ]
         )
@@ -489,7 +489,7 @@ final class STMarkdownPipelineTests: XCTestCase {
 
         let attributed = renderer.render(document: document)
 
-        XCTAssertEqual(attributed.string, String(repeating: "─", count: 10))
+        XCTAssertEqual(attributed.string, String(repeating: "─", count: 12))
     }
 
     func testCodeBlockAttachmentRendererProducesAttachment() {
@@ -593,5 +593,284 @@ final class STMarkdownPipelineTests: XCTestCase {
         XCTAssertNotNil(attachment)
         XCTAssertNotNil(attachment?.image)
         XCTAssertGreaterThan(attachment?.bounds.width ?? 0, 0)
+    }
+
+    // MARK: - Strikethrough Tests
+
+    func testStructureParserParsesStrikethrough() {
+        let parser = STMarkdownStructureParser()
+        let document = parser.parse("~~删除文本~~")
+
+        guard case .paragraph(let inlines)? = document.blocks.first else {
+            return XCTFail("Expected paragraph block")
+        }
+
+        XCTAssertTrue(inlines.contains { node in
+            if case .strikethrough(let children) = node {
+                return children.contains(.text("删除文本"))
+            }
+            return false
+        })
+    }
+
+    func testAttributedStringRendererAppliesStrikethroughStyle() {
+        let renderer = STMarkdownAttributedStringRenderer()
+        let document = STMarkdownRenderDocument(
+            blocks: [
+                .paragraph([
+                    .strikethrough([.text("已删除")])
+                ])
+            ]
+        )
+
+        let attributed = renderer.render(document: document)
+        let style = attributed.attribute(.strikethroughStyle, at: 0, effectiveRange: nil) as? Int
+
+        XCTAssertEqual(attributed.string, "已删除")
+        XCTAssertNotNil(style)
+        XCTAssertEqual(style, NSUnderlineStyle.single.rawValue)
+    }
+
+    func testStrikethroughWithCustomColor() {
+        let markdownStyle = STMarkdownStyle(
+            font: .systemFont(ofSize: 16),
+            textColor: .label,
+            lineHeight: 24,
+            kern: 0.12,
+            strikethroughColor: .red
+        )
+        let renderer = STMarkdownAttributedStringRenderer(style: markdownStyle)
+        let document = STMarkdownRenderDocument(
+            blocks: [
+                .paragraph([
+                    .strikethrough([.text("红色删除线")])
+                ])
+            ]
+        )
+
+        let attributed = renderer.render(document: document)
+        let color = attributed.attribute(.strikethroughColor, at: 0, effectiveRange: nil) as? UIColor
+
+        XCTAssertEqual(color, .red)
+    }
+
+    // MARK: - Task List / Checkbox Tests
+
+    func testStructureParserParsesTaskListCheckbox() {
+        let parser = STMarkdownStructureParser()
+        let document = parser.parse("- [x] 已完成\n- [ ] 未完成")
+
+        guard case .list(_, let items)? = document.blocks.first else {
+            return XCTFail("Expected list block")
+        }
+
+        XCTAssertEqual(items.count, 2)
+        XCTAssertEqual(items[0].checkbox, .checked)
+        XCTAssertEqual(items[1].checkbox, .unchecked)
+    }
+
+    func testRenderAdapterPreservesCheckbox() {
+        let parser = STMarkdownStructureParser()
+        let adapter = STMarkdownRenderAdapter()
+        let document = parser.parse("- [x] 已完成\n- [ ] 未完成")
+
+        let renderDocument = adapter.adapt(document)
+
+        guard case .list(let items)? = renderDocument.blocks.first else {
+            return XCTFail("Expected list render block")
+        }
+
+        XCTAssertEqual(items[0].checkbox, .checked)
+        XCTAssertEqual(items[1].checkbox, .unchecked)
+    }
+
+    func testAttributedStringRendererRendersCheckboxMarkers() {
+        let renderer = STMarkdownAttributedStringRenderer()
+        let document = STMarkdownRenderDocument(
+            blocks: [
+                .list([
+                    STMarkdownRenderListItem(
+                        content: [.text("已完成")],
+                        ordered: false,
+                        level: 0,
+                        orderedIndex: nil,
+                        childBlocks: [],
+                        checkbox: .checked
+                    ),
+                    STMarkdownRenderListItem(
+                        content: [.text("未完成")],
+                        ordered: false,
+                        level: 0,
+                        orderedIndex: nil,
+                        childBlocks: [],
+                        checkbox: .unchecked
+                    ),
+                ])
+            ]
+        )
+
+        let attributed = renderer.render(document: document)
+        let text = attributed.string
+
+        XCTAssertTrue(text.contains("☑"))
+        XCTAssertTrue(text.contains("☐"))
+        XCTAssertTrue(text.contains("已完成"))
+        XCTAssertTrue(text.contains("未完成"))
+    }
+
+    // MARK: - Sanitizer Rule Tests
+
+    func testHtmlNormalizeRuleUnescapesCRLF() {
+        let rule = STHtmlNormalizeRule()
+        var context = STMarkdownPreprocessContext()
+
+        let result = rule.apply(to: "第一行\\n第二行", context: &context)
+
+        XCTAssertEqual(result, "第一行\n第二行")
+    }
+
+    func testAnchorCleanupRuleRemovesFragmentAnchors() {
+        let rule = STAnchorCleanupRule()
+        var context = STMarkdownPreprocessContext()
+
+        let input = ##"参考<a href="#ref1">文献1</a>内容"##
+        let result = rule.apply(to: input, context: &context)
+
+        XCTAssertFalse(result.contains("<a"))
+        XCTAssertTrue(result.contains("参考"))
+        XCTAssertTrue(result.contains("内容"))
+    }
+
+    func testPageReferenceCleanupRuleRemovesWebpageReferences() {
+        let rule = STPageReferenceCleanupRule()
+        var context = STMarkdownPreprocessContext()
+
+        let input = "一些内容[webpage 1]后续文本"
+        let result = rule.apply(to: input, context: &context)
+
+        XCTAssertEqual(result, "一些内容后续文本")
+    }
+
+    func testDoubleNewlineRuleCollapsesTripleNewlines() {
+        let rule = STDoubleNewlineRule()
+        var context = STMarkdownPreprocessContext()
+
+        let result = rule.apply(to: "A\n\n\n\nB", context: &context)
+
+        XCTAssertEqual(result, "A\n\nB")
+    }
+
+    // MARK: - Math Normalizer Tests
+
+    func testMathNormalizerHandlesEmptyInput() {
+        let result = STMarkdownMathNormalizer.normalizeBlocks(in: "")
+
+        XCTAssertEqual(result.text, "")
+        XCTAssertTrue(result.blockMap.isEmpty)
+    }
+
+    func testMathNormalizerExtractsBlockMath() {
+        let input = "文本\n\n$$\nx^2 + y^2 = z^2\n$$\n\n后续"
+        let result = STMarkdownMathNormalizer.normalizeBlocks(in: input)
+
+        XCTAssertFalse(result.blockMap.isEmpty)
+        XCTAssertTrue(result.text.contains("{{ST_MATH_BLOCK:"))
+        XCTAssertTrue(result.blockMap.values.contains { $0.contains("x^2 + y^2 = z^2") })
+    }
+
+    func testMathNormalizerPreservesCodeBlocks() {
+        let input = "```\n$$\nnot math\n$$\n```"
+        let result = STMarkdownMathNormalizer.normalizeBlocks(in: input)
+
+        XCTAssertTrue(result.blockMap.isEmpty)
+        XCTAssertTrue(result.text.contains("not math"))
+    }
+
+    func testInlineMathSplitProducesCorrectNodes() {
+        let nodes = STMarkdownMathNormalizer.splitInlineMath(in: #"结果 \(x+y\) 结束"#)
+
+        XCTAssertEqual(nodes.count, 3)
+        XCTAssertEqual(nodes[0], .text("结果 "))
+        XCTAssertEqual(nodes[1], .inlineMath("x+y", isDisplayMode: false))
+        XCTAssertEqual(nodes[2], .text(" 结束"))
+    }
+
+    // MARK: - Deep Nested List Tests
+
+    func testRenderAdapterHandlesThreeLevelNestedList() {
+        let parser = STMarkdownStructureParser()
+        let adapter = STMarkdownRenderAdapter()
+        let document = parser.parse(
+            """
+            - 第一层
+              - 第二层
+                - 第三层
+            """
+        )
+
+        let renderDocument = adapter.adapt(document)
+
+        guard case .list(let items)? = renderDocument.blocks.first else {
+            return XCTFail("Expected list block")
+        }
+
+        XCTAssertEqual(items.first?.level, 0)
+
+        guard case .list(let level1Items)? = items.first?.childBlocks.first else {
+            return XCTFail("Expected nested list at level 1")
+        }
+        XCTAssertEqual(level1Items.first?.level, 1)
+
+        guard case .list(let level2Items)? = level1Items.first?.childBlocks.first else {
+            return XCTFail("Expected nested list at level 2")
+        }
+        XCTAssertEqual(level2Items.first?.level, 2)
+    }
+
+    // MARK: - Streaming View Tests
+
+    func testStreamingTextViewAppendFragment() {
+        let view = STMarkdownStreamingTextView()
+
+        view.setMarkdown("Hello", animated: false)
+        view.appendMarkdownFragment(" World", animated: false)
+
+        XCTAssertTrue(view.attributedText.string.contains("Hello"))
+        XCTAssertTrue(view.attributedText.string.contains("World"))
+        XCTAssertEqual(view.rawMarkdown, "Hello World")
+    }
+
+    func testStreamingTextViewResetClearsContent() {
+        let view = STMarkdownStreamingTextView()
+        view.setMarkdown("一些内容", animated: false)
+
+        view.reset()
+
+        XCTAssertTrue(view.rawMarkdown.isEmpty)
+    }
+
+    // MARK: - Sendable Conformance Tests
+
+    func testPipelineResultIsSendable() {
+        let result = STMarkdownPipelineResult(
+            rawMarkdown: "test",
+            sanitizedMarkdown: "test",
+            appliedRules: [],
+            sourceDocument: STMarkdownDocument(blocks: []),
+            normalizedDocument: STMarkdownDocument(blocks: []),
+            renderDocument: STMarkdownRenderDocument(blocks: [])
+        )
+        let sendableCheck: any Sendable = result
+        XCTAssertNotNil(sendableCheck)
+    }
+
+    func testSanitizationResultIsSendable() {
+        let result = STMarkdownSanitizationResult(
+            originalText: "test",
+            sanitizedText: "test",
+            appliedRules: []
+        )
+        let sendableCheck: any Sendable = result
+        XCTAssertNotNil(sendableCheck)
     }
 }

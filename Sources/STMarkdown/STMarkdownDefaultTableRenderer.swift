@@ -84,6 +84,8 @@ private extension STMarkdownDefaultTableRenderer {
                 return alt.isEmpty ? "[image]" : alt
             case .softBreak:
                 return " "
+            case .strikethrough(let children):
+                return self.plainText(from: children)
             }
         }.joined()
     }

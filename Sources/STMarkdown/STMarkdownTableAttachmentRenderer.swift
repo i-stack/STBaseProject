@@ -52,6 +52,8 @@ private extension STMarkdownTableAttachmentRenderer {
                 return alt.isEmpty ? "[image]" : alt
             case .softBreak:
                 return " "
+            case .strikethrough(let children):
+                return self.plainText(from: children)
             }
         }.joined()
     }
@@ -92,7 +94,7 @@ private extension STMarkdownTableAttachmentRenderer {
         let totalHeight = CGFloat(paddedRows.count) * rowHeight + 1
 
         let format = UIGraphicsImageRendererFormat.default()
-        format.scale = UIScreen.main.scale
+        format.scale = style.resolvedDisplayScale
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: totalWidth, height: totalHeight), format: format)
 
         return renderer.image { context in
@@ -132,7 +134,7 @@ private extension STMarkdownTableAttachmentRenderer {
                     )
 
                     cgContext.setStrokeColor(borderColor)
-                    cgContext.setLineWidth(1 / UIScreen.main.scale)
+                    cgContext.setLineWidth(1 / style.resolvedDisplayScale)
                     cgContext.stroke(CGRect(x: x, y: y, width: columnWidths[columnIndex], height: rowHeight))
                     x += columnWidths[columnIndex] + 1
                 }

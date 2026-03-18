@@ -9,44 +9,23 @@ import UIKit
 import SwiftMath
 
 public protocol STMarkdownInlineMathRendering {
-    func renderInlineMath(
-        formula: String,
-        style: STMarkdownStyle,
-        baseFont: UIFont,
-        textColor: UIColor
-    ) -> NSAttributedString?
+    func renderInlineMath(formula: String, style: STMarkdownStyle, baseFont: UIFont, textColor: UIColor) -> NSAttributedString?
 }
 
 public protocol STMarkdownBlockMathRendering {
-    func renderBlockMath(
-        formula: String,
-        style: STMarkdownStyle
-    ) -> NSAttributedString?
+    func renderBlockMath(formula: String, style: STMarkdownStyle) -> NSAttributedString?
 }
 
 public protocol STMarkdownCodeBlockRendering {
-    func renderCodeBlock(
-        language: String?,
-        code: String,
-        style: STMarkdownStyle
-    ) -> NSAttributedString?
+    func renderCodeBlock(language: String?, code: String, style: STMarkdownStyle) -> NSAttributedString?
 }
 
 public protocol STMarkdownTableRendering {
-    func renderTable(
-        _ table: STMarkdownTableModel,
-        style: STMarkdownStyle
-    ) -> NSAttributedString?
+    func renderTable(_ table: STMarkdownTableModel, style: STMarkdownStyle) -> NSAttributedString?
 }
 
 public protocol STMarkdownImageRendering {
-    func renderImage(
-        url: String,
-        altText: String,
-        title: String?,
-        style: STMarkdownStyle,
-        inline: Bool
-    ) -> NSAttributedString?
+    func renderImage(url: String, altText: String, title: String?, style: STMarkdownStyle, inline: Bool) -> NSAttributedString?
 }
 
 public protocol STMarkdownHorizontalRuleRendering {
@@ -81,16 +60,12 @@ public struct STMarkdownAdvancedRenderers {
 }
 
 public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering, STMarkdownBlockMathRendering {
+    
     private let fallbackRenderer = STMarkdownDefaultMathRenderer()
 
     public init() {}
 
-    public func renderInlineMath(
-        formula: String,
-        style: STMarkdownStyle,
-        baseFont: UIFont,
-        textColor: UIColor
-    ) -> NSAttributedString? {
+    public func renderInlineMath(formula: String, style: STMarkdownStyle, baseFont: UIFont, textColor: UIColor) -> NSAttributedString? {
         guard let image = self.renderImage(
             formula: formula,
             fontSize: max(baseFont.pointSize, 14),
@@ -116,10 +91,7 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
         return NSAttributedString(attachment: attachment)
     }
 
-    public func renderBlockMath(
-        formula: String,
-        style: STMarkdownStyle
-    ) -> NSAttributedString? {
+    public func renderBlockMath(formula: String,style: STMarkdownStyle) -> NSAttributedString? {
         guard let image = self.renderImage(
             formula: formula,
             fontSize: max(style.font.pointSize + 2, 18),
@@ -157,13 +129,7 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 }
 
 private extension STMarkdownHighFidelityMathRenderer {
-    func renderImage(
-        formula: String,
-        fontSize: CGFloat,
-        textColor: UIColor,
-        displayMode: Bool,
-        maximumWidth: CGFloat
-    ) -> UIImage? {
+    func renderImage(formula: String, fontSize: CGFloat, textColor: UIColor, displayMode: Bool,maximumWidth: CGFloat) -> UIImage? {
         let normalized = self.normalizedFormula(formula)
         let label = MTMathUILabel()
         label.latex = normalized
@@ -176,15 +142,12 @@ private extension STMarkdownHighFidelityMathRenderer {
             ? UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
             : UIEdgeInsets(top: 2, left: 0, bottom: 2, right: 0)
         label.displayErrorInline = true
-
         let fittingSize = label.sizeThatFits(CGSize(width: maximumWidth, height: .greatestFiniteMagnitude))
         guard fittingSize.width > 0, fittingSize.height > 0 else {
             return nil
         }
-
         label.frame = CGRect(origin: .zero, size: CGSize(width: ceil(fittingSize.width), height: ceil(fittingSize.height)))
         let format = UIGraphicsImageRendererFormat.default()
-        format.scale = UIScreen.main.scale
         let renderer = UIGraphicsImageRenderer(size: label.bounds.size, format: format)
         let image = renderer.image { context in
             let cgContext = context.cgContext
@@ -196,7 +159,6 @@ private extension STMarkdownHighFidelityMathRenderer {
             cgContext.scaleBy(x: 1, y: -1)
             label.layer.render(in: cgContext)
         }
-
         return image.size.width > 0 && image.size.height > 0 ? image : nil
     }
 

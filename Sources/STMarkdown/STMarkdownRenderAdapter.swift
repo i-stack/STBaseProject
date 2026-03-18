@@ -11,7 +11,7 @@ public protocol STMarkdownRenderAdapting {
     func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument
 }
 
-public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting {
+public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
     public init() {}
 
     public func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument {
@@ -69,7 +69,8 @@ private extension STMarkdownRenderAdapter {
                     blocks: renderBlocks,
                     ordered: isOrdered,
                     level: level,
-                    orderedIndex: orderedIndex
+                    orderedIndex: orderedIndex,
+                    checkbox: item.checkbox
                 )
             )
         }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-public struct STMarkdownStyle {
+public struct STMarkdownStyle: @unchecked Sendable {
     public var font: UIFont
     public var textColor: UIColor
     public var lineHeight: CGFloat
@@ -29,6 +29,7 @@ public struct STMarkdownStyle {
     public var imagePlaceholderCaptionColor: UIColor?
     public var horizontalRuleColor: UIColor?
     public var horizontalRuleLength: Int
+    public var strikethroughColor: UIColor?
     public var listItemSpacing: CGFloat
     public var listIndentPerLevel: CGFloat
     public var headingLineHeightMultiplier: CGFloat
@@ -38,6 +39,8 @@ public struct STMarkdownStyle {
     public var headingTopSpacing: [CGFloat]?
     /// 标题下方间距（按 level 1-6 索引取值），nil 时使用 blockSpacing
     public var headingBottomSpacing: [CGFloat]?
+    /// 渲染缩放因子，0 表示自动检测
+    public var displayScale: CGFloat
 
     public init(
         font: UIFont,
@@ -61,12 +64,14 @@ public struct STMarkdownStyle {
         imagePlaceholderCaptionColor: UIColor? = nil,
         horizontalRuleColor: UIColor? = nil,
         horizontalRuleLength: Int = 24,
+        strikethroughColor: UIColor? = nil,
         listItemSpacing: CGFloat = 8,
         listIndentPerLevel: CGFloat = 14,
         headingLineHeightMultiplier: CGFloat = 1.25,
         blockSpacing: CGFloat = 16,
         headingTopSpacing: [CGFloat]? = nil,
-        headingBottomSpacing: [CGFloat]? = nil
+        headingBottomSpacing: [CGFloat]? = nil,
+        displayScale: CGFloat = 0
     ) {
         self.font = font
         self.textColor = textColor
@@ -89,12 +94,14 @@ public struct STMarkdownStyle {
         self.imagePlaceholderCaptionColor = imagePlaceholderCaptionColor
         self.horizontalRuleColor = horizontalRuleColor
         self.horizontalRuleLength = horizontalRuleLength
+        self.strikethroughColor = strikethroughColor
         self.listItemSpacing = listItemSpacing
         self.listIndentPerLevel = listIndentPerLevel
         self.headingLineHeightMultiplier = headingLineHeightMultiplier
         self.blockSpacing = blockSpacing
         self.headingTopSpacing = headingTopSpacing
         self.headingBottomSpacing = headingBottomSpacing
+        self.displayScale = displayScale
     }
 
     public static let `default` = STMarkdownStyle(
@@ -103,6 +110,14 @@ public struct STMarkdownStyle {
         lineHeight: 24,
         kern: 0.12
     )
+
+    public var resolvedDisplayScale: CGFloat {
+        if self.displayScale > 0 { return self.displayScale }
+        if #available(iOS 17.0, *) {
+            return UITraitCollection.current.displayScale
+        }
+        return UIScreen.main.scale
+    }
 }
 
 enum STMarkdownFontResolver {

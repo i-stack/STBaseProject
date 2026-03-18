@@ -115,7 +115,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
     }
 
     public override var intrinsicContentSize: CGSize {
-        let width = self.bounds.width > 0 ? self.bounds.width : UIScreen.main.bounds.width
+        let width = self.bounds.width > 0 ? self.bounds.width : (self.window?.bounds.width ?? UIView.layoutFittingExpandedSize.width)
         let fitting = self.textView.sizeThatFits(
             CGSize(width: width, height: .greatestFiniteMagnitude)
         )
@@ -127,6 +127,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         let result = self.engine.process(markdown)
         let rendered = self.renderer.render(document: result.renderDocument)
         self.textView.attributedText = rendered
+        self.textView.accessibilityValue = rendered.string
         self.bindAttachmentRefreshHandlers(in: rendered)
         self.invalidateIntrinsicContentSize()
     }
@@ -146,6 +147,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
 
     private func setup() {
         self.backgroundColor = .clear
+        self.isAccessibilityElement = false
         self.textView.translatesAutoresizingMaskIntoConstraints = false
         self.textView.isEditable = false
         self.textView.isSelectable = true
@@ -155,6 +157,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         self.textView.textContainer.lineFragmentPadding = 0
         self.textView.font = self.markdownStyle.font
         self.textView.textColor = self.markdownStyle.textColor
+        self.textView.accessibilityTraits = .staticText
         self.textView.delegate = self
         self.addSubview(self.textView)
         NSLayoutConstraint.activate([

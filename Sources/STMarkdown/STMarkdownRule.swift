@@ -15,7 +15,7 @@ public protocol STMarkdownRule {
     func apply(to text: String, context: inout STMarkdownPreprocessContext) -> String
 }
 
-public struct STMarkdownPreprocessContext {
+public struct STMarkdownPreprocessContext: Sendable {
     public let isDebug: Bool
     public private(set) var appliedRules: [String] = []
 

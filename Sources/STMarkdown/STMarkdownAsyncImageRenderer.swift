@@ -11,7 +11,7 @@ public protocol STMarkdownImageLoading: AnyObject {
     func loadImage(from url: URL, completion: @escaping @Sendable (UIImage?) -> Void)
 }
 
-public final class STMarkdownURLSessionImageLoader: STMarkdownImageLoading {
+public final class STMarkdownURLSessionImageLoader: STMarkdownImageLoading, @unchecked Sendable {
     
     public static let shared = STMarkdownURLSessionImageLoader()
     private let cache = NSCache<NSURL, UIImage>()

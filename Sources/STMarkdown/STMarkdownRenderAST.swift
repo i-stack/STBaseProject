@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct STMarkdownRenderDocument: Hashable {
+public struct STMarkdownRenderDocument: Hashable, Sendable {
     public let blocks: [STMarkdownRenderBlock]
 
     public init(blocks: [STMarkdownRenderBlock]) {
@@ -15,7 +15,7 @@ public struct STMarkdownRenderDocument: Hashable {
     }
 }
 
-public enum STMarkdownRenderBlock: Hashable {
+public enum STMarkdownRenderBlock: Hashable, Sendable {
     case paragraph([STMarkdownInlineNode])
     case heading(level: Int, content: [STMarkdownInlineNode])
     case quote([STMarkdownRenderBlock])
@@ -27,22 +27,25 @@ public enum STMarkdownRenderBlock: Hashable {
     case thematicBreak
 }
 
-public struct STMarkdownRenderListItem: Hashable {
+public struct STMarkdownRenderListItem: Hashable, Sendable {
     public let blocks: [STMarkdownRenderBlock]
     public let ordered: Bool
     public let level: Int
     public let orderedIndex: Int?
+    public let checkbox: STMarkdownCheckbox?
 
     public init(
         blocks: [STMarkdownRenderBlock],
         ordered: Bool,
         level: Int,
-        orderedIndex: Int?
+        orderedIndex: Int?,
+        checkbox: STMarkdownCheckbox? = nil
     ) {
         self.blocks = blocks
         self.ordered = ordered
         self.level = level
         self.orderedIndex = orderedIndex
+        self.checkbox = checkbox
     }
 
     public init(
@@ -50,7 +53,8 @@ public struct STMarkdownRenderListItem: Hashable {
         ordered: Bool,
         level: Int,
         orderedIndex: Int?,
-        childBlocks: [STMarkdownRenderBlock]
+        childBlocks: [STMarkdownRenderBlock],
+        checkbox: STMarkdownCheckbox? = nil
     ) {
         var blocks: [STMarkdownRenderBlock] = []
         if content.isEmpty == false {
@@ -61,7 +65,8 @@ public struct STMarkdownRenderListItem: Hashable {
             blocks: blocks,
             ordered: ordered,
             level: level,
-            orderedIndex: orderedIndex
+            orderedIndex: orderedIndex,
+            checkbox: checkbox
         )
     }
 

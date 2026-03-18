@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum STMarkdownInlineNode: Hashable {
+public enum STMarkdownInlineNode: Hashable, Sendable {
     case text(String)
     case inlineMath(String, isDisplayMode: Bool)
     case emphasis([STMarkdownInlineNode])
@@ -16,32 +16,38 @@ public enum STMarkdownInlineNode: Hashable {
     case link(destination: String, children: [STMarkdownInlineNode])
     case image(source: String, alt: String, title: String?)
     case softBreak
+    case strikethrough([STMarkdownInlineNode])
 }
 
-public enum STMarkdownListKind: Hashable {
+public enum STMarkdownCheckbox: Hashable, Sendable {
+    case checked
+    case unchecked
+}
+
+public enum STMarkdownListKind: Hashable, Sendable {
     case ordered(startIndex: Int)
     case unordered
 }
 
-public struct STMarkdownListItemNode: Hashable {
+public struct STMarkdownListItemNode: Hashable, Sendable {
     public let blocks: [STMarkdownBlockNode]
-
-    public init(blocks: [STMarkdownBlockNode]) {
+    public let checkbox: STMarkdownCheckbox?
+    public init(blocks: [STMarkdownBlockNode], checkbox: STMarkdownCheckbox? = nil) {
         self.blocks = blocks
+        self.checkbox = checkbox
     }
 }
 
-public struct STMarkdownTableModel: Hashable {
+public struct STMarkdownTableModel: Hashable, Sendable {
     public let header: [[STMarkdownInlineNode]]?
     public let rows: [[[STMarkdownInlineNode]]]
-
     public init(header: [[STMarkdownInlineNode]]?, rows: [[[STMarkdownInlineNode]]]) {
         self.header = header
         self.rows = rows
     }
 }
 
-public enum STMarkdownBlockNode: Hashable {
+public enum STMarkdownBlockNode: Hashable, Sendable {
     case paragraph([STMarkdownInlineNode])
     case heading(level: Int, content: [STMarkdownInlineNode])
     case quote([STMarkdownBlockNode])
@@ -53,9 +59,8 @@ public enum STMarkdownBlockNode: Hashable {
     case thematicBreak
 }
 
-public struct STMarkdownDocument: Hashable {
+public struct STMarkdownDocument: Hashable, Sendable {
     public let blocks: [STMarkdownBlockNode]
-
     public init(blocks: [STMarkdownBlockNode]) {
         self.blocks = blocks
     }

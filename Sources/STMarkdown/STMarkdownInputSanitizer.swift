@@ -21,9 +21,6 @@ public struct STHtmlNormalizeRule: STMarkdownRule {
         result = result.replacingOccurrences(of: "</>", with: "</a>")
         result = result.replacingOccurrences(of: "<br>", with: "")
         result = result.replacingOccurrences(of: "&gt;", with: ">")
-        result = result.replacingOccurrences(of: "·", with: "×")
-        result = result.replacingOccurrences(of: "<sup>", with: "")
-        result = result.replacingOccurrences(of: "</sup>", with: "")
 
         result = STMarkdownRegex.escaped2CRLF.stringByReplacingMatches(
             in: result,
@@ -146,16 +143,19 @@ public struct STAnchorCleanupRule: STMarkdownRule {
 public struct STPageReferenceCleanupRule: STMarkdownRule {
     public let name = "STPageReferenceCleanupRule"
 
-    private static let cleanupPatterns: [String] = [
-        #"[（(]\s*\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)\s*[）)]"#,
-        #"\[\s*\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)\s*\]"#,
-        #"[【《「『]\s*\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)\s*[】》」』]"#,
-        #"\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)"#,
-        #"\[webpage\s+\d+\]"#,
-        #"[（(]\s*\[webpage\s+\d+\]\s*[）)]"#,
-        #"\[\s*\[webpage\s+\d+\]\s*\]"#,
-        #"[【《「『]\s*\[webpage\s+\d+\]\s*[】》」』]"#,
-    ]
+    private static let cleanupRegexes: [NSRegularExpression] = {
+        let patterns: [String] = [
+            #"[（(]\s*\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)\s*[）)]"#,
+            #"\[\s*\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)\s*\]"#,
+            #"[【《「『]\s*\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)\s*[】》」』]"#,
+            #"\[(?:第\d+页|页面\d+|\d+页|P\d+|引用网页\d+|参考\d+|见\d+页|网页\d+|webpage\s+\d+)\]\(#[^)]*\)"#,
+            #"\[webpage\s+\d+\]"#,
+            #"[（(]\s*\[webpage\s+\d+\]\s*[）)]"#,
+            #"\[\s*\[webpage\s+\d+\]\s*\]"#,
+            #"[【《「『]\s*\[webpage\s+\d+\]\s*[】》」』]"#,
+        ]
+        return patterns.compactMap { try? NSRegularExpression(pattern: $0, options: .caseInsensitive) }
+    }()
 
     public init() {}
 
@@ -168,8 +168,7 @@ public struct STPageReferenceCleanupRule: STMarkdownRule {
         var previous = ""
         while result != previous {
             previous = result
-            for pattern in Self.cleanupPatterns {
-                let regex = try! NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+            for regex in Self.cleanupRegexes {
                 result = regex.stringByReplacingMatches(
                     in: result,
                     range: NSRange(location: 0, length: result.utf16.count),
@@ -247,7 +246,7 @@ public struct STMarkdownInputSanitizer {
     }
 }
 
-public struct STMarkdownSanitizationResult {
+public struct STMarkdownSanitizationResult: Sendable {
     public let originalText: String
     public let sanitizedText: String
     public let appliedRules: [String]

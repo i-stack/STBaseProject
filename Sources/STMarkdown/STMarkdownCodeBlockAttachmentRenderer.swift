@@ -68,7 +68,7 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
         let blockHeight = verticalPadding + headerHeight + separatorSpacing + codeHeight + verticalPadding
 
         let format = UIGraphicsImageRendererFormat.default()
-        format.scale = UIScreen.main.scale
+        format.scale = style.resolvedDisplayScale
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: blockWidth, height: blockHeight), format: format)
 
         return renderer.image { context in

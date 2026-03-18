@@ -48,7 +48,10 @@ private extension STMarkdownSoftBreakCollapsingNormalizer {
             return .list(
                 kind: kind,
                 items: items.map { item in
-                    STMarkdownListItemNode(blocks: item.blocks.map(self.normalizeBlock))
+                    STMarkdownListItemNode(
+                        blocks: item.blocks.map(self.normalizeBlock),
+                        checkbox: item.checkbox
+                    )
                 }
             )
         case .codeBlock, .table, .mathBlock, .image, .thematicBreak:
@@ -73,6 +76,8 @@ private extension STMarkdownSoftBreakCollapsingNormalizer {
                 result.append(.strong(self.normalizeInlineNodes(children)))
             case .link(let destination, let children):
                 result.append(.link(destination: destination, children: self.normalizeInlineNodes(children)))
+            case .strikethrough(let children):
+                result.append(.strikethrough(self.normalizeInlineNodes(children)))
             default:
                 result.append(node)
             }

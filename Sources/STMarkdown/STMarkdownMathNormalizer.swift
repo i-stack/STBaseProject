@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct STMarkdownMathNormalizationResult {
+public struct STMarkdownMathNormalizationResult: Sendable {
     public let text: String
     public let blockMap: [Int: String]
 
@@ -164,10 +164,13 @@ enum STMarkdownMathNormalizer {
         return result
     }
 
+    private static let inlineMathRegex = try! NSRegularExpression(
+        pattern: #"(\\\(.+?\\\))|(\\\[.+?\\\])"#,
+        options: [.dotMatchesLineSeparators]
+    )
+
     private static func inlineMathMatches(in text: String) -> [NSTextCheckingResult] {
-        let pattern = #"(\\\(.+?\\\))|(\\\[.+?\\\])"#
-        let regex = try! NSRegularExpression(pattern: pattern, options: [.dotMatchesLineSeparators])
-        return regex.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
+        inlineMathRegex.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
     }
 
     private static func environmentName(from line: String) -> String? {

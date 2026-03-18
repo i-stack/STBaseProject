@@ -11,7 +11,7 @@ public protocol STMarkdownProcessing {
     func process(_ rawMarkdown: String) -> STMarkdownPipelineResult
 }
 
-public final class STMarkdownEngine: STMarkdownProcessing {
+public final class STMarkdownEngine: STMarkdownProcessing, @unchecked Sendable {
     public let pipeline: STMarkdownPipeline
 
     public init(
