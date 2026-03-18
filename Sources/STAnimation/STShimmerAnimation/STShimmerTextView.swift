@@ -107,6 +107,14 @@ open class STShimmerTextView: UITextView {
         let appended = NSMutableAttributedString(attributedString: attributedText)
         let defaultColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         self.ensureForegroundColor(in: appended, defaultColor: defaultColor)
+        // 保存 contentOffset：UITextView 在 textStorage 修改后可能意外偏移，
+        // 导致非滚动文本视图出现上下抖动。在所有 textStorage 操作之前保存。
+        let savedOffset = self.contentOffset
+        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画，
+        // 确保前一段落完全显示后新段落才开始淡入，避免两段同时渲染的视觉问题。
+        if animated, self.tokenFadeDuration > 0 {
+            self.finishAnimationsBeforeLastNewline()
+        }
         // _baseAttributedText 记录全不透明最终态，必须在 applyTransparentForegroundColors
         // 之前追加，保留原始 alpha=1 颜色。
         _baseAttributedText.append(appended)
@@ -117,14 +125,65 @@ open class STShimmerTextView: UITextView {
         self.textStorage.beginEditing()
         self.textStorage.append(appended)
         self.textStorage.endEditing()
-        guard animated, self.tokenFadeDuration > 0, !colorRuns.isEmpty else { return }
-        let token = AnimatingToken(
-            range: NSRange(location: startLocation, length: appended.length),
-            startTime: CACurrentMediaTime(),
-            colorRuns: colorRuns
-        )
-        self.animatingTokens.append(token)
-        self.startDisplayLinkIfNeeded()
+        guard animated, self.tokenFadeDuration > 0, !colorRuns.isEmpty else {
+            if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
+            return
+        }
+
+        // 当 delta 内含换行符时，最后一个 \n 之前的内容属于已完成的行，
+        // 直接以全不透明渲染（不做 fade-in 动画），只对最后一行（\n 之后的尾部片段）做淡入。
+        // 这避免了大段 delta 同时淡入导致"多段同时渲染"的视觉问题，
+        // 同时不引入 staggered delay，不会造成布局跳动。
+        let deltaString = appended.string as NSString
+        let lastNLInDelta = deltaString.range(of: "\n", options: .backwards)
+        if lastNLInDelta.location != NSNotFound {
+            let splitPos = lastNLInDelta.location + lastNLInDelta.length  // local offset in delta
+            // 立即完成 splitPos 之前的 colorRuns
+            self.textStorage.beginEditing()
+            var trailingRuns: [AnimatingColorRun] = []
+            for run in colorRuns {
+                let runLocalStart = run.range.location - startLocation
+                let runLocalEnd = runLocalStart + run.range.length
+                if runLocalEnd <= splitPos {
+                    // run 完全在 \n 之前 → 立即显示
+                    self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
+                } else if runLocalStart >= splitPos {
+                    // run 完全在 \n 之后 → 保留动画
+                    trailingRuns.append(run)
+                } else {
+                    // run 横跨 \n → 拆分
+                    let beforeLength = splitPos - runLocalStart
+                    let beforeRange = NSRange(location: run.range.location, length: beforeLength)
+                    self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: beforeRange)
+                    let afterLength = runLocalEnd - splitPos
+                    let afterRange = NSRange(location: startLocation + splitPos, length: afterLength)
+                    trailingRuns.append(AnimatingColorRun(range: afterRange, targetColor: run.targetColor))
+                }
+            }
+            self.textStorage.endEditing()
+            if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
+            // 只对尾部片段（最后一个 \n 之后的内容）创建动画 token
+            if !trailingRuns.isEmpty {
+                let trailingStart = trailingRuns.map(\.range.location).min()!
+                let trailingEnd = trailingRuns.map { $0.range.location + $0.range.length }.max()!
+                let token = AnimatingToken(
+                    range: NSRange(location: trailingStart, length: trailingEnd - trailingStart),
+                    startTime: CACurrentMediaTime(),
+                    colorRuns: trailingRuns
+                )
+                self.animatingTokens.append(token)
+                self.startDisplayLinkIfNeeded()
+            }
+        } else {
+            if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
+            let token = AnimatingToken(
+                range: NSRange(location: startLocation, length: appended.length),
+                startTime: CACurrentMediaTime(),
+                colorRuns: colorRuns
+            )
+            self.animatingTokens.append(token)
+            self.startDisplayLinkIfNeeded()
+        }
     }
 
     public func setRenderedAttributedText(_ attributedText: NSAttributedString) {
@@ -138,6 +197,7 @@ open class STShimmerTextView: UITextView {
 
     public func replaceTrailingAttributedText(from location: Int, with attributedText: NSAttributedString) {
         let clampedLocation = max(0, min(location, self.textStorage.length))
+        let savedOffset = self.contentOffset
 
         // 1. 立即完成前缀区域内仍在动画的 token，丢弃与尾部重叠的 token
         if !self.animatingTokens.isEmpty {
@@ -175,6 +235,7 @@ open class STShimmerTextView: UITextView {
             with: attributedText
         )
         self.textStorage.endEditing()
+        if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
         self.stopDisplayLink()
     }
 
@@ -229,6 +290,7 @@ open class STShimmerTextView: UITextView {
         }
         let now = CACurrentMediaTime()
         var completedIndices: [Int] = []
+        let savedOffset = self.contentOffset
         self.textStorage.beginEditing()
         for (index, token) in self.animatingTokens.enumerated() {
             let elapsed = now - token.startTime
@@ -243,6 +305,9 @@ open class STShimmerTextView: UITextView {
             }
         }
         self.textStorage.endEditing()
+        if self.contentOffset != savedOffset {
+            self.contentOffset = savedOffset
+        }
         for index in completedIndices.reversed() {
             self.animatingTokens.remove(at: index)
         }
@@ -349,15 +414,63 @@ open class STShimmerTextView: UITextView {
         let boundary = lastNLRange.location + lastNLRange.length
 
         var completedIndices: [Int] = []
+        var splitReplacements: [(index: Int, newToken: AnimatingToken)] = []
         self.textStorage.beginEditing()
         for (idx, token) in self.animatingTokens.enumerated() {
-            guard token.range.location + token.range.length <= boundary else { continue }
-            for run in token.colorRuns {
-                self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
+            let tokenEnd = token.range.location + token.range.length
+            if tokenEnd <= boundary {
+                // token 完全在 boundary 之前 → 立即完成全部动画
+                for run in token.colorRuns {
+                    self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
+                }
+                completedIndices.append(idx)
+            } else if token.range.location < boundary {
+                // token 横跨 boundary → 拆分：boundary 之前的部分立即完成，之后的部分保留动画
+                var beforeRuns: [AnimatingColorRun] = []
+                var afterRuns: [AnimatingColorRun] = []
+                for run in token.colorRuns {
+                    let runEnd = run.range.location + run.range.length
+                    if runEnd <= boundary {
+                        // run 完全在 boundary 之前
+                        beforeRuns.append(run)
+                    } else if run.range.location >= boundary {
+                        // run 完全在 boundary 之后
+                        afterRuns.append(run)
+                    } else {
+                        // run 横跨 boundary → 拆成两段
+                        let beforeLength = boundary - run.range.location
+                        let beforeRange = NSRange(location: run.range.location, length: beforeLength)
+                        beforeRuns.append(AnimatingColorRun(range: beforeRange, targetColor: run.targetColor))
+                        let afterLength = runEnd - boundary
+                        let afterRange = NSRange(location: boundary, length: afterLength)
+                        afterRuns.append(AnimatingColorRun(range: afterRange, targetColor: run.targetColor))
+                    }
+                }
+                // 立即完成 boundary 之前的部分
+                for run in beforeRuns {
+                    self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
+                }
+                if afterRuns.isEmpty {
+                    completedIndices.append(idx)
+                } else {
+                    // 用剩余的 afterRuns 替换原 token，保持原始 startTime
+                    let afterStart = afterRuns.map(\.range.location).min() ?? boundary
+                    let afterEnd = afterRuns.map { $0.range.location + $0.range.length }.max() ?? boundary
+                    let newToken = AnimatingToken(
+                        range: NSRange(location: afterStart, length: afterEnd - afterStart),
+                        startTime: token.startTime,
+                        colorRuns: afterRuns
+                    )
+                    splitReplacements.append((index: idx, newToken: newToken))
+                }
             }
-            completedIndices.append(idx)
+            // token 完全在 boundary 之后 → 不处理，继续动画
         }
         self.textStorage.endEditing()
+        // 应用拆分替换
+        for replacement in splitReplacements {
+            self.animatingTokens[replacement.index] = replacement.newToken
+        }
         guard !completedIndices.isEmpty else { return }
         for idx in completedIndices.reversed() {
             self.animatingTokens.remove(at: idx)
