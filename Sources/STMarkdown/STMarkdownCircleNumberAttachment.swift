@@ -58,4 +58,40 @@ public final class STMarkdownCircleNumberAttachment: NSTextAttachment {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    /// 直接渲染圆形数字角标图片，供 CoreGraphics 绘制上下文（如表格渲染）调用。
+    /// - Parameters:
+    ///   - number: 显示的数字文本
+    ///   - textColor: 数字文本颜色
+    ///   - backgroundColor: 圆圈背景颜色
+    ///   - diameter: 圆圈直径，默认与 fixedDiameter 一致
+    /// - Returns: 固定尺寸的圆形角标图片
+    public static func renderBadgeImage(
+        number: String,
+        textColor: UIColor,
+        backgroundColor: UIColor,
+        diameter: CGFloat = 18
+    ) -> UIImage {
+        let size = CGSize(width: diameter, height: diameter)
+        let baseFontSize: CGFloat = number.count <= 1 ? 11 : (number.count == 2 ? 10 : 9)
+        let badgeFont = UIFont.st_systemFont(ofSize: baseFontSize, weight: .semibold)
+        let textAttributes: [NSAttributedString.Key: Any] = [
+            .font: badgeFont,
+            .foregroundColor: textColor,
+        ]
+        let textSize = (number as NSString).size(withAttributes: textAttributes)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { _ in
+            let rect = CGRect(origin: .zero, size: size)
+            backgroundColor.setFill()
+            UIBezierPath(ovalIn: rect).fill()
+            let textRect = CGRect(
+                x: (size.width - textSize.width) * 0.5,
+                y: (size.height - textSize.height) * 0.5,
+                width: textSize.width,
+                height: textSize.height
+            )
+            (number as NSString).draw(in: textRect, withAttributes: textAttributes)
+        }
+    }
 }

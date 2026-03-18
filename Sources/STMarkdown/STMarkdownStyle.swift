@@ -70,6 +70,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var renderWidth: CGFloat
     /// 渲染缩放因子，0 表示自动检测
     public var displayScale: CGFloat
+    /// Citation 角标圆圈背景色（nil 时使用 systemBlue）
+    public var citationBadgeBgColor: UIColor?
+    /// Citation 角标数字文本色（nil 时使用 white）
+    public var citationBadgeTextColor: UIColor?
 
     public init(
         font: UIFont,
@@ -117,7 +121,9 @@ public struct STMarkdownStyle: @unchecked Sendable {
         blockquoteBackgroundColor: UIColor? = nil,
         blockquoteCornerRadius: CGFloat = 10,
         renderWidth: CGFloat = 0,
-        displayScale: CGFloat = 0
+        displayScale: CGFloat = 0,
+        citationBadgeBgColor: UIColor? = nil,
+        citationBadgeTextColor: UIColor? = nil
     ) {
         self.font = font
         self.textColor = textColor
@@ -165,6 +171,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.blockquoteCornerRadius = blockquoteCornerRadius
         self.renderWidth = renderWidth
         self.displayScale = displayScale
+        self.citationBadgeBgColor = citationBadgeBgColor
+        self.citationBadgeTextColor = citationBadgeTextColor
     }
 
     public static let `default` = STMarkdownStyle(

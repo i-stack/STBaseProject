@@ -21,6 +21,9 @@ open class STShimmerTextView: UITextView {
     private struct AnimatingToken {
         let range: NSRange
         let startTime: CFTimeInterval
+        /// 逐字 stagger 间隔：colorRuns 中第 i 个字符的实际 startTime = startTime + i * staggerInterval。
+        /// 为 0 时所有字符同时 fade-in（原始行为）。
+        let staggerInterval: TimeInterval
         let colorRuns: [AnimatingColorRun]
     }
 
@@ -94,6 +97,7 @@ open class STShimmerTextView: UITextView {
         let token = AnimatingToken(
             range: NSRange(location: startLocation, length: text.utf16.count),
             startTime: CACurrentMediaTime(),
+            staggerInterval: 0,
             colorRuns: [
                 AnimatingColorRun(
                     range: NSRange(location: startLocation, length: text.utf16.count),
@@ -325,47 +329,25 @@ open class STShimmerTextView: UITextView {
         return rect
     }
 
-    /// 将 colorRuns 按字符拆分为多个 AnimatingToken，每个字符的 startTime 递增
-    /// `characterStaggerInterval`，实现逐字 fade-in。
+    /// 创建带 stagger 的单个 AnimatingToken。
     ///
     /// 所有文本已经以 alpha=0 插入 textStorage 并完成布局，此处仅控制 fade-in 动画时序，
     /// 不会引起任何布局变化、跳动或闪烁。
     private func appendStaggeredTokens(for colorRuns: [AnimatingColorRun]) {
         guard !colorRuns.isEmpty else { return }
-        let stagger = self.characterStaggerInterval
-        // 当 stagger 为 0 或总字符数很少时，不拆分，保持原有行为
+        let start = colorRuns.map(\.range.location).min()!
+        let end = colorRuns.map { $0.range.location + $0.range.length }.max()!
         let totalLength = colorRuns.reduce(0) { $0 + $1.range.length }
-        if stagger <= 0 || totalLength <= 2 {
-            let start = colorRuns.map(\.range.location).min()!
-            let end = colorRuns.map { $0.range.location + $0.range.length }.max()!
-            let token = AnimatingToken(
-                range: NSRange(location: start, length: end - start),
-                startTime: CACurrentMediaTime(),
-                colorRuns: colorRuns
-            )
-            self.animatingTokens.append(token)
-            return
-        }
-        // 将所有 colorRuns 展开为逐字符的 (location, targetColor) 列表，
-        // 然后为每个字符创建独立的 AnimatingToken。
-        let baseTime = CACurrentMediaTime()
-        var charIndex = 0
-        for run in colorRuns {
-            for offset in 0..<run.range.length {
-                let loc = run.range.location + offset
-                let charRun = AnimatingColorRun(
-                    range: NSRange(location: loc, length: 1),
-                    targetColor: run.targetColor
-                )
-                let token = AnimatingToken(
-                    range: NSRange(location: loc, length: 1),
-                    startTime: baseTime + Double(charIndex) * stagger,
-                    colorRuns: [charRun]
-                )
-                self.animatingTokens.append(token)
-                charIndex += 1
-            }
-        }
+        // 字符数 ≤ 2 或 stagger 为 0 时不使用 stagger
+        let stagger = (self.characterStaggerInterval > 0 && totalLength > 2)
+            ? self.characterStaggerInterval : 0
+        let token = AnimatingToken(
+            range: NSRange(location: start, length: end - start),
+            startTime: CACurrentMediaTime(),
+            staggerInterval: stagger,
+            colorRuns: colorRuns
+        )
+        self.animatingTokens.append(token)
     }
 
     private func startDisplayLinkIfNeeded() {
@@ -386,27 +368,45 @@ open class STShimmerTextView: UITextView {
             return
         }
         let now = CACurrentMediaTime()
-        var completedIndices: [Int] = []
+        let fadeDuration = self.tokenFadeDuration
         let savedOffset = self.contentOffset
         self.textStorage.beginEditing()
-        for (index, token) in self.animatingTokens.enumerated() {
-            let elapsed = now - token.startTime
-            let progress = min(1.0, elapsed / self.tokenFadeDuration)
-            let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
-            for run in token.colorRuns {
-                let color = run.targetColor.withAlphaComponent(CGFloat(easedProgress))
-                self.textStorage.addAttribute(.foregroundColor, value: color, range: run.range)
-            }
-            if progress >= 1.0 {
-                completedIndices.append(index)
+        for token in self.animatingTokens {
+            if token.staggerInterval <= 0 {
+                // 无 stagger：所有 colorRuns 共享同一进度
+                let elapsed = now - token.startTime
+                let progress = min(1.0, elapsed / fadeDuration)
+                let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
+                for run in token.colorRuns {
+                    let color = run.targetColor.withAlphaComponent(CGFloat(easedProgress))
+                    self.textStorage.addAttribute(.foregroundColor, value: color, range: run.range)
+                }
+            } else {
+                // 有 stagger：逐字符计算进度，每个字符独立的 startTime
+                var charIndex = 0
+                for run in token.colorRuns {
+                    for offset in 0..<run.range.length {
+                        let charStartTime = token.startTime + Double(charIndex) * token.staggerInterval
+                        let elapsed = now - charStartTime
+                        let progress = min(1.0, max(0, elapsed / fadeDuration))
+                        let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
+                        let color = run.targetColor.withAlphaComponent(CGFloat(easedProgress))
+                        let charRange = NSRange(location: run.range.location + offset, length: 1)
+                        self.textStorage.addAttribute(.foregroundColor, value: color, range: charRange)
+                        charIndex += 1
+                    }
+                }
             }
         }
         self.textStorage.endEditing()
         if self.contentOffset != savedOffset {
             self.contentOffset = savedOffset
         }
-        for index in completedIndices.reversed() {
-            self.animatingTokens.remove(at: index)
+        // 移除已完成的 token：所有字符都已完成 fade-in
+        self.animatingTokens.removeAll { token in
+            let totalChars = token.colorRuns.reduce(0) { $0 + $1.range.length }
+            let lastCharStart = token.startTime + Double(max(0, totalChars - 1)) * token.staggerInterval
+            return (now - lastCharStart) >= fadeDuration
         }
         if self.animatingTokens.isEmpty {
             self.stopDisplayLink()
@@ -556,6 +556,7 @@ open class STShimmerTextView: UITextView {
                     let newToken = AnimatingToken(
                         range: NSRange(location: afterStart, length: afterEnd - afterStart),
                         startTime: token.startTime,
+                        staggerInterval: token.staggerInterval,
                         colorRuns: afterRuns
                     )
                     splitReplacements.append((index: idx, newToken: newToken))

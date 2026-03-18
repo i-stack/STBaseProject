@@ -61,10 +61,11 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
     }
 }
 
-/// 表格单元格内容片段：普通文本 或 数学公式
+/// 表格单元格内容片段：普通文本、数学公式 或 Citation 角标
 private enum CellFragment {
     case text(String)
     case math(formula: String, isDisplayMode: Bool)
+    case citation(number: String)
 }
 
 /// 表格单元格：由多个 CellFragment 组成
@@ -102,8 +103,14 @@ private extension STMarkdownTableAttachmentRenderer {
                 self.collectFragments(from: children, into: &fragments)
             case .code(let code):
                 fragments.append(.text(code))
-            case .link(_, let children):
-                self.collectFragments(from: children, into: &fragments)
+            case .link(let destination, let children):
+                // 检测 Citation 角标：destination 为空且子节点为 "Citation:N" 文本
+                if destination.isEmpty,
+                   let number = Self.extractCitationNumber(from: children) {
+                    fragments.append(.citation(number: number))
+                } else {
+                    self.collectFragments(from: children, into: &fragments)
+                }
             case .image(_, let alt, _):
                 fragments.append(.text(alt.isEmpty ? "[image]" : alt))
             case .softBreak:
@@ -112,6 +119,22 @@ private extension STMarkdownTableAttachmentRenderer {
                 self.collectFragments(from: children, into: &fragments)
             }
         }
+    }
+
+    /// 从 .link 节点的 children 中提取 Citation 编号。
+    /// 成功条件：仅有一个 .text 子节点，文本为 "Citation:N" 或纯数字字符串。
+    static func extractCitationNumber(from children: [STMarkdownInlineNode]) -> String? {
+        guard children.count == 1, case .text(let text) = children[0] else { return nil }
+        let prefix = "Citation:"
+        if text.hasPrefix(prefix) {
+            let number = String(text.dropFirst(prefix.count))
+            return number.isEmpty ? nil : number
+        }
+        // 兜底：纯数字字符串也视为合法 citation 编号
+        if !text.isEmpty, text.allSatisfy({ $0.isNumber }) {
+            return text
+        }
+        return nil
     }
 
     /// 将公式中的 LaTeX 转义序列归一化为 SwiftMath 可识别的形式
@@ -153,6 +176,8 @@ private extension STMarkdownTableAttachmentRenderer {
 
     // MARK: - 测量与绘制
 
+    private static let citationBadgeDiameter: CGFloat = 16
+
     /// 计算单元格内容的自然宽度
     func measureCellWidth(_ cell: CellContent, font: UIFont, textColor: UIColor, padding: CGFloat) -> CGFloat {
         var width: CGFloat = 0
@@ -168,17 +193,22 @@ private extension STMarkdownTableAttachmentRenderer {
                     // fallback: 当作纯文本测量
                     width += ceil((formula as NSString).size(withAttributes: [.font: font]).width)
                 }
+            case .citation:
+                // Citation 角标使用固定直径圆圈 + 左侧 2pt 间距
+                width += Self.citationBadgeDiameter + 2
             }
         }
         return width + padding * 2
     }
 
-    /// 在指定矩形内绘制单元格内容（混合文本和公式图片）
+    /// 在指定矩形内绘制单元格内容（混合文本、公式图片和 Citation 角标）
     func drawCell(
         _ cell: CellContent,
         in rect: CGRect,
         font: UIFont,
         textColor: UIColor,
+        badgeBgColor: UIColor,
+        badgeTextColor: UIColor,
         context: CGContext
     ) {
         var x = rect.origin.x
@@ -226,6 +256,24 @@ private extension STMarkdownTableAttachmentRenderer {
                     )
                     x += ceil(size.width)
                 }
+
+            case .citation(let number):
+                x += 2  // 角标左侧间距
+                let badgeImg = STMarkdownCircleNumberAttachment.renderBadgeImage(
+                    number: number,
+                    textColor: badgeTextColor,
+                    backgroundColor: badgeBgColor
+                )
+                let diameter = Self.citationBadgeDiameter
+                let imgY = midY - diameter / 2
+                context.saveGState()
+                context.translateBy(x: x, y: imgY + diameter)
+                context.scaleBy(x: 1, y: -1)
+                if let cgImage = badgeImg.cgImage {
+                    context.draw(cgImage, in: CGRect(x: 0, y: 0, width: diameter, height: diameter))
+                }
+                context.restoreGState()
+                x += diameter
             }
         }
     }
@@ -289,6 +337,8 @@ private extension STMarkdownTableAttachmentRenderer {
             let cgContext = context.cgContext
             let backgroundColor = style.tableBackgroundColor ?? UIColor.secondarySystemBackground
             let borderColor = (style.tableBorderColor ?? UIColor.separator).cgColor
+            let badgeBgColor = style.citationBadgeBgColor ?? UIColor.systemBlue
+            let badgeTextColor = style.citationBadgeTextColor ?? UIColor.white
             
             // 始终填充完整背景色（除非显式要求透明，但在本方案中滑动图片也应自带背景）
             if !transparentBackground {
@@ -323,6 +373,8 @@ private extension STMarkdownTableAttachmentRenderer {
                         in: cellRect,
                         font: font,
                         textColor: color,
+                        badgeBgColor: badgeBgColor,
+                        badgeTextColor: badgeTextColor,
                         context: cgContext
                     )
 

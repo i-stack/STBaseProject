@@ -135,31 +135,54 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
         let rendered = self.render(markdown)
-        if animated, self.tryAppendRenderedDelta(for: markdown, rendered: rendered) {
+        guard animated, !self.rawMarkdown.isEmpty else {
+            // 非动画模式或首次渲染：全量替换
+            self.rawMarkdown = markdown
+            self.textView.setRenderedAttributedText(rendered)
+            self.textView.accessibilityValue = self.textView.renderedAttributedText.string
+            self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+            self.invalidateIntrinsicContentSize()
+            return
+        }
+
+        let current = self.textView.renderedAttributedText
+        let currentStr = current.string
+        let renderedStr = rendered.string
+
+        // 路径 1：纯追加 — rendered 的字符串前缀与 current 完全一致
+        if renderedStr.count >= currentStr.count,
+           (renderedStr as NSString).hasPrefix(currentStr) {
+            let deltaLen = rendered.length - current.length
+            if deltaLen > 0 {
+                let delta = rendered.attributedSubstring(
+                    from: NSRange(location: current.length, length: deltaLen)
+                )
+                self.rawMarkdown = markdown
+                self.textView.appendAttributedText(delta, animated: true)
+                self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+                self.invalidateIntrinsicContentSize()
+            } else {
+                self.rawMarkdown = markdown
+            }
             self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             return
         }
-        // 流式模式下 tryAppendRenderedDelta 失败（如 rawMarkdown 前缀不匹配），
-        // 使用 replaceTrailingAttributedText 基于字符串公共前缀做局部替换 + 逐字动画，
-        // 避免全量 setRenderedAttributedText 导致已显示文本闪烁。
-        if animated, !self.rawMarkdown.isEmpty {
-            let current = self.textView.renderedAttributedText
-            let currentStr = current.string
-            let renderedStr = rendered.string
-            let commonPrefix = currentStr.commonPrefix(with: renderedStr)
-            let commonLen = commonPrefix.utf16.count
-            if commonLen > 0 {
-                let trailing = rendered.attributedSubstring(
-                    from: NSRange(location: commonLen, length: rendered.length - commonLen)
-                )
-                self.rawMarkdown = markdown
-                self.textView.replaceTrailingAttributedText(from: commonLen, with: trailing)
-                self.textView.accessibilityValue = self.textView.renderedAttributedText.string
-                self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
-                self.invalidateIntrinsicContentSize()
-                return
-            }
+
+        // 路径 2：字符串公共前缀 + 尾部替换（带 stagger 动画）
+        let commonLen = currentStr.commonPrefix(with: renderedStr).utf16.count
+        if commonLen > 0 {
+            let trailing = rendered.attributedSubstring(
+                from: NSRange(location: commonLen, length: rendered.length - commonLen)
+            )
+            self.rawMarkdown = markdown
+            self.textView.replaceTrailingAttributedText(from: commonLen, with: trailing)
+            self.textView.accessibilityValue = self.textView.renderedAttributedText.string
+            self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+            self.invalidateIntrinsicContentSize()
+            return
         }
+
+        // 路径 3：完全无公共前缀（极端情况）— 全量替换
         self.rawMarkdown = markdown
         self.textView.setRenderedAttributedText(rendered)
         self.textView.accessibilityValue = self.textView.renderedAttributedText.string
@@ -199,101 +222,6 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
             return customRenderer(result.renderDocument)
         }
         return self.renderer.render(document: result.renderDocument)
-    }
-
-    private func tryAppendRenderedDelta(
-        for markdown: String,
-        rendered: NSAttributedString
-    ) -> Bool {
-        guard markdown.hasPrefix(self.rawMarkdown) else { return false }
-
-        let current = self.textView.renderedAttributedText
-        if self.hasStableAttributedPrefix(current, in: rendered) {
-            return self.appendRenderedDelta(markdown: markdown, current: current, rendered: rendered)
-        }
-
-        // 流式场景下，Markdown 渲染器会对「最后一个段落」随后继段落的出现而回溯修改
-        // NSParagraphStyle（如 paragraphSpacingAfter）。这会导致 hasStableAttributedPrefix
-        // 误判，进而触发 replaceTrailingAttributedText（无动画瞬间替换）产生视觉跳动。
-        //
-        // 修复：若文字内容前缀稳定（string hasPrefix 成立），则仍走追加路径，
-        // 只追加 delta 部分，前缀的 paragraphStyle 差异留给 finishStreamingRender
-        // 的静态 AST 渲染最终修正，流式阶段 blockSeparator 的 minimumLineHeight 已提供视觉间距。
-        if rendered.length >= current.length,
-           (rendered.string as NSString).hasPrefix(current.string) {
-            return self.appendRenderedDelta(markdown: markdown, current: current, rendered: rendered)
-        }
-
-        let stablePrefixLength = self.longestCommonAttributedPrefixLength(current, rendered: rendered)
-        guard stablePrefixLength > 0 else { return false }
-
-        let trailingRange = NSRange(
-            location: stablePrefixLength,
-            length: rendered.length - stablePrefixLength
-        )
-        let trailing = rendered.attributedSubstring(from: trailingRange)
-        self.rawMarkdown = markdown
-        self.textView.replaceTrailingAttributedText(from: stablePrefixLength, with: trailing)
-        self.invalidateIntrinsicContentSize()
-        return true
-    }
-
-    private func appendRenderedDelta(
-        markdown: String,
-        current: NSAttributedString,
-        rendered: NSAttributedString
-    ) -> Bool {
-        guard rendered.length >= current.length else { return false }
-
-        let deltaRange = NSRange(location: current.length, length: rendered.length - current.length)
-        guard deltaRange.length > 0 else {
-            self.rawMarkdown = markdown
-            return true
-        }
-
-        let delta = rendered.attributedSubstring(from: deltaRange)
-        self.rawMarkdown = markdown
-        self.textView.appendAttributedText(delta, animated: true)
-        self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
-        self.invalidateIntrinsicContentSize()
-        return true
-    }
-
-    private func hasStableAttributedPrefix(_ current: NSAttributedString, in rendered: NSAttributedString) -> Bool {
-        guard rendered.length >= current.length else { return false }
-        let prefix = rendered.attributedSubstring(from: NSRange(location: 0, length: current.length))
-        return current.isEqual(to: prefix)
-    }
-
-    private func longestCommonAttributedPrefixLength(
-        _ current: NSAttributedString,
-        rendered: NSAttributedString
-    ) -> Int {
-        let currentString = current.string as NSString
-        let renderedString = rendered.string as NSString
-        let maxLength = min(current.length, rendered.length)
-        guard maxLength > 0 else { return 0 }
-
-        var index = 0
-        while index < maxLength {
-            let currentCharacter = currentString.substring(with: NSRange(location: index, length: 1))
-            let renderedCharacter = renderedString.substring(with: NSRange(location: index, length: 1))
-            guard currentCharacter == renderedCharacter else { break }
-            guard self.attributesEqual(current, rendered, at: index) else { break }
-            index += 1
-        }
-
-        return index
-    }
-
-    private func attributesEqual(
-        _ lhs: NSAttributedString,
-        _ rhs: NSAttributedString,
-        at index: Int
-    ) -> Bool {
-        let lhsAttributes = lhs.attributes(at: index, effectiveRange: nil) as NSDictionary
-        let rhsAttributes = rhs.attributes(at: index, effectiveRange: nil) as NSDictionary
-        return lhsAttributes.isEqual(to: rhsAttributes as? [AnyHashable: Any] ?? [:])
     }
 }
 
