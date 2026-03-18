@@ -39,6 +39,16 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var headingTopSpacing: [CGFloat]?
     /// 标题下方间距（按 level 1-6 索引取值），nil 时使用 blockSpacing
     public var headingBottomSpacing: [CGFloat]?
+    /// 代码块内边距
+    public var codeBlockContentInsets: UIEdgeInsets
+    /// 代码块圆角半径
+    public var codeBlockCornerRadius: CGFloat
+    /// 代码块边框宽度，0 表示不描边
+    public var codeBlockBorderWidth: CGFloat
+    /// 代码块边框颜色
+    public var codeBlockBorderColor: UIColor?
+    /// 渲染宽度，0 表示使用默认宽度
+    public var renderWidth: CGFloat
     /// 渲染缩放因子，0 表示自动检测
     public var displayScale: CGFloat
 
@@ -55,6 +65,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
         codeBlockTextColor: UIColor? = nil,
         codeBlockHeaderTextColor: UIColor? = nil,
         codeBlockBackgroundColor: UIColor? = nil,
+        codeBlockContentInsets: UIEdgeInsets = UIEdgeInsets(top: 14, left: 14, bottom: 14, right: 14),
+        codeBlockCornerRadius: CGFloat = 14,
+        codeBlockBorderWidth: CGFloat = 0,
+        codeBlockBorderColor: UIColor? = nil,
         tableTextColor: UIColor? = nil,
         tableHeaderTextColor: UIColor? = nil,
         tableBorderColor: UIColor? = nil,
@@ -71,6 +85,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         blockSpacing: CGFloat = 16,
         headingTopSpacing: [CGFloat]? = nil,
         headingBottomSpacing: [CGFloat]? = nil,
+        renderWidth: CGFloat = 0,
         displayScale: CGFloat = 0
     ) {
         self.font = font
@@ -85,6 +100,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.codeBlockTextColor = codeBlockTextColor
         self.codeBlockHeaderTextColor = codeBlockHeaderTextColor
         self.codeBlockBackgroundColor = codeBlockBackgroundColor
+        self.codeBlockContentInsets = codeBlockContentInsets
+        self.codeBlockCornerRadius = codeBlockCornerRadius
+        self.codeBlockBorderWidth = codeBlockBorderWidth
+        self.codeBlockBorderColor = codeBlockBorderColor
         self.tableTextColor = tableTextColor
         self.tableHeaderTextColor = tableHeaderTextColor
         self.tableBorderColor = tableBorderColor
@@ -101,6 +120,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.blockSpacing = blockSpacing
         self.headingTopSpacing = headingTopSpacing
         self.headingBottomSpacing = headingBottomSpacing
+        self.renderWidth = renderWidth
         self.displayScale = displayScale
     }
 
