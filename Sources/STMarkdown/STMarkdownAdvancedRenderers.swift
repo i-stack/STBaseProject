@@ -169,5 +169,7 @@ private extension STMarkdownHighFidelityMathRenderer {
             .replacingOccurrences(of: #"\\)"#, with: "")
             .replacingOccurrences(of: #"\\["#, with: "")
             .replacingOccurrences(of: #"\\]"#, with: "")
+            .replacingOccurrences(of: #"\'"#, with: "'")
+            .replacingOccurrences(of: #"\|"#, with: "|")
     }
 }
