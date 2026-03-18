@@ -264,8 +264,9 @@ public extension Data {
     }
     
     /// 是否为有效的 JSON 数据
+    @available(*, deprecated, renamed: "isJSONData")
     var isValidJSON: Bool {
-        return jsonObject() != nil
+        return isJSONData
     }
 
     // MARK: - Slicing

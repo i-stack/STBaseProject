@@ -12,7 +12,7 @@ private extension String {
     static func stringify(jsonValue: STJSONValue) -> String {
         switch jsonValue {
         case .bool(let value):
-            return value ? "1" : "0"
+            return String(value)
         case .int(let value):
             return String(value)
         case .double(let value):
@@ -50,12 +50,12 @@ public extension String {
 
     static func string(from value: Any) -> String {
         switch value {
-        case let number as NSNumber:
-            return String(format: "%@", number)
+        case let bool as Bool:
+            return String(bool)
         case let string as String:
             return string
-        case let bool as Bool:
-            return bool ? "1" : "0"
+        case let number as NSNumber:
+            return String(format: "%@", number)
         case let jsonValue as STJSONValue:
             return stringify(jsonValue: jsonValue)
         case let int as Int:
