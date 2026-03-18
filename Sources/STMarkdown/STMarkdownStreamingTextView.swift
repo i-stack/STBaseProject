@@ -153,7 +153,20 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         if renderedStr.count >= currentStr.count,
            (renderedStr as NSString).hasPrefix(currentStr) {
             let deltaLen = rendered.length - current.length
-            if deltaLen > 0 {
+            // 检测公共前缀部分的属性是否变化（如表格 attachment 图片更新）
+            let prefixChanged: Bool = {
+                guard current.length > 0 else { return false }
+                let prefixRange = NSRange(location: 0, length: current.length)
+                let renderedPrefix = rendered.attributedSubstring(from: prefixRange)
+                return !renderedPrefix.isEqual(to: current)
+            }()
+            if prefixChanged {
+                // 公共前缀的属性已变（表格 attachment 更新等）：全量替换
+                self.rawMarkdown = markdown
+                self.textView.setRenderedAttributedText(rendered)
+                self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+                self.invalidateIntrinsicContentSize()
+            } else if deltaLen > 0 {
                 let delta = rendered.attributedSubstring(
                     from: NSRange(location: current.length, length: deltaLen)
                 )
@@ -171,11 +184,24 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         // 路径 2：字符串公共前缀 + 尾部替换（带 stagger 动画）
         let commonLen = currentStr.commonPrefix(with: renderedStr).utf16.count
         if commonLen > 0 {
-            let trailing = rendered.attributedSubstring(
-                from: NSRange(location: commonLen, length: rendered.length - commonLen)
-            )
-            self.rawMarkdown = markdown
-            self.textView.replaceTrailingAttributedText(from: commonLen, with: trailing)
+            // 检测公共前缀部分的属性是否变化（如表格 attachment 更新）
+            let commonPrefixChanged: Bool = {
+                guard commonLen > 0 else { return false }
+                let currentPrefix = current.attributedSubstring(from: NSRange(location: 0, length: commonLen))
+                let renderedCommon = rendered.attributedSubstring(from: NSRange(location: 0, length: commonLen))
+                return !renderedCommon.isEqual(to: currentPrefix)
+            }()
+            if commonPrefixChanged {
+                // 公共前缀属性已变：全量替换
+                self.rawMarkdown = markdown
+                self.textView.setRenderedAttributedText(rendered)
+            } else {
+                let trailing = rendered.attributedSubstring(
+                    from: NSRange(location: commonLen, length: rendered.length - commonLen)
+                )
+                self.rawMarkdown = markdown
+                self.textView.replaceTrailingAttributedText(from: commonLen, with: trailing)
+            }
             self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
             self.invalidateIntrinsicContentSize()

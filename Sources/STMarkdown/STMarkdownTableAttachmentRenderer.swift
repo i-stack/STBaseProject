@@ -9,8 +9,16 @@ import UIKit
 import SwiftMath
 
 public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
-    
-    public init() {}
+
+    /// 当为 true 时，始终生成 `STStaticTableAttachment`（缩放至容器宽度），
+    /// 而不会生成 `STScrollableTableAttachment`。
+    /// 用于流式渲染场景：`STShimmerTextView` 不支持 scrollable attachment overlay，
+    /// 此时将超宽表格缩放显示，流式结束后切换到 AST 模式时再显示可滚动版本。
+    public var forceStaticTable: Bool
+
+    public init(forceStaticTable: Bool = false) {
+        self.forceStaticTable = forceStaticTable
+    }
 
     private let tableHorizontalMargin: CGFloat = 0.0
 
@@ -22,7 +30,7 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
         let containerWidth = style.renderWidth
         let hasHeader = table.header != nil
 
-        // 生成图片时：宽度至少为 containerWidth，确保背景填满，无”背后视图”泄露
+        // 生成图片时：宽度至少为 containerWidth，确保背景填满，无"背后视图"泄露
         let (image, citationRegions) = self.renderAttachmentImage(
             rows: rows,
             hasHeader: hasHeader,
@@ -31,7 +39,7 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
             minWidth: containerWidth
         )
 
-        if containerWidth > 0, image.size.width > containerWidth + 1 {
+        if !self.forceStaticTable, containerWidth > 0, image.size.width > containerWidth + 1 {
             // 超宽表格：生成的图片宽度为 naturalWidth，背景由图片自带或 UIScrollView 提供
             // 这里传入透明背景版本供滑动
             let (scrollableImage, scrollCitationRegions) = self.renderAttachmentImage(
