@@ -13,7 +13,7 @@ public protocol STMarkdownAttributedStringRendering {
 
 public final class STMarkdownAttributedStringRenderer: STMarkdownAttributedStringRendering {
     
-    public let style: STMarkdownStyle
+    public var style: STMarkdownStyle
     public let advancedRenderers: STMarkdownAdvancedRenderers
 
     public init(style: STMarkdownStyle = .default, advancedRenderers: STMarkdownAdvancedRenderers = .empty) {
