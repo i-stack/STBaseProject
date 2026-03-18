@@ -139,6 +139,27 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
             self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             return
         }
+        // 流式模式下 tryAppendRenderedDelta 失败（如 rawMarkdown 前缀不匹配），
+        // 使用 replaceTrailingAttributedText 基于字符串公共前缀做局部替换 + 逐字动画，
+        // 避免全量 setRenderedAttributedText 导致已显示文本闪烁。
+        if animated, !self.rawMarkdown.isEmpty {
+            let current = self.textView.renderedAttributedText
+            let currentStr = current.string
+            let renderedStr = rendered.string
+            let commonPrefix = currentStr.commonPrefix(with: renderedStr)
+            let commonLen = commonPrefix.utf16.count
+            if commonLen > 0 {
+                let trailing = rendered.attributedSubstring(
+                    from: NSRange(location: commonLen, length: rendered.length - commonLen)
+                )
+                self.rawMarkdown = markdown
+                self.textView.replaceTrailingAttributedText(from: commonLen, with: trailing)
+                self.textView.accessibilityValue = self.textView.renderedAttributedText.string
+                self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+                self.invalidateIntrinsicContentSize()
+                return
+            }
+        }
         self.rawMarkdown = markdown
         self.textView.setRenderedAttributedText(rendered)
         self.textView.accessibilityValue = self.textView.renderedAttributedText.string

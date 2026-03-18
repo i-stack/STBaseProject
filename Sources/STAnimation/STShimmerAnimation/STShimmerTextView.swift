@@ -25,6 +25,10 @@ open class STShimmerTextView: UITextView {
     }
 
     public var tokenFadeDuration: TimeInterval = 0.3
+    /// 逐字 stagger 间隔：每个字符的 fade-in 起始时间比前一个字符延迟此值，
+    /// 使多字符 delta 呈现"逐字出现"而非"整段同时出现"的效果。
+    /// 设为 0 则禁用 stagger（所有字符同时 fade-in）。
+    public var characterStaggerInterval: TimeInterval = 0.016
     public var suppressSystemTextMenu: Bool = false
     private var displayLink: CADisplayLink?
     private var animatingTokens: [AnimatingToken] = []
@@ -164,24 +168,12 @@ open class STShimmerTextView: UITextView {
             if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
             // 只对尾部片段（最后一个 \n 之后的内容）创建动画 token
             if !trailingRuns.isEmpty {
-                let trailingStart = trailingRuns.map(\.range.location).min()!
-                let trailingEnd = trailingRuns.map { $0.range.location + $0.range.length }.max()!
-                let token = AnimatingToken(
-                    range: NSRange(location: trailingStart, length: trailingEnd - trailingStart),
-                    startTime: CACurrentMediaTime(),
-                    colorRuns: trailingRuns
-                )
-                self.animatingTokens.append(token)
+                self.appendStaggeredTokens(for: trailingRuns)
                 self.startDisplayLinkIfNeeded()
             }
         } else {
             if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
-            let token = AnimatingToken(
-                range: NSRange(location: startLocation, length: appended.length),
-                startTime: CACurrentMediaTime(),
-                colorRuns: colorRuns
-            )
-            self.animatingTokens.append(token)
+            self.appendStaggeredTokens(for: colorRuns)
             self.startDisplayLinkIfNeeded()
         }
     }
@@ -216,6 +208,16 @@ open class STShimmerTextView: UITextView {
         }
         self.animatingTokens.removeAll()
 
+        // 计算旧尾部字符串，用于后续判断哪些是"真正新增"的字符
+        let oldTrailingLength = self.textStorage.length - clampedLocation
+        let oldTrailingString: String
+        if oldTrailingLength > 0 {
+            oldTrailingString = (self.textStorage.string as NSString)
+                .substring(with: NSRange(location: clampedLocation, length: oldTrailingLength))
+        } else {
+            oldTrailingString = ""
+        }
+
         // 2. 同步更新 _baseAttributedText：保留 [0, clampedLocation) 前缀 + 新尾部
         let clampedBaseLocation = max(0, min(location, _baseAttributedText.length))
         let newBase = NSMutableAttributedString(
@@ -226,17 +228,69 @@ open class STShimmerTextView: UITextView {
         newBase.append(attributedText)
         _baseAttributedText = newBase
 
-        // 3. 直接替换 textStorage 中的尾部内容（不做 fade-in 动画）。
-        //    replaceTrailing 通常在 markdown 重解析后调用，属性变化但文本大致相同，
-        //    此处不做淡入以避免频繁替换时反复从 alpha=0 开始导致闪烁。
+        // 3. 替换 textStorage 中的尾部内容。
+        //    对已有文本部分（旧尾部与新尾部的公共前缀）直接以最终颜色渲染（不做 fade-in），
+        //    对真正新增的字符执行逐字 stagger fade-in 动画。
+        let newTrailingString = attributedText.string
+        let commonPrefixCount = oldTrailingString.commonPrefix(with: newTrailingString).utf16.count
+
+        // 准备新尾部的 appended 副本用于提取 colorRuns
+        let appended = NSMutableAttributedString(attributedString: attributedText)
+        let defaultColor = self.baseForegroundColor(from: self.defaultTextAttributes)
+        self.ensureForegroundColor(in: appended, defaultColor: defaultColor)
+
+        // 对真正新增的部分（公共前缀之后）提取 colorRuns 并设置透明
+        let newCharCount = attributedText.length - commonPrefixCount
+        var newColorRuns: [AnimatingColorRun] = []
+        if newCharCount > 0, self.tokenFadeDuration > 0, self.characterStaggerInterval > 0 {
+            let newRange = NSRange(location: commonPrefixCount, length: newCharCount)
+            let newPortion = appended.attributedSubstring(from: newRange)
+            let newPortionMut = NSMutableAttributedString(attributedString: newPortion)
+            let newPortionOffset = clampedLocation + commonPrefixCount
+            // 提取 colorRuns（从新增部分）
+            let fullRange = NSRange(location: 0, length: newPortionMut.length)
+            newPortionMut.enumerateAttribute(.foregroundColor, in: fullRange, options: []) { value, subrange, _ in
+                guard let color = value as? UIColor else { return }
+                if newPortionMut.attribute(.attachment, at: subrange.location, effectiveRange: nil) != nil { return }
+                if newPortionMut.attribute(Self.skipFadeInAttributeKey, at: subrange.location, effectiveRange: nil) != nil { return }
+                var alpha: CGFloat = 0
+                color.getWhite(nil, alpha: &alpha)
+                if alpha < 0.01 { return }
+                newColorRuns.append(AnimatingColorRun(
+                    range: NSRange(location: newPortionOffset + subrange.location, length: subrange.length),
+                    targetColor: color
+                ))
+            }
+            // 将新增部分在 appended 中设为透明
+            if !newColorRuns.isEmpty {
+                newPortionMut.enumerateAttribute(.foregroundColor, in: fullRange, options: []) { value, subrange, _ in
+                    if newPortionMut.attribute(.attachment, at: subrange.location, effectiveRange: nil) != nil { return }
+                    if newPortionMut.attribute(Self.skipFadeInAttributeKey, at: subrange.location, effectiveRange: nil) != nil { return }
+                    let color = (value as? UIColor) ?? defaultColor
+                    var alpha: CGFloat = 0
+                    color.getWhite(nil, alpha: &alpha)
+                    if alpha < 0.01 { return }
+                    newPortionMut.addAttribute(.foregroundColor, value: color.withAlphaComponent(0), range: subrange)
+                }
+                appended.replaceCharacters(in: newRange, with: newPortionMut)
+            }
+        }
+
         self.textStorage.beginEditing()
         self.textStorage.replaceCharacters(
             in: NSRange(location: clampedLocation, length: self.textStorage.length - clampedLocation),
-            with: attributedText
+            with: appended
         )
         self.textStorage.endEditing()
         if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
-        self.stopDisplayLink()
+
+        // 对新增字符启动逐字 stagger 动画
+        if !newColorRuns.isEmpty {
+            self.appendStaggeredTokens(for: newColorRuns)
+            self.startDisplayLinkIfNeeded()
+        } else {
+            self.stopDisplayLink()
+        }
     }
 
     public func reset() {
@@ -269,6 +323,49 @@ open class STShimmerTextView: UITextView {
             return nil
         }
         return rect
+    }
+
+    /// 将 colorRuns 按字符拆分为多个 AnimatingToken，每个字符的 startTime 递增
+    /// `characterStaggerInterval`，实现逐字 fade-in。
+    ///
+    /// 所有文本已经以 alpha=0 插入 textStorage 并完成布局，此处仅控制 fade-in 动画时序，
+    /// 不会引起任何布局变化、跳动或闪烁。
+    private func appendStaggeredTokens(for colorRuns: [AnimatingColorRun]) {
+        guard !colorRuns.isEmpty else { return }
+        let stagger = self.characterStaggerInterval
+        // 当 stagger 为 0 或总字符数很少时，不拆分，保持原有行为
+        let totalLength = colorRuns.reduce(0) { $0 + $1.range.length }
+        if stagger <= 0 || totalLength <= 2 {
+            let start = colorRuns.map(\.range.location).min()!
+            let end = colorRuns.map { $0.range.location + $0.range.length }.max()!
+            let token = AnimatingToken(
+                range: NSRange(location: start, length: end - start),
+                startTime: CACurrentMediaTime(),
+                colorRuns: colorRuns
+            )
+            self.animatingTokens.append(token)
+            return
+        }
+        // 将所有 colorRuns 展开为逐字符的 (location, targetColor) 列表，
+        // 然后为每个字符创建独立的 AnimatingToken。
+        let baseTime = CACurrentMediaTime()
+        var charIndex = 0
+        for run in colorRuns {
+            for offset in 0..<run.range.length {
+                let loc = run.range.location + offset
+                let charRun = AnimatingColorRun(
+                    range: NSRange(location: loc, length: 1),
+                    targetColor: run.targetColor
+                )
+                let token = AnimatingToken(
+                    range: NSRange(location: loc, length: 1),
+                    startTime: baseTime + Double(charIndex) * stagger,
+                    colorRuns: [charRun]
+                )
+                self.animatingTokens.append(token)
+                charIndex += 1
+            }
+        }
     }
 
     private func startDisplayLinkIfNeeded() {

@@ -9,41 +9,51 @@ import UIKit
 import SwiftMath
 
 public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
+    
     public init() {}
 
-    public let tableHorizontalMargin: CGFloat = 12.0
+    private let tableHorizontalMargin: CGFloat = 0.0
 
     public func renderTable(_ table: STMarkdownTableModel, style: STMarkdownStyle) -> NSAttributedString? {
         let rows = self.makeRows(from: table)
         guard rows.isEmpty == false else { return nil }
         
-        // 考虑左右 12pt 边距后的可用渲染宽度
-        let availableWidth = max(style.renderWidth - 2 * tableHorizontalMargin, 0)
+        // 使用完整的 renderWidth 作为容器宽度，边距设为 0 以保证与文字左对齐
+        let containerWidth = style.renderWidth
         let hasHeader = table.header != nil
         
-        let image = self.renderAttachmentImage(rows: rows, hasHeader: hasHeader, style: style)
+        // 生成图片时：宽度至少为 containerWidth，确保背景填满，无“背后视图”泄露
+        let image = self.renderAttachmentImage(
+            rows: rows,
+            hasHeader: hasHeader,
+            style: style,
+            horizontalMargin: tableHorizontalMargin,
+            minWidth: containerWidth
+        )
         
-        if availableWidth > 0, image.size.width > availableWidth + 1 {
-            // 如果超宽，生成透明背景的高清图片供 UIScrollView 滑动，并在附件中携带原始背景色
+        if containerWidth > 0, image.size.width > containerWidth + 1 {
+            // 超宽表格：生成的图片宽度为 naturalWidth，背景由图片自带或 UIScrollView 提供
+            // 这里传入透明背景版本供滑动
             let scrollableImage = self.renderAttachmentImage(
                 rows: rows,
                 hasHeader: hasHeader,
                 style: style,
-                transparentBackground: true
+                transparentBackground: true,
+                horizontalMargin: tableHorizontalMargin
             )
             return NSAttributedString(attachment: STScrollableTableAttachment(
                 tableImage: scrollableImage,
-                containerWidth: availableWidth,
+                containerWidth: containerWidth,
                 backgroundColor: style.tableBackgroundColor ?? UIColor.secondarySystemBackground
             ))
         }
 
         let attachment = NSTextAttachment()
         attachment.image = image
-        // 非滑动表格也缩放到 availableWidth 宽度，确保左右留白一致
-        if availableWidth > 0, image.size.width > 0 {
-            let scale = availableWidth / image.size.width
-            attachment.bounds = CGRect(x: 0, y: 0, width: availableWidth, height: image.size.height * scale)
+        // 保证附件宽度覆盖 renderWidth，即使表格内容较窄，背景也会延伸到右侧
+        if containerWidth > 0, image.size.width > 0 {
+            let scale = containerWidth / image.size.width
+            attachment.bounds = CGRect(x: 0, y: 0, width: containerWidth, height: image.size.height * scale)
         } else {
             attachment.bounds = CGRect(origin: .zero, size: image.size)
         }
@@ -226,7 +236,9 @@ private extension STMarkdownTableAttachmentRenderer {
         rows: [[CellContent]],
         hasHeader: Bool,
         style: STMarkdownStyle,
-        transparentBackground: Bool = false
+        transparentBackground: Bool = false,
+        horizontalMargin: CGFloat = 0,
+        minWidth: CGFloat = 0
     ) -> UIImage {
         let columnCount = rows.map(\.count).max() ?? 0
         let emptyCell = CellContent(fragments: [])
@@ -264,7 +276,9 @@ private extension STMarkdownTableAttachmentRenderer {
         _ = maxTableWidth
 
         let rowHeight = max(ceil(headerFont.lineHeight), ceil(bodyFont.lineHeight)) + (verticalPadding * 2)
-        let totalWidth = columnWidths.reduce(0, +) + separatorWidth
+        // 总宽度包含左右边距，并确保至少达到 minWidth (renderWidth) 以填充背景
+        let contentWidth = naturalWidth + (horizontalMargin * 2) + separatorWidth
+        let totalWidth = max(contentWidth, minWidth)
         let totalHeight = CGFloat(paddedRows.count) * rowHeight + 1
 
         let format = UIGraphicsImageRendererFormat.default()
@@ -276,6 +290,7 @@ private extension STMarkdownTableAttachmentRenderer {
             let backgroundColor = style.tableBackgroundColor ?? UIColor.secondarySystemBackground
             let borderColor = (style.tableBorderColor ?? UIColor.separator).cgColor
             
+            // 始终填充完整背景色（除非显式要求透明，但在本方案中滑动图片也应自带背景）
             if !transparentBackground {
                 backgroundColor.setFill()
                 cgContext.fill(CGRect(x: 0, y: 0, width: totalWidth, height: totalHeight))
@@ -287,10 +302,13 @@ private extension STMarkdownTableAttachmentRenderer {
                 let rowBackground = isHeader
                     ? (style.tableBackgroundColor ?? UIColor.secondarySystemBackground).withAlphaComponent(0.92)
                     : (style.tableBackgroundColor ?? UIColor.secondarySystemBackground)
+                
+                // 行背景也填充包含边距的全宽
                 cgContext.setFillColor(rowBackground.cgColor)
                 cgContext.fill(CGRect(x: 0, y: y, width: totalWidth, height: rowHeight))
 
-                var x: CGFloat = 0
+                // 从水平边距开始绘制单元格
+                var x: CGFloat = horizontalMargin
                 for columnIndex in paddedRows[rowIndex].indices {
                     let font = isHeader ? headerFont : bodyFont
                     let color = isHeader ? headerTextColor : textColor
