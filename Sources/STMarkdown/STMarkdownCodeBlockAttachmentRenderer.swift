@@ -31,10 +31,16 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
     ) -> UIImage {
         let headerFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold)
         let codeFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular)
-        let horizontalPadding: CGFloat = 12
-        let verticalPadding: CGFloat = 10
-        let contentWidth: CGFloat = 280
-        let blockWidth = contentWidth + (horizontalPadding * 2)
+        let insets = style.codeBlockContentInsets
+        let cornerRadius = style.codeBlockCornerRadius
+
+        let blockWidth: CGFloat
+        if style.renderWidth > 0 {
+            blockWidth = style.renderWidth
+        } else {
+            blockWidth = 280 + insets.left + insets.right
+        }
+        let contentWidth = blockWidth - insets.left - insets.right
 
         let backgroundColor = style.codeBlockBackgroundColor ?? UIColor.secondarySystemBackground
         let headerColor = style.codeBlockHeaderTextColor ?? style.textColor.withAlphaComponent(0.72)
@@ -65,7 +71,7 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
         let headerHeight = headerText.isEmpty ? 0 : ceil(headerFont.lineHeight)
         let separatorSpacing: CGFloat = headerText.isEmpty ? 0 : 8
         let codeHeight = max(ceil(codeBounds.height), ceil(codeFont.lineHeight))
-        let blockHeight = verticalPadding + headerHeight + separatorSpacing + codeHeight + verticalPadding
+        let blockHeight = insets.top + headerHeight + separatorSpacing + codeHeight + insets.bottom
 
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = style.resolvedDisplayScale
@@ -74,15 +80,23 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
         return renderer.image { context in
             let cgContext = context.cgContext
             let rect = CGRect(x: 0, y: 0, width: blockWidth, height: blockHeight)
-            let path = UIBezierPath(roundedRect: rect, cornerRadius: 12)
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius)
             backgroundColor.setFill()
             path.fill()
 
-            var currentY = verticalPadding
+            // 绘制边框
+            if style.codeBlockBorderWidth > 0 {
+                let borderColor = style.codeBlockBorderColor ?? UIColor.separator
+                borderColor.setStroke()
+                path.lineWidth = style.codeBlockBorderWidth
+                path.stroke()
+            }
+
+            var currentY = insets.top
 
             if headerText.isEmpty == false {
                 let headerRect = CGRect(
-                    x: horizontalPadding,
+                    x: insets.left,
                     y: currentY,
                     width: contentWidth,
                     height: headerHeight
@@ -91,7 +105,7 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
                 currentY += headerHeight + 4
 
                 let separatorRect = CGRect(
-                    x: horizontalPadding,
+                    x: insets.left,
                     y: currentY,
                     width: contentWidth,
                     height: 1
@@ -102,7 +116,7 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
             }
 
             let codeRect = CGRect(
-                x: horizontalPadding,
+                x: insets.left,
                 y: currentY,
                 width: contentWidth,
                 height: codeHeight
