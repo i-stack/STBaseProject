@@ -65,13 +65,7 @@ private extension STMarkdownStructureParser {
             }
 
             if let codeBlock = block as? CodeBlock {
-                let code: String
-                if codeBlock.childCount > 0, let first = codeBlock.child(at: 0) as? Text {
-                    code = first.string
-                } else {
-                    code = self.plainText(from: codeBlock)
-                }
-                blocks.append(.codeBlock(language: codeBlock.language, code: code))
+                blocks.append(.codeBlock(language: codeBlock.language, code: codeBlock.code))
                 continue
             }
 
