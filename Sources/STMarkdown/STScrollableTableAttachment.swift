@@ -17,13 +17,21 @@ public final class STScrollableTableAttachment: NSTextAttachment {
     public let tableImage: UIImage
     public let containerWidth: CGFloat
     public let backgroundColor: UIColor?
+    /// 表格图片中 Citation 角标的位置列表，供 overlay 层叠加可点击按钮
+    public let citationRegions: [STTableCitationRegion]
 
-    public init(tableImage: UIImage, containerWidth: CGFloat, backgroundColor: UIColor? = nil) {
+    public init(
+        tableImage: UIImage,
+        containerWidth: CGFloat,
+        backgroundColor: UIColor? = nil,
+        citationRegions: [STTableCitationRegion] = []
+    ) {
         self.tableImage = tableImage
         self.containerWidth = containerWidth
         self.backgroundColor = backgroundColor
+        self.citationRegions = citationRegions
         super.init(data: nil, ofType: nil)
-        // 将 image 设为 nil，防止 TextKit 用原始超宽图片直接绘制导致“背景占位图”残留
+        // 将 image 设为 nil，防止 TextKit 用原始超宽图片直接绘制导致”背景占位图”残留
         self.image = nil
     }
 

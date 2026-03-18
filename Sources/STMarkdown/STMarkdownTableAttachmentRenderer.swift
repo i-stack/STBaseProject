@@ -17,24 +17,24 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
     public func renderTable(_ table: STMarkdownTableModel, style: STMarkdownStyle) -> NSAttributedString? {
         let rows = self.makeRows(from: table)
         guard rows.isEmpty == false else { return nil }
-        
+
         // 使用完整的 renderWidth 作为容器宽度，边距设为 0 以保证与文字左对齐
         let containerWidth = style.renderWidth
         let hasHeader = table.header != nil
-        
-        // 生成图片时：宽度至少为 containerWidth，确保背景填满，无“背后视图”泄露
-        let image = self.renderAttachmentImage(
+
+        // 生成图片时：宽度至少为 containerWidth，确保背景填满，无”背后视图”泄露
+        let (image, citationRegions) = self.renderAttachmentImage(
             rows: rows,
             hasHeader: hasHeader,
             style: style,
             horizontalMargin: tableHorizontalMargin,
             minWidth: containerWidth
         )
-        
+
         if containerWidth > 0, image.size.width > containerWidth + 1 {
             // 超宽表格：生成的图片宽度为 naturalWidth，背景由图片自带或 UIScrollView 提供
             // 这里传入透明背景版本供滑动
-            let scrollableImage = self.renderAttachmentImage(
+            let (scrollableImage, scrollCitationRegions) = self.renderAttachmentImage(
                 rows: rows,
                 hasHeader: hasHeader,
                 style: style,
@@ -44,20 +44,23 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
             return NSAttributedString(attachment: STScrollableTableAttachment(
                 tableImage: scrollableImage,
                 containerWidth: containerWidth,
-                backgroundColor: style.tableBackgroundColor ?? UIColor.secondarySystemBackground
+                backgroundColor: style.tableBackgroundColor ?? UIColor.secondarySystemBackground,
+                citationRegions: scrollCitationRegions
             ))
         }
 
-        let attachment = NSTextAttachment()
-        attachment.image = image
-        // 保证附件宽度覆盖 renderWidth，即使表格内容较窄，背景也会延伸到右侧
+        let displayBounds: CGRect
         if containerWidth > 0, image.size.width > 0 {
             let scale = containerWidth / image.size.width
-            attachment.bounds = CGRect(x: 0, y: 0, width: containerWidth, height: image.size.height * scale)
+            displayBounds = CGRect(x: 0, y: 0, width: containerWidth, height: image.size.height * scale)
         } else {
-            attachment.bounds = CGRect(origin: .zero, size: image.size)
+            displayBounds = CGRect(origin: .zero, size: image.size)
         }
-        return NSAttributedString(attachment: attachment)
+        return NSAttributedString(attachment: STStaticTableAttachment(
+            tableImage: image,
+            displayBounds: displayBounds,
+            citationRegions: citationRegions
+        ))
     }
 }
 
@@ -96,7 +99,8 @@ private extension STMarkdownTableAttachmentRenderer {
         for node in nodes {
             switch node {
             case .text(let text):
-                fragments.append(.text(text))
+                // 检测文本中嵌入的 [Citation:N] 标记，将其拆分为文本片段和角标片段
+                fragments.append(contentsOf: Self.splitTextForCitation(text))
             case .inlineMath(let formula, let isDisplayMode):
                 fragments.append(.math(formula: formula, isDisplayMode: isDisplayMode))
             case .emphasis(let children), .strong(let children):
@@ -135,6 +139,40 @@ private extension STMarkdownTableAttachmentRenderer {
             return text
         }
         return nil
+    }
+
+    /// 匹配 `[Citation:N]` 文本模式的正则表达式（编译一次复用）
+    private static let citationInTextRegex: NSRegularExpression = {
+        // swiftlint:disable:next force_try
+        try! NSRegularExpression(pattern: #"\[Citation:(\d+)\]"#)
+    }()
+
+    /// 将含 `[Citation:N]` 标记的文本拆分为交替的文本片段和角标片段。
+    /// CommonMark parser 将未定义的 reference link `[Citation:N]` 解析为字面 `.text("[Citation:N]")`，
+    /// 此函数对 `.text` 节点做二次扫描，将角标还原为 `.citation` 片段。
+    static func splitTextForCitation(_ text: String) -> [CellFragment] {
+        let ns = text as NSString
+        let range = NSRange(location: 0, length: ns.length)
+        let matches = citationInTextRegex.matches(in: text, range: range)
+        guard !matches.isEmpty else { return [.text(text)] }
+        var result: [CellFragment] = []
+        var lastEnd = 0
+        for match in matches {
+            if match.range.location > lastEnd {
+                let part = ns.substring(with: NSRange(location: lastEnd, length: match.range.location - lastEnd))
+                if !part.isEmpty { result.append(.text(part)) }
+            }
+            let numberRange = match.range(at: 1)
+            if numberRange.location != NSNotFound {
+                result.append(.citation(number: ns.substring(with: numberRange)))
+            }
+            lastEnd = match.range.location + match.range.length
+        }
+        if lastEnd < ns.length {
+            let part = ns.substring(with: NSRange(location: lastEnd, length: ns.length - lastEnd))
+            if !part.isEmpty { result.append(.text(part)) }
+        }
+        return result
     }
 
     /// 将公式中的 LaTeX 转义序列归一化为 SwiftMath 可识别的形式
@@ -209,7 +247,8 @@ private extension STMarkdownTableAttachmentRenderer {
         textColor: UIColor,
         badgeBgColor: UIColor,
         badgeTextColor: UIColor,
-        context: CGContext
+        context: CGContext,
+        citationRecorder: inout [STTableCitationRegion]
     ) {
         var x = rect.origin.x
         let midY = rect.midY
@@ -266,6 +305,11 @@ private extension STMarkdownTableAttachmentRenderer {
                 )
                 let diameter = Self.citationBadgeDiameter
                 let imgY = midY - diameter / 2
+                // 记录角标在图片坐标系中的位置，供 overlay 层叠加可点击按钮
+                citationRecorder.append(STTableCitationRegion(
+                    frame: CGRect(x: x, y: imgY, width: diameter, height: diameter),
+                    number: number
+                ))
                 context.saveGState()
                 context.translateBy(x: x, y: imgY + diameter)
                 context.scaleBy(x: 1, y: -1)
@@ -287,7 +331,7 @@ private extension STMarkdownTableAttachmentRenderer {
         transparentBackground: Bool = false,
         horizontalMargin: CGFloat = 0,
         minWidth: CGFloat = 0
-    ) -> UIImage {
+    ) -> (UIImage, [STTableCitationRegion]) {
         let columnCount = rows.map(\.count).max() ?? 0
         let emptyCell = CellContent(fragments: [])
         let paddedRows = rows.map { row in
@@ -333,13 +377,14 @@ private extension STMarkdownTableAttachmentRenderer {
         format.scale = style.resolvedDisplayScale
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: totalWidth, height: totalHeight), format: format)
 
-        return renderer.image { context in
+        var allCitationRegions: [STTableCitationRegion] = []
+        let image = renderer.image { context in
             let cgContext = context.cgContext
             let backgroundColor = style.tableBackgroundColor ?? UIColor.secondarySystemBackground
             let borderColor = (style.tableBorderColor ?? UIColor.separator).cgColor
             let badgeBgColor = style.citationBadgeBgColor ?? UIColor.systemBlue
             let badgeTextColor = style.citationBadgeTextColor ?? UIColor.white
-            
+
             // 始终填充完整背景色（除非显式要求透明，但在本方案中滑动图片也应自带背景）
             if !transparentBackground {
                 backgroundColor.setFill()
@@ -352,7 +397,7 @@ private extension STMarkdownTableAttachmentRenderer {
                 let rowBackground = isHeader
                     ? (style.tableBackgroundColor ?? UIColor.secondarySystemBackground).withAlphaComponent(0.92)
                     : (style.tableBackgroundColor ?? UIColor.secondarySystemBackground)
-                
+
                 // 行背景也填充包含边距的全宽
                 cgContext.setFillColor(rowBackground.cgColor)
                 cgContext.fill(CGRect(x: 0, y: y, width: totalWidth, height: rowHeight))
@@ -375,7 +420,8 @@ private extension STMarkdownTableAttachmentRenderer {
                         textColor: color,
                         badgeBgColor: badgeBgColor,
                         badgeTextColor: badgeTextColor,
-                        context: cgContext
+                        context: cgContext,
+                        citationRecorder: &allCitationRegions
                     )
 
                     cgContext.setStrokeColor(borderColor)
@@ -386,5 +432,6 @@ private extension STMarkdownTableAttachmentRenderer {
                 y += rowHeight
             }
         }
+        return (image, allCitationRegions)
     }
 }
