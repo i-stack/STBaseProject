@@ -8,7 +8,6 @@
 import Foundation
 import QuartzCore
 
-// MARK: - 耗时打印工具类
 public class STTimeProfiler {
     
     private static let lock = NSLock()

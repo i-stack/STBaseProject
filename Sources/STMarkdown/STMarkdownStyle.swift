@@ -14,6 +14,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var kern: CGFloat
     public var paragraphSpacing: CGFloat
     public var bodyLineSpacing: CGFloat
+    public var bodyTextInsets: UIEdgeInsets
     public var headingTextColor: UIColor?
     public var linkColor: UIColor?
     public var inlineCodeTextColor: UIColor?
@@ -32,6 +33,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var strikethroughColor: UIColor?
     public var listItemSpacing: CGFloat
     public var listIndentPerLevel: CGFloat
+    public var listFirstLineHeadIndent: CGFloat
+    public var listHeadIndent: CGFloat
+    public var listMarkerWidth: CGFloat
+    public var listMarkerColor: UIColor?
     public var headingLineHeightMultiplier: CGFloat
     /// 块级元素之间的默认间距
     public var blockSpacing: CGFloat
@@ -47,6 +52,20 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var codeBlockBorderWidth: CGFloat
     /// 代码块边框颜色
     public var codeBlockBorderColor: UIColor?
+    /// 分隔线高度
+    public var dividerHeight: CGFloat
+    /// 分隔线颜色
+    public var dividerColor: UIColor?
+    /// 引用块左侧竖线宽度
+    public var blockquoteLineWidth: CGFloat
+    /// 引用块内容与竖线的间距
+    public var blockquoteIndentation: CGFloat
+    /// 引用块竖线颜色
+    public var blockquoteLineColor: UIColor?
+    /// 引用块背景色
+    public var blockquoteBackgroundColor: UIColor?
+    /// 引用块圆角半径
+    public var blockquoteCornerRadius: CGFloat
     /// 渲染宽度，0 表示使用默认宽度
     public var renderWidth: CGFloat
     /// 渲染缩放因子，0 表示自动检测
@@ -59,6 +78,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         kern: CGFloat,
         paragraphSpacing: CGFloat = 8,
         bodyLineSpacing: CGFloat = 2,
+        bodyTextInsets: UIEdgeInsets = .zero,
         headingTextColor: UIColor? = nil,
         linkColor: UIColor? = nil,
         inlineCodeTextColor: UIColor? = nil,
@@ -81,10 +101,21 @@ public struct STMarkdownStyle: @unchecked Sendable {
         strikethroughColor: UIColor? = nil,
         listItemSpacing: CGFloat = 8,
         listIndentPerLevel: CGFloat = 14,
+        listFirstLineHeadIndent: CGFloat = 12,
+        listHeadIndent: CGFloat = 24,
+        listMarkerWidth: CGFloat = 18,
+        listMarkerColor: UIColor? = nil,
         headingLineHeightMultiplier: CGFloat = 1.25,
         blockSpacing: CGFloat = 16,
         headingTopSpacing: [CGFloat]? = nil,
         headingBottomSpacing: [CGFloat]? = nil,
+        dividerHeight: CGFloat = 1,
+        dividerColor: UIColor? = nil,
+        blockquoteLineWidth: CGFloat = 3,
+        blockquoteIndentation: CGFloat = 12,
+        blockquoteLineColor: UIColor? = nil,
+        blockquoteBackgroundColor: UIColor? = nil,
+        blockquoteCornerRadius: CGFloat = 10,
         renderWidth: CGFloat = 0,
         displayScale: CGFloat = 0
     ) {
@@ -94,6 +125,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.kern = kern
         self.paragraphSpacing = paragraphSpacing
         self.bodyLineSpacing = bodyLineSpacing
+        self.bodyTextInsets = bodyTextInsets
         self.headingTextColor = headingTextColor
         self.linkColor = linkColor
         self.inlineCodeTextColor = inlineCodeTextColor
@@ -116,10 +148,21 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.strikethroughColor = strikethroughColor
         self.listItemSpacing = listItemSpacing
         self.listIndentPerLevel = listIndentPerLevel
+        self.listFirstLineHeadIndent = listFirstLineHeadIndent
+        self.listHeadIndent = listHeadIndent
+        self.listMarkerWidth = listMarkerWidth
+        self.listMarkerColor = listMarkerColor
         self.headingLineHeightMultiplier = headingLineHeightMultiplier
         self.blockSpacing = blockSpacing
         self.headingTopSpacing = headingTopSpacing
         self.headingBottomSpacing = headingBottomSpacing
+        self.dividerHeight = dividerHeight
+        self.dividerColor = dividerColor
+        self.blockquoteLineWidth = blockquoteLineWidth
+        self.blockquoteIndentation = blockquoteIndentation
+        self.blockquoteLineColor = blockquoteLineColor
+        self.blockquoteBackgroundColor = blockquoteBackgroundColor
+        self.blockquoteCornerRadius = blockquoteCornerRadius
         self.renderWidth = renderWidth
         self.displayScale = displayScale
     }
@@ -140,8 +183,19 @@ public struct STMarkdownStyle: @unchecked Sendable {
     }
 }
 
-enum STMarkdownFontResolver {
-    static func italicFont(from font: UIFont) -> UIFont {
+public enum STMarkdownFontResolver {
+    private static func fontWeight(of font: UIFont) -> CGFloat {
+        let traits = font.fontDescriptor.object(forKey: .traits) as? [UIFontDescriptor.TraitKey: Any]
+        if let weight = traits?[.weight] as? CGFloat {
+            return weight
+        }
+        if let weight = traits?[.weight] as? NSNumber {
+            return CGFloat(truncating: weight)
+        }
+        return UIFont.Weight.regular.rawValue
+    }
+
+    public static func italicFont(from font: UIFont) -> UIFont {
         if let descriptor = font.fontDescriptor.withSymbolicTraits(.traitItalic) {
             let resolved = UIFont(descriptor: descriptor, size: font.pointSize)
             if resolved.fontDescriptor.symbolicTraits.contains(.traitItalic) {
@@ -151,29 +205,32 @@ enum STMarkdownFontResolver {
         return font
     }
 
-    static func boldFont(from font: UIFont) -> UIFont {
+    public static func boldFont(from font: UIFont) -> UIFont {
         if let descriptor = font.fontDescriptor.withSymbolicTraits(.traitBold) {
             let resolved = UIFont(descriptor: descriptor, size: font.pointSize)
-            if resolved.fontDescriptor.symbolicTraits.contains(.traitBold) {
+            let baseWeight = fontWeight(of: font)
+            let resolvedWeight = fontWeight(of: resolved)
+            if resolved.fontDescriptor.symbolicTraits.contains(.traitBold),
+               resolvedWeight > baseWeight + 0.1 {
                 return resolved
             }
         }
         return .st_systemFont(ofSize: font.pointSize, weight: .bold)
     }
 
-    static func boldItalicFont(from font: UIFont) -> UIFont {
+    public static func boldItalicFont(from font: UIFont) -> UIFont {
         let traits: UIFontDescriptor.SymbolicTraits = [.traitBold, .traitItalic]
         if let descriptor = font.fontDescriptor.withSymbolicTraits(traits) {
             let resolved = UIFont(descriptor: descriptor, size: font.pointSize)
-            let symbolicTraits = resolved.fontDescriptor.symbolicTraits
-            if symbolicTraits.contains(.traitBold), symbolicTraits.contains(.traitItalic) {
+            let resolvedTraits = resolved.fontDescriptor.symbolicTraits
+            if resolvedTraits.contains(.traitBold), resolvedTraits.contains(.traitItalic) {
                 return resolved
             }
         }
         return boldFont(from: italicFont(from: font))
     }
 
-    static func italicObliqueness(from font: UIFont) -> CGFloat? {
+    public static func italicObliqueness(from font: UIFont) -> CGFloat? {
         let italic = italicFont(from: font)
         guard italic.fontDescriptor.symbolicTraits.contains(.traitItalic) == false else {
             return nil
@@ -181,7 +238,7 @@ enum STMarkdownFontResolver {
         return 0.16
     }
 
-    static func boldItalicObliqueness(from font: UIFont) -> CGFloat? {
+    public static func boldItalicObliqueness(from font: UIFont) -> CGFloat? {
         let boldItalic = boldItalicFont(from: font)
         guard boldItalic.fontDescriptor.symbolicTraits.contains(.traitItalic) == false else {
             return nil

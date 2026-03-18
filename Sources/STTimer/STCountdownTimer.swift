@@ -90,7 +90,7 @@ public class STCountdownTimer {
             self.progressHandler = progress
             self.completionHandler = completion
             self.errorHandler = error
-            self.startBackgroundTask() // 申请后台时间
+            self.startBackgroundTask()
             self.startDate = Date()
             self.remainingTime = self.totalTime
             self.createAndResumeTimer()

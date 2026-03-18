@@ -191,6 +191,18 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
             return self.appendRenderedDelta(markdown: markdown, current: current, rendered: rendered)
         }
 
+        // 流式场景下，Markdown 渲染器会对「最后一个段落」随后继段落的出现而回溯修改
+        // NSParagraphStyle（如 paragraphSpacingAfter）。这会导致 hasStableAttributedPrefix
+        // 误判，进而触发 replaceTrailingAttributedText（无动画瞬间替换）产生视觉跳动。
+        //
+        // 修复：若文字内容前缀稳定（string hasPrefix 成立），则仍走追加路径，
+        // 只追加 delta 部分，前缀的 paragraphStyle 差异留给 finishStreamingRender
+        // 的静态 AST 渲染最终修正，流式阶段 blockSeparator 的 minimumLineHeight 已提供视觉间距。
+        if rendered.length >= current.length,
+           (rendered.string as NSString).hasPrefix(current.string) {
+            return self.appendRenderedDelta(markdown: markdown, current: current, rendered: rendered)
+        }
+
         let stablePrefixLength = self.longestCommonAttributedPrefixLength(current, rendered: rendered)
         guard stablePrefixLength > 0 else { return false }
 

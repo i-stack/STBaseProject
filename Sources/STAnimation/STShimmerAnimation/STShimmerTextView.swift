@@ -107,13 +107,8 @@ open class STShimmerTextView: UITextView {
         let appended = NSMutableAttributedString(attributedString: attributedText)
         let defaultColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         self.ensureForegroundColor(in: appended, defaultColor: defaultColor)
-        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画：
-        // 新字符只要属于下一行，先前行的 fade-in 就不应再悬挂，立即置为全不透明。
-        if animated, self.tokenFadeDuration > 0 {
-            self.finishAnimationsBeforeLastNewline()
-        }
-        // _baseAttributedText 记录全不透明的最终态，供 tryAppendRenderedDelta 做稳定前缀比较。
-        // 必须在 applyTransparentForegroundColors 之前执行，保留原始 alpha=1 颜色。
+        // _baseAttributedText 记录全不透明最终态，必须在 applyTransparentForegroundColors
+        // 之前追加，保留原始 alpha=1 颜色。
         _baseAttributedText.append(appended)
         let colorRuns = self.animatingColorRuns(in: appended, offset: startLocation)
         if animated {
