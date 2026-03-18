@@ -25,7 +25,10 @@ let package = Package(
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "SwiftMath", package: "SwiftMath")
             ],
-            path: "Sources"
+            path: "Sources",
+            resources: [
+                .process("STMarkdown/Resources")
+            ]
         ),
         .testTarget(
             name: "STBaseProjectTests",
