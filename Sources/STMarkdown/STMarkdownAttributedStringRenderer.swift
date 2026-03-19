@@ -60,7 +60,7 @@ private extension STMarkdownAttributedStringRenderer {
         case .heading(let level, let content):
             let headingFont = self.headingFont(for: level)
             let headingColor = self.style.headingTextColor ?? self.style.textColor
-            return self.renderInline(nodes: content, baseFont: headingFont, textColor: headingColor, paragraphStyle: self.headingParagraphStyle(font: headingFont))
+            return self.renderInline(nodes: content, baseFont: headingFont, textColor: headingColor, paragraphStyle: self.headingParagraphStyle(font: headingFont), kernOverride: self.style.headingKern)
         case .quote(let blocks):
             let rendered = NSMutableAttributedString()
             let paragraphStyle = self.bodyParagraphStyle()
@@ -150,32 +150,44 @@ private extension STMarkdownAttributedStringRenderer {
         paragraphStyle: NSMutableParagraphStyle? = nil,
         italic: Bool = false,
         bold: Bool = false,
-        linkDestination: String? = nil
+        linkDestination: String? = nil,
+        kernOverride: CGFloat? = nil
     ) -> NSAttributedString {
         let result = NSMutableAttributedString()
         let italicFont = STMarkdownFontResolver.italicFont(from: baseFont)
-        let boldFont = STMarkdownFontResolver.boldFont(from: baseFont)
-        let boldItalicFont = STMarkdownFontResolver.boldItalicFont(from: baseFont)
+        let boldFont = self.style.boldFont.map { UIFont(descriptor: $0.fontDescriptor, size: baseFont.pointSize) }
+            ?? STMarkdownFontResolver.boldFont(from: baseFont)
+        let boldItalicFont: UIFont = {
+            if self.style.boldFont != nil {
+                return STMarkdownFontResolver.italicFont(from: boldFont)
+            }
+            return STMarkdownFontResolver.boldItalicFont(from: baseFont)
+        }()
         let style = paragraphStyle ?? self.bodyParagraphStyle()
         let useFont: UIFont
         let obliqueness: CGFloat?
+        let resolvedTextColor: UIColor
         if italic && bold {
             useFont = boldItalicFont
             obliqueness = STMarkdownFontResolver.boldItalicObliqueness(from: baseFont)
+            resolvedTextColor = self.style.boldTextColor ?? textColor
         } else if bold {
             useFont = boldFont
             obliqueness = nil
+            resolvedTextColor = self.style.boldTextColor ?? textColor
         } else if italic {
             useFont = italicFont
             obliqueness = STMarkdownFontResolver.italicObliqueness(from: baseFont)
+            resolvedTextColor = textColor
         } else {
             useFont = baseFont
             obliqueness = nil
+            resolvedTextColor = textColor
         }
         var attributes: [NSAttributedString.Key: Any] = [
             .font: useFont,
-            .foregroundColor: textColor,
-            .kern: self.style.kern,
+            .foregroundColor: resolvedTextColor,
+            .kern: kernOverride ?? self.style.kern,
             .paragraphStyle: style,
         ]
         if let obliqueness {
@@ -347,6 +359,9 @@ private extension STMarkdownAttributedStringRenderer {
     }
 
     func headingFont(for level: Int) -> UIFont {
+        if let provider = self.style.headingFontProvider {
+            return provider(level)
+        }
         switch level {
         case 1:
             return .st_systemFont(ofSize: 22, weight: .bold)

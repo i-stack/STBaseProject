@@ -9,6 +9,10 @@ import UIKit
 
 public struct STMarkdownStyle: @unchecked Sendable {
     public var font: UIFont
+    /// 加粗字体（nil 时由 STMarkdownFontResolver.boldFont(from: font) 自动推导）
+    public var boldFont: UIFont?
+    /// 加粗文本颜色（nil 时沿用 textColor）
+    public var boldTextColor: UIColor?
     public var textColor: UIColor
     public var lineHeight: CGFloat
     public var kern: CGFloat
@@ -16,6 +20,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var bodyLineSpacing: CGFloat
     public var bodyTextInsets: UIEdgeInsets
     public var headingTextColor: UIColor?
+    /// 标题字间距（nil 时沿用 kern）
+    public var headingKern: CGFloat?
+    /// 自定义标题字体（按 level 1-6 返回），nil 时使用默认 headingFont(for:)
+    public var headingFontProvider: ((Int) -> UIFont)?
     public var linkColor: UIColor?
     public var inlineCodeTextColor: UIColor?
     public var codeBlockTextColor: UIColor?
@@ -77,6 +85,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
 
     public init(
         font: UIFont,
+        boldFont: UIFont? = nil,
+        boldTextColor: UIColor? = nil,
         textColor: UIColor,
         lineHeight: CGFloat,
         kern: CGFloat,
@@ -84,6 +94,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         bodyLineSpacing: CGFloat = 2,
         bodyTextInsets: UIEdgeInsets = .zero,
         headingTextColor: UIColor? = nil,
+        headingKern: CGFloat? = nil,
+        headingFontProvider: ((Int) -> UIFont)? = nil,
         linkColor: UIColor? = nil,
         inlineCodeTextColor: UIColor? = nil,
         codeBlockTextColor: UIColor? = nil,
@@ -126,6 +138,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         citationBadgeTextColor: UIColor? = nil
     ) {
         self.font = font
+        self.boldFont = boldFont
+        self.boldTextColor = boldTextColor
         self.textColor = textColor
         self.lineHeight = lineHeight
         self.kern = kern
@@ -133,6 +147,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.bodyLineSpacing = bodyLineSpacing
         self.bodyTextInsets = bodyTextInsets
         self.headingTextColor = headingTextColor
+        self.headingKern = headingKern
+        self.headingFontProvider = headingFontProvider
         self.linkColor = linkColor
         self.inlineCodeTextColor = inlineCodeTextColor
         self.codeBlockTextColor = codeBlockTextColor

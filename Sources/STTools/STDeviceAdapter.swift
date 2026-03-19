@@ -34,7 +34,7 @@ public final class STDeviceAdapter {
     public static let shared = STDeviceAdapter()
     public private(set) var designSize = CGSize.zero
     public private(set) var barHeights = STBarHeightsConfiguration()
-    public private(set) var fontFamily = STFontFamilyConfig.pingFangSC
+    public private(set) var fontFamily = STFontFamilyConfig.system
 
     private init() {}
 

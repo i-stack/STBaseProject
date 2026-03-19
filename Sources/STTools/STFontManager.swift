@@ -8,32 +8,28 @@
 import UIKit
 
 public struct STFontFamilyConfig {
-    public var regular: String
-    public var medium: String
-    public var semibold: String
-    public var bold: String
-    public var light: String
-    public var ultraLight: String
-    public var thin: String
-
-    public static let pingFangSC = STFontFamilyConfig(
-        regular:    "PingFangSC-Regular",
-        medium:     "PingFangSC-Medium",
-        semibold:   "PingFangSC-Semibold",
-        bold:       "PingFangSC-Semibold",
-        light:      "PingFangSC-Light",
-        ultraLight: "PingFangSC-Ultralight",
-        thin:       "PingFangSC-Thin"
-    )
+    public var regular: String?
+    public var medium: String?
+    public var semibold: String?
+    public var bold: String?
+    public var light: String?
+    public var ultraLight: String?
+    public var thin: String?
+    public var heavy: String?
+    public var black: String?
+    /// 使用系统默认字体（简体中文环境下系统会自动选用苹方）
+    public static let system = STFontFamilyConfig()
 
     public init(
-        regular: String,
-        medium: String,
-        semibold: String,
-        bold: String,
-        light: String,
-        ultraLight: String,
-        thin: String
+        regular: String? = nil,
+        medium: String? = nil,
+        semibold: String? = nil,
+        bold: String? = nil,
+        light: String? = nil,
+        ultraLight: String? = nil,
+        thin: String? = nil,
+        heavy: String? = nil,
+        black: String? = nil
     ) {
         self.regular = regular
         self.medium = medium
@@ -42,6 +38,8 @@ public struct STFontFamilyConfig {
         self.light = light
         self.ultraLight = ultraLight
         self.thin = thin
+        self.heavy = heavy
+        self.black = black
     }
 
     func fontName(for weight: UIFont.Weight) -> String? {
@@ -53,6 +51,8 @@ public struct STFontFamilyConfig {
         case .light:      return light
         case .ultraLight: return ultraLight
         case .thin:       return thin
+        case .heavy:      return heavy
+        case .black:      return black
         default:          return nil
         }
     }
@@ -74,7 +74,7 @@ public extension UIFont {
            let customFont = UIFont(name: name, size: size) {
             baseFont = customFont
         } else {
-            baseFont = .systemFont(ofSize: size, weight: weight)
+            baseFont = UIFont.systemFont(ofSize: size, weight: weight)
         }
         let metrics = UIFontMetrics(forTextStyle: style)
         if let maxSize = maxSize {
@@ -124,7 +124,7 @@ public extension UIFont {
            let font = UIFont(name: name, size: scaledSize) {
             return font
         }
-        return .systemFont(ofSize: scaledSize, weight: weight)
+        return UIFont.systemFont(ofSize: scaledSize, weight: weight)
     }
 
     /// 替换 UIFont.boldSystemFont(ofSize:)
@@ -136,14 +136,14 @@ public extension UIFont {
            let font = UIFont(name: name, size: scaledSize) {
             return font
         }
-        return .boldSystemFont(ofSize: scaledSize)
+        return UIFont.boldSystemFont(ofSize: scaledSize)
     }
 
     /// 替换 UIFont.italicSystemFont(ofSize:)
     /// 迁移时只需: UIFont.italicSystemFont(ofSize: 14) → UIFont.st_italicSystemFont(ofSize: 14)
     static func st_italicSystemFont(ofSize size: CGFloat) -> UIFont {
         let scaledSize = STDeviceAdapter.scaledValue(size)
-        return .italicSystemFont(ofSize: scaledSize)
+        return UIFont.italicSystemFont(ofSize: scaledSize)
     }
 
     /// 替换 UIFont.preferredFont(forTextStyle:)
