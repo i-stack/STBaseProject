@@ -7,9 +7,25 @@
 
 import UIKit
 
+private final class STMarkdownCodeBlockCacheEntry: NSObject {
+    let fullBodyHeight: CGFloat
+    let image: UIImage
+
+    init(fullBodyHeight: CGFloat, image: UIImage) {
+        self.fullBodyHeight = fullBodyHeight
+        self.image = image
+    }
+}
+
 public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
     public static let collapsedBodyMaxHeight: CGFloat = 220
-    public static let buttonRowReservedWidth: CGFloat = 116
+    public static let buttonRowReservedWidth: CGFloat = 120
+
+    private static let renderCache: NSCache<NSString, STMarkdownCodeBlockCacheEntry> = {
+        let cache = NSCache<NSString, STMarkdownCodeBlockCacheEntry>()
+        cache.countLimit = 48
+        return cache
+    }()
 
     public let language: String?
     public let code: String
@@ -20,7 +36,13 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
     public let contentInsets: UIEdgeInsets
     public let isCollapsed: Bool
 
-    public init(language: String?, code: String, style: STMarkdownStyle) {
+    public init(
+        language: String?,
+        code: String,
+        style: STMarkdownStyle,
+        visibleCode: String? = nil,
+        forceCollapsed: Bool = false
+    ) {
         self.language = language?.trimmingCharacters(in: .whitespacesAndNewlines)
         self.code = code
         self.style = style
@@ -41,9 +63,31 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
             Self.blockWidth(for: style) - contentInsets.left - contentInsets.right,
             1
         )
-        let highlightedBody = STMarkdownCodeSyntaxHighlighter.highlightedBody(
+        let cacheKey = Self.cacheKey(
             language: self.language,
             code: code,
+            visibleCode: visibleCode,
+            forceCollapsed: forceCollapsed,
+            style: style,
+            codeWidth: codeWidth,
+            headerHeight: self.headerHeight,
+            contentInsets: self.contentInsets
+        )
+
+        if let cached = Self.renderCache.object(forKey: cacheKey as NSString) {
+            self.renderedBodyHeight = cached.fullBodyHeight
+            self.isCollapsed = cached.fullBodyHeight > Self.collapsedBodyMaxHeight
+            self.displayedBodyHeight = min(cached.fullBodyHeight, Self.collapsedBodyMaxHeight)
+            super.init(data: nil, ofType: nil)
+            self.image = cached.image
+            self.bounds = CGRect(origin: .zero, size: cached.image.size)
+            return
+        }
+
+        let renderCode = visibleCode ?? code
+        let highlightedBody = STMarkdownCodeSyntaxHighlighter.highlightedBody(
+            language: self.language,
+            code: renderCode,
             font: codeFont,
             textColor: style.codeBlockTextColor ?? style.textColor,
             paragraphStyle: paragraphStyle
@@ -56,16 +100,18 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
             ).height),
             ceil(codeFont.lineHeight)
         )
-        self.renderedBodyHeight = fullBodyHeight
-        self.isCollapsed = fullBodyHeight > Self.collapsedBodyMaxHeight
-        self.displayedBodyHeight = min(fullBodyHeight, Self.collapsedBodyMaxHeight)
+        self.isCollapsed = forceCollapsed || fullBodyHeight > Self.collapsedBodyMaxHeight
+        self.renderedBodyHeight = self.isCollapsed
+            ? max(fullBodyHeight, Self.collapsedBodyMaxHeight + 1)
+            : fullBodyHeight
+        self.displayedBodyHeight = min(self.renderedBodyHeight, Self.collapsedBodyMaxHeight)
 
         super.init(data: nil, ofType: nil)
 
         let image = STMarkdownCodeBlockRenderer.renderAttachmentImage(
             language: self.language,
-            code: code,
             style: style,
+            highlightedBody: highlightedBody,
             bodyHeight: self.displayedBodyHeight,
             fullBodyHeight: self.renderedBodyHeight,
             headerHeight: self.headerHeight,
@@ -73,6 +119,13 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
         )
         self.image = image
         self.bounds = CGRect(origin: .zero, size: image.size)
+        Self.renderCache.setObject(
+            STMarkdownCodeBlockCacheEntry(
+                fullBodyHeight: fullBodyHeight,
+                image: image
+            ),
+            forKey: cacheKey as NSString
+        )
     }
 
     public required init?(coder: NSCoder) {
@@ -85,6 +138,55 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
         }
         return 280 + style.codeBlockContentInsets.left + style.codeBlockContentInsets.right
     }
+
+    private static func cacheKey(
+        language: String?,
+        code: String,
+        visibleCode: String?,
+        forceCollapsed: Bool,
+        style: STMarkdownStyle,
+        codeWidth: CGFloat,
+        headerHeight: CGFloat,
+        contentInsets: UIEdgeInsets
+    ) -> String {
+        [
+            language ?? "",
+            String(code.hashValue),
+            String(code.count),
+            String(visibleCode?.hashValue ?? 0),
+            String(visibleCode?.count ?? 0),
+            forceCollapsed ? "1" : "0",
+            String(format: "%.2f", codeWidth),
+            String(format: "%.2f", headerHeight),
+            String(format: "%.2f", contentInsets.top),
+            String(format: "%.2f", contentInsets.left),
+            String(format: "%.2f", contentInsets.bottom),
+            String(format: "%.2f", contentInsets.right),
+            String(format: "%.2f", style.font.pointSize),
+            String(format: "%.2f", style.bodyLineSpacing),
+            String(format: "%.2f", style.renderWidth),
+            String(format: "%.2f", style.codeBlockCornerRadius),
+            String(format: "%.2f", style.codeBlockBorderWidth),
+            rgbaKey(style.textColor),
+            rgbaKey(style.codeBlockTextColor),
+            rgbaKey(style.codeBlockHeaderTextColor),
+            rgbaKey(style.codeBlockBackgroundColor),
+            rgbaKey(style.codeBlockBorderColor),
+            rgbaKey(style.horizontalRuleColor),
+        ].joined(separator: "|")
+    }
+
+    private static func rgbaKey(_ color: UIColor?) -> String {
+        guard let color else { return "nil" }
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        guard color.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return color.description
+        }
+        return String(format: "%.4f,%.4f,%.4f,%.4f", red, green, blue, alpha)
+    }
 }
 
 public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
@@ -95,18 +197,14 @@ public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
         code: String,
         style: STMarkdownStyle
     ) -> NSAttributedString? {
-        let attachment = STMarkdownCodeBlockAttachment(
-            language: language,
-            code: code,
-            style: style
-        )
+        let attachment = STMarkdownCodeBlockAttachment(language: language, code: code, style: style)
         return NSAttributedString(attachment: attachment)
     }
 
     static func renderAttachmentImage(
         language: String?,
-        code: String,
         style: STMarkdownStyle,
+        highlightedBody: NSAttributedString,
         bodyHeight: CGFloat,
         fullBodyHeight: CGFloat,
         headerHeight: CGFloat,
@@ -122,23 +220,9 @@ public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
         let backgroundColor = style.codeBlockBackgroundColor ?? UIColor.secondarySystemBackground
         let borderColor = style.codeBlockBorderColor ?? UIColor.separator
         let headerColor = style.codeBlockHeaderTextColor ?? style.textColor.withAlphaComponent(0.72)
-        let codeFont = UIFont.st_monospacedSystemFont(
-            ofSize: max(style.font.pointSize - 1, 12),
-            weight: .regular
-        )
         let headerFont = UIFont.st_monospacedSystemFont(
             ofSize: max(style.font.pointSize - 2, 12),
             weight: .semibold
-        )
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.lineBreakMode = .byCharWrapping
-        paragraphStyle.lineSpacing = max(style.bodyLineSpacing, 2)
-        let highlightedBody = STMarkdownCodeSyntaxHighlighter.highlightedBody(
-            language: language,
-            code: code,
-            font: codeFont,
-            textColor: style.codeBlockTextColor ?? style.textColor,
-            paragraphStyle: paragraphStyle
         )
         let separatorSpacing: CGFloat = 8
         let blockHeight = contentInsets.top + headerHeight + separatorSpacing + bodyHeight + contentInsets.bottom
@@ -247,24 +331,20 @@ public enum STMarkdownCodeSyntaxHighlighter {
         textColor: UIColor,
         paragraphStyle: NSParagraphStyle
     ) -> NSAttributedString {
-        let result = NSMutableAttributedString(
-            string: code,
-            attributes: [
-                .font: font,
-                .foregroundColor: textColor,
-                .paragraphStyle: paragraphStyle,
-            ]
-        )
+        let result = NSMutableAttributedString(string: code, attributes: [
+            .font: font,
+            .foregroundColor: textColor,
+            .paragraphStyle: paragraphStyle,
+        ])
         guard !code.isEmpty else { return result }
-
         let lang = normalize(language)
         let colors = Palette(
             keyword: UIColor.systemBlue,
-            string: UIColor(hex: "#C46B2D") ?? .systemOrange,
+            string: UIColor(fromHexString: "#C46B2D") ?? .systemOrange,
             comment: textColor.withAlphaComponent(0.55),
-            number: UIColor(hex: "#1F8A70") ?? .systemTeal,
-            type: UIColor(hex: "#7A57D1") ?? .systemIndigo,
-            tag: UIColor(hex: "#B5432A") ?? .systemRed
+            number: UIColor(fromHexString: "#1F8A70") ?? .systemTeal,
+            type: UIColor(fromHexString: "#7A57D1") ?? .systemIndigo,
+            tag: UIColor(fromHexString: "#B5432A") ?? .systemRed
         )
 
         apply(patterns: keywordPatterns(for: lang), color: colors.keyword, to: result)

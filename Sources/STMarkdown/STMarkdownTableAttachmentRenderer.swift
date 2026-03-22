@@ -30,13 +30,13 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
         let containerWidth = style.renderWidth
         let hasHeader = table.header != nil
 
-        // 生成图片时：宽度至少为 containerWidth，确保背景填满，无"背后视图"泄露
+        // 先以自然宽度生成图片（minWidth: 0），再根据宽度关系决定 attachment 类型。
+        // 不再强制 minWidth: containerWidth，避免窄表格右侧出现大面积空白背景。
         let (image, citationRegions) = self.renderAttachmentImage(
             rows: rows,
             hasHeader: hasHeader,
             style: style,
-            horizontalMargin: tableHorizontalMargin,
-            minWidth: containerWidth
+            horizontalMargin: tableHorizontalMargin
         )
 
         if !self.forceStaticTable, containerWidth > 0, image.size.width > containerWidth + 1 {
@@ -57,11 +57,15 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
             ))
         }
 
+        // 窄表格（image.size.width <= containerWidth）：保持自然尺寸，不拉伸到容器全宽。
+        // forceStaticTable 场景（流式渲染）：超宽表格等比缩放至容器宽度。
         let displayBounds: CGRect
-        if containerWidth > 0, image.size.width > 0 {
+        if self.forceStaticTable, containerWidth > 0, image.size.width > containerWidth {
+            // 流式阶段：超宽表格缩放至容器宽度
             let scale = containerWidth / image.size.width
             displayBounds = CGRect(x: 0, y: 0, width: containerWidth, height: image.size.height * scale)
         } else {
+            // 窄表格或无容器宽度：直接使用图片自然尺寸
             displayBounds = CGRect(origin: .zero, size: image.size)
         }
         return NSAttributedString(attachment: STStaticTableAttachment(
