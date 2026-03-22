@@ -14,16 +14,8 @@ public protocol STMarkdownProcessing {
 public final class STMarkdownEngine: STMarkdownProcessing, @unchecked Sendable {
     public let pipeline: STMarkdownPipeline
 
-    public init(
-        configuration: STMarkdownPipelineConfiguration = STMarkdownPipelineConfiguration(),
-        parser: any STMarkdownStructureParsing = STMarkdownStructureParser(),
-        renderAdapter: any STMarkdownRenderAdapting = STMarkdownRenderAdapter()
-    ) {
-        self.pipeline = STMarkdownPipeline(
-            configuration: configuration,
-            parser: parser,
-            renderAdapter: renderAdapter
-        )
+    public init(configuration: STMarkdownPipelineConfiguration = STMarkdownPipelineConfiguration(), parser: any STMarkdownStructureParsing = STMarkdownStructureParser(), renderAdapter: any STMarkdownRenderAdapting = STMarkdownRenderAdapter()) {
+        self.pipeline = STMarkdownPipeline(configuration: configuration, parser: parser, renderAdapter: renderAdapter)
     }
 
     public func process(_ rawMarkdown: String) -> STMarkdownPipelineResult {

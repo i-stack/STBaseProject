@@ -1,0 +1,382 @@
+//
+//  STMarkdownCodeBlockSupport.swift
+//  STBaseProject
+//
+//  Created by 寒江孤影 on 2019/03/16.
+//
+
+import UIKit
+
+public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
+    public static let collapsedBodyMaxHeight: CGFloat = 220
+    public static let buttonRowReservedWidth: CGFloat = 116
+
+    public let language: String?
+    public let code: String
+    public let style: STMarkdownStyle
+    public let renderedBodyHeight: CGFloat
+    public let displayedBodyHeight: CGFloat
+    public let headerHeight: CGFloat
+    public let contentInsets: UIEdgeInsets
+    public let isCollapsed: Bool
+
+    public init(language: String?, code: String, style: STMarkdownStyle) {
+        self.language = language?.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.code = code
+        self.style = style
+        self.contentInsets = style.codeBlockContentInsets
+        self.headerHeight = max(
+            ceil(UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold).lineHeight),
+            18
+        )
+
+        let codeFont = UIFont.st_monospacedSystemFont(
+            ofSize: max(style.font.pointSize - 1, 12),
+            weight: .regular
+        )
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = .byCharWrapping
+        paragraphStyle.lineSpacing = max(style.bodyLineSpacing, 2)
+        let codeWidth = max(
+            Self.blockWidth(for: style) - contentInsets.left - contentInsets.right,
+            1
+        )
+        let highlightedBody = STMarkdownCodeSyntaxHighlighter.highlightedBody(
+            language: self.language,
+            code: code,
+            font: codeFont,
+            textColor: style.codeBlockTextColor ?? style.textColor,
+            paragraphStyle: paragraphStyle
+        )
+        let fullBodyHeight = max(
+            ceil(highlightedBody.boundingRect(
+                with: CGSize(width: codeWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                context: nil
+            ).height),
+            ceil(codeFont.lineHeight)
+        )
+        self.renderedBodyHeight = fullBodyHeight
+        self.isCollapsed = fullBodyHeight > Self.collapsedBodyMaxHeight
+        self.displayedBodyHeight = min(fullBodyHeight, Self.collapsedBodyMaxHeight)
+
+        super.init(data: nil, ofType: nil)
+
+        let image = STMarkdownCodeBlockRenderer.renderAttachmentImage(
+            language: self.language,
+            code: code,
+            style: style,
+            bodyHeight: self.displayedBodyHeight,
+            fullBodyHeight: self.renderedBodyHeight,
+            headerHeight: self.headerHeight,
+            contentInsets: self.contentInsets
+        )
+        self.image = image
+        self.bounds = CGRect(origin: .zero, size: image.size)
+    }
+
+    public required init?(coder: NSCoder) {
+        return nil
+    }
+
+    private static func blockWidth(for style: STMarkdownStyle) -> CGFloat {
+        if style.renderWidth > 0 {
+            return style.renderWidth
+        }
+        return 280 + style.codeBlockContentInsets.left + style.codeBlockContentInsets.right
+    }
+}
+
+public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
+    public init() {}
+
+    public func renderCodeBlock(
+        language: String?,
+        code: String,
+        style: STMarkdownStyle
+    ) -> NSAttributedString? {
+        let attachment = STMarkdownCodeBlockAttachment(
+            language: language,
+            code: code,
+            style: style
+        )
+        return NSAttributedString(attachment: attachment)
+    }
+
+    static func renderAttachmentImage(
+        language: String?,
+        code: String,
+        style: STMarkdownStyle,
+        bodyHeight: CGFloat,
+        fullBodyHeight: CGFloat,
+        headerHeight: CGFloat,
+        contentInsets: UIEdgeInsets
+    ) -> UIImage {
+        let blockWidth = max(
+            style.renderWidth > 0
+                ? style.renderWidth
+                : (280 + style.codeBlockContentInsets.left + style.codeBlockContentInsets.right),
+            1
+        )
+        let contentWidth = max(blockWidth - contentInsets.left - contentInsets.right, 1)
+        let backgroundColor = style.codeBlockBackgroundColor ?? UIColor.secondarySystemBackground
+        let borderColor = style.codeBlockBorderColor ?? UIColor.separator
+        let headerColor = style.codeBlockHeaderTextColor ?? style.textColor.withAlphaComponent(0.72)
+        let codeFont = UIFont.st_monospacedSystemFont(
+            ofSize: max(style.font.pointSize - 1, 12),
+            weight: .regular
+        )
+        let headerFont = UIFont.st_monospacedSystemFont(
+            ofSize: max(style.font.pointSize - 2, 12),
+            weight: .semibold
+        )
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineBreakMode = .byCharWrapping
+        paragraphStyle.lineSpacing = max(style.bodyLineSpacing, 2)
+        let highlightedBody = STMarkdownCodeSyntaxHighlighter.highlightedBody(
+            language: language,
+            code: code,
+            font: codeFont,
+            textColor: style.codeBlockTextColor ?? style.textColor,
+            paragraphStyle: paragraphStyle
+        )
+        let separatorSpacing: CGFloat = 8
+        let blockHeight = contentInsets.top + headerHeight + separatorSpacing + bodyHeight + contentInsets.bottom
+        let format = UIGraphicsImageRendererFormat.default()
+        format.scale = style.resolvedDisplayScale
+
+        return UIGraphicsImageRenderer(
+            size: CGSize(width: blockWidth, height: blockHeight),
+            format: format
+        ).image { context in
+            let cgContext = context.cgContext
+            let rect = CGRect(x: 0, y: 0, width: blockWidth, height: blockHeight)
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: style.codeBlockCornerRadius)
+            backgroundColor.setFill()
+            path.fill()
+
+            if style.codeBlockBorderWidth > 0 {
+                borderColor.setStroke()
+                path.lineWidth = style.codeBlockBorderWidth
+                path.stroke()
+            }
+
+            let headerText = (language?.isEmpty == false ? language?.uppercased() : "CODE") ?? "CODE"
+            let headerRect = CGRect(
+                x: contentInsets.left,
+                y: contentInsets.top,
+                width: max(contentWidth - STMarkdownCodeBlockAttachment.buttonRowReservedWidth, 1),
+                height: headerHeight
+            )
+            (headerText as NSString).draw(
+                in: headerRect,
+                withAttributes: [
+                    .font: headerFont,
+                    .foregroundColor: headerColor,
+                ]
+            )
+
+            let separatorRect = CGRect(
+                x: contentInsets.left,
+                y: contentInsets.top + headerHeight + 3,
+                width: contentWidth,
+                height: 1
+            )
+            cgContext.setFillColor((style.horizontalRuleColor ?? UIColor.separator).withAlphaComponent(0.35).cgColor)
+            cgContext.fill(separatorRect)
+
+            let codeRect = CGRect(
+                x: contentInsets.left,
+                y: contentInsets.top + headerHeight + separatorSpacing,
+                width: contentWidth,
+                height: bodyHeight
+            )
+            cgContext.saveGState()
+            cgContext.clip(to: codeRect)
+            highlightedBody.draw(
+                with: CGRect(
+                    x: codeRect.minX,
+                    y: codeRect.minY,
+                    width: codeRect.width,
+                    height: fullBodyHeight
+                ),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                context: nil
+            )
+            cgContext.restoreGState()
+
+            if fullBodyHeight > bodyHeight + 0.5 {
+                let fadeHeight: CGFloat = 42
+                let fadeRect = CGRect(
+                    x: contentInsets.left,
+                    y: max(codeRect.maxY - fadeHeight, codeRect.minY),
+                    width: contentWidth,
+                    height: fadeHeight
+                )
+                let colors = [
+                    backgroundColor.withAlphaComponent(0).cgColor,
+                    backgroundColor.withAlphaComponent(0.96).cgColor,
+                    backgroundColor.cgColor,
+                ] as CFArray
+                let locations: [CGFloat] = [0, 0.7, 1]
+                if let gradient = CGGradient(
+                    colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                    colors: colors,
+                    locations: locations
+                ) {
+                    cgContext.saveGState()
+                    cgContext.clip(to: fadeRect)
+                    cgContext.drawLinearGradient(
+                        gradient,
+                        start: CGPoint(x: fadeRect.minX, y: fadeRect.minY),
+                        end: CGPoint(x: fadeRect.minX, y: fadeRect.maxY),
+                        options: []
+                    )
+                    cgContext.restoreGState()
+                }
+            }
+        }
+    }
+}
+
+public enum STMarkdownCodeSyntaxHighlighter {
+    public static func highlightedBody(
+        language: String?,
+        code: String,
+        font: UIFont,
+        textColor: UIColor,
+        paragraphStyle: NSParagraphStyle
+    ) -> NSAttributedString {
+        let result = NSMutableAttributedString(
+            string: code,
+            attributes: [
+                .font: font,
+                .foregroundColor: textColor,
+                .paragraphStyle: paragraphStyle,
+            ]
+        )
+        guard !code.isEmpty else { return result }
+
+        let lang = normalize(language)
+        let colors = Palette(
+            keyword: UIColor.systemBlue,
+            string: UIColor(hex: "#C46B2D") ?? .systemOrange,
+            comment: textColor.withAlphaComponent(0.55),
+            number: UIColor(hex: "#1F8A70") ?? .systemTeal,
+            type: UIColor(hex: "#7A57D1") ?? .systemIndigo,
+            tag: UIColor(hex: "#B5432A") ?? .systemRed
+        )
+
+        apply(patterns: keywordPatterns(for: lang), color: colors.keyword, to: result)
+        apply(patterns: tagPatterns(for: lang), color: colors.tag, to: result)
+        apply(patterns: typePatterns(for: lang), color: colors.type, to: result)
+        apply(patterns: numberPatterns(), color: colors.number, to: result)
+        apply(patterns: stringPatterns(for: lang), color: colors.string, to: result)
+        apply(patterns: commentPatterns(for: lang), color: colors.comment, to: result)
+        return result
+    }
+
+    private struct Palette {
+        let keyword: UIColor
+        let string: UIColor
+        let comment: UIColor
+        let number: UIColor
+        let type: UIColor
+        let tag: UIColor
+    }
+
+    private static func normalize(_ language: String?) -> String {
+        language?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+    }
+
+    private static func apply(patterns: [String], color: UIColor, to attributedText: NSMutableAttributedString) {
+        let fullRange = NSRange(location: 0, length: attributedText.length)
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.anchorsMatchLines]) else {
+                continue
+            }
+            regex.enumerateMatches(in: attributedText.string, options: [], range: fullRange) { match, _, _ in
+                guard let match, match.range.location != NSNotFound else { return }
+                attributedText.addAttribute(.foregroundColor, value: color, range: match.range)
+            }
+        }
+    }
+
+    private static func commentPatterns(for language: String) -> [String] {
+        switch language {
+        case "python", "bash", "shell", "sh", "yaml", "yml", "ruby":
+            return [#"(?m)#.*$"#]
+        case "sql":
+            return [#"(?m)--.*$"#, #"/\*[\s\S]*?\*/"#]
+        case "html", "xml", "svg":
+            return [#"<!--[\s\S]*?-->"#]
+        case "css":
+            return [#"/\*[\s\S]*?\*/"#]
+        default:
+            return [#"(?m)//.*$"#, #"/\*[\s\S]*?\*/"#]
+        }
+    }
+
+    private static func stringPatterns(for language: String) -> [String] {
+        if language == "html" || language == "xml" || language == "svg" {
+            return [#""([^"\\]|\\.)*""#, #"'([^'\\]|\\.)*'"#]
+        }
+        return [#""([^"\\]|\\.)*""#, #"'([^'\\]|\\.)*'"#, #"`([^`\\]|\\.)*`"#]
+    }
+
+    private static func numberPatterns() -> [String] {
+        [#"\b\d+(?:\.\d+)?\b"#]
+    }
+
+    private static func typePatterns(for language: String) -> [String] {
+        switch language {
+        case "swift":
+            return [#"\b(?:String|Int|Double|Bool|CGFloat|CGRect|UIView|UIColor|URL|Data|Result|Error|Any|Void)\b"#]
+        case "typescript", "ts", "javascript", "js":
+            return [#"\b(?:Promise|Array|Record|Map|Set|Date|RegExp|HTMLElement|HTMLDivElement|JSON)\b"#]
+        case "python":
+            return [#"\b(?:str|int|float|bool|list|dict|tuple|set|None)\b"#]
+        default:
+            return []
+        }
+    }
+
+    private static func keywordPatterns(for language: String) -> [String] {
+        let words: [String]
+        switch language {
+        case "swift":
+            words = ["let", "var", "func", "if", "else", "guard", "return", "class", "struct", "enum", "protocol", "extension", "import", "private", "fileprivate", "internal", "public", "open", "static", "case", "switch", "for", "in", "while", "where", "try", "catch", "throw", "async", "await", "actor", "weak", "self", "nil", "true", "false"]
+        case "typescript", "ts", "javascript", "js":
+            words = ["const", "let", "var", "function", "return", "if", "else", "switch", "case", "break", "for", "while", "class", "extends", "new", "import", "from", "export", "default", "async", "await", "try", "catch", "throw", "null", "undefined", "true", "false"]
+        case "python":
+            words = ["def", "class", "if", "elif", "else", "for", "while", "in", "return", "import", "from", "as", "try", "except", "finally", "with", "lambda", "pass", "break", "continue", "None", "True", "False"]
+        case "html", "xml", "svg":
+            words = []
+        case "css":
+            words = ["display", "position", "color", "background", "padding", "margin", "border", "flex", "grid"]
+        case "json":
+            words = ["true", "false", "null"]
+        case "bash", "shell", "sh":
+            words = ["if", "then", "else", "fi", "for", "do", "done", "case", "esac", "function", "export", "local"]
+        default:
+            words = ["if", "else", "for", "while", "return", "class", "struct", "enum", "switch", "case", "break", "continue", "import", "from", "public", "private", "protected", "static", "const", "let", "var", "func", "def", "new", "true", "false", "null", "nil"]
+        }
+        guard !words.isEmpty else { return [] }
+        let joined = words.joined(separator: "|")
+        return ["(?<![\\w$])(?:\(joined))(?![\\w$])".replacingOccurrences(of: "\\(joined)", with: joined)]
+    }
+
+    private static func tagPatterns(for language: String) -> [String] {
+        switch language {
+        case "html", "xml", "svg":
+            return [
+                #"</?[A-Za-z][A-Za-z0-9:-]*"#,
+                #"\b[A-Za-z-:]+(?=\=)"#,
+            ]
+        case "css":
+            return [#"(?m)^[ \t]*[A-Za-z-]+(?=\s*:)"#]
+        default:
+            return []
+        }
+    }
+}

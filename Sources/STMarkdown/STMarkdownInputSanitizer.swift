@@ -8,6 +8,7 @@
 import Foundation
 
 public struct STHtmlNormalizeRule: STMarkdownRule {
+    
     public let name = "STHtmlNormalizeRule"
 
     public init() {}
@@ -21,7 +22,6 @@ public struct STHtmlNormalizeRule: STMarkdownRule {
         result = result.replacingOccurrences(of: "</>", with: "</a>")
         result = result.replacingOccurrences(of: "<br>", with: "")
         result = result.replacingOccurrences(of: "&gt;", with: ">")
-
         result = STMarkdownRegex.escaped2CRLF.stringByReplacingMatches(
             in: result,
             range: NSRange(location: 0, length: result.utf16.count),
@@ -52,7 +52,6 @@ public struct STHtmlNormalizeRule: STMarkdownRule {
             range: NSRange(location: 0, length: result.utf16.count),
             withTemplate: "\n"
         )
-
         result = result.replacingOccurrences(of: "\\\"", with: "\"")
         result = result.replacingOccurrences(of: "\\'", with: "'")
         result = result.replacingOccurrences(of: "\\/", with: "/")

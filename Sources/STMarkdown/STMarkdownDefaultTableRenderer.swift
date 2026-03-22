@@ -8,42 +8,30 @@
 import UIKit
 
 public struct STMarkdownDefaultTableRenderer: STMarkdownTableRendering {
+    
     public init() {}
 
-    public func renderTable(
-        _ table: STMarkdownTableModel,
-        style: STMarkdownStyle
-    ) -> NSAttributedString? {
+    public func renderTable(_ table: STMarkdownTableModel, style: STMarkdownStyle) -> NSAttributedString? {
         let rows = self.makeRows(from: table)
         guard rows.isEmpty == false else {
             return nil
         }
-
         let columnCount = rows.map(\.count).max() ?? 0
         guard columnCount > 0 else {
             return nil
         }
-
         let paddedRows = rows.map { row in
             row + Array(repeating: "", count: max(0, columnCount - row.count))
         }
         let columnWidths = self.columnWidths(for: paddedRows)
         let result = NSMutableAttributedString()
-
         for (rowIndex, row) in paddedRows.enumerated() {
             let isHeader = table.header != nil && rowIndex == 0
-            let renderedRow = self.renderRow(
-                row,
-                columnWidths: columnWidths,
-                isHeader: isHeader,
-                style: style
-            )
+            let renderedRow = self.renderRow(row, columnWidths: columnWidths, isHeader: isHeader, style: style)
             result.append(renderedRow)
-
             if rowIndex < paddedRows.count - 1 {
                 result.append(NSAttributedString(string: "\n"))
             }
-
             if isHeader {
                 result.append(NSAttributedString(string: "\n"))
                 result.append(self.renderSeparator(columnWidths: columnWidths, style: style))
@@ -52,7 +40,6 @@ public struct STMarkdownDefaultTableRenderer: STMarkdownTableRendering {
                 }
             }
         }
-
         return result
     }
 }
@@ -99,37 +86,22 @@ private extension STMarkdownDefaultTableRenderer {
         }
     }
 
-    func renderRow(
-        _ row: [String],
-        columnWidths: [Int],
-        isHeader: Bool,
-        style: STMarkdownStyle
-    ) -> NSAttributedString {
-        let font = UIFont.st_monospacedSystemFont(
-            ofSize: max(style.font.pointSize - 1, 12),
-            weight: isHeader ? .semibold : .regular
-        )
+    func renderRow(_ row: [String], columnWidths: [Int], isHeader: Bool, style: STMarkdownStyle) -> NSAttributedString {
+        let font = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: isHeader ? .semibold : .regular)
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: isHeader
-                ? (style.tableHeaderTextColor ?? style.textColor)
-                : (style.tableTextColor ?? style.textColor),
+            .foregroundColor: isHeader ? (style.tableHeaderTextColor ?? style.textColor) : (style.tableTextColor ?? style.textColor),
             .backgroundColor: style.tableBackgroundColor ?? UIColor.secondarySystemBackground,
         ]
-
         let rendered = row.enumerated().map { index, column in
             let paddingCount = max(0, columnWidths[index] - column.count)
             return " \(column)\(String(repeating: " ", count: paddingCount)) "
         }
         .joined(separator: "│")
-
         return NSAttributedString(string: rendered, attributes: attributes)
     }
 
-    func renderSeparator(
-        columnWidths: [Int],
-        style: STMarkdownStyle
-    ) -> NSAttributedString {
+    func renderSeparator(columnWidths: [Int], style: STMarkdownStyle) -> NSAttributedString {
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular),
             .foregroundColor: style.tableBorderColor ?? style.textColor.withAlphaComponent(0.55),
@@ -139,7 +111,6 @@ private extension STMarkdownDefaultTableRenderer {
             String(repeating: "─", count: width + 2)
         }
         .joined(separator: "┼")
-
         return NSAttributedString(string: separator, attributes: attributes)
     }
 }

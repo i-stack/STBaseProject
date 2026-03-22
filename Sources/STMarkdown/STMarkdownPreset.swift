@@ -12,7 +12,7 @@ public enum STMarkdownPresets {
     public static let defaultAdvancedRenderers = STMarkdownAdvancedRenderers(
         inlineMathRenderer: STMarkdownHighFidelityMathRenderer(),
         blockMathRenderer: STMarkdownHighFidelityMathRenderer(),
-        codeBlockRenderer: STMarkdownCodeBlockAttachmentRenderer(),
+        codeBlockRenderer: STMarkdownCodeBlockRenderer(),
         tableRenderer: STMarkdownTableAttachmentRenderer(),
         imageRenderer: STMarkdownAsyncImageRenderer(),
         horizontalRuleRenderer: STMarkdownDefaultHorizontalRuleRenderer()
