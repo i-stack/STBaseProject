@@ -32,6 +32,9 @@ open class STShimmerTextView: UITextView {
     /// 使多字符 delta 呈现"逐字出现"而非"整段同时出现"的效果。
     /// 设为 0 则禁用 stagger（所有字符同时 fade-in）。
     public var characterStaggerInterval: TimeInterval = 0.016
+    /// 为 true 时，跨换行也保持连续字符级渐显；
+    /// 为 false 时，新增 delta 中最后一个换行前的内容会立即显示，仅最后一行保留动画。
+    public var animateAcrossNewlines: Bool = false
     public var suppressSystemTextMenu: Bool = false
     private var displayLink: CADisplayLink?
     private var animatingTokens: [AnimatingToken] = []
@@ -78,7 +81,7 @@ open class STShimmerTextView: UITextView {
         let startLocation = self.textStorage.length
         let baseColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画
-        if self.tokenFadeDuration > 0 {
+        if self.tokenFadeDuration > 0, !self.animateAcrossNewlines {
             self.finishAnimationsBeforeLastNewline()
         }
         // _baseAttributedText 记录全不透明最终态
@@ -120,7 +123,7 @@ open class STShimmerTextView: UITextView {
         let savedOffset = self.contentOffset
         // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画，
         // 确保前一段落完全显示后新段落才开始淡入，避免两段同时渲染的视觉问题。
-        if animated, self.tokenFadeDuration > 0 {
+        if animated, self.tokenFadeDuration > 0, !self.animateAcrossNewlines {
             self.finishAnimationsBeforeLastNewline()
         }
         // _baseAttributedText 记录全不透明最终态，必须在 applyTransparentForegroundColors
@@ -138,13 +141,11 @@ open class STShimmerTextView: UITextView {
             return
         }
 
-        // 当 delta 内含换行符时，最后一个 \n 之前的内容属于已完成的行，
-        // 直接以全不透明渲染（不做 fade-in 动画），只对最后一行（\n 之后的尾部片段）做淡入。
-        // 这避免了大段 delta 同时淡入导致"多段同时渲染"的视觉问题，
-        // 同时不引入 staggered delay，不会造成布局跳动。
+        // 默认策略：当 delta 内含换行符时，最后一个 \n 之前的内容立即显示，只对最后一行做淡入。
+        // 聊天流式场景要求严格逐字输出时，会开启 animateAcrossNewlines，整个 delta 都走字符级渐显。
         let deltaString = appended.string as NSString
         let lastNLInDelta = deltaString.range(of: "\n", options: .backwards)
-        if lastNLInDelta.location != NSNotFound {
+        if !self.animateAcrossNewlines, lastNLInDelta.location != NSNotFound {
             let splitPos = lastNLInDelta.location + lastNLInDelta.length  // local offset in delta
             // 立即完成 splitPos 之前的 colorRuns
             self.textStorage.beginEditing()
@@ -191,7 +192,11 @@ open class STShimmerTextView: UITextView {
         self.textStorage.endEditing()
     }
 
-    public func replaceTrailingAttributedText(from location: Int, with attributedText: NSAttributedString) {
+    public func replaceTrailingAttributedText(
+        from location: Int,
+        with attributedText: NSAttributedString,
+        animateNewPortion: Bool = true
+    ) {
         let clampedLocation = max(0, min(location, self.textStorage.length))
         let savedOffset = self.contentOffset
 
@@ -246,7 +251,10 @@ open class STShimmerTextView: UITextView {
         // 对真正新增的部分（公共前缀之后）提取 colorRuns 并设置透明
         let newCharCount = attributedText.length - commonPrefixCount
         var newColorRuns: [AnimatingColorRun] = []
-        if newCharCount > 0, self.tokenFadeDuration > 0, self.characterStaggerInterval > 0 {
+        if animateNewPortion,
+           newCharCount > 0,
+           self.tokenFadeDuration > 0,
+           self.characterStaggerInterval > 0 {
             let newRange = NSRange(location: commonPrefixCount, length: newCharCount)
             let newPortion = appended.attributedSubstring(from: newRange)
             let newPortionMut = NSMutableAttributedString(attributedString: newPortion)
