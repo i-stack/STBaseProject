@@ -58,6 +58,11 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         set { self.textView.suppressSystemTextMenu = newValue }
     }
 
+    public var animateAcrossNewlines: Bool {
+        get { self.textView.animateAcrossNewlines }
+        set { self.textView.animateAcrossNewlines = newValue }
+    }
+
     public private(set) var rawMarkdown: String = ""
 
     public var attributedText: NSAttributedString {
@@ -199,8 +204,17 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
                 let trailing = rendered.attributedSubstring(
                     from: NSRange(location: commonLen, length: rendered.length - commonLen)
                 )
+                let shouldAnimateTrailingReplacement = !self.shouldDisableAnimationForTrailingReplacement(
+                    current: current,
+                    rendered: rendered,
+                    commonLength: commonLen
+                )
                 self.rawMarkdown = markdown
-                self.textView.replaceTrailingAttributedText(from: commonLen, with: trailing)
+                self.textView.replaceTrailingAttributedText(
+                    from: commonLen,
+                    with: trailing,
+                    animateNewPortion: shouldAnimateTrailingReplacement
+                )
             }
             self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
@@ -249,6 +263,42 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         }
         return self.renderer.render(document: result.renderDocument)
     }
+
+    private func shouldDisableAnimationForTrailingReplacement(
+        current: NSAttributedString,
+        rendered: NSAttributedString,
+        commonLength: Int
+    ) -> Bool {
+        let currentSuffix = current.length > commonLength
+            ? current.attributedSubstring(
+                from: NSRange(location: commonLength, length: current.length - commonLength)
+            ).string
+            : ""
+        let renderedSuffix = rendered.length > commonLength
+            ? rendered.attributedSubstring(
+                from: NSRange(location: commonLength, length: rendered.length - commonLength)
+            ).string
+            : ""
+
+        return Self.containsRenderedListMarker(in: currentSuffix)
+            || Self.containsRenderedListMarker(in: renderedSuffix)
+    }
+
+    private static func containsRenderedListMarker(in text: String) -> Bool {
+        guard text.isEmpty == false else { return false }
+        return text.contains("\t●\t")
+            || text.contains("\t▪\t")
+            || Self.orderedListMarkerRegex.firstMatch(
+                in: text,
+                options: [],
+                range: NSRange(location: 0, length: text.utf16.count)
+            ) != nil
+    }
+
+    private static let orderedListMarkerRegex = try! NSRegularExpression(
+        pattern: #"(?m)^\t?\d+\.\t"#,
+        options: []
+    )
 }
 
 private extension STMarkdownStreamingTextView {
