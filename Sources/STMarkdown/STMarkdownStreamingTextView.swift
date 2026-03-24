@@ -196,24 +196,25 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
                 let renderedCommon = rendered.attributedSubstring(from: NSRange(location: 0, length: commonLen))
                 return !renderedCommon.isEqual(to: currentPrefix)
             }()
-            if commonPrefixChanged {
-                // 公共前缀属性已变：全量替换
+            // 列表标记变化时走全量替换，避免公共前缀断裂导致旧/新 bullet 短暂共存（重复圆点）。
+            let listMarkerInvolved = self.shouldDisableAnimationForTrailingReplacement(
+                current: current,
+                rendered: rendered,
+                commonLength: commonLen
+            )
+            if commonPrefixChanged || listMarkerInvolved {
+                // 公共前缀属性已变 或 列表标记结构变化：全量替换
                 self.rawMarkdown = markdown
                 self.textView.setRenderedAttributedText(rendered)
             } else {
                 let trailing = rendered.attributedSubstring(
                     from: NSRange(location: commonLen, length: rendered.length - commonLen)
                 )
-                let shouldAnimateTrailingReplacement = !self.shouldDisableAnimationForTrailingReplacement(
-                    current: current,
-                    rendered: rendered,
-                    commonLength: commonLen
-                )
                 self.rawMarkdown = markdown
                 self.textView.replaceTrailingAttributedText(
                     from: commonLen,
                     with: trailing,
-                    animateNewPortion: shouldAnimateTrailingReplacement
+                    animateNewPortion: true
                 )
             }
             self.textView.accessibilityValue = self.textView.renderedAttributedText.string
