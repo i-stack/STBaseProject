@@ -369,10 +369,20 @@ public enum STMarkdownCodeSyntaxHighlighter {
         language?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
     }
 
+    // 编译后的正则表达式按 pattern 字符串缓存，避免每帧重复编译（流式阶段 20fps × 6 组 = 每秒 120 次编译）。
+    private static let _regexCache = NSCache<NSString, NSRegularExpression>()
+
     private static func apply(patterns: [String], color: UIColor, to attributedText: NSMutableAttributedString) {
         let fullRange = NSRange(location: 0, length: attributedText.length)
         for pattern in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.anchorsMatchLines]) else {
+            let cacheKey = pattern as NSString
+            let regex: NSRegularExpression
+            if let cached = _regexCache.object(forKey: cacheKey) {
+                regex = cached
+            } else if let compiled = try? NSRegularExpression(pattern: pattern, options: [.anchorsMatchLines]) {
+                _regexCache.setObject(compiled, forKey: cacheKey)
+                regex = compiled
+            } else {
                 continue
             }
             regex.enumerateMatches(in: attributedText.string, options: [], range: fullRange) { match, _, _ in
