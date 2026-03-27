@@ -28,7 +28,8 @@ open class STBaseView: UIView {
     public private(set) var scrollDirection: STScrollDirection = .vertical
     
     /// scroll 模式使用的 UIScrollView。可通过 init(scrollView:) 在初始化时注入自定义实例。
-    public private(set) var scrollView: UIScrollView
+    /// open 允许子类（含跨模块）override 此 getter（如将 collectionView 作为 scrollView 代理）。
+    open private(set) var scrollView: UIScrollView
     /// contentView 是内容容器，子视图应添加到此视图。
     /// 在 .scroll 模式下位于 scrollView 内部；在 .fixed 模式下直接贴合 self。
     public private(set) lazy var contentView: UIView = self.makeContentView()
