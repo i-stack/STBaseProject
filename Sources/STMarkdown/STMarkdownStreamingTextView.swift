@@ -203,9 +203,28 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
                 commonLength: commonLen
             )
             if commonPrefixChanged || listMarkerInvolved {
-                // 公共前缀属性已变 或 列表标记结构变化：全量替换
-                self.rawMarkdown = markdown
-                self.textView.setRenderedAttributedText(rendered)
+                // 列表结构变化时，不必全量替换整段 suffix。
+                // 从当前行起点开始做尾部替换，可将更新范围收敛到“最后一个 list item”，
+                // 避免前面稳定的 item 被一起重排。
+                if !commonPrefixChanged, listMarkerInvolved {
+                    let replaceStart = self.replacementStartForListTransition(
+                        currentString: currentStr,
+                        commonLength: commonLen
+                    )
+                    let trailing = rendered.attributedSubstring(
+                        from: NSRange(location: replaceStart, length: rendered.length - replaceStart)
+                    )
+                    self.rawMarkdown = markdown
+                    self.textView.replaceTrailingAttributedText(
+                        from: replaceStart,
+                        with: trailing,
+                        animateNewPortion: false
+                    )
+                } else {
+                    // 公共前缀属性已变：仍需全量替换
+                    self.rawMarkdown = markdown
+                    self.textView.setRenderedAttributedText(rendered)
+                }
             } else {
                 let trailing = rendered.attributedSubstring(
                     from: NSRange(location: commonLen, length: rendered.length - commonLen)
@@ -283,6 +302,17 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
         return Self.containsRenderedListMarker(in: currentSuffix)
             || Self.containsRenderedListMarker(in: renderedSuffix)
+    }
+
+    private func replacementStartForListTransition(
+        currentString: String,
+        commonLength: Int
+    ) -> Int {
+        guard commonLength > 0 else { return 0 }
+        let prefix = (currentString as NSString).substring(to: commonLength) as NSString
+        let lastNewline = prefix.range(of: "\n", options: .backwards)
+        guard lastNewline.location != NSNotFound else { return 0 }
+        return lastNewline.location + lastNewline.length
     }
 
     private static func containsRenderedListMarker(in text: String) -> Bool {
