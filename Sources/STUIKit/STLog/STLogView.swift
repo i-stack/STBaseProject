@@ -7,7 +7,6 @@
 
 import UIKit
 
-// MARK: - 日志条目模型
 public struct STLogEntry {
     public let id: String
     public let timestamp: Date
@@ -21,13 +20,7 @@ public struct STLogEntry {
     init(content: String) {
         self.id = UUID().uuidString
         self.rawContent = content
-        
-        // 解析日志内容
-        let components = content
-            .components(separatedBy: "\n")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        
+        let components = content.components(separatedBy: "\n").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
         if components.count >= 4 {
             let timestampString = components[0]
             self.timestamp = timestampString.date() ?? Date()
@@ -125,16 +118,15 @@ open class STLogView: UIView {
     open weak var mDelegate: STLogViewDelegate?
     private var allLogEntries: [STLogEntry] = []
     private var filteredLogEntries: [STLogEntry] = []
-    private var currentLogEntries: [STLogEntry] {
-        return isFiltering ? filteredLogEntries : allLogEntries
-    }
-    
     private var isFiltering: Bool = false
-    private var selectedLogLevels: Set<STLogLevel> = Set(STLogLevel.allCases)
     private var searchText: String = ""
     private var currentPage: Int = 0
     private let pageSize: Int = 100
-        
+    private var currentLogEntries: [STLogEntry] {
+        return self.isFiltering ? self.filteredLogEntries : self.allLogEntries
+    }
+    private var selectedLogLevels: Set<STLogLevel> = Set(STLogLevel.allCases)
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
@@ -184,7 +176,6 @@ open class STLogView: UIView {
     }
     
     private func setupConstraints() {
-        // 搜索栏约束
         self.addConstraints([
             NSLayoutConstraint(item: self.searchBar, attribute: .top, relatedBy: .equal, toItem: self.safeAreaLayoutGuide, attribute: .top, multiplier: 1, constant: 0),
             NSLayoutConstraint(item: self.searchBar, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
@@ -192,7 +183,6 @@ open class STLogView: UIView {
             NSLayoutConstraint(item: self.searchBar, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 44)
         ])
         
-        // 过滤视图约束
         self.addConstraints([
             NSLayoutConstraint(item: self.filterView, attribute: .top, relatedBy: .equal, toItem: self.searchBar, attribute: .bottom, multiplier: 1, constant: 8),
             NSLayoutConstraint(item: self.filterView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
@@ -200,7 +190,6 @@ open class STLogView: UIView {
             NSLayoutConstraint(item: self.filterView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 50)
         ])
         
-        // 表格视图约束
         self.addConstraints([
             NSLayoutConstraint(item: self.tableView, attribute: .top, relatedBy: .equal, toItem: self.filterView, attribute: .bottom, multiplier: 1, constant: 8),
             NSLayoutConstraint(item: self.tableView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
@@ -208,7 +197,6 @@ open class STLogView: UIView {
             NSLayoutConstraint(item: self.tableView, attribute: .bottom, relatedBy: .equal, toItem: self.bottomToolbar, attribute: .top, multiplier: 1, constant: -8)
         ])
         
-        // 底部工具栏约束
         self.addConstraints([
             NSLayoutConstraint(item: self.bottomToolbar, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1, constant: 0),
             NSLayoutConstraint(item: self.bottomToolbar, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1, constant: 0),
@@ -713,7 +701,6 @@ private class STLogTableViewCell: UITableViewCell {
         self.messageLabel.font = UIFont.st_systemFont(ofSize: 13)
         self.messageLabel.numberOfLines = 0
         
-        // 配置堆栈视图
         self.stackView.axis = .vertical
         self.stackView.spacing = 4
         self.stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -736,14 +723,11 @@ private class STLogTableViewCell: UITableViewCell {
         self.levelLabel.text = "\(logEntry.level.icon) \(logEntry.level.rawValue)"
         self.levelLabel.backgroundColor = logEntry.level.color.withAlphaComponent(0.2)
         self.levelLabel.textColor = logEntry.level.color
-        
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"
         self.timestampLabel.text = formatter.string(from: logEntry.timestamp)
-        
         self.fileLabel.text = "\(logEntry.file):\(logEntry.line) - \(logEntry.function)"
         self.messageLabel.text = logEntry.message
-        
         self.backgroundColor = .secondarySystemBackground
         self.levelLabel.backgroundColor = logEntry.level.color.withAlphaComponent(0.2)
         self.timestampLabel.textColor = .secondaryLabel
