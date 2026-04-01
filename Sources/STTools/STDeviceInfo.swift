@@ -134,6 +134,52 @@ public extension STDeviceInfo {
     static var screenScale: CGFloat {
         UIScreen.main.scale
     }
+
+    /// 屏幕宽度
+    @MainActor
+    static var screenWidth: CGFloat {
+        screenBounds.width
+    }
+
+    /// 屏幕高度
+    @MainActor
+    static var screenHeight: CGFloat {
+        screenBounds.height
+    }
+
+    /// 顶部 / 底部安全区（基于当前 key window）
+    @MainActor
+    static var safeAreaInsets: UIEdgeInsets {
+        preferredWindowScene()?.windows.first(where: \.isKeyWindow)?.safeAreaInsets ?? .zero
+    }
+
+    @MainActor
+    static var topSafeAreaHeight: CGFloat {
+        safeAreaInsets.top
+    }
+
+    @MainActor
+    static var bottomSafeAreaHeight: CGFloat {
+        safeAreaInsets.bottom
+    }
+
+    /// 是否是带刘海设备（通过顶部安全区高度粗略判断）
+    @MainActor
+    static var hasNotch: Bool {
+        topSafeAreaHeight > 20
+    }
+
+    /// 状态栏高度
+    @MainActor
+    static var statusBarHeight: CGFloat {
+        preferredWindowScene()?.statusBarManager?.statusBarFrame.height ?? 0
+    }
+
+    /// 默认导航栏高度
+    static let navigationBarHeight: CGFloat = 44.0
+
+    /// 默认标签栏高度
+    static let tabBarHeight: CGFloat = 49.0
 }
 
 // MARK: - Device Information
@@ -141,6 +187,11 @@ public extension STDeviceInfo {
 
     static var systemVersion: String {
         UIDevice.current.systemVersion
+    }
+
+    /// iOS 主版本号（如 18.2 -> 18）
+    static var systemMajorVersion: Int {
+        Int(systemVersion.split(separator: ".").first ?? "0") ?? 0
     }
 
     static var systemName: String {
@@ -161,6 +212,16 @@ public extension STDeviceInfo {
 
     static var deviceType: STDeviceType {
         deviceType(for: deviceIdentifier)
+    }
+
+    /// 是否运行在 iPhone 设备
+    static var isIPhone: Bool {
+        deviceType == .iPhone
+    }
+
+    /// 是否运行在 iPad 设备
+    static var isIPad: Bool {
+        deviceType == .iPad
     }
 
     static var devicePerformanceLevel: STDevicePerformanceLevel {
