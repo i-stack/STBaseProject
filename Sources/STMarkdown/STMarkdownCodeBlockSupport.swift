@@ -19,7 +19,11 @@ private final class STMarkdownCodeBlockCacheEntry: NSObject {
 
 public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
     public static let collapsedBodyMaxHeight: CGFloat = 220
-    public static let buttonRowReservedWidth: CGFloat = 120
+
+    /// 根据 style 计算按钮行预留宽度
+    public static func buttonRowReservedWidth(for style: STMarkdownStyle) -> CGFloat {
+        style.codeBlockButtonRowReservedWidth
+    }
 
     private static let renderCache: NSCache<NSString, STMarkdownCodeBlockCacheEntry> = {
         let cache = NSCache<NSString, STMarkdownCodeBlockCacheEntry>()
@@ -47,10 +51,11 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
         self.code = code
         self.style = style
         self.contentInsets = style.codeBlockContentInsets
-        self.headerHeight = max(
+        let autoHeight = max(
             ceil(UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold).lineHeight),
             18
         )
+        self.headerHeight = style.codeBlockHeaderHeight > 0 ? style.codeBlockHeaderHeight : autoHeight
 
         let codeFont = UIFont.st_monospacedSystemFont(
             ofSize: max(style.font.pointSize - 1, 12),
@@ -224,7 +229,8 @@ public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
             ofSize: max(style.font.pointSize - 2, 12),
             weight: .semibold
         )
-        let separatorSpacing: CGFloat = 8
+        let separatorSpacing = style.codeBlockSeparatorSpacing
+        let buttonRowReservedWidth = style.codeBlockButtonRowReservedWidth
         let blockHeight = contentInsets.top + headerHeight + separatorSpacing + bodyHeight + contentInsets.bottom
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = style.resolvedDisplayScale
@@ -246,11 +252,13 @@ public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
             }
 
             let headerText = (language?.isEmpty == false ? language?.uppercased() : "CODE") ?? "CODE"
+            let headerTextSize = (headerText as NSString).size(withAttributes: [.font: headerFont])
+            let headerTextY = contentInsets.top + max((headerHeight - headerTextSize.height) / 2, 0)
             let headerRect = CGRect(
                 x: contentInsets.left,
-                y: contentInsets.top,
-                width: max(contentWidth - STMarkdownCodeBlockAttachment.buttonRowReservedWidth, 1),
-                height: headerHeight
+                y: headerTextY,
+                width: max(contentWidth - buttonRowReservedWidth, 1),
+                height: headerTextSize.height
             )
             (headerText as NSString).draw(
                 in: headerRect,
@@ -262,7 +270,7 @@ public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
 
             let separatorRect = CGRect(
                 x: contentInsets.left,
-                y: contentInsets.top + headerHeight + 3,
+                y: contentInsets.top + headerHeight + separatorSpacing / 2,
                 width: contentWidth,
                 height: 1
             )

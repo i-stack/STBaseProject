@@ -64,9 +64,17 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
             // 流式阶段：超宽表格缩放至容器宽度
             let scale = containerWidth / image.size.width
             displayBounds = CGRect(x: 0, y: 0, width: containerWidth, height: image.size.height * scale)
+            #if DEBUG
+            print("[HJ-TABLE-IMG] SCALED naturalW=\(String(format:"%.1f",image.size.width)) naturalH=\(String(format:"%.1f",image.size.height)) scale=\(String(format:"%.3f",scale)) displayW=\(String(format:"%.1f",displayBounds.width)) displayH=\(String(format:"%.1f",displayBounds.height)) containerW=\(String(format:"%.1f",containerWidth)) rows=\(rows.count) cols=\(rows.first?.count ?? 0)")
+            #endif
         } else {
             // 窄表格或无容器宽度：直接使用图片自然尺寸
             displayBounds = CGRect(origin: .zero, size: image.size)
+            #if DEBUG
+            if self.forceStaticTable {
+                print("[HJ-TABLE-IMG] NATURAL naturalW=\(String(format:"%.1f",image.size.width)) naturalH=\(String(format:"%.1f",image.size.height)) containerW=\(String(format:"%.1f",containerWidth)) rows=\(rows.count) cols=\(rows.first?.count ?? 0)")
+            }
+            #endif
         }
         return NSAttributedString(attachment: STStaticTableAttachment(
             tableImage: image,

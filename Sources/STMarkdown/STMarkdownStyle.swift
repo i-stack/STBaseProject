@@ -82,6 +82,12 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var citationBadgeBgColor: UIColor?
     /// Citation 角标数字文本色（nil 时使用 white）
     public var citationBadgeTextColor: UIColor?
+    /// 代码块头部高度（0 表示根据字体自动计算）
+    public var codeBlockHeaderHeight: CGFloat
+    /// 代码块头部与正文之间的间距
+    public var codeBlockSeparatorSpacing: CGFloat
+    /// 代码块按钮行预留宽度
+    public var codeBlockButtonRowReservedWidth: CGFloat
 
     public init(
         font: UIFont,
@@ -135,7 +141,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
         renderWidth: CGFloat = 0,
         displayScale: CGFloat = 0,
         citationBadgeBgColor: UIColor? = nil,
-        citationBadgeTextColor: UIColor? = nil
+        citationBadgeTextColor: UIColor? = nil,
+        codeBlockHeaderHeight: CGFloat = 0,
+        codeBlockSeparatorSpacing: CGFloat = 8,
+        codeBlockButtonRowReservedWidth: CGFloat = 120
     ) {
         self.font = font
         self.boldFont = boldFont
@@ -189,6 +198,9 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.displayScale = displayScale
         self.citationBadgeBgColor = citationBadgeBgColor
         self.citationBadgeTextColor = citationBadgeTextColor
+        self.codeBlockHeaderHeight = codeBlockHeaderHeight
+        self.codeBlockSeparatorSpacing = codeBlockSeparatorSpacing
+        self.codeBlockButtonRowReservedWidth = codeBlockButtonRowReservedWidth
     }
 
     public static let `default` = STMarkdownStyle(
