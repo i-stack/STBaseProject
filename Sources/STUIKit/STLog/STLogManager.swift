@@ -7,11 +7,10 @@
 
 import Foundation
 
-// MARK: - 日志管理器
 public class STLogManager {
     
-    private static let directoryName = "outputLog"
     private static let fileName = "log.txt"
+    private static let directoryName = "outputLog"
     public static let queryNotificationName = "com.notification.queryLog"
 
     /// 获取日志输出路径（若不存在则自动创建）
