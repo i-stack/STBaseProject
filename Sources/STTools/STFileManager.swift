@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2018/10/10.
 //
 
-import Foundation
 import Darwin
+import Foundation
 
 public enum STFileSystem {
     public static var homeDirectoryPath: String {
@@ -33,11 +33,7 @@ public enum STFileSystem {
         NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true).first ?? ""
     }
 
-    public static func appendLine(
-        _ content: String,
-        toFileAt path: String,
-        encoding: String.Encoding = .utf8
-    ) -> Bool {
+    public static func appendLine(_ content: String, toFileAt path: String, encoding: String.Encoding = .utf8) -> Bool {
         guard fileStatus(at: path).exists else { return false }
         let existingContent = readString(fromFileAt: path, encoding: encoding)
         let updatedContent = existingContent.isEmpty ? content : "\(existingContent)\n\(content)"
@@ -45,11 +41,7 @@ public enum STFileSystem {
     }
 
     @discardableResult
-    public static func overwriteFile(
-        at path: String,
-        with content: String,
-        encoding: String.Encoding = .utf8
-    ) -> Bool {
+    public static func overwriteFile(at path: String, with content: String, encoding: String.Encoding = .utf8) -> Bool {
         guard let data = content.data(using: encoding) else { return false }
         do {
             try data.write(to: URL(fileURLWithPath: path))
@@ -60,11 +52,7 @@ public enum STFileSystem {
     }
 
     @discardableResult
-    public static func appendContent(
-        _ content: String,
-        toFileAt path: String,
-        encoding: String.Encoding = .utf8
-    ) -> Bool {
+    public static func appendContent(_ content: String, toFileAt path: String, encoding: String.Encoding = .utf8) -> Bool {
         guard let fileHandle = FileHandle(forWritingAtPath: path), let data = content.data(using: encoding) else {
             return false
         }
@@ -74,10 +62,7 @@ public enum STFileSystem {
         return true
     }
 
-    public static func readString(
-        fromFileAt path: String,
-        encoding: String.Encoding = .utf8
-    ) -> String {
+    public static func readString(fromFileAt path: String, encoding: String.Encoding = .utf8) -> String {
         guard fileStatus(at: path).exists else { return "" }
         return (try? String(contentsOfFile: path, encoding: encoding)) ?? ""
     }
@@ -121,8 +106,9 @@ public enum STFileSystem {
         }
     }
 
+    @discardableResult
     public static func createFileIfNeeded(in directoryPath: String, fileName: String) -> String {
-        _ = createDirectoryIfNeeded(at: directoryPath)
+        createDirectoryIfNeeded(at: directoryPath)
         let path = URL(fileURLWithPath: directoryPath).appendingPathComponent(fileName).path
         if !fileStatus(at: path).exists {
             FileManager.default.createFile(atPath: path, contents: nil)
@@ -130,6 +116,7 @@ public enum STFileSystem {
         return path
     }
 
+    @discardableResult
     public static func createTemporaryFile(named fileName: String) -> String {
         let path = URL(fileURLWithPath: temporaryDirectoryPath).appendingPathComponent(fileName).path
         FileManager.default.createFile(atPath: path, contents: nil)
