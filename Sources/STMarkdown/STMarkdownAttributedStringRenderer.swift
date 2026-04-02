@@ -26,6 +26,25 @@ public final class STMarkdownAttributedStringRenderer: STMarkdownAttributedStrin
     }
 }
 
+public extension STMarkdownAttributedStringRenderer {
+
+    /// 渲染 inline 节点数组为 NSAttributedString，保留完整样式（bold/italic/code/strikethrough/link）。
+    /// 供表格 cell 等外部组件复用。
+    func renderInlineContent(
+        nodes: [STMarkdownInlineNode],
+        baseFont: UIFont,
+        textColor: UIColor,
+        paragraphStyle: NSMutableParagraphStyle? = nil
+    ) -> NSAttributedString {
+        self.renderInline(
+            nodes: nodes,
+            baseFont: baseFont,
+            textColor: textColor,
+            paragraphStyle: paragraphStyle
+        )
+    }
+}
+
 private extension STMarkdownAttributedStringRenderer {
     func render(blocks: [STMarkdownRenderBlock]) -> NSAttributedString {
         let result = NSMutableAttributedString()

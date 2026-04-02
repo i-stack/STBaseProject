@@ -38,12 +38,27 @@ public struct STMarkdownListItemNode: Hashable, Sendable {
     }
 }
 
+public enum STMarkdownColumnAlignment: Hashable, Sendable {
+    case left
+    case center
+    case right
+}
+
 public struct STMarkdownTableModel: Hashable, Sendable {
     public let header: [[STMarkdownInlineNode]]?
     public let rows: [[[STMarkdownInlineNode]]]
+    public let columnAlignments: [STMarkdownColumnAlignment]
+
     public init(header: [[STMarkdownInlineNode]]?, rows: [[[STMarkdownInlineNode]]]) {
         self.header = header
         self.rows = rows
+        self.columnAlignments = []
+    }
+
+    public init(header: [[STMarkdownInlineNode]]?, rows: [[[STMarkdownInlineNode]]], columnAlignments: [STMarkdownColumnAlignment]) {
+        self.header = header
+        self.rows = rows
+        self.columnAlignments = columnAlignments
     }
 }
 

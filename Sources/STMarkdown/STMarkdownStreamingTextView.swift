@@ -47,6 +47,8 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
     public var engine: STMarkdownEngine
     public var onLinkTap: ((URL) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
+    /// Citation 角标点击回调，参数为 citation 编号字符串
+    public var onCitationTap: ((String) -> Void)?
 
     public var isTextSelectionEnabled: Bool {
         get { self.textView.isSelectable }
@@ -80,6 +82,14 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         }
         return STShimmerTextView()
     }()
+
+    // MARK: - Table View Overlay
+
+    /// key = characterIndex (Int)，value = view-based 表格视图
+    private var tableViewOverlays: [Int: STMarkdownTableView] = [:]
+    /// overlay 脏标记：仅在文本/尺寸变化时执行 updateTableViewOverlays
+    private var tableOverlayNeedsUpdate: Bool = false
+    private var lastTableOverlayLayoutSize: CGSize = .zero
 
     public override init(frame: CGRect) {
         let style = STMarkdownStyle.default
@@ -128,9 +138,19 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         return self.textView.sizeThatFits(size)
     }
 
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        let sizeChanged = self.bounds.size != self.lastTableOverlayLayoutSize
+        guard self.tableOverlayNeedsUpdate || sizeChanged else { return }
+        self.lastTableOverlayLayoutSize = self.bounds.size
+        self.tableOverlayNeedsUpdate = false
+        self.updateTableViewOverlays()
+    }
+
     public func reset() {
         self.rawMarkdown = ""
         self.textView.reset()
+        self.removeAllTableViewOverlays()
         self.invalidateIntrinsicContentSize()
     }
 
@@ -146,6 +166,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
             self.textView.setRenderedAttributedText(rendered)
             self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+            self.markTableOverlayDirty()
             self.invalidateIntrinsicContentSize()
             return
         }
@@ -170,6 +191,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
                 self.rawMarkdown = markdown
                 self.textView.setRenderedAttributedText(rendered)
                 self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+                self.markTableOverlayDirty()
                 self.invalidateIntrinsicContentSize()
             } else if deltaLen > 0 {
                 let delta = rendered.attributedSubstring(
@@ -178,6 +200,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
                 self.rawMarkdown = markdown
                 self.textView.appendAttributedText(delta, animated: true)
                 self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+                self.markTableOverlayDirty()
                 self.invalidateIntrinsicContentSize()
             } else {
                 self.rawMarkdown = markdown
@@ -238,6 +261,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
             }
             self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+            self.markTableOverlayDirty()
             self.invalidateIntrinsicContentSize()
             return
         }
@@ -247,6 +271,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         self.textView.setRenderedAttributedText(rendered)
         self.textView.accessibilityValue = self.textView.renderedAttributedText.string
         self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+        self.markTableOverlayDirty()
         self.invalidateIntrinsicContentSize()
     }
 
@@ -347,6 +372,75 @@ private extension STMarkdownStreamingTextView {
     func bindAttachmentRefreshHandlers(in attributedText: NSAttributedString) {
         STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] in
             self?.refreshRenderedAttachments()
+        }
+    }
+
+    func markTableOverlayDirty() {
+        self.tableOverlayNeedsUpdate = true
+        self.setNeedsLayout()
+    }
+
+    func removeAllTableViewOverlays() {
+        for (_, tableView) in self.tableViewOverlays {
+            tableView.removeFromSuperview()
+        }
+        self.tableViewOverlays.removeAll()
+        self.tableOverlayNeedsUpdate = false
+        self.lastTableOverlayLayoutSize = .zero
+    }
+
+    func updateTableViewOverlays() {
+        let attributedText = self.textView.renderedAttributedText
+        guard attributedText.length > 0 else {
+            self.removeAllTableViewOverlays()
+            return
+        }
+
+        var foundKeys = Set<Int>()
+        let fullRange = NSRange(location: 0, length: attributedText.length)
+
+        attributedText.enumerateAttribute(.attachment, in: fullRange, options: []) { value, range, _ in
+            guard let attachment = value as? STMarkdownTableViewAttachment else { return }
+            let charIndex = range.location
+            foundKeys.insert(charIndex)
+
+            let glyphRange = self.textView.layoutManager.glyphRange(
+                forCharacterRange: range,
+                actualCharacterRange: nil
+            )
+            guard glyphRange.location != NSNotFound, glyphRange.length > 0 else { return }
+            let glyphRect = self.textView.layoutManager.boundingRect(
+                forGlyphRange: glyphRange,
+                in: self.textView.textContainer
+            )
+            let frame = CGRect(
+                x: glyphRect.origin.x + self.textView.textContainerInset.left,
+                y: glyphRect.origin.y + self.textView.textContainerInset.top,
+                width: attachment.containerWidth,
+                height: glyphRect.height
+            )
+
+            if let existing = self.tableViewOverlays[charIndex] {
+                // 复用已有的 UICollectionView，仅更新数据和尺寸（避免重建开销）
+                if existing.tableData !== attachment.tableViewModel {
+                    existing.tableData = attachment.tableViewModel
+                }
+                existing.frame = frame
+            } else {
+                let tableView = attachment.tableView
+                tableView.onCitationTap = { [weak self] number in
+                    self?.onCitationTap?(number)
+                }
+                tableView.frame = frame
+                self.textView.addSubview(tableView)
+                self.tableViewOverlays[charIndex] = tableView
+            }
+        }
+
+        // 移除已不存在的 attachment 对应的 tableView
+        for (key, tableView) in self.tableViewOverlays where !foundKeys.contains(key) {
+            tableView.removeFromSuperview()
+            self.tableViewOverlays.removeValue(forKey: key)
         }
     }
 }

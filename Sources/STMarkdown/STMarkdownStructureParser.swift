@@ -86,7 +86,18 @@ private extension STMarkdownStructureParser {
                 let rows = Array(table.body.rows).map { row in
                     Array(row.cells).map { self.inlineNodes(from: $0) }
                 }
-                blocks.append(.table(STMarkdownTableModel(header: header.isEmpty ? nil : header, rows: rows)))
+                let alignments: [STMarkdownColumnAlignment] = table.columnAlignments.map { alignment in
+                    switch alignment {
+                    case .center: return .center
+                    case .right: return .right
+                    default: return .left
+                    }
+                }
+                blocks.append(.table(STMarkdownTableModel(
+                    header: header.isEmpty ? nil : header,
+                    rows: rows,
+                    columnAlignments: alignments
+                )))
                 continue
             }
 
