@@ -211,6 +211,11 @@ open class STBaseViewController: UIViewController {
             }
         }
 
+        // STBaseView 在 STBaseViewController 内默认关闭外观管理（enableAppearanceManagement = false）。
+        // 但 UITableView 的外观依赖 trait / overrideUserInterfaceStyle 的变化，
+        // 因此这里强制触发 baseView 的外观刷新，确保内部 table 也能跟随主题切换。
+        self.baseView.st_forceAppearanceRefresh(animated: false)
+
         let resolvedStyle = style == .unspecified ? .light : style
         let applyBlock = { [weak self] in
             guard let strongSelf = self else { return }
