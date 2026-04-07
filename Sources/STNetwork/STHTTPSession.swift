@@ -6,9 +6,9 @@
 //
 
 import UIKit
-import Foundation
 import Combine
 import Network
+import Foundation
 
 public class STParameterEncoder {
     
@@ -19,7 +19,6 @@ public class STParameterEncoder {
         case multipart
     }
     
-    // MARK: - URL 编码
     public static func st_encodeURL(_ parameters: [String: Any]) -> String {
        var components: [(String, String)] = []
        for key in parameters.keys.sorted(by: <) {
@@ -57,12 +56,10 @@ public class STParameterEncoder {
         return string.addingPercentEncoding(withAllowedCharacters: allowedCharacterSet) ?? string
     }
     
-    // MARK: - JSON 编码
     public static func st_encodeJSON(_ parameters: [String: Any]) -> Data? {
         return try? JSONSerialization.data(withJSONObject: parameters)
     }
     
-    // MARK: - Form Data 编码
     public static func st_encodeFormData(_ parameters: [String: Any]) -> Data? {
         let queryString = st_encodeURL(parameters)
         return queryString.data(using: .utf8)
@@ -99,19 +96,18 @@ public enum STHTTPError: Error, LocalizedError {
     }
 }
 
-// MARK: - 网络可达性管理器
 public class STNetworkReachabilityManager {
     private let monitor = NWPathMonitor()
     private let queue = DispatchQueue(label: "NetworkMonitor")
     public var currentStatus: STNetworkReachabilityStatus = .unknown
     
     public init() {
-        monitor.pathUpdateHandler = { [weak self] path in
+        self.monitor.pathUpdateHandler = { [weak self] path in
             DispatchQueue.main.async {
                 self?.currentStatus = self?.st_networkStatus(from: path) ?? .unknown
             }
         }
-        monitor.start(queue: queue)
+        self.monitor.start(queue: self.queue)
     }
     
     private func st_networkStatus(from path: NWPath) -> STNetworkReachabilityStatus {
@@ -129,21 +125,21 @@ public class STNetworkReachabilityManager {
     }
     
     deinit {
-        monitor.cancel()
+        self.monitor.cancel()
     }
 }
 
-// MARK: - HTTP 会话管理器
 open class STHTTPSession: NSObject {
     public static let shared = STHTTPSession()
     public var defaultRequestConfig = STRequestConfig()
     public var defaultRequestHeaders = STRequestHeaders()
     public var networkReachability = STNetworkReachabilityManager()
+    
+    private var currentRetryCount = 0
+    private var currentRequest: URLRequest?
     private var cancellables = Set<AnyCancellable>()
     private var currentRequestConfig: STRequestConfig?
     private var currentRequestHeaders: STRequestHeaders?
-    private var currentRetryCount = 0
-    private var currentRequest: URLRequest?
     private var currentCompletion: ((STHTTPResponse) -> Void)?
     
     private override init() {
@@ -168,61 +164,36 @@ open class STHTTPSession: NSObject {
         return URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
     }()
     
-    // MARK: - 公共请求方法
-    public func st_request(url: String,
-                          method: STHTTPMethod = .get,
-                          parameters: [String: Any]? = nil,
-                          encodingType: STParameterEncoder.EncodingType = .json,
-                          requestConfig: STRequestConfig? = nil,
-                          requestHeaders: STRequestHeaders? = nil,
-                          completion: @escaping (STHTTPResponse) -> Void) {
+    public func st_request(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, requestConfig: STRequestConfig? = nil, requestHeaders: STRequestHeaders? = nil, completion: @escaping (STHTTPResponse) -> Void) {
         guard let url = URL(string: url) else {
             let response = STHTTPResponse(data: nil, response: nil, error: STHTTPError.invalidURL)
             completion(response)
             return
         }
-        let request = st_buildRequest(url: url, method: method, parameters: parameters, 
-                                    encodingType: encodingType, requestConfig: requestConfig, 
-                                    requestHeaders: requestHeaders)
-        currentRequestConfig = requestConfig ?? defaultRequestConfig
-        currentRequestHeaders = requestHeaders ?? defaultRequestHeaders
-        currentRequest = request
-        currentCompletion = completion
-        currentRetryCount = 0
-        st_executeRequest(request, config: requestConfig ?? defaultRequestConfig, completion: completion)
+        let request = self.st_buildRequest(url: url, method: method, parameters: parameters, encodingType: encodingType, requestConfig: requestConfig, requestHeaders: requestHeaders)
+        self.currentRequestConfig = requestConfig ?? self.defaultRequestConfig
+        self.currentRequestHeaders = requestHeaders ?? self.defaultRequestHeaders
+        self.currentRequest = request
+        self.currentCompletion = completion
+        self.currentRetryCount = 0
+        self.st_executeRequest(request, config: requestConfig ?? self.defaultRequestConfig, completion: completion)
     }
     
     // MARK: - 泛型请求方法（支持模型映射）
-    public func st_request<T: Codable>(url: String,
-                                      method: STHTTPMethod = .get,
-                                      parameters: [String: Any]? = nil,
-                                      encodingType: STParameterEncoder.EncodingType = .json,
-                                      requestConfig: STRequestConfig? = nil,
-                                      requestHeaders: STRequestHeaders? = nil,
-                                      modelType: T.Type,
-                                      completion: @escaping (STHTTPResponseWithModel<T>) -> Void) {
-        
+    public func st_request<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, requestConfig: STRequestConfig? = nil, requestHeaders: STRequestHeaders? = nil, modelType: T.Type, completion: @escaping (STHTTPResponseWithModel<T>) -> Void) {
         guard let url = URL(string: url) else {
             let response = STHTTPResponseWithModel<T>(data: nil, response: nil, error: STHTTPError.invalidURL, model: nil)
             completion(response)
             return
         }
-        let request = st_buildRequest(url: url, method: method, parameters: parameters, 
-                                    encodingType: encodingType, requestConfig: requestConfig, 
-                                    requestHeaders: requestHeaders)
-        st_executeRequestWithModel(request, config: requestConfig ?? defaultRequestConfig, 
-                                 modelType: modelType, completion: completion)
+        let request = self.st_buildRequest(url: url, method: method, parameters: parameters, encodingType: encodingType, requestConfig: requestConfig, requestHeaders: requestHeaders)
+        self.st_executeRequestWithModel(request, config: requestConfig ?? defaultRequestConfig, modelType: modelType, completion: completion)
     }
     
     // MARK: - 构建请求的公共方法
-    private func st_buildRequest(url: URL,
-                               method: STHTTPMethod,
-                               parameters: [String: Any]?,
-                               encodingType: STParameterEncoder.EncodingType,
-                               requestConfig: STRequestConfig?,
-                               requestHeaders: STRequestHeaders?) -> URLRequest {
-        let config = requestConfig ?? defaultRequestConfig
-        let headers = requestHeaders ?? defaultRequestHeaders
+    private func st_buildRequest(url: URL, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType, requestConfig: STRequestConfig?, requestHeaders: STRequestHeaders?) -> URLRequest {
+        let config = requestConfig ?? self.defaultRequestConfig
+        let headers = requestHeaders ?? self.defaultRequestHeaders
         var request = URLRequest(url: url)
         request.httpMethod = method.rawValue
         request.timeoutInterval = config.timeoutInterval
@@ -279,11 +250,8 @@ open class STHTTPSession: NSObject {
     }
     
     // MARK: - 执行泛型请求
-    private func st_executeRequestWithModel<T: Codable>(_ request: URLRequest, 
-                                                       config: STRequestConfig, 
-                                                       modelType: T.Type, 
-                                                       completion: @escaping (STHTTPResponseWithModel<T>) -> Void) {
-        let task = session.dataTask(with: request) { data, response, error in
+    private func st_executeRequestWithModel<T: Codable>(_ request: URLRequest, config: STRequestConfig, modelType: T.Type, completion: @escaping (STHTTPResponseWithModel<T>) -> Void) {
+        let task = self.session.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 var model: T?
                 if let data = data {
@@ -302,7 +270,7 @@ open class STHTTPSession: NSObject {
     
     // MARK: - 重试逻辑
     private func st_shouldRetry(response: STHTTPResponse, config: STRequestConfig) -> Bool {
-        guard currentRetryCount < config.retryCount else { return false }
+        guard self.currentRetryCount < config.retryCount else { return false }
         if response.error != nil || (response.statusCode >= 500 && response.statusCode < 600) {
             return true
         }
@@ -310,31 +278,24 @@ open class STHTTPSession: NSObject {
     }
     
     private func st_retryRequest(completion: @escaping (STHTTPResponse) -> Void) {
-        guard let request = currentRequest, let config = currentRequestConfig else {
+        guard let request = self.currentRequest, let config = self.currentRequestConfig else {
             return
         }
-        currentRetryCount += 1
+        self.currentRetryCount += 1
         DispatchQueue.main.asyncAfter(deadline: .now() + config.retryDelay) { [weak self] in
             self?.st_executeRequest(request, config: config, completion: completion)
         }
     }
     
     // MARK: - 上传文件
-    public func st_upload(url: String,
-                         files: [STUploadFile],
-                         parameters: [String: Any]? = nil,
-                         requestConfig: STRequestConfig? = nil,
-                         requestHeaders: STRequestHeaders? = nil,
-                         progress: ((STUploadProgress) -> Void)? = nil,
-                         completion: @escaping (STHTTPResponse) -> Void) {
-        
+    public func st_upload(url: String, files: [STUploadFile], parameters: [String: Any]? = nil, requestConfig: STRequestConfig? = nil, requestHeaders: STRequestHeaders? = nil, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (STHTTPResponse) -> Void) {
         guard let url = URL(string: url) else {
             let response = STHTTPResponse(data: nil, response: nil, error: STHTTPError.invalidURL)
             completion(response)
             return
         }
-        let config = requestConfig ?? defaultRequestConfig
-        let headers = requestHeaders ?? defaultRequestHeaders
+        let config = requestConfig ?? self.defaultRequestConfig
+        let headers = requestHeaders ?? self.defaultRequestHeaders
         var request = URLRequest(url: url)
         request.httpMethod = STHTTPMethod.post.rawValue
         request.timeoutInterval = config.timeoutInterval
@@ -376,12 +337,7 @@ open class STHTTPSession: NSObject {
     }
     
     // MARK: - 下载文件
-    public func st_download(
-        url: String,
-        destinationURL: URL,
-        progress: ((Double) -> Void)? = nil,
-        completion: @escaping (Result<URL, Error>) -> Void
-    ) {
+    public func st_download(url: String, destinationURL: URL, progress: ((Double) -> Void)? = nil, completion: @escaping (Result<URL, Error>) -> Void) {
         guard let requestURL = URL(string: url) else {
             completion(.failure(NSError(domain: "STHTTPSession", code: -1, userInfo: [NSLocalizedDescriptionKey: "无效的URL"])))
             return
