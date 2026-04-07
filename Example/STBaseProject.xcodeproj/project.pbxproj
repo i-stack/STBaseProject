@@ -14,7 +14,6 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C35D61289B634B00C449DF /* STNextViewController.swift */; };
-		62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */; };
 		E40ADBA62EC5ED2F004FC664 /* STTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40ADBA52EC5ED2F004FC664 /* STTestViewController.swift */; };
 		E41AED1A29AC509100760473 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E41AED1929AC509100760473 /* ViewController.xib */; };
 		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
@@ -39,7 +38,6 @@
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		62C35D61289B634B00C449DF /* STNextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STNextViewController.swift; sourceTree = "<group>"; };
-		62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STCustomURLProtocol.swift; sourceTree = "<group>"; };
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF65A6D5DDF550B36F808158 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.release.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
 		D130156922DC92BC00D5216C /* STBaseProject-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -103,9 +101,6 @@
 			children = (
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				E4F158692F42C45F00D1D6E1 /* SceneDelegate.swift */,
-				62C35D61289B634B00C449DF /* STNextViewController.swift */,
-				E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */,
-				62CBA81627D9D30A001204B1 /* STCustomURLProtocol.swift */,
 				E41AED2429AC968D00760473 /* Module */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
 			);
@@ -165,6 +160,8 @@
 		E41AED2A29AC96D200760473 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				62C35D61289B634B00C449DF /* STNextViewController.swift */,
+				E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */,
 				E4F09E092F42A80E00253CC5 /* STLogDemoViewController.swift */,
 				E40ADBA52EC5ED2F004FC664 /* STTestViewController.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
@@ -296,7 +293,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				62CBA81727D9D30A001204B1 /* STCustomURLProtocol.swift in Sources */,
 				E45802332E821D9600E3B669 /* STMyScrollableView.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				E40ADBA62EC5ED2F004FC664 /* STTestViewController.swift in Sources */,
@@ -461,9 +457,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9FFQU5J4Q;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = STBaseProject/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -486,9 +483,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9FFQU5J4Q;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = STBaseProject/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

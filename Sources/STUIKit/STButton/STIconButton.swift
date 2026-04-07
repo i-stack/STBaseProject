@@ -7,7 +7,6 @@
 
 import UIKit
 
-// MARK: - 图标位置枚举
 public enum STIconPosition {
     case left
     case right
@@ -27,7 +26,7 @@ public class STIconButtonBuilder {
     /// - Returns: 构建器实例，支持链式调用
     @discardableResult
     public func iconPosition(_ position: STIconPosition) -> STIconButtonBuilder {
-        button?.iconPosition = position
+        self.button?.iconPosition = position
         return self
     }
     
@@ -36,7 +35,14 @@ public class STIconButtonBuilder {
     /// - Returns: 构建器实例，支持链式调用
     @discardableResult
     public func spacing(_ spacing: CGFloat) -> STIconButtonBuilder {
-        button?.spacing = spacing
+        self.button?.spacing = spacing
+        return self
+    }
+
+    /// 设置按钮内容边距
+    @discardableResult
+    public func contentInsets(_ insets: UIEdgeInsets) -> STIconButtonBuilder {
+        self.button?.iconContentInsets = insets
         return self
     }
     
@@ -49,7 +55,7 @@ public class STIconButtonBuilder {
     ///     .done()
     /// ```
     public func done() {
-        button?.setNeedsLayout()
+        self.button?.setNeedsLayout()
     }
 }
 
@@ -57,11 +63,32 @@ public class STIconButtonBuilder {
 open class STIconButton: STBtn {
     
     /// 图标位置
-    public var iconPosition: STIconPosition = .left
+    public var iconPosition: STIconPosition = .left {
+        didSet {
+            guard oldValue != iconPosition else { return }
+            self.invalidateIntrinsicContentSize()
+            self.setNeedsLayout()
+        }
+    }
 
     /// 图标和文字之间的间距
-    public var spacing: CGFloat = 8
-    
+    public var spacing: CGFloat = 8 {
+        didSet {
+            guard oldValue != spacing else { return }
+            self.invalidateIntrinsicContentSize()
+            self.setNeedsLayout()
+        }
+    }
+
+    /// 图文整体内容边距
+    public var iconContentInsets: UIEdgeInsets = .zero {
+        didSet {
+            guard oldValue != iconContentInsets else { return }
+            self.invalidateIntrinsicContentSize()
+            self.setNeedsLayout()
+        }
+    }
+
     /// 开始链式调用配置
     /// 使用示例：
     /// ```
@@ -83,12 +110,33 @@ open class STIconButton: STBtn {
     /// button.updateLayout()
     /// ```
     public func updateLayout() {
+        self.invalidateIntrinsicContentSize()
         self.setNeedsLayout()
     }
 
     open override func layoutSubviews() {
         super.layoutSubviews()
         self.updateIconLayout()
+    }
+
+    open override func contentRect(forBounds bounds: CGRect) -> CGRect {
+        super.contentRect(forBounds: bounds).inset(by: self.iconContentInsets)
+    }
+
+    open override var intrinsicContentSize: CGSize {
+        let baseSize = self.computedContentSize()
+        return CGSize(
+            width: baseSize.width + self.iconContentInsets.left + self.iconContentInsets.right,
+            height: baseSize.height + self.iconContentInsets.top + self.iconContentInsets.bottom
+        )
+    }
+
+    open override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let baseSize = self.computedContentSize()
+        return CGSize(
+            width: min(size.width, baseSize.width + self.iconContentInsets.left + self.iconContentInsets.right),
+            height: min(size.height, baseSize.height + self.iconContentInsets.top + self.iconContentInsets.bottom)
+        )
     }
 
     private func updateIconLayout() {
@@ -149,6 +197,27 @@ open class STIconButton: STBtn {
                 left: -imageSize.width / 2,
                 bottom: 0,
                 right: imageSize.width / 2
+            )
+        }
+    }
+
+    private func computedContentSize() -> CGSize {
+        let imageSize = self.imageView?.intrinsicContentSize ?? .zero
+        let titleSize = self.titleLabel?.intrinsicContentSize ?? .zero
+        let hasImage = imageSize != .zero
+        let hasTitle = titleSize != .zero
+        let actualSpacing = (hasImage && hasTitle) ? self.spacing : 0
+
+        switch self.iconPosition {
+        case .left, .right:
+            return CGSize(
+                width: imageSize.width + titleSize.width + actualSpacing,
+                height: max(imageSize.height, titleSize.height)
+            )
+        case .top, .bottom:
+            return CGSize(
+                width: max(imageSize.width, titleSize.width),
+                height: imageSize.height + titleSize.height + actualSpacing
             )
         }
     }

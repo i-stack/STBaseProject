@@ -18,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         STDeviceAdapter.shared.configure(designSize: CGSize(width: 375, height: 812))
         Bundle.st_setCustomLanguage("zh-Hans")
+        configureLogging()
 
         if #available(iOS 13.0, *) {
             // window setup handled in SceneDelegate
@@ -30,8 +31,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    private func configureLogging() {
+        STLogManager.bootstrap(.init(
+            minimumLevel: .debug,
+            persistDefaultLogs: false,
+            maxFileSize: 2 * 1024 * 1024,
+            maxArchivedFiles: 5,
+            retainedLogCountForDisplay: 1500,
+            cloudTransport: nil,
+            cloudBatchSize: 20
+        ))
+
+        STPersistentLog("日志系统已完成启动", level: .info, metadata: [
+            "environment": "example",
+            "cloudUpload": "disabled"
+        ])
+
+        // 需要接入云端上传时，替换为你们自己的接口地址或 requestBuilder。
+        // let transport = STURLSessionLogCloudTransport(
+        //     endpoint: URL(string: "https://example.com/api/logs")!,
+        //     headers: ["Authorization": "Bearer <token>"]
+        // )
+        // STLogManager.setCloudTransport(transport)
+    }
+
     static func makeRootNavigationController() -> UINavigationController {
-        let logDemo = STNextViewController()//STLogDemoViewController()
+        let logDemo = STLogDemoViewController()
         return UINavigationController(rootViewController: logDemo)
     }
 
@@ -73,4 +98,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
     }
 }
-

@@ -51,8 +51,14 @@ final class STLogDemoViewController: UIViewController {
     private func seedInitialLogs() {
         STLogLevel.allCases.forEach { level in
             let message = "示例 \(level.rawValue) 级别日志，用于展示过滤效果。"
-            let content = logGenerator.makeLog(level: level, message: message, function: "viewDidLoad", line: 52)
-            logView.beginQueryLogP(content: content)
+            STPersistentLog(
+                message,
+                level: level,
+                metadata: ["seed": "true"],
+                file: "STLogDemoViewController.swift",
+                function: "viewDidLoad",
+                line: 52
+            )
         }
     }
 
@@ -67,30 +73,22 @@ final class STLogDemoViewController: UIViewController {
     }
 
     private func makeNavButton(title: String, action: Selector) -> UIBarButtonItem {
-        let button = STIconButton()
+        let button = STIconButton(type: .system)
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-//        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+        button.iconContentInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
         button.layer.cornerRadius = 16
+        button.layer.masksToBounds = true
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.3).cgColor
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.backgroundColor = .secondarySystemBackground
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.required, for: .horizontal)
         button.addTarget(self, action: action, for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.heightAnchor.constraint(equalToConstant: 32).isActive = true
-        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 68).isActive = true
-        
-        let container = UIView()
-        container.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(button)
-        
-        NSLayoutConstraint.activate([
-            button.topAnchor.constraint(equalTo: container.topAnchor),
-            button.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-            button.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            button.trailingAnchor.constraint(equalTo: container.trailingAnchor)
-        ])
-        
-        return UIBarButtonItem(customView: container)
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 84).isActive = true
+        return UIBarButtonItem(customView: button)
     }
 
     private func startAutoLogging() {
@@ -154,10 +152,6 @@ extension STLogDemoViewController: STLogViewDelegate {
         navigationController?.popViewController(animated: true)
     }
 
-    func logViewShowDocumentInteractionController() {
-        presentAlert(title: "导出日志", message: "示例环境仅展示导出入口，未真正写入文件。")
-    }
-
     func logViewDidFilterLogs(with results: [STLogEntry]) {
         if !logView.st_isFiltering() || results.count == logView.allLogCount() {
             title = baseTitle
@@ -170,22 +164,10 @@ extension STLogDemoViewController: STLogViewDelegate {
             title = "\(baseTitle) · \(results.count) 条"
         }
     }
-
-    private func presentAlert(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "好的", style: .default))
-        present(alert, animated: true)
-    }
 }
 
 // MARK: - Demo Log Generator
 private struct STDemoLogGenerator {
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        return formatter
-    }()
-
     let displayFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy年MM月dd日 HH:mm:ss"
@@ -205,22 +187,6 @@ private struct STDemoLogGenerator {
         guard let level = STLogLevel.allCases.randomElement() else { return "" }
         let message = sampleMessages[level]?.randomElement() ?? "未知日志"
         STPersistentLog(message, level: level)
-        return makeLog(level: level, message: message)
-    }
-
-    func makeLog(level: STLogLevel, message: String, function: String = #function, line: Int = #line) -> String {
-        let timestamp = dateFormatter.string(from: Date())
-        let fileName = "STLogDemoViewController.swift"
-        let formattedMessage = "\(level.rawValue): \(message)"
-
-        return """
-        \(timestamp)
-        \(fileName)
-        funcName: \(function)
-        lineNum: (\(line))
-        level: \(level.rawValue)
-        message: \(formattedMessage)
-        """
+        return message
     }
 }
-
