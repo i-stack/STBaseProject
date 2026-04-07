@@ -211,9 +211,9 @@ STHUD.hide()
 
 ### STTabBar - 标签栏组件
 - `STCustomTabBar.swift` - 自定义标签栏
-- `STCustomTabBarController.swift` - 自定义标签栏控制器
-- `STCustomUITabBarController.swift` - 自定义 UI 标签栏控制器
-- `STTabBarItemModel.swift` - 标签栏项模型
+- `STCustomTabBarController.swift` - 基于 `UITabBarController` 的自定义标签栏容器
+- `STTabBarItemModel.swift` - 标签栏项模型（分组子结构：`colors` / `typography` / `layout` / `badge` / `irregular`）
+- `STTabBarConfig.swift` - 标签栏整体配置
 - `STTabBarItemView.swift` - 标签栏项视图
 - `STTabBarMixedSupport.swift` - 标签栏混合支持
 

@@ -43,8 +43,7 @@ public class STTabBarMixedSupport {
             }
         }
         
-        // 设置 ViewControllers
-        tabBarController.viewControllers = viewControllers
+        tabBarController.setViewControllers(viewControllers, animated: false)
         
         // 如果有系统 TabBar Item，设置到对应的 ViewController
         for (index, systemItem) in systemItems.enumerated() {
@@ -53,13 +52,10 @@ public class STTabBarMixedSupport {
             }
         }
         
-        // 如果有自定义 TabBar Item，配置自定义 TabBar
         if !customItems.isEmpty {
-            tabBarController.setViewControllers(
-                viewControllers,
-                tabBarItems: customItems,
-                config: config
-            )
+            tabBarController.configureCustomTabBar(items: customItems, config: config)
+        } else {
+            tabBarController.hideCustomTabBar()
         }
         
         return tabBarController
@@ -79,20 +75,19 @@ public class STTabBarMixedSupport {
         let item = UITabBarItem(title: customItem.title, image: customItem.normalImage, selectedImage: customItem.selectedImage)
         
         // 设置文字属性
-        let font = UIFont(name: customItem.titleFontName, size: customItem.titleSize) ?? UIFont.st_systemFont(ofSize: customItem.titleSize)
+        let font = UIFont(name: customItem.typography.fontName, size: customItem.typography.fontSize) ?? UIFont.st_systemFont(ofSize: customItem.typography.fontSize)
         item.setTitleTextAttributes([
-            .foregroundColor: customItem.normalTextColor,
+            .foregroundColor: customItem.colors.normalText,
             .font: font
         ], for: .normal)
         item.setTitleTextAttributes([
-            .foregroundColor: customItem.selectedTextColor,
+            .foregroundColor: customItem.colors.selectedText,
             .font: font
         ], for: .selected)
         
-        // 设置徽章
-        if customItem.badgeCount > 0 {
-            item.badgeValue = customItem.badgeCount > 99 ? "99+" : "\(customItem.badgeCount)"
-            item.badgeColor = customItem.badgeBackgroundColor
+        if customItem.badge.count > 0 {
+            item.badgeValue = customItem.badge.count > 99 ? "99+" : "\(customItem.badge.count)"
+            item.badgeColor = customItem.badge.backgroundColor
         }
         
         return item
@@ -112,7 +107,6 @@ public extension STCustomTabBarController {
         mixedItems: [STTabBarMixedSupport.MixedTabBarItem],
         config: STTabBarConfig = STTabBarConfig()
     ) {
-        // 分离系统 TabBar Item 和自定义 TabBar Item
         var customItems: [STTabBarItemModel] = []
         var systemItems: [UITabBarItem] = []
         
@@ -125,23 +119,18 @@ public extension STCustomTabBarController {
             }
         }
         
-        // 设置 ViewControllers
-        self.viewControllers = viewControllers
+        self.setViewControllers(viewControllers, animated: false)
         
-        // 如果有系统 TabBar Item，设置到对应的 ViewController
         for (index, systemItem) in systemItems.enumerated() {
             if index < viewControllers.count {
                 viewControllers[index].tabBarItem = systemItem
             }
         }
         
-        // 如果有自定义 TabBar Item，配置自定义 TabBar
         if !customItems.isEmpty {
-            self.setViewControllers(
-                viewControllers,
-                tabBarItems: customItems,
-                config: config
-            )
+            self.configureCustomTabBar(items: customItems, config: config)
+        } else {
+            self.hideCustomTabBar()
         }
     }
 }

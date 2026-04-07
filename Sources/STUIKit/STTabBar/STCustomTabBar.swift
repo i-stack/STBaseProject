@@ -7,250 +7,219 @@
 
 import UIKit
 
-// MARK: - 自定义 TabBar 协议
-/// 自定义 TabBar 代理协议
 public protocol STCustomTabBarDelegate: AnyObject {
-    /// TabBar Item 被选中
-    /// - Parameters:
-    ///   - tabBar: TabBar 实例
-    ///   - index: 选中的索引
     func customTabBar(_ tabBar: STCustomTabBar, didSelectItemAt index: Int)
 }
 
 public class STCustomTabBar: UIView {
     
     public weak var delegate: STCustomTabBarDelegate?
+    public var preferredLayoutHeight: CGFloat { self.config.height }
     
-    private var itemModels: [STTabBarItemModel] = []
-    private var itemViews: [STTabBarItemView] = []
     private var selectedIndex: Int = 0
+    private var itemViews: [STTabBarItemView] = []
+    private var itemModels: [STTabBarItemModel] = []
     private var config: STTabBarConfig = STTabBarConfig()
     private var heightConstraint: NSLayoutConstraint?
-    
-    private lazy var contentView: UIView = {
-        let view = UIView()
-        return view
-    }()
-    
-    private lazy var topBorderView: UIView = {
-        let view = UIView()
-        return view
-    }()
+    private var topBorderHeightConstraint: NSLayoutConstraint?
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setupUI()
+        self.setupUI()
     }
     
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setupUI()
+        self.setupUI()
     }
     
     private func setupUI() {
-        addSubview(contentView)
-        addSubview(topBorderView)
-        
-        // 设置 contentView 约束
-        contentView.translatesAutoresizingMaskIntoConstraints = false
+        self.clipsToBounds = false
+        self.addSubview(self.backgroundImageView)
+        self.backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: topAnchor),
-            contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            self.backgroundImageView.topAnchor.constraint(equalTo: topAnchor),
+            self.backgroundImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            self.backgroundImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            self.backgroundImageView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
         
-        // 设置 topBorderView 约束
-        topBorderView.translatesAutoresizingMaskIntoConstraints = false
+        self.addSubview(self.contentView)
+        self.contentView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            topBorderView.topAnchor.constraint(equalTo: topAnchor),
-            topBorderView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            topBorderView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            topBorderView.heightAnchor.constraint(equalToConstant: 0.5)
+            self.contentView.topAnchor.constraint(equalTo: topAnchor),
+            self.contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            self.contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            self.contentView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
         
-        updateAppearance()
+        self.addSubview(self.topBorderView)
+        self.topBorderView.translatesAutoresizingMaskIntoConstraints = false
+        let borderHeight = self.topBorderView.heightAnchor.constraint(equalToConstant: self.config.topBorderWidth)
+        self.topBorderHeightConstraint = borderHeight
+        NSLayoutConstraint.activate([
+            self.topBorderView.topAnchor.constraint(equalTo: topAnchor),
+            self.topBorderView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            self.topBorderView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            borderHeight
+        ])
+        
+        self.updateAppearance()
     }
     
-    // MARK: - 公共方法
     /// 配置 TabBar
-    /// - Parameters:
-    ///   - items: TabBar Item 数据数组
-    ///   - config: TabBar 配置
     public func configure(items: [STTabBarItemModel], config: STTabBarConfig = STTabBarConfig()) {
         self.itemModels = items
         self.config = config
-        setupItems()
-        updateAppearance()
+        self.clampSelectedIndexForCurrentItems()
+        self.setupItems()
+        self.updateAppearance()
     }
     
-    /// 设置选中的 Item
-    /// - Parameter index: 索引
     public func setSelectedIndex(_ index: Int) {
-        guard index >= 0 && index < itemViews.count else { return }
-        if selectedIndex < itemViews.count {
-            itemViews[selectedIndex].updateSelection(false)
+        guard index >= 0, index < self.itemViews.count else { return }
+        if self.selectedIndex < self.itemViews.count {
+            self.itemViews[self.selectedIndex].updateSelection(false)
         }
-        selectedIndex = index
-        itemViews[selectedIndex].updateSelection(true)
+        self.selectedIndex = index
+        self.itemViews[self.selectedIndex].updateSelection(true)
     }
     
-    /// 更新指定 Item 的徽章数量
-    /// - Parameters:
-    ///   - index: Item 索引
-    ///   - count: 徽章数量
     public func updateBadgeCount(at index: Int, count: Int) {
-        guard index >= 0 && index < itemViews.count else { return }
-        itemViews[index].updateBadgeCount(count)
+        guard index >= 0, index < self.itemViews.count else { return }
+        self.itemViews[index].updateBadgeCount(count)
     }
     
-    /// 更新 TabBar 配置
-    /// - Parameter config: 新的配置
     public func updateConfig(_ config: STTabBarConfig) {
         self.config = config
-        updateAppearance()
+        self.updateAppearance()
+        self.itemViews.forEach { $0.reapplyTabBarConfig(config) }
     }
     
-    /// 获取当前选中的索引
-    public func getSelectedIndex() -> Int {
-        return selectedIndex
-    }
+    public func getSelectedIndex() -> Int { self.selectedIndex }
     
-    /// 获取 Item 数量
-    public func getItemCount() -> Int {
-        return itemModels.count
+    public func getItemCount() -> Int { self.itemModels.count }
+    
+    private func clampSelectedIndexForCurrentItems() {
+        if self.itemModels.isEmpty {
+            self.selectedIndex = 0
+        } else {
+            self.selectedIndex = min(self.selectedIndex, self.itemModels.count - 1)
+        }
     }
     
     private func setupItems() {
-        itemViews.forEach { $0.removeFromSuperview() }
-        itemViews.removeAll()
-        for (index, model) in itemModels.enumerated() {
+        self.itemViews.forEach { $0.removeFromSuperview() }
+        self.itemViews.removeAll()
+        for (index, model) in self.itemModels.enumerated() {
             let itemView = STTabBarItemView()
-            itemView.configure(with: model, config: config, isSelected: index == selectedIndex) { [weak self] in
+            itemView.configure(with: model, config: self.config, isSelected: index == self.selectedIndex) { [weak self] in
                 self?.handleItemTap(at: index)
             }
             contentView.addSubview(itemView)
             itemViews.append(itemView)
         }
-        setupItemConstraints()
+        self.setupItemConstraints()
     }
     
     private func setupItemConstraints() {
-        guard !itemViews.isEmpty else { return }
-        
-        // 移除所有现有约束
-        itemViews.forEach { $0.removeFromSuperview() }
-        for itemView in itemViews {
-            contentView.addSubview(itemView)
-        }
-        
-        for (index, itemView) in itemViews.enumerated() {
-            let model = itemModels[index]
+        guard !self.itemViews.isEmpty else { return }
+        for (index, itemView) in self.itemViews.enumerated() {
+            let model = self.itemModels[index]
             itemView.translatesAutoresizingMaskIntoConstraints = false
-            
             if model.isIrregular {
-                // 不规则按钮：向上凸起
+                let protrusion = model.irregular?.protrusionHeight ?? STTabBarIrregularStyle.standard.protrusionHeight
                 NSLayoutConstraint.activate([
-                    itemView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor, constant: -model.irregularHeight / 2),
-                    itemView.heightAnchor.constraint(equalToConstant: config.height + model.irregularHeight)
+                    itemView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor, constant: -protrusion / 2),
+                    itemView.heightAnchor.constraint(equalToConstant: self.config.height + protrusion)
                 ])
             } else {
-                // 普通按钮：正常高度
                 NSLayoutConstraint.activate([
-                    itemView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                    itemView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+                    itemView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+                    itemView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)
                 ])
             }
-            
-            // 设置水平约束
             if index == 0 {
-                NSLayoutConstraint.activate([
-                    itemView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor)
-                ])
+                itemView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor).isActive = true
             } else {
                 NSLayoutConstraint.activate([
-                    itemView.leadingAnchor.constraint(equalTo: itemViews[index - 1].trailingAnchor),
-                    itemView.widthAnchor.constraint(equalTo: itemViews[index - 1].widthAnchor)
+                    itemView.leadingAnchor.constraint(equalTo: self.itemViews[index - 1].trailingAnchor),
+                    itemView.widthAnchor.constraint(equalTo: self.itemViews[index - 1].widthAnchor)
                 ])
             }
-            
-            if index == itemViews.count - 1 {
-                NSLayoutConstraint.activate([
-                    itemView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
-                ])
+            if index == self.itemViews.count - 1 {
+                itemView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
             }
         }
     }
     
     private func updateAppearance() {
-        backgroundColor = config.backgroundColor
-        
-        // 更新高度约束
-        if let heightConstraint = heightConstraint {
-            heightConstraint.constant = config.height
+        self.alpha = 1.0
+        self.backgroundColor = self.config.backgroundColor
+        if let image = self.config.backgroundImage {
+            self.backgroundImageView.image = image
+            self.backgroundImageView.isHidden = false
         } else {
-            heightConstraint = heightAnchor.constraint(equalToConstant: config.height)
-            heightConstraint?.isActive = true
+            self.backgroundImageView.image = nil
+            self.backgroundImageView.isHidden = true
+        }
+        if let existing = self.heightConstraint {
+            existing.constant = self.config.height
+        } else {
+            let c = heightAnchor.constraint(equalToConstant: self.config.height)
+            self.heightConstraint = c
+            c.isActive = true
         }
         
-        topBorderView.isHidden = !config.showTopBorder
-        topBorderView.backgroundColor = config.topBorderColor
+        self.topBorderView.isHidden = !self.config.showTopBorder
+        self.topBorderView.backgroundColor = self.config.topBorderColor
+        self.topBorderHeightConstraint?.constant = self.config.topBorderWidth
         
-        // 更新 topBorderView 高度约束
-        for constraint in topBorderView.constraints {
-            if constraint.firstAttribute == .height {
-                constraint.constant = config.topBorderWidth
-                break
-            }
-        }
-        
-        if config.showShadow {
-            layer.shadowColor = config.shadowColor.cgColor
-            layer.shadowOffset = config.shadowOffset
-            layer.shadowRadius = config.shadowRadius
-            layer.shadowOpacity = config.shadowOpacity
-            layer.masksToBounds = false
+        if self.config.showShadow {
+            self.layer.shadowColor = self.config.shadowColor.cgColor
+            self.layer.shadowOffset = self.config.shadowOffset
+            self.layer.shadowRadius = self.config.shadowRadius
+            self.layer.shadowOpacity = self.config.shadowOpacity
+            self.layer.masksToBounds = false
         } else {
-            layer.shadowOpacity = 0
+            self.layer.shadowOpacity = 0
         }
     }
     
     private func handleItemTap(at index: Int) {
-        guard index != selectedIndex else { return }
-        setSelectedIndex(index)
-        delegate?.customTabBar(self, didSelectItemAt: index)
+        guard index != self.selectedIndex else { return }
+        self.setSelectedIndex(index)
+        self.delegate?.customTabBar(self, didSelectItemAt: index)
     }
+    
+    private lazy var backgroundImageView: UIImageView = {
+        let iv = UIImageView()
+        iv.clipsToBounds = true
+        iv.contentMode = .scaleToFill
+        iv.isHidden = true
+        return iv
+    }()
+    
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        view.clipsToBounds = false
+        return view
+    }()
+    
+    private lazy var topBorderView: UIView = UIView()
 }
 
-// MARK: - 便捷方法
 extension STCustomTabBar {
-    /// 创建默认的 TabBar
-    /// - Parameter items: TabBar Item 数据数组
-    /// - Returns: 配置好的 TabBar
     public static func createDefault(with items: [STTabBarItemModel]) -> STCustomTabBar {
         let tabBar = STCustomTabBar()
         tabBar.configure(items: items)
         return tabBar
     }
     
-    /// 创建简单的 TabBar
-    /// - Parameters:
-    ///   - titles: 标题数组
-    ///   - normalImages: 普通图标数组
-    ///   - selectedImages: 选中图标数组
-    /// - Returns: 配置好的 TabBar
-    public static func createSimple(
-        titles: [String],
-        normalImages: [UIImage?],
-        selectedImages: [UIImage?]
-    ) -> STCustomTabBar {
+    public static func createSimple(titles: [String], normalImages: [UIImage?], selectedImages: [UIImage?]) -> STCustomTabBar {
         var items: [STTabBarItemModel] = []
         for i in 0..<titles.count {
-            let model = STTabBarItemModel(
-                title: titles[i],
-                normalImage: i < normalImages.count ? normalImages[i] : nil,
-                selectedImage: i < selectedImages.count ? selectedImages[i] : nil
-            )
+            let model = STTabBarItemModel(title: titles[i], normalImage: i < normalImages.count ? normalImages[i] : nil, selectedImage: i < selectedImages.count ? selectedImages[i] : nil)
             items.append(model)
         }
         return createDefault(with: items)
