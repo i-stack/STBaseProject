@@ -17,8 +17,8 @@ public enum STNavBtnShowType {
 
 open class STBaseViewController: UIViewController {
 
-    public private(set) var navContainerView = UIView()
-    public private(set) var navBackgroundView = UIView()
+    public private(set) var navigationBarView = UIView()
+    public private(set) var navigationBarItemsView = UIView()
     public private(set) lazy var baseView: STBaseView = {
         let view = STBaseView()
         view.enableAppearanceManagement = false
@@ -34,13 +34,12 @@ open class STBaseViewController: UIViewController {
     public var rightBtnConstraints: [NSLayoutConstraint] = []
     public var baseViewConstraints: [NSLayoutConstraint] = []
     public var titleLabelConstraints: [NSLayoutConstraint] = []
-    public var navContainerHeightConstraint: NSLayoutConstraint?
 
     public var navBarBackgroundColor: UIColor = .white
     public var navBarTitleColor: UIColor = .black
     public var buttonTitleColor: UIColor = .systemBlue
     public var buttonTitleFont: UIFont = .st_systemFont(ofSize: 16)
-    public var navBarHeight: CGFloat = 88  // default for Notch devices
+    public var navBarHeight: CGFloat = STDeviceAdapter.navigationBarHeight
     public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20)
 
     public var leftBtnImage: UIImage?
@@ -64,7 +63,7 @@ open class STBaseViewController: UIViewController {
 
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.view.bringSubviewToFront(self.navContainerView)
+        self.view.bringSubviewToFront(self.navigationBarView)
     }
 
     deinit {
@@ -75,70 +74,58 @@ open class STBaseViewController: UIViewController {
         if let observer = self.systemThemeObserver {
             NotificationCenter.default.removeObserver(observer)
         }
-        #if DEBUG
-            print("STBaseViewController deinit: \(String(describing: type(of: self)))")
-        #endif
     }
 
     private func setupNavigationBar() {
         self.navigationController?.setNavigationBarHidden(true, animated: false)
-        self.navContainerView.translatesAutoresizingMaskIntoConstraints = false
-        self.navBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+        self.navigationBarView.translatesAutoresizingMaskIntoConstraints = false
+        self.navigationBarItemsView.translatesAutoresizingMaskIntoConstraints = false
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.leftBtn.translatesAutoresizingMaskIntoConstraints = false
         self.rightBtn.translatesAutoresizingMaskIntoConstraints = false
 
-        self.view.addSubview(self.navContainerView)
-        self.navContainerView.addSubview(self.navBackgroundView)
-        self.navContainerView.addSubview(self.titleLabel)
-        self.navContainerView.addSubview(self.leftBtn)
-        self.navContainerView.addSubview(self.rightBtn)
-
-        let h = self.navContainerView.heightAnchor.constraint(equalToConstant: self.navBarHeight)
-        h.isActive = true
-        self.navContainerHeightConstraint = h
-
+        self.view.addSubview(self.navigationBarView)
         NSLayoutConstraint.activate([
-            self.navContainerView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            self.navContainerView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
-            self.navContainerView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            self.navigationBarView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
+            self.navigationBarView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            self.navigationBarView.heightAnchor.constraint(equalToConstant: self.navBarHeight)
         ])
 
+        self.navigationBarView.addSubview(self.navigationBarItemsView)
         NSLayoutConstraint.activate([
-            self.navBackgroundView.topAnchor.constraint(equalTo: self.navContainerView.topAnchor),
-            self.navBackgroundView.leftAnchor.constraint(equalTo: self.navContainerView.leftAnchor),
-            self.navBackgroundView.rightAnchor.constraint(
-                equalTo: self.navContainerView.rightAnchor),
-            self.navBackgroundView.bottomAnchor.constraint(
-                equalTo: self.navContainerView.bottomAnchor),
+            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
+            self.navigationBarItemsView.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
+            self.navigationBarItemsView.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor),
+            self.navigationBarItemsView.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor)
         ])
 
+        self.navigationBarItemsView.addSubview(self.titleLabel)
         self.titleLabelConstraints = [
-            self.titleLabel.centerXAnchor.constraint(equalTo: self.navContainerView.centerXAnchor),
-            self.titleLabel.bottomAnchor.constraint(
-                equalTo: self.navContainerView.bottomAnchor, constant: -8),
+            self.titleLabel.centerYAnchor.constraint(equalTo: self.navigationBarItemsView.centerYAnchor),
+            self.titleLabel.centerXAnchor.constraint(equalTo: self.navigationBarItemsView.centerXAnchor)
         ]
         NSLayoutConstraint.activate(self.titleLabelConstraints)
 
+        self.navigationBarItemsView.addSubview(self.leftBtn)
         let leftWidth = self.leftBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
         leftWidth.priority = .required
         self.leftBtnConstraints = [
-            self.leftBtn.leftAnchor.constraint(
-                equalTo: self.navContainerView.leftAnchor, constant: 8),
-            self.leftBtn.centerYAnchor.constraint(equalTo: self.titleLabel.centerYAnchor),
+            self.leftBtn.leftAnchor.constraint(equalTo: self.navigationBarItemsView.leftAnchor, constant: 8),
+            self.leftBtn.centerYAnchor.constraint(equalTo: self.navigationBarItemsView.centerYAnchor),
             leftWidth,
-            self.leftBtn.heightAnchor.constraint(equalToConstant: 44),
+            self.leftBtn.heightAnchor.constraint(equalToConstant: 44)
         ]
         NSLayoutConstraint.activate(self.leftBtnConstraints)
 
+        self.navigationBarItemsView.addSubview(self.rightBtn)
         let rightWidth = self.rightBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
         rightWidth.priority = .required
         self.rightBtnConstraints = [
-            self.rightBtn.rightAnchor.constraint(
-                equalTo: self.navContainerView.rightAnchor, constant: -8),
-            self.rightBtn.centerYAnchor.constraint(equalTo: self.titleLabel.centerYAnchor),
+            self.rightBtn.rightAnchor.constraint(equalTo: self.navigationBarItemsView.rightAnchor, constant: -8),
+            self.rightBtn.centerYAnchor.constraint(equalTo: self.navigationBarItemsView.centerYAnchor),
             rightWidth,
-            self.rightBtn.heightAnchor.constraint(equalToConstant: 44),
+            self.rightBtn.heightAnchor.constraint(equalToConstant: 44)
         ]
         NSLayoutConstraint.activate(self.rightBtnConstraints)
 
@@ -147,10 +134,10 @@ open class STBaseViewController: UIViewController {
 
         self.view.addSubview(self.baseView)
         self.baseViewConstraints = [
-            self.baseView.topAnchor.constraint(equalTo: self.navContainerView.bottomAnchor),
+            self.baseView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
             self.baseView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.baseView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
-            self.baseView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            self.baseView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ]
         NSLayoutConstraint.activate(self.baseViewConstraints)
     }
@@ -267,31 +254,31 @@ open class STBaseViewController: UIViewController {
         case .showLeftBtn:
             self.leftBtn.isHidden = false
             self.rightBtn.isHidden = true
-            self.navContainerView.isHidden = false
-            self.navBackgroundView.isHidden = false
+            self.navigationBarView.isHidden = false
+            self.navigationBarItemsView.isHidden = false
             break
         case .showRightBtn:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = false
-            self.navContainerView.isHidden = false
-            self.navBackgroundView.isHidden = false
+            self.navigationBarView.isHidden = false
+            self.navigationBarItemsView.isHidden = false
             break
         case .showBothBtn:
             self.leftBtn.isHidden = false
             self.rightBtn.isHidden = false
-            self.navContainerView.isHidden = false
-            self.navBackgroundView.isHidden = false
+            self.navigationBarView.isHidden = false
+            self.navigationBarItemsView.isHidden = false
             break
         case .onlyShowTitle:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = true
-            self.navContainerView.isHidden = false
-            self.navBackgroundView.isHidden = false
+            self.navigationBarView.isHidden = false
+            self.navigationBarItemsView.isHidden = false
         default:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = true
-            self.navContainerView.isHidden = true
-            self.navBackgroundView.isHidden = true
+            self.navigationBarView.isHidden = true
+            self.navigationBarItemsView.isHidden = true
             break
         }
     }
@@ -305,15 +292,7 @@ open class STBaseViewController: UIViewController {
     @discardableResult
     open func st_setNavigationBarColor(_ color: UIColor) -> Self {
         self.navBarBackgroundColor = color
-        self.navBackgroundView.backgroundColor = color
-        return self
-    }
-
-    @discardableResult
-    open func st_setNavigationBarHeight(_ height: CGFloat) -> Self {
-        self.navBarHeight = height
-        self.navContainerHeightConstraint?.constant = height
-        self.view.layoutIfNeeded()
+        self.navigationBarView.backgroundColor = color
         return self
     }
 
@@ -341,12 +320,12 @@ open class STBaseViewController: UIViewController {
         gradient.startColor = startColor
         gradient.endColor = endColor
         gradient.translatesAutoresizingMaskIntoConstraints = false
-        self.navBackgroundView.addSubview(gradient)
+        self.navigationBarView.addSubview(gradient)
         NSLayoutConstraint.activate([
-            gradient.topAnchor.constraint(equalTo: self.navBackgroundView.topAnchor),
-            gradient.bottomAnchor.constraint(equalTo: self.navBackgroundView.bottomAnchor),
-            gradient.leftAnchor.constraint(equalTo: self.navBackgroundView.leftAnchor),
-            gradient.rightAnchor.constraint(equalTo: self.navBackgroundView.rightAnchor),
+            gradient.topAnchor.constraint(equalTo: self.navigationBarView.topAnchor),
+            gradient.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
+            gradient.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
+            gradient.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor),
         ])
         self.navGradientBar = gradient
         return self
@@ -361,7 +340,7 @@ open class STBaseViewController: UIViewController {
                 guard let self = self else { return }
                 let offset = scroll.contentOffset.y
                 let alpha = max(0, min(1, offset / 120))
-                self.navBackgroundView.alpha = alpha
+                self.navigationBarView.alpha = alpha
                 self.navGradientBar?.alpha = alpha
             })
         return self
