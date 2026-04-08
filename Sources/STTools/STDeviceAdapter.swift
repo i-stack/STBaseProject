@@ -9,24 +9,14 @@ import UIKit
 import Foundation
 
 public struct STBarHeightsConfiguration {
+    
     public var navigationBarRegularHeight: CGFloat = 64.0
     public var navigationBarSafeAreaHeight: CGFloat = 88.0
+    public var navigationBarContainerHeight: CGFloat = 50.0
     public var tabBarRegularHeight: CGFloat = 49.0
     public var tabBarSafeAreaHeight: CGFloat = 83.0
 
     public init() {}
-
-    public init(
-        navigationBarRegularHeight: CGFloat = 64.0,
-        navigationBarSafeAreaHeight: CGFloat = 88.0,
-        tabBarRegularHeight: CGFloat = 49.0,
-        tabBarSafeAreaHeight: CGFloat = 83.0
-    ) {
-        self.navigationBarRegularHeight = navigationBarRegularHeight
-        self.navigationBarSafeAreaHeight = navigationBarSafeAreaHeight
-        self.tabBarRegularHeight = tabBarRegularHeight
-        self.tabBarSafeAreaHeight = tabBarSafeAreaHeight
-    }
 }
 
 public final class STDeviceAdapter {
@@ -42,9 +32,10 @@ public final class STDeviceAdapter {
         self.designSize = designSize
     }
 
-    public func configureNavigationBar(regularHeight: CGFloat, safeAreaHeight: CGFloat) {
+    public func configureNavigationBar(regularHeight: CGFloat, safeAreaHeight: CGFloat, containerHeight: CGFloat = 50) {
         self.barHeights.navigationBarRegularHeight = regularHeight
         self.barHeights.navigationBarSafeAreaHeight = safeAreaHeight
+        self.barHeights.navigationBarContainerHeight = containerHeight
     }
 
     public func configureTabBar(regularHeight: CGFloat, safeAreaHeight: CGFloat) {
@@ -120,6 +111,10 @@ public final class STDeviceAdapter {
         self.isNotchScreen
         ? self.shared.barHeights.navigationBarSafeAreaHeight
         : self.shared.barHeights.navigationBarRegularHeight
+    }
+    
+    public static var navigationBarContainerHeight: CGFloat {
+        self.shared.barHeights.navigationBarContainerHeight
     }
 
     public static var tabBarHeight: CGFloat {
