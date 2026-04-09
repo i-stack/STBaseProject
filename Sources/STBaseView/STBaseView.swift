@@ -438,11 +438,16 @@ open class STBaseView: UIView {
 
     private func makeTableView(_ style: UITableView.Style) -> UITableView {
         let tableView = UITableView(frame: .zero, style: style)
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .clear
-        tableView.tableFooterView = UIView()
-        tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
+        tableView.separatorStyle = .none
+        tableView.tableFooterView = UIView()
+        tableView.allowsSelection = false
+        tableView.delaysContentTouches = false
+        tableView.keyboardDismissMode = .interactive
+        tableView.contentInsetAdjustmentBehavior = .never
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }
 
