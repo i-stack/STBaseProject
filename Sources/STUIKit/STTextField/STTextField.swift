@@ -27,8 +27,8 @@ open class STTextField: UITextField {
     weak open var cusDelegate: STTextFieldDelegate?
     
     private var limitCount: Int = -1
-    private var orginLeft: CGFloat = 0
-    private var orginRight: CGFloat = 0
+    private var contentInsetLeft: CGFloat = 0
+    private var contentInsetRight: CGFloat = 0
     private var savaText: String = ""
     private var showPasswordIcon: UIImage?
     private var hidePasswordIcon: UIImage?
@@ -50,29 +50,49 @@ open class STTextField: UITextField {
 
     @IBInspectable var cornerRadius: CGFloat {
         get {
-            return layer.cornerRadius
+            return self.layer.cornerRadius
         }
         set {
-            layer.cornerRadius = newValue
-            layer.masksToBounds = newValue > 0
+            self.layer.cornerRadius = newValue
+            self.layer.masksToBounds = newValue > 0
         }
     }
     
     @IBInspectable var borderWidth: CGFloat {
         get {
-            return layer.borderWidth
+            return self.layer.borderWidth
         }
         set {
-            layer.borderWidth = newValue > 0 ? newValue : 0
+            self.layer.borderWidth = newValue > 0 ? newValue : 0
         }
     }
     
     @IBInspectable var borderColor: UIColor {
         get {
-            return UIColor(cgColor: layer.borderColor!)
+            return UIColor(cgColor: self.layer.borderColor!)
         }
         set {
-            layer.borderColor = newValue.cgColor
+            self.layer.borderColor = newValue.cgColor
+        }
+    }
+    
+    @IBInspectable open var textInsetLeft: CGFloat {
+        get {
+            return self.contentInsetLeft
+        }
+        set {
+            self.contentInsetLeft = max(0, newValue)
+            self.setNeedsLayout()
+        }
+    }
+    
+    @IBInspectable open var textInsetRight: CGFloat {
+        get {
+            return self.contentInsetRight
+        }
+        set {
+            self.contentInsetRight = max(0, newValue)
+            self.setNeedsLayout()
         }
     }
 
@@ -87,7 +107,7 @@ open class STTextField: UITextField {
     }
     
     deinit {
-        removeSecureTextEntryObserver()
+        self.removeSecureTextEntryObserver()
     }
     
     open override func deleteBackward() {
@@ -98,12 +118,12 @@ open class STTextField: UITextField {
     }
     
     open override func textRect(forBounds bounds: CGRect) -> CGRect {
-        let inset = CGRect.init(x: bounds.origin.x + self.orginLeft, y: bounds.origin.y, width: bounds.size.width - self.orginLeft - self.orginRight, height: bounds.size.height)
+        let inset = CGRect.init(x: bounds.origin.x + self.contentInsetLeft, y: bounds.origin.y, width: bounds.size.width - self.contentInsetLeft - self.contentInsetRight, height: bounds.size.height)
         return inset
     }
     
     open override func editingRect(forBounds bounds: CGRect) -> CGRect {
-        let inset = CGRect.init(x: bounds.origin.x + self.orginLeft, y: bounds.origin.y, width: bounds.size.width - self.orginLeft - self.orginRight, height: bounds.size.height)
+        let inset = CGRect.init(x: bounds.origin.x + self.contentInsetLeft, y: bounds.origin.y, width: bounds.size.width - self.contentInsetLeft - self.contentInsetRight, height: bounds.size.height)
         return inset
     }
     
@@ -127,7 +147,7 @@ open class STTextField: UITextField {
     
     open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if let rightView = self.rightView {
-            let rightViewFrame = rightViewRect(forBounds: self.bounds)
+            let rightViewFrame = self.rightViewRect(forBounds: self.bounds)
             if rightViewFrame.contains(point) {
                 let pointInRightView = CGPoint(x: point.x - rightViewFrame.origin.x, y: point.y - rightViewFrame.origin.y)
                 if let hitView = rightView.hitTest(pointInRightView, with: event) {
@@ -140,11 +160,10 @@ open class STTextField: UITextField {
     
     open override func layoutSubviews() {
         super.layoutSubviews()
-        if isPasswordToggleEnabled, let container = self.rightView, let button = passwordToggleButton {
+        if self.isPasswordToggleEnabled, let container = self.rightView, let button = self.passwordToggleButton {
             button.center = CGPoint(x: container.bounds.midX, y: container.bounds.midY)
         }
     }
-    
     
     private func config() {
         self.configContent()
@@ -161,9 +180,10 @@ open class STTextField: UITextField {
         self.addTarget(self, action: #selector(st_textFieldEditingChanged(textField:)), for: .editingChanged)
     }
     
-    public func config(orginLeft: CGFloat, orginRight: CGFloat) -> Void {
-        self.orginLeft = orginLeft
-        self.orginRight = orginRight
+    public func setTextInsets(left: CGFloat, right: CGFloat) -> Void {
+        self.contentInsetLeft = max(0, left)
+        self.contentInsetRight = max(0, right)
+        self.setNeedsLayout()
     }
     
     public func config(textLimitCount: Int) -> Void {
@@ -187,8 +207,8 @@ open class STTextField: UITextField {
     }
     
     public func st_updateLocalizedPlaceholder() {
-        if !localizedPlaceholder.isEmpty {
-            self.placeholder = localizedPlaceholder.localized
+        if !self.localizedPlaceholder.isEmpty {
+            self.placeholder = self.localizedPlaceholder.localized
         }
     }
     
@@ -196,38 +216,38 @@ open class STTextField: UITextField {
     
     /// 启用密码切换功能（使用默认图标）
     public func st_enablePasswordToggle() {
-        st_enablePasswordToggle(showIcon: nil, hideIcon: nil)
+        self.st_enablePasswordToggle(showIcon: nil, hideIcon: nil)
     }
     
     /// 启用密码切换功能（支持自定义图标）
     public func st_enablePasswordToggle(showIcon: UIImage?, hideIcon: UIImage?) {
-        guard !isPasswordToggleEnabled else { return }
-        isPasswordToggleEnabled = true
+        guard !self.isPasswordToggleEnabled else { return }
+        self.isPasswordToggleEnabled = true
         self.showPasswordIcon = showIcon
         self.hidePasswordIcon = hideIcon
         self.isSecureTextEntry = true
-        setupPasswordToggle()
-        setupSecureTextEntryObserver()
+        self.setupPasswordToggle()
+        self.setupSecureTextEntryObserver()
     }
     
     /// 禁用密码切换功能
     public func st_disablePasswordToggle() {
-        guard isPasswordToggleEnabled else { return }
-        isPasswordToggleEnabled = false
+        guard self.isPasswordToggleEnabled else { return }
+        self.isPasswordToggleEnabled = false
         self.rightView = nil
         self.rightViewMode = .never
-        passwordToggleButton = nil
-        removeSecureTextEntryObserver()
+        self.passwordToggleButton = nil
+        self.removeSecureTextEntryObserver()
     }
     
     /// 更新密码切换图标
     public func st_updatePasswordToggleIcons(showIcon: UIImage?, hideIcon: UIImage?) {
-        guard isPasswordToggleEnabled else { return }
+        guard self.isPasswordToggleEnabled else { return }
         self.showPasswordIcon = showIcon
         self.hidePasswordIcon = hideIcon
-        if let button = passwordToggleButton {
-            let showIcon = showPasswordIcon ?? UIImage(systemName: "eye")
-            let hideIcon = hidePasswordIcon ?? UIImage(systemName: "eye.slash")
+        if let button = self.passwordToggleButton {
+            let showIcon = self.showPasswordIcon ?? UIImage(systemName: "eye")
+            let hideIcon = self.hidePasswordIcon ?? UIImage(systemName: "eye.slash")
             button.setImage(showIcon, for: .normal)
             button.setImage(hideIcon, for: .selected)
         }
@@ -235,13 +255,13 @@ open class STTextField: UITextField {
     
     /// 设置密码切换按钮颜色
     public func st_setPasswordToggleButtonColor(_ color: UIColor) {
-        passwordToggleButton?.tintColor = color
+        self.passwordToggleButton?.tintColor = color
     }
     
     /// 设置isSecureTextEntry的KVO监听
     private func setupSecureTextEntryObserver() {
-        removeSecureTextEntryObserver()
-        secureTextEntryObserver = observe(\.isSecureTextEntry, options: [.old, .new]) { [weak self] textField, change in
+        self.removeSecureTextEntryObserver()
+        self.secureTextEntryObserver = self.observe(\.isSecureTextEntry, options: [.old, .new]) { [weak self] textField, change in
             guard let strongSelf = self, strongSelf.isPasswordToggleEnabled else { return }
             if let oldValue = change.oldValue, let newValue = change.newValue,
                !oldValue && newValue {
@@ -255,16 +275,16 @@ open class STTextField: UITextField {
     
     /// 移除isSecureTextEntry的KVO监听
     private func removeSecureTextEntryObserver() {
-        secureTextEntryObserver?.invalidate()
-        secureTextEntryObserver = nil
+        self.secureTextEntryObserver?.invalidate()
+        self.secureTextEntryObserver = nil
     }
     
     /// 设置密码切换按钮
     private func setupPasswordToggle() {
         let toggleButton = UIButton(type: .custom)
         toggleButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-        let showIcon = showPasswordIcon ?? UIImage(systemName: "eye")
-        let hideIcon = hidePasswordIcon ?? UIImage(systemName: "eye.slash")
+        let showIcon = self.showPasswordIcon ?? UIImage(systemName: "eye")
+        let hideIcon = self.hidePasswordIcon ?? UIImage(systemName: "eye.slash")
         toggleButton.setImage(showIcon, for: .normal)
         toggleButton.setImage(hideIcon, for: .selected)
         toggleButton.tintColor = UIColor.systemGray
@@ -287,7 +307,7 @@ open class STTextField: UITextField {
     
     /// 密码切换按钮点击事件
     @objc private func st_passwordToggleButtonTapped() {
-        guard let button = passwordToggleButton else { return }
+        guard let button = self.passwordToggleButton else { return }
         self.savaText = self.text ?? ""
         self.isChangingSecureTextEntry = true
         self.isSecureTextEntry = !self.isSecureTextEntry
@@ -299,11 +319,11 @@ open class STTextField: UITextField {
     }
     
     @objc private func st_textFieldEditingChanged(textField: STTextField) {
-        if isPasswordToggleEnabled {
+        if self.isPasswordToggleEnabled {
             // 只有在切换密码可见性时才恢复保存的文本，用户正常删除操作不应该恢复
-            if isChangingSecureTextEntry {
-                if (textField.text?.isEmpty ?? true) && !savaText.isEmpty {
-                    textField.text = savaText
+            if self.isChangingSecureTextEntry {
+                if (textField.text?.isEmpty ?? true) && !self.savaText.isEmpty {
+                    textField.text = self.savaText
                     return
                 }
             }
