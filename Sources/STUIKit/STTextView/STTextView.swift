@@ -2,7 +2,7 @@
 //  STTextView.swift
 //  STBaseProject
 //
-//  Created by Codex on 2026/4/9.
+//  Created by 寒江孤影 on 2018/10/12.
 //
 
 import UIKit
@@ -29,6 +29,19 @@ open class STTextView: UITextView {
 
     weak open var cusDelegate: STTextViewDelegate?
 
+    open var shouldLimitTextCount: Bool = true
+    open private(set) var currentTextCount: Int = 0
+    open private(set) var currentInputHeight: CGFloat = 0
+    open private(set) var isReachMaxInputHeight: Bool = false
+
+    private let placeholderLabel = UILabel()
+    private var lastReportedHeight: CGFloat = 0
+    private var _contentInsets: UIEdgeInsets = .zero
+    private var isApplyingDefaultPlaceholderFont: Bool = false
+    private var shouldFollowTextViewFontForPlaceholder: Bool = true
+
+    // MARK: - Localization
+
     @IBInspectable open var localizedPlaceholder: String {
         get {
             return objc_getAssociatedObject(self, &STTextViewLocalizationKey.localizedPlaceholderKey) as? String ?? ""
@@ -44,25 +57,22 @@ open class STTextView: UITextView {
         }
     }
 
-    open var placeholder: String = "" {
+    // MARK: - Placeholder
+
+    @IBInspectable open var placeholder: String = "" {
         didSet {
             self.placeholderLabel.text = self.placeholder
             self.updatePlaceholderVisibility()
         }
     }
 
-    @IBInspectable public var st_placeholderText: String {
-        get { return self.placeholder }
-        set { self.placeholder = newValue }
-    }
-
-    open var placeholderTextColor: UIColor = UIColor.systemGray3 {
+    @IBInspectable open var placeholderTextColor: UIColor = UIColor.systemGray3 {
         didSet {
             self.placeholderLabel.textColor = self.placeholderTextColor
         }
     }
 
-    open var placeholderFont: UIFont = UIFont.st_systemFont(ofSize: 16) {
+    @objc dynamic open var placeholderFont: UIFont = UIFont.st_systemFont(ofSize: 16) {
         didSet {
             self.placeholderLabel.font = self.placeholderFont
             if !self.isApplyingDefaultPlaceholderFont {
@@ -72,23 +82,90 @@ open class STTextView: UITextView {
         }
     }
 
-    open var maxTextHeight: CGFloat = CGFloat.greatestFiniteMagnitude {
-        didSet {
+    @IBInspectable public var placeholderFontSize: CGFloat {
+        get { return self.placeholderFont.pointSize }
+        set {
+            self.placeholderFont = UIFont.st_systemFont(ofSize: max(1, newValue))
+        }
+    }
+
+    // MARK: - Content Insets (unified)
+
+    /// Unified content insets for text, cursor, and placeholder.
+    /// All individual inset properties (placeholderLeftInset, cursorInsetTop, etc.) route through this.
+    public var contentInsets: UIEdgeInsets {
+        get { return _contentInsets }
+        set {
+            _contentInsets = newValue
+            self.textContainer.lineFragmentPadding = 0
+            self.textContainerInset = newValue
+            self.layoutPlaceholderLabel()
             self.updateHeightIfNeeded(notify: true)
         }
     }
 
-    open var maxTextCount: Int = -1
-    open var shouldLimitTextCount: Bool = true
-    open private(set) var currentTextCount: Int = 0
-    open private(set) var currentInputHeight: CGFloat = 0
-    open private(set) var isReachMaxInputHeight: Bool = false
+    @IBInspectable public var placeholderLeftInset: CGFloat {
+        get { return _contentInsets.left }
+        set {
+            var insets = _contentInsets
+            insets.left = max(0, newValue)
+            self.contentInsets = insets
+        }
+    }
 
+    @IBInspectable public var placeholderTopInset: CGFloat {
+        get { return _contentInsets.top }
+        set {
+            var insets = _contentInsets
+            insets.top = max(0, newValue)
+            self.contentInsets = insets
+        }
+    }
+
+    @IBInspectable public var cursorInsetTop: CGFloat {
+        get { return _contentInsets.top }
+        set { self.placeholderTopInset = newValue }
+    }
+
+    @IBInspectable public var cursorInsetLeft: CGFloat {
+        get { return _contentInsets.left }
+        set { self.placeholderLeftInset = newValue }
+    }
+
+    @IBInspectable public var cursorInsetBottom: CGFloat {
+        get { return _contentInsets.bottom }
+        set {
+            var insets = _contentInsets
+            insets.bottom = max(0, newValue)
+            self.contentInsets = insets
+        }
+    }
+
+    @IBInspectable public var cursorInsetRight: CGFloat {
+        get { return _contentInsets.right }
+        set {
+            var insets = _contentInsets
+            insets.right = max(0, newValue)
+            self.contentInsets = insets
+        }
+    }
+
+    // MARK: - Appearance
+
+    /// Setting cornerRadius > 0 automatically adjusts contentInsets to match the rounded corners.
     @IBInspectable var cornerRadius: CGFloat {
         get { return self.layer.cornerRadius }
         set {
             self.layer.cornerRadius = newValue
             self.layer.masksToBounds = newValue > 0
+            if newValue > 0 {
+                self.contentInsets = UIEdgeInsets(
+                    top: newValue * 0.5,
+                    left: newValue,
+                    bottom: newValue * 0.5,
+                    right: newValue
+                )
+            }
         }
     }
 
@@ -105,64 +182,39 @@ open class STTextView: UITextView {
         set { self.layer.borderColor = newValue.cgColor }
     }
 
-    @IBInspectable public var placeholderFontSize: CGFloat {
-        get { return self.placeholderFont.pointSize }
-        set {
-            let size = max(1, newValue)
-            self.placeholderFont = UIFont.st_systemFont(ofSize: size)
-            self.layoutPlaceholderLabel()
+    // MARK: - Text Limits
+
+    open var maxTextHeight: CGFloat = CGFloat.greatestFiniteMagnitude {
+        didSet {
+            self.updateHeightIfNeeded(notify: true)
         }
     }
 
-    @IBInspectable public var placeholderColor: UIColor {
-        get { return self.placeholderTextColor }
-        set { self.placeholderTextColor = newValue }
+    @IBInspectable open var maxTextCount: Int = -1 {
+        didSet {
+            self.enforceTextCountIfNeeded()
+            self.notifyTextCount()
+        }
     }
 
     @IBInspectable public var maxInputHeight: CGFloat {
         get { return self.maxTextHeight == CGFloat.greatestFiniteMagnitude ? 0 : self.maxTextHeight }
         set {
             self.maxTextHeight = newValue > 0 ? newValue : CGFloat.greatestFiniteMagnitude
-            self.updateHeightIfNeeded(notify: true)
         }
     }
 
-    @IBInspectable public var maxInputCount: Int {
-        get { return self.maxTextCount }
-        set {
-            self.maxTextCount = newValue
-            self.enforceTextCountIfNeeded()
-            self.notifyTextCount()
-        }
-    }
-
-    @IBInspectable public var placeholderLeftInset: CGFloat = 0 {
-        didSet {
-            self.layoutPlaceholderLabel()
-        }
-    }
-
-    @IBInspectable public var placeholderTopInset: CGFloat = 0 {
-        didSet {
-            self.layoutPlaceholderLabel()
-        }
-    }
+    // MARK: - Overrides
 
     public override var text: String! {
         didSet {
-            self.updatePlaceholderVisibility()
-            self.enforceTextCountIfNeeded()
-            self.updateHeightIfNeeded(notify: true)
-            self.notifyTextCount()
+            self.handleTextChange()
         }
     }
 
     public override var attributedText: NSAttributedString! {
         didSet {
-            self.updatePlaceholderVisibility()
-            self.enforceTextCountIfNeeded()
-            self.updateHeightIfNeeded(notify: true)
-            self.notifyTextCount()
+            self.handleTextChange()
         }
     }
 
@@ -196,10 +248,7 @@ open class STTextView: UITextView {
         return CGSize(width: UIView.noIntrinsicMetric, height: ceil(targetHeight))
     }
 
-    private let placeholderLabel = UILabel()
-    private var lastReportedHeight: CGFloat = 0
-    private var shouldFollowTextViewFontForPlaceholder: Bool = true
-    private var isApplyingDefaultPlaceholderFont: Bool = false
+    // MARK: - Init
 
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
@@ -216,15 +265,14 @@ open class STTextView: UITextView {
         self.layoutPlaceholderLabel()
     }
 
+    // MARK: - Public Config
+
     public func config(textLimitCount: Int) {
         self.maxTextCount = textLimitCount
-        self.enforceTextCountIfNeeded()
-        self.notifyTextCount()
     }
 
     public func config(maxInputHeight: CGFloat) {
         self.maxTextHeight = maxInputHeight > 0 ? maxInputHeight : CGFloat.greatestFiniteMagnitude
-        self.updateHeightIfNeeded(notify: true)
     }
 
     public func config(placeholder: String, placeholderFont: UIFont? = nil, placeholderColor: UIColor? = nil) {
@@ -235,7 +283,6 @@ open class STTextView: UITextView {
         if let placeholderColor {
             self.placeholderTextColor = placeholderColor
         }
-        self.updatePlaceholderVisibility()
     }
 
     public func st_updateLocalizedPlaceholder() {
@@ -254,21 +301,21 @@ open class STTextView: UITextView {
             self.typingAttributes[.foregroundColor] = textColor
         }
         self.text = text
-        self.updatePlaceholderVisibility()
-        self.updateHeightIfNeeded(notify: true)
     }
 
     public func configAttributed(placeholderColor: UIColor) {
         self.placeholderTextColor = placeholderColor
     }
 
+    // MARK: - Private
+
     private func config() {
-        self.backgroundColor = .clear
         self.isScrollEnabled = false
         self.delegate = self
         self.keyboardDismissMode = .interactive
         self.alwaysBounceVertical = false
         self.textContainer.lineFragmentPadding = 0
+        _contentInsets = self.textContainerInset
         self.placeholderLabel.numberOfLines = 0
         self.placeholderLabel.textColor = self.placeholderTextColor
         self.applyDefaultPlaceholderFont()
@@ -289,7 +336,7 @@ open class STTextView: UITextView {
 
     private func layoutPlaceholderLabel() {
         let inset = self.textContainerInset
-        let x = inset.left + self.textContainer.lineFragmentPadding + self.placeholderLeftInset
+        let x = inset.left + self.textContainer.lineFragmentPadding
         let maxWidth = self.bounds.width - x - inset.right - self.textContainer.lineFragmentPadding
         let targetWidth = max(0, maxWidth)
         let fittingSize = self.placeholderLabel.sizeThatFits(
@@ -297,7 +344,7 @@ open class STTextView: UITextView {
         )
         self.placeholderLabel.frame = CGRect(
             x: x,
-            y: inset.top + self.placeholderTopInset,
+            y: inset.top,
             width: targetWidth,
             height: ceil(fittingSize.height)
         )
@@ -306,6 +353,13 @@ open class STTextView: UITextView {
     private func minTextHeight() -> CGFloat {
         let lineHeight = (self.font ?? UIFont.st_systemFont(ofSize: 16)).lineHeight
         return lineHeight + self.textContainerInset.top + self.textContainerInset.bottom
+    }
+
+    private func handleTextChange() {
+        self.updatePlaceholderVisibility()
+        self.enforceTextCountIfNeeded()
+        self.updateHeightIfNeeded(notify: true)
+        self.notifyTextCount()
     }
 
     private func enforceTextCountIfNeeded() {
@@ -354,10 +408,7 @@ open class STTextView: UITextView {
 
 extension STTextView: UITextViewDelegate {
     public func textViewDidChange(_ textView: UITextView) {
-        self.updatePlaceholderVisibility()
-        self.enforceTextCountIfNeeded()
-        self.updateHeightIfNeeded(notify: true)
-        self.notifyTextCount()
+        self.handleTextChange()
         self.cusDelegate?.st_textViewEditingChanged(textView: self)
     }
 
