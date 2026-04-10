@@ -442,7 +442,7 @@ open class STBaseView: UIView {
         tableView.estimatedRowHeight = 44
         tableView.separatorStyle = .none
         tableView.tableFooterView = UIView()
-        tableView.allowsSelection = false
+        tableView.allowsSelection = true
         tableView.delaysContentTouches = false
         tableView.keyboardDismissMode = .interactive
         tableView.contentInsetAdjustmentBehavior = .never
