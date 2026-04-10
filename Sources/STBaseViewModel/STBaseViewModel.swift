@@ -115,7 +115,7 @@ open class STBaseViewModel: NSObject {
     public var httpSession = STHTTPSession.shared
     public var requestHeaders = STRequestHeaders()
     
-    private var cancellables = Set<AnyCancellable>()
+    public var cancellables = Set<AnyCancellable>()
     private var cache = NSCache<NSString, AnyObject>()
     private var retryCount = 0
     
