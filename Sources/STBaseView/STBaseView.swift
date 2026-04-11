@@ -731,3 +731,84 @@ open class STGradientNavigationBar: UIView {
         return CGSize(width: UIView.noIntrinsicMetric, height: self.height)
     }
 }
+
+// MARK: - Refresh & Load More
+
+private struct STRefreshKeys {
+    static var header = "st_refreshHeader"
+    static var footer = "st_loadMoreFooter"
+}
+
+extension STBaseView {
+
+    private func st_refreshScrollView() -> UIScrollView? {
+        switch layoutMode {
+        case .table:      return st_getTableView()
+        case .collection: return st_getCollectionView()
+        default:
+            #if DEBUG
+            assertionFailure("STBaseView: st_addPullToRefresh / st_addLoadMore 仅支持 .table 和 .collection 模式")
+            #endif
+            return nil
+        }
+    }
+
+    // MARK: Pull-to-Refresh
+
+    /// 添加下拉刷新。必须在 configure(layoutMode: .table/.collection) 之后调用。
+    /// - Parameters:
+    ///   - content: 显示内容（`.animation` 仅 spinner / `.text` 文字 / `.imageAndText` 图片+文字）
+    ///   - action: 刷新回调，完成后调用 `st_endRefreshing()`
+    public func st_addPullToRefresh(content: STRefreshContent = .animation, action: @escaping () -> Void) {
+        guard let sv = st_refreshScrollView() else { return }
+        st_removePullToRefresh()
+        let header = STRefreshHeaderView(content: content)
+        header.attach(to: sv, action: action)
+        objc_setAssociatedObject(self, &STRefreshKeys.header, header, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
+
+    /// 结束刷新动画，恢复 contentInset。
+    public func st_endRefreshing() {
+        (objc_getAssociatedObject(self, &STRefreshKeys.header) as? STRefreshHeaderView)?.endRefreshing()
+    }
+
+    /// 移除下拉刷新控件。
+    public func st_removePullToRefresh() {
+        if let header = objc_getAssociatedObject(self, &STRefreshKeys.header) as? STRefreshHeaderView {
+            header.removeFromSuperview()
+            objc_setAssociatedObject(self, &STRefreshKeys.header, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+
+    // MARK: Load More
+
+    /// 添加上拉加载更多。必须在 configure(layoutMode: .table/.collection) 之后调用。
+    /// - Parameters:
+    ///   - content: 显示内容（`.animation` 仅 spinner / `.text` 文字 / `.imageAndText` 图片+文字）
+    ///   - action: 加载回调，完成后调用 `st_endLoadMore(hasMore:)`
+    public func st_addLoadMore(content: STLoadMoreContent = .animation, action: @escaping () -> Void) {
+        guard let sv = st_refreshScrollView() else { return }
+        st_removeLoadMore()
+        let footer = STLoadMoreFooterView(content: content)
+        footer.attach(to: sv, action: action)
+        objc_setAssociatedObject(self, &STRefreshKeys.footer, footer, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
+
+    /// 结束加载动画。`hasMore = false` 时显示"无更多数据"并锁定，不再自动触发。
+    public func st_endLoadMore(hasMore: Bool = true) {
+        (objc_getAssociatedObject(self, &STRefreshKeys.footer) as? STLoadMoreFooterView)?.endLoading(hasMore: hasMore)
+    }
+
+    /// 重置加载更多为初始 idle 状态（换页或重新请求时调用）。
+    public func st_resetLoadMore() {
+        (objc_getAssociatedObject(self, &STRefreshKeys.footer) as? STLoadMoreFooterView)?.resetToIdle()
+    }
+
+    /// 移除上拉加载更多控件。
+    public func st_removeLoadMore() {
+        if let footer = objc_getAssociatedObject(self, &STRefreshKeys.footer) as? STLoadMoreFooterView {
+            footer.removeFromSuperview()
+            objc_setAssociatedObject(self, &STRefreshKeys.footer, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+}
