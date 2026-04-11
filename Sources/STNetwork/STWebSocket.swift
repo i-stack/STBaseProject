@@ -124,11 +124,10 @@ private extension STWebSocket {
     }
 
     func buildConnection() {
-        guard let host = self.config.url.host else {
+        guard self.config.url.host != nil else {
             self.continuation?.yield(.error(.invalidURL))
             return
         }
-        let port = self.config.url.port.map { NWEndpoint.Port(rawValue: UInt16($0)) ?? .https } ?? (self.config.url.scheme == "wss" ? .https : .http)
 
         let wsOptions = NWProtocolWebSocket.Options()
         wsOptions.autoReplyPing = false  // 手动处理，以便我们能做 Pong 超时检测
@@ -144,7 +143,7 @@ private extension STWebSocket {
         parameters.defaultProtocolStack.applicationProtocols.insert(wsOptions, at: 0)
         parameters.serviceClass = .interactiveVideo
 
-        let conn = NWConnection(host: NWEndpoint.Host(host), port: port, using: parameters)
+        let conn = NWConnection(to: NWEndpoint.url(self.config.url), using: parameters)
         self.connection = conn
 
         conn.stateUpdateHandler = { [weak self] nwState in
