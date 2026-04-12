@@ -19,12 +19,8 @@ open class STBaseViewController: UIViewController {
 
     public private(set) var navigationBarView = UIView()
     public private(set) var navigationBarItemsView = UIView()
-    public private(set) lazy var baseView: STBaseView = {
-        let view = STBaseView()
-        view.enableAppearanceManagement = false
-        return view
-    }()
     public private(set) var navGradientBar: STGradientNavigationBar?
+    public var contentTopAnchor: NSLayoutYAxisAnchor { self.navigationBarView.bottomAnchor }
 
     public private(set) var titleLabel = UILabel()
     public private(set) var leftBtn = UIButton(type: .custom)
@@ -32,7 +28,6 @@ open class STBaseViewController: UIViewController {
 
     public var leftBtnConstraints: [NSLayoutConstraint] = []
     public var rightBtnConstraints: [NSLayoutConstraint] = []
-    public var baseViewConstraints: [NSLayoutConstraint] = []
     public var titleLabelConstraints: [NSLayoutConstraint] = []
 
     public var navBarBackgroundColor: UIColor = .white
@@ -131,15 +126,6 @@ open class STBaseViewController: UIViewController {
 
         self.leftBtn.addTarget(self, action: #selector(self.onLeftBtnTap), for: .touchUpInside)
         self.rightBtn.addTarget(self, action: #selector(self.onRightBtnTap), for: .touchUpInside)
-
-        self.view.addSubview(self.baseView)
-        self.baseViewConstraints = [
-            self.baseView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
-            self.baseView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
-            self.baseView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
-            self.baseView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
-        ]
-        NSLayoutConstraint.activate(self.baseViewConstraints)
     }
 
     private func applyNavButtons() {
@@ -198,11 +184,7 @@ open class STBaseViewController: UIViewController {
             }
         }
 
-        // STBaseView 在 STBaseViewController 内默认关闭外观管理（enableAppearanceManagement = false）。
-        // 但 UITableView 的外观依赖 trait / overrideUserInterfaceStyle 的变化，
-        // 因此这里强制触发 baseView 的外观刷新，确保内部 table 也能跟随主题切换。
-        self.baseView.st_forceAppearanceRefresh(animated: false)
-
+        // STBaseView 的外观由使用者自行管理（enableAppearanceManagement 默认开启）。
         let resolvedStyle = style == .unspecified ? .light : style
         let applyBlock = { [weak self] in
             guard let strongSelf = self else { return }
@@ -225,7 +207,7 @@ open class STBaseViewController: UIViewController {
     /// - Parameter resolvedStyle: 解析后的外观样式（.light 或 .dark）
     /// 
     /// 默认实现为空，使用者可以：
-    /// 1. 在外界通过属性（如 navBarBackgroundColor、baseView.backgroundColor）设置颜色
+    /// 1. 在外界通过属性（如 navBarBackgroundColor）设置颜色
     /// 2. 重写此方法来自定义外观变化时的颜色设置逻辑
     open func st_appearanceDidChange(resolvedStyle: UIUserInterfaceStyle) {
         // 默认不自动设置颜色，保持使用者在外界设置的颜色
