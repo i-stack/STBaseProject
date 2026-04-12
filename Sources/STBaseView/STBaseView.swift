@@ -23,13 +23,12 @@ public enum STScrollDirection {
 
 open class STBaseView: UIView {
 
-    public private(set) var isFromXIB: Bool = false
     public private(set) var layoutMode: STLayoutMode = .scroll
     public private(set) var scrollDirection: STScrollDirection = .vertical
     
     /// scroll 模式使用的 UIScrollView。可通过 init(scrollView:) 在初始化时注入自定义实例。
     /// open 允许子类（含跨模块）override 此 getter（如将 collectionView 作为 scrollView 代理）。
-    open private(set) var scrollView: UIScrollView
+    open private(set) var scrollView: UIScrollView = STBaseView.makeDefaultScrollView()
     /// contentView 是内容容器，子视图应添加到此视图。
     /// 在 .scroll 模式下位于 scrollView 内部；在 .fixed 模式下直接贴合 self。
     public private(set) lazy var contentView: UIView = self.makeContentView()
@@ -40,7 +39,6 @@ open class STBaseView: UIView {
 
     private var keyboardObserverTokens: [NSObjectProtocol] = []
     /// 是否启用 scrollView 的键盘 contentInset 自动调整（默认 true）。
-    /// 子类自行处理键盘时（如 DrawBaseView），应在 init 中设为 false 以避免冲突。
     public var enableScrollViewKeyboardAdjustment: Bool = true
     /// 是否启用外观模式管理（默认 true）
     /// 当 STBaseView 在 STBaseViewController 中使用时，建议设置为 false，由 STBaseViewController 统一管理外观
@@ -55,23 +53,19 @@ open class STBaseView: UIView {
     }
 
     public override init(frame: CGRect) {
-        self.scrollView = STBaseView.makeDefaultScrollView()
         super.init(frame: frame)
-        self.setupBase(fromXIB: false)
+        self.setupBase()
     }
 
-    /// 注入自定义 UIScrollView。必须通过此初始化器传入，configure() 之前无法替换。
     public init(scrollView: UIScrollView) {
-        self.scrollView = scrollView
         super.init(frame: .zero)
-        self.setupBase(fromXIB: false)
+        self.scrollView = scrollView
+        self.setupBase()
     }
 
     required public init?(coder: NSCoder) {
-        self.scrollView = STBaseView.makeDefaultScrollView()
         super.init(coder: coder)
-        self.isFromXIB = true
-        self.setupBase(fromXIB: true)
+        self.setupBase()
     }
 
     deinit {
@@ -79,17 +73,13 @@ open class STBaseView: UIView {
         NotificationCenter.default.removeObserver(self)
     }
 
-    private func setupBase(fromXIB: Bool) {
+    private func setupBase() {
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.backgroundColor = .clear
         self.setupKeyboardObservers()
         if self.enableAppearanceManagement {
             self.setupAppearanceObservation()
         }
-        // XIB 场景：子视图由 XIB 加载时追加，不在此处安装结构，由使用者在 awakeFromNib 中调用 configure()
-        if !fromXIB {
-            self.installLayoutStructure()
-        }
+        self.installLayoutStructure()
     }
 
     /// 切换布局模式。
@@ -172,18 +162,14 @@ open class STBaseView: UIView {
     }
 
     private func removeManagedContainers() {
-        // 只操作私有 backing store，避免触发 tableView / collectionView 的 lazy 初始化
         [self.scrollView as UIView, _tableView, _collectionView].compactMap { $0 }.forEach {
             if $0.superview == self { $0.removeFromSuperview() }
         }
-        // contentView 可能在 self 或 scrollView 内，统一 removeFromSuperview
         self.contentView.removeFromSuperview()
     }
 
     private func installScrollStructure() {
-        // scrollView 的位置由 installScrollViewConstraints() 决定，子类可重写以自定义布局
         self.installScrollViewConstraints()
-        // contentView 固定在 scrollView 的 contentLayoutGuide 内，由 STBaseView 统一管理
         self.scrollView.addSubview(self.contentView)
         NSLayoutConstraint.activate([
             self.contentView.topAnchor.constraint(equalTo: self.scrollView.contentLayoutGuide.topAnchor),
@@ -358,38 +344,6 @@ open class STBaseView: UIView {
         self.scrollView.scrollIndicatorInsets = insets
     }
 
-    // MARK: - XIB Support
-    /// XIB 场景下，在 awakeFromNib 中调用此方法将 XIB 子视图迁移到 contentView 内，并切换为 scroll 结构。
-    /// 非 XIB 场景无需调用。
-    public func st_migrateXIBSubviewsIfNeeded() {
-        guard self.isFromXIB else { return }
-        self.configure(layoutMode: .scroll)
-        let existing = subviews.filter { $0 !== self.scrollView && $0 !== self.contentView }
-        existing.forEach { view in
-            view.removeFromSuperview()
-            self.contentView.addSubview(view)
-            view.translatesAutoresizingMaskIntoConstraints = false
-        }
-        let toFix = constraints
-        toFix.forEach { c in
-            guard let first = c.firstItem as? UIView, let second = c.secondItem as? UIView else { return }
-            if first == self || second == self {
-                c.isActive = false
-                let newConstraint = NSLayoutConstraint(
-                    item: (first == self ? contentView : first),
-                    attribute: c.firstAttribute,
-                    relatedBy: c.relation,
-                    toItem: (second == self ? contentView : second),
-                    attribute: c.secondAttribute,
-                    multiplier: c.multiplier,
-                    constant: c.constant
-                )
-                newConstraint.priority = c.priority
-                newConstraint.isActive = true
-            }
-        }
-    }
-
     /// Convenience for debugging: ensure last subview has bottom constraint to contentView
     public func st_validateBottomConstraintLogging() {
         guard self.layoutMode == .scroll else { return }
@@ -399,9 +353,7 @@ open class STBaseView: UIView {
             return (c.firstItem as? UIView) == last && (c.firstAttribute == .bottom) && (c.secondItem as? UIView) == self.contentView
         }
         if !found {
-            #if DEBUG
-            print("⚠️ STBaseView: last subview doesn't have bottom constraint to contentView. Add st_setBottomConstraintForLastSubview(_:,offset:)")
-            #endif
+            STLog("⚠️ STBaseView: last subview doesn't have bottom constraint to contentView. Add st_setBottomConstraintForLastSubview(_:,offset:)")
         }
     }
     
@@ -677,19 +629,6 @@ extension STBaseView {
         objc_setAssociatedObject(self, &StateKeys.empty, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
-//    public func st_showError(_ text: String = "Load Failed") {
-//        self.st_hideAllStates()
-//        let v = self.st_makeStateView(text)
-//        self.addSubview(v)
-//        NSLayoutConstraint.activate([
-//            v.topAnchor.constraint(equalTo: self.topAnchor),
-//            v.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-//            v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-//            v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-//        ])
-//        objc_setAssociatedObject(self, &StateKeys.error, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-//    }
-
     public func st_hideAllStates() {
         self.st_removeStateView(with: &StateKeys.loading)
         self.st_removeStateView(with: &StateKeys.empty)
@@ -735,19 +674,21 @@ open class STGradientNavigationBar: UIView {
 // MARK: - Refresh & Load More
 
 private struct STRefreshKeys {
-    static var header = "st_refreshHeader"
-    static var footer = "st_loadMoreFooter"
+    // 值本身无意义，仅用内存地址作为 objc_setAssociatedObject 的 key
+    static var header: UInt8 = 0
+    static var footer: UInt8 = 0
 }
 
 extension STBaseView {
 
     private func st_refreshScrollView() -> UIScrollView? {
-        switch layoutMode {
-        case .table:      return st_getTableView()
-        case .collection: return st_getCollectionView()
-        default:
+        switch self.layoutMode {
+        case .scroll:     return self.scrollView
+        case .table:      return self.st_getTableView()
+        case .collection: return self.st_getCollectionView()
+        case .fixed:
             #if DEBUG
-            assertionFailure("STBaseView: st_addPullToRefresh / st_addLoadMore 仅支持 .table 和 .collection 模式")
+            assertionFailure("STBaseView: st_addPullToRefresh / st_addLoadMore 不支持 .fixed 模式")
             #endif
             return nil
         }
@@ -760,8 +701,8 @@ extension STBaseView {
     ///   - content: 显示内容（`.animation` 仅 spinner / `.text` 文字 / `.imageAndText` 图片+文字）
     ///   - action: 刷新回调，完成后调用 `st_endRefreshing()`
     public func st_addPullToRefresh(content: STRefreshContent = .animation, action: @escaping () -> Void) {
-        guard let sv = st_refreshScrollView() else { return }
-        st_removePullToRefresh()
+        guard let sv = self.st_refreshScrollView() else { return }
+        self.st_removePullToRefresh()
         let header = STRefreshHeaderView(content: content)
         header.attach(to: sv, action: action)
         objc_setAssociatedObject(self, &STRefreshKeys.header, header, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
@@ -770,6 +711,11 @@ extension STBaseView {
     /// 结束刷新动画，恢复 contentInset。
     public func st_endRefreshing() {
         (objc_getAssociatedObject(self, &STRefreshKeys.header) as? STRefreshHeaderView)?.endRefreshing()
+    }
+
+    /// 程序化触发下拉刷新（如首次进入页面自动加载）。
+    public func st_beginRefreshing() {
+        (objc_getAssociatedObject(self, &STRefreshKeys.header) as? STRefreshHeaderView)?.beginRefreshing()
     }
 
     /// 移除下拉刷新控件。
@@ -787,8 +733,8 @@ extension STBaseView {
     ///   - content: 显示内容（`.animation` 仅 spinner / `.text` 文字 / `.imageAndText` 图片+文字）
     ///   - action: 加载回调，完成后调用 `st_endLoadMore(hasMore:)`
     public func st_addLoadMore(content: STLoadMoreContent = .animation, action: @escaping () -> Void) {
-        guard let sv = st_refreshScrollView() else { return }
-        st_removeLoadMore()
+        guard let sv = self.st_refreshScrollView() else { return }
+        self.st_removeLoadMore()
         let footer = STLoadMoreFooterView(content: content)
         footer.attach(to: sv, action: action)
         objc_setAssociatedObject(self, &STRefreshKeys.footer, footer, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
