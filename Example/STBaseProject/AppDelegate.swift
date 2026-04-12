@@ -56,7 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     static func makeRootNavigationController() -> UINavigationController {
-        let logDemo = STLogDemoViewController()
+        let logDemo = STNextViewController(nibName: "STNextViewController", bundle: nil)
         return UINavigationController(rootViewController: logDemo)
     }
 

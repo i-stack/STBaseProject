@@ -14,7 +14,6 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C35D61289B634B00C449DF /* STNextViewController.swift */; };
-		E40ADBA62EC5ED2F004FC664 /* STTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40ADBA52EC5ED2F004FC664 /* STTestViewController.swift */; };
 		E41AED1A29AC509100760473 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E41AED1929AC509100760473 /* ViewController.xib */; };
 		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
 		E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1E29AC558A00760473 /* ViewControllerModel.swift */; };
@@ -41,7 +40,6 @@
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF65A6D5DDF550B36F808158 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.release.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
 		D130156922DC92BC00D5216C /* STBaseProject-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-Bridging-Header.h"; sourceTree = "<group>"; };
-		E40ADBA52EC5ED2F004FC664 /* STTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STTestViewController.swift; sourceTree = "<group>"; };
 		E41AED1929AC509100760473 /* ViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ViewController.xib; sourceTree = "<group>"; };
 		E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerViewModel.swift; sourceTree = "<group>"; };
 		E41AED1E29AC558A00760473 /* ViewControllerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerModel.swift; sourceTree = "<group>"; };
@@ -163,7 +161,6 @@
 				62C35D61289B634B00C449DF /* STNextViewController.swift */,
 				E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */,
 				E4F09E092F42A80E00253CC5 /* STLogDemoViewController.swift */,
-				E40ADBA52EC5ED2F004FC664 /* STTestViewController.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				E41AED1929AC509100760473 /* ViewController.xib */,
 			);
@@ -295,7 +292,6 @@
 			files = (
 				E45802332E821D9600E3B669 /* STMyScrollableView.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
-				E40ADBA62EC5ED2F004FC664 /* STTestViewController.swift in Sources */,
 				E4F1586A2F42C45F00D1D6E1 /* SceneDelegate.swift in Sources */,
 				E4F09E0A2F42A80E00253CC5 /* STLogDemoViewController.swift in Sources */,
 				E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */,
