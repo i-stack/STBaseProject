@@ -69,7 +69,10 @@ open class STTextField: UITextField {
     
     @IBInspectable var borderColor: UIColor {
         get {
-            return UIColor(cgColor: self.layer.borderColor!)
+            guard let cgColor = self.layer.borderColor else {
+                return .clear
+            }
+            return UIColor(cgColor: cgColor)
         }
         set {
             self.layer.borderColor = newValue.cgColor
