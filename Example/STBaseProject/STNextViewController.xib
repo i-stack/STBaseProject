@@ -4,7 +4,6 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24743"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -17,64 +16,12 @@
         <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
             <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-            <subviews>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4GK-kl-gy4" customClass="STBtn" customModule="STBaseProject">
-                    <rect key="frame" x="0.0" y="100" width="393" height="35"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="35" id="abk-4q-Irz"/>
-                    </constraints>
-                    <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                    <state key="normal" title="Button">
-                        <color key="titleColor" systemColor="linkColor"/>
-                    </state>
-                </button>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gd3-ve-Xb8">
-                    <rect key="frame" x="0.0" y="155" width="393" height="21"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                    <nil key="textColor"/>
-                    <nil key="highlightedColor"/>
-                </label>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KmZ-zJ-EvJ" customClass="STBaseView" customModule="STBaseProject">
-                    <rect key="frame" x="0.0" y="226" width="393" height="128"/>
-                    <subviews>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PBB-Hb-kxf">
-                            <rect key="frame" x="89" y="54" width="42" height="21"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                            <nil key="textColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                    </subviews>
-                    <color key="backgroundColor" systemColor="systemMintColor"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="128" id="Ph5-1l-2cI"/>
-                    </constraints>
-                </view>
-            </subviews>
-            <color key="backgroundColor" systemColor="systemOrangeColor"/>
-            <constraints>
-                <constraint firstItem="KmZ-zJ-EvJ" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="0uv-vQ-0dW"/>
-                <constraint firstItem="4GK-kl-gy4" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="1eq-FS-lFn"/>
-                <constraint firstItem="gd3-ve-Xb8" firstAttribute="top" secondItem="4GK-kl-gy4" secondAttribute="bottom" constant="20" id="7WA-Sa-WIJ"/>
-                <constraint firstItem="KmZ-zJ-EvJ" firstAttribute="top" secondItem="gd3-ve-Xb8" secondAttribute="bottom" constant="50" id="D2U-Wz-iDM"/>
-                <constraint firstAttribute="trailing" secondItem="4GK-kl-gy4" secondAttribute="trailing" id="ULL-gu-KOi"/>
-                <constraint firstAttribute="trailing" secondItem="gd3-ve-Xb8" secondAttribute="trailing" id="WAq-0V-u9d"/>
-                <constraint firstAttribute="trailing" secondItem="KmZ-zJ-EvJ" secondAttribute="trailing" id="iyK-or-gNF"/>
-                <constraint firstItem="4GK-kl-gy4" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="100" id="kaw-8X-dTF"/>
-                <constraint firstItem="gd3-ve-Xb8" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" id="xHJ-cG-321"/>
-            </constraints>
-            <point key="canvasLocation" x="51.145038167938928" y="20.422535211267608"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
         </view>
     </objects>
     <resources>
-        <systemColor name="linkColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemMintColor">
-            <color red="0.0" green="0.78431372549019607" blue="0.70196078431372544" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemOrangeColor">
-            <color red="1" green="0.55294117647058827" blue="0.15686274509803921" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
     </resources>
 </document>
