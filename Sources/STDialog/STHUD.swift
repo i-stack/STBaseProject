@@ -38,16 +38,13 @@ public struct STHUDTheme {
     public var loadingColor: UIColor
     public var cornerRadius: CGFloat
     public var shadowEnabled: Bool
-    
     public var successIconName: String?
     public var errorIconName: String?
     public var warningIconName: String?
     public var infoIconName: String?
     public var loadingIconName: String?
-    
     public var iconSize: CGSize
     public var hudSize: CGSize
-    
     public var labelFont: UIFont?
     public var detailLabelFont: UIFont?
     public var customView: UIView?
@@ -154,103 +151,103 @@ open class STHUD: NSObject {
     /// 设置背景颜色
     /// - Parameter color: 背景颜色
     public func setBackgroundColor(_ color: UIColor) {
-        theme.backgroundColor = color
+        self.theme.backgroundColor = color
     }
     
     /// 设置文字颜色
     /// - Parameter color: 文字颜色
     public func setTextColor(_ color: UIColor) {
-        theme.textColor = color
+        self.theme.textColor = color
     }
     
     /// 设置详细文字颜色
     /// - Parameter color: 详细文字颜色
     public func setDetailTextColor(_ color: UIColor) {
-        theme.detailTextColor = color
+        self.theme.detailTextColor = color
     }
     
     /// 设置成功颜色
     /// - Parameter color: 成功颜色
     public func setSuccessColor(_ color: UIColor) {
-        theme.successColor = color
+        self.theme.successColor = color
     }
     
     /// 设置错误颜色
     /// - Parameter color: 错误颜色
     public func setErrorColor(_ color: UIColor) {
-        theme.errorColor = color
+        self.theme.errorColor = color
     }
     
     /// 设置警告颜色
     /// - Parameter color: 警告颜色
     public func setWarningColor(_ color: UIColor) {
-        theme.warningColor = color
+        self.theme.warningColor = color
     }
     
     /// 设置信息颜色
     /// - Parameter color: 信息颜色
     public func setInfoColor(_ color: UIColor) {
-        theme.infoColor = color
+        self.theme.infoColor = color
     }
     
     /// 设置加载颜色
     /// - Parameter color: 加载颜色
     public func setLoadingColor(_ color: UIColor) {
-        theme.loadingColor = color
+        self.theme.loadingColor = color
     }
     
     /// 设置圆角
     /// - Parameter radius: 圆角半径
     public func setCornerRadius(_ radius: CGFloat) {
-        theme.cornerRadius = radius
+        self.theme.cornerRadius = radius
     }
     
     /// 设置阴影
     /// - Parameter enabled: 是否启用阴影
     public func setShadowEnabled(_ enabled: Bool) {
-        theme.shadowEnabled = enabled
+        self.theme.shadowEnabled = enabled
     }
     
     /// 设置成功图标
     /// - Parameter iconName: 图标名称
     public func setSuccessIcon(_ iconName: String?) {
-        theme.successIconName = iconName
+        self.theme.successIconName = iconName
     }
     
     /// 设置错误图标
     /// - Parameter iconName: 图标名称
     public func setErrorIcon(_ iconName: String?) {
-        theme.errorIconName = iconName
+        self.theme.errorIconName = iconName
     }
     
     /// 设置警告图标
     /// - Parameter iconName: 图标名称
     public func setWarningIcon(_ iconName: String?) {
-        theme.warningIconName = iconName
+        self.theme.warningIconName = iconName
     }
     
     /// 设置信息图标
     /// - Parameter iconName: 图标名称
     public func setInfoIcon(_ iconName: String?) {
-        theme.infoIconName = iconName
+        self.theme.infoIconName = iconName
     }
     
     /// 设置加载图标
     /// - Parameter iconName: 图标名称
     public func setLoadingIcon(_ iconName: String?) {
-        theme.loadingIconName = iconName
+        self.theme.loadingIconName = iconName
     }
     
     /// 设置图标大小
     /// - Parameter size: 图标大小
     public func setIconSize(_ size: CGSize) {
-        theme.iconSize = size
+        self.theme.iconSize = size
     }
     
     /// 设置HUD大小
     /// - Parameter size: HUD大小
     public func setHudSize(_ size: CGSize) {
-        theme.hudSize = size
+        self.theme.hudSize = size
     }
     
     /// 立即更新当前显示的HUD大小
@@ -262,31 +259,31 @@ open class STHUD: NSObject {
     /// 设置标签字体
     /// - Parameter font: 字体
     public func setLabelFont(_ font: UIFont?) {
-        theme.labelFont = font
+        self.theme.labelFont = font
     }
     
     /// 设置详细标签字体
     /// - Parameter font: 字体
     public func setDetailLabelFont(_ font: UIFont?) {
-        theme.detailLabelFont = font
+        self.theme.detailLabelFont = font
     }
     
     /// 设置自定义视图
     /// - Parameter view: 自定义视图
     public func setCustomView(_ view: UIView?) {
-        theme.customView = view
+        self.theme.customView = view
     }
     
     /// 设置自定义背景颜色
     /// - Parameter color: 背景颜色
     public func setCustomBgColor(_ color: UIColor?) {
-        theme.customBgColor = color
+        self.theme.customBgColor = color
     }
     
     /// 设置活动视图颜色
     /// - Parameter color: 活动视图颜色
     public func setActivityViewColor(_ color: UIColor?) {
-        theme.activityViewColor = color
+        self.theme.activityViewColor = color
     }
         
     /// 使用配置显示 HUD
@@ -313,7 +310,7 @@ open class STHUD: NSObject {
                 self.progressHUD?.mode = .text
             }
         } else {
-            setDefaultIcon(for: config.type)
+            self.setDefaultIcon(for: config.type)
         }
         
         // 设置位置偏移
@@ -342,7 +339,7 @@ open class STHUD: NSObject {
             type: .success,
             title: title,
             detailText: detailText,
-            iconName: theme.successIconName,
+            iconName: self.theme.successIconName,
             autoHide: autoHide,
             hideDelay: 2.0
         )
@@ -359,7 +356,7 @@ open class STHUD: NSObject {
             type: .error,
             title: title,
             detailText: detailText,
-            iconName: theme.errorIconName,
+            iconName: self.theme.errorIconName,
             autoHide: autoHide,
             hideDelay: 3.0
         )
@@ -376,7 +373,7 @@ open class STHUD: NSObject {
             type: .warning,
             title: title,
             detailText: detailText,
-            iconName: theme.warningIconName,
+            iconName: self.theme.warningIconName,
             autoHide: autoHide,
             hideDelay: 2.5
         )
@@ -393,7 +390,7 @@ open class STHUD: NSObject {
             type: .info,
             title: title,
             detailText: detailText,
-            iconName: theme.infoIconName,
+            iconName: self.theme.infoIconName,
             autoHide: autoHide
         )
         self.show(with: config)
@@ -408,7 +405,7 @@ open class STHUD: NSObject {
             type: .loading,
             title: title,
             detailText: detailText,
-            autoHide: true
+            autoHide: false
         )
         self.show(with: config)
     }
@@ -445,62 +442,39 @@ open class STHUD: NSObject {
         guard self.progressHUD != nil else { return }
         self.progressHUD?.delegate = self
         self.progressHUD?.label?.numberOfLines = 0
-        self.progressHUD?.contentColor = theme.textColor
+        self.progressHUD?.contentColor = self.theme.textColor
         self.progressHUD?.bezelView?.style = .solidColor
         self.progressHUD?.removeFromSuperViewOnHide = true
-        if let font = theme.labelFont {
+        if let font = self.theme.labelFont {
             self.progressHUD?.label?.font = font
         } else {
             self.progressHUD?.label?.font = UIFont.st_systemFont(ofSize: 16, weight: .medium)
         }
         
-        if let detailsLabelFont = theme.detailLabelFont {
+        if let detailsLabelFont = self.theme.detailLabelFont {
             self.progressHUD?.detailsLabel?.font = detailsLabelFont
         } else {
             self.progressHUD?.detailsLabel?.font = UIFont.st_systemFont(ofSize: 14, weight: .regular)
         }
         
-        self.progressHUD?.label?.textColor = theme.textColor
-        self.progressHUD?.detailsLabel?.textColor = theme.detailTextColor
+        self.progressHUD?.label?.textColor = self.theme.textColor
+        self.progressHUD?.detailsLabel?.textColor = self.theme.detailTextColor
         
-        let backgroundColor = theme.customBgColor ?? theme.backgroundColor
+        let backgroundColor = self.theme.customBgColor ?? self.theme.backgroundColor
         self.progressHUD?.bezelView?.backgroundColor = backgroundColor
         self.progressHUD?.bezelView?.style = .solidColor
         self.progressHUD?.bezelView?.color = backgroundColor
         
         if let bezelView = self.progressHUD?.bezelView {
-            bezelView.layer.cornerRadius = theme.cornerRadius
-            if theme.shadowEnabled {
+            bezelView.layer.cornerRadius = self.theme.cornerRadius
+            if self.theme.shadowEnabled {
                 bezelView.layer.shadowColor = UIColor.black.cgColor
                 bezelView.layer.shadowOffset = CGSize(width: 0, height: 2)
                 bezelView.layer.shadowRadius = 4
                 bezelView.layer.shadowOpacity = 0.3
             }
         }
-        
-//        let hudSize = theme.hudSize
-//        updateHudSize(hudSize)
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-//            if let bezelView = self.progressHUD?.bezelView {
-//                let currentFrame = bezelView.frame
-//                bezelView.frame = CGRect(
-//                    x: currentFrame.origin.x,
-//                    y: currentFrame.origin.y,
-//                    width: hudSize.width,
-//                    height: hudSize.height
-//                )
-//            }
-//        }
-//        if let bezelView = self.progressHUD?.bezelView {
-//            let currentFrame = bezelView.frame
-//            bezelView.frame = CGRect(
-//                x: currentFrame.origin.x,
-//                y: currentFrame.origin.y,
-//                width: hudSize.width,
-//                height: hudSize.height
-//            )
-//        }
-        if let cusView = theme.customView {
+        if let cusView = self.theme.customView {
             self.progressHUD?.customView = cusView
         }
         self.progressHUD?.mode = self.hudMode
@@ -528,44 +502,23 @@ open class STHUD: NSObject {
     /// - Parameter size: 目标大小
     private func updateHudSize(_ size: CGSize) {
         guard let progressHUD = self.progressHUD else { return }
-        
-        // 方法1：通过约束更新大小
         if let bezelView = progressHUD.bezelView {
             bezelView.translatesAutoresizingMaskIntoConstraints = false
-            
-            // 移除现有的大小约束
             NSLayoutConstraint.deactivate(bezelView.constraints.filter { constraint in
                 constraint.firstAttribute == .width || constraint.firstAttribute == .height
             })
-            
-            // 添加新的大小约束
             NSLayoutConstraint.activate([
                 bezelView.widthAnchor.constraint(equalToConstant: size.width),
                 bezelView.heightAnchor.constraint(equalToConstant: size.height)
             ])
-            
-            // 强制布局更新
             bezelView.setNeedsLayout()
             bezelView.layoutIfNeeded()
         }
-        
-        // 方法2：如果约束不生效，直接设置 frame（作为备选）
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-//            if let bezelView = progressHUD.bezelView {
-//                let currentFrame = bezelView.frame
-//                bezelView.frame = CGRect(
-//                    x: currentFrame.origin.x,
-//                    y: currentFrame.origin.y,
-//                    width: size.width,
-//                    height: size.height
-//                )
-//            }
-//        }
     }
     
     /// 应用主题
     /// - Parameter theme: 主题配置
-    internal func applyTheme(_ theme: STHUDTheme) {
+    public func applyTheme(_ theme: STHUDTheme) {
         self.theme = theme
     }
     
@@ -584,7 +537,6 @@ open class STHUD: NSObject {
             self.progressHUD?.customView = createWarningIcon()
         case .info:
             self.progressHUD?.mode = .customView
-//            self.progressHUD?.customView = createInfoIcon()
         case .loading:
             self.progressHUD?.mode = .indeterminate
         case .progress:
@@ -616,40 +568,40 @@ open class STHUD: NSObject {
     /// 创建成功图标
     /// - Returns: 成功图标视图
     private func createSuccessIcon() -> UIView {
-        return createIconView(iconName: theme.successIconName ?? nil,
-                              backgroundColor: theme.successColor,
+        return createIconView(iconName: self.theme.successIconName ?? nil,
+                              backgroundColor: self.theme.successColor,
                               text: "✓")
     }
     
     /// 创建错误图标
     /// - Returns: 错误图标视图
     private func createErrorIcon() -> UIView {
-        return createIconView(iconName: theme.errorIconName ?? nil,
-                              backgroundColor: theme.errorColor,
+        return createIconView(iconName: self.theme.errorIconName ?? nil,
+                              backgroundColor: self.theme.errorColor,
                               text: "✕")
     }
     
     /// 创建警告图标
     /// - Returns: 警告图标视图
     private func createWarningIcon() -> UIView {
-        return createIconView(iconName: theme.warningIconName ?? nil,
-                              backgroundColor: theme.warningColor,
+        return createIconView(iconName: self.theme.warningIconName ?? nil,
+                              backgroundColor: self.theme.warningColor,
                               text: "i")
     }
     
     /// 创建信息图标
     /// - Returns: 信息图标视图
     private func createInfoIcon() -> UIView {
-        return createIconView(iconName: theme.infoIconName ?? nil,
-                              backgroundColor: theme.infoColor,
+        return createIconView(iconName: self.theme.infoIconName ?? nil,
+                              backgroundColor: self.theme.infoColor,
                               text: "i")
     }
     
     /// 创建加载图标
     /// - Returns: 加载图标视图
     private func createLoadingIcon() -> UIView {
-        return createIconView(iconName: theme.loadingIconName ?? nil,
-                              backgroundColor: theme.loadingColor,
+        return createIconView(iconName: self.theme.loadingIconName ?? nil,
+                              backgroundColor: self.theme.loadingColor,
                               text: "⟳")
     }
     
@@ -683,9 +635,40 @@ extension STHUD: STProgressHUDDelegate {
     }
 }
 
+// MARK: - STHUD 实用方法
+public extension STHUD {
+    /// 在异步任务期间显示加载指示器，任务结束后自动隐藏
+    /// - Parameters:
+    ///   - status: 加载文本
+    ///   - task: 异步任务
+    /// - Returns: 任务结果
+    static func st_showWhileExecuting<T>(status: String? = "加载中...",
+                                         task: @escaping () async throws -> T) async throws -> T {
+        DispatchQueue.main.async {
+            sharedHUD.showLoading(title: status ?? "加载中...")
+        }
+        do {
+            let result = try await task()
+            DispatchQueue.main.async { sharedHUD.hide(animated: true) }
+            return result
+        } catch {
+            DispatchQueue.main.async { sharedHUD.hide(animated: true) }
+            throw error
+        }
+    }
+
+    /// 根据当前界面样式自动适配 HUD 样式（深色/浅色模式）
+    static func st_adaptToUserInterfaceStyle() {
+        let isDarkMode = UITraitCollection.current.userInterfaceStyle == .dark
+        let bgColor = isDarkMode ? UIColor.black.withAlphaComponent(0.8) : UIColor.white.withAlphaComponent(0.9)
+        let txtColor = isDarkMode ? UIColor.white : UIColor.black
+        sharedHUD.setBackgroundColor(bgColor)
+        sharedHUD.setTextColor(txtColor)
+    }
+}
+
 // MARK: - UIView 扩展 - HUD 方法
 public extension UIView {
-    
     /// 显示成功提示
     /// - Parameter text: 显示文本
     func st_showSuccess(_ text: String) {
