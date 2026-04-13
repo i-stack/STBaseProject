@@ -330,7 +330,9 @@ open class STLogView: UIView {
         button.titleLabel?.numberOfLines = 1
         button.setContentHuggingPriority(.required, for: .horizontal)
         button.setContentCompressionResistancePriority(.required, for: .horizontal)
-        button.heightAnchor.constraint(equalToConstant: 32).isActive = true
+        let heightConstraint = button.heightAnchor.constraint(equalToConstant: 32)
+        heightConstraint.priority = .defaultHigh
+        heightConstraint.isActive = true
         button.addTarget(self, action: #selector(filterLevelButtonTapped(_:)), for: .touchUpInside)
         button.configure()
             .iconPosition(.left)
