@@ -132,6 +132,8 @@ public class STHUD: NSObject {
     public var theme: STHUDTheme = STHUDTheme()
     public static let sharedHUD: STHUD = STHUD()
     public var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
+    /// 全局默认图标位置，便捷方法未指定 iconPosition 时使用此值
+    public var defaultIconPosition: STHUDIconPosition = .top
     
     private override init() {
         super.init()
@@ -310,64 +312,72 @@ public class STHUD: NSObject {
     ///   - title: 标题
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
-    internal func showSuccess(title: String, detailText: String? = nil, autoHide: Bool = true) {
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    internal func showSuccess(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
         let config = STHUDConfig(
             type: .success,
             title: title,
             detailText: detailText,
             iconName: self.theme.successIconName,
             autoHide: autoHide,
-            hideDelay: 2.0
+            hideDelay: 2.0,
+            iconPosition: iconPosition ?? self.defaultIconPosition
         )
         self.show(with: config)
     }
-    
+
     /// 显示错误提示
     /// - Parameters:
     ///   - title: 标题
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
-    internal func showError(title: String, detailText: String? = nil, autoHide: Bool = true) {
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    internal func showError(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
         let config = STHUDConfig(
             type: .error,
             title: title,
             detailText: detailText,
             iconName: self.theme.errorIconName,
             autoHide: autoHide,
-            hideDelay: 3.0
+            hideDelay: 3.0,
+            iconPosition: iconPosition ?? self.defaultIconPosition
         )
         self.show(with: config)
     }
-    
+
     /// 显示警告提示
     /// - Parameters:
     ///   - title: 标题
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
-    internal func showWarning(title: String, detailText: String? = nil, autoHide: Bool = true) {
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    internal func showWarning(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
         let config = STHUDConfig(
             type: .warning,
             title: title,
             detailText: detailText,
             iconName: self.theme.warningIconName,
             autoHide: autoHide,
-            hideDelay: 2.5
+            hideDelay: 2.5,
+            iconPosition: iconPosition ?? self.defaultIconPosition
         )
         self.show(with: config)
     }
-    
+
     /// 显示信息提示
     /// - Parameters:
     ///   - title: 标题
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
-    internal func showInfo(title: String, detailText: String? = nil, autoHide: Bool = true) {
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    internal func showInfo(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
         let config = STHUDConfig(
             type: .info,
             title: title,
             detailText: detailText,
             iconName: self.theme.infoIconName,
-            autoHide: autoHide
+            autoHide: autoHide,
+            iconPosition: iconPosition ?? self.defaultIconPosition
         )
         self.show(with: config)
     }
@@ -620,30 +630,34 @@ public extension STHUD {
 // MARK: - UIView 扩展 - HUD 方法
 public extension UIView {
     /// 显示成功提示（带图标，自动隐藏）
-    func st_showSuccess(_ text: String, detailText: String? = nil) {
+    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    func st_showSuccess(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showSuccess(title: text, detailText: detailText)
+            STHUD.sharedHUD.showSuccess(title: text, detailText: detailText, iconPosition: iconPosition)
         }
     }
 
     /// 显示错误提示（带图标，自动隐藏）
-    func st_showError(_ text: String, detailText: String? = nil) {
+    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    func st_showError(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showError(title: text, detailText: detailText)
+            STHUD.sharedHUD.showError(title: text, detailText: detailText, iconPosition: iconPosition)
         }
     }
 
     /// 显示警告提示（带图标，自动隐藏）
-    func st_showWarning(_ text: String, detailText: String? = nil) {
+    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    func st_showWarning(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showWarning(title: text, detailText: detailText)
+            STHUD.sharedHUD.showWarning(title: text, detailText: detailText, iconPosition: iconPosition)
         }
     }
 
     /// 显示信息提示（带图标，自动隐藏）
-    func st_showInfo(_ text: String, detailText: String? = nil) {
+    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    func st_showInfo(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showInfo(title: text, detailText: detailText)
+            STHUD.sharedHUD.showInfo(title: text, detailText: detailText, iconPosition: iconPosition)
         }
     }
 
