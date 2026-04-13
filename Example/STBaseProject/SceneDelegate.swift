@@ -1,8 +1,9 @@
 //
-//  SceneDelegate.swift
-//  STBaseProject_Example
+//  AppDelegate.swift
+//  STBaseProject
 //
-//  Created to adopt UIScene lifecycle for iOS 13+.
+//  Created by 寒江孤影 on 05/16/2017.
+//  Copyright (c) 2019 STBaseProject. All rights reserved.
 //
 
 import UIKit

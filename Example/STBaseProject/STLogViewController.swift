@@ -1,83 +1,82 @@
 //
-//  STLogDemoViewController.swift
+//  STLogViewController.swift
 //  STBaseProject_Example
 //
-//  Created to showcase STLogView capabilities within the Example app.
+//  Created by 寒江孤影 on 2022/8/4.
+//  Copyright © 2022 STBaseProject. All rights reserved.
 //
 
 import UIKit
 import STBaseProject
 
-/// 通过注入模拟日志，演示 STLogView 的过滤、搜索与主题切换等能力
-final class STLogDemoViewController: UIViewController {
+final class STLogViewController: STBaseViewController {
 
-    private let baseTitle = "STLogView Demo"
-
+    private var timer: Timer?
     private let logView = STLogView()
     private let logGenerator = STDemoLogGenerator()
-    private var timer: Timer?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = baseTitle
-        view.backgroundColor = .systemBackground
-
-        setupLogView()
-        configureNavigationItems()
-        seedInitialLogs()
-        startAutoLogging()
-        logNetworkSample()
+        self.view.backgroundColor = .systemBackground
+        self.setupNavBar()
+        self.setupLogView()
+        self.seedInitialLogs()
+        self.startAutoLogging()
+        self.logNetworkSample()
     }
 
-    private func setupLogView() {
-        logView.translatesAutoresizingMaskIntoConstraints = false
-        logView.mDelegate = self
-        view.addSubview(logView)
-
+    private func setupNavBar() {
+        self.st_showNavBtnType(type: .showLeftBtn)
+        self.leftBtn.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        let randomBtn = self.makeNavButton(title: "随机日志", action: #selector(addRandomLog))
+        let burstBtn = self.makeNavButton(title: "批量注入", action: #selector(addBurstLogs))
+        let stack = UIStackView(arrangedSubviews: [burstBtn, randomBtn])
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        self.navigationBarItemsView.addSubview(stack)
         NSLayoutConstraint.activate([
-            logView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            logView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            logView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            logView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            stack.centerYAnchor.constraint(equalTo: self.navigationBarItemsView.centerYAnchor),
+            stack.trailingAnchor.constraint(equalTo: self.navigationBarItemsView.trailingAnchor, constant: -12)
         ])
     }
 
-    private func configureNavigationItems() {
-        let randomItem = makeNavButton(title: "随机日志", action: #selector(addRandomLog))
-        let burstItem = makeNavButton(title: "批量注入", action: #selector(addBurstLogs))
-        navigationItem.rightBarButtonItems = [randomItem, burstItem]
+    private func setupLogView() {
+        self.logView.translatesAutoresizingMaskIntoConstraints = false
+        self.logView.mDelegate = self
+        self.view.addSubview(self.logView)
+        NSLayoutConstraint.activate([
+            self.logView.topAnchor.constraint(equalTo: self.contentTopAnchor),
+            self.logView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            self.logView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            self.logView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 
     private func seedInitialLogs() {
         STLogLevel.allCases.forEach { level in
             let message = "示例 \(level.rawValue) 级别日志，用于展示过滤效果。"
-            STPersistentLog(
-                message,
-                level: level,
-                metadata: ["seed": "true"],
-                file: "STLogDemoViewController.swift",
-                function: "viewDidLoad",
-                line: 52
+            STPersistentLog(message, level: level, metadata: ["seed": "true"], file: "STLogDemoViewController.swift", function: "viewDidLoad", line: 52
             )
         }
     }
 
     @objc private func addRandomLog() {
-        logGenerator.randomLog()
+        self.logGenerator.randomLog()
     }
 
     @objc private func addBurstLogs() {
         (0..<10).forEach { _ in
-            logGenerator.randomLog()
+            self.logGenerator.randomLog()
         }
     }
 
-    private func makeNavButton(title: String, action: Selector) -> UIBarButtonItem {
+    private func makeNavButton(title: String, action: Selector) -> UIButton {
         let button = STIconButton(type: .system)
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         button.iconContentInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
-        button.layer.cornerRadius = 16
+        button.layer.cornerRadius = 14
         button.layer.masksToBounds = true
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.3).cgColor
@@ -86,14 +85,15 @@ final class STLogDemoViewController: UIViewController {
         button.setContentHuggingPriority(.required, for: .horizontal)
         button.setContentCompressionResistancePriority(.required, for: .horizontal)
         button.addTarget(self, action: action, for: .touchUpInside)
-        button.heightAnchor.constraint(equalToConstant: 32).isActive = true
-        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 84).isActive = true
-        return UIBarButtonItem(customView: button)
+        let heightConstraint = button.heightAnchor.constraint(equalToConstant: 28)
+        heightConstraint.priority = .defaultHigh
+        heightConstraint.isActive = true
+        return button
     }
 
     private func startAutoLogging() {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
+        self.timer?.invalidate()
+        self.timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
             self?.logGenerator.randomLog()
         }
     }
@@ -142,27 +142,18 @@ final class STLogDemoViewController: UIViewController {
     }
 
     deinit {
-        timer?.invalidate()
+        self.timer?.invalidate()
     }
 }
 
 // MARK: - STLogViewDelegate
-extension STLogDemoViewController: STLogViewDelegate {
+extension STLogViewController: STLogViewDelegate {
     func logViewBackBtnClick() {
-        navigationController?.popViewController(animated: true)
+        self.onLeftBtnTap()
     }
 
     func logViewDidFilterLogs(with results: [STLogEntry]) {
-        if !logView.st_isFiltering() || results.count == logView.allLogCount() {
-            title = baseTitle
-            return
-        }
-        
-        if results.isEmpty {
-            title = "\(baseTitle) · 无结果"
-        } else {
-            title = "\(baseTitle) · \(results.count) 条"
-        }
+    
     }
 }
 

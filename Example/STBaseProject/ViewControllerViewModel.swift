@@ -10,28 +10,5 @@ import UIKit
 
 class ViewControllerViewModel: NSObject {
 
-    private var dataSources:[ViewControllerModel] = [ViewControllerModel]()
     
-    func cellDateSources() -> [ViewControllerModel] {
-        return dataSources
-    }
-    
-    func cellForRow(indexPath: IndexPath) -> ViewControllerModel {
-        if dataSources.count > indexPath.row {
-            return dataSources[indexPath.row]
-        }
-        return ViewControllerModel()
-    }
-    
-    func loadData(complection: @escaping(Bool) -> Void) {
-        dataSources.removeAll()
-        var model = ViewControllerModel()
-        model.title = Bundle.st_localizedString(key: "test1")
-        model.nibName = "STNextViewController"
-        model.className = model.nibName
-        dataSources.append(model)
-        DispatchQueue.main.async {
-            complection(true)
-        }
-    }
 }

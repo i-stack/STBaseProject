@@ -2,8 +2,8 @@
 //  AppDelegate.swift
 //  STBaseProject
 //
-//  Created by 寒江孤影MW on 05/16/2017.
-//  Copyright (c) 2019 songMW. All rights reserved.
+//  Created by 寒江孤影 on 05/16/2017.
+//  Copyright (c) 2019 STBaseProject. All rights reserved.
 //
 
 import UIKit
@@ -14,20 +14,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        STDeviceAdapter.shared.configureNavigationBar(regularHeight: 88, safeAreaHeight: 106, containerHeight: 50)
         STDeviceAdapter.shared.configure(designSize: CGSize(width: 375, height: 812))
         Bundle.st_setCustomLanguage("zh-Hans")
-        configureLogging()
-
-        if #available(iOS 13.0, *) {
-            // window setup handled in SceneDelegate
-        } else {
-            let window = UIWindow(frame: UIScreen.main.bounds)
-            window.rootViewController = AppDelegate.makeRootNavigationController()
-            self.window = window
-            window.makeKeyAndVisible()
-        }
+        self.configureLogging()
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = AppDelegate.makeRootNavigationController()
+        self.window = window
+        window.makeKeyAndVisible()
         return true
     }
 
@@ -56,8 +51,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     static func makeRootNavigationController() -> UINavigationController {
-        let logDemo = STNextViewController(nibName: "STNextViewController", bundle: nil)
-        return UINavigationController(rootViewController: logDemo)
+        let rootViewController = ViewController(nibName: "ViewController", bundle: nil)
+        return UINavigationController(rootViewController: rootViewController)
     }
 
     @available(iOS 13.0, *)

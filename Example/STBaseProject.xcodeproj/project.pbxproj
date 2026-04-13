@@ -13,7 +13,7 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C35D61289B634B00C449DF /* STNextViewController.swift */; };
+		62C35D63289B634B00C449DF /* STHudViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62C35D61289B634B00C449DF /* STHudViewController.swift */; };
 		E41AED1A29AC509100760473 /* ViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E41AED1929AC509100760473 /* ViewController.xib */; };
 		E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1C29AC548D00760473 /* ViewControllerViewModel.swift */; };
 		E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E41AED1E29AC558A00760473 /* ViewControllerModel.swift */; };
@@ -21,9 +21,9 @@
 		E45802332E821D9600E3B669 /* STMyScrollableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45802322E821D9600E3B669 /* STMyScrollableView.swift */; };
 		E48B26362D3CA50800BF3FC3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E48B26342D3CA50800BF3FC3 /* Localizable.strings */; };
 		E4DB508D2EC41C7900EAEF71 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = E4DB508C2EC41C7900EAEF71 /* STBaseProject */; };
-		E4F09E0A2F42A80E00253CC5 /* STLogDemoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F09E092F42A80E00253CC5 /* STLogDemoViewController.swift */; };
+		E4F09E0A2F42A80E00253CC5 /* STLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F09E092F42A80E00253CC5 /* STLogViewController.swift */; };
 		E4F1586A2F42C45F00D1D6E1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F158692F42C45F00D1D6E1 /* SceneDelegate.swift */; };
-		E4F5D9192D6330FA00A6C212 /* STNextViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */; };
+		E4F5D9192D6330FA00A6C212 /* STHudViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F5D9182D6330FA00A6C212 /* STHudViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,7 +36,7 @@
 		607FACDA1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		62C35D61289B634B00C449DF /* STNextViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STNextViewController.swift; sourceTree = "<group>"; };
+		62C35D61289B634B00C449DF /* STHudViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STHudViewController.swift; sourceTree = "<group>"; };
 		B6C3E7656A39FBFA3405A9B0 /* Pods_STBaseProject_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF65A6D5DDF550B36F808158 /* Pods-STBaseProject_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.release.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.release.xcconfig"; sourceTree = "<group>"; };
 		D130156922DC92BC00D5216C /* STBaseProject-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "STBaseProject-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -47,9 +47,9 @@
 		E45802322E821D9600E3B669 /* STMyScrollableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STMyScrollableView.swift; sourceTree = "<group>"; };
 		E48B26352D3CA50800BF3FC3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E48B26372D3CA51D00BF3FC3 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		E4F09E092F42A80E00253CC5 /* STLogDemoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STLogDemoViewController.swift; sourceTree = "<group>"; };
+		E4F09E092F42A80E00253CC5 /* STLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STLogViewController.swift; sourceTree = "<group>"; };
 		E4F158692F42C45F00D1D6E1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STNextViewController.xib; sourceTree = "<group>"; };
+		E4F5D9182D6330FA00A6C212 /* STHudViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STHudViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,9 +158,9 @@
 		E41AED2A29AC96D200760473 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
-				62C35D61289B634B00C449DF /* STNextViewController.swift */,
-				E4F5D9182D6330FA00A6C212 /* STNextViewController.xib */,
-				E4F09E092F42A80E00253CC5 /* STLogDemoViewController.swift */,
+				62C35D61289B634B00C449DF /* STHudViewController.swift */,
+				E4F5D9182D6330FA00A6C212 /* STHudViewController.xib */,
+				E4F09E092F42A80E00253CC5 /* STLogViewController.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				E41AED1929AC509100760473 /* ViewController.xib */,
 			);
@@ -249,7 +249,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4F5D9192D6330FA00A6C212 /* STNextViewController.xib in Resources */,
+				E4F5D9192D6330FA00A6C212 /* STHudViewController.xib in Resources */,
 				E41AED1A29AC509100760473 /* ViewController.xib in Resources */,
 				E48B26362D3CA50800BF3FC3 /* Localizable.strings in Resources */,
 				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
@@ -293,10 +293,10 @@
 				E45802332E821D9600E3B669 /* STMyScrollableView.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				E4F1586A2F42C45F00D1D6E1 /* SceneDelegate.swift in Sources */,
-				E4F09E0A2F42A80E00253CC5 /* STLogDemoViewController.swift in Sources */,
+				E4F09E0A2F42A80E00253CC5 /* STLogViewController.swift in Sources */,
 				E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */,
 				E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */,
-				62C35D63289B634B00C449DF /* STNextViewController.swift in Sources */,
+				62C35D63289B634B00C449DF /* STHudViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
