@@ -14,6 +14,7 @@ public protocol STTextViewDelegate: NSObjectProtocol {
     func st_textViewWillChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat)
     func st_textViewHeightDidChange(textView: STTextView, currentHeight: CGFloat, isReachMaxHeight: Bool)
     func st_textViewDidChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat)
+    func st_textViewShouldChangeText(textView: STTextView, in range: NSRange, replacementText text: String) -> Bool
 }
 
 public extension STTextViewDelegate {
@@ -23,6 +24,7 @@ public extension STTextViewDelegate {
     func st_textViewWillChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat) {}
     func st_textViewHeightDidChange(textView: STTextView, currentHeight: CGFloat, isReachMaxHeight: Bool) {}
     func st_textViewDidChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat) {}
+    func st_textViewShouldChangeText(textView: STTextView, in range: NSRange, replacementText text: String) -> Bool { true }
 }
 
 public typealias STTextViewHeightChangeUserActionsBlock = (_ oldHeight: CGFloat, _ newHeight: CGFloat) -> Void
@@ -452,6 +454,9 @@ extension STTextView: UITextViewDelegate {
     }
 
     public func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if let cusDelegate, !cusDelegate.st_textViewShouldChangeText(textView: self, in: range, replacementText: text) {
+            return false
+        }
         guard self.maxTextCount > 0, self.shouldLimitTextCount else { return true }
         guard let currentText = textView.text else { return true }
         guard let stringRange = Range(range, in: currentText) else { return true }
