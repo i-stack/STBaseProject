@@ -34,22 +34,16 @@ public struct STHUDTheme {
     public var errorColor: UIColor
     public var warningColor: UIColor
     public var infoColor: UIColor
-    public var loadingColor: UIColor
     public var cornerRadius: CGFloat
     public var shadowEnabled: Bool
     public var successIconName: String?
     public var errorIconName: String?
     public var warningIconName: String?
     public var infoIconName: String?
-    public var loadingIconName: String?
     public var iconSize: CGSize
-    public var hudSize: CGSize
     public var labelFont: UIFont?
     public var detailLabelFont: UIFont?
-    public var customView: UIView?
-    public var customBgColor: UIColor?
-    public var activityViewColor: UIColor?
-    
+
     public init(backgroundColor: UIColor = UIColor.black.withAlphaComponent(0.8),
                 textColor: UIColor = .white,
                 detailTextColor: UIColor = .lightGray,
@@ -57,21 +51,15 @@ public struct STHUDTheme {
                 errorColor: UIColor = .systemRed,
                 warningColor: UIColor = .systemOrange,
                 infoColor: UIColor = .systemBlue,
-                loadingColor: UIColor = .systemBlue,
                 cornerRadius: CGFloat = 8,
                 shadowEnabled: Bool = true,
                 successIconName: String? = nil,
                 errorIconName: String? = nil,
                 warningIconName: String? = nil,
                 infoIconName: String? = nil,
-                loadingIconName: String? = nil,
                 iconSize: CGSize = CGSize(width: 28, height: 28),
-                hudSize: CGSize = CGSize(width: 120, height: 120),
                 labelFont: UIFont? = UIFont.st_systemFont(ofSize: 16, weight: .medium),
-                detailLabelFont: UIFont? = UIFont.st_systemFont(ofSize: 14, weight: .regular),
-                customView: UIView? = nil,
-                customBgColor: UIColor? = nil,
-                activityViewColor: UIColor? = nil) {
+                detailLabelFont: UIFont? = UIFont.st_systemFont(ofSize: 14, weight: .regular)) {
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.detailTextColor = detailTextColor
@@ -79,21 +67,15 @@ public struct STHUDTheme {
         self.errorColor = errorColor
         self.warningColor = warningColor
         self.infoColor = infoColor
-        self.loadingColor = loadingColor
         self.cornerRadius = cornerRadius
         self.shadowEnabled = shadowEnabled
         self.successIconName = successIconName
         self.errorIconName = errorIconName
         self.warningIconName = warningIconName
         self.infoIconName = infoIconName
-        self.loadingIconName = loadingIconName
         self.iconSize = iconSize
-        self.hudSize = hudSize
         self.labelFont = labelFont
         self.detailLabelFont = detailLabelFont
-        self.customView = customView
-        self.customBgColor = customBgColor
-        self.activityViewColor = activityViewColor
     }
 }
 
@@ -149,137 +131,95 @@ open class STHUD: NSObject {
     public func setBackgroundColor(_ color: UIColor) {
         self.theme.backgroundColor = color
     }
-    
+
     /// 设置文字颜色
     /// - Parameter color: 文字颜色
     public func setTextColor(_ color: UIColor) {
         self.theme.textColor = color
     }
-    
+
     /// 设置详细文字颜色
     /// - Parameter color: 详细文字颜色
     public func setDetailTextColor(_ color: UIColor) {
         self.theme.detailTextColor = color
     }
-    
+
     /// 设置成功颜色
     /// - Parameter color: 成功颜色
     public func setSuccessColor(_ color: UIColor) {
         self.theme.successColor = color
     }
-    
+
     /// 设置错误颜色
     /// - Parameter color: 错误颜色
     public func setErrorColor(_ color: UIColor) {
         self.theme.errorColor = color
     }
-    
+
     /// 设置警告颜色
     /// - Parameter color: 警告颜色
     public func setWarningColor(_ color: UIColor) {
         self.theme.warningColor = color
     }
-    
+
     /// 设置信息颜色
     /// - Parameter color: 信息颜色
     public func setInfoColor(_ color: UIColor) {
         self.theme.infoColor = color
     }
-    
-    /// 设置加载颜色
-    /// - Parameter color: 加载颜色
-    public func setLoadingColor(_ color: UIColor) {
-        self.theme.loadingColor = color
-    }
-    
+
     /// 设置圆角
     /// - Parameter radius: 圆角半径
     public func setCornerRadius(_ radius: CGFloat) {
         self.theme.cornerRadius = radius
     }
-    
+
     /// 设置阴影
     /// - Parameter enabled: 是否启用阴影
     public func setShadowEnabled(_ enabled: Bool) {
         self.theme.shadowEnabled = enabled
     }
-    
+
     /// 设置成功图标
     /// - Parameter iconName: 图标名称
     public func setSuccessIcon(_ iconName: String?) {
         self.theme.successIconName = iconName
     }
-    
+
     /// 设置错误图标
     /// - Parameter iconName: 图标名称
     public func setErrorIcon(_ iconName: String?) {
         self.theme.errorIconName = iconName
     }
-    
+
     /// 设置警告图标
     /// - Parameter iconName: 图标名称
     public func setWarningIcon(_ iconName: String?) {
         self.theme.warningIconName = iconName
     }
-    
+
     /// 设置信息图标
     /// - Parameter iconName: 图标名称
     public func setInfoIcon(_ iconName: String?) {
         self.theme.infoIconName = iconName
     }
-    
-    /// 设置加载图标
-    /// - Parameter iconName: 图标名称
-    public func setLoadingIcon(_ iconName: String?) {
-        self.theme.loadingIconName = iconName
-    }
-    
+
     /// 设置图标大小
     /// - Parameter size: 图标大小
     public func setIconSize(_ size: CGSize) {
         self.theme.iconSize = size
     }
-    
-    /// 设置HUD大小
-    /// - Parameter size: HUD大小
-    public func setHudSize(_ size: CGSize) {
-        self.theme.hudSize = size
-    }
-    
-    /// 立即更新当前显示的HUD大小
-    /// - Parameter size: 目标大小
-    public func updateCurrentHudSize(_ size: CGSize) {
-        self.updateHudSize(size)
-    }
-    
+
     /// 设置标签字体
     /// - Parameter font: 字体
     public func setLabelFont(_ font: UIFont?) {
         self.theme.labelFont = font
     }
-    
+
     /// 设置详细标签字体
     /// - Parameter font: 字体
     public func setDetailLabelFont(_ font: UIFont?) {
         self.theme.detailLabelFont = font
-    }
-    
-    /// 设置自定义视图
-    /// - Parameter view: 自定义视图
-    public func setCustomView(_ view: UIView?) {
-        self.theme.customView = view
-    }
-    
-    /// 设置自定义背景颜色
-    /// - Parameter color: 背景颜色
-    public func setCustomBgColor(_ color: UIColor?) {
-        self.theme.customBgColor = color
-    }
-    
-    /// 设置活动视图颜色
-    /// - Parameter color: 活动视图颜色
-    public func setActivityViewColor(_ color: UIColor?) {
-        self.theme.activityViewColor = color
     }
         
     /// 使用配置显示 HUD
@@ -454,10 +394,9 @@ open class STHUD: NSObject {
         }
         hud.label.textColor = self.theme.textColor
         hud.detailsLabel.textColor = self.theme.detailTextColor
-        let backgroundColor = self.theme.customBgColor ?? self.theme.backgroundColor
-        hud.bezelView.backgroundColor = backgroundColor
+        hud.bezelView.backgroundColor = self.theme.backgroundColor
         hud.bezelView.style = .solidColor
-        hud.bezelView.color = backgroundColor
+        hud.bezelView.color = self.theme.backgroundColor
         
         if let hud = self.progressHUD {
             hud.bezelView.layer.cornerRadius = self.theme.cornerRadius
@@ -467,9 +406,6 @@ open class STHUD: NSObject {
                 hud.bezelView.layer.shadowRadius = 4
                 hud.bezelView.layer.shadowOpacity = 0.3
             }
-        }
-        if let cusView = self.theme.customView {
-            self.progressHUD?.customView = cusView
         }
         self.progressHUD?.mode = self.hudMode
     }
@@ -492,23 +428,6 @@ open class STHUD: NSObject {
         }
     }
      
-    /// 更新 HUD 大小
-    /// - Parameter size: 目标大小
-    private func updateHudSize(_ size: CGSize) {
-        guard let progressHUD = self.progressHUD else { return }
-        let bezelView = progressHUD.bezelView
-        bezelView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.deactivate(bezelView.constraints.filter { constraint in
-            constraint.firstAttribute == .width || constraint.firstAttribute == .height
-        })
-        NSLayoutConstraint.activate([
-            bezelView.widthAnchor.constraint(equalToConstant: size.width),
-            bezelView.heightAnchor.constraint(equalToConstant: size.height)
-        ])
-        bezelView.setNeedsLayout()
-        bezelView.layoutIfNeeded()
-    }
-    
     /// 应用主题
     /// - Parameter theme: 主题配置
     public func applyTheme(_ theme: STHUDTheme) {
