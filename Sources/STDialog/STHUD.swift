@@ -14,6 +14,13 @@ public enum STHUDLocation {
     case bottom
 }
 
+// MARK: - HUD 图标位置
+public enum STHUDIconPosition {
+    case top    // 图标在上方，文本在下方（默认）
+    case left   // 图标在左侧，文本在右侧；有 detailText 时图标垂直居中
+    case right  // 图标在右侧，文本在左侧；有 detailText 时图标垂直居中
+}
+
 // MARK: - HUD 类型枚举
 public enum STHUDType {
     case success      // 成功提示（有图标，自动隐藏）
@@ -91,7 +98,8 @@ public struct STHUDConfig {
     public var hideDelay: TimeInterval
     public var theme: STHUDTheme
     public var isLocalized: Bool
-    
+    public var iconPosition: STHUDIconPosition
+
     public init(type: STHUDType = .info,
                 title: String,
                 detailText: String? = nil,
@@ -101,7 +109,8 @@ public struct STHUDConfig {
                 autoHide: Bool = true,
                 hideDelay: TimeInterval = 1.5,
                 theme: STHUDTheme = STHUDTheme(),
-                isLocalized: Bool = true) {
+                isLocalized: Bool = true,
+                iconPosition: STHUDIconPosition = .top) {
         self.type = type
         self.title = title
         self.detailText = detailText
@@ -112,6 +121,7 @@ public struct STHUDConfig {
         self.hideDelay = hideDelay
         self.theme = theme
         self.isLocalized = isLocalized
+        self.iconPosition = iconPosition
     }
 }
 
@@ -239,21 +249,42 @@ open class STHUD: NSObject {
             if let hud = self.progressHUD { window.addSubview(hud) }
         }
         let isIconType: Bool = [.success, .error, .warning, .info].contains(config.type)
+
+        // label/detailsLabel 文本，left/right 模式时由容器视图承载，置 nil 让 STProgressHUD 忽略
+        var labelText: String? = finalTitle
+        var detailLabelText: String? = finalDetailText
+
         if let customView = config.customView {
             // 用户传入自定义视图
             self.progressHUD?.customView = customView
             self.progressHUD?.mode = .customView
         } else if isIconType {
-            // 有图标类型：customView 只放图标，label/detailsLabel 由 STProgressHUD 垂直排列
-            self.progressHUD?.customView = createIconImageView(for: config.type, iconName: config.iconName)
-            self.progressHUD?.mode = .customView
+            let iconView = createIconImageView(for: config.type, iconName: config.iconName)
+            switch config.iconPosition {
+            case .top:
+                // 图标在上方：customView 只放图标，label/detailsLabel 由 STProgressHUD 垂直排列
+                self.progressHUD?.customView = iconView
+                self.progressHUD?.mode = .customView
+            case .left, .right:
+                // 图标在左/右：构建水平布局容器，STProgressHUD 的 label/detailsLabel 置 nil
+                let contentView = makeHorizontalContentView(
+                    iconView: iconView,
+                    title: finalTitle,
+                    detail: finalDetailText,
+                    iconOnLeft: config.iconPosition == .left
+                )
+                self.progressHUD?.customView = contentView
+                self.progressHUD?.mode = .customView
+                labelText = nil
+                detailLabelText = nil
+            }
         } else {
             // 无图标类型（loading / text / progress）
             self.setMode(for: config.type)
         }
 
-        self.progressHUD?.label.text = finalTitle
-        self.progressHUD?.detailsLabel.text = finalDetailText
+        self.progressHUD?.label.text = labelText
+        self.progressHUD?.detailsLabel.text = detailLabelText
 
         // 设置位置偏移
         let offset = calculateOffset(for: config.location, in: self.progressHUD?.superview)
@@ -460,6 +491,56 @@ open class STHUD: NSObject {
         }
     }
         
+    /// 构建水平图标+文本布局容器（用于 iconPosition == .left / .right）
+    /// - icon 与文本垂直居中对齐
+    /// - 有 detailText 时，icon 相对于 title+detail 整体垂直居中
+    private func makeHorizontalContentView(
+        iconView: UIImageView,
+        title: String,
+        detail: String?,
+        iconOnLeft: Bool
+    ) -> UIView {
+        // 固定 icon 尺寸（不依赖 frame，UIStackView 内通过约束固定）
+        let iconSize = theme.iconSize
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            iconView.widthAnchor.constraint(equalToConstant: iconSize.width),
+            iconView.heightAnchor.constraint(equalToConstant: iconSize.height)
+        ])
+
+        // 标题
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.textColor = theme.textColor
+        titleLabel.font = theme.labelFont ?? UIFont.st_systemFont(ofSize: 16, weight: .medium)
+        titleLabel.numberOfLines = 0
+        titleLabel.textAlignment = .left
+
+        // 垂直文本栈（title + optional detail）
+        let textStack = UIStackView(arrangedSubviews: [titleLabel])
+        textStack.axis = .vertical
+        textStack.spacing = 4
+        textStack.alignment = .leading
+
+        if let detail = detail, !detail.isEmpty {
+            let detailLabel = UILabel()
+            detailLabel.text = detail
+            detailLabel.textColor = theme.detailTextColor
+            detailLabel.font = theme.detailLabelFont ?? UIFont.st_systemFont(ofSize: 14, weight: .regular)
+            detailLabel.numberOfLines = 0
+            detailLabel.textAlignment = .left
+            textStack.addArrangedSubview(detailLabel)
+        }
+
+        // 水平主栈（icon + textStack，对齐方式 center 让 icon 始终垂直居中）
+        let items: [UIView] = iconOnLeft ? [iconView, textStack] : [textStack, iconView]
+        let hStack = UIStackView(arrangedSubviews: items)
+        hStack.axis = .horizontal
+        hStack.spacing = 8
+        hStack.alignment = .center
+        return hStack
+    }
+
     /// 创建图标视图（仅包含图标，文本由 STProgressHUD 的 label/detailsLabel 显示）
     private func createIconImageView(for type: STHUDType, iconName: String?) -> UIImageView {
         let imageView = UIImageView()

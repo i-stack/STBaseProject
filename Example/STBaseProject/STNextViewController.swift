@@ -69,6 +69,12 @@ class STNextViewController: STBaseViewController {
 
         addSectionLabel("自定义配置")
         addButton("st_showHUD(with: config)", action: #selector(testCustomConfig))
+
+        addSectionLabel("图标位置")
+        addButton("iconPosition: .left（无 detail）", action: #selector(testIconLeft))
+        addButton("iconPosition: .left（有 detail）", action: #selector(testIconLeftWithDetail))
+        addButton("iconPosition: .right（无 detail）", action: #selector(testIconRight))
+        addButton("iconPosition: .right（有 detail）", action: #selector(testIconRightWithDetail))
     }
 
     private func addSectionLabel(_ title: String) {
@@ -152,6 +158,28 @@ class STNextViewController: STBaseViewController {
             autoHide: true,
             hideDelay: 3.0
         )
+        self.view.st_showHUD(with: config)
+    }
+
+    // MARK: - 图标位置
+
+    @objc private func testIconLeft() {
+        let config = STHUDConfig(type: .success, title: "操作成功", autoHide: true, iconPosition: .left)
+        self.view.st_showHUD(with: config)
+    }
+
+    @objc private func testIconLeftWithDetail() {
+        let config = STHUDConfig(type: .error, title: "加载失败", detailText: "请检查网络连接后重试", autoHide: true, iconPosition: .left)
+        self.view.st_showHUD(with: config)
+    }
+
+    @objc private func testIconRight() {
+        let config = STHUDConfig(type: .warning, title: "操作有风险", autoHide: true, iconPosition: .right)
+        self.view.st_showHUD(with: config)
+    }
+
+    @objc private func testIconRightWithDetail() {
+        let config = STHUDConfig(type: .info, title: "这是提示", detailText: "图标显示在右侧，icon 垂直居中", autoHide: true, iconPosition: .right)
         self.view.st_showHUD(with: config)
     }
 }
