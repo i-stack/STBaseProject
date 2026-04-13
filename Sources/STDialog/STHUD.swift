@@ -96,7 +96,7 @@ public struct STHUDConfig {
     public var location: STHUDLocation
     public var autoHide: Bool
     public var hideDelay: TimeInterval
-    public var theme: STHUDTheme
+    public var theme: STHUDTheme?
     public var isLocalized: Bool
     public var iconPosition: STHUDIconPosition
 
@@ -108,7 +108,7 @@ public struct STHUDConfig {
                 location: STHUDLocation = .center,
                 autoHide: Bool = true,
                 hideDelay: TimeInterval = 1.5,
-                theme: STHUDTheme = STHUDTheme(),
+                theme: STHUDTheme? = nil,
                 isLocalized: Bool = true,
                 iconPosition: STHUDIconPosition = .top) {
         self.type = type
@@ -126,11 +126,12 @@ public struct STHUDConfig {
 }
 
 /// 功能强大的 HUD 提示组件，支持多种类型、主题和自定义配置
-open class STHUD: NSObject {
+public class STHUD: NSObject {
+
     public var progressHUD: STProgressHUD?
-    open var theme: STHUDTheme = STHUDTheme()
+    public var theme: STHUDTheme = STHUDTheme()
     public static let sharedHUD: STHUD = STHUD()
-    open var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
+    public var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
     
     private override init() {
         super.init()
@@ -235,6 +236,12 @@ open class STHUD: NSObject {
     /// 使用配置显示 HUD
     /// - Parameter config: HUD 配置
     internal func show(with config: STHUDConfig) {
+        // config.theme 不为 nil 时，临时替换 self.theme 以应用本次调用的主题；
+        // 调用结束后通过 defer 恢复为调用前的全局主题（即用户通过 applyTheme 设置的主题，而非默认主题）
+        let previousTheme = self.theme
+        self.theme = config.theme ?? self.theme
+        defer { self.theme = previousTheme }
+
         let finalTitle = config.isLocalized ? config.title.localized : config.title
         let finalDetailText = config.detailText != nil ? (config.isLocalized ? config.detailText!.localized : config.detailText!) : nil
         let keyWindow = UIApplication.shared.connectedScenes
@@ -494,13 +501,7 @@ open class STHUD: NSObject {
     /// 构建水平图标+文本布局容器（用于 iconPosition == .left / .right）
     /// - icon 与文本垂直居中对齐
     /// - 有 detailText 时，icon 相对于 title+detail 整体垂直居中
-    private func makeHorizontalContentView(
-        iconView: UIImageView,
-        title: String,
-        detail: String?,
-        iconOnLeft: Bool
-    ) -> UIView {
-        // 固定 icon 尺寸（不依赖 frame，UIStackView 内通过约束固定）
+    private func makeHorizontalContentView(iconView: UIImageView, title: String, detail: String?, iconOnLeft: Bool) -> UIView {
         let iconSize = theme.iconSize
         iconView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
