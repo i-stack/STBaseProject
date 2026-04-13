@@ -598,6 +598,20 @@ extension STHUD: STProgressHUDDelegate {
 
 // MARK: - STHUD 实用方法
 public extension STHUD {
+    /// 全局显示加载指示器（需手动调用 st_dismiss 关闭）
+    static func st_show(_ text: String = "") {
+        DispatchQueue.main.async {
+            self.sharedHUD.showLoading(title: text)
+        }
+    }
+
+    /// 全局关闭加载指示器
+    static func st_dismiss() {
+        DispatchQueue.main.async {
+            self.sharedHUD.hide(animated: true)
+        }
+    }
+
     /// 在异步任务期间显示加载指示器，任务结束后自动隐藏
     /// - Parameters:
     ///   - status: 加载文本
