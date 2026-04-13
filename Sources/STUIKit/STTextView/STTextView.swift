@@ -7,25 +7,28 @@
 
 import UIKit
 
-private struct STTextViewLocalizationKey {
-    static var localizedPlaceholderKey: UInt8 = 0
-}
-
 public protocol STTextViewDelegate: NSObjectProtocol {
     func st_textViewEditingChanged(textView: STTextView)
     func st_textViewDidReachMaxTextCount(textView: STTextView, maxCount: Int)
     func st_textViewTextCountDidChange(textView: STTextView, currentCount: Int, maxCount: Int)
+    func st_textViewWillChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat)
     func st_textViewHeightDidChange(textView: STTextView, currentHeight: CGFloat, isReachMaxHeight: Bool)
+    func st_textViewDidChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat)
 }
 
 public extension STTextViewDelegate {
     func st_textViewEditingChanged(textView: STTextView) {}
     func st_textViewDidReachMaxTextCount(textView: STTextView, maxCount: Int) {}
     func st_textViewTextCountDidChange(textView: STTextView, currentCount: Int, maxCount: Int) {}
+    func st_textViewWillChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat) {}
     func st_textViewHeightDidChange(textView: STTextView, currentHeight: CGFloat, isReachMaxHeight: Bool) {}
+    func st_textViewDidChangeHeight(textView: STTextView, from oldHeight: CGFloat, to newHeight: CGFloat) {}
 }
 
-open class STTextView: UITextView {
+public typealias STTextViewHeightChangeUserActionsBlock = (_ oldHeight: CGFloat, _ newHeight: CGFloat) -> Void
+
+@IBDesignable
+open class STTextView: STPlaceholderTextView {
 
     weak open var cusDelegate: STTextViewDelegate?
 
@@ -33,127 +36,15 @@ open class STTextView: UITextView {
     open private(set) var currentTextCount: Int = 0
     open private(set) var currentInputHeight: CGFloat = 0
     open private(set) var isReachMaxInputHeight: Bool = false
+    open var heightChangeUserActionsBlock: STTextViewHeightChangeUserActionsBlock?
 
-    private let placeholderLabel = UILabel()
+    private weak var heightConstraint: NSLayoutConstraint?
     private var lastReportedHeight: CGFloat = 0
-    private var _contentInsets: UIEdgeInsets = .zero
-    private var isApplyingDefaultPlaceholderFont: Bool = false
-    private var shouldFollowTextViewFontForPlaceholder: Bool = true
-
-    // MARK: - Localization
-
-    @IBInspectable open var localizedPlaceholder: String {
-        get {
-            return objc_getAssociatedObject(self, &STTextViewLocalizationKey.localizedPlaceholderKey) as? String ?? ""
-        }
-        set {
-            objc_setAssociatedObject(
-                self,
-                &STTextViewLocalizationKey.localizedPlaceholderKey,
-                newValue,
-                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
-            )
-            self.placeholder = newValue.localized
-        }
-    }
-
-    // MARK: - Placeholder
-
-    @IBInspectable open var placeholder: String = "" {
-        didSet {
-            self.placeholderLabel.text = self.placeholder
-            self.updatePlaceholderVisibility()
-        }
-    }
-
-    @IBInspectable open var placeholderTextColor: UIColor = UIColor.systemGray3 {
-        didSet {
-            self.placeholderLabel.textColor = self.placeholderTextColor
-        }
-    }
-
-    @objc dynamic open var placeholderFont: UIFont = UIFont.st_systemFont(ofSize: 16) {
-        didSet {
-            self.placeholderLabel.font = self.placeholderFont
-            if !self.isApplyingDefaultPlaceholderFont {
-                self.shouldFollowTextViewFontForPlaceholder = false
-            }
-            self.layoutPlaceholderLabel()
-        }
-    }
-
-    @IBInspectable public var placeholderFontSize: CGFloat {
-        get { return self.placeholderFont.pointSize }
-        set {
-            self.placeholderFont = UIFont.st_systemFont(ofSize: max(1, newValue))
-        }
-    }
-
-    // MARK: - Content Insets (unified)
-
-    /// Unified content insets for text, cursor, and placeholder.
-    /// All individual inset properties (placeholderLeftInset, cursorInsetTop, etc.) route through this.
-    public var contentInsets: UIEdgeInsets {
-        get { return _contentInsets }
-        set {
-            _contentInsets = newValue
-            self.textContainer.lineFragmentPadding = 0
-            self.textContainerInset = newValue
-            self.layoutPlaceholderLabel()
-            self.updateHeightIfNeeded(notify: true)
-        }
-    }
-
-    @IBInspectable public var placeholderLeftInset: CGFloat {
-        get { return _contentInsets.left }
-        set {
-            var insets = _contentInsets
-            insets.left = max(0, newValue)
-            self.contentInsets = insets
-        }
-    }
-
-    @IBInspectable public var placeholderTopInset: CGFloat {
-        get { return _contentInsets.top }
-        set {
-            var insets = _contentInsets
-            insets.top = max(0, newValue)
-            self.contentInsets = insets
-        }
-    }
-
-    @IBInspectable public var cursorInsetTop: CGFloat {
-        get { return _contentInsets.top }
-        set { self.placeholderTopInset = newValue }
-    }
-
-    @IBInspectable public var cursorInsetLeft: CGFloat {
-        get { return _contentInsets.left }
-        set { self.placeholderLeftInset = newValue }
-    }
-
-    @IBInspectable public var cursorInsetBottom: CGFloat {
-        get { return _contentInsets.bottom }
-        set {
-            var insets = _contentInsets
-            insets.bottom = max(0, newValue)
-            self.contentInsets = insets
-        }
-    }
-
-    @IBInspectable public var cursorInsetRight: CGFloat {
-        get { return _contentInsets.right }
-        set {
-            var insets = _contentInsets
-            insets.right = max(0, newValue)
-            self.contentInsets = insets
-        }
-    }
 
     // MARK: - Appearance
 
     /// Setting cornerRadius > 0 automatically adjusts contentInsets to match the rounded corners.
-    @IBInspectable var cornerRadius: CGFloat {
+    @IBInspectable open var cornerRadius: CGFloat {
         get { return self.layer.cornerRadius }
         set {
             self.layer.cornerRadius = newValue
@@ -169,12 +60,12 @@ open class STTextView: UITextView {
         }
     }
 
-    @IBInspectable var borderWidth: CGFloat {
+    @IBInspectable open var borderWidth: CGFloat {
         get { return self.layer.borderWidth }
         set { self.layer.borderWidth = newValue > 0 ? newValue : 0 }
     }
 
-    @IBInspectable var borderColor: UIColor {
+    @IBInspectable open var borderColor: UIColor {
         get {
             guard let color = self.layer.borderColor else { return .clear }
             return UIColor(cgColor: color)
@@ -182,11 +73,51 @@ open class STTextView: UITextView {
         set { self.layer.borderColor = newValue.cgColor }
     }
 
-    // MARK: - Text Limits
+    @IBInspectable open var animateHeightChange: Bool = true
+    @IBInspectable open var heightChangeAnimationDuration: Double = 0.35
+
+    @IBInspectable open var minimumNumberOfLines: Int = 1 {
+        didSet {
+            if self.minimumNumberOfLines < 1 {
+                self.minimumNumberOfLines = 1
+            }
+            if self.maximumNumberOfLines > 0, self.minimumNumberOfLines > self.maximumNumberOfLines {
+                self.minimumNumberOfLines = self.maximumNumberOfLines
+            }
+            self.updateHeightIfNeeded(notify: true, animated: false)
+        }
+    }
+
+    /// Set to 0 for unlimited height. Set to a positive value to enable scrolling after the given line count.
+    @IBInspectable open var maximumNumberOfLines: Int = 0 {
+        didSet {
+            if self.maximumNumberOfLines < 0 {
+                self.maximumNumberOfLines = 0
+            }
+            if self.maximumNumberOfLines > 0, self.maximumNumberOfLines < self.minimumNumberOfLines {
+                self.maximumNumberOfLines = self.minimumNumberOfLines
+            }
+            self.updateHeightIfNeeded(notify: true, animated: false)
+        }
+    }
+
+    open var numberOfLines: Int {
+        self.layoutManager.ensureLayout(for: self.textContainer)
+        var lineCount = 0
+        var index = 0
+        var lineRange = NSRange()
+        let numberOfGlyphs = self.layoutManager.numberOfGlyphs
+        while index < numberOfGlyphs {
+            _ = self.layoutManager.lineFragmentRect(forGlyphAt: index, effectiveRange: &lineRange)
+            index = NSMaxRange(lineRange)
+            lineCount += 1
+        }
+        return lineCount
+    }
 
     open var maxTextHeight: CGFloat = CGFloat.greatestFiniteMagnitude {
         didSet {
-            self.updateHeightIfNeeded(notify: true)
+            self.updateHeightIfNeeded(notify: true, animated: false)
         }
     }
 
@@ -204,26 +135,9 @@ open class STTextView: UITextView {
         }
     }
 
-    // MARK: - Overrides
-
-    public override var text: String! {
-        didSet {
-            self.handleTextChange()
-        }
-    }
-
-    public override var attributedText: NSAttributedString! {
-        didSet {
-            self.handleTextChange()
-        }
-    }
-
     public override var font: UIFont? {
         didSet {
-            if self.shouldFollowTextViewFontForPlaceholder {
-                self.applyDefaultPlaceholderFont()
-            }
-            self.updateHeightIfNeeded(notify: true)
+            self.updateHeightIfNeeded(notify: true, animated: false)
         }
     }
 
@@ -236,19 +150,25 @@ open class STTextView: UITextView {
     public override var bounds: CGRect {
         didSet {
             if oldValue.size.width != self.bounds.size.width {
-                self.updateHeightIfNeeded(notify: true)
+                self.updateHeightIfNeeded(notify: true, animated: false)
             }
         }
     }
 
-    public override var intrinsicContentSize: CGSize {
-        let targetWidth = self.bounds.width > 0 ? self.bounds.width : UIScreen.main.bounds.width
-        let fitting = self.sizeThatFits(CGSize(width: targetWidth, height: CGFloat.greatestFiniteMagnitude))
-        let targetHeight = min(self.maxTextHeight, max(self.minTextHeight(), fitting.height))
-        return CGSize(width: UIView.noIntrinsicMetric, height: ceil(targetHeight))
+    public override var contentSize: CGSize {
+        didSet {
+            guard oldValue != self.contentSize else { return }
+            let animated = self.window != nil && self.isFirstResponder && self.animateHeightChange
+            self.updateHeightIfNeeded(notify: true, animated: animated)
+        }
     }
 
-    // MARK: - Init
+    public override var intrinsicContentSize: CGSize {
+        if self.heightConstraint != nil {
+            return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
+        }
+        return CGSize(width: UIView.noIntrinsicMetric, height: self.calculatedHeight())
+    }
 
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
@@ -262,10 +182,36 @@ open class STTextView: UITextView {
 
     open override func layoutSubviews() {
         super.layoutSubviews()
-        self.layoutPlaceholderLabel()
+        self.updateHeightConstraintIfNeeded()
     }
 
-    // MARK: - Public Config
+    open override func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        self.updateHeightConstraintIfNeeded()
+        self.updateHeightIfNeeded(notify: false, animated: false)
+    }
+
+    open override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let fittingHeight = self.fittingContentHeight(for: size.width)
+        let height = self.clampedHeight(for: fittingHeight)
+        return CGSize(width: size.width, height: height)
+    }
+
+    open override func sizeToFit() {
+        self.bounds.size.height = self.calculatedHeight()
+    }
+
+    open override func st_placeholderTextDidChange() {
+        self.handleTextChange()
+    }
+
+    open override func st_placeholderHeightAffectingChange() {
+        self.updateHeightIfNeeded(notify: true, animated: false)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
 
     public func config(textLimitCount: Int) {
         self.maxTextCount = textLimitCount
@@ -275,20 +221,9 @@ open class STTextView: UITextView {
         self.maxTextHeight = maxInputHeight > 0 ? maxInputHeight : CGFloat.greatestFiniteMagnitude
     }
 
-    public func config(placeholder: String, placeholderFont: UIFont? = nil, placeholderColor: UIColor? = nil) {
-        self.placeholder = placeholder
-        if let placeholderFont {
-            self.placeholderFont = placeholderFont
-        }
-        if let placeholderColor {
-            self.placeholderTextColor = placeholderColor
-        }
-    }
-
-    public func st_updateLocalizedPlaceholder() {
-        if !self.localizedPlaceholder.isEmpty {
-            self.placeholder = self.localizedPlaceholder.localized
-        }
+    public func config(minimumNumberOfLines: Int, maximumNumberOfLines: Int) {
+        self.minimumNumberOfLines = minimumNumberOfLines
+        self.maximumNumberOfLines = maximumNumberOfLines
     }
 
     public func config(text: String?, textFont: UIFont? = nil, textColor: UIColor? = nil) {
@@ -303,62 +238,75 @@ open class STTextView: UITextView {
         self.text = text
     }
 
-    public func configAttributed(placeholderColor: UIColor) {
-        self.placeholderTextColor = placeholderColor
-    }
-
-    // MARK: - Private
-
     private func config() {
         self.isScrollEnabled = false
         self.delegate = self
         self.keyboardDismissMode = .interactive
         self.alwaysBounceVertical = false
-        self.textContainer.lineFragmentPadding = 0
-        _contentInsets = self.textContainerInset
-        self.placeholderLabel.numberOfLines = 0
-        self.placeholderLabel.textColor = self.placeholderTextColor
-        self.applyDefaultPlaceholderFont()
-        self.placeholderLabel.isUserInteractionEnabled = false
-        self.addSubview(self.placeholderLabel)
         self.typingAttributes[.font] = self.font ?? UIFont.st_systemFont(ofSize: 16)
         self.typingAttributes[.foregroundColor] = self.textColor ?? UIColor.label
-        self.updatePlaceholderVisibility()
-        self.updateHeightIfNeeded(notify: false)
-    }
-
-    private func applyDefaultPlaceholderFont() {
-        self.isApplyingDefaultPlaceholderFont = true
-        self.placeholderFont = self.font ?? UIFont.st_systemFont(ofSize: 16)
-        self.isApplyingDefaultPlaceholderFont = false
-        self.shouldFollowTextViewFontForPlaceholder = true
-    }
-
-    private func layoutPlaceholderLabel() {
-        let inset = self.textContainerInset
-        let x = inset.left + self.textContainer.lineFragmentPadding
-        let maxWidth = self.bounds.width - x - inset.right - self.textContainer.lineFragmentPadding
-        let targetWidth = max(0, maxWidth)
-        let fittingSize = self.placeholderLabel.sizeThatFits(
-            CGSize(width: targetWidth, height: CGFloat.greatestFiniteMagnitude)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.handleTextDidChangeNotification(_:)),
+            name: UITextView.textDidChangeNotification,
+            object: self
         )
-        self.placeholderLabel.frame = CGRect(
-            x: x,
-            y: inset.top,
-            width: targetWidth,
-            height: ceil(fittingSize.height)
-        )
+        self.updateHeightConstraintIfNeeded()
+        self.updateHeightIfNeeded(notify: false, animated: false)
     }
 
     private func minTextHeight() -> CGFloat {
-        let lineHeight = (self.font ?? UIFont.st_systemFont(ofSize: 16)).lineHeight
-        return lineHeight + self.textContainerInset.top + self.textContainerInset.bottom
+        return self.heightForNumberOfLines(self.minimumNumberOfLines)
+    }
+
+    private func maxTextHeightLimit() -> CGFloat {
+        let lineBasedMaxHeight = self.maximumNumberOfLines > 0
+            ? self.heightForNumberOfLines(self.maximumNumberOfLines)
+            : CGFloat.greatestFiniteMagnitude
+        return min(self.maxTextHeight, lineBasedMaxHeight)
+    }
+
+    private func heightForNumberOfLines(_ numberOfLines: Int) -> CGFloat {
+        let font = self.typingAttributes[.font] as? UIFont ?? self.font ?? UIFont.st_systemFont(ofSize: 16)
+        var lineHeight = font.lineHeight
+        if let paragraphStyle = self.typingAttributes[.paragraphStyle] as? NSParagraphStyle {
+            if paragraphStyle.lineHeightMultiple > 0 {
+                lineHeight *= paragraphStyle.lineHeightMultiple
+            }
+            if paragraphStyle.minimumLineHeight > 0, lineHeight < paragraphStyle.minimumLineHeight {
+                lineHeight = paragraphStyle.minimumLineHeight
+            } else if paragraphStyle.maximumLineHeight > 0, lineHeight > paragraphStyle.maximumLineHeight {
+                lineHeight = paragraphStyle.maximumLineHeight
+            }
+            lineHeight += paragraphStyle.lineSpacing
+        }
+        return ceil(self.textContainerInset.top + self.textContainerInset.bottom + lineHeight * CGFloat(numberOfLines))
+    }
+
+    private func fittingContentHeight(for width: CGFloat) -> CGFloat {
+        let targetWidth = width > 0 ? width : UIScreen.main.bounds.width
+        let textViewFitting = super.sizeThatFits(
+            CGSize(width: targetWidth, height: CGFloat.greatestFiniteMagnitude)
+        ).height
+        let placeholderHeight = self.placeholderFittingHeight(for: targetWidth)
+        guard (self.text ?? "").isEmpty, placeholderHeight > 0 else {
+            return textViewFitting
+        }
+        return max(textViewFitting, placeholderHeight)
+    }
+
+    private func clampedHeight(for fittingHeight: CGFloat) -> CGFloat {
+        return ceil(max(self.minTextHeight(), min(self.maxTextHeightLimit(), fittingHeight)))
+    }
+
+    private func calculatedHeight() -> CGFloat {
+        let targetWidth = self.bounds.width > 0 ? self.bounds.width : UIScreen.main.bounds.width
+        return self.clampedHeight(for: self.fittingContentHeight(for: targetWidth))
     }
 
     private func handleTextChange() {
-        self.updatePlaceholderVisibility()
         self.enforceTextCountIfNeeded()
-        self.updateHeightIfNeeded(notify: true)
+        self.updateHeightIfNeeded(notify: true, animated: self.shouldAnimateHeightChangeNow())
         self.notifyTextCount()
     }
 
@@ -381,28 +329,119 @@ open class STTextView: UITextView {
         )
     }
 
-    private func updatePlaceholderVisibility() {
-        self.placeholderLabel.isHidden = !(self.text ?? "").isEmpty
+    @objc private func handleTextDidChangeNotification(_ notification: Notification) {
+        self.updateHeightIfNeeded(notify: true, animated: self.shouldAnimateHeightChangeNow())
     }
 
-    private func updateHeightIfNeeded(notify: Bool) {
+    private func shouldAnimateHeightChangeNow() -> Bool {
+        return self.animateHeightChange && self.window != nil && self.isFirstResponder
+    }
+
+    private func updateHeightIfNeeded(notify: Bool, animated: Bool) {
         self.invalidateIntrinsicContentSize()
+        self.updateHeightConstraintIfNeeded()
         let targetWidth = self.bounds.width > 0 ? self.bounds.width : UIScreen.main.bounds.width
-        let fitting = self.sizeThatFits(CGSize(width: targetWidth, height: CGFloat.greatestFiniteMagnitude))
-        let minHeight = self.minTextHeight()
-        let currentHeight = ceil(max(minHeight, min(self.maxTextHeight, fitting.height)))
-        let isReachMaxHeight = fitting.height >= self.maxTextHeight && self.maxTextHeight < CGFloat.greatestFiniteMagnitude
+        let fittingHeight = self.fittingContentHeight(for: targetWidth)
+        let currentHeight = self.clampedHeight(for: fittingHeight)
+        let maxHeightLimit = self.maxTextHeightLimit()
+        let isReachMaxHeight = fittingHeight >= maxHeightLimit && maxHeightLimit < CGFloat.greatestFiniteMagnitude
         self.currentInputHeight = currentHeight
         self.isReachMaxInputHeight = isReachMaxHeight
         self.isScrollEnabled = isReachMaxHeight
-        if notify, currentHeight != self.lastReportedHeight {
-            self.lastReportedHeight = currentHeight
-            self.cusDelegate?.st_textViewHeightDidChange(
-                textView: self,
-                currentHeight: currentHeight,
-                isReachMaxHeight: isReachMaxHeight
-            )
+        let oldHeight = self.currentDisplayedHeight()
+        guard currentHeight != self.lastReportedHeight else {
+            if currentHeight != oldHeight {
+                self.setHeight(currentHeight)
+            }
+            if isReachMaxHeight {
+                self.scrollToVisibleCaretIfNeeded()
+            }
+            return
         }
+        let applyHeightChange = {
+            self.setHeight(currentHeight)
+            self.heightChangeUserActionsBlock?(oldHeight, currentHeight)
+            self.superview?.layoutIfNeeded()
+        }
+        let completeHeightChange = {
+            self.layoutManager.ensureLayout(for: self.textContainer)
+            self.scrollToVisibleCaretIfNeeded()
+            self.lastReportedHeight = currentHeight
+            if notify {
+                self.cusDelegate?.st_textViewHeightDidChange(
+                    textView: self,
+                    currentHeight: currentHeight,
+                    isReachMaxHeight: isReachMaxHeight
+                )
+                self.cusDelegate?.st_textViewDidChangeHeight(textView: self, from: oldHeight, to: currentHeight)
+            }
+        }
+        if notify {
+            self.cusDelegate?.st_textViewWillChangeHeight(textView: self, from: oldHeight, to: currentHeight)
+        }
+        if animated {
+            UIView.animate(
+                withDuration: self.heightChangeAnimationDuration,
+                delay: 0,
+                options: [.allowUserInteraction, .beginFromCurrentState],
+                animations: applyHeightChange,
+                completion: { _ in completeHeightChange() }
+            )
+        } else {
+            applyHeightChange()
+            completeHeightChange()
+        }
+    }
+
+    private func currentDisplayedHeight() -> CGFloat {
+        if let heightConstraint = self.heightConstraint {
+            return ceil(heightConstraint.constant)
+        }
+        if self.bounds.height > 0 {
+            return ceil(self.bounds.height)
+        }
+        return ceil(self.lastReportedHeight)
+    }
+
+    private func setHeight(_ height: CGFloat) {
+        if let heightConstraint = self.heightConstraint {
+            heightConstraint.constant = height
+        } else if !self.constraints.isEmpty || self.superview != nil {
+            self.invalidateIntrinsicContentSize()
+            self.setNeedsLayout()
+        } else {
+            self.frame.size.height = height
+        }
+    }
+
+    private func updateHeightConstraintIfNeeded() {
+        if self.heightConstraint?.isActive == true {
+            return
+        }
+        if let constraint = self.constraints.first(where: { self.isHeightConstraint($0) }) {
+            self.heightConstraint = constraint
+            return
+        }
+        self.heightConstraint = self.superview?.constraints.first(where: { self.isHeightConstraint($0) })
+    }
+
+    private func isHeightConstraint(_ constraint: NSLayoutConstraint) -> Bool {
+        guard constraint.firstAttribute == .height, constraint.relation == .equal else { return false }
+        return constraint.firstItem as? UIView === self || constraint.secondItem as? UIView === self
+    }
+
+    private func scrollToVisibleCaretIfNeeded() {
+        guard self.isReachMaxInputHeight, let textPosition = self.selectedTextRange?.end else { return }
+        let caretRect = self.caretRect(for: textPosition)
+        let insets = UIEdgeInsets(
+            top: self.contentInset.top + self.textContainerInset.top,
+            left: self.contentInset.left + self.textContainerInset.left + self.textContainer.lineFragmentPadding,
+            bottom: self.contentInset.bottom + self.textContainerInset.bottom,
+            right: self.contentInset.right + self.textContainerInset.right + self.textContainer.lineFragmentPadding
+        )
+        let visibleRect = self.bounds.inset(by: insets)
+        guard !visibleRect.contains(caretRect) else { return }
+        self.scrollRectToVisible(caretRect, animated: false)
     }
 }
 
