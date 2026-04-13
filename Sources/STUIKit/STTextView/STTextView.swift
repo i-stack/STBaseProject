@@ -42,6 +42,7 @@ open class STTextView: STPlaceholderTextView {
 
     private weak var heightConstraint: NSLayoutConstraint?
     private var lastReportedHeight: CGFloat = 0
+    private var _minInputHeight: CGFloat = 0
 
     // MARK: - Appearance
 
@@ -127,6 +128,14 @@ open class STTextView: STPlaceholderTextView {
         didSet {
             self.enforceTextCountIfNeeded()
             self.notifyTextCount()
+        }
+    }
+
+    @IBInspectable public var minInputHeight: CGFloat {
+        get { return _minInputHeight }
+        set {
+            _minInputHeight = max(0, newValue)
+            self.updateHeightIfNeeded(notify: true, animated: false)
         }
     }
 
@@ -258,7 +267,8 @@ open class STTextView: STPlaceholderTextView {
     }
 
     private func minTextHeight() -> CGFloat {
-        return self.heightForNumberOfLines(self.minimumNumberOfLines)
+        let lineBasedMin = self.heightForNumberOfLines(self.minimumNumberOfLines)
+        return _minInputHeight > 0 ? max(_minInputHeight, lineBasedMin) : lineBasedMin
     }
 
     private func maxTextHeightLimit() -> CGFloat {
@@ -421,10 +431,14 @@ open class STTextView: STPlaceholderTextView {
             return
         }
         if let constraint = self.constraints.first(where: { self.isHeightConstraint($0) }) {
+            constraint.priority = UILayoutPriority(999)
             self.heightConstraint = constraint
             return
         }
-        self.heightConstraint = self.superview?.constraints.first(where: { self.isHeightConstraint($0) })
+        if let constraint = self.superview?.constraints.first(where: { self.isHeightConstraint($0) }) {
+            constraint.priority = UILayoutPriority(999)
+            self.heightConstraint = constraint
+        }
     }
 
     private func isHeightConstraint(_ constraint: NSLayoutConstraint) -> Bool {

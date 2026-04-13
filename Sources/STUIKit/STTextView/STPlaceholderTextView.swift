@@ -212,6 +212,16 @@ open class STPlaceholderTextView: UITextView {
         self.addSubview(self.placeholderLabel)
         self.updatePlaceholderVisibility()
         self.isConfiguringPlaceholderTextView = false
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.handleTextDidChangeForPlaceholder(_:)),
+            name: UITextView.textDidChangeNotification,
+            object: self
+        )
+    }
+
+    @objc private func handleTextDidChangeForPlaceholder(_ notification: Notification) {
+        self.updatePlaceholderVisibility()
     }
 
     private func notifyPlaceholderTextDidChange() {
