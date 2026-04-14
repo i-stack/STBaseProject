@@ -125,10 +125,20 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         self.setup()
     }
 
+    /// 外部（如 UITableViewCell 的 systemLayoutSizeFitting）在 cell 加入 window 之前
+    /// 注入正确的内容宽度，确保第一次高度测量就准确。
+    public var preferredContentWidth: CGFloat = 0
+
     public override var intrinsicContentSize: CGSize {
-        let fitting = self.textView.sizeThatFits(
-            CGSize(width: self.bounds.width > 0 ? self.bounds.width : (self.window?.bounds.width ?? UIView.layoutFittingExpandedSize.width), height: .greatestFiniteMagnitude)
-        )
+        let w: CGFloat
+        if self.preferredContentWidth > 0 {
+            w = self.preferredContentWidth
+        } else if self.bounds.width > 0 {
+            w = self.bounds.width
+        } else {
+            w = self.window?.bounds.width ?? UIScreen.main.bounds.width
+        }
+        let fitting = self.textView.sizeThatFits(CGSize(width: w, height: .greatestFiniteMagnitude))
         return CGSize(width: UIView.noIntrinsicMetric, height: ceil(fitting.height))
     }
 
@@ -145,6 +155,11 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         self.lastTableOverlayLayoutSize = self.bounds.size
         self.tableOverlayNeedsUpdate = false
         self.updateTableViewOverlays()
+        // 宽度确定后重新计算高度，修正 systemLayoutSizeFitting 首次用 UIScreen.main.bounds.width
+        // 估算的偏差，使 UITableView 以正确高度重新排版 cell。
+        if sizeChanged && self.bounds.width > 0 {
+            self.invalidateIntrinsicContentSize()
+        }
     }
 
     public func reset() {
