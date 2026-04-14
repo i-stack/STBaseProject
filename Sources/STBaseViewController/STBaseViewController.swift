@@ -43,6 +43,7 @@ open class STBaseViewController: UIViewController {
     public var rightBtnTitle: String?
     public var statusBarHidden: Bool = false
     public var statusBarStyle: UIStatusBarStyle = .default
+    open var prefersSystemNavigationBarHidden: Bool { true }
     
     private var appearanceObserver: NSObjectProtocol?
     private var systemThemeObserver: NSObjectProtocol?
@@ -54,6 +55,11 @@ open class STBaseViewController: UIViewController {
         self.setupAppearanceObservation()
         self.applyNavButtons()
         self.finalizeLayout()
+    }
+
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(self.prefersSystemNavigationBarHidden, animated: false)
     }
 
     open override func viewDidLayoutSubviews() {
@@ -72,7 +78,6 @@ open class STBaseViewController: UIViewController {
     }
 
     private func setupNavigationBar() {
-        self.navigationController?.setNavigationBarHidden(true, animated: false)
         self.navigationBarView.translatesAutoresizingMaskIntoConstraints = false
         self.navigationBarItemsView.translatesAutoresizingMaskIntoConstraints = false
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
