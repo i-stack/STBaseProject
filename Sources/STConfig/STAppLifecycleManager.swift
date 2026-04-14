@@ -30,44 +30,44 @@ public class STAppLifecycleManager {
     private init() {}
     
     public func start() {
-        self.st_setupNotifications()
+        self.setupNotifications()
     }
         
     /// 设置通知监听
-    private func st_setupNotifications() {
+    private func setupNotifications() {
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(st_appDidEnterBackground),
+            selector: #selector(appDidEnterBackground),
             name: UIApplication.didEnterBackgroundNotification,
             object: nil
         )
         
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(st_appWillEnterForeground),
+            selector: #selector(appWillEnterForeground),
             name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
     }
         
     /// 应用进入后台时调用
-    @objc private func st_appDidEnterBackground() {
+    @objc private func appDidEnterBackground() {
         self.backgroundTimestamp = Date()
-        STLog("📱 应用进入后台时间: \(self.st_formatDate(self.backgroundTimestamp!))")
+        STLog("📱 应用进入后台时间: \(self.formatDate(self.backgroundTimestamp!))")
         UserDefaults.standard.set(self.backgroundTimestamp, forKey: STAppLifecycleKeys.backgroundTimestamp)
         self.onDidEnterBackground?()
     }
     
     /// 应用进入前台时调用
-    @objc private func st_appWillEnterForeground() {
+    @objc private func appWillEnterForeground() {
         self.foregroundTimestamp = Date()
-        STLog("📱 应用进入前台时间: \(st_formatDate(foregroundTimestamp!))")
-        self.st_checkTimeDifference()
+        STLog("📱 应用进入前台时间: \(self.formatDate(foregroundTimestamp!))")
+        self.checkTimeDifference()
         self.onWillEnterForeground?()
     }
         
     /// 检查时间差是否超过设定阈值
-    private func st_checkTimeDifference() {
+    private func checkTimeDifference() {
         let savedBackgroundTime = self.backgroundTimestamp ?? UserDefaults.standard.object(forKey: STAppLifecycleKeys.backgroundTimestamp) as? Date
         guard let backgroundTime = savedBackgroundTime,
               let foregroundTime = self.foregroundTimestamp else {
@@ -81,7 +81,7 @@ public class STAppLifecycleManager {
         // 检查是否超过设定阈值
         if timeDifference > self.backgroundTimeoutInterval {
             STLog("⚠️ 应用在后台超过 \(self.backgroundTimeoutInterval / 60) 分钟！")
-            self.st_handleLongBackgroundTime(minutes: minutes)
+            self.handleLongBackgroundTime(minutes: minutes)
         } else {
             STLog("✅ 应用在后台未超过 \(self.backgroundTimeoutInterval / 60) 分钟")
         }
@@ -90,7 +90,7 @@ public class STAppLifecycleManager {
     
     /// 处理长时间后台的逻辑
     /// - Parameter minutes: 后台时长（分钟）
-    private func st_handleLongBackgroundTime(minutes: Double) {
+    private func handleLongBackgroundTime(minutes: Double) {
         DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
             strongSelf.onBackgroundTimeout?(minutes * 60)
@@ -100,7 +100,7 @@ public class STAppLifecycleManager {
     /// 格式化日期显示
     /// - Parameter date: 日期
     /// - Returns: 格式化后的字符串
-    private func st_formatDate(_ date: Date) -> String {
+    private func formatDate(_ date: Date) -> String {
         return self.dateFormatter.string(from: date)
     }
     
