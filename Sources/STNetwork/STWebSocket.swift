@@ -2,12 +2,7 @@
 //  STWebSocket.swift
 //  STBaseProject
 //
-//  基于 Network.framework 封装的 WebSocket 客户端。
-//
-//  并发模型：
-//  - 所有可变状态由 actor 隔离，外部调用均线程安全。
-//  - UI 事件通过 AsyncStream 推送，调用侧负责切主线程。
-//  - 内部每个长生命周期 Task 都在注释里标明：谁创建、谁持有、谁取消、何时释放。
+//  Created by 寒江孤影 on 2018/12/10.
 //
 
 import Foundation

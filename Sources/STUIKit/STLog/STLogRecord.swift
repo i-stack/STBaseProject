@@ -64,7 +64,7 @@ public struct STLogRecord: Codable, Identifiable, Sendable {
             .joined(separator: ", ")
 
         let lines = [
-            "\(self.timestamp.formatted("yyyy-MM-dd HH:mm:ss.SSS")) \(fileName)",
+            "\n\(self.timestamp.formatted("yyyy-MM-dd HH:mm:ss.SSS")) \(fileName)",
             "label: \(self.label)",
             "funcName: \(self.function)",
             "lineNum: (\(self.line))",

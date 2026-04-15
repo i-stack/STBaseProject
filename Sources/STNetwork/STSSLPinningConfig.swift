@@ -2,7 +2,7 @@
 //  STSSLPinningConfig.swift
 //  STBaseProject
 //
-//  Created by AI Assistant on 2024/12/19.
+//  Created by 寒江孤影 on 2018/12/10.
 //
 
 import Foundation

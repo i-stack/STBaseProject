@@ -2,6 +2,8 @@
 //  STWebSocketTypes.swift
 //  STBaseProject
 //
+//  Created by 寒江孤影 on 2018/12/10.
+//
 
 import Foundation
 import Network
