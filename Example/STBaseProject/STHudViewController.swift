@@ -113,7 +113,9 @@ class STHudViewController: STBaseViewController {
 
     // MARK: - 自动隐藏
     @objc private func testSuccess() {
-        self.view.st_showSuccess("操作成功")
+        self.view.st_showSuccess("操作成功") {
+            self.testToast()
+        }
     }
 
     @objc private func testSuccessWithDetail() {
