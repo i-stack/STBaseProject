@@ -131,10 +131,11 @@ public class STHUD: NSObject {
     public var progressHUD: STProgressHUD?
     public var theme: STHUDTheme = STHUDTheme()
     public static let sharedHUD: STHUD = STHUD()
-    public var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
-    /// 全局默认图标位置，便捷方法未指定 iconPosition 时使用此值
     public var defaultIconPosition: STHUDIconPosition = .top
-    
+    public var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
+
+    private var completionHandler: (() -> Void)?
+
     private override init() {
         super.init()
     }
@@ -236,8 +237,12 @@ public class STHUD: NSObject {
     }
         
     /// 使用配置显示 HUD
-    /// - Parameter config: HUD 配置
-    internal func show(with config: STHUDConfig) {
+    /// - Parameters:
+    ///   - config: HUD 配置
+    ///   - completion: HUD 隐藏后的回调（仅 autoHide 为 true 时有意义；手动关闭场景请使用 hide 后手动执行逻辑）
+    internal func show(with config: STHUDConfig, completion: (() -> Void)? = nil) {
+        self.completionHandler = completion
+
         // config.theme 不为 nil 时，临时替换 self.theme 以应用本次调用的主题；
         // 调用结束后通过 defer 恢复为调用前的全局主题（即用户通过 applyTheme 设置的主题，而非默认主题）
         let previousTheme = self.theme
@@ -254,7 +259,7 @@ public class STHUD: NSObject {
                 self.progressHUD?.hide(animated: true)
             }
             self.progressHUD = STProgressHUD.init(withView: window)
-            self.configHUBCommonProperty()
+            self.configCommonProperty()
             if let hud = self.progressHUD { window.addSubview(hud) }
         }
         let isIconType: Bool = [.success, .error, .warning, .info].contains(config.type)
@@ -313,7 +318,8 @@ public class STHUD: NSObject {
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
-    internal func showSuccess(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
+    ///   - completion: HUD 隐藏后的回调
+    internal func showSuccess(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .success,
             title: title,
@@ -323,7 +329,7 @@ public class STHUD: NSObject {
             hideDelay: 2.0,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
-        self.show(with: config)
+        self.show(with: config, completion: completion)
     }
 
     /// 显示错误提示
@@ -332,7 +338,8 @@ public class STHUD: NSObject {
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
-    internal func showError(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
+    ///   - completion: HUD 隐藏后的回调
+    internal func showError(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .error,
             title: title,
@@ -342,7 +349,7 @@ public class STHUD: NSObject {
             hideDelay: 3.0,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
-        self.show(with: config)
+        self.show(with: config, completion: completion)
     }
 
     /// 显示警告提示
@@ -351,7 +358,8 @@ public class STHUD: NSObject {
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
-    internal func showWarning(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
+    ///   - completion: HUD 隐藏后的回调
+    internal func showWarning(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .warning,
             title: title,
@@ -361,7 +369,7 @@ public class STHUD: NSObject {
             hideDelay: 2.5,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
-        self.show(with: config)
+        self.show(with: config, completion: completion)
     }
 
     /// 显示信息提示
@@ -370,7 +378,8 @@ public class STHUD: NSObject {
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
-    internal func showInfo(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil) {
+    ///   - completion: HUD 隐藏后的回调
+    internal func showInfo(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .info,
             title: title,
@@ -379,9 +388,9 @@ public class STHUD: NSObject {
             autoHide: autoHide,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
-        self.show(with: config)
+        self.show(with: config, completion: completion)
     }
-    
+
     /// 显示加载中（需手动调用 st_dismiss 关闭）
     /// - Parameters:
     ///   - title: 标题
@@ -395,13 +404,14 @@ public class STHUD: NSObject {
         )
         self.show(with: config)
     }
-    
+
     /// 显示纯文本提示
     /// - Parameters:
     ///   - title: 标题
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
-    internal func showText(title: String, detailText: String? = nil, autoHide: Bool = true) {
+    ///   - completion: HUD 隐藏后的回调
+    internal func showText(title: String, detailText: String? = nil, autoHide: Bool = true, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .text,
             title: title,
@@ -409,7 +419,7 @@ public class STHUD: NSObject {
             autoHide: autoHide,
             hideDelay: 2.0
         )
-        self.show(with: config)
+        self.show(with: config, completion: completion)
     }
         
     /// 配置手动隐藏的 HUD
@@ -419,12 +429,12 @@ public class STHUD: NSObject {
             self.progressHUD?.hide(animated: true)
         }
         self.progressHUD = STProgressHUD.init(withView: showInView)
-        self.configHUBCommonProperty()
+        self.configCommonProperty()
         if let hud = self.progressHUD { showInView.addSubview(hud) }
     }
     
     /// 配置通用属性
-    private func configHUBCommonProperty() {
+    private func configCommonProperty() {
         guard let hud = self.progressHUD else { return }
         hud.delegate = self
         hud.label.numberOfLines = 0
@@ -512,7 +522,7 @@ public class STHUD: NSObject {
     /// - icon 与文本垂直居中对齐
     /// - 有 detailText 时，icon 相对于 title+detail 整体垂直居中
     private func makeHorizontalContentView(iconView: UIImageView, title: String, detail: String?, iconOnLeft: Bool) -> UIView {
-        let iconSize = theme.iconSize
+        let iconSize = self.theme.iconSize
         iconView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             iconView.widthAnchor.constraint(equalToConstant: iconSize.width),
@@ -522,8 +532,8 @@ public class STHUD: NSObject {
         // 标题
         let titleLabel = UILabel()
         titleLabel.text = title
-        titleLabel.textColor = theme.textColor
-        titleLabel.font = theme.labelFont ?? UIFont.st_systemFont(ofSize: 16, weight: .medium)
+        titleLabel.textColor = self.theme.textColor
+        titleLabel.font = self.theme.labelFont ?? UIFont.st_systemFont(ofSize: 16, weight: .medium)
         titleLabel.numberOfLines = 0
         titleLabel.textAlignment = .left
 
@@ -536,8 +546,8 @@ public class STHUD: NSObject {
         if let detail = detail, !detail.isEmpty {
             let detailLabel = UILabel()
             detailLabel.text = detail
-            detailLabel.textColor = theme.detailTextColor
-            detailLabel.font = theme.detailLabelFont ?? UIFont.st_systemFont(ofSize: 14, weight: .regular)
+            detailLabel.textColor = self.theme.detailTextColor
+            detailLabel.font = self.theme.detailLabelFont ?? UIFont.st_systemFont(ofSize: 14, weight: .regular)
             detailLabel.numberOfLines = 0
             detailLabel.textAlignment = .left
             textStack.addArrangedSubview(detailLabel)
@@ -556,14 +566,14 @@ public class STHUD: NSObject {
     private func createIconImageView(for type: STHUDType, iconName: String?) -> UIImageView {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        let size = theme.iconSize
+        let size = self.theme.iconSize
         imageView.frame = CGRect(origin: .zero, size: size)
         if let name = iconName, let customImage = UIImage(named: name) {
             imageView.image = customImage
         } else {
             let symbolConfig = UIImage.SymbolConfiguration(pointSize: size.width, weight: .semibold)
-            imageView.image = UIImage(systemName: defaultSymbolName(for: type), withConfiguration: symbolConfig)?
-                .withTintColor(iconColor(for: type), renderingMode: .alwaysOriginal)
+            imageView.image = UIImage(systemName: self.defaultSymbolName(for: type), withConfiguration: symbolConfig)?
+                .withTintColor(self.iconColor(for: type), renderingMode: .alwaysOriginal)
         }
         return imageView
     }
@@ -580,11 +590,11 @@ public class STHUD: NSObject {
 
     private func iconColor(for type: STHUDType) -> UIColor {
         switch type {
-        case .success: return theme.successColor
-        case .error:   return theme.errorColor
-        case .warning: return theme.warningColor
-        case .info:    return theme.infoColor
-        default:       return theme.infoColor
+        case .success: return self.self.theme.successColor
+        case .error:   return self.theme.errorColor
+        case .warning: return self.theme.warningColor
+        case .info:    return self.theme.infoColor
+        default:       return self.theme.infoColor
         }
     }
 }
@@ -592,16 +602,78 @@ public class STHUD: NSObject {
 // MARK: - STHUD 代理实现
 extension STHUD: STProgressHUDDelegate {
     public func hudWasHidden(_ hud: STProgressHUD) {
-        // HUD 隐藏完成
+        let handler = self.completionHandler
+        self.completionHandler = nil
+        handler?()
     }
 }
 
-// MARK: - STHUD 实用方法
+// MARK: - STHUD 静态方法（可在非 UIView 场景如 Model/ViewModel 中调用）
 public extension STHUD {
-    /// 全局显示加载指示器（需手动调用 st_dismiss 关闭）
-    static func st_show(_ text: String = "") {
+    
+    /// 全局显示成功提示（带图标，自动隐藏）
+    /// - Parameters:
+    ///   - text: 提示文本
+    ///   - detailText: 详细文本
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    static func st_showSuccess(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async {
-            self.sharedHUD.showLoading(title: text)
+            self.sharedHUD.showSuccess(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
+        }
+    }
+
+    /// 全局显示错误提示（带图标，自动隐藏）
+    /// - Parameters:
+    ///   - text: 提示文本
+    ///   - detailText: 详细文本
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    static func st_showError(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            self.sharedHUD.showError(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
+        }
+    }
+
+    /// 全局显示警告提示（带图标，自动隐藏）
+    /// - Parameters:
+    ///   - text: 提示文本
+    ///   - detailText: 详细文本
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    static func st_showWarning(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            self.sharedHUD.showWarning(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
+        }
+    }
+
+    /// 全局显示信息提示（带图标，自动隐藏）
+    /// - Parameters:
+    ///   - text: 提示文本
+    ///   - detailText: 详细文本
+    ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    static func st_showInfo(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            self.sharedHUD.showInfo(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
+        }
+    }
+
+    /// 全局显示纯文本 Text（无图标，自动隐藏）
+    /// - Parameters:
+    ///   - text: 提示文本
+    ///   - detailText: 详细文本
+    ///   - completion: HUD 隐藏后的回调
+    static func st_showText(_ text: String, detailText: String? = nil, completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            self.sharedHUD.showText(title: text, detailText: detailText, completion: completion)
+        }
+    }
+    
+    /// 全局显示加载指示器（需手动调用 st_dismiss 关闭）
+    static func st_showLoading(_ text: String = "", detailText: String? = nil) {
+        DispatchQueue.main.async {
+            self.sharedHUD.showLoading(title: text, detailText: detailText)
         }
     }
 
@@ -609,6 +681,16 @@ public extension STHUD {
     static func st_dismiss() {
         DispatchQueue.main.async {
             self.sharedHUD.hide(animated: true)
+        }
+    }
+
+    /// 使用自定义配置显示 HUD
+    /// - Parameters:
+    ///   - config: HUD 配置
+    ///   - completion: HUD 隐藏后的回调
+    static func st_showHUD(with config: STHUDConfig, completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            self.sharedHUD.show(with: config, completion: completion)
         }
     }
 
@@ -644,37 +726,53 @@ public extension STHUD {
 // MARK: - UIView 扩展 - HUD 方法
 public extension UIView {
     /// 显示成功提示（带图标，自动隐藏）
-    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
-    func st_showSuccess(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
+    /// - Parameters:
+    ///   - iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    func st_showSuccess(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showSuccess(title: text, detailText: detailText, iconPosition: iconPosition)
+            STHUD.sharedHUD.showSuccess(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
         }
     }
 
     /// 显示错误提示（带图标，自动隐藏）
-    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
-    func st_showError(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
+    /// - Parameters:
+    ///   - iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    func st_showError(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showError(title: text, detailText: detailText, iconPosition: iconPosition)
+            STHUD.sharedHUD.showError(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
         }
     }
 
     /// 显示警告提示（带图标，自动隐藏）
-    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
-    func st_showWarning(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
+    /// - Parameters:
+    ///   - iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    func st_showWarning(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showWarning(title: text, detailText: detailText, iconPosition: iconPosition)
+            STHUD.sharedHUD.showWarning(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
         }
     }
 
     /// 显示信息提示（带图标，自动隐藏）
-    /// - Parameter iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
-    func st_showInfo(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil) {
+    /// - Parameters:
+    ///   - iconPosition: 图标位置，nil 时使用 STHUD.sharedHUD.defaultIconPosition
+    ///   - completion: HUD 隐藏后的回调
+    func st_showInfo(_ text: String, detailText: String? = nil, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.showInfo(title: text, detailText: detailText, iconPosition: iconPosition)
+            STHUD.sharedHUD.showInfo(title: text, detailText: detailText, iconPosition: iconPosition, completion: completion)
         }
     }
 
+    /// 显示纯文本 Text（无图标，自动隐藏）
+    /// - Parameter completion: HUD 隐藏后的回调
+    func st_showText(_ text: String, detailText: String? = nil, completion: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            STHUD.sharedHUD.showText(title: text, detailText: detailText, completion: completion)
+        }
+    }
+    
     /// 显示加载指示器（需手动调用 st_dismiss 关闭）
     /// - Parameters:
     ///   - text: 加载文本
@@ -693,13 +791,6 @@ public extension UIView {
         }
     }
 
-    /// 显示纯文本 Toast（无图标，自动隐藏）
-    func st_showToast(_ text: String, detailText: String? = nil) {
-        DispatchQueue.main.async {
-            STHUD.sharedHUD.showText(title: text, detailText: detailText)
-        }
-    }
-
     /// 关闭 HUD
     func st_dismiss() {
         DispatchQueue.main.async {
@@ -708,9 +799,10 @@ public extension UIView {
     }
 
     /// 使用自定义配置显示 HUD
-    func st_showHUD(with config: STHUDConfig) {
+    /// - Parameter completion: HUD 隐藏后的回调
+    func st_showHUD(with config: STHUDConfig, completion: (() -> Void)? = nil) {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.show(with: config)
+            STHUD.sharedHUD.show(with: config, completion: completion)
         }
     }
 }

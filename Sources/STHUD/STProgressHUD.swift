@@ -611,6 +611,7 @@ public class STProgressHUDBackgroundView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        self.isOpaque = false
         self.style = .blur
         self.color = UIColor(white: 0.8, alpha: 0.6)
         self.clipsToBounds = true
@@ -625,6 +626,7 @@ public class STProgressHUDBackgroundView: UIView {
 
     private func updateForBackgroundStyle() {
         if self.style == .blur {
+            self.effectView?.removeFromSuperview()
             let effect = UIBlurEffect(style: .light)
             let view = UIVisualEffectView(effect: effect)
             self.addSubview(view)
@@ -637,6 +639,7 @@ public class STProgressHUDBackgroundView: UIView {
             self.effectView?.removeFromSuperview()
             self.effectView = nil
             self.backgroundColor = self.color
+            self.layer.allowsGroupOpacity = true
         }
     }
 }

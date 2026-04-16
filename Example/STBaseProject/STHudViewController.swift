@@ -137,7 +137,7 @@ class STHudViewController: STBaseViewController {
     }
 
     @objc private func testToast() {
-        self.view.st_showToast("这是纯文本 Toast，无图标")
+        self.view.st_showText("这是纯文本 Toast，无图标")
     }
 
     // MARK: - 加载中
