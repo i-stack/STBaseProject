@@ -188,7 +188,6 @@ public class STCustomTabBar: UIView {
     
     private func handleItemTap(at index: Int) {
         guard index != self.selectedIndex else { return }
-        self.setSelectedIndex(index)
         self.delegate?.customTabBar(self, didSelectItemAt: index)
     }
     

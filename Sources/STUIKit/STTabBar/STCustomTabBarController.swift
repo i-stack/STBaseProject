@@ -41,9 +41,8 @@ open class STCustomTabBarController: UITabBarController {
     private func shouldUseSystemTabBar() -> Bool {
         if #available(iOS 26.0, *) {
             return true
-        } else {
-            return false
         }
+        return false
     }
 
     private func applyPreferredTabBarMode() {
@@ -184,11 +183,30 @@ open class STCustomTabBarController: UITabBarController {
 
 extension STCustomTabBarController: STCustomTabBarDelegate {
     public func customTabBar(_ tabBar: STCustomTabBar, didSelectItemAt index: Int) {
+        guard let targetViewController = self.targetViewController(at: index) else {
+            self.customTabBar.setSelectedIndex(self.selectedIndex)
+            return
+        }
+        let shouldSelect = self.delegate?.tabBarController?(self, shouldSelect: targetViewController) ?? true
+        guard shouldSelect else {
+            self.customTabBar.setSelectedIndex(self.selectedIndex)
+            return
+        }
         self.selectedIndex = index
+        self.delegate?.tabBarController?(self, didSelect: targetViewController)
     }
 }
 
 extension STCustomTabBarController {
+    private func targetViewController(at index: Int) -> UIViewController? {
+        guard let viewControllers = self.viewControllers,
+              index >= 0,
+              index < viewControllers.count else {
+            return nil
+        }
+        return viewControllers[index]
+    }
+
     /// 设置子页面并配置自定义 TabBar
     public func setViewControllers(_ viewControllers: [UIViewController], tabBarItems: [STTabBarItemModel], config: STTabBarConfig = STTabBarConfig()) {
         self.setViewControllers(viewControllers, animated: false)
