@@ -34,7 +34,7 @@ open class STBaseViewController: UIViewController {
     public var navBarTitleColor: UIColor = .black
     public var buttonTitleColor: UIColor = .systemBlue
     public var buttonTitleFont: UIFont = .st_systemFont(ofSize: 16)
-    public var navBarHeight: CGFloat = STDeviceAdapter.navigationBarHeight
+    public lazy var navBarHeight: CGFloat = STDeviceAdapter.navigationBarHeight
     public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20)
 
     public var leftBtnImage: UIImage?
@@ -279,7 +279,9 @@ open class STBaseViewController: UIViewController {
     @discardableResult
     open func st_setNavigationBarColor(_ color: UIColor) -> Self {
         self.navBarBackgroundColor = color
-        self.navigationBarView.backgroundColor = color
+        if self.liquidGlassContainerView == nil {
+            self.navigationBarView.backgroundColor = color
+        }
         return self
     }
 
@@ -394,5 +396,52 @@ extension STBaseViewController {
     /// 获取当前的外观模式（实例方法）
     public func st_getCurrentAppearanceMode() -> STAppearanceMode {
         return STAppearanceManager.shared.currentMode
+    }
+}
+
+// MARK: - Liquid Glass
+
+private var liquidGlassKey: UInt8 = 0
+
+extension STBaseViewController {
+
+    fileprivate var liquidGlassContainerView: UIView? {
+        get { objc_getAssociatedObject(self, &liquidGlassKey) as? UIView }
+        set { objc_setAssociatedObject(self, &liquidGlassKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+
+    /// iOS 26+ Liquid Glass 是否已启用
+    public var isLiquidGlassEnabled: Bool {
+        if #available(iOS 26.0, *) { return self.liquidGlassContainerView != nil }
+        return false
+    }
+
+    /// 为 navigationBarView 启用 Liquid Glass 效果（iOS 26+，低版本无操作）
+    @discardableResult
+    public func st_enableLiquidGlass() -> Self {
+        guard #available(iOS 26.0, *) else { return self }
+        guard self.liquidGlassContainerView == nil else { return self }
+
+        let container = UIVisualEffectView(effect: UIGlassEffect())
+        container.translatesAutoresizingMaskIntoConstraints = false
+        self.navigationBarView.insertSubview(container, at: 0)
+        NSLayoutConstraint.activate([
+            container.topAnchor.constraint(equalTo: self.navigationBarView.topAnchor),
+            container.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
+            container.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
+            container.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor),
+        ])
+        self.liquidGlassContainerView = container
+        self.navigationBarView.backgroundColor = .clear
+        self.navGradientBar?.isHidden = true
+        return self
+    }
+
+    /// 关闭 Liquid Glass，恢复原背景色
+    public func st_disableLiquidGlass() {
+        self.liquidGlassContainerView?.removeFromSuperview()
+        self.liquidGlassContainerView = nil
+        self.navigationBarView.backgroundColor = self.navBarBackgroundColor
+        self.navGradientBar?.isHidden = false
     }
 }
