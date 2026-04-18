@@ -125,47 +125,22 @@ open class STLogView: UIView {
     }
 
     private func configUI() {
-        self.backgroundColor = .systemBackground
-        self.addSubview(self.searchBar)
-        self.addSubview(self.filterView)
+        self.backgroundColor = .systemGroupedBackground
         self.addSubview(self.tableView)
         self.addSubview(self.bottomToolbar)
         self.setupConstraints()
-        self.setupKeyboardDismissInteraction()
         self.tableView.register(STLogTableViewCell.self, forCellReuseIdentifier: "STLogTableViewCell")
     }
 
-    private func setupKeyboardDismissInteraction() {
-        self.tableView.keyboardDismissMode = .onDrag
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(endEditingFromTap))
-        tapGesture.cancelsTouchesInView = false
-        self.addGestureRecognizer(tapGesture)
-    }
-
-    @objc private func endEditingFromTap() {
-        self.endEditing(true)
-    }
-
     private func setupConstraints() {
-        self.searchBar.translatesAutoresizingMaskIntoConstraints = false
-        self.filterView.translatesAutoresizingMaskIntoConstraints = false
         self.tableView.translatesAutoresizingMaskIntoConstraints = false
         self.bottomToolbar.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            self.searchBar.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            self.searchBar.leadingAnchor.constraint(equalTo: leadingAnchor),
-            self.searchBar.trailingAnchor.constraint(equalTo: trailingAnchor),
-
-            self.filterView.topAnchor.constraint(equalTo: self.searchBar.bottomAnchor, constant: 8),
-            self.filterView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            self.filterView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            self.filterView.heightAnchor.constraint(equalToConstant: 50),
-
-            self.tableView.topAnchor.constraint(equalTo: self.filterView.bottomAnchor, constant: 8),
+            self.tableView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             self.tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
             self.tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            self.tableView.bottomAnchor.constraint(equalTo: self.bottomToolbar.topAnchor, constant: -8),
+            self.tableView.bottomAnchor.constraint(equalTo: self.bottomToolbar.topAnchor),
 
             self.bottomToolbar.leadingAnchor.constraint(equalTo: leadingAnchor),
             self.bottomToolbar.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -217,10 +192,13 @@ open class STLogView: UIView {
                         self.displayedLogEntries = self.allLogEntries
                     }
                 } else {
+                    // 基于偏移的分页在实时追加后会产生边界重复，按 id 去重消除
+                    let existingIds = Set(self.allLogEntries.map(\.id))
+                    let deduplicated = entries.filter { !existingIds.contains($0.id) }
                     if requestState.isFiltering {
-                        self.displayedLogEntries.append(contentsOf: entries)
+                        self.displayedLogEntries.append(contentsOf: deduplicated)
                     } else {
-                        self.allLogEntries.append(contentsOf: entries)
+                        self.allLogEntries.append(contentsOf: deduplicated)
                         self.displayedLogEntries = self.allLogEntries
                     }
                 }
@@ -252,6 +230,8 @@ open class STLogView: UIView {
         guard !self.queryState.isFiltering, let record = notification.object as? STLogRecord else { return }
         let applyUpdate = {
             let entry = STLogEntry(record: record)
+            // 幂等校验：分页 reset 可能已包含该记录，避免通知与磁盘读取重复
+            guard !self.allLogEntries.contains(where: { $0.id == entry.id }) else { return }
             self.allLogEntries.insert(entry, at: 0)
             if self.allLogEntries.count > STLogManager.configuration.retainedLogCountForDisplay {
                 self.allLogEntries.removeLast(self.allLogEntries.count - STLogManager.configuration.retainedLogCountForDisplay)
@@ -298,66 +278,6 @@ open class STLogView: UIView {
         self.getTopViewController()?.present(activity, animated: true)
     }
 
-    @objc private func filterLevelButtonTapped(_ sender: UIButton) {
-        let level = STLogLevel.allCases[sender.tag]
-        if self.queryState.selectedLogLevels.contains(level) {
-            self.queryState.selectedLogLevels.remove(level)
-        } else {
-            self.queryState.selectedLogLevels.insert(level)
-        }
-        self.updateFilterButtons()
-        self.applyFilter()
-    }
-
-    private func updateFilterButtons() {
-        for (index, button) in self.filterButtons.enumerated() {
-            guard index < STLogLevel.allCases.count else { continue }
-            let level = STLogLevel.allCases[index]
-            let selected = self.queryState.selectedLogLevels.contains(level)
-            self.applyFilterButtonStyle(button, level: level, selected: selected)
-        }
-    }
-
-    private func makeFilterButton(level: STLogLevel, index: Int) -> STIconButton {
-        let button = STIconButton(type: .system)
-        button.tag = index
-        button.layer.cornerRadius = 16
-        button.layer.borderWidth = 1
-        button.layer.masksToBounds = true
-        button.contentHorizontalAlignment = .center
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
-        button.titleLabel?.lineBreakMode = .byTruncatingTail
-        button.titleLabel?.numberOfLines = 1
-        button.setContentHuggingPriority(.required, for: .horizontal)
-        button.setContentCompressionResistancePriority(.required, for: .horizontal)
-        let heightConstraint = button.heightAnchor.constraint(equalToConstant: 32)
-        heightConstraint.priority = .defaultHigh
-        heightConstraint.isActive = true
-        button.addTarget(self, action: #selector(filterLevelButtonTapped(_:)), for: .touchUpInside)
-        button.configure()
-            .iconPosition(.left)
-            .spacing(6)
-            .contentInsets(UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14))
-            .done()
-        self.applyFilterButtonStyle(button, level: level, selected: true)
-        return button
-    }
-
-    private func applyFilterButtonStyle(_ button: UIButton, level: STLogLevel, selected: Bool) {
-        let foregroundColor = selected ? UIColor.white : level.color
-        let backgroundColor = selected ? level.color : level.color.withAlphaComponent(0.12)
-        let borderColor = selected ? level.color : level.color.withAlphaComponent(0.35)
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
-        let image = UIImage(systemName: level.systemImageName, withConfiguration: symbolConfig)
-        button.setTitle(level.rawValue, for: .normal)
-        button.setTitleColor(foregroundColor, for: .normal)
-        button.setImage(image, for: .normal)
-        button.tintColor = foregroundColor
-        button.backgroundColor = backgroundColor
-        button.imageView?.contentMode = .scaleAspectFit
-        button.layer.borderColor = borderColor.cgColor
-    }
-
     private func getTopViewController() -> UIViewController? {
         UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
@@ -372,82 +292,45 @@ open class STLogView: UIView {
         self.getTopViewController()?.present(alert, animated: true)
     }
 
-    private lazy var searchBar: UISearchBar = {
-        let bar = UISearchBar()
-        bar.placeholder = "搜索日志 / metadata / label"
-        bar.searchBarStyle = .minimal
-        bar.delegate = self
-        return bar
-    }()
-
-    private lazy var filterView: UIView = {
-        let view = UIView()
-        let scroll = UIScrollView()
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        scroll.showsHorizontalScrollIndicator = false
-        view.addSubview(scroll)
-        scroll.addSubview(self.filterStackView)
-        NSLayoutConstraint.activate([
-            scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scroll.topAnchor.constraint(equalTo: view.topAnchor),
-            scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            self.filterStackView.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor, constant: 12),
-            self.filterStackView.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor, constant: -12),
-            self.filterStackView.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: 8),
-            self.filterStackView.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -8),
-            self.filterStackView.heightAnchor.constraint(equalTo: scroll.frameLayoutGuide.heightAnchor, constant: -16)
-        ])
-        return view
-    }()
-
-    private lazy var filterStackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = 12
-        stack.alignment = .center
-        stack.distribution = .fill
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        STLogLevel.allCases.enumerated().forEach { index, level in
-            let button = self.makeFilterButton(level: level, index: index)
-            self.filterButtons.append(button)
-            stack.addArrangedSubview(button)
-        }
-        self.updateFilterButtons()
-        return stack
-    }()
-
-    private var filterButtons: [UIButton] = []
-
     private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.delegate = self
         table.dataSource = self
         table.rowHeight = UITableView.automaticDimension
-        table.estimatedRowHeight = 96
+        table.estimatedRowHeight = 130
         table.tableFooterView = UIView()
+        table.separatorStyle = .none
+        table.backgroundColor = .systemGroupedBackground
         return table
     }()
 
     private lazy var bottomToolbar: UIView = {
         let view = UIView()
         view.backgroundColor = .systemBackground
-        view.addSubview(bottomToolbarStackView)
+        let separator = UIView()
+        separator.backgroundColor = .separator
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(separator)
+        view.addSubview(self.bottomToolbarStackView)
         NSLayoutConstraint.activate([
-            bottomToolbarStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
-            bottomToolbarStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
-            bottomToolbarStackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
-            bottomToolbarStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -8)
+            separator.topAnchor.constraint(equalTo: view.topAnchor),
+            separator.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            separator.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            separator.heightAnchor.constraint(equalToConstant: 0.5),
+            self.bottomToolbarStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
+            self.bottomToolbarStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
+            self.bottomToolbarStackView.topAnchor.constraint(equalTo: view.topAnchor, constant: 8),
+            self.bottomToolbarStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -8)
         ])
         return view
     }()
 
     private lazy var bottomToolbarStackView: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [
-            makeToolbarButton(title: "返回", action: #selector(backBtnClick)),
-            makeToolbarButton(title: "清除", action: #selector(cleanLogBtnClick)),
-            makeToolbarButton(title: "导出文本", action: #selector(exportBtnClick)),
-            makeToolbarButton(title: "导出文件", action: #selector(outputLogBtnClick))
+            self.makeToolbarButton(title: "返回", action: #selector(backBtnClick)),
+            self.makeToolbarButton(title: "清除", action: #selector(cleanLogBtnClick)),
+            self.makeToolbarButton(title: "导出文本", action: #selector(exportBtnClick)),
+            self.makeToolbarButton(title: "导出文件", action: #selector(outputLogBtnClick))
         ])
         stack.axis = .horizontal
         stack.alignment = .fill
@@ -489,23 +372,21 @@ extension STLogView: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension STLogView: UISearchBarDelegate {
-    public func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        self.queryState.searchText = searchText
-        self.applyFilter()
-    }
-
-    public func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        searchBar.resignFirstResponder()
-    }
-}
+// MARK: - STLogTableViewCell
 
 private final class STLogTableViewCell: UITableViewCell {
-    private let levelLabel = UILabel()
-    private let titleLabel = UILabel()
-    private let subtitleLabel = UILabel()
+
+    private let cardView = UIView()
+    private let colorBarView = UIView()
+    private let contentStack = UIStackView()
+    private let headerRow = UIStackView()
+    private let levelBadge = UILabel()
+    private let timestampLabel = UILabel()
+    private let sourceLabel = UILabel()
+    private let locationLabel = UILabel()
+    private let metadataLabel = UILabel()
+    private let divider = UIView()
     private let messageLabel = UILabel()
-    private let stackView = UIStackView()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -519,47 +400,113 @@ private final class STLogTableViewCell: UITableViewCell {
 
     private func setupUI() {
         self.selectionStyle = .none
-        self.levelLabel.font = UIFont.boldSystemFont(ofSize: 12)
-        self.levelLabel.textAlignment = .center
-        self.levelLabel.layer.cornerRadius = 8
-        self.levelLabel.clipsToBounds = true
-        self.titleLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        self.titleLabel.textColor = .secondaryLabel
-        self.subtitleLabel.font = UIFont.systemFont(ofSize: 11)
-        self.subtitleLabel.textColor = .tertiaryLabel
-        self.messageLabel.font = UIFont.systemFont(ofSize: 13)
-        self.messageLabel.numberOfLines = 0
+        self.backgroundColor = .clear
 
-        self.stackView.axis = .vertical
-        self.stackView.spacing = 6
-        self.stackView.translatesAutoresizingMaskIntoConstraints = false
-        [self.levelLabel, self.titleLabel, self.subtitleLabel, self.messageLabel].forEach(self.stackView.addArrangedSubview)
-        self.contentView.addSubview(self.stackView)
+        self.cardView.layer.cornerRadius = 10
+        self.cardView.layer.masksToBounds = true
+        self.cardView.backgroundColor = .secondarySystemBackground
+        self.cardView.translatesAutoresizingMaskIntoConstraints = false
+
+        self.colorBarView.translatesAutoresizingMaskIntoConstraints = false
+
+        self.levelBadge.font = UIFont.boldSystemFont(ofSize: 11)
+        self.levelBadge.textAlignment = .center
+        self.levelBadge.layer.cornerRadius = 8
+        self.levelBadge.clipsToBounds = true
+        self.levelBadge.setContentHuggingPriority(.required, for: .horizontal)
+        self.levelBadge.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        self.timestampLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular)
+        self.timestampLabel.textColor = .secondaryLabel
+        self.timestampLabel.textAlignment = .right
+
+        self.headerRow.axis = .horizontal
+        self.headerRow.spacing = 8
+        self.headerRow.alignment = .center
+        [self.levelBadge, self.timestampLabel].forEach(self.headerRow.addArrangedSubview)
+
+        self.sourceLabel.font = UIFont.systemFont(ofSize: 11, weight: .medium)
+        self.sourceLabel.textColor = .secondaryLabel
+
+        self.locationLabel.font = UIFont.monospacedSystemFont(ofSize: 10, weight: .regular)
+        self.locationLabel.textColor = .tertiaryLabel
+        self.locationLabel.numberOfLines = 2
+
+        self.metadataLabel.font = UIFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        self.metadataLabel.textColor = .secondaryLabel
+        self.metadataLabel.numberOfLines = 0
+
+        self.divider.backgroundColor = .separator
+
+        self.messageLabel.font = UIFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        self.messageLabel.numberOfLines = 0
+        self.messageLabel.textColor = .label
+
+        self.contentStack.axis = .vertical
+        self.contentStack.spacing = 4
+        self.contentStack.translatesAutoresizingMaskIntoConstraints = false
+        [self.headerRow, self.sourceLabel, self.locationLabel, self.metadataLabel, self.divider, self.messageLabel]
+            .forEach(self.contentStack.addArrangedSubview)
+        self.contentStack.setCustomSpacing(6, after: self.headerRow)
+        self.contentStack.setCustomSpacing(2, after: self.sourceLabel)
+        self.contentStack.setCustomSpacing(8, after: self.locationLabel)
+        self.contentStack.setCustomSpacing(8, after: self.metadataLabel)
+        self.contentStack.setCustomSpacing(8, after: self.divider)
+
+        self.cardView.addSubview(self.colorBarView)
+        self.cardView.addSubview(self.contentStack)
+        self.contentView.addSubview(self.cardView)
 
         NSLayoutConstraint.activate([
-            self.stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            self.stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            self.stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            self.stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10),
-            self.levelLabel.heightAnchor.constraint(equalToConstant: 22)
+            self.cardView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 5),
+            self.cardView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 12),
+            self.cardView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -12),
+            self.cardView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -5),
+
+            self.colorBarView.topAnchor.constraint(equalTo: self.cardView.topAnchor),
+            self.colorBarView.leadingAnchor.constraint(equalTo: self.cardView.leadingAnchor),
+            self.colorBarView.bottomAnchor.constraint(equalTo: self.cardView.bottomAnchor),
+            self.colorBarView.widthAnchor.constraint(equalToConstant: 4),
+
+            self.contentStack.topAnchor.constraint(equalTo: self.cardView.topAnchor, constant: 10),
+            self.contentStack.leadingAnchor.constraint(equalTo: self.colorBarView.trailingAnchor, constant: 10),
+            self.contentStack.trailingAnchor.constraint(equalTo: self.cardView.trailingAnchor, constant: -12),
+            self.contentStack.bottomAnchor.constraint(equalTo: self.cardView.bottomAnchor, constant: -10),
+
+            self.divider.heightAnchor.constraint(equalToConstant: 0.5),
+            self.levelBadge.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
 
-    func configure(with logEntry: STLogEntry) {
-        self.levelLabel.text = "\(logEntry.level.icon) \(logEntry.level.rawValue)"
-        self.levelLabel.backgroundColor = logEntry.level.color.withAlphaComponent(0.14)
-        self.levelLabel.textColor = logEntry.level.color
-        self.titleLabel.text = "\(logEntry.timestamp.formatted("HH:mm:ss.SSS")) · \(logEntry.label) · \(logEntry.thread)"
-        self.subtitleLabel.text = "\(logEntry.file):\(logEntry.line) · \(logEntry.function)"
-        if logEntry.metadata.isEmpty {
-            self.messageLabel.text = logEntry.message
+    func configure(with entry: STLogEntry) {
+        let levelColor = entry.level.color
+        self.colorBarView.backgroundColor = levelColor
+
+        self.levelBadge.text = "  \(entry.level.icon) \(entry.level.rawValue)  "
+        self.levelBadge.backgroundColor = levelColor.withAlphaComponent(0.15)
+        self.levelBadge.textColor = levelColor
+
+        self.timestampLabel.text = entry.timestamp.formatted("yyyy-MM-dd HH:mm:ss.SSS")
+
+        self.sourceLabel.text = "[\(entry.label)]  \(entry.thread)"
+
+        self.locationLabel.text = "\(entry.file):\(entry.line)  ·  \(entry.function)"
+
+        if entry.metadata.isEmpty {
+            self.metadataLabel.isHidden = true
         } else {
-            let metadata = logEntry.metadata.sorted { $0.key < $1.key }.map { "[\($0.key): \($0.value)]" }.joined(separator: " ")
-            self.messageLabel.text = "\(metadata)\n\(logEntry.message)"
+            self.metadataLabel.isHidden = false
+            self.metadataLabel.text = entry.metadata
+                .sorted { $0.key < $1.key }
+                .map { "[\($0.key): \($0.value)]" }
+                .joined(separator: "  ")
         }
-        self.backgroundColor = .secondarySystemBackground
+
+        self.messageLabel.text = entry.message
     }
 }
+
+// MARK: - Public API
 
 extension STLogView {
     public class func logFilePath() -> String {
@@ -593,13 +540,11 @@ extension STLogView {
 
     public func st_setLogLevelFilter(_ levels: Set<STLogLevel>) {
         self.queryState.selectedLogLevels = levels
-        self.updateFilterButtons()
         self.applyFilter()
     }
 
     public func st_setSearchText(_ text: String) {
         self.queryState.searchText = text
-        self.searchBar.text = text
         self.applyFilter()
     }
 

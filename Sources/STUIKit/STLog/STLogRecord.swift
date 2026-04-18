@@ -94,12 +94,11 @@ public struct STLogRecord: Codable, Identifiable, Sendable {
     }
 
     public static func threadDescription() -> String {
-        if Thread.isMainThread {
-            return "main"
-        }
-        if let name = Thread.current.name, !name.isEmpty {
-            return name
-        }
+        if Thread.isMainThread { return "main" }
+        // Dispatch queue label（GCD 匿名线程可读名称，如 com.stbase.log.manager）
+        let queueLabel = String(cString: __dispatch_queue_get_label(nil))
+        if !queueLabel.isEmpty { return queueLabel }
+        if let name = Thread.current.name, !name.isEmpty { return name }
         return "\(Unmanaged.passUnretained(Thread.current).toOpaque())"
     }
 }

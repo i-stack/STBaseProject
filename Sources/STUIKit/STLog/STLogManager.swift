@@ -51,6 +51,10 @@ final class STCloudLogHandler: STLogHandler {
             self.queue.async {
                 if case .failure = result {
                     self.buffer.insert(contentsOf: batch, at: 0)
+                    let maxCount = STLogManager.configuration.maxCloudBufferCount
+                    if self.buffer.count > maxCount {
+                        self.buffer.removeFirst(self.buffer.count - maxCount)
+                    }
                 }
                 self.isSending = false
                 if self.buffer.count >= STLogManager.configuration.cloudBatchSize {
@@ -72,6 +76,8 @@ public final class STLogManager {
         public var retainedLogCountForDisplay: Int
         public var cloudTransport: STLogCloudTransport?
         public var cloudBatchSize: Int
+        /// 云端上传失败时 buffer 的最大条数，超出后丢弃最旧的记录，防止持续失败时内存无限增长。
+        public var maxCloudBufferCount: Int
 
         public init(
             minimumLevel: STLogLevel = .debug,
@@ -80,7 +86,8 @@ public final class STLogManager {
             maxArchivedFiles: Int = 7,
             retainedLogCountForDisplay: Int = 2000,
             cloudTransport: STLogCloudTransport? = nil,
-            cloudBatchSize: Int = 20
+            cloudBatchSize: Int = 20,
+            maxCloudBufferCount: Int = 500
         ) {
             self.minimumLevel = minimumLevel
             self.persistDefaultLogs = persistDefaultLogs
@@ -89,6 +96,7 @@ public final class STLogManager {
             self.retainedLogCountForDisplay = retainedLogCountForDisplay
             self.cloudTransport = cloudTransport
             self.cloudBatchSize = max(1, cloudBatchSize)
+            self.maxCloudBufferCount = max(cloudBatchSize, maxCloudBufferCount)
         }
     }
 
@@ -225,7 +233,15 @@ public final class STLogManager {
         if shouldSearch {
             return STLogFileWriter.shared.searchRecords(searchText: normalizedSearch, levels: normalizedLevels, limit: pageSize, offset: page * pageSize)
         }
-        return STLogFileWriter.shared.fetchRecords(skip: page * pageSize, limit: pageSize)
+        // 优先从 memoryBuffer 返回（含非持久化日志），超出内存范围再回落到磁盘
+        let skip = page * pageSize
+        let memorySlice: [STLogRecord] = self.shared.queue.sync {
+            let all = Array(self.shared.memoryBuffer.reversed())
+            guard skip < all.count else { return [] }
+            return Array(all.dropFirst(skip).prefix(pageSize))
+        }
+        guard memorySlice.isEmpty else { return memorySlice }
+        return STLogFileWriter.shared.fetchRecords(skip: skip, limit: pageSize)
     }
 
     public class func hasMoreRecords(page: Int, pageSize: Int, levels: Set<STLogLevel>? = nil, searchText: String? = nil) -> Bool {

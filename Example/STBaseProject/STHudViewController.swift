@@ -13,7 +13,7 @@ class STHudViewController: STBaseViewController {
 
     private let scrollView = UIScrollView()
     private let stackView = UIStackView()
-
+    
     deinit {
         STLog("STNextViewController dealloc")
     }
@@ -31,7 +31,7 @@ class STHudViewController: STBaseViewController {
         self.scrollView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(self.scrollView)
         NSLayoutConstraint.activate([
-            self.scrollView.topAnchor.constraint(equalTo: self.contentTopAnchor),
+            self.scrollView.topAnchor.constraint(equalTo: view.topAnchor),
             self.scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             self.scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             self.scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -48,6 +48,8 @@ class STHudViewController: STBaseViewController {
             self.stackView.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor, constant: -20),
             self.stackView.widthAnchor.constraint(equalTo: self.scrollView.widthAnchor, constant: -40)
         ])
+        
+//        self.st_configureScrollViewForGlass(self.scrollView)
     }
 
     private func setupButtons() {

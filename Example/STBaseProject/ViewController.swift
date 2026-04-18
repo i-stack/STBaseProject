@@ -22,7 +22,7 @@ class ViewController: STBaseViewController {
         self.topConstraint.constant = STDeviceAdapter.navigationBarHeight
         self.configData()
     }
-    
+
     private func configData() {
         let hudViewController = STHudViewController(nibName: "STHudViewController", bundle: nil)
         self.dataSouces["hud 测试"] = hudViewController
