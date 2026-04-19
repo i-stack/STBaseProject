@@ -32,7 +32,7 @@ public enum STLoadMoreContent {
 public final class STRefreshHeaderView: UIView {
 
     public let height: CGFloat = 60
-    
+
     private enum State { case idle, pulling, triggered, refreshing }
     private var state: State = .idle { didSet { guard state != oldValue else { return }; applyState() } }
     private let content: STRefreshContent
@@ -40,6 +40,7 @@ public final class STRefreshHeaderView: UIView {
 
     private weak var attachedScrollView: UIScrollView?
     private var offsetToken: NSKeyValueObservation?
+    // adjustedContentInset.top（含 safeArea）作为基准，避免 safeArea 场景下 offset 计算偏差
     private var originalInsetTop: CGFloat = 0
     private var hasRecordedOriginalInset = false
 
@@ -62,7 +63,6 @@ public final class STRefreshHeaderView: UIView {
     public func attach(to scrollView: UIScrollView, action: @escaping () -> Void) {
         self.action = action
         self.attachedScrollView = scrollView
-        // originalInsetTop 延迟到首次 KVO 回调时捕获，避免 viewDidLoad 阶段 inset 尚未稳定
         self.frame = CGRect(x: 0, y: -self.height, width: scrollView.bounds.width, height: self.height)
         self.autoresizingMask = [.flexibleWidth]
         scrollView.addSubview(self)
@@ -71,13 +71,16 @@ public final class STRefreshHeaderView: UIView {
         }
     }
 
-    // MARK: End Refreshing
+    // MARK: Public API
     public func endRefreshing() {
         guard self.state == .refreshing else { return }
         UIView.animate(withDuration: 0.3, animations: {
-            var inset = self.attachedScrollView?.contentInset ?? .zero
-            inset.top = self.originalInsetTop
-            self.attachedScrollView?.contentInset = inset
+            guard let sv = self.attachedScrollView else { return }
+            self.setEffectiveInsetTop(self.originalInsetTop, on: sv)
+            // resetInset 已在刷新期间持续收缩 inset；此处仅在用户仍处于顶部区域时对齐 offset
+            if sv.contentOffset.y <= -self.originalInsetTop {
+                sv.contentOffset = CGPoint(x: sv.contentOffset.x, y: -self.originalInsetTop)
+            }
         }, completion: { _ in
             self.state = .idle
         })
@@ -87,7 +90,7 @@ public final class STRefreshHeaderView: UIView {
     public func beginRefreshing() {
         guard self.state != .refreshing, let sv = self.attachedScrollView else { return }
         if !self.hasRecordedOriginalInset {
-            self.originalInsetTop = sv.contentInset.top
+            self.originalInsetTop = sv.adjustedContentInset.top
             self.hasRecordedOriginalInset = true
         }
         self.beginRefreshing(scrollView: sv)
@@ -122,6 +125,7 @@ public final class STRefreshHeaderView: UIView {
         }
     }
 
+    // MARK: - Private
     private func setupUI() {
         self.backgroundColor = .clear
         self.clipsToBounds = true
@@ -147,13 +151,17 @@ public final class STRefreshHeaderView: UIView {
     }
 
     private func handleContentOffsetChange(_ scrollView: UIScrollView) {
-        // 首次回调时捕获稳定的 originalInsetTop（此时布局已完成）
         if !self.hasRecordedOriginalInset {
-            self.originalInsetTop = scrollView.contentInset.top
+            // 使用 adjustedContentInset 捕获含 safeArea 的真实顶部基准
+            self.originalInsetTop = scrollView.adjustedContentInset.top
             self.hasRecordedOriginalInset = true
         }
-        guard self.isEnabled, self.state != .refreshing else { return }
-        // pullDistance > 0 表示正在下拉
+        // 刷新期间：持续用当前 offset 反算并同步 inset，保证 endRefreshing 时位置连续
+        if self.state == .refreshing {
+            self.resetInset(scrollView: scrollView)
+            return
+        }
+        guard self.isEnabled else { return }
         let pullDistance = -(scrollView.contentOffset.y + self.originalInsetTop)
         if scrollView.isDragging {
             if pullDistance >= self.height {
@@ -164,7 +172,6 @@ public final class STRefreshHeaderView: UIView {
                 self.state = .idle
             }
         } else {
-            // 松手时如果已触发，则开始刷新
             if self.state == .triggered {
                 self.beginRefreshing(scrollView: scrollView)
             } else if state == .pulling {
@@ -176,12 +183,30 @@ public final class STRefreshHeaderView: UIView {
     private func beginRefreshing(scrollView: UIScrollView) {
         self.state = .refreshing
         UIView.animate(withDuration: 0.3) {
-            var inset = scrollView.contentInset
-            inset.top = self.originalInsetTop + self.height
-            scrollView.contentInset = inset
+            self.setEffectiveInsetTop(self.originalInsetTop + self.height, on: scrollView)
             scrollView.setContentOffset(CGPoint(x: 0, y: -(self.originalInsetTop + self.height)), animated: false)
         }
         self.action?()
+    }
+
+    // MARK: - inset helpers
+    /// 刷新期间根据当前 offset 动态收缩 inset，用户滚离顶部时 header 随之隐藏，
+    /// 使 endRefreshing 时无需强制修改 offset 也能平滑复原。
+    private func resetInset(scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        // 将有效 insetTop 钳制在 [originalInsetTop, originalInsetTop + height]
+        var insetT = max(-offsetY, self.originalInsetTop)
+        insetT = min(insetT, self.originalInsetTop + self.height)
+        guard abs(scrollView.adjustedContentInset.top - insetT) > 0.001 else { return }
+        self.setEffectiveInsetTop(insetT, on: scrollView)
+    }
+
+    /// 将"有效顶部 inset（含 safeArea）"设为 value；写入 contentInset 时自动扣除 safeArea 贡献。
+    private func setEffectiveInsetTop(_ value: CGFloat, on sv: UIScrollView) {
+        let safeAreaDelta = sv.adjustedContentInset.top - sv.contentInset.top
+        var inset = sv.contentInset
+        inset.top = value - safeAreaDelta
+        sv.contentInset = inset
     }
 
     private func applyState() {
@@ -286,16 +311,16 @@ public final class STRefreshHeaderView: UIView {
         anim.repeatCount = .infinity
         self.customImageView.layer.add(anim, forKey: "st_rotation")
     }
-    
+
     private let spinner: UIActivityIndicatorView = {
         let v = UIActivityIndicatorView(style: .medium)
         v.hidesWhenStopped = true
         return v
     }()
-    
+
     private let arrowImageView = UIImageView()
     private let customImageView = UIImageView()
-    
+
     private let textLabel: UILabel = {
         let l = UILabel()
         l.font = .systemFont(ofSize: 13)
@@ -317,8 +342,11 @@ public final class STLoadMoreFooterView: UIView {
     private weak var attachedScrollView: UIScrollView?
     private var offsetToken: NSKeyValueObservation?
     private var contentSizeToken: NSKeyValueObservation?
+    // adjustedContentInset.bottom（含 safeArea）作为基准
     private var originalInsetBottom: CGFloat = 0
     private var hasRecordedOriginalInset = false
+    // beginLoading 时实际增加的 insetBottom 差值，结束时用于精确还原
+    private var lastBottomDelta: CGFloat = 0
     /// 是否启用上拉加载更多（默认 true）。
     public var isEnabled: Bool = true
 
@@ -339,7 +367,6 @@ public final class STLoadMoreFooterView: UIView {
     public func attach(to scrollView: UIScrollView, action: @escaping () -> Void) {
         self.action = action
         self.attachedScrollView = scrollView
-        // originalInsetBottom 延迟到首次 KVO 回调时捕获
         let footerY = max(scrollView.contentSize.height, scrollView.bounds.height)
         frame = CGRect(x: 0, y: footerY, width: scrollView.bounds.width, height: height)
         autoresizingMask = [.flexibleWidth]
@@ -352,18 +379,19 @@ public final class STLoadMoreFooterView: UIView {
         }
     }
 
-    // MARK: End Loading
+    // MARK: Public API
     /// 结束加载状态。`hasMore = false` 时显示"无更多"状态并锁定。
     public func endLoading(hasMore: Bool) {
         if hasMore {
+            if let sv = self.attachedScrollView {
+                self.setEffectiveInsetBottom(self.originalInsetBottom, on: sv)
+            }
             self.state = .idle
         } else {
             self.state = .noMore
-            // noMore 时保持 footer 可见
             if let sv = self.attachedScrollView {
-                var inset = sv.contentInset
-                inset.bottom = self.originalInsetBottom + height
-                sv.contentInset = inset
+                // noMore 时保持 footer 可见
+                self.setEffectiveInsetBottom(self.originalInsetBottom + self.height, on: sv)
             }
         }
     }
@@ -372,9 +400,7 @@ public final class STLoadMoreFooterView: UIView {
     public func resetToIdle() {
         self.state = .idle
         if let sv = self.attachedScrollView {
-            var inset = sv.contentInset
-            inset.bottom = self.originalInsetBottom
-            sv.contentInset = inset
+            self.setEffectiveInsetBottom(self.originalInsetBottom, on: sv)
         }
     }
 
@@ -399,6 +425,7 @@ public final class STLoadMoreFooterView: UIView {
         }
     }
 
+    // MARK: - Private
     private func setupUI() {
         self.backgroundColor = .clear
         self.clipsToBounds = true
@@ -420,7 +447,7 @@ public final class STLoadMoreFooterView: UIView {
 
     private func handleContentOffsetChange(_ scrollView: UIScrollView) {
         if !self.hasRecordedOriginalInset {
-            self.originalInsetBottom = scrollView.contentInset.bottom
+            self.originalInsetBottom = scrollView.adjustedContentInset.bottom
             self.hasRecordedOriginalInset = true
         }
         guard self.state == .idle, self.isEnabled else { return }
@@ -436,15 +463,24 @@ public final class STLoadMoreFooterView: UIView {
 
     private func beginLoading(scrollView: UIScrollView) {
         self.state = .loading
-        var inset = scrollView.contentInset
-        inset.bottom = self.originalInsetBottom + self.height
-        scrollView.contentInset = inset
+        let targetBottom = self.originalInsetBottom + self.height
+        // 记录本次实际增加的差值（外部可能已修改过 inset），还原时只减去这段 delta
+        self.lastBottomDelta = targetBottom - scrollView.adjustedContentInset.bottom
+        self.setEffectiveInsetBottom(targetBottom, on: scrollView)
         self.action?()
     }
 
     private func repositionFooter(in scrollView: UIScrollView) {
         let footerY = max(scrollView.contentSize.height, scrollView.bounds.height)
         frame = CGRect(x: frame.origin.x, y: footerY, width: frame.width, height: self.height)
+    }
+
+    /// 将"有效底部 inset（含 safeArea）"设为 value；写入 contentInset 时自动扣除 safeArea 贡献。
+    private func setEffectiveInsetBottom(_ value: CGFloat, on sv: UIScrollView) {
+        let safeAreaDelta = sv.adjustedContentInset.bottom - sv.contentInset.bottom
+        var inset = sv.contentInset
+        inset.bottom = value - safeAreaDelta
+        sv.contentInset = inset
     }
 
     private func applyState() {
@@ -508,15 +544,15 @@ public final class STLoadMoreFooterView: UIView {
         anim.repeatCount = .infinity
         self.customImageView.layer.add(anim, forKey: "st_rotation")
     }
-    
+
     private let spinner: UIActivityIndicatorView = {
         let v = UIActivityIndicatorView(style: .medium)
         v.hidesWhenStopped = true
         return v
     }()
-    
+
     private let customImageView = UIImageView()
-    
+
     private let textLabel: UILabel = {
         let l = UILabel()
         l.font = .systemFont(ofSize: 13)
