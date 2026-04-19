@@ -279,6 +279,24 @@ open class STBaseView: UIView {
         self.refreshAppearance(animated: animated)
     }
 
+    open override func safeAreaInsetsDidChange() {
+        super.safeAreaInsetsDidChange()
+        switch self.layoutMode {
+        case .table:
+            if let tv = self._tableView {
+                tv.contentInset.bottom = safeAreaInsets.bottom
+                tv.scrollIndicatorInsets.bottom = safeAreaInsets.bottom
+            }
+        case .collection:
+            if let cv = self._collectionView {
+                cv.contentInset.bottom = safeAreaInsets.bottom
+                cv.scrollIndicatorInsets.bottom = safeAreaInsets.bottom
+            }
+        default:
+            break
+        }
+    }
+
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         guard self.enableAppearanceManagement else { return }
