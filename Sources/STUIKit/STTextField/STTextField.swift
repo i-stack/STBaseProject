@@ -26,7 +26,6 @@ open class STTextField: UITextField {
     open var textIsCheck: Bool = false
     weak open var cusDelegate: STTextFieldDelegate?
     
-    private var limitCount: Int = -1
     private var contentInsetLeft: CGFloat = 0
     private var contentInsetRight: CGFloat = 0
     private var savaText: String = ""
@@ -96,6 +95,12 @@ open class STTextField: UITextField {
         set {
             self.contentInsetRight = max(0, newValue)
             self.setNeedsLayout()
+        }
+    }
+
+    @IBInspectable open var maxTextCount: Int = -1 {
+        didSet {
+            self.enforceTextCountIfNeeded(for: self)
         }
     }
 
@@ -190,7 +195,7 @@ open class STTextField: UITextField {
     }
     
     public func config(textLimitCount: Int) -> Void {
-        self.limitCount = textLimitCount
+        self.maxTextCount = textLimitCount
     }
         
     public func configAttributed(textColor: UIColor) -> Void {
@@ -334,13 +339,17 @@ open class STTextField: UITextField {
             self.savaText = textField.text ?? ""
         }
         
-        // 处理文本长度限制
-        if self.limitCount > 0 {
-            if let inputText = textField.text, inputText.count > self.limitCount {
-                self.text = String(inputText.prefix(self.limitCount))
-            }
-        }
+        self.enforceTextCountIfNeeded(for: textField)
 
         self.cusDelegate?.st_textFieldEditingChanged(textField: textField)
+    }
+
+    private func enforceTextCountIfNeeded(for textField: STTextField) {
+        guard self.maxTextCount > 0 else { return }
+        if textField.markedTextRange != nil {
+            return
+        }
+        guard let inputText = textField.text, inputText.count > self.maxTextCount else { return }
+        textField.text = String(inputText.prefix(self.maxTextCount))
     }
 }
