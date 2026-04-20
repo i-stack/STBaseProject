@@ -33,6 +33,7 @@ public typealias STTextViewHeightChangeUserActionsBlock = (_ oldHeight: CGFloat,
 open class STTextView: STPlaceholderTextView {
 
     weak open var cusDelegate: STTextViewDelegate?
+    open var shouldPreventResigningFirstResponder: (() -> Bool)?
 
     open var shouldLimitTextCount: Bool = true
     open private(set) var currentTextCount: Int = 0
@@ -200,6 +201,13 @@ open class STTextView: STPlaceholderTextView {
         super.didMoveToSuperview()
         self.updateHeightConstraintIfNeeded()
         self.updateHeightIfNeeded(notify: false, animated: false)
+    }
+
+    open override func resignFirstResponder() -> Bool {
+        if self.shouldPreventResigningFirstResponder?() == true {
+            return false
+        }
+        return super.resignFirstResponder()
     }
 
     open override func sizeThatFits(_ size: CGSize) -> CGSize {
