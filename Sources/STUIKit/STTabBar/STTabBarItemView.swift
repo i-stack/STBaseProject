@@ -372,6 +372,27 @@ public class STTabBarItemView: UIView {
         guard let model = self.itemModel, model.isEnabled else { return }
         self.tapAction?()
     }
+
+    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else { return }
+        guard var model = self.itemModel else { return }
+        var updated = false
+        if let name = model.normalImageName,
+           let img = UIImage(named: name)?.withRenderingMode(.alwaysOriginal) {
+            model.normalImage = img
+            updated = true
+        }
+        if let name = model.selectedImageName,
+           let img = UIImage(named: name)?.withRenderingMode(.alwaysOriginal) {
+            model.selectedImage = img
+            updated = true
+        }
+        if updated {
+            self.itemModel = model
+            self.updateUI()
+        }
+    }
     
     private lazy var iconImageView: UIImageView = {
         let imageView = UIImageView()

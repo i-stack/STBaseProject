@@ -114,6 +114,8 @@ public struct STTabBarItemModel {
     public var title: String
     public var normalImage: UIImage?
     public var selectedImage: UIImage?
+    public var normalImageName: String?
+    public var selectedImageName: String?
     public var customView: UIView?
     public var displayMode: STTabBarItemDisplayMode
     public var colors: STTabBarItemColors
@@ -185,7 +187,7 @@ public struct STTabBarItemModel {
         let normalImage = loadImage(named: normalImageName, imageSize: imageSize)
         let selectedImage = loadImage(named: selectedImageName, imageSize: imageSize)
         let count = badgeCountFromString(badgeValue)
-        return STTabBarItemModel(
+        var model = STTabBarItemModel(
             title: finalTitle,
             normalImage: normalImage,
             selectedImage: selectedImage,
@@ -200,6 +202,9 @@ public struct STTabBarItemModel {
             layout: STTabBarItemLayout(imageSize: imageSize, imageTopInset: imageTopInset),
             badge: STTabBarItemBadge(count: count, backgroundColor: badgeColor, textColor: .white)
         )
+        model.normalImageName = normalImageName
+        model.selectedImageName = selectedImageName
+        return model
     }
 
     public static func createLocalized(
@@ -245,7 +250,7 @@ public struct STTabBarItemModel {
         let normalImage = loadImage(named: normalImageName, imageSize: imageSize)
         let selectedImage = loadImage(named: selectedImageName, imageSize: imageSize)
         let count = badgeCountFromString(badgeValue)
-        return STTabBarItemModel(
+        var model = STTabBarItemModel(
             title: "",
             normalImage: normalImage,
             selectedImage: selectedImage,
@@ -260,6 +265,9 @@ public struct STTabBarItemModel {
             layout: STTabBarItemLayout(imageSize: imageSize, imageTopInset: 6.0),
             badge: STTabBarItemBadge(count: count)
         )
+        model.normalImageName = normalImageName
+        model.selectedImageName = selectedImageName
+        return model
     }
 
     public static func createTextOnly(
@@ -305,7 +313,7 @@ public struct STTabBarItemModel {
             shadowOffset: CGSize(width: 0, height: 2),
             shadowRadius: 4.0
         )
-        return STTabBarItemModel(
+        var model = STTabBarItemModel(
             title: title,
             normalImage: normalImage,
             selectedImage: selectedImage,
@@ -320,6 +328,9 @@ public struct STTabBarItemModel {
             layout: STTabBarItemLayout(imageSize: imageSize, imageTopInset: 6.0),
             irregular: irr
         )
+        model.normalImageName = normalImageName
+        model.selectedImageName = selectedImageName
+        return model
     }
 
     public static func createCustom(customView: UIView, title: String = "") -> STTabBarItemModel {

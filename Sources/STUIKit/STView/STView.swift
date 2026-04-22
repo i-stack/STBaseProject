@@ -7,7 +7,6 @@
 
 import UIKit
 
-// MARK: - 圆角配置结构
 public struct STCornerRadius {
     public var topLeft: CGFloat
     public var topRight: CGFloat
@@ -63,29 +62,29 @@ public class STView: UIView {
     
     @IBInspectable var cornerRadius: CGFloat {
         set {
-            layer.cornerRadius = newValue
-            layer.masksToBounds = newValue > 0
+            self.layer.cornerRadius = newValue
+            self.layer.masksToBounds = newValue > 0
         }
         get {
-            return layer.cornerRadius
+            return self.layer.cornerRadius
         }
     }
     
     @IBInspectable var borderWidth: CGFloat {
         set {
-            layer.borderWidth = newValue > 0 ? newValue : 0
+            self.layer.borderWidth = newValue > 0 ? newValue : 0
         }
         get {
-            return layer.borderWidth
+            return self.layer.borderWidth
         }
     }
     
     @IBInspectable var borderColor: UIColor {
         set {
-            layer.borderColor = newValue.cgColor
+            self.layer.borderColor = newValue.cgColor
         }
         get {
-            return UIColor(cgColor: layer.borderColor!)
+            return UIColor(cgColor: self.layer.borderColor!)
         }
     }
 }
@@ -99,19 +98,15 @@ public extension UIView {
     ///   - topRight: 右上角圆角半径
     ///   - bottomLeft: 左下角圆角半径
     ///   - bottomRight: 右下角圆角半径
-    func st_setCustomCorners(topLeft: CGFloat,
-                          topRight: CGFloat,
-                          bottomLeft: CGFloat,
-                          bottomRight: CGFloat) {
+    func st_setCustomCorners(topLeft: CGFloat, topRight: CGFloat, bottomLeft: CGFloat, bottomRight: CGFloat) {
         let cornerRadius = STCornerRadius(topLeft: topLeft, topRight: topRight, bottomLeft: bottomLeft, bottomRight: bottomRight)
-        st_setCustomCorners(cornerRadius)
+        self.st_setCustomCorners(cornerRadius)
     }
     
     /// 使用配置结构设置圆角
     /// - Parameter cornerRadius: 圆角配置
     func st_setCustomCorners(_ cornerRadius: STCornerRadius) {
-        // 确保视图已经布局
-        layoutIfNeeded()
+        self.layoutIfNeeded()
         
         let path = UIBezierPath()
         let bounds = self.bounds
@@ -137,8 +132,8 @@ public extension UIView {
     /// 设置统一圆角
     /// - Parameter radius: 圆角半径
     func st_setCornerRadius(_ radius: CGFloat) {
-        layer.cornerRadius = radius
-        layer.masksToBounds = radius > 0
+        self.layer.cornerRadius = radius
+        self.layer.masksToBounds = radius > 0
     }
     
     /// 设置圆角和边框
@@ -147,9 +142,9 @@ public extension UIView {
     ///   - borderWidth: 边框宽度
     ///   - borderColor: 边框颜色
     func st_setCornerRadius(_ radius: CGFloat, borderWidth: CGFloat, borderColor: UIColor) {
-        st_setCornerRadius(radius)
-        layer.borderWidth = borderWidth
-        layer.borderColor = borderColor.cgColor
+        self.st_setCornerRadius(radius)
+        self.layer.borderWidth = borderWidth
+        self.layer.borderColor = borderColor.cgColor
     }
 }
 
@@ -163,25 +158,25 @@ public extension UIView {
     ///   - radius: 阴影半径
     ///   - opacity: 阴影透明度
     @objc func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
-        layer.shadowColor = color.cgColor
-        layer.shadowOffset = offset
-        layer.shadowRadius = radius
-        layer.shadowOpacity = opacity
-        layer.masksToBounds = false
+        self.layer.shadowColor = color.cgColor
+        self.layer.shadowOffset = offset
+        self.layer.shadowRadius = radius
+        self.layer.shadowOpacity = opacity
+        self.layer.masksToBounds = false
     }
     
     /// 使用配置结构设置阴影
     /// - Parameter config: 阴影配置
     func st_setShadow(_ config: STShadowConfig) {
-        st_setShadow(color: config.color, offset: config.offset, radius: config.radius, opacity: config.opacity)
+        self.st_setShadow(color: config.color, offset: config.offset, radius: config.radius, opacity: config.opacity)
     }
     
     /// 清除阴影
     func st_clearShadow() {
-        layer.shadowColor = nil
-        layer.shadowOffset = CGSize.zero
-        layer.shadowRadius = 0
-        layer.shadowOpacity = 0
+        self.layer.shadowColor = nil
+        self.layer.shadowOffset = CGSize.zero
+        self.layer.shadowRadius = 0
+        self.layer.shadowOpacity = 0
     }
 }
 
@@ -201,21 +196,19 @@ public extension UIView {
         gradientLayer.startPoint = startPoint
         gradientLayer.endPoint = endPoint
         gradientLayer.locations = locations
-        
-        // 移除之前的渐变层
-        layer.sublayers?.removeAll { $0 is CAGradientLayer }
-        layer.insertSublayer(gradientLayer, at: 0)
+        self.layer.sublayers?.removeAll { $0 is CAGradientLayer }
+        self.layer.insertSublayer(gradientLayer, at: 0)
     }
     
     /// 使用配置结构设置渐变背景
     /// - Parameter config: 渐变配置
     func st_setGradientBackground(_ config: STGradientConfig) {
-        st_setGradientBackground(colors: config.colors, startPoint: config.startPoint, endPoint: config.endPoint, locations: config.locations)
+        self.st_setGradientBackground(colors: config.colors, startPoint: config.startPoint, endPoint: config.endPoint, locations: config.locations)
     }
     
     /// 清除渐变背景
     func st_clearGradientBackground() {
-        layer.sublayers?.removeAll { $0 is CAGradientLayer }
+        self.layer.sublayers?.removeAll { $0 is CAGradientLayer }
     }
 }
 
@@ -358,7 +351,7 @@ public extension UIView {
     /// 获取当前视图控制器
     /// - Returns: 当前视图控制器
     func st_currentViewController() -> UIViewController? {
-        return st_currentViewController(st_keyWindow()?.rootViewController)
+        return self.st_currentViewController(st_keyWindow()?.rootViewController)
     }
     
     /// 递归查找视图控制器
@@ -367,20 +360,19 @@ public extension UIView {
     func st_currentViewController(_ vc: UIViewController?) -> UIViewController? {
         if vc == nil { return nil }
         if let presentVC = vc?.presentedViewController {
-            return st_currentViewController(presentVC)
+            return self.st_currentViewController(presentVC)
         }
         if let tabVC = vc as? UITabBarController {
             if let selectVC = tabVC.selectedViewController {
-                return st_currentViewController(selectVC)
+                return self.st_currentViewController(selectVC)
             }
             return nil
         }
         if let navVC = vc as? UINavigationController {
-            return st_currentViewController(navVC.visibleViewController)
+            return self.st_currentViewController(navVC.visibleViewController)
         }
         return vc
     }
-    
 }
 
 // MARK: - UIView 便捷方法扩展
@@ -393,7 +385,7 @@ public extension UIView {
         defer { UIGraphicsEndImageContext() }
         
         if let context = UIGraphicsGetCurrentContext() {
-            layer.render(in: context)
+            self.layer.render(in: context)
             return UIGraphicsGetImageFromCurrentImageContext()
         }
         return nil
@@ -401,13 +393,13 @@ public extension UIView {
     
     /// 移除所有子视图
     func st_removeAllSubviews() {
-        subviews.forEach { $0.removeFromSuperview() }
+        self.subviews.forEach { $0.removeFromSuperview() }
     }
     
     /// 设置背景色（支持十六进制）
     /// - Parameter hex: 十六进制颜色值
     func st_setBackgroundColor(hex: String) {
-        backgroundColor = UIColor.color(hex: hex)
+        self.backgroundColor = UIColor.color(hex: hex)
     }
     
     /// 设置边框
@@ -415,20 +407,20 @@ public extension UIView {
     ///   - width: 边框宽度
     ///   - color: 边框颜色
     func st_setBorder(width: CGFloat, color: UIColor) {
-        layer.borderWidth = width
-        layer.borderColor = color.cgColor
+        self.layer.borderWidth = width
+        self.layer.borderColor = color.cgColor
     }
     
     /// 清除所有样式
     func st_clearAllStyles() {
-        layer.cornerRadius = 0
-        layer.borderWidth = 0
-        layer.borderColor = nil
-        layer.shadowColor = nil
-        layer.shadowOffset = CGSize.zero
-        layer.shadowRadius = 0
-        layer.shadowOpacity = 0
-        layer.mask = nil
-        st_clearGradientBackground()
+        self.layer.cornerRadius = 0
+        self.layer.borderWidth = 0
+        self.layer.borderColor = nil
+        self.layer.shadowColor = nil
+        self.layer.shadowOffset = CGSize.zero
+        self.layer.shadowRadius = 0
+        self.layer.shadowOpacity = 0
+        self.layer.mask = nil
+        self.st_clearGradientBackground()
     }
 }

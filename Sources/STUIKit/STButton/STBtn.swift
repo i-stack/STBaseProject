@@ -29,26 +29,7 @@ open class STBtn: UIButton {
     /// button.tag = 100
     /// if button.tag == 100 { ... }
     /// ```
-    open var stringIdentifier: String?
-    
-    /// 类型安全的标识符访问（泛型方法）
-    /// 使用示例：
-    /// ```
-    /// button.setIdentifier(STAlertBtnClickType.leftBtnClick)
-    /// if let type: STAlertBtnClickType = button.getIdentifier() {
-    ///     // 使用 type
-    /// }
-    /// ```
-    /// - Parameter value: 要设置的标识符值
-    public func setIdentifier<T>(_ value: T) {
-        self.identifier = value
-    }
-    
-    /// 类型安全的标识符获取（泛型方法）
-    /// - Returns: 转换后的标识符值，如果类型不匹配则返回 nil
-    public func getIdentifier<T>() -> T? {
-        return self.identifier as? T
-    }
+    @IBInspectable open var stringIdentifier: String?
     
     @IBInspectable open var localizedTitle: String {
         get {
