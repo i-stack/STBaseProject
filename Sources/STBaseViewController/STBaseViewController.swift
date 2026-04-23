@@ -60,9 +60,9 @@ open class STBaseViewController: UIViewController {
 
     private var appearanceCancellable: AnyCancellable?
     private var contentOffsetObservation: NSKeyValueObservation?
-    private var leftBtnConstraints: [NSLayoutConstraint] = []
-    private var rightBtnConstraints: [NSLayoutConstraint] = []
-    private var titleLabelConstraints: [NSLayoutConstraint] = []
+    public var leftBtnConstraints: [NSLayoutConstraint] = []
+    public var rightBtnConstraints: [NSLayoutConstraint] = []
+    public var titleLabelConstraints: [NSLayoutConstraint] = []
 
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -93,6 +93,7 @@ open class STBaseViewController: UIViewController {
         self.rightBtn.translatesAutoresizingMaskIntoConstraints = false
 
         self.view.addSubview(self.navigationBarView)
+        self.navigationBarView.addSubview(self.navigationBarItemsView)
         NSLayoutConstraint.activate([
             self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor),
             self.navigationBarView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
@@ -100,7 +101,6 @@ open class STBaseViewController: UIViewController {
             self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor)
         ])
 
-        self.navigationBarView.addSubview(self.navigationBarItemsView)
         NSLayoutConstraint.activate([
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
             self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
