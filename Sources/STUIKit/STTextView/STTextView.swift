@@ -47,20 +47,11 @@ open class STTextView: STPlaceholderTextView {
 
     // MARK: - Appearance
 
-    /// Setting cornerRadius > 0 automatically adjusts contentInsets to match the rounded corners.
     @IBInspectable open var cornerRadius: CGFloat {
         get { return self.layer.cornerRadius }
         set {
             self.layer.cornerRadius = newValue
             self.layer.masksToBounds = newValue > 0
-            if newValue > 0 {
-                self.contentInsets = UIEdgeInsets(
-                    top: newValue * 0.5,
-                    left: newValue,
-                    bottom: newValue * 0.5,
-                    right: newValue
-                )
-            }
         }
     }
 

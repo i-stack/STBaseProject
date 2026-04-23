@@ -67,7 +67,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    @IBInspectable public var placeholderLeftInset: CGFloat {
+    @IBInspectable public var contentInsetLeft: CGFloat {
         get { return self.contentInsetsStorage.left }
         set {
             var insets = self.contentInsetsStorage
@@ -76,7 +76,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    @IBInspectable public var placeholderTopInset: CGFloat {
+    @IBInspectable public var contentInsetTop: CGFloat {
         get { return self.contentInsetsStorage.top }
         set {
             var insets = self.contentInsetsStorage
@@ -85,17 +85,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    @IBInspectable public var cursorInsetTop: CGFloat {
-        get { return self.contentInsetsStorage.top }
-        set { self.placeholderTopInset = newValue }
-    }
-
-    @IBInspectable public var cursorInsetLeft: CGFloat {
-        get { return self.contentInsetsStorage.left }
-        set { self.placeholderLeftInset = newValue }
-    }
-
-    @IBInspectable public var cursorInsetBottom: CGFloat {
+    @IBInspectable public var contentInsetBottom: CGFloat {
         get { return self.contentInsetsStorage.bottom }
         set {
             var insets = self.contentInsetsStorage
@@ -104,7 +94,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    @IBInspectable public var cursorInsetRight: CGFloat {
+    @IBInspectable public var contentInsetRight: CGFloat {
         get { return self.contentInsetsStorage.right }
         set {
             var insets = self.contentInsetsStorage
