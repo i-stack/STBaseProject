@@ -5,14 +5,15 @@
 //  Created by 寒江孤影 on 2018/3/14.
 //
 
+import Combine
 import UIKit
 
 public enum STNavBtnShowType {
-    case none  // show nothing
-    case showBothBtn  // show left button right button and title
-    case showLeftBtn  // show left button and title
-    case showRightBtn  // show right button and title
-    case onlyShowTitle  // only show title
+    case none
+    case showBothBtn
+    case showLeftBtn
+    case showRightBtn
+    case onlyShowTitle
 }
 
 open class STBaseViewController: UIViewController {
@@ -26,34 +27,47 @@ open class STBaseViewController: UIViewController {
     public private(set) var leftBtn = UIButton(type: .custom)
     public private(set) var rightBtn = UIButton(type: .custom)
 
-    public var leftBtnConstraints: [NSLayoutConstraint] = []
-    public var rightBtnConstraints: [NSLayoutConstraint] = []
-    public var titleLabelConstraints: [NSLayoutConstraint] = []
-
     public var navBarBackgroundColor: UIColor = .white
     public var navBarTitleColor: UIColor = .black
     public var buttonTitleColor: UIColor = .systemBlue
     public var buttonTitleFont: UIFont = .st_systemFont(ofSize: 16)
-    public lazy var navBarHeight: CGFloat = STDeviceAdapter.navigationBarHeight
     public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20)
+    public lazy var navBarHeight: CGFloat = STDeviceAdapter.navigationBarHeight
 
-    public var leftBtnImage: UIImage?
-    public var rightBtnImage: UIImage?
-    public var leftBtnTitle: String?
-    public var rightBtnTitle: String?
+    public var leftBtnImage: UIImage? {
+        didSet {
+            self.leftBtn.setImage(self.leftBtnImage, for: .normal)
+        }
+    }
+    public var rightBtnImage: UIImage? {
+        didSet {
+            self.rightBtn.setImage(self.rightBtnImage, for: .normal)
+        }
+    }
+    public var leftBtnTitle: String? {
+        didSet {
+            self.leftBtn.setTitle(self.leftBtnTitle, for: .normal)
+        }
+    }
+    public var rightBtnTitle: String? {
+        didSet {
+            self.rightBtn.setTitle(self.rightBtnTitle, for: .normal)
+        }
+    }
     public var statusBarHidden: Bool = false
     public var statusBarStyle: UIStatusBarStyle = .default
     open var prefersSystemNavigationBarHidden: Bool { true }
-    
-    private var appearanceObserver: NSObjectProtocol?
-    private var systemThemeObserver: NSObjectProtocol?
+
+    private var appearanceCancellable: AnyCancellable?
     private var contentOffsetObservation: NSKeyValueObservation?
+    private var leftBtnConstraints: [NSLayoutConstraint] = []
+    private var rightBtnConstraints: [NSLayoutConstraint] = []
+    private var titleLabelConstraints: [NSLayoutConstraint] = []
 
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.setupNavigationBar()
         self.setupAppearanceObservation()
-        self.applyNavButtons()
         self.finalizeLayout()
     }
 
@@ -69,12 +83,6 @@ open class STBaseViewController: UIViewController {
 
     deinit {
         self.contentOffsetObservation?.invalidate()
-        if let observer = self.appearanceObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
-        if let observer = self.systemThemeObserver {
-            NotificationCenter.default.removeObserver(observer)
-        }
     }
 
     private func setupNavigationBar() {
@@ -89,55 +97,63 @@ open class STBaseViewController: UIViewController {
             self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor),
             self.navigationBarView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.navigationBarView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
-            self.navigationBarView.heightAnchor.constraint(equalToConstant: self.navBarHeight)
+            self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor)
         ])
 
         self.navigationBarView.addSubview(self.navigationBarItemsView)
         NSLayoutConstraint.activate([
+            self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
             self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
             self.navigationBarItemsView.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
-            self.navigationBarItemsView.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor),
-            self.navigationBarItemsView.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor)
+            self.navigationBarItemsView.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor)
         ])
 
         self.navigationBarItemsView.addSubview(self.titleLabel)
-        self.titleLabelConstraints = [
-            self.titleLabel.centerYAnchor.constraint(equalTo: self.navigationBarItemsView.centerYAnchor),
-            self.titleLabel.centerXAnchor.constraint(equalTo: self.navigationBarItemsView.centerXAnchor)
-        ]
+        self.titleLabelConstraints = self.st_titleLabelConstraints(in: self.navigationBarItemsView)
         NSLayoutConstraint.activate(self.titleLabelConstraints)
 
         self.navigationBarItemsView.addSubview(self.leftBtn)
-        let leftWidth = self.leftBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
-        leftWidth.priority = .required
-        self.leftBtnConstraints = [
-            self.leftBtn.leftAnchor.constraint(equalTo: self.navigationBarItemsView.leftAnchor, constant: 8),
-            self.leftBtn.centerYAnchor.constraint(equalTo: self.navigationBarItemsView.centerYAnchor),
-            leftWidth,
-            self.leftBtn.heightAnchor.constraint(equalToConstant: 44)
-        ]
+        self.leftBtnConstraints = self.st_leftButtonConstraints(in: self.navigationBarItemsView)
         NSLayoutConstraint.activate(self.leftBtnConstraints)
 
         self.navigationBarItemsView.addSubview(self.rightBtn)
-        let rightWidth = self.rightBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
-        rightWidth.priority = .required
-        self.rightBtnConstraints = [
-            self.rightBtn.rightAnchor.constraint(equalTo: self.navigationBarItemsView.rightAnchor, constant: -8),
-            self.rightBtn.centerYAnchor.constraint(equalTo: self.navigationBarItemsView.centerYAnchor),
-            rightWidth,
-            self.rightBtn.heightAnchor.constraint(equalToConstant: 44)
-        ]
+        self.rightBtnConstraints = self.st_rightButtonConstraints(in: self.navigationBarItemsView)
         NSLayoutConstraint.activate(self.rightBtnConstraints)
 
         self.leftBtn.addTarget(self, action: #selector(self.onLeftBtnTap), for: .touchUpInside)
         self.rightBtn.addTarget(self, action: #selector(self.onRightBtnTap), for: .touchUpInside)
     }
 
-    private func applyNavButtons() {
-        if let img = self.leftBtnImage { self.leftBtn.setImage(img, for: .normal) }
-        if let txt = self.leftBtnTitle { self.leftBtn.setTitle(txt, for: .normal) }
-        if let img = self.rightBtnImage { self.rightBtn.setImage(img, for: .normal) }
-        if let txt = self.rightBtnTitle { self.rightBtn.setTitle(txt, for: .normal) }
+    /// 子类重写此方法以自定义左按钮约束
+    open func st_leftButtonConstraints(in container: UIView) -> [NSLayoutConstraint] {
+        let widthConstraint = self.leftBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
+        widthConstraint.priority = .required
+        return [
+            self.leftBtn.leftAnchor.constraint(equalTo: container.leftAnchor, constant: 8),
+            self.leftBtn.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            widthConstraint,
+            self.leftBtn.heightAnchor.constraint(equalToConstant: 44)
+        ]
+    }
+
+    /// 子类重写此方法以自定义右按钮约束
+    open func st_rightButtonConstraints(in container: UIView) -> [NSLayoutConstraint] {
+        let widthConstraint = self.rightBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
+        widthConstraint.priority = .required
+        return [
+            self.rightBtn.rightAnchor.constraint(equalTo: container.rightAnchor, constant: -8),
+            self.rightBtn.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            widthConstraint,
+            self.rightBtn.heightAnchor.constraint(equalToConstant: 44)
+        ]
+    }
+
+    /// 子类重写此方法以自定义标题约束
+    open func st_titleLabelConstraints(in container: UIView) -> [NSLayoutConstraint] {
+        return [
+            self.titleLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            self.titleLabel.centerXAnchor.constraint(equalTo: container.centerXAnchor)
+        ]
     }
 
     private func finalizeLayout() {
@@ -146,93 +162,54 @@ open class STBaseViewController: UIViewController {
     }
 
     private func setupAppearanceObservation() {
-        self.appearanceObserver = NotificationCenter.default.addObserver(
-            forName: .stAppearanceDidChange,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            guard let strongSelf = self else { return }
-            strongSelf.st_refreshAppearance(animated: true)
-        }
-
-        // 监听系统深浅模式切换通知（仅当模式为 .system 时生效）
-        if #available(iOS 13.0, *) {
-            self.systemThemeObserver = NotificationCenter.default.addObserver(
-                forName: UIApplication.willEnterForegroundNotification,
-                object: nil,
-                queue: .main
-            ) { [weak self] _ in
-                guard let strongSelf = self else { return }
-                strongSelf.checkSystemThemeChange()
-            }
-        }
-        self.st_refreshAppearance()
-    }
-    
-    /// 检查系统主题变化（当模式为 .system 时）
-    @available(iOS 13.0, *)
-    private func checkSystemThemeChange() {
-        guard STAppearanceManager.shared.currentMode == .system else { return }
         self.st_refreshAppearance(animated: false)
+        self.appearanceCancellable = STAppearanceManager.shared.appearanceModePublisher
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.st_refreshAppearance(animated: true)
+            }
+    }
+
+    /// 外观变化回调，子类重写以自定义颜色处理逻辑
+    open func st_appearanceDidChange(resolvedStyle: UIUserInterfaceStyle) {}
+
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        guard #available(iOS 13.0, *) else { return }
+        guard STAppearanceManager.shared.currentMode == .system else { return }
+
+        let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
+        let currentStyle = self.traitCollection.userInterfaceStyle
+        if previousStyle != currentStyle && previousStyle != .unspecified {
+            self.st_refreshAppearance(animated: true)
+        }
     }
 
     private func st_refreshAppearance(animated: Bool = false) {
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
         if #available(iOS 13.0, *) {
             switch STAppearanceManager.shared.currentMode {
-            case .system:
-                self.overrideUserInterfaceStyle = .unspecified
-            case .light:
-                self.overrideUserInterfaceStyle = .light
-            case .dark:
-                self.overrideUserInterfaceStyle = .dark
+            case .system: self.overrideUserInterfaceStyle = .unspecified
+            case .light:  self.overrideUserInterfaceStyle = .light
+            case .dark:   self.overrideUserInterfaceStyle = .dark
             }
         }
 
-        // STBaseView 的外观由使用者自行管理（enableAppearanceManagement 默认开启）。
-        let resolvedStyle = style == .unspecified ? .light : style
+        let resolvedStyle: UIUserInterfaceStyle = style == .unspecified ? .light : style
         let applyBlock = { [weak self] in
             guard let strongSelf = self else { return }
-            // 通知子类外观已变化，子类可以重写此方法来自定义处理
             strongSelf.st_appearanceDidChange(resolvedStyle: resolvedStyle)
         }
 
         if animated {
             UIView.transition(
                 with: self.view, duration: 0.25,
-                options: [.transitionCrossDissolve, .allowUserInteraction], animations: applyBlock,
+                options: [.transitionCrossDissolve, .allowUserInteraction],
+                animations: applyBlock,
                 completion: nil)
         } else {
             applyBlock()
-        }
-    }
-    
-    /// 外观模式变化时的回调方法（可重写）
-    /// SDK 只负责设置 overrideUserInterfaceStyle，具体的颜色设置由使用者在外界或重写此方法时处理
-    /// - Parameter resolvedStyle: 解析后的外观样式（.light 或 .dark）
-    /// 
-    /// 默认实现为空，使用者可以：
-    /// 1. 在外界通过属性（如 navBarBackgroundColor）设置颜色
-    /// 2. 重写此方法来自定义外观变化时的颜色设置逻辑
-    open func st_appearanceDidChange(resolvedStyle: UIUserInterfaceStyle) {
-        // 默认不自动设置颜色，保持使用者在外界设置的颜色
-        // 使用者可以重写此方法来自定义处理逻辑
-    }
-
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        guard #available(iOS 13.0, *) else { return }
-        
-        // 监听系统深浅模式切换
-        // 只有当 STAppearanceManager 的模式为 .system（跟随系统）时，才响应系统切换
-        guard STAppearanceManager.shared.currentMode == .system else { return }
-        
-        // 检查系统用户界面风格是否发生变化
-        let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
-        let currentStyle = self.traitCollection.userInterfaceStyle
-        if previousStyle != currentStyle && previousStyle != .unspecified {
-            // 系统深浅模式切换，自动更新外观
-            self.st_refreshAppearance(animated: true)
         }
     }
 
@@ -243,30 +220,26 @@ open class STBaseViewController: UIViewController {
             self.rightBtn.isHidden = true
             self.navigationBarView.isHidden = false
             self.navigationBarItemsView.isHidden = false
-            break
         case .showRightBtn:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = false
             self.navigationBarView.isHidden = false
             self.navigationBarItemsView.isHidden = false
-            break
         case .showBothBtn:
             self.leftBtn.isHidden = false
             self.rightBtn.isHidden = false
             self.navigationBarView.isHidden = false
             self.navigationBarItemsView.isHidden = false
-            break
         case .onlyShowTitle:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = true
             self.navigationBarView.isHidden = false
             self.navigationBarItemsView.isHidden = false
-        default:
+        case .none:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = true
             self.navigationBarView.isHidden = true
             self.navigationBarItemsView.isHidden = true
-            break
         }
     }
 
@@ -287,19 +260,15 @@ open class STBaseViewController: UIViewController {
 
     @discardableResult
     open func st_setLeftBtn(image: UIImage? = nil, title: String? = nil) -> Self {
-        self.leftBtnImage = image
-        self.leftBtnTitle = title
-        if let img = image { self.leftBtn.setImage(img, for: .normal) }
-        if let txt = title { self.leftBtn.setTitle(txt, for: .normal) }
+        if let image { self.leftBtnImage = image }
+        if let title { self.leftBtnTitle = title }
         return self
     }
 
     @discardableResult
     open func st_setRightBtn(image: UIImage? = nil, title: String? = nil) -> Self {
-        self.rightBtnImage = image
-        self.rightBtnTitle = title
-        if let img = image { self.rightBtn.setImage(img, for: .normal) }
-        if let txt = title { self.rightBtn.setTitle(txt, for: .normal) }
+        if let image { self.rightBtnImage = image }
+        if let title { self.rightBtnTitle = title }
         return self
     }
 
@@ -314,7 +283,7 @@ open class STBaseViewController: UIViewController {
             gradient.topAnchor.constraint(equalTo: self.navigationBarView.topAnchor),
             gradient.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
             gradient.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
-            gradient.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor),
+            gradient.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor)
         ])
         self.navGradientBar = gradient
         return self
@@ -325,10 +294,9 @@ open class STBaseViewController: UIViewController {
         self.contentOffsetObservation?.invalidate()
         self.contentOffsetObservation = scrollView.observe(
             \.contentOffset, options: [.new, .initial],
-            changeHandler: { [weak self] scroll, change in
+            changeHandler: { [weak self] scroll, _ in
                 guard let self = self else { return }
-                let offset = scroll.contentOffset.y
-                let alpha = max(0, min(1, offset / 120))
+                let alpha = max(0, min(1, scroll.contentOffset.y / 120))
                 self.navigationBarView.alpha = alpha
                 self.navGradientBar?.alpha = alpha
             })
@@ -343,80 +311,37 @@ open class STBaseViewController: UIViewController {
         }
     }
 
-    @objc open func onRightBtnTap() {
-        // override in subclass
-    }
+    @objc open func onRightBtnTap() {}
 
     open override var preferredStatusBarStyle: UIStatusBarStyle { self.statusBarStyle }
     open override var prefersStatusBarHidden: Bool { self.statusBarHidden }
 }
 
-// MARK: - 对外接口：设置外观模式
 extension STBaseViewController {
-    
-    /// 设置 SDK 的外观模式（对外接口）
-    /// 这是全局方法，会影响所有使用 STBaseViewController 的控制器
-    /// - Parameters:
-    ///   - mode: 外观模式，支持 .system（跟随系统）、.light（浅色）、.dark（深色）
-    ///   - animated: 是否使用动画过渡，默认 true（注意：动画参数仅在实例方法中生效）
-    /// 
-    /// 使用示例：
-    /// ```swift
-    /// // 设置为跟随系统
-    /// STBaseViewController.st_setAppearanceMode(.system)
-    /// 
-    /// // 设置为深色模式
-    /// STBaseViewController.st_setAppearanceMode(.dark)
-    /// 
-    /// // 设置为浅色模式
-    /// STBaseViewController.st_setAppearanceMode(.light)
-    /// ```
     public static func st_setAppearanceMode(_ mode: STAppearanceMode, animated: Bool = true) {
         STAppearanceManager.shared.st_apply(mode: mode)
-        // 通知已通过 STAppearanceManager 自动发送，所有 STBaseViewController 实例会自动响应
     }
-    
-    /// 实例方法：设置当前控制器的外观模式
-    /// - Parameters:
-    ///   - mode: 外观模式，支持 .system（跟随系统）、.light（浅色）、.dark（深色）
-    ///   - animated: 是否使用动画过渡，默认 true
-    /// - Returns: 返回自身，支持链式调用
-    @discardableResult
-    public func st_setAppearanceMode(_ mode: STAppearanceMode, animated: Bool = true) -> Self {
-        STAppearanceManager.shared.st_apply(mode: mode)
-        // 通知已通过 STAppearanceManager 自动发送，当前控制器会自动响应
-        return self
-    }
-    
-    /// 获取当前的外观模式
+
     public static func st_getCurrentAppearanceMode() -> STAppearanceMode {
-        return STAppearanceManager.shared.currentMode
-    }
-    
-    /// 获取当前的外观模式（实例方法）
-    public func st_getCurrentAppearanceMode() -> STAppearanceMode {
-        return STAppearanceManager.shared.currentMode
+        STAppearanceManager.shared.currentMode
     }
 }
 
 // MARK: - Liquid Glass
-
-private var liquidGlassKey: UInt8 = 0
-
 extension STBaseViewController {
 
+    private static var liquidGlassKey: UInt8 = 0
+
     fileprivate var liquidGlassContainerView: UIView? {
-        get { objc_getAssociatedObject(self, &liquidGlassKey) as? UIView }
-        set { objc_setAssociatedObject(self, &liquidGlassKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        get { objc_getAssociatedObject(self, &Self.liquidGlassKey) as? UIView }
+        set { objc_setAssociatedObject(self, &Self.liquidGlassKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
 
-    /// iOS 26+ Liquid Glass 是否已启用
     public var isLiquidGlassEnabled: Bool {
         if #available(iOS 26.0, *) { return self.liquidGlassContainerView != nil }
         return false
     }
 
-    /// 为 navigationBarView 启用 Liquid Glass 效果（iOS 26+，低版本无操作）
     @discardableResult
     public func st_enableLiquidGlass() -> Self {
         guard #available(iOS 26.0, *) else { return self }
@@ -429,7 +354,7 @@ extension STBaseViewController {
             container.topAnchor.constraint(equalTo: self.navigationBarView.topAnchor),
             container.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
             container.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
-            container.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor),
+            container.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor)
         ])
         self.liquidGlassContainerView = container
         self.navigationBarView.backgroundColor = .clear
@@ -437,7 +362,6 @@ extension STBaseViewController {
         return self
     }
 
-    /// 关闭 Liquid Glass，恢复原背景色
     public func st_disableLiquidGlass() {
         self.liquidGlassContainerView?.removeFromSuperview()
         self.liquidGlassContainerView = nil

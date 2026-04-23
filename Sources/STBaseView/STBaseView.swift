@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 public enum STLayoutMode {
     case scroll     // UIScrollView（默认）
@@ -38,16 +39,18 @@ open class STBaseView: UIView {
     public private(set) var tableViewStyle: UITableView.Style = .plain
 
     private var keyboardObserverTokens: [NSObjectProtocol] = []
+    private var appearanceCancellable: AnyCancellable?
     /// 是否启用 scrollView 的键盘 contentInset 自动调整（默认 true）。
     public var enableScrollViewKeyboardAdjustment: Bool = true
     /// 是否启用外观模式管理（默认 true）
     /// 当 STBaseView 在 STBaseViewController 中使用时，建议设置为 false，由 STBaseViewController 统一管理外观
     public var enableAppearanceManagement: Bool = true {
         didSet {
-            if !self.enableAppearanceManagement && oldValue {
-                NotificationCenter.default.removeObserver(self)
-            } else if self.enableAppearanceManagement && !oldValue {
+            guard self.enableAppearanceManagement != oldValue else { return }
+            if self.enableAppearanceManagement {
                 self.setupAppearanceObservation()
+            } else {
+                self.appearanceCancellable = nil
             }
         }
     }
@@ -70,7 +73,6 @@ open class STBaseView: UIView {
 
     deinit {
         self.removeKeyboardObservers()
-        NotificationCenter.default.removeObserver(self)
     }
 
     private func setupBase() {
@@ -236,47 +238,45 @@ open class STBaseView: UIView {
         self.scrollView.alwaysBounceHorizontal = (self.scrollDirection == .horizontal || self.scrollDirection == .both)
         self.scrollView.showsVerticalScrollIndicator = (self.scrollDirection == .vertical || self.scrollDirection == .both)
         self.scrollView.showsHorizontalScrollIndicator = (self.scrollDirection == .horizontal || self.scrollDirection == .both)
-        // Default content inset adjustment. Let parent view controller adjust automatically.
         self.scrollView.contentInsetAdjustmentBehavior = .automatic
     }
 
     // MARK: - Appearance
     private func setupAppearanceObservation() {
         guard self.enableAppearanceManagement else { return }
-        NotificationCenter.default.addObserver(forName: .stAppearanceDidChange, object: nil, queue: .main) { [weak self] _ in
-            guard let strongSelf = self, strongSelf.enableAppearanceManagement else { return }
-            strongSelf.refreshAppearance(animated: true)
-        }
-        self.refreshAppearance()
-    }
-
-    private func refreshAppearance(animated: Bool = false) {
+        self.applyOverrideStyle()
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
-        if #available(iOS 13.0, *) {
-            switch STAppearanceManager.shared.currentMode {
-            case .system:
-                self.overrideUserInterfaceStyle = .unspecified
-            case .light:
-                self.overrideUserInterfaceStyle = .light
-            case .dark:
-                self.overrideUserInterfaceStyle = .dark
+        self.st_appearanceDidChange(resolvedStyle: style == .unspecified ? .light : style)
+        self.appearanceCancellable = STAppearanceManager.shared.appearanceModePublisher
+            .dropFirst()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self = self, self.enableAppearanceManagement else { return }
+                self.applyOverrideStyle()
             }
-        }
-        let resolvedStyle = style == .unspecified ? .light : style
-        let action = { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.st_appearanceDidChange(resolvedStyle: resolvedStyle)
-        }
-        if animated {
-            UIView.transition(with: self, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction], animations: action, completion: nil)
-        } else {
-            action()
+    }
+
+    private func applyOverrideStyle() {
+        guard #available(iOS 13.0, *) else { return }
+        switch STAppearanceManager.shared.currentMode {
+        case .system: self.overrideUserInterfaceStyle = .unspecified
+        case .light:  self.overrideUserInterfaceStyle = .light
+        case .dark:   self.overrideUserInterfaceStyle = .dark
         }
     }
 
-    /// 外部可手动触发，保证在自定义属性变动后立即响应
+    /// 外部手动触发，适用于自定义属性变动后需要立即同步外观的场景
     public func st_forceAppearanceRefresh(animated: Bool = false) {
-        self.refreshAppearance(animated: animated)
+        self.applyOverrideStyle()
+        let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
+        let resolved: UIUserInterfaceStyle = style == .unspecified ? .light : style
+        if animated {
+            UIView.transition(with: self, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction]) {
+                self.st_appearanceDidChange(resolvedStyle: resolved)
+            }
+        } else {
+            self.st_appearanceDidChange(resolvedStyle: resolved)
+        }
     }
 
     open override func safeAreaInsetsDidChange() {
@@ -299,18 +299,15 @@ open class STBaseView: UIView {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        guard self.enableAppearanceManagement else { return }
         guard #available(iOS 13.0, *) else { return }
-        // 监听系统深浅模式切换
-        // 只有当 STAppearanceManager 的模式为 .system（跟随系统）时，才响应系统切换
-        guard STAppearanceManager.shared.currentMode == .system else { return }
-        // 检查系统用户界面风格是否发生变化
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
         let currentStyle = self.traitCollection.userInterfaceStyle
-        if previousStyle != currentStyle && previousStyle != .unspecified {
-            // 系统深浅模式切换，自动更新外观
-            self.refreshAppearance(animated: true)
-        }
+        // 响应任何 userInterfaceStyle 变化：
+        // - 独立使用时：Combine 设置 overrideUserInterfaceStyle 后由此触发
+        // - 在 STBaseViewController 内：VC 的 overrideUserInterfaceStyle 通过 trait 级联到此
+        guard previousStyle != currentStyle, previousStyle != .unspecified else { return }
+        let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
+        self.st_appearanceDidChange(resolvedStyle: style == .unspecified ? .light : style)
     }
     
     /// 外观模式变化时的回调方法（可重写）

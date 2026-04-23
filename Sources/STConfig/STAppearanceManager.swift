@@ -6,17 +6,13 @@
 //
 
 import UIKit
+import Combine
 
 /// SDK 统一的外观模式
 public enum STAppearanceMode: Equatable {
     case system        // 跟随系统
     case light         // 强制浅色
     case dark          // 强制深色
-}
-
-/// 外观变化通知
-public extension Notification.Name {
-    static let stAppearanceDidChange = Notification.Name("com.stbaseproject.appearance.didChange")
 }
 
 /// 负责管理 SDK 中的深浅色模式
@@ -28,16 +24,17 @@ public final class STAppearanceManager {
     public private(set) var currentMode: STAppearanceMode = .system {
         didSet {
             guard oldValue != currentMode else { return }
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(
-                    name: .stAppearanceDidChange,
-                    object: self,
-                    userInfo: ["mode": self.currentMode]
-                )
-            }
+            self.modeSubject.send(self.currentMode)
         }
     }
-    
+
+    private let modeSubject = CurrentValueSubject<STAppearanceMode, Never>(.system)
+
+    /// 订阅此 publisher 以响应外观模式变化；新订阅者立即收到当前值
+    public var appearanceModePublisher: AnyPublisher<STAppearanceMode, Never> {
+        self.modeSubject.eraseToAnyPublisher()
+    }
+
     private init() {}
     
     /// 外部（宿主 App）调用此方法即可切换 SDK 内部的显示模式
