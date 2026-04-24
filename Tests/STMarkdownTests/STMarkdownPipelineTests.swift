@@ -564,12 +564,112 @@ final class STMarkdownPipelineTests: XCTestCase {
         )
 
         let attributed = renderer.render(document: document)
-        let attachment = attributed.attribute(.attachment, at: 0, effectiveRange: nil) as? NSTextAttachment
+        // STMarkdownTableViewAttachment 使用 overlay 机制（不走 TextKit 绘制），
+        // image 始终为 nil，尺寸通过 attachmentBounds 在 layout 时计算。
+        let attachment = attributed.attribute(.attachment, at: 0, effectiveRange: nil) as? STMarkdownTableViewAttachment
 
         XCTAssertNotNil(attachment)
-        XCTAssertNotNil(attachment?.image)
-        XCTAssertGreaterThan(attachment?.bounds.width ?? 0, 0)
-        XCTAssertGreaterThan(attachment?.bounds.height ?? 0, 0)
+        XCTAssertNil(attachment?.image)
+        XCTAssertNotNil(attachment?.tableViewModel)
+        XCTAssertGreaterThan(attachment?.containerWidth ?? 0, 0)
+    }
+
+    // MARK: - Multi-table Tests
+
+    func testTableBlankLineRuleInsertsBlankLineBeforeTableAfterText() {
+        let rule = STTableBlankLineNormalizationRule()
+        var context = STMarkdownPreprocessContext()
+
+        let input = "Some text\n| A | B |\n|---|---|"
+
+        let result = rule.apply(to: input, context: &context)
+
+        XCTAssertTrue(result.contains("Some text\n\n| A | B |"))
+    }
+
+    func testTableBlankLineRuleInsertsBlankLineAfterTableBeforeText() {
+        let rule = STTableBlankLineNormalizationRule()
+        var context = STMarkdownPreprocessContext()
+
+        let input = "| A | B |\n|---|---|\nSome text"
+
+        let result = rule.apply(to: input, context: &context)
+
+        XCTAssertTrue(result.contains("|---|---|\n\nSome text"))
+    }
+
+    func testTableBlankLineRuleSkipsContentInsideCodeFence() {
+        let rule = STTableBlankLineNormalizationRule()
+        var context = STMarkdownPreprocessContext()
+
+        let input = "```\nSome text\n| A | B |\n```"
+
+        let result = rule.apply(to: input, context: &context)
+
+        XCTAssertEqual(result, input)
+    }
+
+    func testTableDelimiterRuleInsertsDelimiterForHeaderWithoutOne() {
+        let rule = STTableDelimiterNormalizationRule()
+        var context = STMarkdownPreprocessContext()
+
+        // Second table starts after blank line but has no delimiter row
+        let input = "| A | B |\n|---|---|\n| 1 | 2 |\n\n| C | D |\n| 3 | 4 |"
+
+        let result = rule.apply(to: input, context: &context)
+
+        XCTAssertTrue(result.contains("| C | D |\n| --- | --- |\n| 3 | 4 |"))
+    }
+
+    func testTableDelimiterRuleDoesNotDuplicateExistingDelimiter() {
+        let rule = STTableDelimiterNormalizationRule()
+        var context = STMarkdownPreprocessContext()
+
+        let input = "| A | B |\n|---|---|\n| 1 | 2 |"
+
+        let result = rule.apply(to: input, context: &context)
+
+        // No extra delimiter should be inserted
+        let delimiterCount = result.components(separatedBy: "|---|---|").count - 1
+        XCTAssertEqual(delimiterCount, 1)
+    }
+
+    func testTableDelimiterRuleSkipsContentInsideCodeFence() {
+        let rule = STTableDelimiterNormalizationRule()
+        var context = STMarkdownPreprocessContext()
+
+        let input = "```\n| A | B |\n| 1 | 2 |\n```"
+
+        let result = rule.apply(to: input, context: &context)
+
+        XCTAssertEqual(result, input)
+    }
+
+    func testEngineRecognizesSecondTableMissingDelimiter() {
+        let engine = STMarkdownEngine()
+        // Second table lacks delimiter row — should be repaired by STTableDelimiterNormalizationRule
+        let markdown = "| A | B |\n|---|---|\n| 1 | 2 |\n\n| C | D |\n| 3 | 4 |"
+
+        let result = engine.process(markdown)
+        let tableBlocks = result.renderDocument.blocks.compactMap { block -> STMarkdownTableModel? in
+            if case .table(let m) = block { return m }
+            return nil
+        }
+
+        XCTAssertEqual(tableBlocks.count, 2, "两个表格都应被识别，即使第二个缺少分隔行")
+    }
+
+    func testEngineRecognizesTwoWellFormedTables() {
+        let engine = STMarkdownEngine()
+        let markdown = "| A | B |\n|---|---|\n| 1 | 2 |\n\n| C | D |\n|---|---|\n| 3 | 4 |"
+
+        let result = engine.process(markdown)
+        let tableBlocks = result.renderDocument.blocks.compactMap { block -> STMarkdownTableModel? in
+            if case .table(let m) = block { return m }
+            return nil
+        }
+
+        XCTAssertEqual(tableBlocks.count, 2)
     }
 
     func testHighFidelityMathRendererProducesInlineAttachment() {
