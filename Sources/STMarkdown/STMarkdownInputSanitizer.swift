@@ -199,12 +199,135 @@ public struct STDoubleNewlineRule: STMarkdownRule {
     }
 }
 
+public struct STTableBlankLineNormalizationRule: STMarkdownRule {
+    public let name = "STTableBlankLineNormalizationRule"
+
+    public init() {}
+
+    public func shouldApply(to text: String) -> Bool {
+        text.contains("|")
+    }
+
+    public func apply(to text: String, context: inout STMarkdownPreprocessContext) -> String {
+        let lines = text.components(separatedBy: "\n")
+        var result: [String] = []
+        result.reserveCapacity(lines.count + 8)
+        var insideCodeFence = false
+
+        for (index, line) in lines.enumerated() {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
+                insideCodeFence.toggle()
+            }
+
+            if !insideCodeFence {
+                let isTableRow = trimmed.hasPrefix("|")
+                let prevTrimmed = result.last?.trimmingCharacters(in: .whitespaces) ?? ""
+                let isPrevBlank = prevTrimmed.isEmpty
+                let isPrevTableRow = prevTrimmed.hasPrefix("|")
+
+                if isTableRow && !result.isEmpty && !isPrevBlank && !isPrevTableRow {
+                    result.append("")
+                }
+
+                result.append(line)
+
+                let nextIndex = index + 1
+                if isTableRow && nextIndex < lines.count {
+                    let nextTrimmed = lines[nextIndex].trimmingCharacters(in: .whitespaces)
+                    if !nextTrimmed.isEmpty && !nextTrimmed.hasPrefix("|") && !nextTrimmed.hasPrefix("```") && !nextTrimmed.hasPrefix("~~~") {
+                        result.append("")
+                    }
+                }
+            } else {
+                result.append(line)
+            }
+        }
+
+        return result.joined(separator: "\n")
+    }
+}
+
+public struct STTableDelimiterNormalizationRule: STMarkdownRule {
+    
+    public let name = "STTableDelimiterNormalizationRule"
+
+    private static let delimiterPattern = try! NSRegularExpression(
+        pattern: #"^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$"#,
+        options: []
+    )
+
+    public init() {}
+
+    public func shouldApply(to text: String) -> Bool {
+        text.contains("|")
+    }
+
+    public func apply(to text: String, context: inout STMarkdownPreprocessContext) -> String {
+        let lines = text.components(separatedBy: "\n")
+        var result: [String] = []
+        result.reserveCapacity(lines.count + 4)
+        var insideCodeFence = false
+
+        for (index, line) in lines.enumerated() {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
+                insideCodeFence.toggle()
+            }
+
+            result.append(line)
+
+            guard !insideCodeFence, trimmed.hasPrefix("|") else { continue }
+
+            // Only treat as a potential header when preceded by a blank line (new block)
+            let prevTrimmed = result.count >= 2
+                ? result[result.count - 2].trimmingCharacters(in: .whitespaces)
+                : ""
+            guard prevTrimmed.isEmpty else { continue }
+
+            // Look ahead: next line starts with | but is NOT a delimiter row → insert one
+            let nextIndex = index + 1
+            guard nextIndex < lines.count else { continue }
+            let nextTrimmed = lines[nextIndex].trimmingCharacters(in: .whitespaces)
+            guard nextTrimmed.hasPrefix("|"),
+                  !Self.isDelimiterRow(nextTrimmed) else { continue }
+
+            let columnCount = Self.countColumns(in: trimmed)
+            guard columnCount >= 1 else { continue }
+            let cells = (0..<columnCount).map { _ in " --- " }.joined(separator: "|")
+            result.append("|\(cells)|")
+        }
+
+        return result.joined(separator: "\n")
+    }
+
+    private static func isDelimiterRow(_ line: String) -> Bool {
+        let nsLine = line as NSString
+        return Self.delimiterPattern.firstMatch(
+            in: line,
+            options: [],
+            range: NSRange(location: 0, length: nsLine.length)
+        ) != nil
+    }
+
+    private static func countColumns(in tableRow: String) -> Int {
+        var stripped = tableRow
+        if stripped.hasPrefix("|") { stripped = String(stripped.dropFirst()) }
+        if stripped.hasSuffix("|") { stripped = String(stripped.dropLast()) }
+        return stripped.components(separatedBy: "|")
+            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            .count
+    }
+}
+
 public struct STMarkdownInputSanitizer {
     public static let defaultRules: [any STMarkdownRule] = [
         STHtmlNormalizeRule(),
         STPageReferenceCleanupRule(),
         STAnchorCleanupRule(),
         STHtmlLinkToMarkdownRule(),
+        STTableBlankLineNormalizationRule(),
+        STTableDelimiterNormalizationRule(),
         STDoubleNewlineRule(),
     ]
 
