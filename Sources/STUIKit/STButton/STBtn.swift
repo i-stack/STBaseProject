@@ -122,17 +122,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 阴影颜色（IBInspectable）
-    @IBInspectable open var shadowColor: UIColor? {
-        get {
-            guard let cgColor = self.layer.shadowColor else { return nil }
-            return UIColor(cgColor: cgColor)
-        }
-        set {
-            self.layer.shadowColor = newValue?.cgColor
-        }
-    }
-    
     /// 阴影偏移宽度（IBInspectable）
     @IBInspectable open var shadowOffsetWidth: CGFloat {
         get {
