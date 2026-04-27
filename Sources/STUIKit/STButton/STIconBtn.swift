@@ -197,8 +197,12 @@ open class STIconBtn: STBtn {
     }
 
     private func updateIconLayout() {
-        self.imageEdgeInsets = .zero
-        self.titleEdgeInsets = .zero
+        var newImageInsets = UIEdgeInsets.zero
+        var newTitleInsets = UIEdgeInsets.zero
+        defer {
+            if self.imageEdgeInsets != newImageInsets { self.imageEdgeInsets = newImageInsets }
+            if self.titleEdgeInsets != newTitleInsets { self.titleEdgeInsets = newTitleInsets }
+        }
         guard
             let imageSize = self.currentImageSize(),
             let titleSize = self.currentTitleSize()
@@ -206,57 +210,17 @@ open class STIconBtn: STBtn {
         let halfSpace = self.spacing / 2
         switch self.iconPosition {
         case .left:
-            self.imageEdgeInsets = UIEdgeInsets(
-                top: 0,
-                left: -halfSpace,
-                bottom: 0,
-                right: halfSpace
-            )
-            self.titleEdgeInsets = UIEdgeInsets(
-                top: 0,
-                left: halfSpace,
-                bottom: 0,
-                right: -halfSpace
-            )
+            newImageInsets = UIEdgeInsets(top: 0, left: -halfSpace, bottom: 0, right: halfSpace)
+            newTitleInsets = UIEdgeInsets(top: 0, left: halfSpace, bottom: 0, right: -halfSpace)
         case .right:
-            self.imageEdgeInsets = UIEdgeInsets(
-                top: 0,
-                left: titleSize.width + halfSpace,
-                bottom: 0,
-                right: -(titleSize.width + halfSpace)
-            )
-            self.titleEdgeInsets = UIEdgeInsets(
-                top: 0,
-                left: -(imageSize.width + halfSpace),
-                bottom: 0,
-                right: imageSize.width + halfSpace
-            )
+            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width + halfSpace, bottom: 0, right: -(titleSize.width + halfSpace))
+            newTitleInsets = UIEdgeInsets(top: 0, left: -(imageSize.width + halfSpace), bottom: 0, right: imageSize.width + halfSpace)
         case .top:
-            self.imageEdgeInsets = UIEdgeInsets(
-                top: -(titleSize.height + self.spacing),
-                left: titleSize.width / 2,
-                bottom: 0,
-                right: -titleSize.width / 2
-            )
-            self.titleEdgeInsets = UIEdgeInsets(
-                top: 0,
-                left: -imageSize.width / 2,
-                bottom: -(imageSize.height + self.spacing),
-                right: imageSize.width / 2
-            )
+            newImageInsets = UIEdgeInsets(top: -(titleSize.height + self.spacing), left: titleSize.width / 2, bottom: 0, right: -titleSize.width / 2)
+            newTitleInsets = UIEdgeInsets(top: 0, left: -imageSize.width / 2, bottom: -(imageSize.height + self.spacing), right: imageSize.width / 2)
         case .bottom:
-            self.imageEdgeInsets = UIEdgeInsets(
-                top: 0,
-                left: titleSize.width / 2,
-                bottom: -(titleSize.height + self.spacing),
-                right: -titleSize.width / 2
-            )
-            self.titleEdgeInsets = UIEdgeInsets(
-                top: -(imageSize.height + self.spacing),
-                left: -imageSize.width / 2,
-                bottom: 0,
-                right: imageSize.width / 2
-            )
+            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width / 2, bottom: -(titleSize.height + self.spacing), right: -titleSize.width / 2)
+            newTitleInsets = UIEdgeInsets(top: -(imageSize.height + self.spacing), left: -imageSize.width / 2, bottom: 0, right: imageSize.width / 2)
         }
     }
 

@@ -17,7 +17,8 @@ public enum STLabelVerticalAlignment {
     case bottom
 }
 
-public class STLabel: UILabel {
+@IBDesignable
+open class STLabel: UILabel {
     
     private var verticalAlignment: STLabelVerticalAlignment?
     
@@ -26,6 +27,26 @@ public class STLabel: UILabel {
             invalidateIntrinsicContentSize()
             setNeedsLayout()
         }
+    }
+    
+    @IBInspectable open var contentInsetTop: CGFloat {
+        get { return self.contentEdgeInsets.top }
+        set { self.contentEdgeInsets.top = max(0, newValue) }
+    }
+    
+    @IBInspectable open var contentInsetLeft: CGFloat {
+        get { return self.contentEdgeInsets.left }
+        set { self.contentEdgeInsets.left = max(0, newValue) }
+    }
+    
+    @IBInspectable open var contentInsetBottom: CGFloat {
+        get { return self.contentEdgeInsets.bottom }
+        set { self.contentEdgeInsets.bottom = max(0, newValue) }
+    }
+    
+    @IBInspectable open var contentInsetRight: CGFloat {
+        get { return self.contentEdgeInsets.right }
+        set { self.contentEdgeInsets.right = max(0, newValue) }
     }
     
     @IBInspectable open var localizedText: String {
@@ -38,17 +59,26 @@ public class STLabel: UILabel {
         }
     }
     
-    @IBInspectable var cornerRadius: CGFloat {
+    @IBInspectable open var cornerRadius: CGFloat {
         set {
             layer.cornerRadius = newValue
-            layer.masksToBounds = newValue > 0
+            self.st_updateLiquidGlassCornerRadius()
         }
         get {
             return layer.cornerRadius
         }
     }
     
-    @IBInspectable var borderWidth: CGFloat {
+    @IBInspectable open var clipsContentToBounds: Bool {
+        get {
+            return self.layer.masksToBounds
+        }
+        set {
+            self.layer.masksToBounds = newValue
+        }
+    }
+    
+    @IBInspectable open var borderWidth: CGFloat {
         set {
             layer.borderWidth = newValue > 0 ? newValue : 0
         }
@@ -57,12 +87,41 @@ public class STLabel: UILabel {
         }
     }
     
-    @IBInspectable var borderColor: UIColor {
+    @IBInspectable open var borderColor: UIColor? {
         set {
-            layer.borderColor = newValue.cgColor
+            layer.borderColor = newValue?.cgColor
         }
         get {
-            return UIColor(cgColor: layer.borderColor!)
+            guard let color = self.layer.borderColor else { return nil }
+            return UIColor(cgColor: color)
+        }
+    }
+    
+    @IBInspectable open var isLiquidGlassEnabled: Bool = false {
+        didSet {
+            if self.isLiquidGlassEnabled {
+                self.updateLiquidGlassBackground()
+            } else {
+                self.st_disableLiquidGlassBackground()
+            }
+        }
+    }
+    
+    @IBInspectable open var liquidGlassTintColor: UIColor = UIColor.white.withAlphaComponent(0.18) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassHighlightOpacity: Float = 0.45 {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassBorderColor: UIColor = UIColor.white.withAlphaComponent(0.45) {
+        didSet {
+            self.updateLiquidGlassBackground()
         }
     }
     
@@ -78,7 +137,7 @@ public class STLabel: UILabel {
         self.adjustsFontForContentSizeCategory = true
     }
 
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.verticalAlignment = STLabelVerticalAlignment.middle
         self.adjustsFontForContentSizeCategory = true
@@ -87,6 +146,10 @@ public class STLabel: UILabel {
     
     public override func layoutSubviews() {
         super.layoutSubviews()
+        self.st_updateLiquidGlassCornerRadius()
+        if let glassView = self.subviews.first(where: { $0 is STLiquidGlassView }) {
+            self.sendSubviewToBack(glassView)
+        }
     }
     
     private func updateFontSize() {
@@ -140,5 +203,14 @@ public class STLabel: UILabel {
         let originalSize = super.sizeThatFits(adjustedSize)
         return CGSize(width: originalSize.width + contentEdgeInsets.left + contentEdgeInsets.right,
                      height: originalSize.height + contentEdgeInsets.top + contentEdgeInsets.bottom)
+    }
+    
+    private func updateLiquidGlassBackground() {
+        guard self.isLiquidGlassEnabled else { return }
+        self.st_enableLiquidGlassBackground(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor
+        )
     }
 }

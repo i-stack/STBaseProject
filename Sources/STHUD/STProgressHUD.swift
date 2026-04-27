@@ -592,7 +592,7 @@ private extension STProgressHUD {
 public class STProgressHUDBackgroundView: UIView {
 
     public enum BackgroundStyle {
-        case solidColor, blur
+        case solidColor, blur, liquidGlass
     }
 
     public var style: BackgroundStyle? {
@@ -619,13 +619,28 @@ public class STProgressHUDBackgroundView: UIView {
     }
 
     required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: aDecoder)
+        self.isOpaque = false
+        self.style = .blur
+        self.color = UIColor(white: 0.8, alpha: 0.6)
+        self.clipsToBounds = true
+        self.updateForBackgroundStyle()
     }
 
     public override var intrinsicContentSize: CGSize { .zero }
 
     private func updateForBackgroundStyle() {
-        if self.style == .blur {
+        if self.style == .liquidGlass {
+            self.effectView?.removeFromSuperview()
+            self.st_enableLiquidGlassBackground(
+                tintColor: self.color ?? UIColor(white: 0.8, alpha: 0.35),
+                highlightOpacity: 0.28,
+                borderColor: UIColor.white.withAlphaComponent(0.32)
+            )
+            self.backgroundColor = .clear
+            self.layer.allowsGroupOpacity = false
+        } else if self.style == .blur {
+            self.st_disableLiquidGlassBackground()
             self.effectView?.removeFromSuperview()
             let effect = UIBlurEffect(style: .light)
             let view = UIVisualEffectView(effect: effect)
@@ -636,6 +651,7 @@ public class STProgressHUDBackgroundView: UIView {
             self.backgroundColor = self.color
             self.layer.allowsGroupOpacity = false
         } else {
+            self.st_disableLiquidGlassBackground()
             self.effectView?.removeFromSuperview()
             self.effectView = nil
             self.backgroundColor = self.color

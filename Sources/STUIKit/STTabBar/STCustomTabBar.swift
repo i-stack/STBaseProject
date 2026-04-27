@@ -16,6 +16,30 @@ public class STCustomTabBar: UIView {
     public weak var delegate: STCustomTabBarDelegate?
     public var preferredLayoutHeight: CGFloat { self.config.height }
     
+    @IBInspectable public var isLiquidGlassEnabled: Bool = false {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable public var liquidGlassTintColor: UIColor = UIColor.white.withAlphaComponent(0.18) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable public var liquidGlassHighlightOpacity: Float = 0.35 {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable public var liquidGlassBorderColor: UIColor = UIColor.white.withAlphaComponent(0.35) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
     private var selectedIndex: Int = 0
     private var itemViews: [STTabBarItemView] = []
     private var itemModels: [STTabBarItemModel] = []
@@ -94,6 +118,18 @@ public class STCustomTabBar: UIView {
         self.config = config
         self.updateAppearance()
         self.itemViews.forEach { $0.reapplyTabBarConfig(config) }
+    }
+    
+    public func st_setLiquidGlassBackground(
+        tintColor: UIColor = UIColor.white.withAlphaComponent(0.18),
+        highlightOpacity: Float = 0.35,
+        borderColor: UIColor = UIColor.white.withAlphaComponent(0.35)
+    ) {
+        self.liquidGlassTintColor = tintColor
+        self.liquidGlassHighlightOpacity = highlightOpacity
+        self.liquidGlassBorderColor = borderColor
+        self.isLiquidGlassEnabled = true
+        self.updateLiquidGlassBackground()
     }
     
     public func getSelectedIndex() -> Int { self.selectedIndex }
@@ -184,6 +220,20 @@ public class STCustomTabBar: UIView {
         } else {
             self.layer.shadowOpacity = 0
         }
+        self.updateLiquidGlassBackground()
+    }
+    
+    private func updateLiquidGlassBackground() {
+        guard self.isLiquidGlassEnabled else {
+            self.st_disableLiquidGlassBackground()
+            return
+        }
+        let glassView = self.st_enableLiquidGlassBackground(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor
+        )
+        self.insertSubview(glassView, aboveSubview: self.backgroundImageView)
     }
     
     private func handleItemTap(at index: Int) {

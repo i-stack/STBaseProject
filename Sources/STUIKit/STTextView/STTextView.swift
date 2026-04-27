@@ -51,8 +51,13 @@ open class STTextView: STPlaceholderTextView {
         get { return self.layer.cornerRadius }
         set {
             self.layer.cornerRadius = newValue
-            self.layer.masksToBounds = newValue > 0
+            self.st_updateLiquidGlassCornerRadius()
         }
+    }
+    
+    @IBInspectable open var clipsContentToBounds: Bool {
+        get { return self.layer.masksToBounds }
+        set { self.layer.masksToBounds = newValue }
     }
 
     @IBInspectable open var borderWidth: CGFloat {

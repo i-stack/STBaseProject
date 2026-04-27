@@ -37,6 +37,34 @@ open class STPlaceholderTextView: UITextView {
             self.placeholderLabel.textColor = self.placeholderTextColor
         }
     }
+    
+    @IBInspectable open var isLiquidGlassEnabled: Bool = false {
+        didSet {
+            if self.isLiquidGlassEnabled {
+                self.updateLiquidGlassBackground()
+            } else {
+                self.st_disableLiquidGlassBackground()
+            }
+        }
+    }
+    
+    @IBInspectable open var liquidGlassTintColor: UIColor = UIColor.white.withAlphaComponent(0.18) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassHighlightOpacity: Float = 0.45 {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassBorderColor: UIColor = UIColor.white.withAlphaComponent(0.45) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
 
     @objc dynamic open var placeholderFont: UIFont = UIFont.st_systemFont(ofSize: 16) {
         didSet {
@@ -156,6 +184,7 @@ open class STPlaceholderTextView: UITextView {
 
     open override func layoutSubviews() {
         super.layoutSubviews()
+        self.st_updateLiquidGlassCornerRadius()
         self.layoutPlaceholderLabel()
     }
 
@@ -248,6 +277,16 @@ open class STPlaceholderTextView: UITextView {
 
     private func updatePlaceholderVisibility() {
         self.placeholderLabel.isHidden = !(self.text ?? "").isEmpty
+    }
+    
+    private func updateLiquidGlassBackground() {
+        guard self.isLiquidGlassEnabled else { return }
+        let glassView = self.st_enableLiquidGlassBackground(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor
+        )
+        self.sendSubviewToBack(glassView)
     }
 
     private lazy var placeholderLabel: UILabel = {

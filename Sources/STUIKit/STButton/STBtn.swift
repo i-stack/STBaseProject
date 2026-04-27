@@ -29,9 +29,7 @@ open class STBtn: UIButton {
     private var gradientColors: [UIColor]?
     private var gradientStartPoint: CGPoint = CGPoint(x: 0, y: 0)
     private var gradientEndPoint: CGPoint = CGPoint(x: 1, y: 1)
-    private var liquidGlassEffectView: UIVisualEffectView?
-    private var liquidGlassHighlightLayer: CAGradientLayer?
-    private var liquidGlassBorderLayer: CAShapeLayer?
+    private var liquidGlassView: STLiquidGlassView?
     
     public var backgroundStyle: STBtnBackgroundStyle = .normal {
         didSet {
@@ -477,83 +475,39 @@ open class STBtn: UIButton {
     }
     
     private func updateLiquidGlassView() {
-        let effectView = self.liquidGlassEffectView ?? self.createLiquidGlassEffectView()
-        if effectView.superview == nil {
-            self.insertSubview(effectView, at: 0)
+        let glassView = self.liquidGlassView ?? STLiquidGlassView()
+        if glassView.superview == nil {
+            self.insertSubview(glassView, at: 0)
         }
-        self.liquidGlassEffectView = effectView
+        self.liquidGlassView = glassView
         self.updateLiquidGlassFrame()
         self.updateLiquidGlassAppearance()
     }
-    
-    private func createLiquidGlassEffectView() -> UIVisualEffectView {
-        let effectView: UIVisualEffectView
-        if #available(iOS 26.0, *) {
-            effectView = UIVisualEffectView(effect: UIGlassEffect())
-        } else {
-            effectView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
-        }
-        effectView.isUserInteractionEnabled = false
-        effectView.clipsToBounds = true
-        effectView.backgroundColor = .clear
-        return effectView
-    }
-    
+
     private func updateLiquidGlassFrame() {
-        guard let effectView = self.liquidGlassEffectView else { return }
-        effectView.frame = self.bounds
-        effectView.layer.cornerRadius = self.layer.cornerRadius
-        self.sendSubviewToBack(effectView)
-        self.updateLiquidGlassLayerFrames()
+        guard let glassView = self.liquidGlassView else { return }
+        glassView.frame = self.bounds
+        glassView.glassCornerRadius = self.layer.cornerRadius
+        self.sendSubviewToBack(glassView)
     }
     
     private func updateLiquidGlassAppearance() {
-        guard let effectView = self.liquidGlassEffectView else { return }
-        effectView.contentView.backgroundColor = self.liquidGlassTintColor
+        guard let glassView = self.liquidGlassView else { return }
+        glassView.configure(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor,
+            cornerRadius: self.layer.cornerRadius
+        )
         self.updateLiquidGlassState(animated: false)
-        
-        let highlightLayer = self.liquidGlassHighlightLayer ?? CAGradientLayer()
-        highlightLayer.colors = [
-            UIColor.white.withAlphaComponent(CGFloat(self.liquidGlassHighlightOpacity)).cgColor,
-            UIColor.white.withAlphaComponent(0.05).cgColor,
-            UIColor.clear.cgColor
-        ]
-        highlightLayer.startPoint = CGPoint(x: 0, y: 0)
-        highlightLayer.endPoint = CGPoint(x: 1, y: 1)
-        if highlightLayer.superlayer == nil {
-            effectView.contentView.layer.addSublayer(highlightLayer)
-        }
-        self.liquidGlassHighlightLayer = highlightLayer
-        
-        let borderLayer = self.liquidGlassBorderLayer ?? CAShapeLayer()
-        borderLayer.fillColor = UIColor.clear.cgColor
-        borderLayer.strokeColor = self.liquidGlassBorderColor.cgColor
-        borderLayer.lineWidth = 1 / UIScreen.main.scale
-        if borderLayer.superlayer == nil {
-            effectView.contentView.layer.addSublayer(borderLayer)
-        }
-        self.liquidGlassBorderLayer = borderLayer
-        self.updateLiquidGlassLayerFrames()
-    }
-    
-    private func updateLiquidGlassLayerFrames() {
-        let bounds = self.bounds
-        self.liquidGlassHighlightLayer?.frame = bounds
-        self.liquidGlassHighlightLayer?.cornerRadius = self.layer.cornerRadius
-        self.liquidGlassBorderLayer?.frame = bounds
-        self.liquidGlassBorderLayer?.path = UIBezierPath(
-            roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5),
-            cornerRadius: max(0, self.layer.cornerRadius - 0.5)
-        ).cgPath
     }
     
     private func updateLiquidGlassCornerRadius() {
-        self.liquidGlassEffectView?.layer.cornerRadius = self.layer.cornerRadius
-        self.updateLiquidGlassLayerFrames()
+        self.liquidGlassView?.glassCornerRadius = self.layer.cornerRadius
     }
     
     private func updateLiquidGlassState(animated: Bool) {
-        guard let effectView = self.liquidGlassEffectView else { return }
+        guard let glassView = self.liquidGlassView else { return }
         let alpha: CGFloat
         if !self.isEnabled {
             alpha = 0.45
@@ -562,21 +516,11 @@ open class STBtn: UIButton {
         } else {
             alpha = 1
         }
-        guard animated else {
-            effectView.alpha = alpha
-            return
-        }
-        UIView.animate(withDuration: 0.18) {
-            effectView.alpha = alpha
-        }
+        glassView.setStateAlpha(alpha, animated: animated)
     }
     
     private func removeLiquidGlassView() {
-        self.liquidGlassHighlightLayer?.removeFromSuperlayer()
-        self.liquidGlassBorderLayer?.removeFromSuperlayer()
-        self.liquidGlassEffectView?.removeFromSuperview()
-        self.liquidGlassHighlightLayer = nil
-        self.liquidGlassBorderLayer = nil
-        self.liquidGlassEffectView = nil
+        self.liquidGlassView?.removeFromSuperview()
+        self.liquidGlassView = nil
     }
 }

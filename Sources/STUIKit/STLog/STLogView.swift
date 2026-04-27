@@ -97,6 +97,29 @@ open class STLogView: UIView {
     }
 
     open weak var mDelegate: STLogViewDelegate?
+    @IBInspectable open var isLiquidGlassEnabled: Bool = false {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassTintColor: UIColor = UIColor.white.withAlphaComponent(0.16) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassHighlightOpacity: Float = 0.28 {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassBorderColor: UIColor = UIColor.white.withAlphaComponent(0.32) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
 
     private let pageSize = 100
     private var currentPage = 0
@@ -130,6 +153,43 @@ open class STLogView: UIView {
         self.addSubview(self.bottomToolbar)
         self.setupConstraints()
         self.tableView.register(STLogTableViewCell.self, forCellReuseIdentifier: "STLogTableViewCell")
+        self.updateLiquidGlassBackground()
+    }
+    
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        self.st_updateLiquidGlassCornerRadius()
+    }
+    
+    public func st_setLiquidGlassBackground(
+        tintColor: UIColor = UIColor.white.withAlphaComponent(0.16),
+        highlightOpacity: Float = 0.28,
+        borderColor: UIColor = UIColor.white.withAlphaComponent(0.32)
+    ) {
+        self.liquidGlassTintColor = tintColor
+        self.liquidGlassHighlightOpacity = highlightOpacity
+        self.liquidGlassBorderColor = borderColor
+        self.isLiquidGlassEnabled = true
+        self.updateLiquidGlassBackground()
+    }
+    
+    private func updateLiquidGlassBackground() {
+        guard self.isLiquidGlassEnabled else {
+            self.st_disableLiquidGlassBackground()
+            self.backgroundColor = .systemGroupedBackground
+            self.tableView.backgroundColor = .systemGroupedBackground
+            self.bottomToolbar.backgroundColor = .systemBackground
+            return
+        }
+        self.backgroundColor = .clear
+        self.tableView.backgroundColor = .clear
+        self.bottomToolbar.backgroundColor = .clear
+        let glassView = self.st_enableLiquidGlassBackground(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor
+        )
+        self.sendSubviewToBack(glassView)
     }
 
     private func setupConstraints() {

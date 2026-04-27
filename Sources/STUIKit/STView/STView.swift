@@ -58,19 +58,29 @@ public struct STGradientConfig {
     }
 }
 
-public class STView: UIView {
+@IBDesignable
+open class STView: UIView {
     
-    @IBInspectable var cornerRadius: CGFloat {
+    @IBInspectable open var cornerRadius: CGFloat {
         set {
             self.layer.cornerRadius = newValue
-            self.layer.masksToBounds = newValue > 0
+            self.st_updateLiquidGlassCornerRadius()
         }
         get {
             return self.layer.cornerRadius
         }
     }
     
-    @IBInspectable var borderWidth: CGFloat {
+    @IBInspectable open var clipsContentToBounds: Bool {
+        get {
+            return self.layer.masksToBounds
+        }
+        set {
+            self.layer.masksToBounds = newValue
+        }
+    }
+    
+    @IBInspectable open var borderWidth: CGFloat {
         set {
             self.layer.borderWidth = newValue > 0 ? newValue : 0
         }
@@ -79,13 +89,56 @@ public class STView: UIView {
         }
     }
     
-    @IBInspectable var borderColor: UIColor {
+    @IBInspectable open var borderColor: UIColor? {
         set {
-            self.layer.borderColor = newValue.cgColor
+            self.layer.borderColor = newValue?.cgColor
         }
         get {
-            return UIColor(cgColor: self.layer.borderColor!)
+            guard let color = self.layer.borderColor else { return nil }
+            return UIColor(cgColor: color)
         }
+    }
+    
+    @IBInspectable open var isLiquidGlassEnabled: Bool = false {
+        didSet {
+            if self.isLiquidGlassEnabled {
+                self.updateLiquidGlassBackground()
+            } else {
+                self.st_disableLiquidGlassBackground()
+            }
+        }
+    }
+    
+    @IBInspectable open var liquidGlassTintColor: UIColor = UIColor.white.withAlphaComponent(0.18) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassHighlightOpacity: Float = 0.45 {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassBorderColor: UIColor = UIColor.white.withAlphaComponent(0.45) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        self.st_updateLiquidGlassCornerRadius()
+    }
+    
+    private func updateLiquidGlassBackground() {
+        guard self.isLiquidGlassEnabled else { return }
+        self.st_enableLiquidGlassBackground(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor
+        )
     }
 }
 
