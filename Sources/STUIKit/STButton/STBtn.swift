@@ -14,9 +14,15 @@ private struct STBtnLocalizationKey {
 }
 
 // MARK: - 自定义按钮类
+@IBDesignable
 open class STBtn: UIButton {
     
     open var identifier: Any?
+    
+    private var gradientLayer: CAGradientLayer?
+    private var gradientColors: [UIColor]?
+    private var gradientStartPoint: CGPoint = CGPoint(x: 0, y: 0)
+    private var gradientEndPoint: CGPoint = CGPoint(x: 1, y: 1)
     
     /// 字符串标识符（类型安全，推荐使用）
     /// 使用示例：
@@ -63,17 +69,25 @@ open class STBtn: UIButton {
     @IBInspectable open var cornerRadius: CGFloat {
         set {
             self.layer.cornerRadius = newValue
-            self.layer.masksToBounds = newValue > 0
+            self.updateGradientLayerCornerRadius()
         }
         get {
             return self.layer.cornerRadius
         }
     }
     
+    @IBInspectable open var clipsContentToBounds: Bool {
+        get {
+            return self.layer.masksToBounds
+        }
+        set {
+            self.layer.masksToBounds = newValue
+        }
+    }
+    
     @IBInspectable open var borderColor: UIColor? {
         set {
-            guard let uiColor = newValue else { return }
-            self.layer.borderColor = uiColor.cgColor
+            self.layer.borderColor = newValue?.cgColor
         }
         get {
             guard let color = self.layer.borderColor else { return nil }
@@ -181,7 +195,12 @@ open class STBtn: UIButton {
     /// ```
     /// 注意：布局更新会在下一个布局周期自动生效，无需手动调用 `setNeedsLayout()`
     /// `layoutSubviews` 方法会在系统需要时自动调用，并更新边距
-    @IBInspectable open var contentHorizontalPadding: CGFloat = 0
+    @IBInspectable open var contentHorizontalPadding: CGFloat = 0 {
+        didSet {
+            guard oldValue != self.contentHorizontalPadding else { return }
+            self.setNeedsLayout()
+        }
+    }
     
     private func setupButton() {
         self.titleLabel?.adjustsFontForContentSizeCategory = true
@@ -192,6 +211,7 @@ open class STBtn: UIButton {
     open override func layoutSubviews() {
         super.layoutSubviews()
         self.updateContentHorizontalPadding()
+        self.updateGradientLayerFrame()
     }
     
     /// 更新内容水平对齐时的边距
@@ -297,6 +317,7 @@ open class STBtn: UIButton {
     ///   - borderColor: 边框颜色
     public func st_roundedButton(cornerRadius: CGFloat, borderWidth: CGFloat, borderColor: UIColor) {
         self.cornerRadius = cornerRadius
+        self.clipsContentToBounds = true
         self.borderWidth = borderWidth
         self.borderColor = borderColor
     }
@@ -307,13 +328,10 @@ open class STBtn: UIButton {
     ///   - startPoint: 起始点
     ///   - endPoint: 结束点
     public func st_setGradientBackground(colors: [UIColor], startPoint: CGPoint = CGPoint(x: 0, y: 0), endPoint: CGPoint = CGPoint(x: 1, y: 1)) {
-        let gradientLayer = CAGradientLayer()
-        gradientLayer.frame = bounds
-        gradientLayer.colors = colors.map { $0.cgColor }
-        gradientLayer.startPoint = startPoint
-        gradientLayer.endPoint = endPoint
-        self.layer.sublayers?.removeAll { $0 is CAGradientLayer }
-        self.layer.insertSublayer(gradientLayer, at: 0)
+        self.gradientColors = colors
+        self.gradientStartPoint = startPoint
+        self.gradientEndPoint = endPoint
+        self.updateGradientLayer()
     }
     
     /// 设置阴影
@@ -333,5 +351,29 @@ open class STBtn: UIButton {
     private func updateFontSize() {
         guard let fontSize = self.titleLabel?.font.pointSize else { return }
         self.titleLabel?.font = UIFont.st_systemFont(ofSize: fontSize)
+    }
+    
+    private func updateGradientLayer() {
+        guard let colors = self.gradientColors else { return }
+        let gradientLayer = self.gradientLayer ?? CAGradientLayer()
+        gradientLayer.colors = colors.map { $0.cgColor }
+        gradientLayer.startPoint = self.gradientStartPoint
+        gradientLayer.endPoint = self.gradientEndPoint
+        gradientLayer.frame = self.bounds
+        gradientLayer.cornerRadius = self.layer.cornerRadius
+        if gradientLayer.superlayer == nil {
+            self.layer.insertSublayer(gradientLayer, at: 0)
+        }
+        self.gradientLayer = gradientLayer
+    }
+    
+    private func updateGradientLayerFrame() {
+        guard let gradientLayer = self.gradientLayer else { return }
+        gradientLayer.frame = self.bounds
+        gradientLayer.cornerRadius = self.layer.cornerRadius
+    }
+    
+    private func updateGradientLayerCornerRadius() {
+        self.gradientLayer?.cornerRadius = self.layer.cornerRadius
     }
 }

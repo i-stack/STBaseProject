@@ -7,20 +7,32 @@
 
 import UIKit
 
+@IBDesignable
 open class STVerificationCodeBtn: STBtn {
 
-    private var timer: Timer?
+    private var timer: STTimer?
+    private var endDate: Date?
     private var originTitle: String?
-    private var tempTimerInterval: Int = 0
+    private var remainingTimerInterval: Int = 0
 
     /// Display suffix 10s, 10 seconds
-    open var titleSuffix: String = ""
+    @IBInspectable open var titleSuffix: String = ""
     
     /// Countdown interval time
-    open var interval: TimeInterval = 1
+    @IBInspectable open var interval: TimeInterval = 1 {
+        didSet {
+            guard self.interval <= 0 else { return }
+            self.interval = oldValue > 0 ? oldValue : 1
+        }
+    }
     
     /// Countdown end time
-    open var timerInterval: Int = 60
+    @IBInspectable open var timerInterval: Int = 60 {
+        didSet {
+            guard self.timerInterval < 0 else { return }
+            self.timerInterval = 0
+        }
+    }
 
     deinit {
         self.invalidTimer()
@@ -39,40 +51,80 @@ open class STVerificationCodeBtn: STBtn {
     }
     
     public func st_configDone() {
-        self.originTitle = self.titleLabel?.text
-        self.tempTimerInterval = self.timerInterval
+        self.originTitle = self.title(for: .normal) ?? self.titleLabel?.text
     }
     
     public func beginTimer() -> Void {
-        self.timer = Timer.scheduledTimer(withTimeInterval: self.interval, repeats: true, block: {[weak self] (resultTimer) in
-            guard let strongSelf = self else { return }
-            strongSelf.timerSelector()
-        })
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self] in
+                self?.beginTimer()
+            }
+            return
+        }
+        guard self.timer == nil else { return }
+        self.invalidTimer()
+        if self.originTitle == nil {
+            self.originTitle = self.title(for: .normal) ?? self.titleLabel?.text
+        }
+        let countdownDuration = max(self.timerInterval, 0)
+        self.remainingTimerInterval = countdownDuration
+        guard self.remainingTimerInterval > 0 else {
+            self.restoreTimerState()
+            return
+        }
+        self.endDate = Date().addingTimeInterval(TimeInterval(countdownDuration))
+        self.isEnabled = false
+        self.updateCountdownTitle()
+        let timer = STTimer(interval: self.interval)
+        timer.start { [weak self] timer in
+            self?.timerSelector(timer)
+        }
+        self.timer = timer
     }
     
-    @objc private func timerSelector() -> Void {
-        DispatchQueue.main.async {
-            if self.timerInterval == 0 {
-                self.invalidTimer()
-                self.isUserInteractionEnabled = true
-                self.timerInterval = self.tempTimerInterval
-                if let title = self.originTitle {
-                    self.setTitle(title, for: UIControl.State.normal)
-                } else {
-                    self.setTitle("发送验证码", for: UIControl.State.normal)
-                }
-                return
+    private func timerSelector(_ timer: STTimer) -> Void {
+        guard self.timer === timer else { return }
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async { [weak self, weak timer] in
+                guard let timer else { return }
+                self?.timerSelector(timer)
             }
-            self.timerInterval -= 1
-            self.isUserInteractionEnabled = false
-            self.setTitle("\(self.timerInterval)\(self.titleSuffix)", for: UIControl.State.normal)
+            return
         }
+        self.updateRemainingTimerInterval()
+        guard self.remainingTimerInterval > 0 else {
+            self.resetCountdown()
+            return
+        }
+        self.updateCountdownTitle()
     }
     
     public func invalidTimer() -> Void {
-        if self.timer?.isValid ?? false {
-            self.timer?.invalidate()
-            self.timer = nil
+        self.timer?.stop()
+        self.timer = nil
+    }
+    
+    public func resetCountdown() -> Void {
+        self.invalidTimer()
+        self.restoreTimerState()
+    }
+    
+    private func updateCountdownTitle() {
+        self.setTitle("\(self.remainingTimerInterval)\(self.titleSuffix)", for: UIControl.State.normal)
+    }
+    
+    private func updateRemainingTimerInterval() {
+        guard let endDate = self.endDate else {
+            self.remainingTimerInterval = 0
+            return
         }
+        self.remainingTimerInterval = max(0, Int(ceil(endDate.timeIntervalSinceNow)))
+    }
+    
+    private func restoreTimerState() {
+        self.endDate = nil
+        self.isEnabled = true
+        self.remainingTimerInterval = 0
+        self.setTitle(self.originTitle ?? self.title(for: .normal) ?? "发送验证码", for: UIControl.State.normal)
     }
 }

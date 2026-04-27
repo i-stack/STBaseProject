@@ -1,5 +1,5 @@
 //
-//  STIconButton.swift
+//  STIconBtn.swift
 //  STBaseProject
 //
 //  Created by 寒江孤影 on 2019/10/14.
@@ -7,17 +7,17 @@
 
 import UIKit
 
-public enum STIconPosition {
-    case left
-    case right
-    case top
-    case bottom
+public enum STIconPosition: Int {
+    case left = 0
+    case right = 1
+    case top = 2
+    case bottom = 3
 }
 
-public class STIconButtonBuilder {
-    private weak var button: STIconButton?
+public class STIconBtnBuilder {
+    private weak var button: STIconBtn?
     
-    init(button: STIconButton) {
+    init(button: STIconBtn) {
         self.button = button
     }
     
@@ -25,7 +25,7 @@ public class STIconButtonBuilder {
     /// - Parameter position: 图标位置
     /// - Returns: 构建器实例，支持链式调用
     @discardableResult
-    public func iconPosition(_ position: STIconPosition) -> STIconButtonBuilder {
+    public func iconPosition(_ position: STIconPosition) -> STIconBtnBuilder {
         self.button?.iconPosition = position
         return self
     }
@@ -34,14 +34,14 @@ public class STIconButtonBuilder {
     /// - Parameter spacing: 间距值
     /// - Returns: 构建器实例，支持链式调用
     @discardableResult
-    public func spacing(_ spacing: CGFloat) -> STIconButtonBuilder {
+    public func spacing(_ spacing: CGFloat) -> STIconBtnBuilder {
         self.button?.spacing = spacing
         return self
     }
 
     /// 设置按钮内容边距
     @discardableResult
-    public func contentInsets(_ insets: UIEdgeInsets) -> STIconButtonBuilder {
+    public func contentInsets(_ insets: UIEdgeInsets) -> STIconBtnBuilder {
         self.button?.iconContentInsets = insets
         return self
     }
@@ -60,7 +60,8 @@ public class STIconButtonBuilder {
 }
 
 // MARK: - 图标按钮类
-open class STIconButton: STBtn {
+@IBDesignable
+open class STIconBtn: STBtn {
     
     /// 图标位置
     public var iconPosition: STIconPosition = .left {
@@ -88,6 +89,62 @@ open class STIconButton: STBtn {
             self.setNeedsLayout()
         }
     }
+    
+    /// xib 中配置图标位置：0 左、1 右、2 上、3 下
+    @IBInspectable open var iconPositionRaw: Int {
+        get {
+            return self.iconPosition.rawValue
+        }
+        set {
+            guard let position = STIconPosition(rawValue: newValue) else { return }
+            self.iconPosition = position
+        }
+    }
+    
+    @IBInspectable open var iconSpacing: CGFloat {
+        get {
+            return self.spacing
+        }
+        set {
+            self.spacing = newValue
+        }
+    }
+    
+    @IBInspectable open var iconContentInsetTop: CGFloat {
+        get {
+            return self.iconContentInsets.top
+        }
+        set {
+            self.iconContentInsets.top = newValue
+        }
+    }
+    
+    @IBInspectable open var iconContentInsetLeft: CGFloat {
+        get {
+            return self.iconContentInsets.left
+        }
+        set {
+            self.iconContentInsets.left = newValue
+        }
+    }
+    
+    @IBInspectable open var iconContentInsetBottom: CGFloat {
+        get {
+            return self.iconContentInsets.bottom
+        }
+        set {
+            self.iconContentInsets.bottom = newValue
+        }
+    }
+    
+    @IBInspectable open var iconContentInsetRight: CGFloat {
+        get {
+            return self.iconContentInsets.right
+        }
+        set {
+            self.iconContentInsets.right = newValue
+        }
+    }
 
     /// 开始链式调用配置
     /// 使用示例：
@@ -98,8 +155,8 @@ open class STIconButton: STBtn {
     ///     .done()
     /// ```
     /// - Returns: 构建器实例
-    public func configure() -> STIconButtonBuilder {
-        return STIconButtonBuilder(button: self)
+    public func configure() -> STIconBtnBuilder {
+        return STIconBtnBuilder(button: self)
     }
     
     /// 更新布局（当直接设置属性时使用）
@@ -140,9 +197,11 @@ open class STIconButton: STBtn {
     }
 
     private func updateIconLayout() {
+        self.imageEdgeInsets = .zero
+        self.titleEdgeInsets = .zero
         guard
-            let imageSize = self.imageView?.intrinsicContentSize,
-            let titleSize = self.titleLabel?.intrinsicContentSize
+            let imageSize = self.currentImageSize(),
+            let titleSize = self.currentTitleSize()
         else { return }
         let halfSpace = self.spacing / 2
         switch self.iconPosition {
@@ -202,8 +261,8 @@ open class STIconButton: STBtn {
     }
 
     private func computedContentSize() -> CGSize {
-        let imageSize = self.imageView?.intrinsicContentSize ?? .zero
-        let titleSize = self.titleLabel?.intrinsicContentSize ?? .zero
+        let imageSize = self.currentImageSize() ?? .zero
+        let titleSize = self.currentTitleSize() ?? .zero
         let hasImage = imageSize != .zero
         let hasTitle = titleSize != .zero
         let actualSpacing = (hasImage && hasTitle) ? self.spacing : 0
@@ -220,5 +279,18 @@ open class STIconButton: STBtn {
                 height: imageSize.height + titleSize.height + actualSpacing
             )
         }
+    }
+    
+    private func currentImageSize() -> CGSize? {
+        guard self.currentImage != nil else { return nil }
+        let imageSize = self.imageView?.intrinsicContentSize ?? .zero
+        return imageSize == .zero ? nil : imageSize
+    }
+    
+    private func currentTitleSize() -> CGSize? {
+        let hasTitle = !(self.currentTitle?.isEmpty ?? true) || self.currentAttributedTitle != nil
+        guard hasTitle else { return nil }
+        let titleSize = self.titleLabel?.intrinsicContentSize ?? .zero
+        return titleSize == .zero ? nil : titleSize
     }
 }
