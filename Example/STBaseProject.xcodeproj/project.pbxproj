@@ -24,6 +24,7 @@
 		E4F09E0A2F42A80E00253CC5 /* STLogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F09E092F42A80E00253CC5 /* STLogViewController.swift */; };
 		E4F1586A2F42C45F00D1D6E1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F158692F42C45F00D1D6E1 /* SceneDelegate.swift */; };
 		E4F5D9192D6330FA00A6C212 /* STHudViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = E4F5D9182D6330FA00A6C212 /* STHudViewController.xib */; };
+		E4A7B0022F43A00000B70001 /* STBtnTestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A7B0012F43A00000B70001 /* STBtnTestViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +51,7 @@
 		E4F09E092F42A80E00253CC5 /* STLogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STLogViewController.swift; sourceTree = "<group>"; };
 		E4F158692F42C45F00D1D6E1 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		E4F5D9182D6330FA00A6C212 /* STHudViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = STHudViewController.xib; sourceTree = "<group>"; };
+		E4A7B0012F43A00000B70001 /* STBtnTestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = STBtnTestViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -161,6 +163,7 @@
 				62C35D61289B634B00C449DF /* STHudViewController.swift */,
 				E4F5D9182D6330FA00A6C212 /* STHudViewController.xib */,
 				E4F09E092F42A80E00253CC5 /* STLogViewController.swift */,
+				E4A7B0012F43A00000B70001 /* STBtnTestViewController.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
 				E41AED1929AC509100760473 /* ViewController.xib */,
 			);
@@ -294,6 +297,7 @@
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				E4F1586A2F42C45F00D1D6E1 /* SceneDelegate.swift in Sources */,
 				E4F09E0A2F42A80E00253CC5 /* STLogViewController.swift in Sources */,
+				E4A7B0022F43A00000B70001 /* STBtnTestViewController.swift in Sources */,
 				E41AED1F29AC558A00760473 /* ViewControllerModel.swift in Sources */,
 				E41AED1D29AC548D00760473 /* ViewControllerViewModel.swift in Sources */,
 				62C35D63289B634B00C449DF /* STHudViewController.swift in Sources */,

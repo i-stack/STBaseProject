@@ -30,6 +30,9 @@ class ViewController: STBaseViewController {
         let logViewController = STLogViewController()
         self.dataSouces["log 测试"] = logViewController
         
+        let btnTestViewController = STBtnTestViewController()
+        self.dataSouces["STBtn 测试"] = btnTestViewController
+        
         self.tableView.reloadData()
     }
 }
