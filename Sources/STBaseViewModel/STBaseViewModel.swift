@@ -227,15 +227,14 @@ open class STBaseViewModel: NSObject {
         encodingType: STParameterEncoder.EncodingType,
         completion: @escaping (STHTTPResponse) -> Void
     ) {
-        self.httpSession.st_request(
-            url: url,
+        self.httpSession.request(
+            url,
             method: method,
             parameters: parameters,
-            encodingType: encodingType,
-            requestConfig: self.requestConfig,
-            requestHeaders: self.requestHeaders,
-            completion: completion
-        )
+            encoding: encodingType,
+            headers: self.requestHeaders,
+            requestConfig: self.requestConfig
+        ).response(completionHandler: completion)
     }
     
     public func st_get<T: Codable>(url: String,
@@ -559,7 +558,17 @@ open class STBaseViewModel: NSObject {
             self.loadingState.send(.loading)
         }
         
-        self.httpSession.st_upload(url: url, files: files, parameters: parameters, requestConfig: self.requestConfig, requestHeaders: self.requestHeaders, progress: progress) { [weak self] response in
+        let uploadRequest = self.httpSession.upload(
+            url,
+            files: files,
+            parameters: parameters,
+            headers: self.requestHeaders,
+            requestConfig: self.requestConfig
+        )
+        if let progress = progress {
+            uploadRequest.uploadProgress(handler: progress)
+        }
+        uploadRequest.response { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
         }
     }
@@ -570,7 +579,14 @@ open class STBaseViewModel: NSObject {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        self.httpSession.st_request(url: url, method: .get, parameters: nil, encodingType: .json, requestConfig: self.requestConfig, requestHeaders: self.requestHeaders) { [weak self] response in
+        self.httpSession.request(
+            url,
+            method: .get,
+            parameters: nil,
+            encoding: .json,
+            headers: self.requestHeaders,
+            requestConfig: self.requestConfig
+        ).response { [weak self] response in
             if response.isSuccess, let data = response.data {
                 let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
                 do {

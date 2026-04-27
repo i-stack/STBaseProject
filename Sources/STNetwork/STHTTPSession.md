@@ -20,7 +20,7 @@
 - [接口日志 / cURL 输出](#接口日志--curl-输出)
 - [SSL Pinning](#ssl-pinning)
 - [错误类型 STHTTPError](#错误类型-sthttperror)
-- [兼容旧 API](#兼容旧-api)
+- [常见配方](#常见配方)
 
 ---
 
@@ -65,11 +65,6 @@ STHTTPSession.shared.request("https://api.example.com/users")
 let users = try await STHTTPSession.shared
     .request("https://api.example.com/users")
     .serializingDecodable([User].self)
-
-// 3. 旧 completion 接口（保留兼容）
-STHTTPSession.shared.st_request(url: "...", method: .get) { resp in
-    print(resp.statusCode, resp.json ?? "")
-}
 ```
 
 ---
@@ -455,22 +450,6 @@ enum STHTTPError: Error {
 ```
 
 `STHTTPSession` 内部统一把 `URLSession` 的 `NSError` 归一化成 `STHTTPError`，再交给 retrier / response 链路。
-
----
-
-## 兼容旧 API
-
-为了不破坏现有 `STBaseViewModel` 等调用方，保留了一组完成回调风格的方法：
-
-```swift
-session.st_request(url: ..., method: ..., parameters: ..., encodingType: ..., requestConfig: ..., requestHeaders: ...) { resp in }
-session.st_request(... modelType: User.self) { respWithModel in }
-session.st_upload(url: ..., files: ..., parameters: ..., progress: ...) { resp in }
-session.st_download(url: ..., destinationURL: ..., progress: ...) { result in }
-session.st_checkNetworkStatus()
-```
-
-它们都是新 API 的薄封装，新代码建议直接用链式 / async 形态。
 
 ---
 
