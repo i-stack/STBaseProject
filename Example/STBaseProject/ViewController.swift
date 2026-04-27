@@ -33,6 +33,12 @@ class ViewController: STBaseViewController {
         let btnTestViewController = STBtnTestViewController()
         self.dataSouces["STBtn 测试"] = btnTestViewController
         
+        self.dataSouces["STView 测试"] = STViewTestViewController()
+        self.dataSouces["文本控件测试"] = STTextControlsTestViewController()
+        self.dataSouces["按钮子类测试"] = STButtonControlsTestViewController()
+        self.dataSouces["TabBar 测试"] = STTabBarTestViewController()
+        self.dataSouces["Log/HUD 背景测试"] = STLogAndHUDTestViewController()
+        
         self.tableView.reloadData()
     }
 }
