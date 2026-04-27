@@ -9,9 +9,6 @@ import Foundation
 
 open class STBaseModel: NSObject {
 
-    // MARK: - 线程安全
-
-    /// 用于保护灵活模式数据的锁
     private let st_lock = NSLock()
 
     private func st_withLock<T>(_ body: () -> T) -> T {
@@ -19,8 +16,6 @@ open class STBaseModel: NSObject {
         defer { st_lock.unlock() }
         return body()
     }
-
-    // MARK: - 数据存储
 
     /// 存储原始数据
     private var _st_rawData: [String: STJSONValue] = [:]
@@ -117,8 +112,6 @@ open class STBaseModel: NSObject {
         STLog("unrecognized selector sent to class", level: .error)
     }
 
-    // MARK: - Key 映射
-
     /// 子类重写此方法以提供 JSON 键名到属性名的映射
     /// 返回 [JSON键名: 属性名] 的字典
     /// 例如: ["user_name": "userName", "phone_number": "phoneNumber"]
@@ -135,8 +128,6 @@ open class STBaseModel: NSObject {
         }
         return reversed
     }
-
-    // MARK: - 嵌套模型类型
 
     /// 子类重写此方法以声明嵌套模型类型
     /// 返回 [属性名: 模型类型] 的字典
@@ -378,8 +369,6 @@ open class STBaseModel: NSObject {
         return description
     }
 
-    // MARK: - 复制和相等性
-
     /// 复制模型（正确处理子类类型）
     open func st_copy() -> STBaseModel {
         let newInstance = type(of: self).init()
@@ -409,8 +398,6 @@ open class STBaseModel: NSObject {
         return hasher.finalize()
     }
 
-    // MARK: - 数组解析
-
     /// 从字典数组创建模型数组
     open class func st_fromArray(_ array: [[String: Any]]) -> [STBaseModel] {
         return array.map { dict in
@@ -429,7 +416,6 @@ open class STBaseModel: NSObject {
 
 // MARK: - Codable 支持
 extension STBaseModel: Codable {
-
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: STCodingKeys.self)
         if self.st_isFlexibleMode {
