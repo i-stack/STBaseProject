@@ -264,3 +264,51 @@ public enum STNetworkReachabilityStatus {
     case reachableViaWiFi
     case reachableViaCellular
 }
+
+// MARK: - 请求生命周期状态
+public enum STRequestState: Int, Sendable {
+    case initialized
+    case resumed
+    case suspended
+    case cancelled
+    case finished
+}
+
+// MARK: - 重试结果
+public enum STRetryResult {
+    case retry
+    case retryWithDelay(TimeInterval)
+    case doNotRetry
+    case doNotRetryWithError(Error)
+}
+
+// MARK: - 下载进度
+public struct STDownloadProgress {
+    public let bytesWritten: Int64
+    public let totalBytesWritten: Int64
+    public let totalBytesExpectedToWrite: Int64
+
+    public var fractionCompleted: Double {
+        guard self.totalBytesExpectedToWrite > 0 else { return 0 }
+        return Double(self.totalBytesWritten) / Double(self.totalBytesExpectedToWrite)
+    }
+
+    public init(bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+        self.bytesWritten = bytesWritten
+        self.totalBytesWritten = totalBytesWritten
+        self.totalBytesExpectedToWrite = totalBytesExpectedToWrite
+    }
+}
+
+// MARK: - 下载选项
+public struct STDownloadOptions {
+    public var createIntermediateDirectories: Bool
+    public var removePreviousFile: Bool
+
+    public static let `default` = STDownloadOptions()
+
+    public init(createIntermediateDirectories: Bool = true, removePreviousFile: Bool = true) {
+        self.createIntermediateDirectories = createIntermediateDirectories
+        self.removePreviousFile = removePreviousFile
+    }
+}

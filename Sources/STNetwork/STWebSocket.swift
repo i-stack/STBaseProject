@@ -5,19 +5,13 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
-import Foundation
-import Network
 import UIKit
-
-// MARK: - Public Actor
+import Network
+import Foundation
 
 public actor STWebSocket {
 
-    // MARK: Typealias / Enum
-
     private typealias WebSocketContinuation = AsyncStream<STWebSocketEvent>.Continuation
-
-    // MARK: - 初始化
 
     public init(config: STWebSocketConfig) {
         self.config = config
@@ -26,8 +20,6 @@ public actor STWebSocket {
     deinit {
         self.cancelAllTasks()
     }
-
-    // MARK: - Public API
 
     /// 连接并返回事件流；多次调用会先断开旧连接再重新建立。
     public func connect() -> AsyncStream<STWebSocketEvent> {
@@ -63,8 +55,6 @@ public actor STWebSocket {
         await self.teardown(reason: .clientInitiated, allowReconnect: false)
     }
 
-    // MARK: - Private State
-
     private var config: STWebSocketConfig
     private var connection: NWConnection?
     private var continuation: WebSocketContinuation?
@@ -79,9 +69,6 @@ public actor STWebSocket {
 
     /// 离线消息队列（断线期间缓存，重连后批量发送）
     private var offlineQueue: [(Data, NWConnection.ContentContext)] = []
-
-    // MARK: Tasks
-    // 创建者：actor 自身；持有者：actor 属性；取消：teardown / 各自独立取消方法
 
     /// 接收循环 Task（持续 receive）
     private var receiveTask: Task<Void, Never>?
@@ -104,10 +91,7 @@ public actor STWebSocket {
     private var isInBackground: Bool = false
 }
 
-// MARK: - 连接建立
-
 private extension STWebSocket {
-
     func startConnect() async {
         guard self.state == .idle || self.state == .reconnecting(attempt: self.reconnectAttempt, delay: 0) else { return }
         self.state = .connecting
@@ -174,10 +158,7 @@ private extension STWebSocket {
     }
 }
 
-// MARK: - 接收循环
-
 private extension STWebSocket {
-
     /// Task 创建：startReceiveLoop；持有：receiveTask；取消：teardown / 连接失败
     func startReceiveLoop() {
         self.receiveTask?.cancel()
@@ -252,9 +233,7 @@ private extension STWebSocket {
 }
 
 // MARK: - 发送
-
 private extension STWebSocket {
-
     func sendRaw(data: Data, context: NWConnection.ContentContext, message: STWebSocketMessage) async throws {
         if case .connected = self.state, let conn = self.connection {
             try await self.performSend(data: data, context: context, on: conn)
@@ -282,8 +261,6 @@ private extension STWebSocket {
         conn.send(content: data, contentContext: context, isComplete: true, completion: .idempotent)
     }
 
-    // MARK: 离线队列
-
     func enqueueOffline(data: Data, context: NWConnection.ContentContext) {
         guard self.config.offlineQueueCapacity > 0 else { return }
         if self.offlineQueue.count >= self.config.offlineQueueCapacity {
@@ -302,10 +279,7 @@ private extension STWebSocket {
     }
 }
 
-// MARK: - 心跳
-
 private extension STWebSocket {
-
     /// Task 创建：startHeartbeat；持有：heartbeatTask；取消：stopHeartbeat / teardown
     func startHeartbeat() {
         guard self.config.heartbeat.interval > 0 else { return }
@@ -427,10 +401,7 @@ private extension STWebSocket {
     }
 }
 
-// MARK: - 拆链
-
 private extension STWebSocket {
-
     func teardown(reason: STWebSocketCloseReason, allowReconnect: Bool) async {
         self.cancelAllTasks()
         self.connection?.cancel()
@@ -465,10 +436,7 @@ private extension STWebSocket {
     }
 }
 
-// MARK: - App 生命周期
-
 private extension STWebSocket {
-
     func observeAppLifecycle() {
         self.removeAppLifecycleObservers()
         let center = NotificationCenter.default
@@ -534,10 +502,7 @@ private extension STWebSocket {
     }
 }
 
-// MARK: - 网络质量监控
-
 private extension STWebSocket {
-
     /// Task 创建：startNetworkMonitor；持有：networkMonitorTask；取消：teardown
     func startNetworkMonitor() {
         self.networkMonitorTask?.cancel()
@@ -573,8 +538,6 @@ private extension STWebSocket {
         monitor.cancel()
     }
 }
-
-// MARK: - Logger
 
 private enum STWebSocketLogger {
     static func log(_ message: String) {
