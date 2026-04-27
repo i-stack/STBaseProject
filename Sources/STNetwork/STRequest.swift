@@ -5,6 +5,7 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
+import Combine
 import Foundation
 
 open class STRequest {
@@ -96,104 +97,52 @@ open class STRequest {
 
 public final class STDataRequest: STRequest {
 
-    public typealias ResponseHandler = (STHTTPResponse) -> Void
+    private let responseSubject = CurrentValueSubject<STHTTPResponse?, Never>(nil)
 
-    private let handlersLock = NSLock()
-    private var completionHandlers: [ResponseHandler] = []
-    private var _response: STHTTPResponse?
+    public var responsePublisher: AnyPublisher<STHTTPResponse, Never> {
+        self.responseSubject
+            .compactMap { $0 }
+            .first()
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+
+    public var dataPublisher: AnyPublisher<Data, Error> {
+        self.responsePublisher.tryMap { resp -> Data in
+            if let error = resp.error { throw error }
+            guard let data = resp.data, !data.isEmpty else { throw STHTTPError.noData }
+            return data
+        }.eraseToAnyPublisher()
+    }
+
+    /// String 结果
+    public var stringPublisher: AnyPublisher<String, Error> {
+        self.dataPublisher.tryMap { data -> String in
+            guard let string = String(data: data, encoding: .utf8) else {
+                throw STHTTPError.decodingError
+            }
+            return string
+        }.eraseToAnyPublisher()
+    }
+
+    /// Decodable 结果
+    public func decodablePublisher<T: Decodable>(_ type: T.Type = T.self, decoder: JSONDecoder = JSONDecoder()) -> AnyPublisher<T, Error> {
+        self.dataPublisher.tryMap { data -> T in
+            guard let value = try? decoder.decode(T.self, from: data) else {
+                throw STHTTPError.decodingError
+            }
+            return value
+        }.eraseToAnyPublisher()
+    }
 
     func didComplete(with response: STHTTPResponse) {
-        self.handlersLock.lock()
-        self._response = response
-        let handlers = self.completionHandlers
-        self.completionHandlers.removeAll()
-        self.handlersLock.unlock()
-
         self.transition(to: .finished)
-        handlers.forEach { $0(response) }
-    }
-
-    @discardableResult
-    public func response(
-        queue: DispatchQueue = .main,
-        completionHandler: @escaping ResponseHandler
-    ) -> Self {
-        let wrapper: ResponseHandler = { resp in queue.async { completionHandler(resp) } }
-        self.handlersLock.lock()
-        if let existing = self._response {
-            self.handlersLock.unlock()
-            queue.async { completionHandler(existing) }
-        } else {
-            self.completionHandlers.append(wrapper)
-            self.handlersLock.unlock()
-        }
-        return self
-    }
-
-    @discardableResult
-    public func responseData(
-        queue: DispatchQueue = .main,
-        completionHandler: @escaping (Result<Data, Error>) -> Void
-    ) -> Self {
-        return self.response(queue: queue) { resp in
-            if let error = resp.error {
-                completionHandler(.failure(error))
-            } else if let data = resp.data, !data.isEmpty {
-                completionHandler(.success(data))
-            } else {
-                completionHandler(.failure(STHTTPError.noData))
-            }
-        }
-    }
-
-    @discardableResult
-    public func responseString(
-        queue: DispatchQueue = .main,
-        encoding: String.Encoding = .utf8,
-        completionHandler: @escaping (Result<String, Error>) -> Void
-    ) -> Self {
-        return self.responseData(queue: queue) { result in
-            switch result {
-            case .success(let data):
-                guard let string = String(data: data, encoding: encoding) else {
-                    completionHandler(.failure(STHTTPError.decodingError))
-                    return
-                }
-                completionHandler(.success(string))
-            case .failure(let error):
-                completionHandler(.failure(error))
-            }
-        }
-    }
-
-    @discardableResult
-    public func responseDecodable<T: Decodable>(
-        of type: T.Type = T.self,
-        queue: DispatchQueue = .main,
-        decoder: JSONDecoder = JSONDecoder(),
-        completionHandler: @escaping (Result<T, Error>) -> Void
-    ) -> Self {
-        return self.responseData(queue: queue) { result in
-            switch result {
-            case .success(let data):
-                do {
-                    completionHandler(.success(try decoder.decode(T.self, from: data)))
-                } catch {
-                    completionHandler(.failure(STHTTPError.decodingError))
-                }
-            case .failure(let error):
-                completionHandler(.failure(error))
-            }
-        }
+        self.responseSubject.send(response)
     }
 
     public func serializingData() async throws -> Data {
         try await withTaskCancellationHandler(
-            operation: {
-                try await withCheckedThrowingContinuation { continuation in
-                    self.responseData { continuation.resume(with: $0) }
-                }
-            },
+            operation: { try await self.st_awaitPublisher(self.dataPublisher) },
             onCancel: { self.cancel() }
         )
     }
@@ -201,24 +150,22 @@ public final class STDataRequest: STRequest {
     public func serializingString(encoding: String.Encoding = .utf8) async throws -> String {
         try await withTaskCancellationHandler(
             operation: {
-                try await withCheckedThrowingContinuation { continuation in
-                    self.responseString(encoding: encoding) { continuation.resume(with: $0) }
-                }
+                try await self.st_awaitPublisher(
+                    self.dataPublisher.tryMap { data -> String in
+                        guard let s = String(data: data, encoding: encoding) else {
+                            throw STHTTPError.decodingError
+                        }
+                        return s
+                    }.eraseToAnyPublisher()
+                )
             },
             onCancel: { self.cancel() }
         )
     }
 
-    public func serializingDecodable<T: Decodable>(
-        _ type: T.Type,
-        decoder: JSONDecoder = JSONDecoder()
-    ) async throws -> T {
+    public func serializingDecodable<T: Decodable>( _ type: T.Type, decoder: JSONDecoder = JSONDecoder()) async throws -> T {
         try await withTaskCancellationHandler(
-            operation: {
-                try await withCheckedThrowingContinuation { continuation in
-                    self.responseDecodable(of: type, decoder: decoder) { continuation.resume(with: $0) }
-                }
-            },
+            operation: { try await self.st_awaitPublisher(self.decodablePublisher(type, decoder: decoder)) },
             onCancel: { self.cancel() }
         )
     }
@@ -226,96 +173,48 @@ public final class STDataRequest: STRequest {
 
 public final class STUploadRequest: STRequest {
 
-    public typealias ProgressHandler = (STUploadProgress) -> Void
-    public typealias ResponseHandler = (STHTTPResponse) -> Void
+    private let progressSubject = PassthroughSubject<STUploadProgress, Never>()
+    private let responseSubject = CurrentValueSubject<STHTTPResponse?, Never>(nil)
 
-    private let handlersLock = NSLock()
-    private var progressHandlers: [ProgressHandler] = []
-    private var completionHandlers: [ResponseHandler] = []
-    private var _response: STHTTPResponse?
+    public var progressPublisher: AnyPublisher<STUploadProgress, Never> {
+        self.progressSubject.receive(on: DispatchQueue.main).eraseToAnyPublisher()
+    }
+
+    public var responsePublisher: AnyPublisher<STHTTPResponse, Never> {
+        self.responseSubject.compactMap { $0 }.first().receive(on: DispatchQueue.main).eraseToAnyPublisher()
+    }
+
+    public func decodablePublisher<T: Decodable>(_ type: T.Type = T.self, decoder: JSONDecoder = JSONDecoder()) -> AnyPublisher<T, Error> {
+        self.responsePublisher.tryMap { resp -> T in
+            if let error = resp.error { throw error }
+            guard let data = resp.data, !data.isEmpty else { throw STHTTPError.noData }
+            guard let value = try? decoder.decode(T.self, from: data) else {
+                throw STHTTPError.decodingError
+            }
+            return value
+        }.eraseToAnyPublisher()
+    }
 
     func didUpdateProgress(_ progress: STUploadProgress) {
-        self.handlersLock.lock()
-        let handlers = self.progressHandlers
-        self.handlersLock.unlock()
-        DispatchQueue.main.async { handlers.forEach { $0(progress) } }
+        self.progressSubject.send(progress)
     }
 
     func didComplete(with response: STHTTPResponse) {
-        self.handlersLock.lock()
-        self._response = response
-        let handlers = self.completionHandlers
-        self.completionHandlers.removeAll()
-        self.handlersLock.unlock()
-
         self.transition(to: .finished)
-        handlers.forEach { $0(response) }
-    }
-
-    @discardableResult
-    public func uploadProgress(
-        queue: DispatchQueue = .main,
-        handler: @escaping ProgressHandler
-    ) -> Self {
-        self.handlersLock.lock()
-        self.progressHandlers.append({ p in queue.async { handler(p) } })
-        self.handlersLock.unlock()
-        return self
-    }
-
-    @discardableResult
-    public func response(
-        queue: DispatchQueue = .main,
-        completionHandler: @escaping ResponseHandler
-    ) -> Self {
-        let wrapper: ResponseHandler = { resp in queue.async { completionHandler(resp) } }
-        self.handlersLock.lock()
-        if let existing = self._response {
-            self.handlersLock.unlock()
-            queue.async { completionHandler(existing) }
-        } else {
-            self.completionHandlers.append(wrapper)
-            self.handlersLock.unlock()
-        }
-        return self
-    }
-
-    @discardableResult
-    public func responseDecodable<T: Decodable>(
-        of type: T.Type = T.self,
-        queue: DispatchQueue = .main,
-        decoder: JSONDecoder = JSONDecoder(),
-        completionHandler: @escaping (Result<T, Error>) -> Void
-    ) -> Self {
-        return self.response(queue: queue) { resp in
-            if let error = resp.error {
-                completionHandler(.failure(error))
-                return
-            }
-            guard let data = resp.data, !data.isEmpty else {
-                completionHandler(.failure(STHTTPError.noData))
-                return
-            }
-            do {
-                completionHandler(.success(try decoder.decode(T.self, from: data)))
-            } catch {
-                completionHandler(.failure(STHTTPError.decodingError))
-            }
-        }
+        self.responseSubject.send(response)
     }
 
     public func serializingResponse() async throws -> STHTTPResponse {
         try await withTaskCancellationHandler(
             operation: {
-                try await withCheckedThrowingContinuation { continuation in
-                    self.response { resp in
-                        if let error = resp.error {
-                            continuation.resume(throwing: error)
-                        } else {
-                            continuation.resume(returning: resp)
+                try await self.st_awaitPublisher(
+                    self.responsePublisher
+                        .tryMap { resp -> STHTTPResponse in
+                            if let error = resp.error { throw error }
+                            return resp
                         }
-                    }
-                }
+                        .eraseToAnyPublisher()
+                )
             },
             onCancel: { self.cancel() }
         )
@@ -324,14 +223,10 @@ public final class STUploadRequest: STRequest {
 
 public final class STDownloadRequest: STRequest {
 
-    public typealias ProgressHandler = (STDownloadProgress) -> Void
     public typealias Destination = (URL, HTTPURLResponse) -> URL
-    public typealias CompletionHandler = (Result<URL, Error>) -> Void
 
-    private let handlersLock = NSLock()
-    private var progressHandlers: [ProgressHandler] = []
-    private var completionHandlers: [CompletionHandler] = []
-    private var _result: Result<URL, Error>?
+    private let progressSubject = PassthroughSubject<STDownloadProgress, Never>()
+    private let resultSubject = CurrentValueSubject<Result<URL, Error>?, Never>(nil)
 
     private(set) var destination: Destination?
     private(set) var downloadOptions: STDownloadOptions
@@ -339,7 +234,6 @@ public final class STDownloadRequest: STRequest {
     private let resumeLock = NSLock()
     private var _resumeData: Data?
 
-    /// 上一次失败/取消产生的 resumeData，可用于下次断点续传。
     public var resumeData: Data? {
         self.resumeLock.lock()
         defer { self.resumeLock.unlock() }
@@ -363,8 +257,31 @@ public final class STDownloadRequest: STRequest {
         super.init(maxRetryCount: maxRetryCount, retryDelay: retryDelay)
     }
 
-    /// 取消并请求 URLSession 生成 resumeData，便于稍后续传。
-    /// resumeData 既会回调给 handler，也会保存到 `self.resumeData`。
+    public var progressPublisher: AnyPublisher<STDownloadProgress, Never> {
+        self.progressSubject
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+
+    /// 成功时发出目标 URL，失败时 upstream error
+    public var responsePublisher: AnyPublisher<URL, Error> {
+        self.resultSubject
+            .compactMap { $0 }
+            .first()
+            .tryMap { try $0.get() }
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+
+    func didUpdateProgress(_ progress: STDownloadProgress) {
+        self.progressSubject.send(progress)
+    }
+
+    func didComplete(with result: Result<URL, Error>) {
+        self.transition(to: .finished)
+        self.resultSubject.send(result)
+    }
+
     @discardableResult
     public func cancel(byProducingResumeData handler: @escaping (Data?) -> Void) -> Self {
         guard let task = self.task as? URLSessionDownloadTask, !self.isCancelled, !self.isFinished else {
@@ -380,65 +297,13 @@ public final class STDownloadRequest: STRequest {
         return self
     }
 
-    func didUpdateProgress(_ progress: STDownloadProgress) {
-        self.handlersLock.lock()
-        let handlers = self.progressHandlers
-        self.handlersLock.unlock()
-        DispatchQueue.main.async { handlers.forEach { $0(progress) } }
-    }
-
-    func didComplete(with result: Result<URL, Error>) {
-        self.handlersLock.lock()
-        self._result = result
-        let handlers = self.completionHandlers
-        self.completionHandlers.removeAll()
-        self.handlersLock.unlock()
-
-        self.transition(to: .finished)
-        handlers.forEach { $0(result) }
-    }
-
-    @discardableResult
-    public func downloadProgress(
-        queue: DispatchQueue = .main,
-        handler: @escaping ProgressHandler
-    ) -> Self {
-        self.handlersLock.lock()
-        self.progressHandlers.append({ p in queue.async { handler(p) } })
-        self.handlersLock.unlock()
-        return self
-    }
-
-    @discardableResult
-    public func response(
-        queue: DispatchQueue = .main,
-        completionHandler: @escaping CompletionHandler
-    ) -> Self {
-        let wrapper: CompletionHandler = { result in queue.async { completionHandler(result) } }
-        self.handlersLock.lock()
-        if let existing = self._result {
-            self.handlersLock.unlock()
-            queue.async { completionHandler(existing) }
-        } else {
-            self.completionHandlers.append(wrapper)
-            self.handlersLock.unlock()
-        }
-        return self
-    }
-
     public func serializingURL() async throws -> URL {
         try await withTaskCancellationHandler(
-            operation: {
-                try await withCheckedThrowingContinuation { continuation in
-                    self.response { continuation.resume(with: $0) }
-                }
-            },
+            operation: { try await self.st_awaitPublisher(self.responsePublisher) },
             onCancel: { self.cancel() }
         )
     }
 }
-
-// MARK: - Server-Sent Event
 
 public struct STServerSentEvent: Sendable {
     public let id: String?
@@ -456,8 +321,6 @@ public struct STServerSentEvent: Sendable {
 
 enum STSSEParser {
 
-    /// 从缓冲区中提取所有完整的 SSE 消息（以 \n\n 或 \r\n\r\n 分帧），
-    /// 已消费的字节会从缓冲区中移除。
     static func parse(buffer: inout Data) -> [STServerSentEvent] {
         var events: [STServerSentEvent] = []
         let lf = "\n\n".data(using: .utf8)!
@@ -514,159 +377,141 @@ enum STSSEParser {
     }
 }
 
-// MARK: - Data Stream Request
-
 public final class STDataStreamRequest: STRequest {
 
-    public typealias DataHandler = (Data) -> Void
-    public typealias EventHandler = (STServerSentEvent) -> Void
-    public typealias CompletionHandler = (Error?) -> Void
-
-    private struct Sink<T> {
-        let queue: DispatchQueue
-        let handler: (T) -> Void
-    }
-
-    private let handlersLock = NSLock()
-    private var dataHandlers: [Sink<Data>] = []
-    private var eventHandlers: [Sink<STServerSentEvent>] = []
-    private var completionHandlers: [Sink<Error?>] = []
-    private var dataContinuations: [AsyncThrowingStream<Data, Error>.Continuation] = []
-    private var eventContinuations: [AsyncThrowingStream<STServerSentEvent, Error>.Continuation] = []
-    private var sseBuffer = Data()
+    private let stateLock2 = NSLock()
     private var _receivedFirstByte = false
     private var _httpResponse: HTTPURLResponse?
     private var _isFinished = false
     private var _terminalError: Error?
+    private var sseBuffer = Data()
 
-    /// 是否已收到首字节。流式请求一旦开始吐数据，就不应再被自动重试。
+    private let dataSubject = PassthroughSubject<Data, Error>()
+    private let eventSubject = PassthroughSubject<STServerSentEvent, Error>()
+
     public var hasReceivedFirstByte: Bool {
-        self.handlersLock.lock()
-        defer { self.handlersLock.unlock() }
+        self.stateLock2.lock()
+        defer { self.stateLock2.unlock() }
         return self._receivedFirstByte
     }
 
     public var httpResponse: HTTPURLResponse? {
-        self.handlersLock.lock()
-        defer { self.handlersLock.unlock() }
+        self.stateLock2.lock()
+        defer { self.stateLock2.unlock() }
         return self._httpResponse
     }
 
+    /// 原始 chunk 流，完成或出错时终止
+    public var dataPublisher: AnyPublisher<Data, Error> {
+        self.dataSubject.eraseToAnyPublisher()
+    }
+
+    /// SSE 事件流，完成或出错时终止
+    public var eventPublisher: AnyPublisher<STServerSentEvent, Error> {
+        self.eventSubject.eraseToAnyPublisher()
+    }
+
     func didReceiveHTTPResponse(_ response: HTTPURLResponse) {
-        self.handlersLock.lock()
+        self.stateLock2.lock()
         self._httpResponse = response
-        self.handlersLock.unlock()
+        self.stateLock2.unlock()
     }
 
     func didReceive(_ chunk: Data) {
-        self.handlersLock.lock()
+        self.stateLock2.lock()
         self._receivedFirstByte = true
-        let dataSinks = self.dataHandlers
-        let eventSinks = self.eventHandlers
-        let dataConts = self.dataContinuations
-        let eventConts = self.eventContinuations
-        var events: [STServerSentEvent] = []
-        if !eventSinks.isEmpty || !eventConts.isEmpty {
-            self.sseBuffer.append(chunk)
-            events = STSSEParser.parse(buffer: &self.sseBuffer)
-        }
-        self.handlersLock.unlock()
+        self.sseBuffer.append(chunk)
+        let events = STSSEParser.parse(buffer: &self.sseBuffer)
+        self.stateLock2.unlock()
 
-        dataSinks.forEach { sink in sink.queue.async { sink.handler(chunk) } }
-        for cont in dataConts { cont.yield(chunk) }
-        for event in events {
-            eventSinks.forEach { sink in sink.queue.async { sink.handler(event) } }
-            for cont in eventConts { cont.yield(event) }
-        }
+        self.dataSubject.send(chunk)
+        events.forEach { self.eventSubject.send($0) }
     }
 
     func didFinish(error: Error?) {
-        self.handlersLock.lock()
+        self.stateLock2.lock()
         guard !self._isFinished else {
-            self.handlersLock.unlock()
+            self.stateLock2.unlock()
             return
         }
         self._isFinished = true
         self._terminalError = error
-        let cSinks = self.completionHandlers
-        let dataConts = self.dataContinuations
-        let eventConts = self.eventContinuations
-        self.completionHandlers.removeAll()
-        self.dataContinuations.removeAll()
-        self.eventContinuations.removeAll()
-        self.handlersLock.unlock()
+        self.stateLock2.unlock()
 
         self.transition(to: .finished)
-        cSinks.forEach { sink in sink.queue.async { sink.handler(error) } }
-        for cont in dataConts {
-            if let error = error { cont.finish(throwing: error) } else { cont.finish() }
+        if let error = error {
+            self.dataSubject.send(completion: .failure(error))
+            self.eventSubject.send(completion: .failure(error))
+        } else {
+            self.dataSubject.send(completion: .finished)
+            self.eventSubject.send(completion: .finished)
         }
-        for cont in eventConts {
-            if let error = error { cont.finish(throwing: error) } else { cont.finish() }
-        }
-    }
-
-    @discardableResult
-    public func onData(queue: DispatchQueue = .main, handler: @escaping DataHandler) -> Self {
-        self.handlersLock.lock()
-        if !self._isFinished {
-            self.dataHandlers.append(Sink(queue: queue, handler: handler))
-        }
-        self.handlersLock.unlock()
-        return self
-    }
-
-    @discardableResult
-    public func onEvent(queue: DispatchQueue = .main, handler: @escaping EventHandler) -> Self {
-        self.handlersLock.lock()
-        if !self._isFinished {
-            self.eventHandlers.append(Sink(queue: queue, handler: handler))
-        }
-        self.handlersLock.unlock()
-        return self
-    }
-
-    @discardableResult
-    public func onComplete(queue: DispatchQueue = .main, handler: @escaping CompletionHandler) -> Self {
-        self.handlersLock.lock()
-        if self._isFinished {
-            let error = self._terminalError
-            self.handlersLock.unlock()
-            queue.async { handler(error) }
-            return self
-        }
-        self.completionHandlers.append(Sink(queue: queue, handler: handler))
-        self.handlersLock.unlock()
-        return self
     }
 
     public func bytes() -> AsyncThrowingStream<Data, Error> {
         return AsyncThrowingStream { continuation in
-            self.handlersLock.lock()
-            if self._isFinished {
-                let error = self._terminalError
-                self.handlersLock.unlock()
-                if let error = error { continuation.finish(throwing: error) } else { continuation.finish() }
-                return
+            var cancellable: AnyCancellable?
+            cancellable = self.dataSubject.sink(
+                receiveCompletion: { completion in
+                    switch completion {
+                    case .finished: continuation.finish()
+                    case .failure(let error): continuation.finish(throwing: error)
+                    }
+                    cancellable = nil
+                },
+                receiveValue: { continuation.yield($0) }
+            )
+            continuation.onTermination = { [weak self] _ in
+                cancellable?.cancel()
+                cancellable = nil
+                self?.cancel()
             }
-            self.dataContinuations.append(continuation)
-            self.handlersLock.unlock()
-            continuation.onTermination = { [weak self] _ in self?.cancel() }
         }
     }
 
     public func events() -> AsyncThrowingStream<STServerSentEvent, Error> {
         return AsyncThrowingStream { continuation in
-            self.handlersLock.lock()
-            if self._isFinished {
-                let error = self._terminalError
-                self.handlersLock.unlock()
-                if let error = error { continuation.finish(throwing: error) } else { continuation.finish() }
-                return
+            var cancellable: AnyCancellable?
+            cancellable = self.eventSubject.sink(
+                receiveCompletion: { completion in
+                    switch completion {
+                    case .finished: continuation.finish()
+                    case .failure(let error): continuation.finish(throwing: error)
+                    }
+                    cancellable = nil
+                },
+                receiveValue: { continuation.yield($0) }
+            )
+            continuation.onTermination = { [weak self] _ in
+                cancellable?.cancel()
+                cancellable = nil
+                self?.cancel()
             }
-            self.eventContinuations.append(continuation)
-            self.handlersLock.unlock()
-            continuation.onTermination = { [weak self] _ in self?.cancel() }
+        }
+    }
+}
+
+private extension STRequest {
+    func st_awaitPublisher<T>(_ publisher: AnyPublisher<T, Error>) async throws -> T {
+        try await withCheckedThrowingContinuation { continuation in
+            var cancellable: AnyCancellable?
+            var resumed = false
+            cancellable = publisher.sink(
+                receiveCompletion: { completion in
+                    guard !resumed else { return }
+                    if case .failure(let error) = completion {
+                        resumed = true
+                        continuation.resume(throwing: error)
+                    }
+                    cancellable = nil
+                },
+                receiveValue: { value in
+                    guard !resumed else { return }
+                    resumed = true
+                    continuation.resume(returning: value)
+                    cancellable = nil
+                }
+            )
         }
     }
 }

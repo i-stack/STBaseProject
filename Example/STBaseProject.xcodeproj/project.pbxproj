@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		34CA454AA8FD1F60C7B63C3F /* Pods_STBaseProject_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0527130535D9B00C23149A00 /* Pods_STBaseProject_Example.framework */; };
+		F10000010000000000000001 /* STBaseViewModelNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000011 /* STBaseViewModelNetworkTests.swift */; };
+		F10000010000000000000002 /* STHTTPDebugLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000012 /* STHTTPDebugLogTests.swift */; };
+		F10000010000000000000003 /* STNetworkStreamAndResumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000013 /* STNetworkStreamAndResumeTests.swift */; };
+		F10000010000000000000004 /* STMarkdownPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000014 /* STMarkdownPipelineTests.swift */; };
+		F10000010000000000000005 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F10000010000000000000015 /* XCTest.framework */; };
+		F10000010000000000000006 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = F10000010000000000000031 /* STBaseProject */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
@@ -34,6 +40,12 @@
 
 /* Begin PBXFileReference section */
 		0527130535D9B00C23149A00 /* Pods_STBaseProject_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProject_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F10000010000000000000010 /* STBaseProject_ExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = STBaseProject_ExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F10000010000000000000011 /* STBaseViewModelNetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STBaseViewModelNetworkTests.swift; path = ../Tests/STBaseProjectTests/STBaseViewModelNetworkTests.swift; sourceTree = SOURCE_ROOT; };
+		F10000010000000000000012 /* STHTTPDebugLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STHTTPDebugLogTests.swift; path = ../Tests/STBaseProjectTests/STHTTPDebugLogTests.swift; sourceTree = SOURCE_ROOT; };
+		F10000010000000000000013 /* STNetworkStreamAndResumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STNetworkStreamAndResumeTests.swift; path = ../Tests/STBaseProjectTests/STNetworkStreamAndResumeTests.swift; sourceTree = SOURCE_ROOT; };
+		F10000010000000000000014 /* STMarkdownPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STMarkdownPipelineTests.swift; path = ../Tests/STMarkdownTests/STMarkdownPipelineTests.swift; sourceTree = SOURCE_ROOT; };
+		F10000010000000000000015 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		5595EECA994E10E795995F12 /* Pods-STBaseProject_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProject_Example.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProject_Example/Pods-STBaseProject_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* STBaseProject_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = STBaseProject_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -65,6 +77,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		F10000010000000000000020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F10000010000000000000006 /* STBaseProject in Frameworks */,
+				F10000010000000000000005 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		607FACCD1AFB9204008FA782 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -92,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				607FACD21AFB9204008FA782 /* Example for STBaseProject */,
+				F10000010000000000000016 /* Tests */,
 				607FACD11AFB9204008FA782 /* Products */,
 				30DD7ED2B9D148B9BB2FD4F5 /* Frameworks */,
 				608B8C5D24724C39A764929F /* Pods */,
@@ -102,8 +124,20 @@
 			isa = PBXGroup;
 			children = (
 				607FACD01AFB9204008FA782 /* STBaseProject_Example.app */,
+				F10000010000000000000010 /* STBaseProject_ExampleTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F10000010000000000000016 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F10000010000000000000012 /* STHTTPDebugLogTests.swift */,
+				F10000010000000000000011 /* STBaseViewModelNetworkTests.swift */,
+				F10000010000000000000013 /* STNetworkStreamAndResumeTests.swift */,
+				F10000010000000000000014 /* STMarkdownPipelineTests.swift */,
+			);
+			name = Tests;
 			sourceTree = "<group>";
 		};
 		607FACD21AFB9204008FA782 /* Example for STBaseProject */ = {
@@ -204,6 +238,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		F10000010000000000000030 /* STBaseProject_ExampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10000010000000000000042 /* Build configuration list for PBXNativeTarget "STBaseProject_ExampleTests" */;
+			buildPhases = (
+				F10000010000000000000021 /* Sources */,
+				F10000010000000000000020 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = STBaseProject_ExampleTests;
+			packageProductDependencies = (
+				F10000010000000000000031 /* STBaseProject */,
+			);
+			productName = STBaseProject_ExampleTests;
+			productReference = F10000010000000000000010 /* STBaseProject_ExampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		607FACCF1AFB9204008FA782 /* STBaseProject_Example */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "STBaseProject_Example" */;
@@ -234,6 +287,10 @@
 				LastUpgradeCheck = 2610;
 				ORGANIZATIONNAME = STBaseProject;
 				TargetAttributes = {
+					F10000010000000000000030 = {
+						CreatedOnToolsVersion = 17.0;
+						TestTargetID = 607FACCF1AFB9204008FA782;
+					};
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
 						LastSwiftMigration = 1020;
@@ -258,6 +315,7 @@
 			projectRoot = "";
 			targets = (
 				607FACCF1AFB9204008FA782 /* STBaseProject_Example */,
+				F10000010000000000000030 /* STBaseProject_ExampleTests */,
 			);
 		};
 /* End PBXProject section */
@@ -304,6 +362,17 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		F10000010000000000000021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F10000010000000000000001 /* STBaseViewModelNetworkTests.swift in Sources */,
+				F10000010000000000000002 /* STHTTPDebugLogTests.swift in Sources */,
+				F10000010000000000000003 /* STNetworkStreamAndResumeTests.swift in Sources */,
+				F10000010000000000000004 /* STMarkdownPipelineTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		607FACCC1AFB9204008FA782 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -356,6 +425,53 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		F10000010000000000000040 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9FFQU5J4Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.cocoapods.STBaseProject.comTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/STBaseProject_Example.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/STBaseProject_Example";
+				TEST_TARGET_NAME = STBaseProject_Example;
+			};
+			name = Debug;
+		};
+		F10000010000000000000041 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = S9FFQU5J4Q;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.cocoapods.STBaseProject.comTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/STBaseProject_Example.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/STBaseProject_Example";
+				TEST_TARGET_NAME = STBaseProject_Example;
+			};
+			name = Release;
+		};
 		607FACED1AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -526,6 +642,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F10000010000000000000042 /* Build configuration list for PBXNativeTarget "STBaseProject_ExampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10000010000000000000040 /* Debug */,
+				F10000010000000000000041 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		607FACCB1AFB9204008FA782 /* Build configuration list for PBXProject "STBaseProject" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -554,6 +679,11 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		F10000010000000000000031 /* STBaseProject */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E404A0522E87E72400EE9230 /* XCLocalSwiftPackageReference "../../STBaseProject" */;
+			productName = STBaseProject;
+		};
 		E4DB508C2EC41C7900EAEF71 /* STBaseProject */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E404A0522E87E72400EE9230 /* XCLocalSwiftPackageReference "../../STBaseProject" */;

@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2018/01/10.
 //
 
-import Foundation
 import UIKit
+import Foundation
 
 // MARK: - 本地化常量
 private struct STLocalizationConstantKey {
@@ -66,7 +66,6 @@ public struct STSupportedLanguage {
 // MARK: - 本地化管理器
 /// 本地化管理器，负责应用的语言切换和本地化字符串管理
 public class STLocalizationManager: Bundle, @unchecked Sendable {
-    
     deinit {
         objc_removeAssociatedObjects(self)
     }
@@ -81,7 +80,6 @@ public class STLocalizationManager: Bundle, @unchecked Sendable {
 
 // MARK: - 自定义语言包
 public extension Bundle {
-    
     static var customLanguageBundle: Bundle? {
         get {
             return objc_getAssociatedObject(Bundle.main, &STLocalizationConstantKey.customBundleKey) as? Bundle

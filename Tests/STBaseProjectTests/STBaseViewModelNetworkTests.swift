@@ -18,22 +18,22 @@ private final class MockRequestingViewModel: STBaseViewModel {
     var capturedRequest: CapturedRequest?
     var mockedResponse: STHTTPResponse?
 
-    override func st_dispatchRequest(
+    override func st_dispatchRequestPublisher(
         url: String,
         method: STHTTPMethod,
         parameters: [String: Any]?,
-        encodingType: STParameterEncoder.EncodingType,
-        completion: @escaping (STHTTPResponse) -> Void
-    ) {
+        encodingType: STParameterEncoder.EncodingType
+    ) -> AnyPublisher<STHTTPResponse, Never> {
         self.capturedRequest = CapturedRequest(
             url: url,
             method: method,
             parameters: parameters,
             encodingType: encodingType
         )
-        if let mockedResponse = self.mockedResponse {
-            completion(mockedResponse)
+        guard let mockedResponse = self.mockedResponse else {
+            return Empty<STHTTPResponse, Never>().eraseToAnyPublisher()
         }
+        return Just(mockedResponse).eraseToAnyPublisher()
     }
 }
 
@@ -74,17 +74,26 @@ final class STBaseViewModelNetworkTests: XCTestCase {
             }
             .store(in: &self.cancellables)
 
-        let completionExpectation = expectation(description: "request completion called")
-        var completionResult: Result<MockUserDTO, STBaseError>?
-        viewModel.st_request(
+        let completionExpectation = expectation(description: "request publisher emits value")
+        var receivedValue: MockUserDTO?
+        viewModel.st_requestPublisher(
             url: url.absoluteString,
             method: .get,
             parameters: ["id": 7],
             responseType: MockUserDTO.self
-        ) { result in
-            completionResult = result
-            completionExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    XCTFail("Expected success but got error: \(error)")
+                }
+            },
+            receiveValue: { value in
+                receivedValue = value
+                completionExpectation.fulfill()
+            }
+        )
+        .store(in: &self.cancellables)
 
         wait(for: [completionExpectation, stateExpectation], timeout: 1.0)
 
@@ -102,7 +111,7 @@ final class STBaseViewModelNetworkTests: XCTestCase {
             return false
         })
 
-        guard case .success(let value) = completionResult else {
+        guard let value = receivedValue else {
             return XCTFail("Expected success result")
         }
         XCTAssertEqual(value, responseBody)
@@ -124,19 +133,28 @@ final class STBaseViewModelNetworkTests: XCTestCase {
             }
             .store(in: &self.cancellables)
 
-        let completionExpectation = expectation(description: "request completion called")
-        var completionResult: Result<MockUserDTO, STBaseError>?
-        viewModel.st_request(
+        let completionExpectation = expectation(description: "request publisher emits failure")
+        var completionError: STBaseError?
+        viewModel.st_requestPublisher(
             url: "https://example.com/user",
             responseType: MockUserDTO.self
-        ) { result in
-            completionResult = result
-            completionExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    completionError = error
+                    completionExpectation.fulfill()
+                }
+            },
+            receiveValue: { _ in
+                XCTFail("Expected failure but received value")
+            }
+        )
+        .store(in: &self.cancellables)
 
         wait(for: [completionExpectation, failedStateExpectation], timeout: 1.0)
 
-        guard case .failure(let error) = completionResult else {
+        guard let error = completionError else {
             return XCTFail("Expected failure result")
         }
         if case .networkError(let message) = error {
@@ -161,19 +179,28 @@ final class STBaseViewModelNetworkTests: XCTestCase {
         let invalidData = Data("{\"id\":\"not-int\"}".utf8)
         viewModel.mockedResponse = STHTTPResponse(data: invalidData, response: urlResponse, error: nil)
 
-        let completionExpectation = expectation(description: "request completion called")
-        var completionResult: Result<MockUserDTO, STBaseError>?
-        viewModel.st_request(
+        let completionExpectation = expectation(description: "request publisher emits decode failure")
+        var completionError: STBaseError?
+        viewModel.st_requestPublisher(
             url: url.absoluteString,
             responseType: MockUserDTO.self
-        ) { result in
-            completionResult = result
-            completionExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    completionError = error
+                    completionExpectation.fulfill()
+                }
+            },
+            receiveValue: { _ in
+                XCTFail("Expected decode failure but received value")
+            }
+        )
+        .store(in: &self.cancellables)
 
         wait(for: [completionExpectation], timeout: 1.0)
 
-        guard case .failure(let error) = completionResult else {
+        guard let error = completionError else {
             return XCTFail("Expected decode failure")
         }
         if case .dataError(let message) = error {
@@ -186,15 +213,17 @@ final class STBaseViewModelNetworkTests: XCTestCase {
     func testPostMethodConvenienceForwardsPostRequestMethod() throws {
         let viewModel = MockRequestingViewModel()
         viewModel.mockedResponse = try self.makeSuccessHTTPResponse()
-        let completionExpectation = expectation(description: "post completion called")
-
-        viewModel.st_post(
+        let completionExpectation = expectation(description: "post publisher emits value")
+        viewModel.st_postPublisher(
             url: "https://example.com/user",
             parameters: ["name": "Song"],
             responseType: MockUserDTO.self
-        ) { _ in
-            completionExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in completionExpectation.fulfill() }
+        )
+        .store(in: &self.cancellables)
 
         wait(for: [completionExpectation], timeout: 1.0)
         XCTAssertEqual(viewModel.capturedRequest?.method, .post)
@@ -204,15 +233,17 @@ final class STBaseViewModelNetworkTests: XCTestCase {
     func testPutMethodConvenienceForwardsPutRequestMethod() throws {
         let viewModel = MockRequestingViewModel()
         viewModel.mockedResponse = try self.makeSuccessHTTPResponse()
-        let completionExpectation = expectation(description: "put completion called")
-
-        viewModel.st_put(
+        let completionExpectation = expectation(description: "put publisher emits value")
+        viewModel.st_putPublisher(
             url: "https://example.com/user",
             parameters: ["name": "Updated"],
             responseType: MockUserDTO.self
-        ) { _ in
-            completionExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in completionExpectation.fulfill() }
+        )
+        .store(in: &self.cancellables)
 
         wait(for: [completionExpectation], timeout: 1.0)
         XCTAssertEqual(viewModel.capturedRequest?.method, .put)
@@ -222,15 +253,17 @@ final class STBaseViewModelNetworkTests: XCTestCase {
     func testDeleteMethodConvenienceForwardsDeleteRequestMethod() throws {
         let viewModel = MockRequestingViewModel()
         viewModel.mockedResponse = try self.makeSuccessHTTPResponse()
-        let completionExpectation = expectation(description: "delete completion called")
-
-        viewModel.st_delete(
+        let completionExpectation = expectation(description: "delete publisher emits value")
+        viewModel.st_deletePublisher(
             url: "https://example.com/user",
             parameters: ["id": 7],
             responseType: MockUserDTO.self
-        ) { _ in
-            completionExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in completionExpectation.fulfill() }
+        )
+        .store(in: &self.cancellables)
 
         wait(for: [completionExpectation], timeout: 1.0)
         XCTAssertEqual(viewModel.capturedRequest?.method, .delete)
@@ -241,40 +274,105 @@ final class STBaseViewModelNetworkTests: XCTestCase {
         let viewModel = MockRequestingViewModel()
         viewModel.mockedResponse = try self.makeSuccessHTTPResponse()
 
-        let postExpectation = expectation(description: "explicit post completion")
-        viewModel.st_request(
+        let postExpectation = expectation(description: "explicit post publisher")
+        viewModel.st_requestPublisher(
             url: "https://example.com/user",
             method: .post,
             parameters: ["kind": "post"],
             responseType: MockUserDTO.self
-        ) { _ in
-            postExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in postExpectation.fulfill() }
+        )
+        .store(in: &self.cancellables)
         wait(for: [postExpectation], timeout: 1.0)
         XCTAssertEqual(viewModel.capturedRequest?.method, .post)
 
-        let putExpectation = expectation(description: "explicit put completion")
-        viewModel.st_request(
+        let putExpectation = expectation(description: "explicit put publisher")
+        viewModel.st_requestPublisher(
             url: "https://example.com/user",
             method: .put,
             parameters: ["kind": "put"],
             responseType: MockUserDTO.self
-        ) { _ in
-            putExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in putExpectation.fulfill() }
+        )
+        .store(in: &self.cancellables)
         wait(for: [putExpectation], timeout: 1.0)
         XCTAssertEqual(viewModel.capturedRequest?.method, .put)
 
-        let deleteExpectation = expectation(description: "explicit delete completion")
-        viewModel.st_request(
+        let deleteExpectation = expectation(description: "explicit delete publisher")
+        viewModel.st_requestPublisher(
             url: "https://example.com/user",
             method: .delete,
             parameters: ["kind": "delete"],
             responseType: MockUserDTO.self
-        ) { _ in
-            deleteExpectation.fulfill()
-        }
+        )
+        .sink(
+            receiveCompletion: { _ in },
+            receiveValue: { _ in deleteExpectation.fulfill() }
+        )
+        .store(in: &self.cancellables)
         wait(for: [deleteExpectation], timeout: 1.0)
         XCTAssertEqual(viewModel.capturedRequest?.method, .delete)
+    }
+
+    func testLegacyCompletionRequestStillWorksWithPublisherBackedImplementation() throws {
+        let viewModel = MockRequestingViewModel()
+        viewModel.requestConfig.showLoading = true
+
+        let responseBody = MockUserDTO(id: 99, name: "Legacy")
+        let responseData = try JSONEncoder().encode(responseBody)
+        let url = URL(string: "https://example.com/legacy")!
+        let urlResponse = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)
+        viewModel.mockedResponse = STHTTPResponse(data: responseData, response: urlResponse, error: nil)
+
+        let completionExpectation = expectation(description: "legacy completion receives success")
+        var completionResult: Result<MockUserDTO, STBaseError>?
+        viewModel.st_request(
+            url: url.absoluteString,
+            method: .get,
+            parameters: ["legacy": true],
+            responseType: MockUserDTO.self
+        ) { result in
+            completionResult = result
+            completionExpectation.fulfill()
+        }
+
+        wait(for: [completionExpectation], timeout: 1.0)
+        XCTAssertEqual(viewModel.capturedRequest?.method, .get)
+        XCTAssertEqual(viewModel.capturedRequest?.parameters?["legacy"] as? Bool, true)
+        guard case .success(let value) = completionResult else {
+            return XCTFail("Expected success result from legacy completion API")
+        }
+        XCTAssertEqual(value, responseBody)
+    }
+
+    func testLegacyCompletionRequestFailureStillMapsToSTBaseError() {
+        let viewModel = MockRequestingViewModel()
+        viewModel.mockedResponse = STHTTPResponse(data: nil, response: nil, error: STHTTPError.timeout)
+
+        let completionExpectation = expectation(description: "legacy completion receives failure")
+        var completionResult: Result<MockUserDTO, STBaseError>?
+        viewModel.st_request(
+            url: "https://example.com/legacy-error",
+            responseType: MockUserDTO.self
+        ) { result in
+            completionResult = result
+            completionExpectation.fulfill()
+        }
+
+        wait(for: [completionExpectation], timeout: 1.0)
+        guard case .failure(let error) = completionResult else {
+            return XCTFail("Expected failure result from legacy completion API")
+        }
+        if case .networkError(let message) = error {
+            XCTAssertEqual(message, "请求超时")
+        } else {
+            XCTFail("Expected networkError for legacy completion API")
+        }
     }
 }

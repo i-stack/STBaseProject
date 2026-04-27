@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "607FACE41AFB9204008FA782"
-               BuildableName = "STBaseProject_Tests.xctest"
-               BlueprintName = "STBaseProject_Tests"
+               BlueprintIdentifier = "F10000010000000000000030"
+               BuildableName = "STBaseProject_ExampleTests.xctest"
+               BlueprintName = "STBaseProject_ExampleTests"
                ReferencedContainer = "container:STBaseProject.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -51,6 +51,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F10000010000000000000030"
+               BuildableName = "STBaseProject_ExampleTests.xctest"
+               BlueprintName = "STBaseProject_ExampleTests"
+               ReferencedContainer = "container:STBaseProject.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

@@ -7,9 +7,7 @@
 
 import UIKit
 
-// MARK: - STBaseViewController 本地化扩展
 public extension STBaseViewController {
-    
     func st_updateLocalizedTexts() {
         if let title = self.title, !title.isEmpty {
             self.titleLabel.text = Bundle.st_localizedString(key: title)
