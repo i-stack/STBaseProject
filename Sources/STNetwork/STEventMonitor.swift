@@ -74,53 +74,46 @@ public final class STConsoleEventMonitor: STEventMonitor {
 
     public static let `default` = STConsoleEventMonitor()
 
-    private lazy var dateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm:ss.SSS"
-        return f
-    }()
-
-    private func ts() -> String { self.dateFormatter.string(from: Date()) }
-
     public func request(_ request: STRequest, didCreateURLRequest urlRequest: URLRequest) {
         let method = urlRequest.httpMethod ?? "??"
         let url = urlRequest.url?.absoluteString ?? ""
-        print("[\(self.ts())] [\(method)] --> \(url)")
+        STLog("[\(method)] --> \(url)", level: .debug)
         if let body = urlRequest.httpBody,
            let bodyStr = String(data: body, encoding: .utf8) {
-            print("  Body: \(bodyStr.prefix(500))")
+            STLog("  Body: \(bodyStr.prefix(500))", level: .debug)
         }
     }
 
     public func request(_ request: STRequest, didAdaptURLRequest initial: URLRequest, to adapted: URLRequest) {
         if initial.allHTTPHeaderFields != adapted.allHTTPHeaderFields {
-            print("[\(self.ts())] [ADAPT] Headers updated")
+            STLog("[ADAPT] Headers updated", level: .debug)
         }
     }
 
     public func request(_ request: STRequest, didReceiveHTTPResponse response: HTTPURLResponse) {
         let emoji = response.statusCode < 400 ? "✓" : "✗"
         let url = response.url?.absoluteString ?? ""
-        print("[\(self.ts())] [\(emoji) \(response.statusCode)] <-- \(url)")
+        let level: STLogLevel = response.statusCode < 400 ? .info : .warning
+        STLog("[\(emoji) \(response.statusCode)] <-- \(url)", level: level)
     }
 
     public func requestDidCancel(_ request: STRequest) {
-        print("[\(self.ts())] [CANCEL] \(request.urlRequest?.url?.absoluteString ?? "")")
+        STLog("[CANCEL] \(request.urlRequest?.url?.absoluteString ?? "")", level: .warning)
     }
 
     public func requestDidFinish(_ request: STRequest) {
-        print("[\(self.ts())] [DONE]")
+        STLog("[DONE]", level: .debug)
     }
 
     public func request(_ request: STUploadRequest, didSendBytes bytesSent: Int64, totalBytesSent: Int64, totalBytesExpected: Int64) {
         guard totalBytesExpected > 0 else { return }
         let pct = Int(Double(totalBytesSent) / Double(totalBytesExpected) * 100)
-        print("[\(self.ts())] [UPLOAD] \(pct)%")
+        STLog("[UPLOAD] \(pct)%", level: .debug)
     }
 
     public func request(_ request: STDownloadRequest, didWriteData bytesWritten: Int64, totalWritten: Int64, totalExpected: Int64) {
         guard totalExpected > 0 else { return }
         let pct = Int(Double(totalWritten) / Double(totalExpected) * 100)
-        print("[\(self.ts())] [DOWNLOAD] \(pct)%")
+        STLog("[DOWNLOAD] \(pct)%", level: .debug)
     }
 }

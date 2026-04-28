@@ -789,19 +789,9 @@ extension STHTTPSession: URLSessionDelegate, URLSessionDataDelegate, URLSessionT
     }
 
     private func serverCertificates(from trust: SecTrust) -> [Data] {
-        if #available(iOS 15.0, *) {
-            guard let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate] else { return [] }
-            return chain.map { SecCertificateCopyData($0) as Data }
-        } else {
-            let count = SecTrustGetCertificateCount(trust)
-            var result: [Data] = []
-            for i in 0..<count {
-                if let cert = SecTrustGetCertificateAtIndex(trust, i) {
-                    result.append(SecCertificateCopyData(cert) as Data)
-                }
-            }
-            return result
-        }
+        guard let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate] else { return [] }
+        return chain.map { SecCertificateCopyData($0) as Data }
+    }
     }
 
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {

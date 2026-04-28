@@ -73,12 +73,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
     }
 
     private var renderer: STMarkdownAttributedStringRenderer
-    private let textView: UITextView = {
-        if #available(iOS 16.0, *) {
-            return UITextView(usingTextLayoutManager: false)
-        }
-        return UITextView()
-    }()
+    private let textView: UITextView = UITextView(usingTextLayoutManager: false)
 
     public override init(frame: CGRect) {
         let style = STMarkdownStyle.default

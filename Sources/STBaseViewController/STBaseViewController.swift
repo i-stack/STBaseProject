@@ -176,7 +176,6 @@ open class STBaseViewController: UIViewController {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        guard #available(iOS 13.0, *) else { return }
         guard STAppearanceManager.shared.currentMode == .system else { return }
 
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
@@ -188,12 +187,10 @@ open class STBaseViewController: UIViewController {
 
     private func st_refreshAppearance(animated: Bool = false) {
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
-        if #available(iOS 13.0, *) {
-            switch STAppearanceManager.shared.currentMode {
-            case .system: self.overrideUserInterfaceStyle = .unspecified
-            case .light:  self.overrideUserInterfaceStyle = .light
-            case .dark:   self.overrideUserInterfaceStyle = .dark
-            }
+        switch STAppearanceManager.shared.currentMode {
+        case .system: self.overrideUserInterfaceStyle = .unspecified
+        case .light:  self.overrideUserInterfaceStyle = .light
+        case .dark:   self.overrideUserInterfaceStyle = .dark
         }
 
         let resolvedStyle: UIUserInterfaceStyle = style == .unspecified ? .light : style

@@ -200,21 +200,11 @@ open class STBaseViewModel: NSObject {
     }
     
     // MARK: - 网络请求核心方法
-    public func st_requestPublisher<T: Codable>(url: String,
-                                                method: STHTTPMethod = .get,
-                                                parameters: [String: Any]? = nil,
-                                                encodingType: STParameterEncoder.EncodingType = .json,
-                                                responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_requestPublisher<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-
-        return self.st_dispatchRequestPublisher(
-            url: url,
-            method: method,
-            parameters: parameters,
-            encodingType: encodingType
-        )
+        return self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
         .prefix(1)
         .tryMap { [weak self] response -> T in
             guard let self = self else {
@@ -227,14 +217,12 @@ open class STBaseViewModel: NSObject {
             case .failure(let error):
                 throw error
             }
-        }
-        .mapError { error -> STBaseError in
+        }.mapError { error -> STBaseError in
             if let baseError = error as? STBaseError {
                 return baseError
             }
             return STBaseError.origin(error: error)
-        }
-        .handleEvents(
+        }.handleEvents(
             receiveOutput: { [weak self] _ in
                 self?.loadingState.send(.loaded)
                 self?.dataUpdated.send()
@@ -248,23 +236,11 @@ open class STBaseViewModel: NSObject {
                     }
                 }
             }
-        )
-        .eraseToAnyPublisher()
+        ).eraseToAnyPublisher()
     }
 
-    public func st_request<T: Codable>(url: String,
-                                   method: STHTTPMethod = .get,
-                                   parameters: [String: Any]? = nil,
-                                   encodingType: STParameterEncoder.EncodingType = .json,
-                                   responseType: T.Type,
-                                   completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.st_requestPublisher(
-            url: url,
-            method: method,
-            parameters: parameters,
-            encodingType: encodingType,
-            responseType: responseType
-        )
+    public func st_request<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
+        self.st_requestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType, responseType: responseType)
         .sink(
             receiveCompletion: { state in
                 if case .failure(let error) = state {
@@ -274,93 +250,46 @@ open class STBaseViewModel: NSObject {
             receiveValue: { value in
                 completion(.success(value))
             }
-        )
-        .store(in: &self.cancellables)
+        ).store(in: &self.cancellables)
     }
 
-    open func st_dispatchRequestPublisher(
-        url: String,
-        method: STHTTPMethod,
-        parameters: [String: Any]?,
-        encodingType: STParameterEncoder.EncodingType
-    ) -> AnyPublisher<STHTTPResponse, Never> {
-        self.httpSession.request(
-            url,
-            method: method,
-            parameters: parameters,
-            encoding: encodingType,
-            headers: self.requestHeaders,
-            requestConfig: self.requestConfig
-        ).responsePublisher
-            .eraseToAnyPublisher()
+    open func st_dispatchRequestPublisher(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType) -> AnyPublisher<STHTTPResponse, Never> {
+        self.httpSession.request(url,method: method, parameters: parameters, encoding: encodingType, headers: self.requestHeaders, requestConfig: self.requestConfig).responsePublisher.eraseToAnyPublisher()
     }
 
-    open func st_dispatchRequest(
-        url: String,
-        method: STHTTPMethod,
-        parameters: [String: Any]?,
-        encodingType: STParameterEncoder.EncodingType,
-        completion: @escaping (STHTTPResponse) -> Void
-    ) {
-        self.st_dispatchRequestPublisher(
-            url: url,
-            method: method,
-            parameters: parameters,
-            encodingType: encodingType
-        )
-            .sink(receiveValue: completion)
-            .store(in: &self.cancellables)
+    open func st_dispatchRequest(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType, completion: @escaping (STHTTPResponse) -> Void) {
+        self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType).sink(receiveValue: completion).store(in: &self.cancellables)
     }
 
-    public func st_getPublisher<T: Codable>(url: String,
-                                            parameters: [String: Any]? = nil,
-                                            responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_getPublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .get, parameters: parameters, responseType: responseType)
     }
 
-    public func st_postPublisher<T: Codable>(url: String,
-                                             parameters: [String: Any]? = nil,
-                                             responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_postPublisher<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .post, parameters: parameters, responseType: responseType)
     }
 
-    public func st_putPublisher<T: Codable>(url: String,
-                                            parameters: [String: Any]? = nil,
-                                            responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_putPublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .put, parameters: parameters, responseType: responseType)
     }
 
-    public func st_deletePublisher<T: Codable>(url: String,
-                                               parameters: [String: Any]? = nil,
-                                               responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_deletePublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .delete, parameters: parameters, responseType: responseType)
     }
     
-    public func st_get<T: Codable>(url: String,
-                                parameters: [String: Any]? = nil,
-                                responseType: T.Type,
-                                completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_get<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .get, parameters: parameters, responseType: responseType, completion: completion)
     }
     
-    public func st_post<T: Codable>(url: String,
-                                 parameters: [String: Any]? = nil,
-                                 responseType: T.Type,
-                                 completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_post<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .post, parameters: parameters, responseType: responseType, completion: completion)
     }
     
-    public func st_put<T: Codable>(url: String,
-                                parameters: [String: Any]? = nil,
-                                responseType: T.Type,
-                                completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_put<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .put, parameters: parameters, responseType: responseType, completion: completion)
     }
     
-    public func st_delete<T: Codable>(url: String,
-                                   parameters: [String: Any]? = nil,
-                                   responseType: T.Type,
-                                   completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_delete<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .delete, parameters: parameters, responseType: responseType, completion: completion)
     }
     
@@ -371,11 +300,7 @@ open class STBaseViewModel: NSObject {
         }
         let method = STHTTPMethod(rawValue: request.httpMethod ?? "GET") ?? .get
         let parameters = st_extractParameters(from: request)
-        self.st_request(url: url,
-                  method: method,
-                  parameters: parameters, 
-                  responseType: responseType, 
-                  completion: completion)
+        self.st_request(url: url,method: method, parameters: parameters, responseType: responseType, completion: completion)
     }
     
     // MARK: - 参数提取（用于 URLRequest）
@@ -466,9 +391,7 @@ open class STBaseViewModel: NSObject {
         STLog(log)
     }
     
-    private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse,
-                                                 responseType: T.Type,
-                                                 completion: @escaping (Result<T, STBaseError>) -> Void) {
+    private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         let result = self.st_resultFromHTTPResponse(httpResponse, responseType: responseType)
         switch result {
         case .success(let value):
@@ -478,8 +401,7 @@ open class STBaseViewModel: NSObject {
         }
     }
 
-    private func st_resultFromHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse,
-                                                       responseType: T.Type) -> Result<T, STBaseError> {
+    private func st_resultFromHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> Result<T, STBaseError> {
         if httpResponse.isSuccess {
             return self.st_decodeResponse(httpResponse, responseType: responseType)
         }
@@ -649,69 +571,41 @@ open class STBaseViewModel: NSObject {
     }
     
     // MARK: - 文件上传和下载
-    public func st_upload<T: Codable>(url: String,
-                                   parameters: [String: Any]? = nil,
-                                   files: [STUploadFile],
-                                   responseType: T.Type,
-                                   progress: ((STUploadProgress) -> Void)? = nil,
-                                   completion: @escaping (Result<T, STBaseError>) -> Void) {
-        
+    public func st_upload<T: Codable>(url: String, parameters: [String: Any]? = nil, files: [STUploadFile], responseType: T.Type, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (Result<T, STBaseError>) -> Void) {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        
-        let uploadRequest = self.httpSession.upload(
-            url,
-            files: files,
-            parameters: parameters,
-            headers: self.requestHeaders,
-            requestConfig: self.requestConfig
-        )
+        let uploadRequest = self.httpSession.upload(url, files: files, parameters: parameters, headers: self.requestHeaders, requestConfig: self.requestConfig)
         if let progress = progress {
-            uploadRequest.progressPublisher
-                .sink(receiveValue: progress)
-                .store(in: &self.cancellables)
+            uploadRequest.progressPublisher.sink(receiveValue: progress).store(in: &self.cancellables)
         }
-        uploadRequest.responsePublisher
-            .sink { [weak self] response in
-                self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
-            }
-            .store(in: &self.cancellables)
+        uploadRequest.responsePublisher.sink { [weak self] response in
+            self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
+        }.store(in: &self.cancellables)
     }
     
-    public func st_download(url: String,
-                         progress: ((STUploadProgress) -> Void)? = nil,
-                         completion: @escaping (URL?, STBaseError?) -> Void) {
+    public func st_download(url: String, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (URL?, STBaseError?) -> Void) {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        self.httpSession.request(
-            url,
-            method: .get,
-            parameters: nil,
-            encoding: .json,
-            headers: self.requestHeaders,
-            requestConfig: self.requestConfig
-        ).responsePublisher
-            .sink { [weak self] response in
-                if response.isSuccess, let data = response.data {
-                    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-                    do {
-                        try data.write(to: tempURL)
-                        self?.loadingState.send(.loaded)
-                        completion(tempURL, nil)
-                    } catch {
-                        let error = STBaseError.dataError("文件保存失败")
-                        self?.loadingState.send(.failed(error))
-                        completion(nil, error)
-                    }
-                } else {
-                    let error = self?.st_convertHTTPError(response.error) ?? STBaseError.unknown
+        self.httpSession.request(url, method: .get, parameters: nil, encoding: .json, headers: self.requestHeaders, requestConfig: self.requestConfig).responsePublisher.sink { [weak self] response in
+            if response.isSuccess, let data = response.data {
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+                do {
+                    try data.write(to: tempURL)
+                    self?.loadingState.send(.loaded)
+                    completion(tempURL, nil)
+                } catch {
+                    let error = STBaseError.dataError("文件保存失败")
                     self?.loadingState.send(.failed(error))
                     completion(nil, error)
                 }
+            } else {
+                let error = self?.st_convertHTTPError(response.error) ?? STBaseError.unknown
+                self?.loadingState.send(.failed(error))
+                completion(nil, error)
             }
-            .store(in: &self.cancellables)
+        }.store(in: &self.cancellables)
     }
     
     // MARK: - 内存管理

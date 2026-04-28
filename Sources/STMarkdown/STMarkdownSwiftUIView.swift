@@ -8,7 +8,6 @@
 import SwiftUI
 
 /// SwiftUI 包装：静态 Markdown 渲染视图
-@available(iOS 14.0, *)
 public struct STMarkdownSwiftUIView: UIViewRepresentable {
     public let markdown: String
     public var style: STMarkdownStyle
@@ -51,7 +50,6 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
 }
 
 /// SwiftUI 包装：流式 Markdown 渲染视图（支持增量追加动画）
-@available(iOS 14.0, *)
 public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
     public let markdown: String
     public var style: STMarkdownStyle

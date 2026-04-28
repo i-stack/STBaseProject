@@ -26,24 +26,10 @@
 	<string>App需要您的同意，才能访问相机，如不允许，可能不能使用头像上传、扫一扫等功能</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>需要访问您的无线网络以提供更好的服务。</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>App需要您的同意，才能访问相机，如不允许，可能不能使用头像上传、扫一扫等功能</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>App需要您的同意，才能访问相机，如不允许，可能不能使用头像上传、扫一扫等功能</string>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>armv7</string>
-	</array>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -61,5 +47,17 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>armv7</string>
+	</array>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
 </dict>
 </plist>
