@@ -47,11 +47,11 @@ public enum STCryptoError: Error, LocalizedError {
 
 // MARK: - 加密配置
 public struct STEncryptionConfig: Codable {
-    let enabled: Bool
-    let algorithm: STCryptoAlgorithm
-    let keyRotationInterval: TimeInterval
-    let enableRequestSigning: Bool
-    let enableResponseSigning: Bool
+    public let enabled: Bool
+    public let algorithm: STCryptoAlgorithm
+    public let keyRotationInterval: TimeInterval
+    public let enableRequestSigning: Bool
+    public let enableResponseSigning: Bool
 
     public init(
         enabled: Bool = true,
@@ -70,11 +70,11 @@ public struct STEncryptionConfig: Codable {
 
 // MARK: - 反调试配置
 public struct STAntiDebugConfig: Codable {
-    let enabled: Bool
-    let checkInterval: TimeInterval
-    let enableAntiDebugging: Bool
-    let enableAntiHooking: Bool
-    let enableAntiTampering: Bool
+    public let enabled: Bool
+    public let checkInterval: TimeInterval
+    public let enableAntiDebugging: Bool
+    public let enableAntiHooking: Bool
+    public let enableAntiTampering: Bool
 
     public init(
         enabled: Bool = true,

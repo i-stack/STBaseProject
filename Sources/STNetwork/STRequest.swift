@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-open class STRequest {
+public class STRequest {
 
     private let stateLock = NSLock()
     private var _state: STRequestState = .initialized
@@ -32,7 +32,7 @@ open class STRequest {
 
     weak var session: STHTTPSession?
 
-    init(maxRetryCount: Int = 0, retryDelay: TimeInterval = 1.0) {
+    public init(maxRetryCount: Int = 0, retryDelay: TimeInterval = 1.0) {
         self.maxRetryCount = maxRetryCount
         self.retryDelay = retryDelay
     }
@@ -95,7 +95,7 @@ open class STRequest {
     }
 }
 
-public final class STDataRequest: STRequest {
+public class STDataRequest: STRequest {
 
     private let responseSubject = CurrentValueSubject<STHTTPResponse?, Never>(nil)
 
@@ -171,7 +171,7 @@ public final class STDataRequest: STRequest {
     }
 }
 
-public final class STUploadRequest: STRequest {
+public class STUploadRequest: STRequest {
 
     private let progressSubject = PassthroughSubject<STUploadProgress, Never>()
     private let responseSubject = CurrentValueSubject<STHTTPResponse?, Never>(nil)
@@ -221,7 +221,7 @@ public final class STUploadRequest: STRequest {
     }
 }
 
-public final class STDownloadRequest: STRequest {
+public class STDownloadRequest: STRequest {
 
     public typealias Destination = (URL, HTTPURLResponse) -> URL
 
@@ -240,13 +240,13 @@ public final class STDownloadRequest: STRequest {
         return self._resumeData
     }
 
-    func didReceiveResumeData(_ data: Data) {
+    public func didReceiveResumeData(_ data: Data) {
         self.resumeLock.lock()
         self._resumeData = data
         self.resumeLock.unlock()
     }
 
-    init(
+    public init(
         destination: Destination? = nil,
         downloadOptions: STDownloadOptions = .default,
         maxRetryCount: Int = 0,
@@ -377,7 +377,7 @@ enum STSSEParser {
     }
 }
 
-public final class STDataStreamRequest: STRequest {
+public class STDataStreamRequest: STRequest {
 
     private let stateLock2 = NSLock()
     private var _receivedFirstByte = false
@@ -417,7 +417,7 @@ public final class STDataStreamRequest: STRequest {
         self.stateLock2.unlock()
     }
 
-    func didReceive(_ chunk: Data) {
+    public func didReceive(_ chunk: Data) {
         self.stateLock2.lock()
         self._receivedFirstByte = true
         self.sseBuffer.append(chunk)
@@ -428,7 +428,7 @@ public final class STDataStreamRequest: STRequest {
         events.forEach { self.eventSubject.send($0) }
     }
 
-    func didFinish(error: Error?) {
+    public func didFinish(error: Error?) {
         self.stateLock2.lock()
         guard !self._isFinished else {
             self.stateLock2.unlock()

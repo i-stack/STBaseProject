@@ -17,13 +17,13 @@ public struct STMarkdownMathNormalizationResult: Sendable {
     }
 }
 
-enum STMarkdownMathNormalizer {
+public enum STMarkdownMathNormalizer {
     private static let mathBlockEnvironmentRegex = try! NSRegularExpression(
         pattern: #"^\\begin\{([^}]+)\}"#,
         options: []
     )
 
-    static func normalizeBlocks(in markdown: String) -> STMarkdownMathNormalizationResult {
+    public static func normalizeBlocks(in markdown: String) -> STMarkdownMathNormalizationResult {
         var normalized = normalizeDelimiters(in: markdown)
         var mathMap: [Int: String] = [:]
         var output: [String] = []
@@ -122,7 +122,7 @@ enum STMarkdownMathNormalizer {
         return result
     }
 
-    static func splitInlineMath(in rawText: String) -> [STMarkdownInlineNode] {
+    public static func splitInlineMath(in rawText: String) -> [STMarkdownInlineNode] {
         let restored = restoreInlineDelimiters(in: rawText)
         let normalized = normalizeDelimiters(in: restored)
         let matches = inlineMathMatches(in: normalized)
