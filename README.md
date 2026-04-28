@@ -9,18 +9,22 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 
 ## 📋 目录
 
-- [安装方式](#安装方式)
-- [按需加载](#按需加载)
-- [快速开始](#快速开始)
-- [文档导航](#文档导航)
-- [业务接入概览](#业务接入概览)
-- [模块使用概览](#模块使用概览)
-- [目录介绍](#目录介绍)
-- [主要功能](#主要功能)
-- [使用说明](#使用说明)
-- [系统要求](#系统要求)
-- [许可证](#许可证)
+- [安装方式](#installation)
+- [按需加载](#modular-import)
+- [快速开始](#quick-start)
+- [文档导航](#docs-navigation)
+- [业务接入概览](#integration-overview)
+- [模块使用概览](#module-overview)
+- [目录介绍](#directory-overview)
+- [主要功能](#features)
+- [使用说明](#usage)
+- [系统要求](#requirements)
+- [Pod 发布脚本](#pod-release-script)
+- [许可证](#license)
+- [贡献](#contributing)
+- [联系方式](#contact)
 
+<a id="installation"></a>
 ## 🚀 安装方式
 
 ### CocoaPods
@@ -57,6 +61,7 @@ dependencies: [
 2. 将 `Sources` 目录拖入工程
 3. 确认文件已加入目标 Target
 
+<a id="modular-import"></a>
 ## 🧩 按需加载
 
 如果只需要部分能力，建议按模块引入，减少编译与依赖负担。
@@ -97,6 +102,7 @@ pod 'STBaseProject/STLocation', '~> 1.1.5'
 # pod 'STBaseProject/STMarkdown', '~> 1.1.5'
 ```
 
+<a id="quick-start"></a>
 ## ⚡ 快速开始
 
 ### 1) 启动配置
@@ -114,8 +120,10 @@ pod 'STBaseProject/STLocation', '~> 1.1.5'
 - UI 组件（按钮、标签、输入框、HUD）统一从 `STUIKit` / `STDialog` 选择
 - 复杂渲染场景（如 Markdown）优先使用 `STMarkdown`
 
+<a id="docs-navigation"></a>
 ## 📚 文档导航
 
+<a id="integration-overview"></a>
 ### 业务接入概览
 
 建议按“启动配置 -> 页面接入 -> 网络接入 -> 展示能力 -> 安全能力 -> 上线检查”的顺序推进：
@@ -126,6 +134,7 @@ pod 'STBaseProject/STLocation', '~> 1.1.5'
 - 展示层：富文本场景优先使用 `STMarkdown`
 - 安全层：敏感数据统一使用 `STKeychainHelper`，高安全接口配合 `STSecurityConfig`/`STSSLPinningConfig`
 
+<a id="module-overview"></a>
 ### 模块使用概览
 
 常用模块入口（点击可直接跳转）：
@@ -145,6 +154,7 @@ pod 'STBaseProject/STLocation', '~> 1.1.5'
 - [Docs/STSecurity.md](Docs/STSecurity.md)：加解密、Keychain、安全检测与策略
 - [Docs/STLocalizable.md](Docs/STLocalizable.md)：本地化读取、语言切换、通知刷新
 
+<a id="directory-overview"></a>
 ## 📁 目录介绍
 
 仅列模块能力与入口，不在 README 展开具体实现细节：
@@ -159,6 +169,7 @@ pod 'STBaseProject/STLocation', '~> 1.1.5'
 - UIKit 组件：`STUIKit`
 - 通用工具：`STTools`
 
+<a id="features"></a>
 ## 🎯 主要功能
 
 ### 🎨 UI 组件
@@ -190,6 +201,7 @@ pod 'STBaseProject/STLocation', '~> 1.1.5'
 - **安全区域适配** - 支持刘海屏等特殊设备
 - **字体适配** - 动态字体大小调整
 
+<a id="usage"></a>
 ## 💡 使用说明
 
 README 仅保留能力概览与模块入口。
@@ -200,12 +212,14 @@ README 仅保留能力概览与模块入口。
 - 安全能力：`Docs/STSecurity.md`
 - 本地化能力：`Docs/STLocalizable.md`
 
+<a id="requirements"></a>
 ## 📋 系统要求
 
 - iOS 16.0+
 - Xcode 12.0+
 - Swift 5.0+
 
+<a id="pod-release-script"></a>
 ## 🚀 Pod 发布脚本
 
 仓库内提供自动发布脚本：
@@ -230,14 +244,17 @@ README 仅保留能力概览与模块入口。
 - 执行 `pod spec lint STBaseProject.podspec --allow-warnings`（可用 `--skip-lint` 跳过）
 - 执行 `pod trunk push STBaseProject.podspec --allow-warnings`
 
+<a id="license"></a>
 ## 📄 许可证
 
 本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
 
+<a id="contributing"></a>
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request 来帮助改进这个项目。
 
+<a id="contact"></a>
 ## 📞 联系方式
 
 如有问题或建议，请通过以下方式联系：
