@@ -136,7 +136,7 @@ OrderAPI.fetchOrders()
 
 ### 3.3 何时看详细文档
 
-涉及以下场景时，直接查 `STDocument/STHTTPSession.md`：
+涉及以下场景时，直接查 `Docs/STHTTPSession.md`：
 
 - 上传下载（含断点续传）
 - SSE / chunked 流式响应
@@ -201,7 +201,7 @@ STHTTPSession.shared.logging = .default
 - 敏感数据是否统一走 Keychain
 - Markdown 渲染是否复用现有组件，而非自建解析链路
 - 请求日志是否按环境分级配置
-- 文档是否已补充到 `STDocument`
+- 文档是否已补充到 `Docs`
 
 ---
 

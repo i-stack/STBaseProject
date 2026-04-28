@@ -10,42 +10,54 @@ import Photos
 import AVFoundation
 
 public enum STScanType {
-    case STScanTypeQrCode
-    case STScanTypeBarCode
-    case STScanTypeAll
+    case qrCode
+    case barCode
+    case all
 }
 
 public typealias STScanFinishBlock = (_ result: String) -> Void
 
-open class STScanManager: NSObject {
-    
-    weak var presentVC: UIViewController?
-    var delayQRAction: Bool = false
-    var delayBarAction: Bool = false
-    var scanFinishBlock: STScanFinishBlock?
+public enum STScanError: LocalizedError {
+    case invalidContent
+    case invalidSize
+    case recognitionFailed
+    case noQRCodeFound
+    case cameraNotAvailable
+    case cameraPermissionDenied
 
-    var scanType: STScanType?
-    open var scanRect: CGRect?
-    open var scanRectView: STScanView?
-    
+    public var errorDescription: String? {
+        switch self {
+        case .invalidContent: return "Content is empty"
+        case .invalidSize: return "Size is zero"
+        case .recognitionFailed: return "Failed to process image"
+        case .noQRCodeFound: return "No QR code found in image"
+        case .cameraNotAvailable: return "Camera is not available"
+        case .cameraPermissionDenied: return "Camera permission denied"
+        }
+    }
+}
+
+open class STScanManager: NSObject {
+
+    public var scanRect: CGRect?
+    public var scanRectView: STScanView?
+
+    private weak var presentVC: UIViewController?
+    private var scanFinishBlock: STScanFinishBlock?
+    private var scanType: STScanType = .qrCode
+
     private var device: AVCaptureDevice?
     private var session: AVCaptureSession?
     private var input: AVCaptureDeviceInput?
     private var output: AVCaptureMetadataOutput?
     private var preview: AVCaptureVideoPreviewLayer?
-    
+
     public init(presentViewController: UIViewController) {
         super.init()
         self.presentVC = presentViewController
     }
-    
-    /// 初始化二维码扫描控制器
-    ///
-    ///  - Parameter type: 扫码类型
-    ///  - Parameter presentViewController: 当前类所在viewController
-    ///  - Parameter onFinish: 扫描完成回调
-    ///
-    public init(qrType type: STScanType, presentViewController: UIViewController, onFinish: @escaping(STScanFinishBlock)) {
+
+    public init(qrType type: STScanType, presentViewController: UIViewController, onFinish: @escaping STScanFinishBlock) {
         super.init()
         self.presentVC = presentViewController
         self.scanType = type
@@ -53,306 +65,218 @@ open class STScanManager: NSObject {
         self.configScanManager()
     }
 
-    /// 扫描完成回调
-    ///
-    ///  - Parameter block: 扫描完成回调
-    ///
-    public func st_scanFinishCallback(block: @escaping STScanFinishBlock) -> Void {
+    deinit {
+        self.session?.stopRunning()
+        self.session = nil
+    }
+
+    // MARK: - Public instance API
+
+    public func st_scanFinishCallback(block: @escaping STScanFinishBlock) {
         self.scanFinishBlock = block
     }
-    
-    /// 开始扫描
+
     public func st_beginScan() {
-        if let newSession = self.session {
-            newSession.startRunning()
-        }
+        self.session?.startRunning()
     }
-    
-    /// 停止扫描
+
     public func st_stopScan() {
-        if let newSession = self.session, newSession.isRunning {
-            newSession.stopRunning()
-        }
+        guard let session = self.session, session.isRunning else { return }
+        session.stopRunning()
     }
-    
-    /// 识别二维码
-    /// - Parameter image: UIImage对象
-    /// - Parameter onFinish: 识别成功回调，返回识别字符串
-    /// - Parameter onFailed: 识别失败回调，返回Error
-    ///
-    public class func st_recognizeQrCodeImage(image: UIImage, onFinish: @escaping(String) -> Void, onFailed: @escaping(Error) -> Void) {
-        if Double(UIDevice.current.systemVersion) ?? 0.0 < 8.0 {
-            DispatchQueue.main.async {
-                onFailed(NSError.init(domain: "Only supports iOS 8.0 system or higher", code: 0, userInfo: [:]))
+
+    public func detailSelectPhoto(image: UIImage) {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let result = try await STScanManager.recognizeQRCode(in: image)
+                self.st_renderUrlStr(url: result)
+            } catch {
+                self.st_renderUrlStr(url: "")
             }
-            return
-        }
-        
-        if image == nil {
-            DispatchQueue.main.async {
-                onFailed(NSError.init(domain: "image is empty", code: 0, userInfo: [:]))
-            }
-            return
-        }
-        
-        let context: CIContext = CIContext()
-        let detector: CIDetector = CIDetector.init(ofType: CIDetectorTypeQRCode, context: context, options: [CIDetectorAccuracy : CIDetectorAccuracyHigh]) ?? CIDetector()
-        
-        let features: [CIFeature] = detector.features(in: CIImage.init(image: image) ?? CIImage.empty())
-        if features.count >= 1 {
-            let feature: CIQRCodeFeature = features[0] as! CIQRCodeFeature
-            let scanResult = feature.messageString
-            DispatchQueue.main.async {
-                onFinish(scanResult ?? "")
-            }
-        } else {
-            DispatchQueue.main.async {
-                onFailed(NSError.init(domain: "scan error", code: 0, userInfo: [:]))
-            }
-        }
-    }
-    
-    /// 生成二维码【白底黑色】
-    /// - Parameter content: 二维码内容字符串【数字、字符、链接等】
-    /// - Parameter qrSize: 生成图片的大小
-    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
-    /// - Parameter onFailed: 识别失败回调，返回Error
-    ///
-    public class func st_createQRImageWithString(content: String, qrSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
-        self.st_createQRImageWithString(content: content, qrSize: qrSize, qrColor: UIColor.black, bkColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
-    }
-    
-    /// 生成二维码【自定义颜色】
-    /// - Parameter content: 二维码内容字符串【数字、字符、链接等】
-    /// - Parameter qrSize: 生成图片的大小
-    /// - Parameter qrColor: 二维码颜色
-    /// - Parameter bkColor: 背景色
-    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
-    /// - Parameter onFailed: 识别失败回调，返回Error
-    ///
-    public class func st_createQRImageWithString(content: String, qrSize: CGSize, qrColor: UIColor, bkColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
-        if content.count < 1 {
-            DispatchQueue.main.async {
-                onFailed(NSError.init(domain: "content is nil", code: 0, userInfo: [:]))
-            }
-            return
-        }
-        
-        if qrSize == CGSize.zero {
-            DispatchQueue.main.async {
-                onFailed(NSError.init(domain: "qrSize is zero", code: 0, userInfo: [:]))
-            }
-            return
-        }
-        
-        let stringData = content.data(using: String.Encoding.utf8)
-        let qrFilter: CIFilter = CIFilter.init(name: "CIQRCodeGenerator") ?? CIFilter()
-        qrFilter.setValue(stringData, forKey: "inputMessage")
-        qrFilter.setValue("H", forKey: "inputCorrectionLevel")
-        let colorFilter: CIFilter = CIFilter.init(
-            name: "CIFalseColor",
-            parameters: ["inputImage": qrFilter.outputImage ?? CIImage.empty(),
-                        "inputColor0": CIColor.init(cgColor: qrColor.cgColor),
-                        "inputColor1": CIColor.init(cgColor: bkColor.cgColor)]) ?? CIFilter()
-        let qrImage: CIImage = colorFilter.outputImage ?? CIImage.empty()
-        let cgImage: CGImage = CIContext.init().createCGImage(qrImage, from: qrImage.extent)!
-        
-        UIGraphicsBeginImageContext(qrSize)
-        let cgContext: CGContext = UIGraphicsGetCurrentContext()!
-        cgContext.interpolationQuality = .none
-        cgContext.scaleBy(x: 1.0, y: -1.0)
-        cgContext.draw(cgImage, in: cgContext.boundingBoxOfClipPath)
-        let codeImage: UIImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
-        UIGraphicsEndImageContext()
-        DispatchQueue.main.async {
-            onFinish(codeImage)
         }
     }
 
-    /// 生成条形码【白底黑色】
-    /// - Parameter content: 条码内容【一般是数字】
-    /// - Parameter barSize: 生成条码图片的大小
-    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
-    /// - Parameter onFailed: 识别失败回调，返回Error
-    ///
-    public class func st_createBarCodeImageWithString(content: String, barSize: CGSize, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
-        self.st_createBarCodeImageWithString(content: content, barSize: barSize, barColor: UIColor.black, barBgColor: UIColor.white, onFinish: onFinish, onFailed: onFailed)
+    // MARK: - Static async API
+
+    public static func recognizeQRCode(in image: UIImage) async throws -> String {
+        guard let ciImage = CIImage(image: image) else { throw STScanError.recognitionFailed }
+        let context = CIContext()
+        let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: context, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+        let features = detector?.features(in: ciImage) ?? []
+        guard let feature = features.first as? CIQRCodeFeature,
+              let result = feature.messageString else {
+            throw STScanError.noQRCodeFound
+        }
+        return result
     }
-    
-    /// 生成条形码【自定义颜色】
-    /// - Parameter content: 条码内容【一般是数字】
-    /// - Parameter barSize: 生成条码图片的大小
-    /// - Parameter barColor: 条形码颜色
-    /// - Parameter barBgColor: 条形码背景色
-    /// - Parameter onFinish: 识别成功回调，返回UIImage图片对象
-    /// - Parameter onFailed: 识别失败回调，返回Error
-    ///
-    public class func st_createBarCodeImageWithString(content: String, barSize: CGSize, barColor: UIColor, barBgColor: UIColor, onFinish: @escaping(UIImage) -> Void, onFailed: @escaping(Error) -> Void) {
-        if content.count < 1 {
-            DispatchQueue.main.async {
-                onFailed(NSError.init(domain: "content is nil", code: 0, userInfo: [:]))
-            }
-            return
-        }
-        
-        if barSize == CGSize.zero {
-            DispatchQueue.main.async {
-                onFailed(NSError.init(domain: "barSize is zero", code: 0, userInfo: [:]))
-            }
-            return
-        }
-        
-        let stringData = content.data(using: String.Encoding.utf8)
-        let qrFilter: CIFilter = CIFilter.init(name: "CICode128BarcodeGenerator") ?? CIFilter()
-        qrFilter.setValue(stringData, forKey: "inputMessage")
-        let colorFilter: CIFilter = CIFilter.init(
-            name: "CIFalseColor",
-            parameters: ["inputImage": qrFilter.outputImage ?? CIImage.empty(),
-                         "inputColor0": CIColor.init(cgColor: barColor.cgColor),
-                         "inputColor1": CIColor.init(cgColor: barBgColor.cgColor)]) ?? CIFilter()
-        let qrImage: CIImage = colorFilter.outputImage ?? CIImage.empty()
-        let cgImage: CGImage = CIContext.init().createCGImage(qrImage, from: qrImage.extent)!
-        UIGraphicsBeginImageContext(barSize)
-        let cgContext: CGContext = UIGraphicsGetCurrentContext()!
-        cgContext.interpolationQuality = .none
-        cgContext.scaleBy(x: 1.0, y: -1.0)
-        cgContext.draw(cgImage, in: cgContext.boundingBoxOfClipPath)
-        let codeImage: UIImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
-        UIGraphicsEndImageContext()
-        DispatchQueue.main.async {
-            onFinish(codeImage)
-        }
+
+    public static func generateQRCode(
+        content: String,
+        size: CGSize,
+        color: UIColor = .black,
+        background: UIColor = .white
+    ) async throws -> UIImage {
+        guard !content.isEmpty else { throw STScanError.invalidContent }
+        guard size != .zero else { throw STScanError.invalidSize }
+        return try _generateQRImage(content: content, size: size, color: color, background: background)
     }
-    
-    /// 调整二维码清晰度，添加水印图片
-    /// - Parameter content: 模糊的二维码图片字符串
-    /// - Parameter size: 二维码的宽高
-    /// - Parameter waterImg: 水印图片
-    /// - Parameter barBgColor: 条形码背景色
-    /// - Parameter onFinish: 识别成功回调，返回添加水印图片后，清晰的二维码图片
-    ///
-    public class func st_getHDImgWithCIImage(content: String, size: CGSize, waterImage: UIImage, waterImageSize: CGSize, onFinish: @escaping(Result<UIImage, Error>) -> Void) {
-        if content.count < 1 {
-            DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "content is nil!", code: 0, userInfo: [:])))
-            }
-            return
-        }
-        
-        if size == CGSize.zero {
-            DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "size is zero!", code: 0, userInfo: [:])))
-            }
-            return
-        }
-        
-        if waterImage == nil {
-            DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "waterImageSize is nil!", code: 0, userInfo: [:])))
-            }
-            return
-        }
-        
-        if waterImageSize == CGSize.zero {
-            DispatchQueue.main.async {
-                onFinish(.failure(NSError.init(domain: "waterImageSize is zero!", code: 0, userInfo: [:])))
-            }
-            return
-        }
-        
-        let stringData = content.data(using: String.Encoding.utf8)
-        let qrFilter: CIFilter = CIFilter.init(name: "CIQRCodeGenerator") ?? CIFilter()
-        qrFilter.setValue(stringData, forKey: "inputMessage")
+
+    public static func generateQRCode(
+        content: String,
+        size: CGSize,
+        watermark: UIImage,
+        watermarkSize: CGSize
+    ) async throws -> UIImage {
+        guard !content.isEmpty else { throw STScanError.invalidContent }
+        guard size != .zero, watermarkSize != .zero else { throw STScanError.invalidSize }
+        return try _generateQRImageWithWatermark(content: content, size: size, watermark: watermark, watermarkSize: watermarkSize)
+    }
+
+    public static func generateBarCode(
+        content: String,
+        size: CGSize,
+        color: UIColor = .black,
+        background: UIColor = .white
+    ) async throws -> UIImage {
+        guard !content.isEmpty else { throw STScanError.invalidContent }
+        guard size != .zero else { throw STScanError.invalidSize }
+        return try _generateBarCodeImage(content: content, size: size, color: color, background: background)
+    }
+
+    // MARK: - Private image helpers
+
+    private static func _generateQRImage(
+        content: String,
+        size: CGSize,
+        color: UIColor,
+        background: UIColor
+    ) throws -> UIImage {
+        guard let data = content.data(using: .utf8) else { throw STScanError.invalidContent }
+        guard let qrFilter = CIFilter(name: "CIQRCodeGenerator") else { throw STScanError.recognitionFailed }
+        qrFilter.setValue(data, forKey: "inputMessage")
         qrFilter.setValue("H", forKey: "inputCorrectionLevel")
-        
-        let img: CIImage = qrFilter.outputImage ?? CIImage.empty()
-        let extent: CGRect = img.extent.integral
-        let scale: CGFloat = min(size.width / extent.width, size.height / extent.height)
-        let width: CGFloat = extent.width * scale
-        let height: CGFloat = extent.height * scale;
-        let cs: CGColorSpace = CGColorSpaceCreateDeviceGray()
-        let bitmapRef: CGContext = CGContext(data: nil, width: Int(width), height: Int(height), bitsPerComponent: 8, bytesPerRow: 0, space: cs, bitmapInfo: CGImageAlphaInfo.none.rawValue)!
-        let ciContext: CIContext = CIContext.init()
-        let bitmapImage: CGImage = ciContext.createCGImage(img, from: extent)!
-        bitmapRef.interpolationQuality = CGInterpolationQuality.none
-        bitmapRef.scaleBy(x: scale, y: scale)
-        bitmapRef.draw(bitmapImage, in: extent)
-        let scaledImage: CGImage = bitmapRef.makeImage()!
-        let outputImage: UIImage = UIImage.init(cgImage: scaledImage)
-        UIGraphicsBeginImageContextWithOptions(outputImage.size, false, UIScreen.main.scale)
-        outputImage.draw(in: CGRect.init(x: 0, y: 0, width: size.width, height: size.height))
-        //把水印图片画到生成的二维码图片上，注意尺寸不要太大（根据上面生成二维码设置的纠错程度设置），否则有可能造成扫不出来
-        let waterImgH: CGFloat = waterImageSize.height
-        let waterImgW: CGFloat = waterImageSize.width
-        waterImage.draw(in: CGRect.init(x: (size.width - waterImgW) / 2.0, y: (size.height - waterImgH) / 2.0, width: waterImgW, height: waterImgH))
-        let newPic: UIImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
-        UIGraphicsEndImageContext()
-        DispatchQueue.main.async {
-            onFinish(.success(newPic))
+        guard let colorFilter = CIFilter(name: "CIFalseColor", parameters: [
+            "inputImage": qrFilter.outputImage ?? CIImage.empty(),
+            "inputColor0": CIColor(cgColor: color.cgColor),
+            "inputColor1": CIColor(cgColor: background.cgColor)
+        ]) else { throw STScanError.recognitionFailed }
+        let ciImage = colorFilter.outputImage ?? CIImage.empty()
+        guard let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent) else {
+            throw STScanError.recognitionFailed
+        }
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            ctx.cgContext.interpolationQuality = .none
+            UIImage(cgImage: cgImage).draw(in: CGRect(origin: .zero, size: size))
         }
     }
-    
-    // 使用系统相册选取图片并识别二维码
-    public func pickImageAndRecognize(from viewController: UIViewController? = nil) {
-        // STImageManager 功能已移至 STKitMedia 模块
-        // 如需使用图片选择功能，请导入 STKitMedia 模块
-        print("⚠️ STScanManager: pickImageAndRecognize 功能需要 STKitMedia 模块支持")
-    }
-    
-    public func detailSelectPhoto(image: UIImage) -> Void {
-        STScanManager.st_recognizeQrCodeImage(image: image, onFinish: {[weak self] (result) in
-            guard let strongSelf = self else { return }
-            strongSelf.st_renderUrlStr(url: result)
-        }) {[weak self] (error) in
-            guard let strongSelf = self else { return }
-            strongSelf.st_renderUrlStr(url: "")
+
+    private static func _generateBarCodeImage(
+        content: String,
+        size: CGSize,
+        color: UIColor,
+        background: UIColor
+    ) throws -> UIImage {
+        guard let data = content.data(using: .utf8) else { throw STScanError.invalidContent }
+        guard let barFilter = CIFilter(name: "CICode128BarcodeGenerator") else { throw STScanError.recognitionFailed }
+        barFilter.setValue(data, forKey: "inputMessage")
+        guard let colorFilter = CIFilter(name: "CIFalseColor", parameters: [
+            "inputImage": barFilter.outputImage ?? CIImage.empty(),
+            "inputColor0": CIColor(cgColor: color.cgColor),
+            "inputColor1": CIColor(cgColor: background.cgColor)
+        ]) else { throw STScanError.recognitionFailed }
+        let ciImage = colorFilter.outputImage ?? CIImage.empty()
+        guard let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent) else {
+            throw STScanError.recognitionFailed
+        }
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            ctx.cgContext.interpolationQuality = .none
+            UIImage(cgImage: cgImage).draw(in: CGRect(origin: .zero, size: size))
         }
     }
-    
-    private func st_renderUrlStr(url: String) -> Void {
-        if let newScanFinish = self.scanFinishBlock {
-            DispatchQueue.main.async {
-                newScanFinish(url)
-            }
+
+    private static func _generateQRImageWithWatermark(
+        content: String,
+        size: CGSize,
+        watermark: UIImage,
+        watermarkSize: CGSize
+    ) throws -> UIImage {
+        guard let data = content.data(using: .utf8) else { throw STScanError.invalidContent }
+        guard let qrFilter = CIFilter(name: "CIQRCodeGenerator") else { throw STScanError.recognitionFailed }
+        qrFilter.setValue(data, forKey: "inputMessage")
+        qrFilter.setValue("H", forKey: "inputCorrectionLevel")
+        let ciImage = qrFilter.outputImage ?? CIImage.empty()
+        let extent = ciImage.extent.integral
+        let scale = min(size.width / extent.width, size.height / extent.height)
+        let scaledWidth = extent.width * scale
+        let scaledHeight = extent.height * scale
+        let cs = CGColorSpaceCreateDeviceGray()
+        guard let bitmapCtx = CGContext(
+            data: nil,
+            width: Int(scaledWidth), height: Int(scaledHeight),
+            bitsPerComponent: 8, bytesPerRow: 0,
+            space: cs,
+            bitmapInfo: CGImageAlphaInfo.none.rawValue
+        ) else { throw STScanError.recognitionFailed }
+        guard let baseCGImage = CIContext().createCGImage(ciImage, from: extent) else {
+            throw STScanError.recognitionFailed
+        }
+        bitmapCtx.interpolationQuality = .none
+        bitmapCtx.scaleBy(x: scale, y: scale)
+        bitmapCtx.draw(baseCGImage, in: extent)
+        guard let scaledCGImage = bitmapCtx.makeImage() else { throw STScanError.recognitionFailed }
+        let baseImage = UIImage(cgImage: scaledCGImage)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { _ in
+            baseImage.draw(in: CGRect(origin: .zero, size: size))
+            let origin = CGPoint(
+                x: (size.width - watermarkSize.width) / 2.0,
+                y: (size.height - watermarkSize.height) / 2.0
+            )
+            watermark.draw(in: CGRect(origin: origin, size: watermarkSize))
         }
     }
-    
+
+    // MARK: - Private setup
+
     private func configScanManager() {
         self.st_scanDevice()
         self.st_drawScanView()
     }
-    
-    private func st_scanDevice() -> Void {
+
+    private func st_scanDevice() {
         self.checkCameraPermission { [weak self] granted in
-            guard let strongSelf = self else { return }
-            if granted {
-                strongSelf.device = AVCaptureDevice.default(for: .video)
-                strongSelf.input = try? AVCaptureDeviceInput(device: strongSelf.device!)
-                strongSelf.output = AVCaptureMetadataOutput()
-                strongSelf.output?.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-                strongSelf.session = AVCaptureSession()
-                if let newSession = strongSelf.session {
-                    newSession.canSetSessionPreset(AVCaptureSession.Preset.inputPriority)
-                    if let newInput = strongSelf.input, newSession.canAddInput(newInput) {
-                        newSession.addInput(newInput)
-                    }
-                    if let newOutput = strongSelf.output, newSession.canAddOutput(newOutput) {
-                        newSession.addOutput(newOutput)
-                        newOutput.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-                        newOutput.rectOfInterest = strongSelf.scanRect ?? CGRect.zero
-                    }
-                    strongSelf.preview = AVCaptureVideoPreviewLayer(session: newSession)
-                    if let newPreview = strongSelf.preview {
-                        newPreview.videoGravity = .resizeAspectFill
-                        newPreview.frame = UIScreen.main.bounds
-                        strongSelf.presentVC?.view.layer.insertSublayer(newPreview, at: 0)
-                    }
-                }
-                strongSelf.output?.metadataObjectTypes = [AVMetadataObject.ObjectType.qr]
-                if let roiString = strongSelf.st_scanRectWithScale(scale: 1)[0] as? String {
-                    strongSelf.output?.rectOfInterest = NSCoder.cgRect(for: roiString)
-                }
+            guard let self, granted else { return }
+            guard let device = AVCaptureDevice.default(for: .video) else { return }
+            self.device = device
+            guard let input = try? AVCaptureDeviceInput(device: device) else { return }
+            self.input = input
+            let output = AVCaptureMetadataOutput()
+            self.output = output
+            output.setMetadataObjectsDelegate(self, queue: .main)
+            let session = AVCaptureSession()
+            self.session = session
+            if session.canAddInput(input) { session.addInput(input) }
+            if session.canAddOutput(output) {
+                session.addOutput(output)
+                output.metadataObjectTypes = self.metadataObjectTypes(for: self.scanType)
+                output.rectOfInterest = self.st_scanRectWithScale(scale: 1).rectOfInterest
             }
+            let preview = AVCaptureVideoPreviewLayer(session: session)
+            self.preview = preview
+            preview.videoGravity = .resizeAspectFill
+            preview.frame = UIScreen.main.bounds
+            self.presentVC?.view.layer.insertSublayer(preview, at: 0)
+        }
+    }
+
+    private func metadataObjectTypes(for type: STScanType) -> [AVMetadataObject.ObjectType] {
+        switch type {
+        case .qrCode: return [.qr]
+        case .barCode: return [.code128, .code39, .ean13, .ean8, .upce, .pdf417]
+        case .all: return [.qr, .code128, .code39, .ean13, .ean8, .upce, .pdf417]
         }
     }
 
@@ -376,34 +300,41 @@ open class STScanManager: NSObject {
         }
     }
 
-    private func st_drawScanView() -> Void {
-        self.scanRectView = STScanView.init(frame: CGRect.init(x: 0, y: 0, width: self.presentVC?.view.bounds.size.width ?? UIScreen.main.bounds.size.width, height: self.presentVC?.view.bounds.size.height ?? UIScreen.main.bounds.size.height))
-        self.scanRectView?.st_configScanType(scanType: self.scanType ?? STScanType.STScanTypeQrCode)
-        self.presentVC?.view.addSubview(self.scanRectView!)
+    private func st_drawScanView() {
+        let width = self.presentVC?.view.bounds.size.width ?? UIScreen.main.bounds.width
+        let height = self.presentVC?.view.bounds.size.height ?? UIScreen.main.bounds.height
+        let view = STScanView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        view.st_configScanType(scanType: self.scanType)
+        self.scanRectView = view
+        self.presentVC?.view.addSubview(view)
     }
-    
-    private func st_scanRectWithScale(scale: CGFloat) -> NSArray {
+
+    private func st_scanRectWithScale(scale: CGFloat) -> (rectOfInterest: CGRect, scanSize: CGSize) {
         let windowSize = UIScreen.main.bounds.size
         let left = 60.0 / scale
-        let scanSize = CGSize.init(width: self.presentVC?.view.frame.size.width ?? UIScreen.main.bounds.size.width - left * 2.0,
-                                   height: (self.presentVC?.view.frame.size.width ?? UIScreen.main.bounds.size.width - left * 2.0) / scale)
-        var scanRect = CGRect.init(x: (windowSize.width - scanSize.width) / 2.0,
-                                   y: (windowSize.height - scanSize.height) / 2.0,
-                                   width: scanSize.width,
-                                   height: scanSize.height)
-        scanRect = CGRect.init(x: scanRect.origin.y / windowSize.height,
-                               y: scanRect.origin.x / windowSize.width,
-                               width: scanRect.size.height / windowSize.height,
-                               height: scanRect.size.width / windowSize.width)
-        return [NSCoder.string(for: scanRect), NSCoder.string(for: scanSize)]
+        let scanWidth = (self.presentVC?.view.frame.size.width ?? windowSize.width) - left * 2.0
+        let scanSize = CGSize(width: scanWidth, height: scanWidth / scale)
+        let scanX = (windowSize.width - scanSize.width) / 2.0
+        let scanY = (windowSize.height - scanSize.height) / 2.0
+        // AVFoundation rectOfInterest: normalized coords, axes swapped vs portrait screen
+        let rectOfInterest = CGRect(
+            x: scanY / windowSize.height,
+            y: scanX / windowSize.width,
+            width: scanSize.height / windowSize.height,
+            height: scanSize.width / windowSize.width
+        )
+        return (rectOfInterest, scanSize)
+    }
+
+    private func st_renderUrlStr(url: String) {
+        self.scanFinishBlock?(url)
     }
 }
 
 extension STScanManager: AVCaptureMetadataOutputObjectsDelegate {
     public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        if metadataObjects.count < 1 { return }
+        guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject else { return }
         self.st_stopScan()
-        let metadataObject: AVMetadataMachineReadableCodeObject = metadataObjects.first as! AVMetadataMachineReadableCodeObject
         self.st_renderUrlStr(url: metadataObject.stringValue ?? "")
     }
 }

@@ -1,6 +1,6 @@
-# STDocument 文档索引
+# Docs 文档索引
 
-`STDocument` 用于统一管理 `STBaseProject` 的内部使用文档与专题说明。
+`Docs` 用于统一管理 `STBaseProject` 的内部使用文档与专题说明。
 
 ## 文档列表
 

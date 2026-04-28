@@ -51,8 +51,8 @@
 | SSL Pinning | `Sources/STNetwork/STSSLPinningConfig.swift` |
 | 安全总目录 | `Sources/STSecurity/` |
 | 设备信息 | `Sources/STTools/STDeviceInfo.swift` |
-| 安全集成文档 | `Sources/STDocument/BusinessIntegrationGuide.md` |
-| 模块使用文档 | `Sources/STDocument/SourcesModulesUsage.md` |
+| 安全集成文档 | `Docs/BusinessIntegrationGuide.md` |
+| 模块使用文档 | `Docs/SourcesModulesUsage.md` |
 | 安全测试 | `Tests/STBaseProjectTests/STSecurityTests.swift` |
 
 ## 验证与交付

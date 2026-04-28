@@ -8,7 +8,6 @@
 import CoreLocation
 import Foundation
 
-/// 位置信息结构体
 public struct STLocationInfo {
     public let name: String?
     public let country: String?
@@ -22,7 +21,7 @@ public struct STLocationInfo {
     public let administrativeArea: String?
     public let postalCode: String?
     public let timestamp: Date
-    
+
     public init(name: String? = nil,
                 country: String? = nil,
                 latitude: Double = 0.0,
@@ -48,46 +47,29 @@ public struct STLocationInfo {
         self.postalCode = postalCode
         self.timestamp = timestamp
     }
-    
-    /// 获取格式化的地址字符串
+
     public var formattedAddress: String {
         var components: [String] = []
-        
-        if let thoroughfare = thoroughfare, !thoroughfare.isEmpty {
-            components.append(thoroughfare)
-        }
-        if let subThoroughfare = subThoroughfare, !subThoroughfare.isEmpty {
-            components.append(subThoroughfare)
-        }
-        if let subLocality = subLocality, !subLocality.isEmpty {
-            components.append(subLocality)
-        }
-        if let locality = locality, !locality.isEmpty {
-            components.append(locality)
-        }
-        if let administrativeArea = administrativeArea, !administrativeArea.isEmpty {
-            components.append(administrativeArea)
-        }
-        if let country = country, !country.isEmpty {
-            components.append(country)
-        }
-        
+        if let v = self.thoroughfare, !v.isEmpty { components.append(v) }
+        if let v = self.subThoroughfare, !v.isEmpty { components.append(v) }
+        if let v = self.subLocality, !v.isEmpty { components.append(v) }
+        if let v = self.locality, !v.isEmpty { components.append(v) }
+        if let v = self.administrativeArea, !v.isEmpty { components.append(v) }
+        if let v = self.country, !v.isEmpty { components.append(v) }
         return components.joined(separator: ", ")
     }
-    
-    /// 获取坐标字符串
+
     public var coordinateString: String {
-        return "\(latitude),\(longitude)"
+        return "\(self.latitude),\(self.longitude)"
     }
 }
 
-/// 位置管理器配置
 public struct STLocationConfig {
     public let desiredAccuracy: CLLocationAccuracy
     public let distanceFilter: CLLocationDistance
     public let timeout: TimeInterval
     public let maximumAge: TimeInterval
-    
+
     public init(desiredAccuracy: CLLocationAccuracy = kCLLocationAccuracyNearestTenMeters,
                 distanceFilter: CLLocationDistance = 10.0,
                 timeout: TimeInterval = 30.0,
@@ -97,7 +79,7 @@ public struct STLocationConfig {
         self.timeout = timeout
         self.maximumAge = maximumAge
     }
-    
+
     public static let `default` = STLocationConfig()
     public static let highAccuracy = STLocationConfig(desiredAccuracy: kCLLocationAccuracyBest,
                                                       distanceFilter: 1.0,
@@ -109,7 +91,6 @@ public struct STLocationConfig {
                                                      maximumAge: 600.0)
 }
 
-/// 位置管理器错误类型
 public enum STLocationError: Error, LocalizedError {
     case authorizationDenied
     case authorizationRestricted
@@ -118,277 +99,233 @@ public enum STLocationError: Error, LocalizedError {
     case networkError
     case geocodingFailed
     case unknown(Error)
-    
+
     public var errorDescription: String? {
         switch self {
-        case .authorizationDenied:
-            return "位置权限被拒绝"
-        case .authorizationRestricted:
-            return "位置权限受限"
-        case .locationServicesDisabled:
-            return "位置服务已禁用"
-        case .timeout:
-            return "获取位置超时"
-        case .networkError:
-            return "网络错误"
-        case .geocodingFailed:
-            return "地理编码失败"
-        case .unknown(let error):
-            return "未知错误: \(error.localizedDescription)"
+        case .authorizationDenied:       return "位置权限被拒绝"
+        case .authorizationRestricted:   return "位置权限受限"
+        case .locationServicesDisabled:  return "位置服务已禁用"
+        case .timeout:                   return "获取位置超时"
+        case .networkError:              return "网络错误"
+        case .geocodingFailed:           return "地理编码失败"
+        case .unknown(let error):        return "未知错误: \(error.localizedDescription)"
         }
     }
 }
 
-/// 位置管理器回调类型
-public typealias STLocationCompletion = (Result<STLocationInfo, STLocationError>) -> Void
-public typealias STLocationPermissionCompletion = (CLAuthorizationStatus) -> Void
+@MainActor
+public protocol STLocationManagerProtocol: AnyObject {
+    func st_configure(with config: STLocationConfig)
+    func st_requestWhenInUseAuthorization(completion: @escaping STLocationPermissionCompletion)
+    func st_requestAlwaysAuthorization(completion: @escaping STLocationPermissionCompletion)
+    func st_checkLocationPermission(completion: @escaping STLocationPermissionCompletion)
+    func st_getCurrentLocation(config: STLocationConfig?, completion: @escaping STLocationCompletion)
+    func st_startUpdatingLocation(config: STLocationConfig?, completion: @escaping STLocationCompletion)
+    func st_stopUpdatingLocation()
+    func st_getLastKnownLocation() -> STLocationInfo?
+    func st_clearLocationCache()
+}
 
-/// 位置管理器 - CLLocationManager 的封装
+/// 所有可变状态由 @MainActor 隔离，CLLocationManager 始终在主线程操作。
+@MainActor
 public class STLocationManager: NSObject {
-    
+
     public static let shared = STLocationManager()
-    
-    private let locationManager = CLLocationManager()
-    private let geocoder = CLGeocoder()
+
     private var currentConfig: STLocationConfig = .default
     private var locationCompletion: STLocationCompletion?
     private var permissionCompletion: STLocationPermissionCompletion?
-    private var timeoutTimer: Timer?
-    private var isUpdatingLocation = false
+    private var isUpdating = false
     private var lastLocationInfo: STLocationInfo?
     private var lastLocationTime: Date?
-    private let queue = DispatchQueue(label: "com.stbaselocation.queue", attributes: .concurrent)
+    private var timeoutTask: Task<Void, Never>?
 
     override init() {
         super.init()
-        setupLocationManager()
     }
-    
-    private func setupLocationManager() {
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = currentConfig.desiredAccuracy
-        locationManager.distanceFilter = currentConfig.distanceFilter
-    }
-    
+
+    private lazy var clManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.delegate = self
+        manager.desiredAccuracy = self.currentConfig.desiredAccuracy
+        manager.distanceFilter = self.currentConfig.distanceFilter
+        return manager
+    }()
+
+    private lazy var geocoder = CLGeocoder()
+}
+
+extension STLocationManager: STLocationManagerProtocol {
+
     public func st_configure(with config: STLocationConfig) {
-        queue.async(flags: .barrier) {
-            self.currentConfig = config
-            self.locationManager.desiredAccuracy = config.desiredAccuracy
-            self.locationManager.distanceFilter = config.distanceFilter
-        }
+        self.currentConfig = config
+        self.clManager.desiredAccuracy = config.desiredAccuracy
+        self.clManager.distanceFilter = config.distanceFilter
     }
-    
+
     public func st_requestWhenInUseAuthorization(completion: @escaping STLocationPermissionCompletion) {
-        guard permissionCompletion == nil else { return }
-        
-        permissionCompletion = completion
-        locationManager.requestWhenInUseAuthorization()
+        guard self.permissionCompletion == nil else { return }
+        self.permissionCompletion = completion
+        self.clManager.requestWhenInUseAuthorization()
     }
-    
+
     public func st_requestAlwaysAuthorization(completion: @escaping STLocationPermissionCompletion) {
-        guard permissionCompletion == nil else { return }
-        
-        permissionCompletion = completion
-        locationManager.requestAlwaysAuthorization()
+        guard self.permissionCompletion == nil else { return }
+        self.permissionCompletion = completion
+        self.clManager.requestAlwaysAuthorization()
     }
-    
+
     public func st_checkLocationPermission(completion: @escaping STLocationPermissionCompletion) {
-        let status = CLLocationManager.authorizationStatus()
-        completion(status)
+        completion(self.clManager.authorizationStatus)
     }
-    
+
     public func st_getCurrentLocation(config: STLocationConfig? = nil, completion: @escaping STLocationCompletion) {
-        guard !isUpdatingLocation else {
-            completion(.failure(.unknown(NSError(domain: "STLocationManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "正在获取位置中"]))))
+        guard !self.isUpdating else {
+            completion(.failure(.unknown(NSError(domain: "STLocationManager",
+                                                 code: -1,
+                                                 userInfo: [NSLocalizedDescriptionKey: "正在获取位置中"]))))
             return
         }
-        
         guard CLLocationManager.locationServicesEnabled() else {
             completion(.failure(.locationServicesDisabled))
             return
         }
-        
-        let status = CLLocationManager.authorizationStatus()
+        let status = self.clManager.authorizationStatus
         guard status == .authorizedWhenInUse || status == .authorizedAlways else {
-            completion(.failure(.authorizationDenied))
+            completion(.failure(status == .restricted ? .authorizationRestricted : .authorizationDenied))
             return
         }
-        
-        if let lastLocation = lastLocationInfo,
-           let lastTime = lastLocationTime,
-           Date().timeIntervalSince(lastTime) < currentConfig.maximumAge {
-            completion(.success(lastLocation))
+        if let last = self.lastLocationInfo,
+           let lastTime = self.lastLocationTime,
+           Date().timeIntervalSince(lastTime) < self.currentConfig.maximumAge {
+            completion(.success(last))
             return
         }
-        
         if let newConfig = config {
-            st_configure(with: newConfig)
+            self.st_configure(with: newConfig)
         }
-        
-        locationCompletion = completion
-        isUpdatingLocation = true
-        startTimeoutTimer()
-        
-        DispatchQueue.main.async {
-            self.locationManager.startUpdatingLocation()
-        }
+        self.locationCompletion = completion
+        self.isUpdating = true
+        self.startTimeoutTask()
+        self.clManager.startUpdatingLocation()
     }
-    
+
     public func st_startUpdatingLocation(config: STLocationConfig? = nil, completion: @escaping STLocationCompletion) {
-        if let newConfig = config {
-            st_configure(with: newConfig)
-        }
-        
-        locationCompletion = completion
-        isUpdatingLocation = true
-        
         guard CLLocationManager.locationServicesEnabled() else {
             completion(.failure(.locationServicesDisabled))
             return
         }
-        
-        let status = CLLocationManager.authorizationStatus()
+        let status = self.clManager.authorizationStatus
         guard status == .authorizedWhenInUse || status == .authorizedAlways else {
-            completion(.failure(.authorizationDenied))
+            completion(.failure(status == .restricted ? .authorizationRestricted : .authorizationDenied))
             return
         }
-        
-        DispatchQueue.main.async {
-            self.locationManager.startUpdatingLocation()
+        if let newConfig = config {
+            self.st_configure(with: newConfig)
         }
+        self.locationCompletion = completion
+        self.isUpdating = true
+        self.clManager.startUpdatingLocation()
     }
-    
+
     public func st_stopUpdatingLocation() {
-        queue.async(flags: .barrier) {
-            self.isUpdatingLocation = false
-            self.locationCompletion = nil
-            self.cancelTimeoutTimer()
-        }
-        
-        DispatchQueue.main.async {
-            self.locationManager.stopUpdatingLocation()
-        }
+        self.isUpdating = false
+        self.locationCompletion = nil
+        self.cancelTimeoutTask()
+        self.clManager.stopUpdatingLocation()
     }
-    
+
     public func st_getLastKnownLocation() -> STLocationInfo? {
-        return queue.sync {
-            return lastLocationInfo
-        }
+        return self.lastLocationInfo
     }
-    
+
     public func st_clearLocationCache() {
-        queue.async(flags: .barrier) {
-            self.lastLocationInfo = nil
-            self.lastLocationTime = nil
+        self.lastLocationInfo = nil
+        self.lastLocationTime = nil
+    }
+}
+
+extension STLocationManager {
+    private func startTimeoutTask() {
+        self.cancelTimeoutTask()
+        let timeout = self.currentConfig.timeout
+        self.timeoutTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
+            guard !Task.isCancelled, let self = self else { return }
+            self.handleLocationTimeout()
         }
     }
-    
-    private func startTimeoutTimer() {
-        cancelTimeoutTimer()
-        timeoutTimer = Timer.scheduledTimer(withTimeInterval: currentConfig.timeout, repeats: false) { [weak self] _ in
-            self?.handleLocationTimeout()
-        }
+
+    private func cancelTimeoutTask() {
+        self.timeoutTask?.cancel()
+        self.timeoutTask = nil
     }
-    
-    private func cancelTimeoutTimer() {
-        timeoutTimer?.invalidate()
-        timeoutTimer = nil
-    }
-    
+
     private func handleLocationTimeout() {
-        queue.async(flags: .barrier) {
-            self.isUpdatingLocation = false
-            let completion = self.locationCompletion
-            self.locationCompletion = nil
-            self.cancelTimeoutTimer()
-            
-            DispatchQueue.main.async {
-                self.locationManager.stopUpdatingLocation()
-                completion?(.failure(.timeout))
-            }
-        }
+        self.cancelTimeoutTask()
+        self.finishRequest(with: .failure(.timeout))
     }
-    
+
     private func processLocation(_ location: CLLocation) {
         let age = Date().timeIntervalSince(location.timestamp)
-        guard age < currentConfig.maximumAge else { return }
-        
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
-            guard let self = self else { return }
-            
-            guard let placemark = placemarks?.first else {
-                self.queue.async(flags: .barrier) {
-                    let completion = self.locationCompletion
-                    self.locationCompletion = nil
-                    self.isUpdatingLocation = false
-                    self.cancelTimeoutTimer()
-                    
-                    DispatchQueue.main.async {
-                        self.locationManager.stopUpdatingLocation()
-                        completion?(.failure(.geocodingFailed))
-                    }
+        guard age < self.currentConfig.maximumAge else { return }
+        self.geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                guard let placemark = placemarks?.first else {
+                    self.finishRequest(with: .failure(.geocodingFailed))
+                    return
                 }
-                return
-            }
-            
-            let locationInfo = STLocationInfo(
-                name: placemark.name,
-                country: placemark.country,
-                latitude: location.coordinate.latitude,
-                longitude: location.coordinate.longitude,
-                locality: placemark.locality,
-                subLocality: placemark.subLocality,
-                thoroughfare: placemark.thoroughfare,
-                subThoroughfare: placemark.subThoroughfare,
-                isoCountryCode: placemark.isoCountryCode,
-                administrativeArea: placemark.administrativeArea,
-                postalCode: placemark.postalCode,
-                timestamp: location.timestamp
-            )
-            
-            self.queue.async(flags: .barrier) {
+                let locationInfo = STLocationInfo(
+                    name: placemark.name,
+                    country: placemark.country,
+                    latitude: location.coordinate.latitude,
+                    longitude: location.coordinate.longitude,
+                    locality: placemark.locality,
+                    subLocality: placemark.subLocality,
+                    thoroughfare: placemark.thoroughfare,
+                    subThoroughfare: placemark.subThoroughfare,
+                    isoCountryCode: placemark.isoCountryCode,
+                    administrativeArea: placemark.administrativeArea,
+                    postalCode: placemark.postalCode,
+                    timestamp: location.timestamp
+                )
                 self.lastLocationInfo = locationInfo
                 self.lastLocationTime = Date()
-                
-                let completion = self.locationCompletion
-                self.locationCompletion = nil
-                self.isUpdatingLocation = false
-                self.cancelTimeoutTimer()
-                
-                DispatchQueue.main.async {
-                    self.locationManager.stopUpdatingLocation()
-                    completion?(.success(locationInfo))
-                }
+                self.finishRequest(with: .success(locationInfo))
             }
         }
+    }
+
+    private func finishRequest(with result: Result<STLocationInfo, STLocationError>) {
+        let completion = self.locationCompletion
+        self.locationCompletion = nil
+        self.isUpdating = false
+        self.cancelTimeoutTask()
+        self.clManager.stopUpdatingLocation()
+        completion?(result)
     }
 }
 
 extension STLocationManager: CLLocationManagerDelegate {
-    
-    public func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        DispatchQueue.main.async {
-            self.permissionCompletion?(status)
-            self.permissionCompletion = nil
+    nonisolated public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        Task { @MainActor [weak self] in
+            self?.permissionCompletion?(status)
+            self?.permissionCompletion = nil
         }
     }
-    
-    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+
+    nonisolated public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        processLocation(location)
+        Task { @MainActor [weak self] in
+            self?.processLocation(location)
+        }
     }
-    
-    public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        queue.async(flags: .barrier) {
-            let completion = self.locationCompletion
-            self.locationCompletion = nil
-            self.isUpdatingLocation = false
-            self.cancelTimeoutTimer()
-            
-            DispatchQueue.main.async {
-                self.locationManager.stopUpdatingLocation()
-                completion?(.failure(.unknown(error)))
-            }
+
+    nonisolated public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        Task { @MainActor [weak self] in
+            self?.finishRequest(with: .failure(.unknown(error)))
         }
     }
 }

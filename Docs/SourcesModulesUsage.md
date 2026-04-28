@@ -12,7 +12,7 @@
 - [STBaseViewController](#stbaseviewcontroller)
 - [STBaseViewModel](#stbaseviewmodel)
 - [STConfig](#stconfig)
-- [STDocument](#stdocument)
+- [Docs](#docs)
 - [STHUD](#sthud)
 - [STContacts](#stcontacts)
 - [STLocation](#stlocation)
@@ -138,7 +138,7 @@
 
 ---
 
-## STDocument
+## Docs
 
 **模块定位**  
 文档聚合目录，用于沉淀模块使用手册、协议说明与维护指南。
@@ -284,7 +284,7 @@ Markdown 渲染模块，覆盖解析、语义归一化、AST、渲染管线与 U
 - `STNetworkMonitoring.swift`
 
 **关联文档**  
-- `STDocument/STHTTPSession.md`
+- `Docs/STHTTPSession.md`
 
 **使用建议**  
 业务请求统一走 `STHTTPSession` 和请求对象链路；鉴权、重试、日志放入拦截器与事件监听层集中治理。
@@ -383,4 +383,4 @@ UIKit 组件集合，覆盖 Button、Label、TextField、TextView、View、WebVi
 
 - 新增 `Sources` 一级目录时，同步在本文档补齐模块说明。
 - 模块发生明显职责变化时，同步更新“模块定位/适用场景/核心文件”三部分。
-- 详细专题文档统一放入 `Sources/STDocument`，并在 `Sources/STDocument/README.md` 登记索引。
+- 详细专题文档统一放入 `Docs`，并在 `Docs/README.md` 登记索引。

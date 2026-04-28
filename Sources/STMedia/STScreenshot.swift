@@ -8,67 +8,77 @@
 import UIKit
 
 open class STScreenShot: NSObject {
-    class private func st_dataWithScreenshotInPNGFormat() -> Data {
-        var imageSize: CGSize = CGSize.zero
-        var ifo: UIInterfaceOrientation?
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            ifo = windowScene.interfaceOrientation
+
+    private class func captureData() -> Data {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return Data()
         }
-        guard let orientation = ifo else { return Data()}
-        if orientation.isPortrait == true {
-            imageSize = UIScreen.main.bounds.size
+        let orientation = windowScene.interfaceOrientation
+        let screenBounds = UIScreen.main.bounds
+        let imageSize: CGSize
+        if orientation.isPortrait {
+            imageSize = screenBounds.size
         } else {
-            imageSize = CGSize.init(width: UIScreen.main.bounds.size.height,
-                                    height: UIScreen.main.bounds.size.width)
+            imageSize = CGSize(width: screenBounds.height, height: screenBounds.width)
         }
-        UIGraphicsBeginImageContextWithOptions(imageSize, false, 0)
-        let context: CGContext = UIGraphicsGetCurrentContext()!
-        for window in UIApplication.shared.windows {
-            context.saveGState()
-            context.translateBy(x: window.center.x, y: window.center.y)
-            context.concatenate(window.transform)
-            context.translateBy(x: -window.bounds.size.width * window.layer.anchorPoint.x,
-                                y: -window.bounds.size.height * window.layer.anchorPoint.y)
-            if orientation == UIInterfaceOrientation.landscapeLeft {
-                context.rotate(by: .pi / 2)
-                context.translateBy(x: 0, y: -imageSize.width)
-            } else if orientation == UIInterfaceOrientation.landscapeRight {
-                context.rotate(by: -(.pi / 2))
-                context.translateBy(x: -imageSize.height, y: 0)
-            } else if orientation == UIInterfaceOrientation.portraitUpsideDown {
-                context.rotate(by: .pi)
-                context.translateBy(x: -imageSize.width, y: -imageSize.height)
+        let windows = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap { $0.windows }
+        let renderer = UIGraphicsImageRenderer(size: imageSize)
+        let image = renderer.image { ctx in
+            for window in windows {
+                ctx.cgContext.saveGState()
+                ctx.cgContext.translateBy(x: window.center.x, y: window.center.y)
+                ctx.cgContext.concatenate(window.transform)
+                ctx.cgContext.translateBy(
+                    x: -window.bounds.size.width * window.layer.anchorPoint.x,
+                    y: -window.bounds.size.height * window.layer.anchorPoint.y
+                )
+                if orientation == .landscapeLeft {
+                    ctx.cgContext.rotate(by: .pi / 2)
+                    ctx.cgContext.translateBy(x: 0, y: -imageSize.width)
+                } else if orientation == .landscapeRight {
+                    ctx.cgContext.rotate(by: -(.pi / 2))
+                    ctx.cgContext.translateBy(x: -imageSize.height, y: 0)
+                } else if orientation == .portraitUpsideDown {
+                    ctx.cgContext.rotate(by: .pi)
+                    ctx.cgContext.translateBy(x: -imageSize.width, y: -imageSize.height)
+                }
+                window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+                ctx.cgContext.restoreGState()
             }
-            window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
-            context.restoreGState()
         }
-        let image: UIImage = UIGraphicsGetImageFromCurrentImageContext() ?? UIImage()
-        UIGraphicsEndImageContext()
         return image.pngData() ?? Data()
     }
-    
+
     class open func st_imageWithScreenshot() -> UIImage {
-        let imageData = self.st_dataWithScreenshotInPNGFormat()
-        return UIImage.init(data: imageData) ?? UIImage()
+        let data = self.captureData()
+        return UIImage(data: data) ?? UIImage()
     }
-    
+
     class open func st_showScreenshotImage(rect: CGRect?) -> UIImageView {
         let image = self.st_imageWithScreenshot()
-        let imgvPhoto: UIImageView = UIImageView.init(image: image)
-        if let newRect = rect, newRect != CGRect.zero {
-            imgvPhoto.frame = newRect
+        let imageView = UIImageView(image: image)
+        if let rect, rect != .zero {
+            imageView.frame = rect
         } else {
-            imgvPhoto.frame = CGRect.init(x: UIScreen.main.bounds.size.width / 2.0,
-                                          y: UIScreen.main.bounds.size.height / 2.0,
-                                          width: UIScreen.main.bounds.size.width / 2.0,
-                                          height: UIScreen.main.bounds.size.height / 2.0)
+            let bounds = UIScreen.main.bounds
+            let side = min(bounds.width, bounds.height) / 2.0
+            imageView.frame = CGRect(
+                x: bounds.width / 2.0,
+                y: bounds.height / 2.0,
+                width: side,
+                height: side
+            )
         }
-        imgvPhoto.layer.borderWidth = 5.0
-        imgvPhoto.layer.shadowRadius = 2.0
-        imgvPhoto.layer.shadowOpacity = 0.5
-        imgvPhoto.layer.borderColor = UIColor.white.cgColor
-        imgvPhoto.layer.shadowColor = UIColor.black.cgColor
-        imgvPhoto.layer.shadowOffset = CGSize.init(width: 4, height: 4)
-        return imgvPhoto
+        let borderWidth: CGFloat = 5.0
+        let shadowRadius: CGFloat = 2.0
+        imageView.layer.borderWidth = borderWidth
+        imageView.layer.shadowRadius = shadowRadius
+        imageView.layer.shadowOpacity = 0.5
+        imageView.layer.borderColor = UIColor.white.cgColor
+        imageView.layer.shadowColor = UIColor.black.cgColor
+        imageView.layer.shadowOffset = CGSize(width: 4, height: 4)
+        return imageView
     }
 }

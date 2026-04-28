@@ -12,6 +12,7 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 - [安装方式](#安装方式)
 - [按需加载示例](#按需加载示例)
 - [快速开始](#快速开始)
+- [文档索引](#文档索引)
 - [目录介绍](#目录介绍)
 - [主要功能](#主要功能)
 - [使用示例](#使用示例)
@@ -171,6 +172,12 @@ button.st_setImageTopTitleBottom(spacing: 8)
 // 设置圆角
 button.st_roundedButton(cornerRadius: 8)
 ```
+
+## 📚 文档索引
+
+- [Docs/README.md](Docs/README.md) - 文档入口与专题索引
+- [Docs/SourcesModulesUsage.md](Docs/SourcesModulesUsage.md) - `Sources` 模块使用说明
+- [Docs/BusinessIntegrationGuide.md](Docs/BusinessIntegrationGuide.md) - 业务接入落地指南
 
 ### 颜色工具
 
