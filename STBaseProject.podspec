@@ -39,19 +39,19 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'STContacts' do |contacts|
-    contacts.source_files = 'Sources/STContacts/**/*.swift'
+    contacts.source_files = 'Sources/STContacts/*.swift'
   end
 
   s.subspec 'STLocation' do |location|
-    location.source_files = 'Sources/STLocation/**/*.swift'
+    location.source_files = 'Sources/STLocation/*.swift'
   end
 
   s.subspec 'STMedia' do |media|
-    media.source_files = 'Sources/STMedia/**/*.swift'
+    media.source_files = 'Sources/STMedia/*.swift'
   end
 
   s.subspec 'STMarkdown' do |markdown|
-    markdown.source_files = 'Sources/STMarkdown/**/*.swift'
+    markdown.source_files = 'Sources/STMarkdown/*.swift'
     markdown.dependency 'Markdown'
     markdown.dependency 'SwiftMath'
     markdown.resource_bundles = {
