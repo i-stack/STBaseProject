@@ -13,6 +13,18 @@ let package = Package(
         .library(
             name: "STBaseProject",
             targets: ["STBaseProject"]
+        ),
+        .library(
+            name: "STContacts",
+            targets: ["STContacts"]
+        ),
+        .library(
+            name: "STLocation",
+            targets: ["STLocation"]
+        ),
+        .library(
+            name: "STMedia",
+            targets: ["STMedia"]
         )
     ],
     dependencies: [
@@ -27,9 +39,26 @@ let package = Package(
                 .product(name: "SwiftMath", package: "SwiftMath")
             ],
             path: "Sources",
+            exclude: [
+                "STContacts",
+                "STLocation",
+                "STMedia"
+            ],
             resources: [
                 .process("STMarkdown/Resources")
             ]
+        ),
+        .target(
+            name: "STContacts",
+            path: "Sources/STContacts"
+        ),
+        .target(
+            name: "STLocation",
+            path: "Sources/STLocation"
+        ),
+        .target(
+            name: "STMedia",
+            path: "Sources/STMedia"
         )
     ],
     swiftLanguageVersions: [.v5]

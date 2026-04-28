@@ -7,60 +7,56 @@
 #
 
 Pod::Spec.new do |s|
-    s.name = 'STBaseProject'
-    s.version = '1.1.5'
-    s.license = { :type => 'MIT', :file => 'LICENSE' }
-    s.summary = 'A powerful iOS base project with modular architecture and rich UI components.'
-    s.description = <<-DESC
-        STBaseProject is a comprehensive iOS development framework that provides:
-        - Modular architecture with independent STBase modules
-        - Complete MVVM architecture with STBaseViewController, STBaseViewModel, STBaseModel, STBaseView
-        - Rich UI components including custom buttons, labels, alerts, and scan views
-        - Unified image management, network session, localization, and security tools
-        - Easy integration with CocoaPods and SPM, supports selective module importing
-    DESC
-    
-    s.homepage = 'https://github.com/i-stack/STBaseProject'
-    s.author = { 'i-stack' => 'songshoubing7664@163.com' }
-    s.source = { :git => 'https://github.com/i-stack/STBaseProject.git', :tag => s.version.to_s }
-    
-    s.ios.deployment_target = '16.0'
-    s.swift_versions = ['5.0', '5.1', '5.2', '5.3', '5.4', '5.5', '5.6', '5.7', '5.8', '5.9', '5.10', '5.11']
-    
-    s.requires_arc = true
+  s.name = 'STBaseProject'
+  s.version = '1.1.5'
+  s.summary = 'Modular iOS foundation library with MVVM base abstractions.'
+  s.description = <<-DESC
+    STBaseProject provides modular iOS foundation components built on MVVM base types.
+    It includes reusable UI components and shared utilities for networking, localization, image handling, and security.
+    Available via CocoaPods subspecs and Swift Package Manager.
+  DESC
 
-    s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
-    s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
-    
-    s.subspec 'STBase' do |base|
-        base.source_files = 'Sources/**/*.swift'
-        base.exclude_files = [
-            'Sources/STContacts/**/*.swift',
-            'Sources/STLocation/**/*.swift',
-            'Sources/STMedia/**/*.swift',
-            'Sources/STMarkdown/**/*.swift'
-        ]
-    end
+  s.homepage = 'https://github.com/i-stack/STBaseProject'
+  s.license = { :type => 'MIT', :file => 'LICENSE' }
+  s.author = { 'i-stack' => 'songshoubing7664@163.com' }
+  s.source = { :git => 'https://github.com/i-stack/STBaseProject.git', :tag => s.version.to_s }
+  s.documentation_url = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
+  s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
 
-    s.subspec 'STContacts' do |contacts|
-        contacts.source_files = 'Sources/STContacts/**/*.swift'
-    end
+  s.ios.deployment_target = '16.0'
+  s.swift_versions = %w[5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 5.9 5.10 5.11]
+  s.requires_arc = true
+  s.default_subspecs = ['STBaseProject']
 
-    s.subspec 'STLocation' do |location|
-        location.source_files = 'Sources/STLocation/**/*.swift'
-    end
+  s.subspec 'STBaseProject' do |base|
+    base.source_files = 'Sources/**/*.swift'
+    base.exclude_files = [
+      'Sources/STContacts/**/*.swift',
+      'Sources/STLocation/**/*.swift',
+      'Sources/STMedia/**/*.swift',
+      'Sources/STMarkdown/**/*.swift'
+    ]
+  end
 
-    s.subspec 'STMedia' do |media|
-        media.source_files = 'Sources/STMedia/**/*.swift'
-    end
+  s.subspec 'STContacts' do |contacts|
+    contacts.source_files = 'Sources/STContacts/**/*.swift'
+  end
 
-    s.subspec 'STMarkdown' do |markdown|
-        markdown.source_files = 'Sources/STMarkdown/**/*.swift'
-        markdown.resource_bundles = {
-            'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
-        }
-    end
-    
-    s.default_subspecs = ['STBase']
+  s.subspec 'STLocation' do |location|
+    location.source_files = 'Sources/STLocation/**/*.swift'
+  end
+
+  s.subspec 'STMedia' do |media|
+    media.source_files = 'Sources/STMedia/**/*.swift'
+  end
+
+  s.subspec 'STMarkdown' do |markdown|
+    markdown.source_files = 'Sources/STMarkdown/**/*.swift'
+    markdown.dependency 'Markdown'
+    markdown.dependency 'SwiftMath'
+    markdown.resource_bundles = {
+      'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
+    }
+  end
 
 end
