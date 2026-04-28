@@ -8,6 +8,7 @@
 import UIKit
 import Darwin
 import Network
+import SystemConfiguration
 
 public struct STDeviceInfo {
 
@@ -262,6 +263,42 @@ public extension STDeviceInfo {
         }
 
         return canWriteToRestrictedPath()
+    }
+
+    /// 兼容旧安全检测 API：检测越狱环境
+    static func st_detectJailbreak() -> Bool {
+        isDeviceJailbroken
+    }
+
+    /// 兼容旧安全检测 API：检测模拟器环境
+    static func st_detectSimulator() -> Bool {
+        isRunningOnSimulator
+    }
+
+    /// 检测网络是否可达
+    static func st_detectNetworkConnection() -> Bool {
+        var zeroAddress = sockaddr_in()
+        zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
+        zeroAddress.sin_family = sa_family_t(AF_INET)
+
+        let defaultRouteReachability = withUnsafePointer(to: &zeroAddress) {
+            $0.withMemoryRebound(to: sockaddr.self, capacity: 1) { zeroSockAddress in
+                SCNetworkReachabilityCreateWithAddress(nil, zeroSockAddress)
+            }
+        }
+
+        guard let defaultRouteReachability else {
+            return false
+        }
+
+        var flags = SCNetworkReachabilityFlags()
+        guard SCNetworkReachabilityGetFlags(defaultRouteReachability, &flags) else {
+            return false
+        }
+
+        let isReachable = flags.contains(.reachable)
+        let needsConnection = flags.contains(.connectionRequired)
+        return isReachable && !needsConnection
     }
 
     static var isLowPowerModeEnabled: Bool {

@@ -205,9 +205,8 @@ STHUD.hide()
 ### STSecurity - 安全组件
 - `STEncrypt.swift` - 加密工具
 - `STKeychainHelper.swift` - Keychain 助手
-- `STNetworkCrypto.swift` - 网络加密工具
-- `STNetworkSecurityConfig.swift` - 网络安全配置
-- `STNetworkSecurityDetector.swift` - 网络安全检测器
+- `STCryptoService` - 加密与签名服务
+- `STSecurityConfig` - 安全策略配置
 
 ### STTabBar - 标签栏组件
 - `STCustomTabBar.swift` - 自定义标签栏

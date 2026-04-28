@@ -13,6 +13,9 @@
 - `BusinessIntegrationGuide.md`  
   面向业务接入的落地指南（启动配置、页面接入、网络接入、Markdown 接入、安全与日志清单）。
 
+- `STSecurity.md`  
+  `STSecurity` 目录专题文档（配置中枢、加解密、Keychain、反调试监控与接入建议）。
+
 ## 维护约定
 
 - 新增公共能力时，优先评估是否需要补充文档并登记到本索引。

@@ -144,6 +144,7 @@
 - `STHTTPSession.md`：网络层详细文档
 - `SourcesModulesUsage.md`：`Sources` 全模块使用说明（本文）
 - `README.md`：文档入口索引
+- `STSecurity.md`：`STSecurity` 目录能力说明（配置、加密、Keychain、反调试）
 
 **使用建议**  
 新增模块或公共能力时，优先同步补齐此目录文档，保持“代码与文档同版本演进”。
@@ -253,9 +254,9 @@ Markdown 渲染模块，覆盖解析、语义归一化、AST、渲染管线与 U
 **核心文件**  
 - `STEncrypt.swift`
 - `STKeychainHelper.swift`
-- `STNetworkCrypto.swift`
-- `STNetworkSecurityConfig.swift`
-- `STNetworkSecurityDetector.swift`
+- `STCryptoService`
+- `STSecurityConfig`
+- `STDeviceInfo.swift`（运行环境与设备态检测）
 
 **使用建议**  
 敏感能力统一收敛在安全模块；不要在业务代码中自行实现加解密与密钥存储细节。

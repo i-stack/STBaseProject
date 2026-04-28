@@ -6,6 +6,22 @@
 //
 
 import Foundation
+import Security
+import CryptoKit
+
+public enum STSSLPinningConfigError: Error, LocalizedError {
+    case invalidCertificateData
+    case publicKeyExtractionFailed
+
+    public var errorDescription: String? {
+        switch self {
+        case .invalidCertificateData:
+            return "无效的证书数据"
+        case .publicKeyExtractionFailed:
+            return "提取证书公钥失败"
+        }
+    }
+}
 
 // MARK: - SSL证书绑定配置
 public struct STSSLPinningConfig: Codable {
@@ -58,5 +74,29 @@ public struct STSSLPinningConfig: Codable {
         // 将证书数据编码为 Base64 字符串
         let certificateStrings = certificates.map { $0.base64EncodedString() }
         try container.encode(certificateStrings, forKey: .certificates)
+    }
+
+    /// 从证书数据生成公钥 SHA-256 哈希（Base64）
+    public static func st_publicKeyHash(from certificateData: Data) throws -> String {
+        guard let certificate = SecCertificateCreateWithData(nil, certificateData as CFData) else {
+            throw STSSLPinningConfigError.invalidCertificateData
+        }
+
+        guard let key = SecCertificateCopyKey(certificate) else {
+            throw STSSLPinningConfigError.publicKeyExtractionFailed
+        }
+
+        var error: Unmanaged<CFError>?
+        guard let publicKeyData = SecKeyCopyExternalRepresentation(key, &error) as Data? else {
+            throw STSSLPinningConfigError.publicKeyExtractionFailed
+        }
+
+        let digest = SHA256.hash(data: publicKeyData)
+        return Data(digest).base64EncodedString()
+    }
+
+    /// 批量从证书数据生成公钥 SHA-256 哈希（Base64）
+    public static func st_publicKeyHashes(from certificates: [Data]) throws -> [String] {
+        return try certificates.map { try self.st_publicKeyHash(from: $0) }
     }
 }

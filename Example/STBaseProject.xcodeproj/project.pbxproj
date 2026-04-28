@@ -34,6 +34,7 @@
 		F10000010000000000000002 /* STHTTPDebugLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000012 /* STHTTPDebugLogTests.swift */; };
 		F10000010000000000000003 /* STNetworkStreamAndResumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000013 /* STNetworkStreamAndResumeTests.swift */; };
 		F10000010000000000000004 /* STMarkdownPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000014 /* STMarkdownPipelineTests.swift */; };
+		F10000010000000000000007 /* STSecurityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000010000000000000017 /* STSecurityTests.swift */; };
 		F10000010000000000000005 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F10000010000000000000015 /* XCTest.framework */; };
 		F10000010000000000000006 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = F10000010000000000000031 /* STBaseProject */; };
 /* End PBXBuildFile section */
@@ -73,6 +74,7 @@
 		F10000010000000000000012 /* STHTTPDebugLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STHTTPDebugLogTests.swift; path = ../Tests/STBaseProjectTests/STHTTPDebugLogTests.swift; sourceTree = SOURCE_ROOT; };
 		F10000010000000000000013 /* STNetworkStreamAndResumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STNetworkStreamAndResumeTests.swift; path = ../Tests/STBaseProjectTests/STNetworkStreamAndResumeTests.swift; sourceTree = SOURCE_ROOT; };
 		F10000010000000000000014 /* STMarkdownPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STMarkdownPipelineTests.swift; path = ../Tests/STMarkdownTests/STMarkdownPipelineTests.swift; sourceTree = SOURCE_ROOT; };
+		F10000010000000000000017 /* STSecurityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = STSecurityTests.swift; path = ../Tests/STBaseProjectTests/STSecurityTests.swift; sourceTree = SOURCE_ROOT; };
 		F10000010000000000000015 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -240,6 +242,7 @@
 				F10000010000000000000011 /* STBaseViewModelNetworkTests.swift */,
 				F10000010000000000000013 /* STNetworkStreamAndResumeTests.swift */,
 				F10000010000000000000014 /* STMarkdownPipelineTests.swift */,
+				F10000010000000000000017 /* STSecurityTests.swift */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -400,6 +403,7 @@
 				F10000010000000000000002 /* STHTTPDebugLogTests.swift in Sources */,
 				F10000010000000000000003 /* STNetworkStreamAndResumeTests.swift in Sources */,
 				F10000010000000000000004 /* STMarkdownPipelineTests.swift in Sources */,
+				F10000010000000000000007 /* STSecurityTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

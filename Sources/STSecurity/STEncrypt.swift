@@ -10,13 +10,6 @@ import Foundation
 import CryptoKit
 import CommonCrypto
 
-// MARK: - 加密算法类型
-public enum STEncryptionAlgorithm {
-    case aes256GCM
-    case aes256CBC
-    case chaCha20Poly1305
-}
-
 // MARK: - 哈希算法类型
 public enum STHashAlgorithm {
     case md5
@@ -24,39 +17,6 @@ public enum STHashAlgorithm {
     case sha256
     case sha384
     case sha512
-}
-
-// MARK: - 加密错误类型
-public enum STEncryptionError: Error, LocalizedError {
-    case invalidKey
-    case invalidData
-    case encryptionFailed
-    case decryptionFailed
-    case keyGenerationFailed
-    case invalidAlgorithm
-    case invalidSalt
-    case invalidIterations
-    
-    public var errorDescription: String? {
-        switch self {
-        case .invalidKey:
-            return "无效的密钥"
-        case .invalidData:
-            return "无效的数据"
-        case .encryptionFailed:
-            return "加密失败"
-        case .decryptionFailed:
-            return "解密失败"
-        case .keyGenerationFailed:
-            return "密钥生成失败"
-        case .invalidAlgorithm:
-            return "无效的算法"
-        case .invalidSalt:
-            return "无效的盐值"
-        case .invalidIterations:
-            return "无效的迭代次数"
-        }
-    }
 }
 
 // MARK: - String 加密扩展
@@ -129,23 +89,13 @@ public extension String {
     /// - Parameters:
     ///   - key: 密钥字符串
     ///   - nonce: 随机数（可选，自动生成）
-    /// - Returns: 加密结果，包含密文和认证标签
-    func st_encryptAES256GCM(key: String, nonce: AES.GCM.Nonce? = nil) throws -> (ciphertext: Data, nonce: AES.GCM.Nonce) {
-        let data = Data(self.utf8)
+    /// - Returns: 加密结果，包含密文、随机数和认证标签
+    func st_encryptAES256GCM(key: String, nonce: AES.GCM.Nonce? = nil) throws -> (ciphertext: Data, nonce: AES.GCM.Nonce, tag: Data) {
         let keyData = Data(key.utf8)
         guard keyData.count == 32 else {
-            throw STEncryptionError.invalidKey
+            throw STCryptoError.invalidKey
         }
-        
-        let symmetricKey = SymmetricKey(data: keyData)
-        let usedNonce = nonce ?? AES.GCM.Nonce()
-        
-        do {
-            let sealedBox = try AES.GCM.seal(data, using: symmetricKey, nonce: usedNonce)
-            return (sealedBox.ciphertext, usedNonce)
-        } catch {
-            throw STEncryptionError.encryptionFailed
-        }
+        return try Data(self.utf8).st_encryptAES256GCM(key: keyData, nonce: nonce)
     }
     
     /// AES-256-GCM 解密
@@ -153,22 +103,18 @@ public extension String {
     ///   - ciphertext: 密文数据
     ///   - key: 密钥字符串
     ///   - nonce: 随机数
+    ///   - tag: 认证标签
     /// - Returns: 解密后的字符串
-    func st_decryptAES256GCM(ciphertext: Data, key: String, nonce: AES.GCM.Nonce) throws -> String {
+    func st_decryptAES256GCM(ciphertext: Data, key: String, nonce: AES.GCM.Nonce, tag: Data) throws -> String {
         let keyData = Data(key.utf8)
         guard keyData.count == 32 else {
-            throw STEncryptionError.invalidKey
+            throw STCryptoError.invalidKey
         }
-        
-        let symmetricKey = SymmetricKey(data: keyData)
-        
-        do {
-            let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: ciphertext, tag: Data())
-            let decryptedData = try AES.GCM.open(sealedBox, using: symmetricKey)
-            return String(data: decryptedData, encoding: .utf8) ?? ""
-        } catch {
-            throw STEncryptionError.decryptionFailed
+        let decryptedData = try keyData.st_decryptAES256GCM(ciphertext: ciphertext, key: keyData, nonce: nonce, tag: tag)
+        guard let string = String(data: decryptedData, encoding: .utf8) else {
+            throw STCryptoError.decryptionFailed
         }
+        return string
     }
         
     /// PBKDF2 密钥派生
@@ -189,7 +135,10 @@ public extension String {
     ///   - characters: 字符集
     /// - Returns: 随机字符串
     static func st_randomString(length: Int, characters: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") -> String {
-        return String((0..<length).map { _ in characters.randomElement()! })
+        guard length > 0, !characters.isEmpty else {
+            return ""
+        }
+        return String((0..<length).compactMap { _ in characters.randomElement() })
     }
     
     /// 生成随机十六进制字符串
@@ -256,41 +205,35 @@ public extension Data {
     /// - Parameters:
     ///   - key: 密钥数据
     ///   - nonce: 随机数（可选，自动生成）
-    /// - Returns: 加密结果，包含密文和认证标签
-    func st_encryptAES256GCM(key: Data, nonce: AES.GCM.Nonce? = nil) throws -> (ciphertext: Data, nonce: AES.GCM.Nonce) {
+    /// - Returns: 加密结果，包含密文、随机数和认证标签
+    func st_encryptAES256GCM(key: Data, nonce: AES.GCM.Nonce? = nil) throws -> (ciphertext: Data, nonce: AES.GCM.Nonce, tag: Data) {
         guard key.count == 32 else {
-            throw STEncryptionError.invalidKey
+            throw STCryptoError.invalidKey
         }
-        
+
         let symmetricKey = SymmetricKey(data: key)
         let usedNonce = nonce ?? AES.GCM.Nonce()
-        
+
         do {
             let sealedBox = try AES.GCM.seal(self, using: symmetricKey, nonce: usedNonce)
-            return (sealedBox.ciphertext, usedNonce)
+            return (sealedBox.ciphertext, usedNonce, sealedBox.tag)
         } catch {
-            throw STEncryptionError.encryptionFailed
+            throw STCryptoError.encryptionFailed
         }
     }
-    
-    /// AES-256-GCM 解密
-    /// - Parameters:
-    ///   - ciphertext: 密文数据
-    ///   - key: 密钥数据
-    ///   - nonce: 随机数
-    /// - Returns: 解密后的数据
-    func st_decryptAES256GCM(ciphertext: Data, key: Data, nonce: AES.GCM.Nonce) throws -> Data {
+
+    func st_decryptAES256GCM(ciphertext: Data, key: Data, nonce: AES.GCM.Nonce, tag: Data) throws -> Data {
         guard key.count == 32 else {
-            throw STEncryptionError.invalidKey
+            throw STCryptoError.invalidKey
         }
-        
+
         let symmetricKey = SymmetricKey(data: key)
-        
+
         do {
-            let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: ciphertext, tag: Data())
+            let sealedBox = try AES.GCM.SealedBox(nonce: nonce, ciphertext: ciphertext, tag: tag)
             return try AES.GCM.open(sealedBox, using: symmetricKey)
         } catch {
-            throw STEncryptionError.decryptionFailed
+            throw STCryptoError.decryptionFailed
         }
     }
         
@@ -302,11 +245,11 @@ public extension Data {
     /// - Returns: 派生的密钥数据
     func st_pbkdf2(salt: Data, iterations: Int = 10000, keyLength: Int = 32) throws -> Data {
         guard iterations > 0 else {
-            throw STEncryptionError.invalidIterations
+            throw STCryptoError.invalidIterations
         }
-        
+
         guard keyLength > 0 else {
-            throw STEncryptionError.invalidKey
+            throw STCryptoError.invalidKey
         }
         
         var derivedKey = Data(count: keyLength)
@@ -329,7 +272,7 @@ public extension Data {
         }
         
         guard result == kCCSuccess else {
-            throw STEncryptionError.keyGenerationFailed
+            throw STCryptoError.keyGenerationFailed
         }
         
         return derivedKey

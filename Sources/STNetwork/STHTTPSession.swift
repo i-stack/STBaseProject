@@ -8,6 +8,7 @@
 import UIKit
 import Network
 import Foundation
+import CryptoKit
 
 public final class STParameterEncoder {
 
@@ -774,17 +775,33 @@ extension STHTTPSession: URLSessionDelegate, URLSessionDataDelegate, URLSessionT
             completionHandler(.cancelAuthenticationChallenge, nil)
             return
         }
-        if self.sslPinningConfig.certificates.isEmpty {
-            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        let hasCertificatePins = !self.sslPinningConfig.certificates.isEmpty
+        let hasPublicKeyPins = !self.sslPinningConfig.publicKeyHashes.isEmpty
+
+        guard hasCertificatePins || hasPublicKeyPins else {
+            completionHandler(.cancelAuthenticationChallenge, nil)
             return
         }
-        let serverCerts = self.serverCertificates(from: serverTrust)
-        for serverCert in serverCerts {
-            if self.sslPinningConfig.certificates.contains(serverCert) {
+
+        let serverCertificates = self.serverCertificates(from: serverTrust)
+        if hasCertificatePins {
+            for serverCertificate in serverCertificates {
+                if self.sslPinningConfig.certificates.contains(serverCertificate) {
+                    completionHandler(.useCredential, URLCredential(trust: serverTrust))
+                    return
+                }
+            }
+        }
+
+        if hasPublicKeyPins {
+            let expectedPublicKeyHashes = Set(self.sslPinningConfig.publicKeyHashes.map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() })
+            let serverPublicKeyHashes = self.serverPublicKeyHashes(from: serverTrust)
+            if !serverPublicKeyHashes.isDisjoint(with: expectedPublicKeyHashes) {
                 completionHandler(.useCredential, URLCredential(trust: serverTrust))
                 return
             }
         }
+
         completionHandler(.cancelAuthenticationChallenge, nil)
     }
 
@@ -792,6 +809,26 @@ extension STHTTPSession: URLSessionDelegate, URLSessionDataDelegate, URLSessionT
         guard let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate] else { return [] }
         return chain.map { SecCertificateCopyData($0) as Data }
     }
+
+    private func serverPublicKeyHashes(from trust: SecTrust) -> Set<String> {
+        guard let chain = SecTrustCopyCertificateChain(trust) as? [SecCertificate] else { return [] }
+
+        var hashes: Set<String> = []
+        for certificate in chain {
+            guard let key = SecCertificateCopyKey(certificate) else {
+                continue
+            }
+            var error: Unmanaged<CFError>?
+            guard let publicKeyData = SecKeyCopyExternalRepresentation(key, &error) as Data? else {
+                continue
+            }
+
+            let digest = SHA256.hash(data: publicKeyData)
+            let digestData = Data(digest)
+            hashes.insert(digestData.base64EncodedString().lowercased())
+            hashes.insert(digestData.map { String(format: "%02x", $0) }.joined())
+        }
+        return hashes
     }
 
     public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
