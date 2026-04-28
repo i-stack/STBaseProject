@@ -55,7 +55,6 @@ public struct STWebViewConfig {
     var applicationNameForUserAgent: String?
     var customUserAgent: String?
     var websiteDataStore: WKWebsiteDataStore = .default()
-    var processPool: WKProcessPool = WKProcessPool()
     var preferences: WKPreferences = WKPreferences()
     var userContentController: WKUserContentController = WKUserContentController()
     
@@ -67,7 +66,6 @@ public struct STWebViewConfig {
                 applicationNameForUserAgent: String? = nil,
                 customUserAgent: String? = nil,
                 websiteDataStore: WKWebsiteDataStore = .default(),
-                processPool: WKProcessPool = WKProcessPool(),
                 preferences: WKPreferences = WKPreferences(),
                 userContentController: WKUserContentController = WKUserContentController()) {
         self.allowsInlineMediaPlayback = allowsInlineMediaPlayback
@@ -78,7 +76,6 @@ public struct STWebViewConfig {
         self.applicationNameForUserAgent = applicationNameForUserAgent
         self.customUserAgent = customUserAgent
         self.websiteDataStore = websiteDataStore
-        self.processPool = processPool
         self.preferences = preferences
         self.userContentController = userContentController
     }
@@ -149,11 +146,11 @@ open class STBaseWKViewController: STBaseViewController {
         }
         // 数据存储
         config.websiteDataStore = self.webViewConfig.websiteDataStore
-        config.processPool = self.webViewConfig.processPool
         
         // 偏好设置
         config.preferences = self.webViewConfig.preferences
-        config.preferences.javaScriptEnabled = self.webInfo?.enableJavaScript ?? true
+        let allowsJavaScript = self.webInfo?.enableJavaScript ?? true
+        config.defaultWebpagePreferences.allowsContentJavaScript = allowsJavaScript
         
         // 用户内容控制器
         config.userContentController = self.webViewConfig.userContentController

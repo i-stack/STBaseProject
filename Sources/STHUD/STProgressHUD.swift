@@ -239,7 +239,7 @@ public class STProgressHUD: UIView {
         self.bezelView.removeConstraints(self.bezelConstraints)
         self.bezelConstraints = []
 
-        var centeringConstraints: [NSLayoutConstraint] = [
+        let centeringConstraints: [NSLayoutConstraint] = [
             NSLayoutConstraint(item: self.bezelView, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: self.offset.x),
             NSLayoutConstraint(item: self.bezelView, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: self.offset.y)
         ]

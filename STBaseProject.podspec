@@ -50,13 +50,13 @@ Pod::Spec.new do |s|
     media.source_files = 'Sources/STMedia/*.swift'
   end
 
-  s.subspec 'STMarkdown' do |markdown|
-    markdown.source_files = 'Sources/STMarkdown/*.swift'
-    markdown.dependency 'Markdown'
-    markdown.dependency 'SwiftMath'
-    markdown.resource_bundles = {
-      'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
-    }
-  end
+  # s.subspec 'STMarkdown' do |markdown|
+  #   markdown.source_files = 'Sources/STMarkdown/*.swift'
+  #   markdown.dependency 'Markdown'
+  #   markdown.dependency 'SwiftMath'
+  #   markdown.resource_bundles = {
+  #     'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
+  #   }
+  # end
 
 end

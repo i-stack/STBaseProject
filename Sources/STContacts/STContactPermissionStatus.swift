@@ -11,6 +11,7 @@ public enum STContactPermissionStatus: Sendable {
     case notDetermined
     case restricted
     case denied
+    case limited
     case authorized
 }
 
@@ -20,6 +21,7 @@ extension STContactPermissionStatus {
         case .notDetermined: self = .notDetermined
         case .restricted:    self = .restricted
         case .denied:        self = .denied
+        case .limited:       self = .limited
         case .authorized:    self = .authorized
         @unknown default:    self = .notDetermined
         }

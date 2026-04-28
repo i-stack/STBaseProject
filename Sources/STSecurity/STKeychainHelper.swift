@@ -192,7 +192,14 @@ public class STKeychainHelper {
             query[kSecUseAuthenticationContext as String] = authenticationContext
         }
         if let authenticationPrompt, !authenticationPrompt.isEmpty {
-            query[kSecUseOperationPrompt as String] = authenticationPrompt
+            let context: LAContext
+            if let authenticationContext {
+                context = authenticationContext
+            } else {
+                context = LAContext()
+                query[kSecUseAuthenticationContext as String] = context
+            }
+            context.localizedReason = authenticationPrompt
         }
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)

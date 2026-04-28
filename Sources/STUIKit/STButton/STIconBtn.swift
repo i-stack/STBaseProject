@@ -176,10 +176,6 @@ open class STIconBtn: STBtn {
         self.updateIconLayout()
     }
 
-    open override func contentRect(forBounds bounds: CGRect) -> CGRect {
-        super.contentRect(forBounds: bounds).inset(by: self.iconContentInsets)
-    }
-
     open override var intrinsicContentSize: CGSize {
         let baseSize = self.computedContentSize()
         return CGSize(
@@ -197,31 +193,25 @@ open class STIconBtn: STBtn {
     }
 
     private func updateIconLayout() {
-        var newImageInsets = UIEdgeInsets.zero
-        var newTitleInsets = UIEdgeInsets.zero
-        defer {
-            if self.imageEdgeInsets != newImageInsets { self.imageEdgeInsets = newImageInsets }
-            if self.titleEdgeInsets != newTitleInsets { self.titleEdgeInsets = newTitleInsets }
-        }
-        guard
-            let imageSize = self.currentImageSize(),
-            let titleSize = self.currentTitleSize()
-        else { return }
-        let halfSpace = self.spacing / 2
+        var config = self.configuration ?? UIButton.Configuration.plain()
+        config.imagePadding = self.spacing
+        config.contentInsets = NSDirectionalEdgeInsets(
+            top: self.iconContentInsets.top,
+            leading: self.iconContentInsets.left,
+            bottom: self.iconContentInsets.bottom,
+            trailing: self.iconContentInsets.right
+        )
         switch self.iconPosition {
         case .left:
-            newImageInsets = UIEdgeInsets(top: 0, left: -halfSpace, bottom: 0, right: halfSpace)
-            newTitleInsets = UIEdgeInsets(top: 0, left: halfSpace, bottom: 0, right: -halfSpace)
+            config.imagePlacement = .leading
         case .right:
-            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width + halfSpace, bottom: 0, right: -(titleSize.width + halfSpace))
-            newTitleInsets = UIEdgeInsets(top: 0, left: -(imageSize.width + halfSpace), bottom: 0, right: imageSize.width + halfSpace)
+            config.imagePlacement = .trailing
         case .top:
-            newImageInsets = UIEdgeInsets(top: -(titleSize.height + self.spacing), left: titleSize.width / 2, bottom: 0, right: -titleSize.width / 2)
-            newTitleInsets = UIEdgeInsets(top: 0, left: -imageSize.width / 2, bottom: -(imageSize.height + self.spacing), right: imageSize.width / 2)
+            config.imagePlacement = .top
         case .bottom:
-            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width / 2, bottom: -(titleSize.height + self.spacing), right: -titleSize.width / 2)
-            newTitleInsets = UIEdgeInsets(top: -(imageSize.height + self.spacing), left: -imageSize.width / 2, bottom: 0, right: imageSize.width / 2)
+            config.imagePlacement = .bottom
         }
+        self.configuration = config
     }
 
     private func computedContentSize() -> CGSize {

@@ -18,7 +18,12 @@ public actor STWebSocket {
     }
 
     deinit {
-        self.cancelAllTasks()
+        self.receiveTask?.cancel()
+        self.heartbeatTask?.cancel()
+        self.pongTimeoutTask?.cancel()
+        self.reconnectTask?.cancel()
+        self.networkMonitorTask?.cancel()
+        self.connection?.cancel()
     }
 
     /// 连接并返回事件流；多次调用会先断开旧连接再重新建立。

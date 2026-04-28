@@ -80,6 +80,7 @@ public enum STImageManagerError: LocalizedError {
     }
 }
 
+@MainActor
 public class STImageManager: NSObject {
 
     public static let shared = STImageManager()
@@ -94,7 +95,6 @@ public class STImageManager: NSObject {
     }
 
     deinit {
-        self.imagePickerController?.delegate = nil
         self.imagePickerController = nil
     }
 
@@ -230,7 +230,8 @@ extension STImageManager: PHPickerViewControllerDelegate {
         }
         let continuation = self.pickerContinuation
         self.pickerContinuation = nil
-        let config = self.configuration
+        let maxFileSize = self.configuration.maxFileSize
+        let imageFormat = self.configuration.imageFormat
         result.itemProvider.loadObject(ofClass: UIImage.self) { object, error in
             if let error {
                 continuation?.resume(throwing: error)
@@ -241,11 +242,11 @@ extension STImageManager: PHPickerViewControllerDelegate {
                 return
             }
             Task.detached(priority: .userInitiated) {
-                guard let compressedData = UIImage.smartCompress(image, maxFileSize: config.maxFileSize) else {
+                guard let compressedData = UIImage.smartCompress(image, maxFileSize: maxFileSize) else {
                     continuation?.resume(throwing: STImageManagerError.compressionFailed)
                     return
                 }
-                let format = image.getTypeString() ?? config.imageFormat
+                let format = image.getTypeString() ?? imageFormat
                 let timestamp = Date().timeIntervalSince1970
                 let model = STImageManagerModel(
                     image: image,
@@ -273,13 +274,14 @@ extension STImageManager: UIImagePickerControllerDelegate, UINavigationControlle
         }
         let continuation = self.cameraContinuation
         self.cameraContinuation = nil
-        let config = self.configuration
+        let maxFileSize = self.configuration.maxFileSize
+        let imageFormat = self.configuration.imageFormat
         Task.detached(priority: .userInitiated) {
-            guard let compressedData = UIImage.smartCompress(image, maxFileSize: config.maxFileSize) else {
+            guard let compressedData = UIImage.smartCompress(image, maxFileSize: maxFileSize) else {
                 continuation?.resume(throwing: STImageManagerError.compressionFailed)
                 return
             }
-            let format = image.getTypeString() ?? config.imageFormat
+            let format = image.getTypeString() ?? imageFormat
             let timestamp = Date().timeIntervalSince1970
             let model = STImageManagerModel(
                 image: image,

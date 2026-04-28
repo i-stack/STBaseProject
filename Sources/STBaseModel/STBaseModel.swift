@@ -54,7 +54,6 @@ open class STBaseModel: NSObject {
         super.init()
         let container = try decoder.container(keyedBy: STCodingKeys.self)
         let properties = self.st_propertyNames()
-        let mapping = type(of: self).st_keyMapping()
         let reverseMapping = type(of: self).st_reverseKeyMapping()
 
         for propertyName in properties {

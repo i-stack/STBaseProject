@@ -208,11 +208,10 @@ extension UIImage {
             if let data = image.pngData(), data.count <= maxBytes { return data }
             return compressImageBySize(image, maxFileSize: maxBytes, format: .png)
         case .jpeg:
-            var compressionQuality = quality
-            guard var data = image.jpegData(compressionQuality: compressionQuality) else { return nil }
+            guard var data = image.jpegData(compressionQuality: quality) else { return nil }
             if data.count <= maxBytes { return data }
             var minQuality: CGFloat = 0.1
-            var maxQuality = compressionQuality
+            var maxQuality = quality
             while maxQuality - minQuality > 0.05 {
                 let mid = (minQuality + maxQuality) / 2
                 if let compressed = image.jpegData(compressionQuality: mid) {

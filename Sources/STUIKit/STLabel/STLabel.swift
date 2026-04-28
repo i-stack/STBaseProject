@@ -161,7 +161,6 @@ open class STLabel: UILabel, STLocalizable {
     }
     
     private func updateFontSize() {
-        let fontName = self.font.fontName
         self.font = UIFont.st_systemFont(ofSize: self.font.pointSize)
     }
     

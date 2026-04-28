@@ -8,6 +8,31 @@
 import Combine
 import Foundation
 
+private final class STCancellableBox {
+    private let lock = NSLock()
+    private var storage: AnyCancellable?
+
+    func set(_ cancellable: AnyCancellable) {
+        self.lock.lock()
+        self.storage = cancellable
+        self.lock.unlock()
+    }
+
+    func cancelAndClear() {
+        self.lock.lock()
+        let cancellable = self.storage
+        self.storage = nil
+        self.lock.unlock()
+        cancellable?.cancel()
+    }
+
+    func clear() {
+        self.lock.lock()
+        self.storage = nil
+        self.lock.unlock()
+    }
+}
+
 public class STRequest {
 
     private let stateLock = NSLock()
@@ -450,20 +475,20 @@ public class STDataStreamRequest: STRequest {
 
     public func bytes() -> AsyncThrowingStream<Data, Error> {
         return AsyncThrowingStream { continuation in
-            var cancellable: AnyCancellable?
-            cancellable = self.dataSubject.sink(
+            let cancellableBox = STCancellableBox()
+            let cancellable = self.dataSubject.sink(
                 receiveCompletion: { completion in
                     switch completion {
                     case .finished: continuation.finish()
                     case .failure(let error): continuation.finish(throwing: error)
                     }
-                    cancellable = nil
+                    cancellableBox.clear()
                 },
                 receiveValue: { continuation.yield($0) }
             )
+            cancellableBox.set(cancellable)
             continuation.onTermination = { [weak self] _ in
-                cancellable?.cancel()
-                cancellable = nil
+                cancellableBox.cancelAndClear()
                 self?.cancel()
             }
         }
@@ -471,20 +496,20 @@ public class STDataStreamRequest: STRequest {
 
     public func events() -> AsyncThrowingStream<STServerSentEvent, Error> {
         return AsyncThrowingStream { continuation in
-            var cancellable: AnyCancellable?
-            cancellable = self.eventSubject.sink(
+            let cancellableBox = STCancellableBox()
+            let cancellable = self.eventSubject.sink(
                 receiveCompletion: { completion in
                     switch completion {
                     case .finished: continuation.finish()
                     case .failure(let error): continuation.finish(throwing: error)
                     }
-                    cancellable = nil
+                    cancellableBox.clear()
                 },
                 receiveValue: { continuation.yield($0) }
             )
+            cancellableBox.set(cancellable)
             continuation.onTermination = { [weak self] _ in
-                cancellable?.cancel()
-                cancellable = nil
+                cancellableBox.cancelAndClear()
                 self?.cancel()
             }
         }
@@ -494,24 +519,25 @@ public class STDataStreamRequest: STRequest {
 private extension STRequest {
     func st_awaitPublisher<T>(_ publisher: AnyPublisher<T, Error>) async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
-            var cancellable: AnyCancellable?
+            let cancellableBox = STCancellableBox()
             var resumed = false
-            cancellable = publisher.sink(
+            let cancellable = publisher.sink(
                 receiveCompletion: { completion in
                     guard !resumed else { return }
                     if case .failure(let error) = completion {
                         resumed = true
                         continuation.resume(throwing: error)
                     }
-                    cancellable = nil
+                    cancellableBox.clear()
                 },
                 receiveValue: { value in
                     guard !resumed else { return }
                     resumed = true
                     continuation.resume(returning: value)
-                    cancellable = nil
+                    cancellableBox.clear()
                 }
             )
+            cancellableBox.set(cancellable)
         }
     }
 }
