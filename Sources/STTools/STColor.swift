@@ -14,7 +14,6 @@ public extension UIColor {
     /// 注意：颜色和透明度都从 Assets 中读取，如需调整透明度请使用 withAlphaComponent 方法
     /// - Parameter colorSet: 颜色集名称
     /// - Returns: UIColor 对象，如果找不到颜色集则返回 clear
-    @available(iOS 11.0, *)
     static func color(named colorSet: String) -> UIColor {
         guard !colorSet.isEmpty else {
             return UIColor.clear

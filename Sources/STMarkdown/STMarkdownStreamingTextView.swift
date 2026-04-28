@@ -76,12 +76,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
     }
 
     private var renderer: STMarkdownAttributedStringRenderer
-    private let textView: STShimmerTextView = {
-        if #available(iOS 16.0, *) {
-            return STShimmerTextView(usingTextLayoutManager: false)
-        }
-        return STShimmerTextView()
-    }()
+    private let textView: STShimmerTextView = STShimmerTextView(usingTextLayoutManager: false)
 
     // MARK: - Table View Overlay
 

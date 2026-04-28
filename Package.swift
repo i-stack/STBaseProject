@@ -6,13 +6,26 @@ import PackageDescription
 let package = Package(
     name: "STBaseProject",
     platforms: [
-        .iOS(.v13)
+        .iOS(.v16),
+        .macOS(.v12)
     ],
     products: [
         .library(
             name: "STBaseProject",
             targets: ["STBaseProject"]
         ),
+        .library(
+            name: "STContacts",
+            targets: ["STContacts"]
+        ),
+        .library(
+            name: "STLocation",
+            targets: ["STLocation"]
+        ),
+        .library(
+            name: "STMedia",
+            targets: ["STMedia"]
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", branch: "main"),
@@ -26,15 +39,27 @@ let package = Package(
                 .product(name: "SwiftMath", package: "SwiftMath")
             ],
             path: "Sources",
+            exclude: [
+                "STContacts",
+                "STLocation",
+                "STMedia"
+            ],
             resources: [
                 .process("STMarkdown/Resources")
             ]
         ),
-        .testTarget(
-            name: "STBaseProjectTests",
-            dependencies: ["STBaseProject"],
-            path: "Tests"
+        .target(
+            name: "STContacts",
+            path: "Sources/STContacts"
         ),
+        .target(
+            name: "STLocation",
+            path: "Sources/STLocation"
+        ),
+        .target(
+            name: "STMedia",
+            path: "Sources/STMedia"
+        )
     ],
     swiftLanguageVersions: [.v5]
 )

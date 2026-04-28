@@ -45,14 +45,17 @@ open class STTextView: STPlaceholderTextView {
     private var lastReportedHeight: CGFloat = 0
     private var _minInputHeight: CGFloat = 0
 
-    // MARK: - Appearance
-
     @IBInspectable open var cornerRadius: CGFloat {
         get { return self.layer.cornerRadius }
         set {
             self.layer.cornerRadius = newValue
-            self.layer.masksToBounds = newValue > 0
+            self.st_updateLiquidGlassCornerRadius()
         }
+    }
+    
+    @IBInspectable open var clipsContentToBounds: Bool {
+        get { return self.layer.masksToBounds }
+        set { self.layer.masksToBounds = newValue }
     }
 
     @IBInspectable open var borderWidth: CGFloat {

@@ -15,12 +15,7 @@ public class STShimmerRendererView: UIView {
 
     private var lastHeight: CGFloat = 0
     private let cursor = STShimmerCursorView()
-    private let renderer: STShimmerTextView = {
-        if #available(iOS 16.0, *) {
-            return STShimmerTextView(usingTextLayoutManager: false)
-        }
-        return STShimmerTextView()
-    }()
+    private let renderer: STShimmerTextView = STShimmerTextView(usingTextLayoutManager: false)
     private let controller = STShimmerController()
     weak var delegate: STShimmerRendererViewDelegate?
     

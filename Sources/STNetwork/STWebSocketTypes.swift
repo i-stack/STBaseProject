@@ -5,10 +5,8 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
-import Foundation
 import Network
-
-// MARK: - 连接状态机
+import Foundation
 
 public enum STWebSocketState: Equatable, Sendable {
     /// 初始未连接
@@ -23,8 +21,6 @@ public enum STWebSocketState: Equatable, Sendable {
     case disconnected(reason: STWebSocketCloseReason)
 }
 
-// MARK: - 关闭原因
-
 public enum STWebSocketCloseReason: Equatable, Sendable {
     /// 客户端主动调用 disconnect()
     case clientInitiated
@@ -38,8 +34,6 @@ public enum STWebSocketCloseReason: Equatable, Sendable {
     case appDidBackground
 }
 
-// MARK: - 错误
-
 public enum STWebSocketError: Error, Sendable {
     case invalidURL
     case notConnected
@@ -50,14 +44,12 @@ public enum STWebSocketError: Error, Sendable {
 }
 
 // MARK: - 消息类型
-
 public enum STWebSocketMessage: Sendable {
     case text(String)
     case data(Data)
 }
 
 // MARK: - 事件（对外事件流）
-
 public enum STWebSocketEvent: Sendable {
     case stateChanged(STWebSocketState)
     case messageReceived(STWebSocketMessage)
@@ -69,7 +61,6 @@ public enum STWebSocketEvent: Sendable {
 }
 
 // MARK: - 重连策略
-
 public struct STWebSocketReconnectPolicy: Sendable {
     /// 最大重连次数；0 表示不重连
     public var maxAttempts: Int
@@ -99,7 +90,6 @@ public struct STWebSocketReconnectPolicy: Sendable {
 }
 
 // MARK: - 心跳配置
-
 public struct STWebSocketHeartbeatConfig: Sendable {
     /// Ping 间隔（秒）；0 表示禁用
     public var interval: TimeInterval
@@ -121,8 +111,6 @@ public struct STWebSocketHeartbeatConfig: Sendable {
     }
 }
 
-// MARK: - 后台行为
-
 public enum STWebSocketBackgroundBehavior: Sendable {
     /// 进入后台立即断开，回到前台自动重连
     case disconnectOnBackground
@@ -131,8 +119,6 @@ public enum STWebSocketBackgroundBehavior: Sendable {
     /// 进入后台暂停心跳，连接不主动断开，回来后恢复心跳
     case pauseHeartbeat
 }
-
-// MARK: - 总配置
 
 public struct STWebSocketConfig: Sendable {
     public var url: URL

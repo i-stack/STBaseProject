@@ -6,8 +6,8 @@
 //
 
 import UIKit
-import Foundation
 import Combine
+import Foundation
 
 // MARK: - 错误类型枚举
 public enum STBaseError: LocalizedError {
@@ -200,66 +200,107 @@ open class STBaseViewModel: NSObject {
     }
     
     // MARK: - 网络请求核心方法
-    open func st_request<T: Codable>(url: String,
-                                   method: STHTTPMethod = .get,
-                                   parameters: [String: Any]? = nil,
-                                   encodingType: STParameterEncoder.EncodingType = .json,
-                                   responseType: T.Type,
-                                   completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_requestPublisher<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        self.httpSession.st_request(url: url,
-                              method: method,
-                              parameters: parameters, 
-                              encodingType: encodingType, 
-                              requestConfig: requestConfig, 
-                              requestHeaders: requestHeaders) { [weak self] response in
-            guard let strongSelf = self else { return }
-            strongSelf.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
-        }
+        return self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
+        .prefix(1)
+        .tryMap { [weak self] response -> T in
+            guard let self = self else {
+                throw STBaseError.unknown
+            }
+            let result = self.st_resultFromHTTPResponse(response, responseType: responseType)
+            switch result {
+            case .success(let value):
+                return value
+            case .failure(let error):
+                throw error
+            }
+        }.mapError { error -> STBaseError in
+            if let baseError = error as? STBaseError {
+                return baseError
+            }
+            return STBaseError.origin(error: error)
+        }.handleEvents(
+            receiveOutput: { [weak self] _ in
+                self?.loadingState.send(.loaded)
+                self?.dataUpdated.send()
+            },
+            receiveCompletion: { [weak self] completion in
+                guard let self = self else { return }
+                if case .failure(let error) = completion {
+                    self.loadingState.send(.failed(error))
+                    if self.retryCount < self.requestConfig.retryCount {
+                        self.retryCount += 1
+                    }
+                }
+            }
+        ).eraseToAnyPublisher()
+    }
+
+    public func st_request<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
+        self.st_requestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType, responseType: responseType)
+        .sink(
+            receiveCompletion: { state in
+                if case .failure(let error) = state {
+                    completion(.failure(error))
+                }
+            },
+            receiveValue: { value in
+                completion(.success(value))
+            }
+        ).store(in: &self.cancellables)
+    }
+
+    open func st_dispatchRequestPublisher(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType) -> AnyPublisher<STHTTPResponse, Never> {
+        self.httpSession.request(url,method: method, parameters: parameters, encoding: encodingType, headers: self.requestHeaders, requestConfig: self.requestConfig).responsePublisher.eraseToAnyPublisher()
+    }
+
+    open func st_dispatchRequest(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType, completion: @escaping (STHTTPResponse) -> Void) {
+        self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType).sink(receiveValue: completion).store(in: &self.cancellables)
+    }
+
+    public func st_getPublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+        self.st_requestPublisher(url: url, method: .get, parameters: parameters, responseType: responseType)
+    }
+
+    public func st_postPublisher<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+        self.st_requestPublisher(url: url, method: .post, parameters: parameters, responseType: responseType)
+    }
+
+    public func st_putPublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+        self.st_requestPublisher(url: url, method: .put, parameters: parameters, responseType: responseType)
+    }
+
+    public func st_deletePublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+        self.st_requestPublisher(url: url, method: .delete, parameters: parameters, responseType: responseType)
     }
     
-    open func st_get<T: Codable>(url: String,
-                                parameters: [String: Any]? = nil,
-                                responseType: T.Type,
-                                completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_get<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .get, parameters: parameters, responseType: responseType, completion: completion)
     }
     
-    open func st_post<T: Codable>(url: String,
-                                 parameters: [String: Any]? = nil,
-                                 responseType: T.Type,
-                                 completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_post<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .post, parameters: parameters, responseType: responseType, completion: completion)
     }
     
-    open func st_put<T: Codable>(url: String,
-                                parameters: [String: Any]? = nil,
-                                responseType: T.Type,
-                                completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_put<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .put, parameters: parameters, responseType: responseType, completion: completion)
     }
     
-    open func st_delete<T: Codable>(url: String,
-                                   parameters: [String: Any]? = nil,
-                                   responseType: T.Type,
-                                   completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_delete<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .delete, parameters: parameters, responseType: responseType, completion: completion)
     }
     
-    open func st_request<T: Codable>(_ request: URLRequest, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
+    public func st_request<T: Codable>(_ request: URLRequest, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         guard let url = request.url?.absoluteString else {
             completion(.failure(.dataError("无效的 URL")))
             return
         }
         let method = STHTTPMethod(rawValue: request.httpMethod ?? "GET") ?? .get
         let parameters = st_extractParameters(from: request)
-        self.st_request(url: url,
-                  method: method,
-                  parameters: parameters, 
-                  responseType: responseType, 
-                  completion: completion)
+        self.st_request(url: url,method: method, parameters: parameters, responseType: responseType, completion: completion)
     }
     
     // MARK: - 参数提取（用于 URLRequest）
@@ -314,86 +355,57 @@ open class STBaseViewModel: NSObject {
     
     // MARK: - 响应处理
     private func st_decodeResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> Result<T, STBaseError> {
-        guard let data = httpResponse.data else {
-            print("==================== st_decodeResponse - 响应数据为空 ====================")
-            return .failure(.dataError("响应数据为空"))
-        }
-        if data.isEmpty {
-            print("==================== st_decodeResponse - 响应数据为空 ====================")
+        guard let data = httpResponse.data, !data.isEmpty else {
             return .failure(.dataError("响应数据为空"))
         }
         do {
-            let decoder = JSONDecoder()
-            let result = try decoder.decode(responseType, from: data)
-            return .success(result)
+            return .success(try JSONDecoder().decode(responseType, from: data))
         } catch DecodingError.keyNotFound(let key, let context) {
-            let errorMessage = "JSON解析失败：缺少必需的字段 '\(key.stringValue)'，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
-            print("==================== st_decodeResponse - keyNotFound ====================")
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("原始JSON数据:")
-                print(jsonString)
-            }
-            print("错误: \(errorMessage)")
-            print("======================================================")
-            return .failure(.dataError(errorMessage))
+            let message = "JSON解析失败：缺少必需的字段 '\(key.stringValue)'，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
+            self.st_logDecodeError("keyNotFound", message: message, data: data)
+            return .failure(.dataError(message))
         } catch DecodingError.valueNotFound(let value, let context) {
-            let errorMessage = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 的值为空，期望类型：\(value)"
-            print("==================== st_decodeResponse - valueNotFound ====================")
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("原始JSON数据:")
-                print(jsonString)
-            }
-            print("错误: \(errorMessage)")
-            print("======================================================")
-            return .failure(.dataError(errorMessage))
+            let message = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 的值为空，期望类型：\(value)"
+            self.st_logDecodeError("valueNotFound", message: message, data: data)
+            return .failure(.dataError(message))
         } catch DecodingError.typeMismatch(let type, let context) {
-            let errorMessage = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 类型不匹配，期望：\(type)，实际：\(context.debugDescription)"
-            print("==================== st_decodeResponse - typeMismatch ====================")
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("原始JSON数据:")
-                print(jsonString)
-            }
-            print("错误: \(errorMessage)")
-            print("======================================================")
-            return .failure(.dataError(errorMessage))
+            let message = "JSON解析失败：字段 '\(context.codingPath.map { $0.stringValue }.joined(separator: "."))' 类型不匹配，期望：\(type)，实际：\(context.debugDescription)"
+            self.st_logDecodeError("typeMismatch", message: message, data: data)
+            return .failure(.dataError(message))
         } catch DecodingError.dataCorrupted(let context) {
-            let errorMessage = "JSON解析失败：数据损坏，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))，原因：\(context.debugDescription)"
-            print("==================== st_decodeResponse - dataCorrupted ====================")
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("原始JSON数据:")
-                print(jsonString)
-            }
-            print("错误: \(errorMessage)")
-            print("======================================================")
-            return .failure(.dataError(errorMessage))
+            let message = "JSON解析失败：数据损坏，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))，原因：\(context.debugDescription)"
+            self.st_logDecodeError("dataCorrupted", message: message, data: data)
+            return .failure(.dataError(message))
         } catch {
-            let errorMessage = "JSON解析失败：\(error.localizedDescription)"
-            print("==================== st_decodeResponse - 其他错误 ====================")
-            if let jsonString = String(data: data, encoding: .utf8) {
-                print("原始JSON数据:")
-                print(jsonString)
-            }
-            print("错误: \(errorMessage)")
-            print("======================================================")
-            return .failure(.dataError(errorMessage))
+            let message = "JSON解析失败：\(error.localizedDescription)"
+            self.st_logDecodeError("unknown", message: message, data: data)
+            return .failure(.dataError(message))
         }
     }
+
+    private func st_logDecodeError(_ tag: String, message: String, data: Data) {
+        var log = "[st_decodeResponse][\(tag)] \(message)"
+        if let jsonString = String(data: data, encoding: .utf8) {
+            log += "\n原始数据: \(jsonString)"
+        }
+        STLog(log)
+    }
     
-    private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse,
-                                                 responseType: T.Type,
-                                                 completion: @escaping (Result<T, STBaseError>) -> Void) {
-        if httpResponse.isSuccess {
-            let decodeResult = self.st_decodeResponse(httpResponse, responseType: responseType)
-            switch decodeResult {
-            case .success(let result):
-                self.st_handleSuccess(result, completion: completion)
-            case .failure(let error):
-                self.st_handleError(error, completion: completion)
-            }
-        } else {
-            let error = self.st_convertHTTPError(httpResponse.error)
+    private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
+        let result = self.st_resultFromHTTPResponse(httpResponse, responseType: responseType)
+        switch result {
+        case .success(let value):
+            self.st_handleSuccess(value, completion: completion)
+        case .failure(let error):
             self.st_handleError(error, completion: completion)
         }
+    }
+
+    private func st_resultFromHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> Result<T, STBaseError> {
+        if httpResponse.isSuccess {
+            return self.st_decodeResponse(httpResponse, responseType: responseType)
+        }
+        return .failure(self.st_convertHTTPError(httpResponse.error))
     }
     
     private func st_convertHTTPError(_ error: Error?) -> STBaseError {
@@ -436,7 +448,7 @@ open class STBaseViewModel: NSObject {
     }
     
     // MARK: - 缓存管理
-    open func st_setCache(_ object: Any, forKey key: String) {
+    public func st_setCache(_ object: Any, forKey key: String) {
         let cacheKey = NSString(string: key)
         self.cache.setObject(object as AnyObject, forKey: cacheKey)
         if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
@@ -444,7 +456,7 @@ open class STBaseViewModel: NSObject {
         }
     }
     
-    open func st_getCache(forKey key: String) -> Any? {
+    public func st_getCache(forKey key: String) -> Any? {
         let cacheKey = NSString(string: key)
         if let cachedObject = self.cache.object(forKey: cacheKey) {
             return cachedObject
@@ -455,7 +467,7 @@ open class STBaseViewModel: NSObject {
         return nil
     }
     
-    open func st_removeCache(forKey key: String) {
+    public func st_removeCache(forKey key: String) {
         let cacheKey = NSString(string: key)
         self.cache.removeObject(forKey: cacheKey)
         if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
@@ -463,7 +475,7 @@ open class STBaseViewModel: NSObject {
         }
     }
     
-    open func st_clearCache() {
+    public func st_clearCache() {
         self.cache.removeAllObjects()
         if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
             self.st_clearDiskCache()
@@ -510,18 +522,18 @@ open class STBaseViewModel: NSObject {
     }
     
     // MARK: - 数据验证
-    open func st_validateData<T>(_ data: T) -> Bool {
+    public func st_validateData<T>(_ data: T) -> Bool {
         // 子类可以重写此方法进行数据验证
         return true
     }
     
-    open func st_validateResponse<T>(_ response: T) -> Bool {
+    public func st_validateResponse<T>(_ response: T) -> Bool {
         // 子类可以重写此方法进行响应验证
         return true
     }
     
     // MARK: - 工具方法
-    open func st_createRequest(url: URL, method: String = "GET", body: Data? = nil) -> URLRequest {
+    public func st_createRequest(url: URL, method: String = "GET", body: Data? = nil) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.httpBody = body
@@ -538,7 +550,7 @@ open class STBaseViewModel: NSObject {
         return request
     }
     
-    open func st_parseJSON<T: Codable>(_ data: Data, type: T.Type) -> Result<T, STBaseError> {
+    public func st_parseJSON<T: Codable>(_ data: Data, type: T.Type) -> Result<T, STBaseError> {
         let result = data.decodeResult(type)
         switch result {
         case .success(let decoded):
@@ -548,7 +560,7 @@ open class STBaseViewModel: NSObject {
         }
     }
     
-    open func st_toJSON<T: Codable>(_ object: T) -> Result<Data, STBaseError> {
+    public func st_toJSON<T: Codable>(_ object: T) -> Result<Data, STBaseError> {
         let result = object.encodeToJSONData()
         switch result {
         case .success(let data):
@@ -559,29 +571,24 @@ open class STBaseViewModel: NSObject {
     }
     
     // MARK: - 文件上传和下载
-    open func st_upload<T: Codable>(url: String,
-                                   parameters: [String: Any]? = nil,
-                                   files: [STUploadFile],
-                                   responseType: T.Type,
-                                   progress: ((STUploadProgress) -> Void)? = nil,
-                                   completion: @escaping (Result<T, STBaseError>) -> Void) {
-        
+    public func st_upload<T: Codable>(url: String, parameters: [String: Any]? = nil, files: [STUploadFile], responseType: T.Type, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (Result<T, STBaseError>) -> Void) {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        
-        self.httpSession.st_upload(url: url, files: files, parameters: parameters, requestConfig: self.requestConfig, requestHeaders: self.requestHeaders, progress: progress) { [weak self] response in
-            self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
+        let uploadRequest = self.httpSession.upload(url, files: files, parameters: parameters, headers: self.requestHeaders, requestConfig: self.requestConfig)
+        if let progress = progress {
+            uploadRequest.progressPublisher.sink(receiveValue: progress).store(in: &self.cancellables)
         }
+        uploadRequest.responsePublisher.sink { [weak self] response in
+            self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
+        }.store(in: &self.cancellables)
     }
     
-    open func st_download(url: String,
-                         progress: ((STUploadProgress) -> Void)? = nil,
-                         completion: @escaping (URL?, STBaseError?) -> Void) {
+    public func st_download(url: String, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (URL?, STBaseError?) -> Void) {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        self.httpSession.st_request(url: url, method: .get, parameters: nil, encodingType: .json, requestConfig: self.requestConfig, requestHeaders: self.requestHeaders) { [weak self] response in
+        self.httpSession.request(url, method: .get, parameters: nil, encoding: .json, headers: self.requestHeaders, requestConfig: self.requestConfig).responsePublisher.sink { [weak self] response in
             if response.isSuccess, let data = response.data {
                 let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
                 do {
@@ -598,11 +605,11 @@ open class STBaseViewModel: NSObject {
                 self?.loadingState.send(.failed(error))
                 completion(nil, error)
             }
-        }
+        }.store(in: &self.cancellables)
     }
     
     // MARK: - 内存管理
-    open func st_cleanup() {
+    public func st_cleanup() {
         self.cancellables.removeAll()
         self.cache.removeAllObjects()
         self.retryCount = 0
@@ -656,26 +663,23 @@ extension STBaseViewModel {
     
     /// 调试方法：打印原始响应数据
     public func st_debugResponse(_ response: STHTTPResponse) {
-        print("=== HTTP 响应调试信息 ===")
-        print("状态码: \(response.statusCode)")
-        print("是否成功: \(response.isSuccess)")
-        print("响应头: \(response.headers)")
-        
+        STLog("=== HTTP 响应调试信息 ===")
+        STLog("状态码: \(response.statusCode)")
+        STLog("是否成功: \(response.isSuccess)")
+        STLog("响应头: \(response.headers)")
         if let data = response.data {
-            print("数据大小: \(data.count) bytes")
+            STLog("数据大小: \(data.count) bytes")
             if let jsonString = String(data: data, encoding: .utf8) {
-                print("原始 JSON: \(jsonString)")
+                STLog("原始 JSON: \(jsonString)")
             } else {
-                print("数据不是有效的 UTF-8 字符串")
+                STLog("数据不是有效的 UTF-8 字符串")
             }
         } else {
-            print("响应数据为空")
+            STLog("响应数据为空")
         }
-        
         if let error = response.error {
-            print("错误信息: \(error.localizedDescription)")
+            STLog("错误信息: \(error.localizedDescription)")
         }
-        print("========================")
     }
     
     /// 设置自定义请求头

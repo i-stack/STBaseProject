@@ -12,7 +12,7 @@ import WebKit
 /// - 全局单例，序列化渲染队列（避免并发冲突），缓存复用
 /// - Mermaid.js 从 SPM Bundle 资源包加载（Bundle.module）
 @MainActor
-public final class STMarkdownMermaidRenderer: NSObject {
+public class STMarkdownMermaidRenderer: NSObject {
 
     public static let shared = STMarkdownMermaidRenderer()
 

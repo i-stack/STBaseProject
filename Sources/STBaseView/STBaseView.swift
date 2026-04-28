@@ -257,7 +257,6 @@ open class STBaseView: UIView {
     }
 
     private func applyOverrideStyle() {
-        guard #available(iOS 13.0, *) else { return }
         switch STAppearanceManager.shared.currentMode {
         case .system: self.overrideUserInterfaceStyle = .unspecified
         case .light:  self.overrideUserInterfaceStyle = .light
@@ -285,12 +284,12 @@ open class STBaseView: UIView {
         case .table:
             if let tv = self._tableView {
                 tv.contentInset.bottom = safeAreaInsets.bottom
-                tv.scrollIndicatorInsets.bottom = safeAreaInsets.bottom
+                tv.verticalScrollIndicatorInsets.bottom = safeAreaInsets.bottom
             }
         case .collection:
             if let cv = self._collectionView {
                 cv.contentInset.bottom = safeAreaInsets.bottom
-                cv.scrollIndicatorInsets.bottom = safeAreaInsets.bottom
+                cv.verticalScrollIndicatorInsets.bottom = safeAreaInsets.bottom
             }
         default:
             break
@@ -299,12 +298,8 @@ open class STBaseView: UIView {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        guard #available(iOS 13.0, *) else { return }
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
         let currentStyle = self.traitCollection.userInterfaceStyle
-        // 响应任何 userInterfaceStyle 变化：
-        // - 独立使用时：Combine 设置 overrideUserInterfaceStyle 后由此触发
-        // - 在 STBaseViewController 内：VC 的 overrideUserInterfaceStyle 通过 trait 级联到此
         guard previousStyle != currentStyle, previousStyle != .unspecified else { return }
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
         self.st_appearanceDidChange(resolvedStyle: style == .unspecified ? .light : style)
@@ -597,9 +592,9 @@ extension STBaseView {
 extension STBaseView {
     
     private struct StateKeys {
-        static var loading = "st_loadingView"
-        static var empty = "st_emptyView"
-        static var error = "st_errorView"
+        static var loading: UInt8 = 0
+        static var empty: UInt8 = 0
+        static var error: UInt8 = 0
     }
 
     private func st_makeStateView(_ text: String) -> UIView {

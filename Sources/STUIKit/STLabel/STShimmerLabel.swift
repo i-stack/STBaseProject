@@ -7,7 +7,7 @@
 
 import UIKit
 
-public class STShimmerLabel: UILabel {
+public class STShimmerLabel: STLabel {
     
     private let gradientLayer = CAGradientLayer()
     private let textMaskLayer = CATextLayer()

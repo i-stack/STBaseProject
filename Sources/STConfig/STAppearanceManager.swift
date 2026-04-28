@@ -48,44 +48,31 @@ public final class STAppearanceManager {
     /// 计算在当前配置下应该使用的 UIUserInterfaceStyle
     /// - Parameter traitCollection: 参考的 trait（为空则只根据 currentMode 决定）
     public func resolvedInterfaceStyle(for traitCollection: UITraitCollection?) -> UIUserInterfaceStyle {
-        #if swift(>=5.1)
-        if #available(iOS 13.0, *) {
-            switch currentMode {
-            case .system:
-                return traitCollection?.userInterfaceStyle ?? .unspecified
-            case .light:
-                return .light
-            case .dark:
-                return .dark
-            }
+        switch currentMode {
+        case .system:
+            return traitCollection?.userInterfaceStyle ?? .unspecified
+        case .light:
+            return .light
+        case .dark:
+            return .dark
         }
-        #endif
-        // iOS 12 及以下仅支持浅色
-        return .light
     }
     
     /// 是否应展示深色内容
     /// - Parameter traitCollection: 参考的 trait
     public func shouldUseDarkAppearance(for traitCollection: UITraitCollection?) -> Bool {
-        if #available(iOS 13.0, *) {
-            let style = resolvedInterfaceStyle(for: traitCollection)
-            if currentMode == .system && style == .unspecified {
-                return traitCollection?.userInterfaceStyle == .dark
-            }
-            return style == .dark
+        let style = resolvedInterfaceStyle(for: traitCollection)
+        if currentMode == .system && style == .unspecified {
+            return traitCollection?.userInterfaceStyle == .dark
         }
-        return currentMode == .dark
+        return style == .dark
     }
     
     /// 创建一个与 SDK 外观联动的动态颜色（可用于代码/XIB/SwiftUI）
     public func dynamicColor(light: UIColor, dark: UIColor) -> UIColor {
-        if #available(iOS 13.0, *) {
-            return UIColor { [weak self] trait in
-                guard let self = self else { return light }
-                return self.shouldUseDarkAppearance(for: trait) ? dark : light
-            }
-        } else {
-            return currentMode == .dark ? dark : light
+        return UIColor { [weak self] trait in
+            guard let self = self else { return light }
+            return self.shouldUseDarkAppearance(for: trait) ? dark : light
         }
     }
     
@@ -95,23 +82,18 @@ public final class STAppearanceManager {
     ///   - dark: 深色图片（可为空，默认为浅色图）
     public func dynamicImage(light: UIImage?, dark: UIImage?) -> UIImage? {
         guard let light = light else { return dark }
-        if #available(iOS 13.0, *) {
-            let asset = UIImageAsset()
-            asset.register(light, with: UITraitCollection(userInterfaceStyle: .light))
-            asset.register((dark ?? light), with: UITraitCollection(userInterfaceStyle: .dark))
-            let style = resolvedInterfaceStyle(for: nil)
-            let trait = UITraitCollection(userInterfaceStyle: style == .unspecified ? .light : style)
-            return asset.image(with: trait)
-        } else {
-            return currentMode == .dark ? (dark ?? light) : light
-        }
+        let asset = UIImageAsset()
+        asset.register(light, with: UITraitCollection(userInterfaceStyle: .light))
+        asset.register((dark ?? light), with: UITraitCollection(userInterfaceStyle: .dark))
+        let style = resolvedInterfaceStyle(for: nil)
+        let trait = UITraitCollection(userInterfaceStyle: style == .unspecified ? .light : style)
+        return asset.image(with: trait)
     }
 }
 
 #if canImport(SwiftUI)
 import SwiftUI
 
-@available(iOS 13.0, *)
 public extension Color {
     /// 根据 SDK 外观生成 Color
     static func st_dynamic(light: UIColor, dark: UIColor) -> Color {

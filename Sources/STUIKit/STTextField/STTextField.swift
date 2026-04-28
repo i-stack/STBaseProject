@@ -21,6 +21,7 @@ public extension STTextFieldDelegate {
     func st_textFieldBackwardKeyPressed(textField: STTextField) {}
 }
 
+@IBDesignable
 open class STTextField: UITextField {
 
     open var textIsCheck: Bool = false
@@ -47,17 +48,26 @@ open class STTextField: UITextField {
         }
     }
 
-    @IBInspectable var cornerRadius: CGFloat {
+    @IBInspectable open var cornerRadius: CGFloat {
         get {
             return self.layer.cornerRadius
         }
         set {
             self.layer.cornerRadius = newValue
-            self.layer.masksToBounds = newValue > 0
+            self.st_updateLiquidGlassCornerRadius()
         }
     }
     
-    @IBInspectable var borderWidth: CGFloat {
+    @IBInspectable open var clipsContentToBounds: Bool {
+        get {
+            return self.layer.masksToBounds
+        }
+        set {
+            self.layer.masksToBounds = newValue
+        }
+    }
+    
+    @IBInspectable open var borderWidth: CGFloat {
         get {
             return self.layer.borderWidth
         }
@@ -66,7 +76,7 @@ open class STTextField: UITextField {
         }
     }
     
-    @IBInspectable var borderColor: UIColor {
+    @IBInspectable open var borderColor: UIColor {
         get {
             guard let cgColor = self.layer.borderColor else {
                 return .clear
@@ -75,6 +85,34 @@ open class STTextField: UITextField {
         }
         set {
             self.layer.borderColor = newValue.cgColor
+        }
+    }
+    
+    @IBInspectable open var isLiquidGlassEnabled: Bool = false {
+        didSet {
+            if self.isLiquidGlassEnabled {
+                self.updateLiquidGlassBackground()
+            } else {
+                self.st_disableLiquidGlassBackground()
+            }
+        }
+    }
+    
+    @IBInspectable open var liquidGlassTintColor: UIColor = UIColor.white.withAlphaComponent(0.18) {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassHighlightOpacity: Float = 0.45 {
+        didSet {
+            self.updateLiquidGlassBackground()
+        }
+    }
+    
+    @IBInspectable open var liquidGlassBorderColor: UIColor = UIColor.white.withAlphaComponent(0.45) {
+        didSet {
+            self.updateLiquidGlassBackground()
         }
     }
     
@@ -168,6 +206,7 @@ open class STTextField: UITextField {
     
     open override func layoutSubviews() {
         super.layoutSubviews()
+        self.st_updateLiquidGlassCornerRadius()
         if self.isPasswordToggleEnabled, let container = self.rightView, let button = self.passwordToggleButton {
             button.center = CGPoint(x: container.bounds.midX, y: container.bounds.midY)
         }
@@ -351,5 +390,24 @@ open class STTextField: UITextField {
         }
         guard let inputText = textField.text, inputText.count > self.maxTextCount else { return }
         textField.text = String(inputText.prefix(self.maxTextCount))
+    }
+    
+    private func updateLiquidGlassBackground() {
+        guard self.isLiquidGlassEnabled else { return }
+        self.st_enableLiquidGlassBackground(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor
+        )
+    }
+}
+
+// MARK: - STLocalizable
+extension STTextField: STLocalizable {
+    public func st_updateLocalizedText() {
+        let key = self.localizedPlaceholder
+        if !key.isEmpty {
+            self.placeholder = key.localized
+        }
     }
 }

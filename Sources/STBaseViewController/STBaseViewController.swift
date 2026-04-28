@@ -68,6 +68,7 @@ open class STBaseViewController: UIViewController {
         super.viewDidLoad()
         self.setupNavigationBar()
         self.setupAppearanceObservation()
+        self.setupLocalizationObservation()
         self.finalizeLayout()
     }
 
@@ -83,6 +84,7 @@ open class STBaseViewController: UIViewController {
 
     deinit {
         self.contentOffsetObservation?.invalidate()
+        NotificationCenter.default.removeObserver(self, name: .stLanguageDidChange, object: nil)
     }
 
     private func setupNavigationBar() {
@@ -161,6 +163,15 @@ open class STBaseViewController: UIViewController {
         self.rightBtn.titleLabel?.font = self.buttonTitleFont
     }
 
+    private func setupLocalizationObservation() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.st_updateLocalizedTexts),
+            name: .stLanguageDidChange,
+            object: nil
+        )
+    }
+
     private func setupAppearanceObservation() {
         self.st_refreshAppearance(animated: false)
         self.appearanceCancellable = STAppearanceManager.shared.appearanceModePublisher
@@ -176,7 +187,6 @@ open class STBaseViewController: UIViewController {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        guard #available(iOS 13.0, *) else { return }
         guard STAppearanceManager.shared.currentMode == .system else { return }
 
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
@@ -188,12 +198,10 @@ open class STBaseViewController: UIViewController {
 
     private func st_refreshAppearance(animated: Bool = false) {
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
-        if #available(iOS 13.0, *) {
-            switch STAppearanceManager.shared.currentMode {
-            case .system: self.overrideUserInterfaceStyle = .unspecified
-            case .light:  self.overrideUserInterfaceStyle = .light
-            case .dark:   self.overrideUserInterfaceStyle = .dark
-            }
+        switch STAppearanceManager.shared.currentMode {
+        case .system: self.overrideUserInterfaceStyle = .unspecified
+        case .light:  self.overrideUserInterfaceStyle = .light
+        case .dark:   self.overrideUserInterfaceStyle = .dark
         }
 
         let resolvedStyle: UIUserInterfaceStyle = style == .unspecified ? .light : style

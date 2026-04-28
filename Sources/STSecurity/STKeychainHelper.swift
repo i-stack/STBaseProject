@@ -74,15 +74,6 @@ public enum STKeychainAccessControl {
 public enum STKeychainSync {
     case none
     case iCloud
-    
-    var secAttrSynchronizable: CFString? {
-        switch self {
-        case .none:
-            return kSecAttrSynchronizable
-        case .iCloud:
-            return kSecAttrSynchronizable
-        }
-    }
 }
 
 public enum STKeychainError: Error, LocalizedError {
@@ -164,12 +155,8 @@ public class STKeychainHelper {
     /// - Throws: STKeychainError
     public static func st_saveData(_ key: String, data: Data, accessControl: STKeychainAccessControl? = nil, sync: STKeychainSync = .none) throws {
         try? st_delete(key)
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecAttrService as String: service,
-            kSecValueData as String: data
-        ]
+        var query = st_baseQuery(for: key)
+        query[kSecValueData as String] = data
         if let accessControl = accessControl {
             query[kSecAttrAccessControl as String] = accessControl.secAccessControl
         }
@@ -191,19 +178,28 @@ public class STKeychainHelper {
     ///   - accessControl: 访问控制（可选）
     /// - Returns: 数据，如果不存在返回 nil
     /// - Throws: STKeychainError
-    public static func st_loadData(_ key: String, accessControl: STKeychainAccessControl? = nil) throws -> Data? {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecAttrService as String: service,
-            kSecReturnData as String: kCFBooleanTrue!,
-            kSecMatchLimit as String: kSecMatchLimitOne
-        ]
+    public static func st_loadData(_ key: String,
+                                   accessControl: STKeychainAccessControl? = nil,
+                                   authenticationContext: LAContext? = nil,
+                                   authenticationPrompt: String? = nil) throws -> Data? {
+        var query = st_baseQuery(for: key)
+        query[kSecReturnData as String] = kCFBooleanTrue!
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
         if let accessControl = accessControl {
             query[kSecAttrAccessControl as String] = accessControl.secAccessControl
         }
-        if let accessGroup = accessGroup {
-            query[kSecAttrAccessGroup as String] = accessGroup
+        if let authenticationContext {
+            query[kSecUseAuthenticationContext as String] = authenticationContext
+        }
+        if let authenticationPrompt, !authenticationPrompt.isEmpty {
+            let context: LAContext
+            if let authenticationContext {
+                context = authenticationContext
+            } else {
+                context = LAContext()
+                query[kSecUseAuthenticationContext as String] = context
+            }
+            context.localizedReason = authenticationPrompt
         }
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
@@ -223,11 +219,7 @@ public class STKeychainHelper {
     /// - Parameter key: 键名
     /// - Throws: STKeychainError
     public static func st_delete(_ key: String) throws {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecAttrService as String: service
-        ]
+        let query = st_baseQuery(for: key)
         let status = SecItemDelete(query as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw STKeychainError.unhandledError(status: status)
@@ -238,13 +230,9 @@ public class STKeychainHelper {
     /// - Parameter key: 键名
     /// - Returns: 是否存在
     public static func st_exists(_ key: String) -> Bool {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key,
-            kSecAttrService as String: service,
-            kSecReturnData as String: kCFBooleanFalse!,
-            kSecMatchLimit as String: kSecMatchLimitOne
-        ]
+        var query = st_baseQuery(for: key)
+        query[kSecReturnData as String] = kCFBooleanFalse!
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
         let status = SecItemCopyMatching(query as CFDictionary, nil)
         return status == errSecSuccess
     }
@@ -399,13 +387,8 @@ public class STKeychainHelper {
         return .none
     }
     
-    /// 使用生物识别保存数据到 Keychain
-    /// - Parameters:
-    ///   - key: 键名
-    ///   - data: 数据
-    ///   - reason: 生物识别提示原因
-    /// - Throws: STKeychainError
-    public static func st_saveWithBiometric(_ key: String, data: Data, reason: String = "使用生物识别保护您的数据") throws {
+    /// 使用生物识别保存数据到 Keychain（保存时无需生物识别提示，提示仅在读取时出现）
+    public static func st_saveWithBiometric(_ key: String, data: Data) throws {
         guard st_isBiometricAvailable() else {
             throw STKeychainError.biometricNotAvailable
         }
@@ -422,7 +405,13 @@ public class STKeychainHelper {
         guard st_isBiometricAvailable() else {
             throw STKeychainError.biometricNotAvailable
         }
-        return try st_loadData(key, accessControl: .biometricCurrentSet)
+        let context = LAContext()
+        return try st_loadData(
+            key,
+            accessControl: .biometricCurrentSet,
+            authenticationContext: context,
+            authenticationPrompt: reason
+        )
     }
     
     // MARK: - 工具方法
@@ -462,5 +451,17 @@ public class STKeychainHelper {
             return 0
         }
         return items.count
+    }
+
+    private static func st_baseQuery(for key: String) -> [String: Any] {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecAttrService as String: service
+        ]
+        if let accessGroup = accessGroup {
+            query[kSecAttrAccessGroup as String] = accessGroup
+        }
+        return query
     }
 }

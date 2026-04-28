@@ -29,9 +29,7 @@ open class STBtn: UIButton {
     private var gradientColors: [UIColor]?
     private var gradientStartPoint: CGPoint = CGPoint(x: 0, y: 0)
     private var gradientEndPoint: CGPoint = CGPoint(x: 1, y: 1)
-    private var liquidGlassEffectView: UIVisualEffectView?
-    private var liquidGlassHighlightLayer: CAGradientLayer?
-    private var liquidGlassBorderLayer: CAShapeLayer?
+    private var liquidGlassView: STLiquidGlassView?
     
     public var backgroundStyle: STBtnBackgroundStyle = .normal {
         didSet {
@@ -157,39 +155,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 高亮时是否自动调整图片（IBInspectable）
-    /// 当为 true 时，按钮高亮时会自动调整图片的亮度
-    @IBInspectable open override var adjustsImageWhenHighlighted: Bool {
-        get {
-            return super.adjustsImageWhenHighlighted
-        }
-        set {
-            super.adjustsImageWhenHighlighted = newValue
-        }
-    }
-    
-    /// 禁用时是否自动调整图片（IBInspectable）
-    /// 当为 true 时，按钮禁用时会自动调整图片的亮度
-    @IBInspectable open override var adjustsImageWhenDisabled: Bool {
-        get {
-            return super.adjustsImageWhenDisabled
-        }
-        set {
-            super.adjustsImageWhenDisabled = newValue
-        }
-    }
-    
-    /// 高亮时是否显示触摸效果（IBInspectable）
-    /// 当为 true 时，按钮高亮时会显示一个圆形的高亮效果
-    @IBInspectable open override var showsTouchWhenHighlighted: Bool {
-        get {
-            return super.showsTouchWhenHighlighted
-        }
-        set {
-            super.showsTouchWhenHighlighted = newValue
-        }
-    }
-    
     /// 阴影偏移宽度（IBInspectable）
     @IBInspectable open var shadowOffsetWidth: CGFloat {
         get {
@@ -285,20 +250,20 @@ open class STBtn: UIButton {
     private func updateContentHorizontalPadding() {
         guard self.contentHorizontalPadding > 0 else {
             // 如果边距为 0，清除水平方向的边距，保留垂直方向的边距
-            let currentInsets = self.contentEdgeInsets
+            let currentInsets = self.st_currentContentInsets()
             if currentInsets.left != 0 || currentInsets.right != 0 {
-                self.contentEdgeInsets = UIEdgeInsets(
+                self.st_applyContentInsets(UIEdgeInsets(
                     top: currentInsets.top,
                     left: 0,
                     bottom: currentInsets.bottom,
                     right: 0
-                )
+                ))
             }
             return
         }
         
         // 保存当前的垂直边距
-        let currentInsets = self.contentEdgeInsets
+        let currentInsets = self.st_currentContentInsets()
         let top = currentInsets.top
         let bottom = currentInsets.bottom
         
@@ -306,69 +271,80 @@ open class STBtn: UIButton {
         switch self.contentHorizontalAlignment {
         case .left:
             // 左对齐时，只设置左边距
-            self.contentEdgeInsets = UIEdgeInsets(
+            self.st_applyContentInsets(UIEdgeInsets(
                 top: top,
                 left: self.contentHorizontalPadding,
                 bottom: bottom,
                 right: 0
-            )
+            ))
         case .right:
             // 右对齐时，只设置右边距
-            self.contentEdgeInsets = UIEdgeInsets(
+            self.st_applyContentInsets(UIEdgeInsets(
                 top: top,
                 left: 0,
                 bottom: bottom,
                 right: self.contentHorizontalPadding
-            )
+            ))
         case .leading:
             // Leading 对齐时，根据布局方向设置
             if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
                 // RTL 布局，设置右边距
-                self.contentEdgeInsets = UIEdgeInsets(
+                self.st_applyContentInsets(UIEdgeInsets(
                     top: top,
                     left: 0,
                     bottom: bottom,
                     right: self.contentHorizontalPadding
-                )
+                ))
             } else {
                 // LTR 布局，设置左边距
-                self.contentEdgeInsets = UIEdgeInsets(
+                self.st_applyContentInsets(UIEdgeInsets(
                     top: top,
                     left: self.contentHorizontalPadding,
                     bottom: bottom,
                     right: 0
-                )
+                ))
             }
         case .trailing:
             // Trailing 对齐时，根据布局方向设置
             if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
                 // RTL 布局，设置左边距
-                self.contentEdgeInsets = UIEdgeInsets(
+                self.st_applyContentInsets(UIEdgeInsets(
                     top: top,
                     left: self.contentHorizontalPadding,
                     bottom: bottom,
                     right: 0
-                )
+                ))
             } else {
                 // LTR 布局，设置右边距
-                self.contentEdgeInsets = UIEdgeInsets(
+                self.st_applyContentInsets(UIEdgeInsets(
                     top: top,
                     left: 0,
                     bottom: bottom,
                     right: self.contentHorizontalPadding
-                )
+                ))
             }
         default:
             // 居中对齐等其他情况，清除水平边距
             if currentInsets.left != 0 || currentInsets.right != 0 {
-                self.contentEdgeInsets = UIEdgeInsets(
+                self.st_applyContentInsets(UIEdgeInsets(
                     top: top,
                     left: 0,
                     bottom: bottom,
                     right: 0
-                )
+                ))
             }
         }
+    }
+
+    private func st_currentContentInsets() -> UIEdgeInsets {
+        let insets = self.configuration?.contentInsets ?? .zero
+        return UIEdgeInsets(top: insets.top, left: insets.leading, bottom: insets.bottom, right: insets.trailing)
+    }
+
+    private func st_applyContentInsets(_ insets: UIEdgeInsets) {
+        var config = self.configuration ?? UIButton.Configuration.plain()
+        config.contentInsets = NSDirectionalEdgeInsets(top: insets.top, leading: insets.left, bottom: insets.bottom, trailing: insets.right)
+        self.configuration = config
     }
     
     /// 设置圆角按钮
@@ -477,83 +453,39 @@ open class STBtn: UIButton {
     }
     
     private func updateLiquidGlassView() {
-        let effectView = self.liquidGlassEffectView ?? self.createLiquidGlassEffectView()
-        if effectView.superview == nil {
-            self.insertSubview(effectView, at: 0)
+        let glassView = self.liquidGlassView ?? STLiquidGlassView()
+        if glassView.superview == nil {
+            self.insertSubview(glassView, at: 0)
         }
-        self.liquidGlassEffectView = effectView
+        self.liquidGlassView = glassView
         self.updateLiquidGlassFrame()
         self.updateLiquidGlassAppearance()
     }
-    
-    private func createLiquidGlassEffectView() -> UIVisualEffectView {
-        let effectView: UIVisualEffectView
-        if #available(iOS 26.0, *) {
-            effectView = UIVisualEffectView(effect: UIGlassEffect())
-        } else {
-            effectView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
-        }
-        effectView.isUserInteractionEnabled = false
-        effectView.clipsToBounds = true
-        effectView.backgroundColor = .clear
-        return effectView
-    }
-    
+
     private func updateLiquidGlassFrame() {
-        guard let effectView = self.liquidGlassEffectView else { return }
-        effectView.frame = self.bounds
-        effectView.layer.cornerRadius = self.layer.cornerRadius
-        self.sendSubviewToBack(effectView)
-        self.updateLiquidGlassLayerFrames()
+        guard let glassView = self.liquidGlassView else { return }
+        glassView.frame = self.bounds
+        glassView.glassCornerRadius = self.layer.cornerRadius
+        self.sendSubviewToBack(glassView)
     }
     
     private func updateLiquidGlassAppearance() {
-        guard let effectView = self.liquidGlassEffectView else { return }
-        effectView.contentView.backgroundColor = self.liquidGlassTintColor
+        guard let glassView = self.liquidGlassView else { return }
+        glassView.configure(
+            tintColor: self.liquidGlassTintColor,
+            highlightOpacity: self.liquidGlassHighlightOpacity,
+            borderColor: self.liquidGlassBorderColor,
+            cornerRadius: self.layer.cornerRadius
+        )
         self.updateLiquidGlassState(animated: false)
-        
-        let highlightLayer = self.liquidGlassHighlightLayer ?? CAGradientLayer()
-        highlightLayer.colors = [
-            UIColor.white.withAlphaComponent(CGFloat(self.liquidGlassHighlightOpacity)).cgColor,
-            UIColor.white.withAlphaComponent(0.05).cgColor,
-            UIColor.clear.cgColor
-        ]
-        highlightLayer.startPoint = CGPoint(x: 0, y: 0)
-        highlightLayer.endPoint = CGPoint(x: 1, y: 1)
-        if highlightLayer.superlayer == nil {
-            effectView.contentView.layer.addSublayer(highlightLayer)
-        }
-        self.liquidGlassHighlightLayer = highlightLayer
-        
-        let borderLayer = self.liquidGlassBorderLayer ?? CAShapeLayer()
-        borderLayer.fillColor = UIColor.clear.cgColor
-        borderLayer.strokeColor = self.liquidGlassBorderColor.cgColor
-        borderLayer.lineWidth = 1 / UIScreen.main.scale
-        if borderLayer.superlayer == nil {
-            effectView.contentView.layer.addSublayer(borderLayer)
-        }
-        self.liquidGlassBorderLayer = borderLayer
-        self.updateLiquidGlassLayerFrames()
-    }
-    
-    private func updateLiquidGlassLayerFrames() {
-        let bounds = self.bounds
-        self.liquidGlassHighlightLayer?.frame = bounds
-        self.liquidGlassHighlightLayer?.cornerRadius = self.layer.cornerRadius
-        self.liquidGlassBorderLayer?.frame = bounds
-        self.liquidGlassBorderLayer?.path = UIBezierPath(
-            roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5),
-            cornerRadius: max(0, self.layer.cornerRadius - 0.5)
-        ).cgPath
     }
     
     private func updateLiquidGlassCornerRadius() {
-        self.liquidGlassEffectView?.layer.cornerRadius = self.layer.cornerRadius
-        self.updateLiquidGlassLayerFrames()
+        self.liquidGlassView?.glassCornerRadius = self.layer.cornerRadius
     }
     
     private func updateLiquidGlassState(animated: Bool) {
-        guard let effectView = self.liquidGlassEffectView else { return }
+        guard let glassView = self.liquidGlassView else { return }
         let alpha: CGFloat
         if !self.isEnabled {
             alpha = 0.45
@@ -562,21 +494,25 @@ open class STBtn: UIButton {
         } else {
             alpha = 1
         }
-        guard animated else {
-            effectView.alpha = alpha
-            return
-        }
-        UIView.animate(withDuration: 0.18) {
-            effectView.alpha = alpha
-        }
+        glassView.setStateAlpha(alpha, animated: animated)
     }
     
     private func removeLiquidGlassView() {
-        self.liquidGlassHighlightLayer?.removeFromSuperlayer()
-        self.liquidGlassBorderLayer?.removeFromSuperlayer()
-        self.liquidGlassEffectView?.removeFromSuperview()
-        self.liquidGlassHighlightLayer = nil
-        self.liquidGlassBorderLayer = nil
-        self.liquidGlassEffectView = nil
+        self.liquidGlassView?.removeFromSuperview()
+        self.liquidGlassView = nil
+    }
+}
+
+// MARK: - STLocalizable
+extension STBtn: STLocalizable {
+    public func st_updateLocalizedText() {
+        let title = self.localizedTitle
+        if !title.isEmpty {
+            self.setTitle(title.localized, for: .normal)
+        }
+        let selectedTitle = self.localizedSelectedTitle
+        if !selectedTitle.isEmpty {
+            self.setTitle(selectedTitle.localized, for: .selected)
+        }
     }
 }
