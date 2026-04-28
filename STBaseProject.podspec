@@ -33,12 +33,12 @@ Pod::Spec.new do |s|
     s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
     
     s.subspec 'STBase' do |base|
-        base.source_files = [
-            'Sources/**/*.swift',
-            '!Sources/STContacts/**/*.swift',
-            '!Sources/STLocation/**/*.swift',
-            '!Sources/STMedia/**/*.swift',
-            '!Sources/STMarkdown/**/*.swift'
+        base.source_files = 'Sources/**/*.swift'
+        base.exclude_files = [
+            'Sources/STContacts/**/*.swift',
+            'Sources/STLocation/**/*.swift',
+            'Sources/STMedia/**/*.swift',
+            'Sources/STMarkdown/**/*.swift'
         ]
     end
 

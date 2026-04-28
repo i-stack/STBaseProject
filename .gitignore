@@ -19,3 +19,4 @@ DerivedData/
 *.dSYM
 *.dSYM.zip
 build-tools/
+AGENTS.md
