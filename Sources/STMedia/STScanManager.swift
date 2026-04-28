@@ -332,7 +332,7 @@ public class STScanManager: NSObject {
 }
 
 extension STScanManager: AVCaptureMetadataOutputObjectsDelegate {
-    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+    public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         guard let metadataObject = metadataObjects.first as? AVMetadataMachineReadableCodeObject else { return }
         self.st_stopScan()
         self.st_renderUrlStr(url: metadataObject.stringValue ?? "")
