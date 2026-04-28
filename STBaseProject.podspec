@@ -33,7 +33,32 @@ Pod::Spec.new do |s|
     s.readme = 'https://github.com/i-stack/STBaseProject/blob/main/README.md'
     
     s.subspec 'STBase' do |base|
-        base.source_files = 'Sources/**/*.swift'
+        base.source_files = [
+            'Sources/**/*.swift',
+            '!Sources/STContacts/**/*.swift',
+            '!Sources/STLocation/**/*.swift',
+            '!Sources/STMedia/**/*.swift',
+            '!Sources/STMarkdown/**/*.swift'
+        ]
+    end
+
+    s.subspec 'STContacts' do |contacts|
+        contacts.source_files = 'Sources/STContacts/**/*.swift'
+    end
+
+    s.subspec 'STLocation' do |location|
+        location.source_files = 'Sources/STLocation/**/*.swift'
+    end
+
+    s.subspec 'STMedia' do |media|
+        media.source_files = 'Sources/STMedia/**/*.swift'
+    end
+
+    s.subspec 'STMarkdown' do |markdown|
+        markdown.source_files = 'Sources/STMarkdown/**/*.swift'
+        markdown.resource_bundles = {
+            'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
+        }
     end
     
     s.default_subspecs = ['STBase']

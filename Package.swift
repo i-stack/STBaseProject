@@ -15,6 +15,18 @@ let package = Package(
             targets: ["STBaseProject"]
         ),
         .library(
+            name: "STContacts",
+            targets: ["STContacts"]
+        ),
+        .library(
+            name: "STLocation",
+            targets: ["STLocation"]
+        ),
+        .library(
+            name: "STMedia",
+            targets: ["STMedia"]
+        ),
+        .library(
             name: "STMarkdown",
             targets: ["STMarkdown"]
         ),
@@ -29,8 +41,26 @@ let package = Package(
             dependencies: [],
             path: "Sources",
             exclude: [
+                "STContacts",
+                "STLocation",
+                "STMedia",
                 "STMarkdown"
             ]
+        ),
+        .target(
+            name: "STContacts",
+            dependencies: [],
+            path: "Sources/STContacts"
+        ),
+        .target(
+            name: "STLocation",
+            dependencies: [],
+            path: "Sources/STLocation"
+        ),
+        .target(
+            name: "STMedia",
+            dependencies: [],
+            path: "Sources/STMedia"
         ),
         .target(
             name: "STMarkdown",

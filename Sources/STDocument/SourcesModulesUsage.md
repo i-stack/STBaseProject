@@ -14,6 +14,9 @@
 - [STConfig](#stconfig)
 - [STDocument](#stdocument)
 - [STHUD](#sthud)
+- [STContacts](#stcontacts)
+- [STLocation](#stlocation)
+- [STMedia](#stmedia)
 - [STLocalizable](#stlocalizable)
 - [STMarkdown](#stmarkdown)
 - [STNetwork](#stnetwork)
@@ -169,6 +172,53 @@
 
 **使用建议**  
 将用户反馈统一走 HUD 模块，避免页面中直接散落 toast/alert 实现，保证一致性与可替换性。
+
+---
+
+## STContacts
+
+**模块定位**  
+联系人权限与通讯录读取模块。
+
+**适用场景**  
+- 联系人授权状态检查
+- 请求联系人权限并读取联系人列表
+
+**核心文件**  
+- `STContactManager.swift`
+
+---
+
+## STLocation
+
+**模块定位**  
+定位权限、单次定位、持续定位与地理编码模块。
+
+**适用场景**  
+- 获取当前位置与地址信息
+- 管理定位权限与定位缓存
+
+**核心文件**  
+- `STLocationManager.swift`
+
+---
+
+## STMedia
+
+**模块定位**  
+媒体能力模块，提供图片选择/压缩、扫码、截图能力。
+
+**适用场景**  
+- 相机或相册选图
+- 二维码识别
+- 页面截图处理
+
+**核心文件**  
+- `STImageManager.swift`
+- `STImage.swift`
+- `STScanManager.swift`
+- `STScanView.swift`
+- `STScreenshot.swift`
 
 ---
 

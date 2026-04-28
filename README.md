@@ -10,6 +10,7 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 ## 📋 目录
 
 - [安装方式](#安装方式)
+- [按需加载示例](#按需加载示例)
 - [快速开始](#快速开始)
 - [目录介绍](#目录介绍)
 - [主要功能](#主要功能)
@@ -55,6 +56,59 @@ dependencies: [
 1. 下载项目源码
 2. 将 `Sources` 文件夹拖入你的项目
 3. 确保所有文件都添加到 target 中
+
+## 🧩 按需加载示例
+
+如果你只需要部分能力（例如联系人、定位、媒体、Markdown），可以按模块引入，减少不必要依赖。
+
+### Swift Package Manager（按 Product 选择）
+
+在 Xcode 添加包后，选择你需要的 Product：
+
+- `STBaseProject`：基础能力（UI、网络、安全、工具等）
+- `STContacts`：联系人权限与联系人读取
+- `STLocation`：定位与地理编码
+- `STMedia`：图片处理、扫码、截图
+- `STMarkdown`：Markdown 渲染能力
+
+或在 `Package.swift` 中显式声明：
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.1.5")
+],
+targets: [
+    .target(
+        name: "YourApp",
+        dependencies: [
+            .product(name: "STBaseProject", package: "STBaseProject"),
+            .product(name: "STContacts", package: "STBaseProject"),
+            .product(name: "STLocation", package: "STBaseProject")
+            // 按需增加 STMedia / STMarkdown
+        ]
+    )
+]
+```
+
+### CocoaPods（按 Subspec 选择）
+
+默认只会引入 `STBase`。如果需要可选模块，显式声明 subspec：
+
+```ruby
+pod 'STBaseProject/STBase', '~> 1.1.5'
+pod 'STBaseProject/STContacts', '~> 1.1.5'
+pod 'STBaseProject/STLocation', '~> 1.1.5'
+# pod 'STBaseProject/STMedia', '~> 1.1.5'
+# pod 'STBaseProject/STMarkdown', '~> 1.1.5'
+```
+
+如果只写：
+
+```ruby
+pod 'STBaseProject', '~> 1.1.5'
+```
+
+等价于默认 subspec（`STBase`）。
 
 ## ⚡ 快速开始
 
