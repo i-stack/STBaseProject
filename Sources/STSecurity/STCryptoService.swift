@@ -102,7 +102,7 @@ public class STCryptoService {
     private static func st_encryptAES256CBC(_ data: Data, keyString: String, config: STCryptoConfig) throws -> Data {
         let key = st_deriveKeyData(from: keyString, config: config)
         let iv = STDataUtils.randomData(length: config.nonceLength)
-        let encryptedData = try st_cipherCBC(operation: kCCEncrypt, data: data, key: key, iv: iv)
+        let encryptedData = try st_cipherCBC(operation: CCOperation(kCCEncrypt), data: data, key: key, iv: iv)
         var result = Data()
         result.append(iv)
         result.append(encryptedData)
@@ -156,7 +156,7 @@ public class STCryptoService {
         let iv = encryptedData.prefix(config.nonceLength)
         let ciphertext = encryptedData.dropFirst(config.nonceLength)
         let key = st_deriveKeyData(from: keyString, config: config)
-        return try st_cipherCBC(operation: kCCDecrypt, data: Data(ciphertext), key: key, iv: Data(iv))
+        return try st_cipherCBC(operation: CCOperation(kCCDecrypt), data: Data(ciphertext), key: key, iv: Data(iv))
     }
 
     private static func st_decryptChaCha20Poly1305(_ encryptedData: Data, keyString: String, config: STCryptoConfig) throws -> Data {

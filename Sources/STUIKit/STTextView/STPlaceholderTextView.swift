@@ -300,3 +300,12 @@ open class STPlaceholderTextView: UITextView {
     private var shouldFollowTextViewFontForPlaceholder: Bool = true
     private var isConfiguringPlaceholderTextView: Bool = false
 }
+
+// MARK: - STLocalizable
+extension STPlaceholderTextView: STLocalizable {
+    public func st_updateLocalizedText() {
+        let key = self.localizedPlaceholder
+        guard !key.isEmpty else { return }
+        self.placeholder = key.localized
+    }
+}

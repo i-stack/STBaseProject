@@ -401,3 +401,13 @@ open class STTextField: UITextField {
         )
     }
 }
+
+// MARK: - STLocalizable
+extension STTextField: STLocalizable {
+    public func st_updateLocalizedText() {
+        let key = self.localizedPlaceholder
+        if !key.isEmpty {
+            self.placeholder = key.localized
+        }
+    }
+}

@@ -68,6 +68,7 @@ open class STBaseViewController: UIViewController {
         super.viewDidLoad()
         self.setupNavigationBar()
         self.setupAppearanceObservation()
+        self.setupLocalizationObservation()
         self.finalizeLayout()
     }
 
@@ -83,6 +84,7 @@ open class STBaseViewController: UIViewController {
 
     deinit {
         self.contentOffsetObservation?.invalidate()
+        NotificationCenter.default.removeObserver(self, name: .stLanguageDidChange, object: nil)
     }
 
     private func setupNavigationBar() {
@@ -159,6 +161,15 @@ open class STBaseViewController: UIViewController {
     private func finalizeLayout() {
         self.leftBtn.titleLabel?.font = self.buttonTitleFont
         self.rightBtn.titleLabel?.font = self.buttonTitleFont
+    }
+
+    private func setupLocalizationObservation() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.st_updateLocalizedTexts),
+            name: .stLanguageDidChange,
+            object: nil
+        )
     }
 
     private func setupAppearanceObservation() {

@@ -524,3 +524,17 @@ open class STBtn: UIButton {
         self.liquidGlassView = nil
     }
 }
+
+// MARK: - STLocalizable
+extension STBtn: STLocalizable {
+    public func st_updateLocalizedText() {
+        let title = self.localizedTitle
+        if !title.isEmpty {
+            self.setTitle(title.localized, for: .normal)
+        }
+        let selectedTitle = self.localizedSelectedTitle
+        if !selectedTitle.isEmpty {
+            self.setTitle(selectedTitle.localized, for: .selected)
+        }
+    }
+}

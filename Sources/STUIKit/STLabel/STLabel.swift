@@ -18,7 +18,7 @@ public enum STLabelVerticalAlignment {
 }
 
 @IBDesignable
-open class STLabel: UILabel {
+open class STLabel: UILabel, STLocalizable {
     
     private var verticalAlignment: STLabelVerticalAlignment?
     
@@ -57,6 +57,14 @@ open class STLabel: UILabel {
             objc_setAssociatedObject(self, &STLabelLocalizationKey.localizedTextKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
             self.text = newValue.localized
         }
+    }
+
+    /// 优先使用 localizedText 存储的原始 key 重新本地化，支持运行时语言切换。
+    /// 未通过 localizedText 设置 key 时不处理（避免将动态赋值的 text 误作 key 查询）。
+    public func st_updateLocalizedText() {
+        let key = self.localizedText
+        guard !key.isEmpty else { return }
+        self.text = key.localized
     }
     
     @IBInspectable open var cornerRadius: CGFloat {

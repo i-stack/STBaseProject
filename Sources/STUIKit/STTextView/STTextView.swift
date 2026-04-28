@@ -45,8 +45,6 @@ open class STTextView: STPlaceholderTextView {
     private var lastReportedHeight: CGFloat = 0
     private var _minInputHeight: CGFloat = 0
 
-    // MARK: - Appearance
-
     @IBInspectable open var cornerRadius: CGFloat {
         get { return self.layer.cornerRadius }
         set {
