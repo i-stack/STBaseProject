@@ -206,6 +206,30 @@ README 仅保留能力概览与模块入口。
 - Xcode 12.0+
 - Swift 5.0+
 
+## 🚀 Pod 发布脚本
+
+仓库内提供自动发布脚本：
+
+```bash
+./scripts/release_pod.sh 1.1.6
+```
+
+推荐（自动创建并推送同名 tag）：
+
+```bash
+./scripts/release_pod.sh 1.1.6 --tag --push-tag
+```
+
+脚本会按顺序执行：
+
+- 更新 `STBaseProject.podspec` 中的 `s.version`
+- 检查工作区是否干净（可用 `--allow-dirty` 跳过）
+- 检查或自动创建本地 tag（`--tag`）
+- 检查或自动推送远端 tag（`--push-tag`）
+- 校验 tag 是否指向当前 `HEAD`
+- 执行 `pod spec lint STBaseProject.podspec --allow-warnings`（可用 `--skip-lint` 跳过）
+- 执行 `pod trunk push STBaseProject.podspec --allow-warnings`
+
 ## 📄 许可证
 
 本项目采用 MIT 许可证。详情请参阅 [LICENSE](LICENSE) 文件。
