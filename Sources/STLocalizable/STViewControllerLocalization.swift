@@ -17,7 +17,7 @@ public extension STBaseViewController {
     /// STBaseViewController 在 viewDidLoad 时自动订阅 stLanguageDidChange 通知并调用此方法，
     /// 子类无需手动注册通知；若需在初始加载时立即本地化 title 等由代码赋值的 key，
     /// 在 viewDidLoad 末尾手动调用一次即可。
-    @objc open func st_updateLocalizedTexts() {
+    @objc func st_updateLocalizedTexts() {
         self.st_applyTitleLocalization()
         self.updateLocalizedTextsInView(self.view)
     }
