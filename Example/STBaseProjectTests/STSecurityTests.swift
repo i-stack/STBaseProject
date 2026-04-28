@@ -2,9 +2,7 @@ import CryptoKit
 import XCTest
 @testable import STBaseProject
 
-/// 覆盖 `Sources/STSecurity` 下对外 API 的单元测试（在 iOS 模拟器 / 真机 + Xcode 测试目标中运行）。
 final class STSecurityTests: XCTestCase {
-
     private var keychainTestKeys: [String] = []
 
     override func tearDown() {

@@ -16,6 +16,9 @@
 - `STSecurity.md`  
   `STSecurity` 目录专题文档（配置中枢、加解密、Keychain、反调试监控与接入建议）。
 
+- `STLocalizable.md`  
+  `STLocalizable` 目录专题文档（本地化协议、语言切换、通知机制、控制器刷新与接入流程）。
+
 ## 维护约定
 
 - 新增公共能力时，优先评估是否需要补充文档并登记到本索引。
