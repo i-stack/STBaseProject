@@ -14,6 +14,10 @@ let package = Package(
             name: "STBaseProject",
             targets: ["STBaseProject"]
         ),
+        .library(
+            name: "STMarkdown",
+            targets: ["STMarkdown"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-markdown.git", branch: "main"),
@@ -22,13 +26,22 @@ let package = Package(
     targets: [
         .target(
             name: "STBaseProject",
+            dependencies: [],
+            path: "Sources",
+            exclude: [
+                "STMarkdown"
+            ]
+        ),
+        .target(
+            name: "STMarkdown",
             dependencies: [
+                "STBaseProject",
                 .product(name: "Markdown", package: "swift-markdown"),
                 .product(name: "SwiftMath", package: "SwiftMath")
             ],
-            path: "Sources",
+            path: "Sources/STMarkdown",
             resources: [
-                .process("STMarkdown/Resources")
+                .process("Resources")
             ]
         )
     ],
