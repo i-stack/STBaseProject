@@ -15,6 +15,7 @@ public enum STIconPosition: Int {
 }
 
 public class STIconBtnBuilder {
+    
     private weak var button: STIconBtn?
     
     init(button: STIconBtn) {

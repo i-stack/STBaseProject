@@ -7,7 +7,6 @@
 
 import UIKit
 
-// MARK: - 按钮本地化常量
 private struct STBtnLocalizationKey {
     static var localizedTitleKey: UInt8 = 0
     static var localizedSelectedTitleKey: UInt8 = 1
@@ -19,7 +18,6 @@ public enum STBtnBackgroundStyle: Int {
     case liquidGlass = 2
 }
 
-// MARK: - 自定义按钮类
 @IBDesignable
 open class STBtn: UIButton {
     
@@ -152,39 +150,6 @@ open class STBtn: UIButton {
             if self.autoAdaptFontSize {
                 self.updateFontSize()
             }
-        }
-    }
-    
-    /// 高亮时是否自动调整图片（IBInspectable）
-    /// 当为 true 时，按钮高亮时会自动调整图片的亮度
-    @IBInspectable open override var adjustsImageWhenHighlighted: Bool {
-        get {
-            return super.adjustsImageWhenHighlighted
-        }
-        set {
-            super.adjustsImageWhenHighlighted = newValue
-        }
-    }
-    
-    /// 禁用时是否自动调整图片（IBInspectable）
-    /// 当为 true 时，按钮禁用时会自动调整图片的亮度
-    @IBInspectable open override var adjustsImageWhenDisabled: Bool {
-        get {
-            return super.adjustsImageWhenDisabled
-        }
-        set {
-            super.adjustsImageWhenDisabled = newValue
-        }
-    }
-    
-    /// 高亮时是否显示触摸效果（IBInspectable）
-    /// 当为 true 时，按钮高亮时会显示一个圆形的高亮效果
-    @IBInspectable open override var showsTouchWhenHighlighted: Bool {
-        get {
-            return super.showsTouchWhenHighlighted
-        }
-        set {
-            super.showsTouchWhenHighlighted = newValue
         }
     }
     
