@@ -1,6 +1,6 @@
 # STBaseProject
 
-[![Version](https://img.shields.io/badge/version-1.1.5-blue?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![CocoaPods](https://img.shields.io/cocoapods/v/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat)](https://cocoapods.org/pods/STBaseProject)
 [![Platform](https://img.shields.io/badge/platform-iOS%2016%2B-lightgrey?style=flat)](https://cocoapods.org/pods/STBaseProject)
 [![Swift](https://img.shields.io/badge/Swift-5.9%20%7C%205.10%20%7C%206.0-orange?style=flat-square)](https://www.swift.org)
