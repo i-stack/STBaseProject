@@ -6,6 +6,7 @@
 //
 
 import Foundation
+#if os(iOS)
 @preconcurrency import Contacts
 
 public final class STContactService: @unchecked Sendable {
@@ -84,3 +85,10 @@ private extension STContact {
         self.phoneNumbers = contact.phoneNumbers.map { $0.value.stringValue }
     }
 }
+#else
+@available(macOS, unavailable, message: "STContactService is only available on iOS.")
+public final class STContactService: @unchecked Sendable {
+    public static let shared = STContactService()
+    public init() {}
+}
+#endif

@@ -8,6 +8,8 @@
 import CoreLocation
 import Foundation
 
+#if os(iOS)
+
 public struct STLocationInfo {
     public let name: String?
     public let country: String?
@@ -414,3 +416,4 @@ extension STLocationManager: CLLocationManagerDelegate {
         }
     }
 }
+#endif

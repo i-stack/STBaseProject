@@ -35,7 +35,7 @@ let package = Package(
             name: "STBaseProject",
             dependencies: [
                 .product(name: "Markdown", package: "swift-markdown"),
-                .product(name: "SwiftMath", package: "SwiftMath")
+                .product(name: "SwiftMath", package: "SwiftMath", condition: .when(platforms: [.iOS]))
             ],
             path: "Sources",
             exclude: [

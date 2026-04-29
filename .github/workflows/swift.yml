@@ -17,6 +17,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      run: swift build -v
-    - name: Run tests
-      run: swift test -v
+      run: xcodebuild -scheme STBaseProject-Package -destination 'generic/platform=iOS Simulator' build
+    - name: Build For Testing
+      run: xcodebuild -scheme STBaseProject-Package -destination 'generic/platform=iOS Simulator' build-for-testing
+    - name: Run Tests Without Building
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        DESTINATIONS="$(xcodebuild -scheme STBaseProject-Package -showdestinations 2>/dev/null)"
+        SIMULATOR_ID="$(printf '%s\n' "$DESTINATIONS" | awk '/platform:iOS Simulator/ && /OS:/ { if (match($0, /id:[^,}]+/)) { value = substr($0, RSTART + 3, RLENGTH - 3); gsub(/[[:space:]]/, "", value); print value; exit } }')"
+
+        if [ -z "${SIMULATOR_ID:-}" ]; then
+          echo "No available iOS Simulator destination found."
+          echo "Full xcodebuild -showdestinations output:"
+          printf '%s\n' "$DESTINATIONS"
+          exit 1
+        fi
+
+        echo "Using iOS Simulator id: $SIMULATOR_ID"
+        xcodebuild -scheme STBaseProject-Package -destination "id=$SIMULATOR_ID" test-without-building

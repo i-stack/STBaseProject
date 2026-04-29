@@ -1,9 +1,14 @@
 # STBaseProject
 
-[![Version](https://img.shields.io/cocoapods/v/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
-[![License](https://img.shields.io/cocoapods/l/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
-[![Platform](https://img.shields.io/cocoapods/p/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
-[![Swift](https://img.shields.io/badge/Swift-5.9_5.10_6.0-orange?style=flat-square)](https://img.shields.io/badge/Swift-5.9_5.10_6.0-Orange?style=flat-square)
+[![Version](https://img.shields.io/badge/version-1.1.5-blue?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![Platform](https://img.shields.io/badge/platform-iOS%2016%2B-lightgrey?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![Swift](https://img.shields.io/badge/Swift-5.9%20%7C%205.10%20%7C%206.0-orange?style=flat-square)](https://www.swift.org)
+[![CI](https://github.com/i-stack/STBaseProject/actions/workflows/swift.yml/badge.svg)](https://github.com/i-stack/STBaseProject/actions/workflows/swift.yml)
+[![SPM](https://img.shields.io/badge/SPM-supported-brightgreen?style=flat)](https://github.com/i-stack/STBaseProject)
+[![iOS](https://img.shields.io/badge/iOS-16.0%2B-blue?style=flat)](https://github.com/i-stack/STBaseProject)
+[![Xcode](https://img.shields.io/badge/Xcode-15%2B-147EFB?style=flat)](https://developer.apple.com/xcode/)
+[![Stars](https://img.shields.io/github/stars/i-stack/STBaseProject?style=flat)](https://github.com/i-stack/STBaseProject/stargazers)
 
 STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 UI 组件和工具类，帮助开发者快速构建高质量的 iOS 应用。
 
