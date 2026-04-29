@@ -16,11 +16,11 @@ public enum STIconPosition: Int {
 
 public class STIconBtnBuilder {
     private weak var button: STIconBtn?
-    
+
     init(button: STIconBtn) {
         self.button = button
     }
-    
+
     /// 设置图标位置
     /// - Parameter position: 图标位置
     /// - Returns: 构建器实例，支持链式调用
@@ -29,7 +29,7 @@ public class STIconBtnBuilder {
         self.button?.iconPosition = position
         return self
     }
-    
+
     /// 设置图标和文字之间的间距
     /// - Parameter spacing: 间距值
     /// - Returns: 构建器实例，支持链式调用
@@ -45,7 +45,7 @@ public class STIconBtnBuilder {
         self.button?.iconContentInsets = insets
         return self
     }
-    
+
     /// 完成配置，执行布局更新
     /// 使用示例：
     /// ```
@@ -62,7 +62,7 @@ public class STIconBtnBuilder {
 // MARK: - 图标按钮类
 @IBDesignable
 open class STIconBtn: STBtn {
-    
+
     /// 图标位置
     public var iconPosition: STIconPosition = .left {
         didSet {
@@ -89,7 +89,7 @@ open class STIconBtn: STBtn {
             self.setNeedsLayout()
         }
     }
-    
+
     /// xib 中配置图标位置：0 左、1 右、2 上、3 下
     @IBInspectable open var iconPositionRaw: Int {
         get {
@@ -100,7 +100,7 @@ open class STIconBtn: STBtn {
             self.iconPosition = position
         }
     }
-    
+
     @IBInspectable open var iconSpacing: CGFloat {
         get {
             return self.spacing
@@ -109,7 +109,7 @@ open class STIconBtn: STBtn {
             self.spacing = newValue
         }
     }
-    
+
     @IBInspectable open var iconContentInsetTop: CGFloat {
         get {
             return self.iconContentInsets.top
@@ -118,7 +118,7 @@ open class STIconBtn: STBtn {
             self.iconContentInsets.top = newValue
         }
     }
-    
+
     @IBInspectable open var iconContentInsetLeft: CGFloat {
         get {
             return self.iconContentInsets.left
@@ -127,7 +127,7 @@ open class STIconBtn: STBtn {
             self.iconContentInsets.left = newValue
         }
     }
-    
+
     @IBInspectable open var iconContentInsetBottom: CGFloat {
         get {
             return self.iconContentInsets.bottom
@@ -136,7 +136,7 @@ open class STIconBtn: STBtn {
             self.iconContentInsets.bottom = newValue
         }
     }
-    
+
     @IBInspectable open var iconContentInsetRight: CGFloat {
         get {
             return self.iconContentInsets.right
@@ -158,7 +158,7 @@ open class STIconBtn: STBtn {
     public func configure() -> STIconBtnBuilder {
         return STIconBtnBuilder(button: self)
     }
-    
+
     /// 更新布局（当直接设置属性时使用）
     /// 使用示例：
     /// ```
@@ -169,6 +169,10 @@ open class STIconBtn: STBtn {
     public func updateLayout() {
         self.invalidateIntrinsicContentSize()
         self.setNeedsLayout()
+    }
+
+    open override func contentRect(forBounds bounds: CGRect) -> CGRect {
+        return super.contentRect(forBounds: bounds).inset(by: self.iconContentInsets)
     }
 
     open override func layoutSubviews() {
@@ -193,25 +197,31 @@ open class STIconBtn: STBtn {
     }
 
     private func updateIconLayout() {
-        var config = self.configuration ?? UIButton.Configuration.plain()
-        config.imagePadding = self.spacing
-        config.contentInsets = NSDirectionalEdgeInsets(
-            top: self.iconContentInsets.top,
-            leading: self.iconContentInsets.left,
-            bottom: self.iconContentInsets.bottom,
-            trailing: self.iconContentInsets.right
-        )
+        var newImageInsets = UIEdgeInsets.zero
+        var newTitleInsets = UIEdgeInsets.zero
+        defer {
+            if self.imageEdgeInsets != newImageInsets { self.imageEdgeInsets = newImageInsets }
+            if self.titleEdgeInsets != newTitleInsets { self.titleEdgeInsets = newTitleInsets }
+        }
+        guard
+            let imageSize = self.currentImageSize(),
+            let titleSize = self.currentTitleSize()
+        else { return }
+        let halfSpace = self.spacing / 2
         switch self.iconPosition {
         case .left:
-            config.imagePlacement = .leading
+            newImageInsets = UIEdgeInsets(top: 0, left: -halfSpace, bottom: 0, right: halfSpace)
+            newTitleInsets = UIEdgeInsets(top: 0, left: halfSpace, bottom: 0, right: -halfSpace)
         case .right:
-            config.imagePlacement = .trailing
+            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width + halfSpace, bottom: 0, right: -(titleSize.width + halfSpace))
+            newTitleInsets = UIEdgeInsets(top: 0, left: -(imageSize.width + halfSpace), bottom: 0, right: imageSize.width + halfSpace)
         case .top:
-            config.imagePlacement = .top
+            newImageInsets = UIEdgeInsets(top: -(titleSize.height + self.spacing), left: titleSize.width / 2, bottom: 0, right: -titleSize.width / 2)
+            newTitleInsets = UIEdgeInsets(top: 0, left: -imageSize.width / 2, bottom: -(imageSize.height + self.spacing), right: imageSize.width / 2)
         case .bottom:
-            config.imagePlacement = .bottom
+            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width / 2, bottom: -(titleSize.height + self.spacing), right: -titleSize.width / 2)
+            newTitleInsets = UIEdgeInsets(top: -(imageSize.height + self.spacing), left: -imageSize.width / 2, bottom: 0, right: imageSize.width / 2)
         }
-        self.configuration = config
     }
 
     private func computedContentSize() -> CGSize {
@@ -234,13 +244,13 @@ open class STIconBtn: STBtn {
             )
         }
     }
-    
+
     private func currentImageSize() -> CGSize? {
         guard self.currentImage != nil else { return nil }
         let imageSize = self.imageView?.intrinsicContentSize ?? .zero
         return imageSize == .zero ? nil : imageSize
     }
-    
+
     private func currentTitleSize() -> CGSize? {
         let hasTitle = !(self.currentTitle?.isEmpty ?? true) || self.currentAttributedTitle != nil
         guard hasTitle else { return nil }

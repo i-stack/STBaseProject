@@ -209,8 +209,9 @@ extension STCustomTabBarController {
 
     /// 设置子页面并配置自定义 TabBar
     public func setViewControllers(_ viewControllers: [UIViewController], tabBarItems: [STTabBarItemModel], config: STTabBarConfig = STTabBarConfig()) {
+        self.customTabBarItems = tabBarItems
+        self.customTabBarConfig = config
         self.setViewControllers(viewControllers, animated: false)
-        self.configureCustomTabBar(items: tabBarItems, config: config)
     }
     
     /// 创建并配置自定义 TabBar Controller
