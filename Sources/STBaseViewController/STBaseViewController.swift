@@ -355,7 +355,7 @@ extension STBaseViewController {
         guard #available(iOS 26.0, *) else { return self }
         guard self.liquidGlassContainerView == nil else { return self }
 
-        let container = UIVisualEffectView(effect: UIGlassEffect())
+        let container = UIVisualEffectView(effect: STGlassEffectFactory.makeVisualEffect())
         container.translatesAutoresizingMaskIntoConstraints = false
         self.navigationBarView.insertSubview(container, at: 0)
         NSLayoutConstraint.activate([

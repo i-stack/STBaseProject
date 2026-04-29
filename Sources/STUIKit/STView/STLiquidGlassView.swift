@@ -131,10 +131,7 @@ open class STLiquidGlassView: UIView {
     }
     
     private static func makeEffectView() -> UIVisualEffectView {
-        if #available(iOS 26.0, *) {
-            return UIVisualEffectView(effect: UIGlassEffect())
-        }
-        return UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
+        return UIVisualEffectView(effect: STGlassEffectFactory.makeVisualEffect())
     }
 }
 
