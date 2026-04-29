@@ -41,11 +41,13 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: STMarkdownTextView, context: Context) {
-        uiView.markdownStyle = self.style
-        uiView.advancedRenderers = self.advancedRenderers
-        uiView.engine = self.engine
         uiView.onLinkTap = self.onLinkTap
-        uiView.setMarkdown(self.markdown)
+        uiView.applyConfiguration(
+            markdown: self.markdown,
+            style: self.style,
+            advancedRenderers: self.advancedRenderers,
+            engine: self.engine
+        )
     }
 }
 
@@ -86,10 +88,13 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: STMarkdownStreamingTextView, context: Context) {
-        uiView.markdownStyle = self.style
-        uiView.advancedRenderers = self.advancedRenderers
-        uiView.engine = self.engine
         uiView.onLinkTap = self.onLinkTap
-        uiView.setMarkdown(self.markdown, animated: self.animated)
+        uiView.applyConfiguration(
+            markdown: self.markdown,
+            style: self.style,
+            advancedRenderers: self.advancedRenderers,
+            engine: self.engine,
+            animated: self.animated
+        )
     }
 }

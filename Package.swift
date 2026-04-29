@@ -6,8 +6,7 @@ import PackageDescription
 let package = Package(
     name: "STBaseProject",
     platforms: [
-        .iOS(.v16),
-        .macOS(.v12)
+        .iOS(.v16)
     ],
     products: [
         .library(

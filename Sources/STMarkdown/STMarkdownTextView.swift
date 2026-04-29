@@ -11,6 +11,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
 
     public var markdownStyle: STMarkdownStyle {
         didSet {
+            guard self.isApplyingConfiguration == false else { return }
             self.textView.font = self.markdownStyle.font
             self.textView.textColor = self.markdownStyle.textColor
             self.renderer = STMarkdownAttributedStringRenderer(
@@ -25,6 +26,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
 
     public var advancedRenderers: STMarkdownAdvancedRenderers {
         didSet {
+            guard self.isApplyingConfiguration == false else { return }
             self.renderer = STMarkdownAttributedStringRenderer(
                 style: self.markdownStyle,
                 advancedRenderers: self.advancedRenderers
@@ -38,6 +40,11 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
     public var engine: STMarkdownEngine
     public var onLinkTap: ((URL) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
+    public var onCitationTap: ((String) -> Void)? {
+        didSet {
+            self.tableOverlayCoordinator.onCitationTap = self.onCitationTap
+        }
+    }
 
     public var isTextSelectionEnabled: Bool {
         get { self.textView.isSelectable }
@@ -73,7 +80,9 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
     }
 
     private var renderer: STMarkdownAttributedStringRenderer
+    private var isApplyingConfiguration = false
     private let textView: UITextView = UITextView(usingTextLayoutManager: false)
+    private lazy var tableOverlayCoordinator = STMarkdownTableOverlayCoordinator(textView: self.textView)
 
     public override init(frame: CGRect) {
         let style = STMarkdownStyle.default
@@ -117,6 +126,14 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         return CGSize(width: UIView.noIntrinsicMetric, height: ceil(fitting.height))
     }
 
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        self.tableOverlayCoordinator.updateIfNeeded(
+            attributedText: self.attributedText,
+            containerBounds: self.bounds
+        )
+    }
+
     public func setMarkdown(_ markdown: String) {
         self.rawMarkdown = markdown
         let result = self.engine.process(markdown)
@@ -124,12 +141,34 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         self.textView.attributedText = rendered
         self.textView.accessibilityValue = rendered.string
         self.bindAttachmentRefreshHandlers(in: rendered)
+        self.tableOverlayCoordinator.markDirty()
         self.invalidateIntrinsicContentSize()
+    }
+
+    public func applyConfiguration(
+        markdown: String,
+        style: STMarkdownStyle,
+        advancedRenderers: STMarkdownAdvancedRenderers,
+        engine: STMarkdownEngine
+    ) {
+        self.isApplyingConfiguration = true
+        self.markdownStyle = style
+        self.advancedRenderers = advancedRenderers
+        self.engine = engine
+        self.isApplyingConfiguration = false
+        self.textView.font = style.font
+        self.textView.textColor = style.textColor
+        self.renderer = STMarkdownAttributedStringRenderer(
+            style: style,
+            advancedRenderers: advancedRenderers
+        )
+        self.setMarkdown(markdown)
     }
 
     public func reset() {
         self.rawMarkdown = ""
         self.textView.attributedText = nil
+        self.tableOverlayCoordinator.reset()
         self.invalidateIntrinsicContentSize()
     }
 

@@ -18,12 +18,12 @@ public class STShimmerLabel: STLabel {
         didSet { self.updateGradient() }
     }
 
-    override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         self.setup()
     }
 
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setup()
     }

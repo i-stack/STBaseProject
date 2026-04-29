@@ -191,7 +191,7 @@ extension STLocationManager: STLocationManagerProtocol {
             return
         }
         let status = self.clManager.authorizationStatus
-        guard status == .authorizedWhenInUse || status == .authorizedAlways else {
+        guard Self.isLocationAccessAuthorized(status) else {
             completion(.failure(status == .restricted ? .authorizationRestricted : .authorizationDenied))
             return
         }
@@ -216,7 +216,7 @@ extension STLocationManager: STLocationManagerProtocol {
             return
         }
         let status = self.clManager.authorizationStatus
-        guard status == .authorizedWhenInUse || status == .authorizedAlways else {
+        guard Self.isLocationAccessAuthorized(status) else {
             completion(.failure(status == .restricted ? .authorizationRestricted : .authorizationDenied))
             return
         }
@@ -246,6 +246,14 @@ extension STLocationManager: STLocationManagerProtocol {
 }
 
 extension STLocationManager {
+    private static func isLocationAccessAuthorized(_ status: CLAuthorizationStatus) -> Bool {
+        #if os(macOS)
+        return status == .authorizedAlways
+        #else
+        return status == .authorizedWhenInUse || status == .authorizedAlways
+        #endif
+    }
+
     private func startTimeoutTask() {
         self.cancelTimeoutTask()
         let timeout = self.currentConfig.timeout
