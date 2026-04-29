@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name = 'STBaseProject'
-  s.version = '1.1.6'
+  s.version = '1.0.0'
   s.summary = 'Modular iOS foundation library with MVVM base abstractions.'
   s.description = <<-DESC
     STBaseProject provides modular iOS foundation components built on MVVM base types.
