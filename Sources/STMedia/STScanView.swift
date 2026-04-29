@@ -57,7 +57,7 @@ public class STScanView: UIView {
     public var theme: STScanViewTheme = .dark {
         didSet {
             configuration = theme.configuration
-            setNeedsDisplay()
+            // configuration.didSet 已调用 setNeedsDisplay()，此处不需再次触发
         }
     }
 
@@ -73,30 +73,9 @@ public class STScanView: UIView {
 
     private var isAnimationStopped: Bool = false
     private var heightScale: CGFloat = 1.0
+    private var animationStartWorkItem: DispatchWorkItem?
     private var tipLabel: UILabel?
     private var scanLineView: UIImageView?
-
-    private lazy var scanLineImage: UIImage = {
-        let size = CGSize(width: 1, height: self.configuration.scanLineHeight)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { ctx in
-            let colors = [UIColor.clear.cgColor,
-                          self.configuration.cornerColor.cgColor,
-                          UIColor.clear.cgColor] as CFArray
-            let locations: [CGFloat] = [0, 0.5, 1]
-            guard let gradient = CGGradient(
-                colorsSpace: CGColorSpaceCreateDeviceRGB(),
-                colors: colors,
-                locations: locations
-            ) else { return }
-            ctx.cgContext.drawLinearGradient(
-                gradient,
-                start: .zero,
-                end: CGPoint(x: 0, y: size.height),
-                options: []
-            )
-        }
-    }()
 
     // MARK: - Lifecycle
 
@@ -141,6 +120,7 @@ public class STScanView: UIView {
     private func setupScanLine() {
         let view = UIImageView()
         view.contentMode = .scaleToFill
+        view.image = makeScanLineImage()
         view.alpha = 0
         addSubview(view)
         self.scanLineView = view
@@ -187,9 +167,12 @@ public class STScanView: UIView {
             stopAnimation()
         case .qrCode, .all:
             heightScale = 1.0
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            // 使用 DispatchWorkItem 以便在 scanType 快速切换时可取消旧的待执行动画
+            let item = DispatchWorkItem { [weak self] in
                 self?.startAnimation()
             }
+            self.animationStartWorkItem = item
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: item)
         }
         setNeedsDisplay()
         setNeedsLayout()
@@ -208,8 +191,31 @@ public class STScanView: UIView {
         self.tipLabel?.font = self.configuration.tipTextFont
     }
 
+    /// 每次按当前 configuration 重新生成扫描线图像，避免 lazy 缓存导致样式不跟随配置更新
+    private func makeScanLineImage() -> UIImage {
+        let size = CGSize(width: 1, height: self.configuration.scanLineHeight)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            let colors = [UIColor.clear.cgColor,
+                          self.configuration.cornerColor.cgColor,
+                          UIColor.clear.cgColor] as CFArray
+            let locations: [CGFloat] = [0, 0.5, 1]
+            guard let gradient = CGGradient(
+                colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                colors: colors,
+                locations: locations
+            ) else { return }
+            ctx.cgContext.drawLinearGradient(
+                gradient,
+                start: .zero,
+                end: CGPoint(x: 0, y: size.height),
+                options: []
+            )
+        }
+    }
+
     private func updateScanLineImage() {
-        self.scanLineView?.image = self.scanLineImage
+        self.scanLineView?.image = makeScanLineImage()
     }
 
     private func updateScanLineFrame() {
@@ -262,15 +268,19 @@ public class STScanView: UIView {
                 scanLineView.alpha = 0
             }) { _ in
                 guard !self.isAnimationStopped else { return }
-                DispatchQueue.main.asyncAfter(deadline: .now() + self.configuration.animationInterval) {
-                    self.startAnimation()
+                let item = DispatchWorkItem { [weak self] in
+                    self?.startAnimation()
                 }
+                self.animationStartWorkItem = item
+                DispatchQueue.main.asyncAfter(deadline: .now() + self.configuration.animationInterval, execute: item)
             }
         }
     }
 
     private func stopAnimation() {
         isAnimationStopped = true
+        self.animationStartWorkItem?.cancel()
+        self.animationStartWorkItem = nil
         self.scanLineView?.layer.removeAllAnimations()
         self.scanLineView?.alpha = 0
     }
@@ -322,7 +332,8 @@ public class STScanView: UIView {
         context.setFillColor(red: 0, green: 0, blue: 0, alpha: self.configuration.maskAlpha)
         context.fill(CGRect(x: 0, y: 0, width: bounds.width, height: scanRect.minY))
         context.fill(CGRect(x: 0, y: scanRect.minY, width: scanRect.minX, height: scanRect.height))
-        context.fill(CGRect(x: scanRect.maxX, y: scanRect.minY, width: scanRect.minX, height: scanRect.height))
+        // 右侧宽度使用 bounds.width - scanRect.maxX，语义正确，不依赖左右对称假设
+        context.fill(CGRect(x: scanRect.maxX, y: scanRect.minY, width: bounds.width - scanRect.maxX, height: scanRect.height))
         context.fill(CGRect(x: 0, y: scanRect.maxY, width: bounds.width, height: bounds.height - scanRect.maxY))
     }
 
@@ -393,7 +404,6 @@ extension STScanView {
     }
 
     public func resetToDefault() {
-        self.configuration = STScanViewConfiguration()
         self.theme = .dark
         self.scanType = .qrCode
     }

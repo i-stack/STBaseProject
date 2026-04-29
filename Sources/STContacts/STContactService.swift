@@ -8,7 +8,7 @@
 import Foundation
 @preconcurrency import Contacts
 
-public final class STContactService {
+public final class STContactService: @unchecked Sendable {
 
     public static let shared = STContactService()
 
@@ -23,8 +23,8 @@ public final class STContactService {
         return try await self.fetchContacts()
     }
 
-    private lazy var contactStore = CNContactStore()
-    private lazy var keysToFetch: [CNKeyDescriptor] = [
+    private let contactStore = CNContactStore()
+    private let keysToFetch: [CNKeyDescriptor] = [
         CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
         CNContactPhoneNumbersKey as CNKeyDescriptor
     ]
@@ -38,9 +38,11 @@ private extension STContactService {
 
     func requestPermission() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            self.contactStore.requestAccess(for: .contacts) { granted, _ in
+            self.contactStore.requestAccess(for: .contacts) { granted, error in
                 if granted {
                     continuation.resume()
+                } else if let error = error {
+                    continuation.resume(throwing: STContactError.fetchFailed(error))
                 } else {
                     continuation.resume(throwing: STContactError.permissionDenied)
                 }
@@ -55,11 +57,14 @@ private extension STContactService {
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
                     let containers = try store.containers(matching: nil)
+                    var seen = Set<String>()
                     var rawContacts: [CNContact] = []
                     for container in containers {
                         let predicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
                         let batch = try store.unifiedContacts(matching: predicate, keysToFetch: keys)
-                        rawContacts.append(contentsOf: batch)
+                        for contact in batch where seen.insert(contact.identifier).inserted {
+                            rawContacts.append(contact)
+                        }
                     }
                     let contacts = rawContacts.map { STContact(contact: $0) }
                     continuation.resume(returning: contacts)
@@ -75,7 +80,7 @@ private extension STContactService {
 private extension STContact {
     init(contact: CNContact) {
         self.identifier = contact.identifier
-        self.fullName = CNContactFormatter.string(from: contact, style: .fullName) ?? ""
+        self.fullName = CNContactFormatter.string(from: contact, style: .fullName)
         self.phoneNumbers = contact.phoneNumbers.map { $0.value.stringValue }
     }
 }

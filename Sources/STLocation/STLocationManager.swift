@@ -97,18 +97,22 @@ public enum STLocationError: Error, LocalizedError {
     case locationServicesDisabled
     case timeout
     case networkError
-    case geocodingFailed
+    /// geocodingFailed 携带底层错误，便于排查是网络问题还是区域不支持
+    case geocodingFailed(Error?)
+    /// 已有请求进行中，拒绝并发调用
+    case busy
     case unknown(Error)
 
     public var errorDescription: String? {
         switch self {
-        case .authorizationDenied:       return "位置权限被拒绝"
-        case .authorizationRestricted:   return "位置权限受限"
-        case .locationServicesDisabled:  return "位置服务已禁用"
-        case .timeout:                   return "获取位置超时"
-        case .networkError:              return "网络错误"
-        case .geocodingFailed:           return "地理编码失败"
-        case .unknown(let error):        return "未知错误: \(error.localizedDescription)"
+        case .authorizationDenied:        return "位置权限被拒绝"
+        case .authorizationRestricted:    return "位置权限受限"
+        case .locationServicesDisabled:   return "位置服务已禁用"
+        case .timeout:                    return "获取位置超时"
+        case .networkError:               return "网络错误"
+        case .geocodingFailed(let e):     return e.map { "地理编码失败: \($0.localizedDescription)" } ?? "地理编码失败"
+        case .busy:                       return "正在获取位置中"
+        case .unknown(let error):         return "未知错误: \(error.localizedDescription)"
         }
     }
 }
@@ -126,6 +130,36 @@ public protocol STLocationManagerProtocol: AnyObject {
     func st_clearLocationCache()
 }
 
+// MARK: - Internal protocols for testability
+
+protocol STCLLocationManaging: AnyObject {
+    var delegate: CLLocationManagerDelegate? { get set }
+    var desiredAccuracy: CLLocationAccuracy { get set }
+    var distanceFilter: CLLocationDistance { get set }
+    var authorizationStatus: CLAuthorizationStatus { get }
+    func isLocationServicesEnabled() -> Bool
+    func requestWhenInUseAuthorization()
+    func requestAlwaysAuthorization()
+    func startUpdatingLocation()
+    func stopUpdatingLocation()
+}
+
+extension CLLocationManager: STCLLocationManaging {
+    func isLocationServicesEnabled() -> Bool {
+        return CLLocationManager.locationServicesEnabled()
+    }
+}
+
+protocol STCLGeocoderProtocol: AnyObject {
+    var isGeocoding: Bool { get }
+    func reverseGeocodeLocation(_ location: CLLocation, completionHandler: @escaping CLGeocodeCompletionHandler)
+    func cancelGeocode()
+}
+
+extension CLGeocoder: STCLGeocoderProtocol {}
+
+// MARK: - STLocationManager
+
 /// 所有可变状态由 @MainActor 隔离，CLLocationManager 始终在主线程操作。
 @MainActor
 public class STLocationManager: NSObject {
@@ -136,24 +170,37 @@ public class STLocationManager: NSObject {
     private var locationCompletion: ((Result<STLocationInfo, STLocationError>) -> Void)?
     private var permissionCompletion: ((CLAuthorizationStatus) -> Void)?
     private var isUpdating = false
+    /// 连续更新模式：success 时不停止 CLLocationManager，继续推送位置
+    private var isContinuousUpdating = false
+    /// 每次新请求自增，用于丢弃 stop→start 竞态中残留的过期 geocoding 结果
+    private var requestGeneration: Int = 0
     private var lastLocationInfo: STLocationInfo?
     private var lastLocationTime: Date?
     private var timeoutTask: Task<Void, Never>?
 
-    override init() {
-        super.init()
-    }
+    private var clManager: STCLLocationManaging
+    private let geocoder: STCLGeocoderProtocol
 
-    private lazy var clManager: CLLocationManager = {
+    public override init() {
         let manager = CLLocationManager()
+        self.clManager = manager
+        self.geocoder = CLGeocoder()
+        super.init()
         manager.delegate = self
         manager.desiredAccuracy = self.currentConfig.desiredAccuracy
         manager.distanceFilter = self.currentConfig.distanceFilter
-        return manager
-    }()
+    }
 
-    private lazy var geocoder = CLGeocoder()
+    /// 仅供测试使用，通过依赖注入替换底层实现
+    init(clManager: STCLLocationManaging, geocoder: STCLGeocoderProtocol) {
+        self.clManager = clManager
+        self.geocoder = geocoder
+        super.init()
+        clManager.delegate = self
+    }
 }
+
+// MARK: - STLocationManagerProtocol
 
 extension STLocationManager: STLocationManagerProtocol {
 
@@ -181,12 +228,10 @@ extension STLocationManager: STLocationManagerProtocol {
 
     public func st_getCurrentLocation(config: STLocationConfig? = nil, completion: @escaping (Result<STLocationInfo, STLocationError>) -> Void) {
         guard !self.isUpdating else {
-            completion(.failure(.unknown(NSError(domain: "STLocationManager",
-                                                 code: -1,
-                                                 userInfo: [NSLocalizedDescriptionKey: "正在获取位置中"]))))
+            completion(.failure(.busy))
             return
         }
-        guard CLLocationManager.locationServicesEnabled() else {
+        guard self.clManager.isLocationServicesEnabled() else {
             completion(.failure(.locationServicesDisabled))
             return
         }
@@ -204,14 +249,20 @@ extension STLocationManager: STLocationManagerProtocol {
         if let newConfig = config {
             self.st_configure(with: newConfig)
         }
+        self.requestGeneration += 1
         self.locationCompletion = completion
         self.isUpdating = true
+        self.isContinuousUpdating = false
         self.startTimeoutTask()
         self.clManager.startUpdatingLocation()
     }
 
     public func st_startUpdatingLocation(config: STLocationConfig? = nil, completion: @escaping (Result<STLocationInfo, STLocationError>) -> Void) {
-        guard CLLocationManager.locationServicesEnabled() else {
+        guard !self.isUpdating else {
+            completion(.failure(.busy))
+            return
+        }
+        guard self.clManager.isLocationServicesEnabled() else {
             completion(.failure(.locationServicesDisabled))
             return
         }
@@ -223,14 +274,20 @@ extension STLocationManager: STLocationManagerProtocol {
         if let newConfig = config {
             self.st_configure(with: newConfig)
         }
+        self.requestGeneration += 1
         self.locationCompletion = completion
         self.isUpdating = true
+        self.isContinuousUpdating = true
         self.clManager.startUpdatingLocation()
     }
 
     public func st_stopUpdatingLocation() {
+        // 自增世代号，使所有正在进行的 geocoding 回调在检查时提前退出
+        self.requestGeneration += 1
+        self.isContinuousUpdating = false
         self.isUpdating = false
         self.locationCompletion = nil
+        self.geocoder.cancelGeocode()
         self.cancelTimeoutTask()
         self.clManager.stopUpdatingLocation()
     }
@@ -245,7 +302,10 @@ extension STLocationManager: STLocationManagerProtocol {
     }
 }
 
+// MARK: - Private helpers
+
 extension STLocationManager {
+
     private static func isLocationAccessAuthorized(_ status: CLAuthorizationStatus) -> Bool {
         #if os(macOS)
         return status == .authorizedAlways
@@ -276,12 +336,19 @@ extension STLocationManager {
 
     private func processLocation(_ location: CLLocation) {
         let age = Date().timeIntervalSince(location.timestamp)
+        // 位置数据过旧时跳过，等待更新的数据或超时兜底
         guard age < self.currentConfig.maximumAge else { return }
-        self.geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, _ in
+        // CLGeocoder 不支持并发，跳过已在进行中时收到的重复更新
+        guard !self.geocoder.isGeocoding else { return }
+        // 捕获当前世代号，用于检测 stop→start 竞态下的过期 geocoding 结果
+        let capturedGeneration = self.requestGeneration
+        self.geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
+                // 若世代号已变（期间调用过 stop 或新请求），丢弃此结果
+                guard self.requestGeneration == capturedGeneration else { return }
                 guard let placemark = placemarks?.first else {
-                    self.finishRequest(with: .failure(.geocodingFailed))
+                    self.finishRequest(with: .failure(.geocodingFailed(error)))
                     return
                 }
                 let locationInfo = STLocationInfo(
@@ -306,16 +373,26 @@ extension STLocationManager {
     }
 
     private func finishRequest(with result: Result<STLocationInfo, STLocationError>) {
-        let completion = self.locationCompletion
-        self.locationCompletion = nil
-        self.isUpdating = false
-        self.cancelTimeoutTask()
-        self.clManager.stopUpdatingLocation()
-        completion?(result)
+        if self.isContinuousUpdating, case .success = result {
+            // 连续模式下成功：回调但保持 CLLocationManager 运行，等待下次位置推送
+            self.locationCompletion?(result)
+        } else {
+            // 单次模式，或连续模式下发生错误：停止一切并交付最终结果
+            let completion = self.locationCompletion
+            self.locationCompletion = nil
+            self.isUpdating = false
+            self.isContinuousUpdating = false
+            self.cancelTimeoutTask()
+            self.clManager.stopUpdatingLocation()
+            completion?(result)
+        }
     }
 }
 
+// MARK: - CLLocationManagerDelegate
+
 extension STLocationManager: CLLocationManagerDelegate {
+
     nonisolated public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let status = manager.authorizationStatus
         Task { @MainActor [weak self] in

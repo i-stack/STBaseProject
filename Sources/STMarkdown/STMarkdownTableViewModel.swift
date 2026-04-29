@@ -100,6 +100,18 @@ public final class STMarkdownTableViewModel {
 
     // MARK: - Private
 
+    private static let citationInTextRegex = try! NSRegularExpression(
+        pattern: #"\[Citation:(\d+)\]"#
+    )
+    private static let citationStripRegexes: [NSRegularExpression] = [
+        try! NSRegularExpression(pattern: #"\[\[?\s*(?:[Cc]itation|[Ww]ebpage)\s*:?\s*\d+\s*\]?\]?"#),
+        try! NSRegularExpression(pattern: #"\b(?:[Cc]itation|[Ww]ebpage)\s*:\s*\d+"#),
+    ]
+    private static let citationBadgeRegexes: [NSRegularExpression] = [
+        try! NSRegularExpression(pattern: #"\[?\[?\s*(?:[Cc]itation|[Ww]ebpage)\s*:?\s*(\d+)\s*\]?\]?"#),
+        try! NSRegularExpression(pattern: #"(?:[Cc]itation|[Ww]ebpage)\s*:\s*(\d+)"#),
+    ]
+
     private static func textAlignment(for alignment: STMarkdownColumnAlignment) -> NSTextAlignment {
         switch alignment {
         case .left: return .left
@@ -127,15 +139,15 @@ public final class STMarkdownTableViewModel {
             case .emphasis(let children), .strong(let children), .strikethrough(let children):
                 collectCitations(from: children, into: &citations)
             case .text(let text):
-                let pattern = #"\[Citation:(\d+)\]"#
-                if let regex = try? NSRegularExpression(pattern: pattern) {
-                    let ns = text as NSString
-                    let matches = regex.matches(in: text, range: NSRange(location: 0, length: ns.length))
-                    for match in matches {
-                        let numberRange = match.range(at: 1)
-                        if numberRange.location != NSNotFound {
-                            citations.append(ns.substring(with: numberRange))
-                        }
+                let ns = text as NSString
+                let matches = Self.citationInTextRegex.matches(
+                    in: text,
+                    range: NSRange(location: 0, length: ns.length)
+                )
+                for match in matches {
+                    let numberRange = match.range(at: 1)
+                    if numberRange.location != NSNotFound {
+                        citations.append(ns.substring(with: numberRange))
                     }
                 }
             default:
@@ -196,20 +208,13 @@ public final class STMarkdownTableViewModel {
     /// 从纯文本中移除 [Citation:N] 及 Citation:N 模式的残留文本。
     private static func stripCitationTextPatterns(from text: String) -> String {
         var result = text
-        // 移除 [Citation:N] 及 [[Citation:N]]
-        let patterns: [String] = [
-            #"\[\[?\s*(?:[Cc]itation|[Ww]ebpage)\s*:?\s*\d+\s*\]?\]?"#,
-            #"\b(?:[Cc]itation|[Ww]ebpage)\s*:\s*\d+"#,
-        ]
-        for pattern in patterns {
-            if let regex = try? NSRegularExpression(pattern: pattern) {
-                let ns = result as NSString
-                result = regex.stringByReplacingMatches(
-                    in: result,
-                    range: NSRange(location: 0, length: ns.length),
-                    withTemplate: ""
-                )
-            }
+        for regex in Self.citationStripRegexes {
+            let ns = result as NSString
+            result = regex.stringByReplacingMatches(
+                in: result,
+                range: NSRange(location: 0, length: ns.length),
+                withTemplate: ""
+            )
         }
         // 清理残留的空括号和多余空格
         result = result.replacingOccurrences(of: "()", with: "")
@@ -233,16 +238,9 @@ public final class STMarkdownTableViewModel {
         let result = NSMutableAttributedString(attributedString: attributedString)
         let text = result.string as NSString
 
-        // 匹配 [Citation:N]、[[Citation:N]]、Citation:N 及链接文本 "Citation:N"
-        let patterns: [String] = [
-            #"\[?\[?\s*(?:[Cc]itation|[Ww]ebpage)\s*:?\s*(\d+)\s*\]?\]?"#,
-            #"(?:[Cc]itation|[Ww]ebpage)\s*:\s*(\d+)"#,
-        ]
-
-        // 收集所有匹配的 (range, number)，从后往前替换以保持索引有效
+        // 匹配 [Citation:N]、[[Citation:N]]、Citation:N 及链接文本 "Citation:N"，从后往前替换以保持索引有效
         var replacements: [(range: NSRange, number: String)] = []
-        for pattern in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+        for regex in Self.citationBadgeRegexes {
             let matches = regex.matches(in: text as String, range: NSRange(location: 0, length: text.length))
             for match in matches {
                 let numberRange = match.range(at: 1)

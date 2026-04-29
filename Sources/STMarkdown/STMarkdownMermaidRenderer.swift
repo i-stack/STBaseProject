@@ -47,8 +47,9 @@ public class STMarkdownMermaidRenderer: NSObject {
     }
 
     // 宽度不纳入 key：Mermaid 输出 SVG 可自适应宽度，截图时用实际 webView.frame.width
-    private func cacheKey(_ code: String, _ isDark: Bool) -> String {
-        "\(code.hashValue)_\(isDark)"
+    // internal 而非 private：允许 @testable import 的单元测试验证键唯一性
+    func cacheKey(_ code: String, _ isDark: Bool) -> String {
+        "\(isDark ? "1" : "0")_\(code)"
     }
 
     private func ensureWebViewReady() {

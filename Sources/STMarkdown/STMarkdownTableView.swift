@@ -50,6 +50,7 @@ public final class STMarkdownTableView: UIView {
     private func setupCollectionView() {
         self.collectionView.register(STMarkdownTableCell.self, forCellWithReuseIdentifier: STMarkdownTableCell.reuseIdentifier)
         self.collectionView.dataSource = self
+        self.collectionView.delegate = self
         self.collectionView.bounces = false
         self.collectionView.alwaysBounceHorizontal = false
         self.collectionView.alwaysBounceVertical = false
@@ -140,6 +141,20 @@ public final class STMarkdownTableView: UIView {
             constrainedWidth: 360,
             contentInsets: self.cellInsets
         )
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension STMarkdownTableView: UICollectionViewDelegate {
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: false)
+        guard let tableData,
+              indexPath.section < tableData.cells.count,
+              indexPath.item < tableData.cells[indexPath.section].count else { return }
+        let citations = tableData.cells[indexPath.section][indexPath.item].citations
+        guard let first = citations.first else { return }
+        self.onCitationTap?(first)
     }
 }
 

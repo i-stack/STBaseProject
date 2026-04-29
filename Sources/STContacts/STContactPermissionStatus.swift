@@ -16,14 +16,14 @@ public enum STContactPermissionStatus: Sendable {
 }
 
 extension STContactPermissionStatus {
-    init(_ rawStatus: CNAuthorizationStatus) {
+    public init(_ rawStatus: CNAuthorizationStatus) {
         switch rawStatus {
         case .notDetermined: self = .notDetermined
         case .restricted:    self = .restricted
         case .denied:        self = .denied
         case .limited:       self = .limited
         case .authorized:    self = .authorized
-        @unknown default:    self = .notDetermined
+        @unknown default:    self = .denied
         }
     }
 }

@@ -112,9 +112,9 @@ public class STImageManager: NSObject {
         if let config = configuration { self.configuration = config }
         switch source {
         case .camera:
-            return try await selectFromCamera(from: viewController)
+            return try await self.selectFromCamera(from: viewController)
         case .photoLibrary:
-            return try await selectFromPhotoLibrary(from: viewController)
+            return try await self.selectFromPhotoLibrary(from: viewController)
         case .simulator:
             throw STImageManagerError.deviceNotAvailable(.simulator)
         case .unknown:
@@ -140,12 +140,14 @@ public class STImageManager: NSObject {
             })
             viewController.present(alert, animated: true)
         }
-        return try await selectImage(from: viewController, source: source)
+        return try await self.selectImage(from: viewController, source: source)
     }
 
     // MARK: - Private photo library
 
     private func selectFromPhotoLibrary(from viewController: UIViewController) async throws -> STImageManagerModel {
+        // 取消之前未完成的请求，避免旧 continuation 永远挂起
+        self.resolvePendingPickerContinuation(with: .userCancelled)
         return try await withCheckedThrowingContinuation { continuation in
             self.pickerContinuation = continuation
             var config = PHPickerConfiguration(photoLibrary: .shared())
@@ -160,7 +162,9 @@ public class STImageManager: NSObject {
     // MARK: - Private camera
 
     private func selectFromCamera(from viewController: UIViewController) async throws -> STImageManagerModel {
-        try await checkCameraPermission()
+        try await self.checkCameraPermission()
+        // 取消之前未完成的请求，避免旧 continuation 永远挂起
+        self.resolvePendingCameraContinuation(with: .userCancelled)
         return try await withCheckedThrowingContinuation { continuation in
             self.cameraContinuation = continuation
             let picker = UIImagePickerController()
@@ -194,10 +198,27 @@ public class STImageManager: NSObject {
         }
     }
 
-    // MARK: - Private model builder
+    // MARK: - Continuation 安全清理
 
-    private func buildModel(from image: UIImage, source: STImageSource) throws -> STImageManagerModel {
-        let config = self.configuration
+    private func resolvePendingPickerContinuation(with error: STImageManagerError) {
+        guard let pending = self.pickerContinuation else { return }
+        self.pickerContinuation = nil
+        pending.resume(throwing: error)
+    }
+
+    private func resolvePendingCameraContinuation(with error: STImageManagerError) {
+        guard let pending = self.cameraContinuation else { return }
+        self.cameraContinuation = nil
+        pending.resume(throwing: error)
+    }
+
+    // MARK: - Model 构建（nonisolated 以便在 Task.detached 中调用）
+
+    public nonisolated static func buildModel(
+        from image: UIImage,
+        source: STImageSource,
+        config: STImageManagerConfiguration
+    ) throws -> STImageManagerModel {
         guard let compressedData = UIImage.smartCompress(image, maxFileSize: config.maxFileSize) else {
             throw STImageManagerError.compressionFailed
         }
@@ -219,19 +240,16 @@ extension STImageManager: PHPickerViewControllerDelegate {
     public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
         guard let result = results.first else {
-            self.pickerContinuation?.resume(throwing: STImageManagerError.userCancelled)
-            self.pickerContinuation = nil
+            self.resolvePendingPickerContinuation(with: .userCancelled)
             return
         }
         guard result.itemProvider.canLoadObject(ofClass: UIImage.self) else {
-            self.pickerContinuation?.resume(throwing: STImageManagerError.unknown)
-            self.pickerContinuation = nil
+            self.resolvePendingPickerContinuation(with: .unknown)
             return
         }
         let continuation = self.pickerContinuation
         self.pickerContinuation = nil
-        let maxFileSize = self.configuration.maxFileSize
-        let imageFormat = self.configuration.imageFormat
+        let config = self.configuration
         result.itemProvider.loadObject(ofClass: UIImage.self) { object, error in
             if let error {
                 continuation?.resume(throwing: error)
@@ -242,20 +260,12 @@ extension STImageManager: PHPickerViewControllerDelegate {
                 return
             }
             Task.detached(priority: .userInitiated) {
-                guard let compressedData = UIImage.smartCompress(image, maxFileSize: maxFileSize) else {
-                    continuation?.resume(throwing: STImageManagerError.compressionFailed)
-                    return
+                do {
+                    let model = try STImageManager.buildModel(from: image, source: .photoLibrary, config: config)
+                    continuation?.resume(returning: model)
+                } catch {
+                    continuation?.resume(throwing: error)
                 }
-                let format = image.getTypeString() ?? imageFormat
-                let timestamp = Date().timeIntervalSince1970
-                let model = STImageManagerModel(
-                    image: image,
-                    imageData: compressedData,
-                    fileName: "photo_\(timestamp).\(format)",
-                    mimeType: "image/\(format)",
-                    source: .photoLibrary
-                )
-                continuation?.resume(returning: model)
             }
         }
     }
@@ -268,35 +278,24 @@ extension STImageManager: UIImagePickerControllerDelegate, UINavigationControlle
         picker.dismiss(animated: true)
         let imageKey: UIImagePickerController.InfoKey = self.configuration.allowsEditing ? .editedImage : .originalImage
         guard let image = info[imageKey] as? UIImage else {
-            self.cameraContinuation?.resume(throwing: STImageManagerError.unknown)
-            self.cameraContinuation = nil
+            self.resolvePendingCameraContinuation(with: .unknown)
             return
         }
         let continuation = self.cameraContinuation
         self.cameraContinuation = nil
-        let maxFileSize = self.configuration.maxFileSize
-        let imageFormat = self.configuration.imageFormat
+        let config = self.configuration
         Task.detached(priority: .userInitiated) {
-            guard let compressedData = UIImage.smartCompress(image, maxFileSize: maxFileSize) else {
-                continuation?.resume(throwing: STImageManagerError.compressionFailed)
-                return
+            do {
+                let model = try STImageManager.buildModel(from: image, source: .camera, config: config)
+                continuation?.resume(returning: model)
+            } catch {
+                continuation?.resume(throwing: error)
             }
-            let format = image.getTypeString() ?? imageFormat
-            let timestamp = Date().timeIntervalSince1970
-            let model = STImageManagerModel(
-                image: image,
-                imageData: compressedData,
-                fileName: "photo_\(timestamp).\(format)",
-                mimeType: "image/\(format)",
-                source: .camera
-            )
-            continuation?.resume(returning: model)
         }
     }
 
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
-        self.cameraContinuation?.resume(throwing: STImageManagerError.userCancelled)
-        self.cameraContinuation = nil
+        self.resolvePendingCameraContinuation(with: .userCancelled)
     }
 }

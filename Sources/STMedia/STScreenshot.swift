@@ -9,6 +9,7 @@ import UIKit
 
 public final class STScreenshot: NSObject {
 
+    @MainActor
     private class func captureData() -> Data {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
             return Data()
@@ -51,11 +52,13 @@ public final class STScreenshot: NSObject {
         return image.pngData() ?? Data()
     }
 
+    @MainActor
     public static func image() -> UIImage {
         let data = self.captureData()
         return UIImage(data: data) ?? UIImage()
     }
 
+    @MainActor
     public static func imageView(frame: CGRect? = nil) -> UIImageView {
         let image = self.image()
         let imageView = UIImageView(image: image)

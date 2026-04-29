@@ -52,6 +52,9 @@ public class STScanManager: NSObject {
     private var output: AVCaptureMetadataOutput?
     private var preview: AVCaptureVideoPreviewLayer?
 
+    // AVCaptureSession 的所有配置、startRunning、stopRunning 必须在此队列执行
+    private let sessionQueue = DispatchQueue(label: "com.st.scan.session", qos: .userInitiated)
+
     public init(presentViewController: UIViewController) {
         super.init()
         self.presentVC = presentViewController
@@ -66,7 +69,9 @@ public class STScanManager: NSObject {
     }
 
     deinit {
-        self.session?.stopRunning()
+        self.sessionQueue.async { [session = self.session] in
+            session?.stopRunning()
+        }
         self.session = nil
     }
 
@@ -77,16 +82,20 @@ public class STScanManager: NSObject {
     }
 
     public func st_beginScan() {
-        self.session?.startRunning()
+        self.sessionQueue.async { [weak self] in
+            self?.session?.startRunning()
+        }
     }
 
     public func st_stopScan() {
-        guard let session = self.session, session.isRunning else { return }
-        session.stopRunning()
+        self.sessionQueue.async { [weak self] in
+            guard let session = self?.session, session.isRunning else { return }
+            session.stopRunning()
+        }
     }
 
     public func detailSelectPhoto(image: UIImage) {
-        Task { [weak self] in
+        Task { @MainActor [weak self] in
             guard let self else { return }
             do {
                 let result = try await STScanManager.recognizeQRCode(in: image)
@@ -97,18 +106,20 @@ public class STScanManager: NSObject {
         }
     }
 
-    // MARK: - Static async API
+    // MARK: - Static async API（CPU 密集操作下沉到后台线程）
 
     public static func recognizeQRCode(in image: UIImage) async throws -> String {
-        guard let ciImage = CIImage(image: image) else { throw STScanError.recognitionFailed }
-        let context = CIContext()
-        let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: context, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
-        let features = detector?.features(in: ciImage) ?? []
-        guard let feature = features.first as? CIQRCodeFeature,
-              let result = feature.messageString else {
-            throw STScanError.noQRCodeFound
-        }
-        return result
+        return try await Task.detached(priority: .userInitiated) {
+            guard let ciImage = CIImage(image: image) else { throw STScanError.recognitionFailed }
+            let context = CIContext()
+            let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: context, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])
+            let features = detector?.features(in: ciImage) ?? []
+            guard let feature = features.first as? CIQRCodeFeature,
+                  let result = feature.messageString else {
+                throw STScanError.noQRCodeFound
+            }
+            return result
+        }.value
     }
 
     public static func generateQRCode(
@@ -119,7 +130,9 @@ public class STScanManager: NSObject {
     ) async throws -> UIImage {
         guard !content.isEmpty else { throw STScanError.invalidContent }
         guard size != .zero else { throw STScanError.invalidSize }
-        return try _generateQRImage(content: content, size: size, color: color, background: background)
+        return try await Task.detached(priority: .userInitiated) {
+            try _generateQRImage(content: content, size: size, color: color, background: background)
+        }.value
     }
 
     public static func generateQRCode(
@@ -130,7 +143,9 @@ public class STScanManager: NSObject {
     ) async throws -> UIImage {
         guard !content.isEmpty else { throw STScanError.invalidContent }
         guard size != .zero, watermarkSize != .zero else { throw STScanError.invalidSize }
-        return try _generateQRImageWithWatermark(content: content, size: size, watermark: watermark, watermarkSize: watermarkSize)
+        return try await Task.detached(priority: .userInitiated) {
+            try _generateQRImageWithWatermark(content: content, size: size, watermark: watermark, watermarkSize: watermarkSize)
+        }.value
     }
 
     public static func generateBarCode(
@@ -141,7 +156,9 @@ public class STScanManager: NSObject {
     ) async throws -> UIImage {
         guard !content.isEmpty else { throw STScanError.invalidContent }
         guard size != .zero else { throw STScanError.invalidSize }
-        return try _generateBarCodeImage(content: content, size: size, color: color, background: background)
+        return try await Task.detached(priority: .userInitiated) {
+            try _generateBarCodeImage(content: content, size: size, color: color, background: background)
+        }.value
     }
 
     // MARK: - Private image helpers
@@ -249,26 +266,37 @@ public class STScanManager: NSObject {
     private func st_scanDevice() {
         self.checkCameraPermission { [weak self] granted in
             guard let self, granted else { return }
-            guard let device = AVCaptureDevice.default(for: .video) else { return }
-            self.device = device
-            guard let input = try? AVCaptureDeviceInput(device: device) else { return }
-            self.input = input
-            let output = AVCaptureMetadataOutput()
-            self.output = output
-            output.setMetadataObjectsDelegate(self, queue: .main)
-            let session = AVCaptureSession()
-            self.session = session
-            if session.canAddInput(input) { session.addInput(input) }
-            if session.canAddOutput(output) {
-                session.addOutput(output)
-                output.metadataObjectTypes = self.metadataObjectTypes(for: self.scanType)
-                output.rectOfInterest = self.st_scanRectWithScale(scale: 1).rectOfInterest
+            // AVCaptureSession 配置移至 sessionQueue，避免主线程阻塞
+            self.sessionQueue.async { [weak self] in
+                guard let self else { return }
+                guard let device = AVCaptureDevice.default(for: .video) else { return }
+                self.device = device
+                guard let input = try? AVCaptureDeviceInput(device: device) else {
+                    print("[STScanManager] AVCaptureDeviceInput 创建失败，请检查相机权限或设备状态")
+                    return
+                }
+                self.input = input
+                let output = AVCaptureMetadataOutput()
+                self.output = output
+                output.setMetadataObjectsDelegate(self, queue: .main)
+                let session = AVCaptureSession()
+                self.session = session
+                if session.canAddInput(input) { session.addInput(input) }
+                if session.canAddOutput(output) {
+                    session.addOutput(output)
+                    output.metadataObjectTypes = self.metadataObjectTypes(for: self.scanType)
+                    output.rectOfInterest = self.st_scanRectWithScale(scale: 1).rectOfInterest
+                }
+                // 预览层必须在主线程插入
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    let preview = AVCaptureVideoPreviewLayer(session: session)
+                    self.preview = preview
+                    preview.videoGravity = .resizeAspectFill
+                    preview.frame = UIScreen.main.bounds
+                    self.presentVC?.view.layer.insertSublayer(preview, at: 0)
+                }
             }
-            let preview = AVCaptureVideoPreviewLayer(session: session)
-            self.preview = preview
-            preview.videoGravity = .resizeAspectFill
-            preview.frame = UIScreen.main.bounds
-            self.presentVC?.view.layer.insertSublayer(preview, at: 0)
         }
     }
 

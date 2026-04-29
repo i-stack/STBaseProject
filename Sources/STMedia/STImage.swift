@@ -48,19 +48,32 @@ public enum WatermarkPosition {
 // MARK: - UIImage 扩展
 extension UIImage {
 
+    // CIContext 创建开销大，全局复用
+    private static let sharedCIContext = CIContext()
+
     public static func isEmpty(_ image: UIImage) -> Bool {
         return image.cgImage == nil && image.ciImage == nil
+    }
+
+    /// 编码为 Data：有 alpha 通道优先 PNG，无 alpha 优先 JPEG（与 getFormat() 保持一致）
+    public func toData() -> Data {
+        guard let cgImage = self.cgImage else {
+            return self.pngData() ?? Data()
+        }
+        let alpha = cgImage.alphaInfo
+        let hasAlpha = alpha != .none && alpha != .noneSkipFirst && alpha != .noneSkipLast
+        if hasAlpha {
+            if let png = self.pngData(), png.count > 0 { return png }
+            return self.jpegData(compressionQuality: 1.0) ?? Data()
+        } else {
+            if let jpeg = self.jpegData(compressionQuality: 1.0), jpeg.count > 0 { return jpeg }
+            return self.pngData() ?? Data()
+        }
     }
 
     public func toBase64() -> String {
         let data = toData()
         return data.count > 0 ? data.base64EncodedString() : ""
-    }
-
-    public func toData() -> Data {
-        if let pngData = self.pngData(), pngData.count > 0 { return pngData }
-        if let jpegData = self.jpegData(compressionQuality: 1.0), jpegData.count > 0 { return jpegData }
-        return Data()
     }
 
     /// 从已有 Data 直接检测图片格式，避免重复编码
@@ -93,8 +106,13 @@ extension UIImage {
         return .undefined
     }
 
+    /// 启发式判断图片格式：有 alpha 通道 → PNG，无 alpha → JPEG
+    /// UIImage 在内存中是格式无关的解码位图，此方法为近似估计，需要原始 Data 时请用 UIImage.format(from:)
     public func getFormat() -> STImageFormat {
-        return UIImage.format(from: self.toData())
+        guard let cgImage = self.cgImage else { return .undefined }
+        let alpha = cgImage.alphaInfo
+        let hasAlpha = alpha != .none && alpha != .noneSkipFirst && alpha != .noneSkipLast
+        return hasAlpha ? .png : .jpeg
     }
 
     public func getTypeString() -> String? {
@@ -280,25 +298,23 @@ extension UIImage {
 
     public func applyBlur(radius: CGFloat = 10) -> UIImage? {
         guard let cgImage = self.cgImage else { return nil }
-        let context = CIContext()
         let ciImage = CIImage(cgImage: cgImage)
         guard let filter = CIFilter(name: "CIGaussianBlur") else { return nil }
         filter.setValue(ciImage, forKey: kCIInputImageKey)
         filter.setValue(radius, forKey: kCIInputRadiusKey)
         guard let output = filter.outputImage,
-              let blurredCGImage = context.createCGImage(output, from: ciImage.extent) else { return nil }
+              let blurredCGImage = UIImage.sharedCIContext.createCGImage(output, from: ciImage.extent) else { return nil }
         return UIImage(cgImage: blurredCGImage)
     }
 
     public func adjustBrightness(_ brightness: Float) -> UIImage? {
         guard let cgImage = self.cgImage else { return nil }
-        let context = CIContext()
         let ciImage = CIImage(cgImage: cgImage)
         guard let filter = CIFilter(name: "CIColorControls") else { return nil }
         filter.setValue(ciImage, forKey: kCIInputImageKey)
         filter.setValue(brightness, forKey: kCIInputBrightnessKey)
         guard let output = filter.outputImage,
-              let adjustedCGImage = context.createCGImage(output, from: ciImage.extent) else { return nil }
+              let adjustedCGImage = UIImage.sharedCIContext.createCGImage(output, from: ciImage.extent) else { return nil }
         return UIImage(cgImage: adjustedCGImage)
     }
 
