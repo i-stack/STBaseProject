@@ -7,92 +7,17 @@
 
 import UIKit
 
-public final class STMarkdownTextView: UIView, STMarkdownInteractable {
+public final class STMarkdownTextView: STMarkdownBaseTextView {
 
-    public var markdownStyle: STMarkdownStyle {
-        didSet {
-            guard self.isApplyingConfiguration == false else { return }
-            self.textView.font = self.markdownStyle.font
-            self.textView.textColor = self.markdownStyle.textColor
-            self.renderer = STMarkdownAttributedStringRenderer(
-                style: self.markdownStyle,
-                advancedRenderers: self.advancedRenderers
-            )
-            if self.rawMarkdown.isEmpty == false {
-                self.setMarkdown(self.rawMarkdown)
-            }
-        }
-    }
-
-    public var advancedRenderers: STMarkdownAdvancedRenderers {
-        didSet {
-            guard self.isApplyingConfiguration == false else { return }
-            self.renderer = STMarkdownAttributedStringRenderer(
-                style: self.markdownStyle,
-                advancedRenderers: self.advancedRenderers
-            )
-            if self.rawMarkdown.isEmpty == false {
-                self.setMarkdown(self.rawMarkdown)
-            }
-        }
-    }
-
-    public var engine: STMarkdownEngine
-    public var onLinkTap: ((URL) -> Void)?
-    public var onSelectionChange: ((String) -> Void)?
-    public var onCitationTap: ((String) -> Void)? {
-        didSet {
-            self.tableOverlayCoordinator.onCitationTap = self.onCitationTap
-        }
-    }
-
-    public var isTextSelectionEnabled: Bool {
-        get { self.textView.isSelectable }
-        set { self.textView.isSelectable = newValue }
-    }
-
-    public var isSelectable: Bool {
-        get { self.isTextSelectionEnabled }
-        set { self.isTextSelectionEnabled = newValue }
-    }
-
-    public var linkTextAttributes: [NSAttributedString.Key: Any] {
-        get { self.textView.linkTextAttributes }
-        set { self.textView.linkTextAttributes = newValue }
-    }
-
-    public private(set) var rawMarkdown: String = ""
-
-    public var attributedText: NSAttributedString {
-        self.textView.attributedText ?? NSAttributedString()
-    }
-
-    public var contentTextView: UITextView {
-        self.textView
-    }
-
-    public var textViewInset: UIEdgeInsets {
-        get { self.textView.textContainerInset }
-        set {
-            self.textView.textContainerInset = newValue
-            self.tableOverlayCoordinator.markDirty()
-            self.invalidateIntrinsicContentSize()
-        }
-    }
-
-    private var renderer: STMarkdownAttributedStringRenderer
-    private var isApplyingConfiguration = false
-    private let textView: UITextView = UITextView(usingTextLayoutManager: false)
-    private lazy var tableOverlayCoordinator = STMarkdownTableOverlayCoordinator(textView: self.textView)
-
-    public override init(frame: CGRect) {
-        let style = STMarkdownStyle.default
-        self.markdownStyle = style
-        self.advancedRenderers = .empty
-        self.engine = STMarkdownEngine()
-        self.renderer = STMarkdownAttributedStringRenderer(style: style, advancedRenderers: .empty)
-        super.init(frame: frame)
-        self.setup()
+    public init(frame: CGRect) {
+        super.init(
+            textView: UITextView(usingTextLayoutManager: false),
+            frame: frame,
+            style: .default,
+            advancedRenderers: .empty,
+            engine: STMarkdownEngine(),
+            accessibilityTraits: .staticText
+        )
     }
 
     public convenience init(
@@ -101,76 +26,29 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         engine: STMarkdownEngine = STMarkdownEngine()
     ) {
         self.init(frame: .zero)
-        self.markdownStyle = style
-        self.advancedRenderers = advancedRenderers
-        self.engine = engine
-        self.renderer = STMarkdownAttributedStringRenderer(style: style, advancedRenderers: advancedRenderers)
-        self.textView.font = style.font
-        self.textView.textColor = style.textColor
+        self.applyConfigurationCommon(
+            style: style,
+            advancedRenderers: advancedRenderers,
+            engine: engine
+        )
     }
 
     public required init?(coder: NSCoder) {
-        let style = STMarkdownStyle.default
-        self.markdownStyle = style
-        self.advancedRenderers = .empty
-        self.engine = STMarkdownEngine()
-        self.renderer = STMarkdownAttributedStringRenderer(style: style, advancedRenderers: .empty)
-        super.init(coder: coder)
-        self.setup()
-    }
-
-    /// 外部（如 UITableViewCell 的 systemLayoutSizeFitting）在 cell 加入 window 之前
-    /// 注入正确的内容宽度，确保第一次高度测量就准确。
-    public var preferredContentWidth: CGFloat = 0 {
-        didSet {
-            guard self.preferredContentWidth != oldValue else { return }
-            self.invalidateIntrinsicContentSize()
-        }
-    }
-
-    public override var intrinsicContentSize: CGSize {
-        let w: CGFloat
-        if self.preferredContentWidth > 0 {
-            w = self.preferredContentWidth
-        } else if self.bounds.width > 0 {
-            w = self.bounds.width
-        } else {
-            w = self.window?.bounds.width ?? UIScreen.main.bounds.width
-        }
-        let fitting = self.textView.sizeThatFits(
-            CGSize(width: w, height: .greatestFiniteMagnitude)
+        super.init(
+            textView: UITextView(usingTextLayoutManager: false),
+            coder: coder,
+            style: .default,
+            advancedRenderers: .empty,
+            engine: STMarkdownEngine(),
+            accessibilityTraits: .staticText
         )
-        return CGSize(width: UIView.noIntrinsicMetric, height: ceil(fitting.height))
     }
-
-    public override func sizeThatFits(_ size: CGSize) -> CGSize {
-        return self.textView.sizeThatFits(size)
-    }
-
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        let sizeChanged = self.bounds.size != self.lastLaidOutSize
-        self.lastLaidOutSize = self.bounds.size
-        self.tableOverlayCoordinator.updateIfNeeded(
-            attributedText: self.attributedText,
-            containerBounds: self.bounds
-        )
-        if sizeChanged && self.bounds.width > 0 {
-            self.invalidateIntrinsicContentSize()
-        }
-    }
-
-    private var lastLaidOutSize: CGSize = .zero
 
     public func setMarkdown(_ markdown: String) {
         self.rawMarkdown = markdown
-        let result = self.engine.process(markdown)
-        let rendered = self.renderer.render(document: result.renderDocument)
+        let rendered = self.renderMarkdown(markdown)
         self.textView.attributedText = rendered
-        self.textView.accessibilityValue = rendered.string
-        self.bindAttachmentRefreshHandlers(in: rendered)
-        self.tableOverlayCoordinator.markDirty()
-        self.invalidateIntrinsicContentSize()
+        self.finalizeRenderUpdate(rendered: rendered)
     }
 
     public func applyConfiguration(
@@ -179,100 +57,20 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         advancedRenderers: STMarkdownAdvancedRenderers,
         engine: STMarkdownEngine
     ) {
-        self.isApplyingConfiguration = true
-        self.markdownStyle = style
-        self.advancedRenderers = advancedRenderers
-        self.engine = engine
-        self.isApplyingConfiguration = false
-        self.textView.font = style.font
-        self.textView.textColor = style.textColor
-        self.renderer = STMarkdownAttributedStringRenderer(
+        self.applyConfigurationCommon(
             style: style,
-            advancedRenderers: advancedRenderers
+            advancedRenderers: advancedRenderers,
+            engine: engine
         )
         self.setMarkdown(markdown)
     }
 
     public func reset() {
-        self.rawMarkdown = ""
         self.textView.attributedText = NSAttributedString()
-        self.tableOverlayCoordinator.reset()
-        self.invalidateIntrinsicContentSize()
+        self.resetBaseState()
     }
 
-    public func sizeThatFitsMarkdown(width: CGFloat) -> CGSize {
-        let size = self.textView.sizeThatFits(
-            CGSize(width: width, height: .greatestFiniteMagnitude)
-        )
-        return CGSize(width: width, height: ceil(size.height))
-    }
-
-    private func setup() {
-        self.backgroundColor = .clear
-        self.isAccessibilityElement = false
-        self.textView.translatesAutoresizingMaskIntoConstraints = false
-        self.textView.isEditable = false
-        self.textView.isSelectable = true
-        self.textView.isScrollEnabled = false
-        self.textView.backgroundColor = .clear
-        self.textView.textContainerInset = .zero
-        self.textView.textContainer.lineFragmentPadding = 0
-        self.textView.font = self.markdownStyle.font
-        self.textView.textColor = self.markdownStyle.textColor
-        self.textView.accessibilityTraits = .staticText
-        self.textView.delegate = self
-        self.addSubview(self.textView)
-        NSLayoutConstraint.activate([
-            self.textView.topAnchor.constraint(equalTo: self.topAnchor),
-            self.textView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            self.textView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            self.textView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-        ])
-    }
-
-    @MainActor
-    private func refreshRenderedAttachment(_ attachment: NSTextAttachment) {
-        let content = self.textView.attributedText ?? NSAttributedString()
-        guard content.length > 0 else { return }
-        var hit: NSRange?
-        content.enumerateAttribute(
-            .attachment,
-            in: NSRange(location: 0, length: content.length)
-        ) { value, range, stop in
-            if let candidate = value as? NSTextAttachment, candidate === attachment {
-                hit = range
-                stop.pointee = true
-            }
-        }
-        guard let range = hit else { return }
-        self.textView.layoutManager.invalidateDisplay(forCharacterRange: range)
-        self.textView.layoutManager.invalidateLayout(forCharacterRange: range, actualCharacterRange: nil)
-        self.invalidateIntrinsicContentSize()
-    }
-
-    private func bindAttachmentRefreshHandlers(in attributedText: NSAttributedString) {
-        STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] attachment in
-            self?.refreshRenderedAttachment(attachment)
-        }
-    }
-}
-
-extension STMarkdownTextView: UITextViewDelegate {
-    public func textViewDidChangeSelection(_ textView: UITextView) {
-        guard let range = textView.selectedTextRange else {
-            self.onSelectionChange?("")
-            return
-        }
-        self.onSelectionChange?(textView.text(in: range) ?? "")
-    }
-
-    public func textView(
-        _ textView: UITextView,
-        shouldInteractWith url: URL,
-        in characterRange: NSRange,
-        interaction: UITextItemInteraction
-    ) -> Bool {
-        self.onLinkTap?(url)
-        return false
+    internal override func configurationDidChangeRerender() {
+        self.setMarkdown(self.rawMarkdown)
     }
 }
