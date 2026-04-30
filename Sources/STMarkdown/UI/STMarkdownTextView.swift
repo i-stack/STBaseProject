@@ -75,6 +75,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         get { self.textView.textContainerInset }
         set {
             self.textView.textContainerInset = newValue
+            self.tableOverlayCoordinator.markDirty()
             self.invalidateIntrinsicContentSize()
         }
     }
@@ -118,21 +119,48 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
         self.setup()
     }
 
+    /// 外部（如 UITableViewCell 的 systemLayoutSizeFitting）在 cell 加入 window 之前
+    /// 注入正确的内容宽度，确保第一次高度测量就准确。
+    public var preferredContentWidth: CGFloat = 0 {
+        didSet {
+            guard self.preferredContentWidth != oldValue else { return }
+            self.invalidateIntrinsicContentSize()
+        }
+    }
+
     public override var intrinsicContentSize: CGSize {
-        let width = self.bounds.width > 0 ? self.bounds.width : (self.window?.bounds.width ?? UIView.layoutFittingExpandedSize.width)
+        let w: CGFloat
+        if self.preferredContentWidth > 0 {
+            w = self.preferredContentWidth
+        } else if self.bounds.width > 0 {
+            w = self.bounds.width
+        } else {
+            w = self.window?.bounds.width ?? UIScreen.main.bounds.width
+        }
         let fitting = self.textView.sizeThatFits(
-            CGSize(width: width, height: .greatestFiniteMagnitude)
+            CGSize(width: w, height: .greatestFiniteMagnitude)
         )
         return CGSize(width: UIView.noIntrinsicMetric, height: ceil(fitting.height))
     }
 
+    public override func sizeThatFits(_ size: CGSize) -> CGSize {
+        return self.textView.sizeThatFits(size)
+    }
+
     public override func layoutSubviews() {
         super.layoutSubviews()
+        let sizeChanged = self.bounds.size != self.lastLaidOutSize
+        self.lastLaidOutSize = self.bounds.size
         self.tableOverlayCoordinator.updateIfNeeded(
             attributedText: self.attributedText,
             containerBounds: self.bounds
         )
+        if sizeChanged && self.bounds.width > 0 {
+            self.invalidateIntrinsicContentSize()
+        }
     }
+
+    private var lastLaidOutSize: CGSize = .zero
 
     public func setMarkdown(_ markdown: String) {
         self.rawMarkdown = markdown
@@ -167,7 +195,7 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
 
     public func reset() {
         self.rawMarkdown = ""
-        self.textView.attributedText = nil
+        self.textView.attributedText = NSAttributedString()
         self.tableOverlayCoordinator.reset()
         self.invalidateIntrinsicContentSize()
     }
@@ -203,19 +231,28 @@ public final class STMarkdownTextView: UIView, STMarkdownInteractable {
     }
 
     @MainActor
-    private func refreshRenderedAttachments() {
-        let range = NSRange(location: 0, length: self.textView.attributedText.length)
-        guard range.length > 0 else { return }
+    private func refreshRenderedAttachment(_ attachment: NSTextAttachment) {
+        let content = self.textView.attributedText ?? NSAttributedString()
+        guard content.length > 0 else { return }
+        var hit: NSRange?
+        content.enumerateAttribute(
+            .attachment,
+            in: NSRange(location: 0, length: content.length)
+        ) { value, range, stop in
+            if let candidate = value as? NSTextAttachment, candidate === attachment {
+                hit = range
+                stop.pointee = true
+            }
+        }
+        guard let range = hit else { return }
         self.textView.layoutManager.invalidateDisplay(forCharacterRange: range)
         self.textView.layoutManager.invalidateLayout(forCharacterRange: range, actualCharacterRange: nil)
-        self.textView.setNeedsLayout()
-        self.textView.layoutIfNeeded()
         self.invalidateIntrinsicContentSize()
     }
 
     private func bindAttachmentRefreshHandlers(in attributedText: NSAttributedString) {
-        STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] in
-            self?.refreshRenderedAttachments()
+        STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] attachment in
+            self?.refreshRenderedAttachment(attachment)
         }
     }
 }

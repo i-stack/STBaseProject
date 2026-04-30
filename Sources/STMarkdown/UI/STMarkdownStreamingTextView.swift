@@ -122,7 +122,14 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
     /// 外部（如 UITableViewCell 的 systemLayoutSizeFitting）在 cell 加入 window 之前
     /// 注入正确的内容宽度，确保第一次高度测量就准确。
-    public var preferredContentWidth: CGFloat = 0
+    public var preferredContentWidth: CGFloat = 0 {
+        didSet {
+            guard self.preferredContentWidth != oldValue else { return }
+            self.invalidateIntrinsicContentSize()
+        }
+    }
+
+    private var lastLaidOutSize: CGSize = .zero
 
     public override var intrinsicContentSize: CGSize {
         let w: CGFloat
@@ -145,7 +152,8 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
     public override func layoutSubviews() {
         super.layoutSubviews()
-        let sizeChanged = self.bounds.size != self.tableOverlayCoordinator.lastTableOverlayLayoutSize
+        let sizeChanged = self.bounds.size != self.lastLaidOutSize
+        self.lastLaidOutSize = self.bounds.size
         self.tableOverlayCoordinator.updateIfNeeded(
             attributedText: self.textView.renderedAttributedText,
             containerBounds: self.bounds
@@ -171,13 +179,7 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
         let rendered = self.render(markdown)
         guard animated, !self.rawMarkdown.isEmpty else {
-            // 非动画模式或首次渲染：全量替换
-            self.rawMarkdown = markdown
-            self.textView.setRenderedAttributedText(rendered)
-            self.textView.accessibilityValue = self.textView.renderedAttributedText.string
-            self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
-            self.markTableOverlayDirty()
-            self.invalidateIntrinsicContentSize()
+            self.applyFullReplace(markdown: markdown, rendered: rendered)
             return
         }
 
@@ -188,99 +190,109 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
         // 路径 1：纯追加 — rendered 的字符串前缀与 current 完全一致
         if renderedStr.count >= currentStr.count,
            (renderedStr as NSString).hasPrefix(currentStr) {
-            let deltaLen = rendered.length - current.length
-            // 检测公共前缀部分的属性是否变化（如表格 attachment 图片更新）
-            let prefixChanged: Bool = {
-                guard current.length > 0 else { return false }
-                let prefixRange = NSRange(location: 0, length: current.length)
-                let renderedPrefix = rendered.attributedSubstring(from: prefixRange)
-                return !renderedPrefix.isEqual(to: current)
-            }()
+            let prefixChanged = current.length > 0
+                && !rendered.attributedSubstring(
+                    from: NSRange(location: 0, length: current.length)
+                ).isEqual(to: current)
             if prefixChanged {
                 // 公共前缀的属性已变（表格 attachment 更新等）：全量替换
-                self.rawMarkdown = markdown
-                self.textView.setRenderedAttributedText(rendered)
-                self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
-                self.markTableOverlayDirty()
-                self.invalidateIntrinsicContentSize()
-            } else if deltaLen > 0 {
+                self.applyFullReplace(markdown: markdown, rendered: rendered)
+                return
+            }
+            let deltaLen = rendered.length - current.length
+            if deltaLen > 0 {
                 let delta = rendered.attributedSubstring(
                     from: NSRange(location: current.length, length: deltaLen)
                 )
-                self.rawMarkdown = markdown
-                self.textView.appendAttributedText(delta, animated: true)
-                self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
-                self.markTableOverlayDirty()
-                self.invalidateIntrinsicContentSize()
+                self.applyAppendDelta(markdown: markdown, delta: delta)
             } else {
+                // 字符串完全相同且属性一致，仅同步 rawMarkdown
                 self.rawMarkdown = markdown
+                self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             }
-            self.textView.accessibilityValue = self.textView.renderedAttributedText.string
             return
         }
 
         // 路径 2：字符串公共前缀 + 尾部替换（带 stagger 动画）
         let commonLen = currentStr.commonPrefix(with: renderedStr).utf16.count
         if commonLen > 0 {
-            // 检测公共前缀部分的属性是否变化（如表格 attachment 更新）
-            let commonPrefixChanged: Bool = {
-                guard commonLen > 0 else { return false }
-                let currentPrefix = current.attributedSubstring(from: NSRange(location: 0, length: commonLen))
-                let renderedCommon = rendered.attributedSubstring(from: NSRange(location: 0, length: commonLen))
-                return !renderedCommon.isEqual(to: currentPrefix)
-            }()
-            // 列表标记变化时走全量替换，避免公共前缀断裂导致旧/新 bullet 短暂共存（重复圆点）。
+            let commonPrefixChanged = !current.attributedSubstring(
+                from: NSRange(location: 0, length: commonLen)
+            ).isEqual(to: rendered.attributedSubstring(
+                from: NSRange(location: 0, length: commonLen)
+            ))
             let listMarkerInvolved = self.shouldDisableAnimationForTrailingReplacement(
                 current: current,
                 rendered: rendered,
                 commonLength: commonLen
             )
-            if commonPrefixChanged || listMarkerInvolved {
-                // 列表结构变化时，不必全量替换整段 suffix。
-                // 从当前行起点开始做尾部替换，可将更新范围收敛到“最后一个 list item”，
-                // 避免前面稳定的 item 被一起重排。
-                if !commonPrefixChanged, listMarkerInvolved {
-                    let replaceStart = self.replacementStartForListTransition(
-                        currentString: currentStr,
-                        commonLength: commonLen
-                    )
-                    let trailing = rendered.attributedSubstring(
-                        from: NSRange(location: replaceStart, length: rendered.length - replaceStart)
-                    )
-                    self.rawMarkdown = markdown
-                    self.textView.replaceTrailingAttributedText(
-                        from: replaceStart,
-                        with: trailing,
-                        animateNewPortion: false
-                    )
-                } else {
-                    // 公共前缀属性已变：仍需全量替换
-                    self.rawMarkdown = markdown
-                    self.textView.setRenderedAttributedText(rendered)
-                }
+            if commonPrefixChanged {
+                // 公共前缀属性已变：仍需全量替换
+                self.applyFullReplace(markdown: markdown, rendered: rendered)
+            } else if listMarkerInvolved {
+                // 列表结构变化：收敛到当前行起点做尾部替换，关闭动画避免旧/新 bullet 短暂共存。
+                let replaceStart = self.replacementStartForListTransition(
+                    currentString: currentStr,
+                    commonLength: commonLen
+                )
+                let trailing = rendered.attributedSubstring(
+                    from: NSRange(location: replaceStart, length: rendered.length - replaceStart)
+                )
+                self.applyTrailingReplace(
+                    markdown: markdown,
+                    from: replaceStart,
+                    trailing: trailing,
+                    animate: false
+                )
             } else {
                 let trailing = rendered.attributedSubstring(
                     from: NSRange(location: commonLen, length: rendered.length - commonLen)
                 )
-                self.rawMarkdown = markdown
-                self.textView.replaceTrailingAttributedText(
+                self.applyTrailingReplace(
+                    markdown: markdown,
                     from: commonLen,
-                    with: trailing,
-                    animateNewPortion: true
+                    trailing: trailing,
+                    animate: true
                 )
             }
-            self.textView.accessibilityValue = self.textView.renderedAttributedText.string
-            self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
-            self.markTableOverlayDirty()
-            self.invalidateIntrinsicContentSize()
             return
         }
 
         // 路径 3：完全无公共前缀（极端情况）— 全量替换
+        self.applyFullReplace(markdown: markdown, rendered: rendered)
+    }
+
+    private func applyFullReplace(markdown: String, rendered: NSAttributedString) {
         self.rawMarkdown = markdown
         self.textView.setRenderedAttributedText(rendered)
-        self.textView.accessibilityValue = self.textView.renderedAttributedText.string
-        self.bindAttachmentRefreshHandlers(in: self.textView.renderedAttributedText)
+        self.finalizeRenderUpdate()
+    }
+
+    private func applyAppendDelta(markdown: String, delta: NSAttributedString) {
+        self.rawMarkdown = markdown
+        self.textView.appendAttributedText(delta, animated: true)
+        self.finalizeRenderUpdate()
+    }
+
+    private func applyTrailingReplace(
+        markdown: String,
+        from location: Int,
+        trailing: NSAttributedString,
+        animate: Bool
+    ) {
+        self.rawMarkdown = markdown
+        self.textView.replaceTrailingAttributedText(
+            from: location,
+            with: trailing,
+            animateNewPortion: animate
+        )
+        self.finalizeRenderUpdate()
+    }
+
+    private func finalizeRenderUpdate() {
+        let rendered = self.textView.renderedAttributedText
+        self.textView.accessibilityValue = rendered.string
+        self.bindAttachmentRefreshHandlers(in: rendered)
         self.markTableOverlayDirty()
         self.invalidateIntrinsicContentSize()
     }
@@ -373,36 +385,48 @@ public final class STMarkdownStreamingTextView: UIView, STMarkdownInteractable {
 
     private static func containsRenderedListMarker(in text: String) -> Bool {
         guard text.isEmpty == false else { return false }
-        return text.contains("\t●\t")
-            || text.contains("\t▪\t")
-            || Self.orderedListMarkerRegex.firstMatch(
-                in: text,
-                options: [],
-                range: NSRange(location: 0, length: text.utf16.count)
-            ) != nil
+        let range = NSRange(location: 0, length: text.utf16.count)
+        return Self.unorderedListMarkerRegex.firstMatch(in: text, options: [], range: range) != nil
+            || Self.orderedListMarkerRegex.firstMatch(in: text, options: [], range: range) != nil
     }
 
+    // 匹配嵌套深度不限的有序列表标记：行首可有任意多 tab 作为缩进，随后 `<num>.\t`。
     private static let orderedListMarkerRegex = try! NSRegularExpression(
-        pattern: #"(?m)^\t?\d+\.\t"#,
+        pattern: #"(?m)^\t*\d+\.\t"#,
+        options: []
+    )
+
+    // 匹配嵌套深度不限的无序列表标记：行首任意 tab 缩进 + 圆点/方块 + tab。
+    private static let unorderedListMarkerRegex = try! NSRegularExpression(
+        pattern: #"(?m)(?:^|\n)\t*[●▪]\t"#,
         options: []
     )
 }
 
 private extension STMarkdownStreamingTextView {
     @MainActor
-    func refreshRenderedAttachments() {
-        let range = NSRange(location: 0, length: self.textView.renderedAttributedText.length)
-        guard range.length > 0 else { return }
+    func refreshRenderedAttachment(_ attachment: NSTextAttachment) {
+        let content = self.textView.renderedAttributedText
+        guard content.length > 0 else { return }
+        var hit: NSRange?
+        content.enumerateAttribute(
+            .attachment,
+            in: NSRange(location: 0, length: content.length)
+        ) { value, range, stop in
+            if let candidate = value as? NSTextAttachment, candidate === attachment {
+                hit = range
+                stop.pointee = true
+            }
+        }
+        guard let range = hit else { return }
         self.textView.layoutManager.invalidateDisplay(forCharacterRange: range)
         self.textView.layoutManager.invalidateLayout(forCharacterRange: range, actualCharacterRange: nil)
-        self.textView.setNeedsLayout()
-        self.textView.layoutIfNeeded()
         self.invalidateIntrinsicContentSize()
     }
 
     func bindAttachmentRefreshHandlers(in attributedText: NSAttributedString) {
-        STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] in
-            self?.refreshRenderedAttachments()
+        STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] attachment in
+            self?.refreshRenderedAttachment(attachment)
         }
     }
 
