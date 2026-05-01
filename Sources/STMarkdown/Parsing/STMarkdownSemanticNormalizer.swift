@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol STMarkdownSemanticNormalizing {
+public protocol STMarkdownSemanticNormalizing: Sendable {
     func normalize(_ document: STMarkdownDocument) -> STMarkdownDocument
 }
 

@@ -8,8 +8,14 @@
 import Foundation
 
 public struct STHtmlNormalizeRule: STMarkdownRule {
-    
+
     public let name = "STHtmlNormalizeRule"
+
+    private static let brTagRegex = STMarkdownRegexFactory.compile(
+        pattern: #"<br\s*/?>"#,
+        options: [.caseInsensitive],
+        owner: "STHtmlNormalizeRule.brTag"
+    )
 
     public init() {}
 
@@ -20,8 +26,18 @@ public struct STHtmlNormalizeRule: STMarkdownRule {
     public func apply(to text: String, context: inout STMarkdownPreprocessContext) -> String {
         var result = text
         result = result.replacingOccurrences(of: "</>", with: "</a>")
-        result = result.replacingOccurrences(of: "<br>", with: "")
-        result = result.replacingOccurrences(of: "&gt;", with: ">")
+        result = Self.brTagRegex.stringByReplacingMatches(
+            in: result,
+            range: NSRange(location: 0, length: result.utf16.count),
+            withTemplate: "  \n"
+        )
+        // HTML entity decoding intentionally omitted here. Unconditionally rewriting
+        // `&lt;`/`&gt;`/`&amp;` to raw characters before the CommonMark parser runs turns
+        // plain-text snippets like `Use &lt;T&gt;` into `Use <T>`, which swift-markdown then
+        // tries to parse as HTML inline — and the downstream `inlineNodes(from:)` path has no
+        // handling for raw HTML, so the content silently vanishes. Let CommonMark handle
+        // entity decoding per spec (6.2); any `<a>`-specific decoding belongs inside
+        // STHtmlLinkToMarkdownRule on the captured title.
         result = STMarkdownRegex.escaped2CRLF.stringByReplacingMatches(
             in: result,
             range: NSRange(location: 0, length: result.utf16.count),
@@ -106,9 +122,10 @@ public struct STHtmlLinkToMarkdownRule: STMarkdownRule {
 public struct STAnchorCleanupRule: STMarkdownRule {
     public let name = "STAnchorCleanupRule"
 
-    private static let regex = try! NSRegularExpression(
+    private static let regex = STMarkdownRegexFactory.compile(
         pattern: "<a\\s+[^>]*href=\"#([^\"]*)\"[^>]*>[^<]*</a>",
-        options: .caseInsensitive
+        options: .caseInsensitive,
+        owner: "STAnchorCleanupRule.regex"
     )
 
     public init() {}
@@ -153,8 +170,16 @@ public struct STPageReferenceCleanupRule: STMarkdownRule {
             #"\[\s*\[webpage\s+\d+\]\s*\]"#,
             #"[【《「『]\s*\[webpage\s+\d+\]\s*[】》」』]"#,
         ]
-        return patterns.compactMap { try? NSRegularExpression(pattern: $0, options: .caseInsensitive) }
+        return patterns.map { pattern in
+            STMarkdownRegexFactory.compile(
+                pattern: pattern,
+                options: .caseInsensitive,
+                owner: "STPageReferenceCleanupRule.\(pattern.prefix(24))"
+            )
+        }
     }()
+
+    private static let maxCleanupIterations = 5
 
     public init() {}
 
@@ -165,6 +190,7 @@ public struct STPageReferenceCleanupRule: STMarkdownRule {
     public func apply(to text: String, context: inout STMarkdownPreprocessContext) -> String {
         var result = text
         var previous = ""
+        var iterations = 0
         while result != previous {
             previous = result
             for regex in Self.cleanupRegexes {
@@ -174,6 +200,8 @@ public struct STPageReferenceCleanupRule: STMarkdownRule {
                     withTemplate: ""
                 )
             }
+            iterations += 1
+            if iterations >= Self.maxCleanupIterations { break }
         }
         return result
     }
@@ -182,7 +210,10 @@ public struct STPageReferenceCleanupRule: STMarkdownRule {
 public struct STDoubleNewlineRule: STMarkdownRule {
     public let name = "STDoubleNewlineRule"
 
-    private static let regex = try! NSRegularExpression(pattern: #"\n{3,}"#, options: [])
+    private static let regex = STMarkdownRegexFactory.compile(
+        pattern: #"\n{3,}"#,
+        owner: "STDoubleNewlineRule.collapse"
+    )
 
     public init() {}
 
@@ -212,35 +243,35 @@ public struct STTableBlankLineNormalizationRule: STMarkdownRule {
         let lines = text.components(separatedBy: "\n")
         var result: [String] = []
         result.reserveCapacity(lines.count + 8)
-        var insideCodeFence = false
+        var fenceState = STMarkdownCodeFenceState()
 
         for (index, line) in lines.enumerated() {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
-                insideCodeFence.toggle()
+            let wasInsideFence = fenceState.isInside
+            fenceState.ingest(trimmedLine: trimmed)
+
+            if wasInsideFence || fenceState.isInside {
+                result.append(line)
+                continue
             }
 
-            if !insideCodeFence {
-                let isTableRow = trimmed.hasPrefix("|")
-                let prevTrimmed = result.last?.trimmingCharacters(in: .whitespaces) ?? ""
-                let isPrevBlank = prevTrimmed.isEmpty
-                let isPrevTableRow = prevTrimmed.hasPrefix("|")
+            let isTableRow = trimmed.hasPrefix("|")
+            let prevTrimmed = result.last?.trimmingCharacters(in: .whitespaces) ?? ""
+            let isPrevBlank = prevTrimmed.isEmpty
+            let isPrevTableRow = prevTrimmed.hasPrefix("|")
 
-                if isTableRow && !result.isEmpty && !isPrevBlank && !isPrevTableRow {
+            if isTableRow && !result.isEmpty && !isPrevBlank && !isPrevTableRow {
+                result.append("")
+            }
+
+            result.append(line)
+
+            let nextIndex = index + 1
+            if isTableRow && nextIndex < lines.count {
+                let nextTrimmed = lines[nextIndex].trimmingCharacters(in: .whitespaces)
+                if !nextTrimmed.isEmpty && !nextTrimmed.hasPrefix("|") && !nextTrimmed.hasPrefix("```") && !nextTrimmed.hasPrefix("~~~") {
                     result.append("")
                 }
-
-                result.append(line)
-
-                let nextIndex = index + 1
-                if isTableRow && nextIndex < lines.count {
-                    let nextTrimmed = lines[nextIndex].trimmingCharacters(in: .whitespaces)
-                    if !nextTrimmed.isEmpty && !nextTrimmed.hasPrefix("|") && !nextTrimmed.hasPrefix("```") && !nextTrimmed.hasPrefix("~~~") {
-                        result.append("")
-                    }
-                }
-            } else {
-                result.append(line)
             }
         }
 
@@ -249,12 +280,12 @@ public struct STTableBlankLineNormalizationRule: STMarkdownRule {
 }
 
 public struct STTableDelimiterNormalizationRule: STMarkdownRule {
-    
+
     public let name = "STTableDelimiterNormalizationRule"
 
-    private static let delimiterPattern = try! NSRegularExpression(
+    private static let delimiterPattern = STMarkdownRegexFactory.compile(
         pattern: #"^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$"#,
-        options: []
+        owner: "STTableDelimiterNormalizationRule.delimiter"
     )
 
     public init() {}
@@ -267,23 +298,26 @@ public struct STTableDelimiterNormalizationRule: STMarkdownRule {
         let lines = text.components(separatedBy: "\n")
         var result: [String] = []
         result.reserveCapacity(lines.count + 4)
-        var insideCodeFence = false
+        var fenceState = STMarkdownCodeFenceState()
 
         for (index, line) in lines.enumerated() {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
-                insideCodeFence.toggle()
-            }
+            let wasInsideFence = fenceState.isInside
+            fenceState.ingest(trimmedLine: trimmed)
 
             result.append(line)
 
-            guard !insideCodeFence, trimmed.hasPrefix("|") else { continue }
+            guard !(wasInsideFence || fenceState.isInside), trimmed.hasPrefix("|") else { continue }
 
-            // Only treat as a potential header when preceded by a blank line (new block)
+            // Previous line is considered "safe to treat this as a new table header" when it's blank,
+            // not itself a table row, and not a code fence. This accepts LLM output that omits the
+            // blank line before a table while still refusing to treat mid-paragraph `|`-lines as tables.
             let prevTrimmed = result.count >= 2
                 ? result[result.count - 2].trimmingCharacters(in: .whitespaces)
                 : ""
-            guard prevTrimmed.isEmpty else { continue }
+            if prevTrimmed.hasPrefix("|") || prevTrimmed.hasPrefix("```") || prevTrimmed.hasPrefix("~~~") {
+                continue
+            }
 
             // Look ahead: next line starts with | but is NOT a delimiter row → insert one
             let nextIndex = index + 1
@@ -292,8 +326,13 @@ public struct STTableDelimiterNormalizationRule: STMarkdownRule {
             guard nextTrimmed.hasPrefix("|"),
                   !Self.isDelimiterRow(nextTrimmed) else { continue }
 
+            // Only synthesize a delimiter when BOTH rows look like table rows: at least 2
+            // cells each and their column counts match. Without this guard, any pair of
+            // consecutive lines that merely start with `|` (e.g. quoted prose, code samples
+            // with a leading pipe) is rewritten into a table.
             let columnCount = Self.countColumns(in: trimmed)
-            guard columnCount >= 1 else { continue }
+            let nextColumnCount = Self.countColumns(in: nextTrimmed)
+            guard columnCount >= 2, columnCount == nextColumnCount else { continue }
             let cells = (0..<columnCount).map { _ in " --- " }.joined(separator: "|")
             result.append("|\(cells)|")
         }
@@ -314,9 +353,8 @@ public struct STTableDelimiterNormalizationRule: STMarkdownRule {
         var stripped = tableRow
         if stripped.hasPrefix("|") { stripped = String(stripped.dropFirst()) }
         if stripped.hasSuffix("|") { stripped = String(stripped.dropLast()) }
-        return stripped.components(separatedBy: "|")
-            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
-            .count
+        // Keep empty cells: `| a |  | b |` → 3 columns, not 2.
+        return stripped.components(separatedBy: "|").count
     }
 }
 

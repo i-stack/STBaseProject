@@ -86,29 +86,32 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
-        let rendered = self.render(markdown)
+        let markdownForRender = animated
+            ? Self.stripUnclosedTailMarkers(in: markdown)
+            : markdown
+        let displayRendered = self.render(markdownForRender)
         guard animated, !self.rawMarkdown.isEmpty else {
-            self.applyFullReplace(markdown: markdown, rendered: rendered)
+            self.applyFullReplace(markdown: markdown, rendered: displayRendered)
             return
         }
 
         let current = self.shimmerTextView.renderedAttributedText
         let currentStr = current.string
-        let renderedStr = rendered.string
+        let renderedStr = displayRendered.string
 
         if renderedStr.count >= currentStr.count,
            (renderedStr as NSString).hasPrefix(currentStr) {
             let prefixChanged = current.length > 0
-                && !rendered.attributedSubstring(
+                && !displayRendered.attributedSubstring(
                     from: NSRange(location: 0, length: current.length)
                 ).isEqual(to: current)
             if prefixChanged {
-                self.applyFullReplace(markdown: markdown, rendered: rendered)
+                self.applyFullReplace(markdown: markdown, rendered: displayRendered)
                 return
             }
-            let deltaLen = rendered.length - current.length
+            let deltaLen = displayRendered.length - current.length
             if deltaLen > 0 {
-                let delta = rendered.attributedSubstring(
+                let delta = displayRendered.attributedSubstring(
                     from: NSRange(location: current.length, length: deltaLen)
                 )
                 self.applyAppendDelta(markdown: markdown, delta: delta)
@@ -123,23 +126,23 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         if commonLen > 0 {
             let commonPrefixChanged = !current.attributedSubstring(
                 from: NSRange(location: 0, length: commonLen)
-            ).isEqual(to: rendered.attributedSubstring(
+            ).isEqual(to: displayRendered.attributedSubstring(
                 from: NSRange(location: 0, length: commonLen)
             ))
             let listMarkerInvolved = self.shouldDisableAnimationForTrailingReplacement(
                 current: current,
-                rendered: rendered,
+                rendered: displayRendered,
                 commonLength: commonLen
             )
             if commonPrefixChanged {
-                self.applyFullReplace(markdown: markdown, rendered: rendered)
+                self.applyFullReplace(markdown: markdown, rendered: displayRendered)
             } else if listMarkerInvolved {
                 let replaceStart = self.replacementStartForListTransition(
                     currentString: currentStr,
                     commonLength: commonLen
                 )
-                let trailing = rendered.attributedSubstring(
-                    from: NSRange(location: replaceStart, length: rendered.length - replaceStart)
+                let trailing = displayRendered.attributedSubstring(
+                    from: NSRange(location: replaceStart, length: displayRendered.length - replaceStart)
                 )
                 self.applyTrailingReplace(
                     markdown: markdown,
@@ -148,8 +151,8 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
                     animate: false
                 )
             } else {
-                let trailing = rendered.attributedSubstring(
-                    from: NSRange(location: commonLen, length: rendered.length - commonLen)
+                let trailing = displayRendered.attributedSubstring(
+                    from: NSRange(location: commonLen, length: displayRendered.length - commonLen)
                 )
                 self.applyTrailingReplace(
                     markdown: markdown,
@@ -161,7 +164,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
             return
         }
 
-        self.applyFullReplace(markdown: markdown, rendered: rendered)
+        self.applyFullReplace(markdown: markdown, rendered: displayRendered)
     }
 
     public func applyConfiguration(
@@ -226,6 +229,129 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         }
         return self.renderer.render(document: result.renderDocument)
     }
+
+    /// 流式期间，若源 markdown 尾部存在**尚未闭合**的 delimiter token（例如只打了
+    /// 开头的 `**`、`~~`、`$$`、` ``` `、`\(`，或 task list 的前缀 `- [ ]`），直接把
+    /// 它们丢给渲染引擎会导致字面字符抖动。历史版本对最终 `NSAttributedString`
+    /// 做全局字符串删除，会把代码块里展示的 `$$`、`**`，inline code 里的 `` ` ``，
+    /// 以及正文里字面 `- [ ]` 等**合法内容**一起吞掉。
+    ///
+    /// 这里改为只裁剪源 markdown 的**尾部未闭合片段**，完全不触碰已渲染的正文：
+    /// 1. 保留所有已完整闭合的代码块、公式块、inline 标记；
+    /// 2. 若最末尾处于一个 fenced code block 未闭合（奇数个 ```），则删掉末尾那组 ```
+    ///    所在行及之后的流式片段；
+    /// 3. 只对最末一行做尾部未闭合 inline delimiter（`**` / `__` / `~~` / `$$` / `\(`）
+    ///    的裁剪，且通过**成对计数**判定，不会误伤已闭合对；
+    /// 4. task list 前缀 `- [ ]` / `- [x]` 仅当该行只有前缀、尚无实际文字时才暂时隐藏。
+    private static func stripUnclosedTailMarkers(in markdown: String) -> String {
+        guard markdown.isEmpty == false else { return markdown }
+
+        var working = Self.stripUnclosedFencedCodeTail(in: markdown)
+        working = Self.stripUnclosedInlineTailMarkers(in: working)
+        working = Self.stripBareTaskListPrefix(in: working)
+        return working
+    }
+
+    /// 若源字符串包含奇数个 ``` fence，则截断到最后一个 fence 之前（保留其前的换行），
+    /// 这样最后那个 "打开但未闭合" 的代码块在流式期间暂时不显示，等到下一帧闭合后再一起渲染。
+    private static func stripUnclosedFencedCodeTail(in markdown: String) -> String {
+        let ns = markdown as NSString
+        let fenceMatches = Self.fencedCodeRegex.matches(
+            in: markdown,
+            options: [],
+            range: NSRange(location: 0, length: ns.length)
+        )
+        guard fenceMatches.count % 2 == 1, let last = fenceMatches.last else {
+            return markdown
+        }
+        // 截到最后一个未闭合 fence 所在行的起点；找不到就截到 fence 之前。
+        let lastLineStart: Int
+        let prefixRange = NSRange(location: 0, length: last.range.location)
+        let prefix = ns.substring(with: prefixRange) as NSString
+        let newline = prefix.range(of: "\n", options: .backwards)
+        lastLineStart = newline.location == NSNotFound ? 0 : newline.location + newline.length
+        return ns.substring(to: lastLineStart)
+    }
+
+    /// 只处理最末一行的未闭合 inline delimiter：成对数量为奇数且尾部紧贴的 delimiter 做裁剪。
+    /// 这样 "文本里已经成对闭合" 的 `**foo**` 不会被动到，代码块内已完整闭合的 token 也不会被动到。
+    private static func stripUnclosedInlineTailMarkers(in markdown: String) -> String {
+        let ns = markdown as NSString
+        let newline = ns.range(of: "\n", options: .backwards)
+        let lastLineStart = newline.location == NSNotFound ? 0 : newline.location + newline.length
+        let lastLine = ns.substring(from: lastLineStart)
+        guard lastLine.isEmpty == false else { return markdown }
+
+        var trimmed = lastLine
+        // 按“从长到短 / 从强到弱”的顺序，避免 `**` 被当成两个 `*`。
+        for token in Self.inlinePairableTokens {
+            trimmed = Self.trimTrailingUnclosedToken(token, in: trimmed)
+        }
+        // `\(` 单独处理：无配对 `\)` 时，直接砍掉末尾 `\(`。
+        trimmed = Self.trimTrailingUnclosedMathOpen(in: trimmed)
+
+        if trimmed == lastLine {
+            return markdown
+        }
+        let prefix = ns.substring(to: lastLineStart)
+        return prefix + trimmed
+    }
+
+    /// 若该行最末 `token` 数量为奇数且恰好出现在末尾，则把末尾那一个 token 去掉。
+    private static func trimTrailingUnclosedToken(_ token: String, in line: String) -> String {
+        guard line.hasSuffix(token) else { return line }
+        let count = line.components(separatedBy: token).count - 1
+        guard count % 2 == 1 else { return line }
+        let end = line.index(line.endIndex, offsetBy: -token.count)
+        return String(line[line.startIndex..<end])
+    }
+
+    private static func trimTrailingUnclosedMathOpen(in line: String) -> String {
+        // `\(` 与 `\)` 成对；若末尾悬挂一个未闭合的 `\(` 或其后跟部分内容，暂不裁剪内容，
+        // 只在行末正好是 `\(` 时才裁剪，避免误删正在输入的公式体。
+        guard line.hasSuffix(#"\("#) else { return line }
+        let opens = line.components(separatedBy: #"\("#).count - 1
+        let closes = line.components(separatedBy: #"\)"#).count - 1
+        guard opens > closes else { return line }
+        let end = line.index(line.endIndex, offsetBy: -2)
+        return String(line[line.startIndex..<end])
+    }
+
+    /// 末行仅为 task list 前缀（`- [ ] ` / `- [x] `）且无后续文字时，暂时隐藏，
+    /// 避免流式过程中 "- [ ]" 字面字符闪一下。已包含任何可见文字则保留，
+    /// 这样用户/模型想展示字面 `- [ ]` 也不会被吞。
+    private static func stripBareTaskListPrefix(in markdown: String) -> String {
+        let ns = markdown as NSString
+        let newline = ns.range(of: "\n", options: .backwards)
+        let lastLineStart = newline.location == NSNotFound ? 0 : newline.location + newline.length
+        let lastLine = ns.substring(from: lastLineStart)
+        let lineRange = NSRange(location: 0, length: (lastLine as NSString).length)
+        guard Self.bareTaskPrefixRegex.firstMatch(in: lastLine, options: [], range: lineRange) != nil else {
+            return markdown
+        }
+        return ns.substring(to: lastLineStart)
+    }
+
+    private static let fencedCodeRegex: NSRegularExpression = {
+        // 行首（允许前置空白）出现至少三个反引号的 fence 标记。
+        return try! NSRegularExpression(pattern: #"(?m)^[ \t]*`{3,}"#, options: [])
+    }()
+
+    private static let bareTaskPrefixRegex: NSRegularExpression = {
+        // 行首为 task list 前缀但没有任何可见正文。
+        return try! NSRegularExpression(
+            pattern: #"^[ \t]*[-*+][ \t]+\[[ xX]\][ \t]*$"#,
+            options: []
+        )
+    }()
+
+    private static let inlinePairableTokens: [String] = [
+        "```",
+        "$$",
+        "**",
+        "__",
+        "~~"
+    ]
 
     private func shouldDisableAnimationForTrailingReplacement(
         current: NSAttributedString,

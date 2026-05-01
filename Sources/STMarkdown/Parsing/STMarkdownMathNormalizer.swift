@@ -18,37 +18,31 @@ public struct STMarkdownMathNormalizationResult: Sendable {
 }
 
 public enum STMarkdownMathNormalizer {
-    private static let mathBlockEnvironmentRegex = try! NSRegularExpression(
+    private static let mathBlockEnvironmentRegex = STMarkdownRegexFactory.compile(
         pattern: #"^\\begin\{([^}]+)\}"#,
-        options: []
+        owner: "STMarkdownMathNormalizer.environment"
     )
 
     public static func normalizeBlocks(in markdown: String) -> STMarkdownMathNormalizationResult {
-        var normalized = normalizeDelimiters(in: markdown)
+        guard markdown.isEmpty == false else {
+            return STMarkdownMathNormalizationResult(text: markdown, blockMap: [:])
+        }
+
+        let normalized = normalizeDelimiters(in: markdown)
         var mathMap: [Int: String] = [:]
         var output: [String] = []
         let lines = normalized.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
         var index = 0
-        var inCodeBlock = false
-        var codeFence = ""
+        var fenceState = STMarkdownCodeFenceState()
 
         while index < lines.count {
             let line = lines[index]
             let trimmed = line.trimmingCharacters(in: .whitespaces)
 
-            if trimmed.hasPrefix("```") {
-                output.append(line)
-                if inCodeBlock == false {
-                    inCodeBlock = true
-                    codeFence = String(trimmed.prefix(3))
-                } else if trimmed.hasPrefix(codeFence) {
-                    inCodeBlock = false
-                }
-                index += 1
-                continue
-            }
+            let wasInsideFence = fenceState.isInside
+            fenceState.ingest(trimmedLine: trimmed)
 
-            if inCodeBlock {
+            if wasInsideFence || fenceState.isInside {
                 output.append(line)
                 index += 1
                 continue
@@ -91,17 +85,14 @@ public enum STMarkdownMathNormalizer {
                 continue
             }
 
-            output.append(line)
+            output.append(applyInlineSentinels(to: line))
             index += 1
         }
 
-        normalized = output.joined(separator: "\n")
-        normalized = normalized.replacingOccurrences(of: #"\("#, with: "⦅ST_LATEX_PAREN_OPEN⦆")
-        normalized = normalized.replacingOccurrences(of: #"\)"#, with: "⦅ST_LATEX_PAREN_CLOSE⦆")
-        normalized = normalized.replacingOccurrences(of: #"\["#, with: "⦅ST_LATEX_BRACKET_OPEN⦆")
-        normalized = normalized.replacingOccurrences(of: #"\]"#, with: "⦅ST_LATEX_BRACKET_CLOSE⦆")
-
-        return STMarkdownMathNormalizationResult(text: normalized, blockMap: mathMap)
+        return STMarkdownMathNormalizationResult(
+            text: output.joined(separator: "\n"),
+            blockMap: mathMap
+        )
     }
 
     static func normalizeDelimiters(in text: String) -> String {
@@ -119,6 +110,15 @@ public enum STMarkdownMathNormalizer {
         result = result.replacingOccurrences(of: "⦅ST_LATEX_PAREN_CLOSE⦆", with: #"\)"#)
         result = result.replacingOccurrences(of: "⦅ST_LATEX_BRACKET_OPEN⦆", with: #"\["#)
         result = result.replacingOccurrences(of: "⦅ST_LATEX_BRACKET_CLOSE⦆", with: #"\]"#)
+        return result
+    }
+
+    private static func applyInlineSentinels(to line: String) -> String {
+        var result = line
+        result = result.replacingOccurrences(of: #"\("#, with: "⦅ST_LATEX_PAREN_OPEN⦆")
+        result = result.replacingOccurrences(of: #"\)"#, with: "⦅ST_LATEX_PAREN_CLOSE⦆")
+        result = result.replacingOccurrences(of: #"\["#, with: "⦅ST_LATEX_BRACKET_OPEN⦆")
+        result = result.replacingOccurrences(of: #"\]"#, with: "⦅ST_LATEX_BRACKET_CLOSE⦆")
         return result
     }
 
@@ -164,14 +164,27 @@ public enum STMarkdownMathNormalizer {
         return result
     }
 
-    private static let inlineMathRegex = try! NSRegularExpression(
+    private static let inlineMathRegex = STMarkdownRegexFactory.compile(
         pattern: #"(\\\(.+?\\\))|(\\\[.+?\\\])"#,
-        options: [.dotMatchesLineSeparators]
+        options: [.dotMatchesLineSeparators],
+        owner: "STMarkdownMathNormalizer.inlineMath"
     )
 
     private static func inlineMathMatches(in text: String) -> [NSTextCheckingResult] {
         inlineMathRegex.matches(in: text, range: NSRange(location: 0, length: text.utf16.count))
     }
+
+    private static let supportedMathEnvironments: Set<String> = [
+        "align", "align*",
+        "equation", "equation*",
+        "gather", "gather*",
+        "multline", "multline*",
+        "aligned", "alignedat",
+        "cases",
+        "matrix", "pmatrix", "bmatrix", "Bmatrix", "vmatrix", "Vmatrix",
+        "array",
+        "split",
+    ]
 
     private static func environmentName(from line: String) -> String? {
         let range = NSRange(location: 0, length: line.utf16.count)
@@ -180,8 +193,7 @@ public enum STMarkdownMathNormalizer {
             return nil
         }
         let environment = String(line[envRange])
-        let supported = ["align", "align*", "equation", "equation*", "gather", "gather*", "multline", "multline*"]
-        return supported.contains(environment) ? environment : nil
+        return supportedMathEnvironments.contains(environment) ? environment : nil
     }
 
     private static func consumeDollarMathBlock(

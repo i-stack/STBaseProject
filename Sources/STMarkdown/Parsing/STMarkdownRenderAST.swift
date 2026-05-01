@@ -70,6 +70,9 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
         )
     }
 
+    /// 列表项文案（仅对"第一个 block 是 paragraph"的项有效）。
+    /// 当列表项以 quote / codeBlock / list 等非段落块开头时返回空数组——
+    /// 此时该项的全部内容都在 `childBlocks` 里，请不要据此判空。
     public var content: [STMarkdownInlineNode] {
         guard case .paragraph(let inlines)? = self.blocks.first else {
             return []
@@ -77,6 +80,8 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
         return inlines
     }
 
+    /// 列表项的子块（排除开头那个 paragraph）。
+    /// 当列表项不以 paragraph 开头时返回完整 `blocks`，因为此时没有独立的文案段。
     public var childBlocks: [STMarkdownRenderBlock] {
         guard case .paragraph? = self.blocks.first else {
             return self.blocks

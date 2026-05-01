@@ -6,9 +6,9 @@
 //
 
 import UIKit
-import AVFoundation
 import Photos
 import PhotosUI
+import AVFoundation
 
 public enum STImageSource {
     case camera
