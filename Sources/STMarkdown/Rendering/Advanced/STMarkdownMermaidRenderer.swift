@@ -17,22 +17,36 @@ public class STMarkdownMermaidRenderer: NSObject {
     public static let shared = STMarkdownMermaidRenderer()
 
     private var webView: WKWebView?
-    private(set) public var imageCache: [String: UIImage] = [:]
-    private var pendingCallbacks: [String: [(UIImage?) -> Void]] = [:]
+    /// 改为 `NSCache` 以便在内存紧张时自动释放，并显式限制条目数。
+    /// 早期用 `Dictionary<String, UIImage>` 无上限，长会话进程会把几十 MB 图片留到进程结束。
+    private let imageCacheStore: NSCache<NSString, UIImage> = {
+        let cache = NSCache<NSString, UIImage>()
+        cache.countLimit = 64
+        return cache
+    }()
+    private var imageCacheSnapshot: [String: UIImage] = [:]
+    private var imageCacheSnapshotOrder: [String] = []
+    private var pendingCallbacks: [String: [@Sendable (UIImage?) -> Void]] = [:]
     private var renderQueue: [(code: String, width: CGFloat, isDark: Bool, key: String)] = []
     private var isWebViewReady = false
     private var isRendering = false
 
     private override init() { super.init() }
 
+    @available(*, deprecated, message: "Use cachedImage(for:isDark:) instead. NSCache storage no longer exposes a complete dictionary snapshot.")
+    public var imageCache: [String: UIImage] {
+        self.imageCacheSnapshot
+    }
+
     public func cachedImage(for code: String, isDark: Bool) -> UIImage? {
-        self.imageCache[cacheKey(code, isDark)]
+        self.imageCacheStore.object(forKey: self.cacheKey(code, isDark) as NSString)
     }
 
     /// 异步渲染 Mermaid 图表。若已缓存立即回调；否则入队等待 WKWebView 渲染完成后回调。
-    public func renderAsync(code: String, width: CGFloat, isDark: Bool, completion: @escaping (UIImage?) -> Void) {
+    /// 回调闭包在主线程触发；标注 `@Sendable` 是为兼容 Swift6 严格并发调用方。
+    public func renderAsync(code: String, width: CGFloat, isDark: Bool, completion: @escaping @Sendable (UIImage?) -> Void) {
         let key = self.cacheKey(code, isDark)
-        if let img = self.imageCache[key] {
+        if let img = self.imageCacheStore.object(forKey: key as NSString) {
             completion(img)
             return
         }
@@ -120,6 +134,9 @@ public class STMarkdownMermaidRenderer: NSObject {
     // MARK: - Snapshot
     private func takeSnapshot(key: String, height: CGFloat) {
         guard let wv = self.webView else { self.finalize(key: key, image: nil); return }
+        // 渲染任务被 `isRendering` 互斥串行化，在本次 takeSnapshot 结束前不会有新
+        // `renderOne` 重设 frame，因此直接读取 `wv.frame.width` 是安全的。
+        // 若未来放宽并发度，需要改为 `renderOne` 阶段捕获 width 到实例变量。
         let renderWidth = wv.frame.width
         let renderHeight = max(height + 16, 40) // 16pt body padding
         wv.frame = CGRect(x: 0, y: 0, width: renderWidth, height: renderHeight)
@@ -132,7 +149,8 @@ public class STMarkdownMermaidRenderer: NSObject {
 
     private func finalize(key: String, image: UIImage?) {
         if let img = image {
-            self.imageCache[key] = img
+            self.imageCacheStore.setObject(img, forKey: key as NSString)
+            self.storeCompatibilityCacheSnapshot(image: img, key: key)
         }
         let callbacks = self.pendingCallbacks.removeValue(forKey: key) ?? []
         self.isRendering = false
@@ -185,6 +203,19 @@ public class STMarkdownMermaidRenderer: NSObject {
         </body>
         </html>
         """
+    }
+}
+
+private extension STMarkdownMermaidRenderer {
+    func storeCompatibilityCacheSnapshot(image: UIImage, key: String) {
+        if self.imageCacheSnapshot[key] == nil {
+            self.imageCacheSnapshotOrder.append(key)
+        }
+        self.imageCacheSnapshot[key] = image
+        while self.imageCacheSnapshotOrder.count > 64 {
+            let oldest = self.imageCacheSnapshotOrder.removeFirst()
+            self.imageCacheSnapshot.removeValue(forKey: oldest)
+        }
     }
 }
 

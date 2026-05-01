@@ -39,7 +39,12 @@ private extension STMarkdownDefaultImageRenderer {
     func renderInlineImage(label: String, style: STMarkdownStyle) -> NSAttributedString {
         let font = UIFont.st_systemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .medium)
         let attachment = NSTextAttachment()
-        attachment.image = UIImage(systemName: "photo")
+        // SF Symbol 默认由 tint 控制颜色；通过 withTintColor + alwaysOriginal 让占位符颜色
+        // 与 style.imagePlaceholderTextColor 对齐，而不是依赖上层 TextView 的 tint。
+        let tint = style.imagePlaceholderTextColor ?? style.textColor.withAlphaComponent(0.88)
+        let placeholder = UIImage(systemName: "photo")?
+            .withTintColor(tint, renderingMode: .alwaysOriginal)
+        attachment.image = placeholder
         let imageHeight = max(font.capHeight, 12)
         attachment.bounds = CGRect(x: 0, y: (font.capHeight - imageHeight) / 2, width: imageHeight, height: imageHeight)
 
@@ -64,7 +69,9 @@ private extension STMarkdownDefaultImageRenderer {
         paragraphStyle.alignment = .center
 
         let iconAttachment = NSTextAttachment()
-        iconAttachment.image = UIImage(systemName: "photo.on.rectangle")
+        let iconTint = style.imagePlaceholderTextColor ?? style.textColor
+        iconAttachment.image = UIImage(systemName: "photo.on.rectangle")?
+            .withTintColor(iconTint, renderingMode: .alwaysOriginal)
         let iconSize = max(style.font.pointSize + 2, 16)
         iconAttachment.bounds = CGRect(x: 0, y: -2, width: iconSize, height: iconSize)
 

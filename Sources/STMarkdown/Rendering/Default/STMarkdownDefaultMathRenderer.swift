@@ -29,7 +29,10 @@ public struct STMarkdownDefaultMathRenderer: STMarkdownInlineMathRendering, STMa
         formula: String,
         style: STMarkdownStyle
     ) -> NSAttributedString? {
-        let baseFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize, 16), weight: .regular)
+        // 早期使用 `st_monospacedSystemFont`，但等宽字体在 iOS 上对希腊字母 / 数学符号
+        // 的 glyph 覆盖差，常出现 fallback 字形阶跃。改为以正文 font 为基线，
+        // 既保持视觉一致，也利用系统字体更全的数学符号子集。
+        let baseFont = UIFont(descriptor: style.font.fontDescriptor, size: max(style.font.pointSize, 16))
         return self.renderMath(
             formula: formula,
             style: style,

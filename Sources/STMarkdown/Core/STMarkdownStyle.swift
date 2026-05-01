@@ -35,6 +35,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var headingFontProvider: (@Sendable (Int) -> UIFont)?
     public var linkColor: UIColor?
     public var inlineCodeTextColor: UIColor?
+    /// 行内代码背景色。nil 时沿用 codeBlockBackgroundColor 或不绘制背景。
+    public var inlineCodeBackgroundColor: UIColor?
     public var codeBlockTextColor: UIColor?
     public var codeBlockHeaderTextColor: UIColor?
     public var codeBlockBackgroundColor: UIColor?
@@ -113,6 +115,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         headingFontProvider: (@Sendable (Int) -> UIFont)? = nil,
         linkColor: UIColor? = nil,
         inlineCodeTextColor: UIColor? = nil,
+        inlineCodeBackgroundColor: UIColor? = nil,
         codeBlockTextColor: UIColor? = nil,
         codeBlockHeaderTextColor: UIColor? = nil,
         codeBlockBackgroundColor: UIColor? = nil,
@@ -169,6 +172,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.headingFontProvider = headingFontProvider
         self.linkColor = linkColor
         self.inlineCodeTextColor = inlineCodeTextColor
+        self.inlineCodeBackgroundColor = inlineCodeBackgroundColor
         self.codeBlockTextColor = codeBlockTextColor
         self.codeBlockHeaderTextColor = codeBlockHeaderTextColor
         self.codeBlockBackgroundColor = codeBlockBackgroundColor

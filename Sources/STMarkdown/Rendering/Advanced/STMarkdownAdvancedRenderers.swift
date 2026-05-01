@@ -130,6 +130,13 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 
 private extension STMarkdownHighFidelityMathRenderer {
     func renderImage(formula: String, fontSize: CGFloat, textColor: UIColor, displayMode: Bool, maximumWidth: CGFloat) -> UIImage? {
+        // MTMathUILabel 是 UIView，layout / layer.render(in:) 都需要在主线程访问。
+        // 上层 `STMarkdownAttributedStringRenderer.render(document:)` 没有 actor 注解，
+        // 后台调度器组装 NSAttributedString 时不能触碰 SwiftMath 的 UIView 渲染路径；
+        // 返回 nil 让调用方走纯 NSAttributedString fallback，而不是在库底层触发 crash。
+        guard Thread.isMainThread else {
+            return nil
+        }
         let normalized = self.normalizedFormula(formula)
         let label = MTMathUILabel()
         label.latex = normalized

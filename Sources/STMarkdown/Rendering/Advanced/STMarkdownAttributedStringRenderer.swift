@@ -160,12 +160,16 @@ private extension STMarkdownAttributedStringRenderer {
     /// 与早期"只在最前面拼一个 `┃ `"的实现不同，这里对每一行（含多段、跨段以及空行）都补上
     /// 左侧竖线，遵循 CommonMark 视觉语义；同时引用 `STMarkdownStyle.blockquoteLineColor`
     /// 作为竖线颜色（之前是硬编码 `UIColor.systemGray`，使该 style 字段沦为 dead config）。
+    ///
+    /// 另外把 `style.blockquoteIndentation`（非负）下沉到段落 `firstLineHeadIndent`/`headIndent`
+    /// 中，使得长段落自动换行后内容仍保持与左竖线对齐的缩进。
     func renderQuote(blocks: [STMarkdownRenderBlock]) -> NSAttributedString {
         let body = NSMutableAttributedString(attributedString: self.render(blocks: blocks))
         guard body.length > 0 else { return body }
 
         let lineColor = self.style.blockquoteLineColor ?? UIColor.systemGray
         let prefixGlyph = "▎  "
+        let indent = max(self.style.blockquoteIndentation, 0)
         let prefixAttributes: [NSAttributedString.Key: Any] = [
             .font: self.style.font,
             .foregroundColor: lineColor,
@@ -174,20 +178,37 @@ private extension STMarkdownAttributedStringRenderer {
         // 收集每个段落的起点（按 NSString.paragraphRange 切分，覆盖 \n / \r\n / 段落分隔符）。
         let nsString = body.string as NSString
         var paragraphStarts: [Int] = []
+        var paragraphRanges: [NSRange] = []
         var cursor = 0
         while cursor < nsString.length {
             let paraRange = nsString.paragraphRange(for: NSRange(location: cursor, length: 0))
-            // 跳过纯空段（length == 0 或仅含空白）—— 不想在分隔空行上多画竖线。
             let snippet = nsString.substring(with: paraRange)
             if snippet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
                 paragraphStarts.append(paraRange.location)
+                paragraphRanges.append(paraRange)
             }
             cursor = NSMaxRange(paraRange)
         }
 
+        // 若配置了缩进，把 blockquoteIndentation 注入每个非空段落的 paragraphStyle。
+        if indent > 0 {
+            for range in paragraphRanges {
+                body.enumerateAttribute(.paragraphStyle, in: range) { value, subRange, _ in
+                    let style = ((value as? NSParagraphStyle)?.mutableCopy() as? NSMutableParagraphStyle) ?? self.bodyParagraphStyle()
+                    style.firstLineHeadIndent += indent
+                    style.headIndent += indent
+                    body.addAttribute(.paragraphStyle, value: style, range: subRange)
+                }
+            }
+        }
+
         // 倒序插入避免索引漂移。
         for location in paragraphStarts.reversed() {
-            let prefix = NSAttributedString(string: prefixGlyph, attributes: prefixAttributes)
+            var attributes = prefixAttributes
+            if let paragraphStyle = body.attribute(.paragraphStyle, at: location, effectiveRange: nil) {
+                attributes[.paragraphStyle] = paragraphStyle
+            }
+            let prefix = NSAttributedString(string: prefixGlyph, attributes: attributes)
             body.insert(prefix, at: location)
         }
         return body
@@ -258,7 +279,10 @@ private extension STMarkdownAttributedStringRenderer {
                     baseFont: useFont,
                     textColor: textColor
                 ) {
-                    result.append(rendered)
+                    // 让 attachment 承载周围文字的 paragraphStyle / kern / link，避免行高抖动及
+                    // 被"排除在链接可点击区域之外"。attachment 自带的 font/foreground/bounds
+                    // 不会被这里的 `mergeInheritableAttributes` 覆盖。
+                    result.append(self.mergeInheritableAttributes(into: rendered, from: attributes))
                 } else {
                     result.append(NSAttributedString(string: formula, attributes: attributes))
                 }
@@ -286,6 +310,9 @@ private extension STMarkdownAttributedStringRenderer {
                 var codeAttributes = attributes
                 codeAttributes[.font] = UIFont.st_monospacedSystemFont(ofSize: max(baseFont.pointSize - 1, 12), weight: .regular)
                 codeAttributes[.foregroundColor] = self.style.inlineCodeTextColor ?? textColor
+                if let inlineBg = self.style.inlineCodeBackgroundColor {
+                    codeAttributes[.backgroundColor] = inlineBg
+                }
                 result.append(NSAttributedString(string: code, attributes: codeAttributes))
             case .link(let destination, let children):
                 result.append(self.renderInline(
@@ -305,7 +332,9 @@ private extension STMarkdownAttributedStringRenderer {
                     style: self.style,
                     inline: true
                 ) {
-                    result.append(rendered)
+                    // 同 inline math：让 attachment 继承 paragraph / kern / link，
+                    // 嵌在链接里的图片点击区域才能覆盖到 attachment glyph。
+                    result.append(self.mergeInheritableAttributes(into: rendered, from: attributes))
                 } else {
                     result.append(NSAttributedString(string: alt.isEmpty ? "[image]" : alt, attributes: attributes))
                 }
@@ -387,6 +416,35 @@ private extension STMarkdownAttributedStringRenderer {
             .kern: self.style.kern,
             .paragraphStyle: self.bodyParagraphStyle(),
         ]
+    }
+
+    /// 把段落级属性（paragraphStyle / kern / link）下沉到 attachment 字符上，避免：
+    ///   1. inline math / 图像 attachment 与周围文字行高不一致；
+    ///   2. 嵌在链接内的图像无法被 TextKit 视作链接可点击区域。
+    /// 不会覆盖 attachment 自身关心的 `.font` / `.foregroundColor` / `.attachment`。
+    func mergeInheritableAttributes(
+        into rendered: NSAttributedString,
+        from attributes: [NSAttributedString.Key: Any]
+    ) -> NSAttributedString {
+        guard rendered.length > 0 else { return rendered }
+        let mutable = NSMutableAttributedString(attributedString: rendered)
+        let fullRange = NSRange(location: 0, length: mutable.length)
+        let inheritKeys: [NSAttributedString.Key] = [.paragraphStyle, .kern, .link]
+        for key in inheritKeys {
+            guard let value = attributes[key] else { continue }
+            // 仅在目标 range 内还没有显式值时补齐；`.link` 是个例外——
+            // 当上层处于链接上下文时无论如何都要覆盖，否则 attachment 无法响应点击。
+            if key == .link {
+                mutable.addAttribute(key, value: value, range: fullRange)
+                continue
+            }
+            mutable.enumerateAttribute(key, in: fullRange) { existing, range, _ in
+                if existing == nil {
+                    mutable.addAttribute(key, value: value, range: range)
+                }
+            }
+        }
+        return mutable
     }
 
     func bodyParagraphStyle() -> NSMutableParagraphStyle {

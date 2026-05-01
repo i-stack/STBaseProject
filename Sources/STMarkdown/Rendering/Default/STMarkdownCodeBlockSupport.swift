@@ -159,12 +159,12 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
         headerHeight: CGFloat,
         contentInsets: UIEdgeInsets
     ) -> String {
+        // `String.hashValue` 含进程级随机 seed，跨进程不稳定；同时只用 64-bit 仍可能碰撞。
+        // 这里追加 utf8 字节数 + 头/尾 prefix 作为指纹，让"长度相同 + 哈希碰撞"的概率近乎为零。
         [
             language ?? "",
-            String(code.hashValue),
-            String(code.count),
-            String(visibleCode?.hashValue ?? 0),
-            String(visibleCode?.count ?? 0),
+            Self.codeFingerprint(code),
+            Self.codeFingerprint(visibleCode),
             forceCollapsed ? "1" : "0",
             String(format: "%.2f", codeWidth),
             String(format: "%.2f", headerHeight),
@@ -186,16 +186,40 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
         ].joined(separator: "|")
     }
 
+    /// 给定字符串生成"长度+前 32 + 后 32 字符 + hashValue"组合指纹。
+    /// 比单 `hashValue` 抗碰撞强得多；前后 prefix 可以区分长度相同但中段不同的代码片段。
+    private static func codeFingerprint(_ value: String?) -> String {
+        guard let value else { return "n" }
+        let count = value.count
+        let utf8Count = value.utf8.count
+        let prefix = value.prefix(32)
+        let suffix = value.suffix(32)
+        return "c\(count)_b\(utf8Count)_h\(value.hashValue)_p\(prefix)_s\(suffix)"
+    }
+
     private static func rgbaKey(_ color: UIColor?) -> String {
         guard let color else { return "nil" }
+        // 在 multi-scene / dark mode 切换场景下，dynamic color 的 `description` 文本
+        // 可能在 light 与 dark 下相同，导致缓存错命中。先解析到当前 trait，再读 RGBA。
+        let resolved: UIColor
+        if #available(iOS 13.0, *) {
+            resolved = color.resolvedColor(with: UITraitCollection.current)
+        } else {
+            resolved = color
+        }
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
-        guard color.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
-            return color.description
+        if resolved.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            return String(format: "%.4f,%.4f,%.4f,%.4f", red, green, blue, alpha)
         }
-        return String(format: "%.4f,%.4f,%.4f,%.4f", red, green, blue, alpha)
+        // DeviceGray / Pattern 色彩空间下 getRed 返回 false。退回 white+alpha。
+        var white: CGFloat = 0
+        if resolved.getWhite(&white, alpha: &alpha) {
+            return String(format: "w%.4f,%.4f", white, alpha)
+        }
+        return resolved.description
     }
 }
 
