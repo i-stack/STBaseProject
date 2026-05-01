@@ -85,6 +85,12 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
     internal var isApplyingConfiguration = false
     internal var renderer: STMarkdownAttributedStringRenderer
 
+    /// 当前 attributedText 上所有异步 attachment 的刷新订阅。
+    /// 文本被替换时需要先把旧 token 全部 `invalidate`，避免共享 attachment 的多个 TextView
+    /// 在旧内容被丢弃后仍然收到回调（虽然 `[weak self]` 会让回调成为 no-op，但仍会在
+    /// attachment 内保留无效 entry）。
+    private var attachmentRefreshTokens: [STMarkdownRefreshObservation] = []
+
     private var lastLaidOutSize: CGSize = .zero
 
     internal init(
@@ -210,6 +216,10 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
 
     internal func resetBaseState() {
         self.rawMarkdown = ""
+        for token in self.attachmentRefreshTokens {
+            token.invalidate()
+        }
+        self.attachmentRefreshTokens.removeAll()
         self.tableOverlayCoordinator.reset()
         self.invalidateIntrinsicContentSize()
     }
@@ -272,7 +282,12 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
     }
 
     private func bindAttachmentRefreshHandlers(in attributedText: NSAttributedString) {
-        STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] attachment in
+        // 先释放旧订阅，避免 TextView 在不同 attributedText 之间切换时，
+        // 共享的 attachment 继续把回调派发到已被替换的内容上。
+        for token in self.attachmentRefreshTokens {
+            token.invalidate()
+        }
+        self.attachmentRefreshTokens = STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attributedText) { [weak self] attachment in
             self?.refreshRenderedAttachment(attachment)
         }
     }

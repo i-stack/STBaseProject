@@ -120,17 +120,19 @@ private extension STMarkdownImageLoading {
     }
 }
 
-final class STMarkdownAsyncImageAttachment: NSTextAttachment {
-    
-    var onNeedsDisplay: (() -> Void)?
+final class STMarkdownAsyncImageAttachment: NSTextAttachment, STMarkdownRefreshableAttachment {
+
+    private let refreshRegistry = STMarkdownRefreshObserverRegistry()
     private let loader: STMarkdownImageLoading
     private let style: STMarkdownStyle
     private let inline: Bool
     private let url: URL
+    private let altText: String
     private let loadToken = STMarkdownImageLoadToken()
 
-    init(url: URL, style: STMarkdownStyle, inline: Bool, loader: STMarkdownImageLoading) {
+    init(url: URL, altText: String, style: STMarkdownStyle, inline: Bool, loader: STMarkdownImageLoading) {
         self.url = url
+        self.altText = altText
         self.style = style
         self.inline = inline
         self.loader = loader
@@ -146,11 +148,22 @@ final class STMarkdownAsyncImageAttachment: NSTextAttachment {
     deinit {
         self.loadToken.cancel()
     }
+
+    func addDisplayObserver(_ observer: @escaping () -> Void) -> STMarkdownRefreshObservation {
+        return self.refreshRegistry.add(observer)
+    }
+
+    /// 内部回调入口：图像就绪时通知所有观察者。
+    /// 仅供本类 extension 中使用，对外通过 `addDisplayObserver` 订阅。
+    fileprivate func notifyDisplayObservers() {
+        self.refreshRegistry.notify()
+    }
 }
 
 private extension STMarkdownAsyncImageAttachment {
     func configurePlaceholder() {
         let placeholderImage = UIImage(systemName: self.inline ? "photo" : "photo.on.rectangle")
+        placeholderImage?.accessibilityLabel = self.accessibilityLabelForCurrentState(imageReady: false)
         self.image = placeholderImage
         self.bounds = self.placeholderBounds()
     }
@@ -161,12 +174,21 @@ private extension STMarkdownAsyncImageAttachment {
             guard self.loadToken.shouldAcceptResult() else { return }
             DispatchQueue.main.async {
                 guard self.loadToken.shouldAcceptResult() else { return }
+                image.accessibilityLabel = self.accessibilityLabelForCurrentState(imageReady: true)
                 self.image = image
                 self.bounds = self.resolvedBounds(for: image.size)
-                self.onNeedsDisplay?()
+                self.notifyDisplayObservers()
             }
         }
         self.loadToken.setCancellable(cancellable)
+    }
+
+    /// 为 `UIImage` 生成无障碍描述。优先使用 Markdown alt text，其次使用 URL。
+    /// - Parameter imageReady: 当前是真实图像 (`true`) 还是占位符 (`false`)。
+    func accessibilityLabelForCurrentState(imageReady: Bool) -> String {
+        let fallback = self.url.lastPathComponent
+        let primary = self.altText.isEmpty ? fallback : self.altText
+        return imageReady ? primary : "\(primary) (loading)"
     }
 
     func placeholderBounds() -> CGRect {
@@ -215,7 +237,7 @@ public struct STMarkdownAsyncImageRenderer: STMarkdownImageRendering {
         guard let resolvedURL = URL(string: url), resolvedURL.scheme?.isEmpty == false else {
             return nil
         }
-        let attachment = STMarkdownAsyncImageAttachment(url: resolvedURL, style: style, inline: inline, loader: self.loader)
+        let attachment = STMarkdownAsyncImageAttachment(url: resolvedURL, altText: altText, style: style, inline: inline, loader: self.loader)
         if inline {
             return NSAttributedString(attachment: attachment)
         }
