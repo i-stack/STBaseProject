@@ -240,13 +240,14 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     /// 1. 保留所有已完整闭合的代码块、公式块、inline 标记；
     /// 2. 若最末尾处于一个 fenced code block 未闭合（奇数个 ```），则删掉末尾那组 ```
     ///    所在行及之后的流式片段；
-    /// 3. 只对最末一行做尾部未闭合 inline delimiter（`**` / `__` / `~~` / `$$` / `\(`）
-    ///    的裁剪，且通过**成对计数**判定，不会误伤已闭合对；
+    /// 3. 只对最末一行做未闭合 inline delimiter（`**` / `__` / `~~` / `\(`）
+    ///    的 opening marker 裁剪，且通过**成对计数**判定，不会误伤已闭合对；
     /// 4. task list 前缀 `- [ ]` / `- [x]` 仅当该行只有前缀、尚无实际文字时才暂时隐藏。
     private static func stripUnclosedTailMarkers(in markdown: String) -> String {
         guard markdown.isEmpty == false else { return markdown }
 
         var working = Self.stripUnclosedFencedCodeTail(in: markdown)
+        working = Self.stripUnclosedDollarMathBlockTail(in: working)
         working = Self.stripUnclosedInlineTailMarkers(in: working)
         working = Self.stripBareTaskListPrefix(in: working)
         return working
@@ -273,7 +274,26 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         return ns.substring(to: lastLineStart)
     }
 
-    /// 只处理最末一行的未闭合 inline delimiter：成对数量为奇数且尾部紧贴的 delimiter 做裁剪。
+    /// 若源字符串包含奇数个 `$$`，说明末尾存在未闭合块公式。
+    /// 流式阶段先隐藏从打开 `$$` 所在行起的尾段，避免 `$$` 或公式体以普通文本闪烁。
+    private static func stripUnclosedDollarMathBlockTail(in markdown: String) -> String {
+        let ns = markdown as NSString
+        let matches = Self.dollarMathFenceRegex.matches(
+            in: markdown,
+            options: [],
+            range: NSRange(location: 0, length: ns.length)
+        )
+        guard matches.count % 2 == 1, let last = matches.last else {
+            return markdown
+        }
+
+        let prefix = ns.substring(to: last.range.location) as NSString
+        let newline = prefix.range(of: "\n", options: .backwards)
+        let lastLineStart = newline.location == NSNotFound ? 0 : newline.location + newline.length
+        return ns.substring(to: lastLineStart)
+    }
+
+    /// 只处理最末一行的未闭合 inline delimiter：成对数量为奇数时裁剪最后一个 opening marker。
     /// 这样 "文本里已经成对闭合" 的 `**foo**` 不会被动到，代码块内已完整闭合的 token 也不会被动到。
     private static func stripUnclosedInlineTailMarkers(in markdown: String) -> String {
         let ns = markdown as NSString
@@ -285,10 +305,10 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         var trimmed = lastLine
         // 按“从长到短 / 从强到弱”的顺序，避免 `**` 被当成两个 `*`。
         for token in Self.inlinePairableTokens {
-            trimmed = Self.trimTrailingUnclosedToken(token, in: trimmed)
+            trimmed = Self.trimUnclosedInlineToken(token, in: trimmed)
         }
-        // `\(` 单独处理：无配对 `\)` 时，直接砍掉末尾 `\(`。
-        trimmed = Self.trimTrailingUnclosedMathOpen(in: trimmed)
+        // `\(` 单独处理：无配对 `\)` 时，先隐藏 opening marker，保留已到达的公式体文本。
+        trimmed = Self.trimUnclosedMathOpen(in: trimmed)
 
         if trimmed == lastLine {
             return markdown
@@ -297,24 +317,33 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         return prefix + trimmed
     }
 
-    /// 若该行最末 `token` 数量为奇数且恰好出现在末尾，则把末尾那一个 token 去掉。
-    private static func trimTrailingUnclosedToken(_ token: String, in line: String) -> String {
-        guard line.hasSuffix(token) else { return line }
+    /// 若该行 `token` 数量为奇数，说明最后一个 token 是未闭合 opener；
+    /// 去掉 opener 本身但保留其后的流式正文，避免显示原始 Markdown 定界符。
+    private static func trimUnclosedInlineToken(_ token: String, in line: String) -> String {
         let count = line.components(separatedBy: token).count - 1
         guard count % 2 == 1 else { return line }
-        let end = line.index(line.endIndex, offsetBy: -token.count)
-        return String(line[line.startIndex..<end])
+
+        guard let range = line.range(of: token, options: .backwards) else {
+            return line
+        }
+        var result = line
+        result.removeSubrange(range)
+        return result
     }
 
-    private static func trimTrailingUnclosedMathOpen(in line: String) -> String {
-        // `\(` 与 `\)` 成对；若末尾悬挂一个未闭合的 `\(` 或其后跟部分内容，暂不裁剪内容，
-        // 只在行末正好是 `\(` 时才裁剪，避免误删正在输入的公式体。
-        guard line.hasSuffix(#"\("#) else { return line }
+    private static func trimUnclosedMathOpen(in line: String) -> String {
+        // `\(` 与 `\)` 成对；未闭合时移除最后一个 opening marker，
+        // 避免流式中间态把 `\(` 直接暴露给用户。
         let opens = line.components(separatedBy: #"\("#).count - 1
         let closes = line.components(separatedBy: #"\)"#).count - 1
         guard opens > closes else { return line }
-        let end = line.index(line.endIndex, offsetBy: -2)
-        return String(line[line.startIndex..<end])
+
+        guard let range = line.range(of: #"\("#, options: .backwards) else {
+            return line
+        }
+        var result = line
+        result.removeSubrange(range)
+        return result
     }
 
     /// 末行仅为 task list 前缀（`- [ ] ` / `- [x] `）且无后续文字时，暂时隐藏，
@@ -337,6 +366,10 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         return try! NSRegularExpression(pattern: #"(?m)^[ \t]*`{3,}"#, options: [])
     }()
 
+    private static let dollarMathFenceRegex: NSRegularExpression = {
+        return try! NSRegularExpression(pattern: #"\$\$"#, options: [])
+    }()
+
     private static let bareTaskPrefixRegex: NSRegularExpression = {
         // 行首为 task list 前缀但没有任何可见正文。
         return try! NSRegularExpression(
@@ -347,7 +380,6 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     private static let inlinePairableTokens: [String] = [
         "```",
-        "$$",
         "**",
         "__",
         "~~"
