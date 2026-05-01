@@ -91,7 +91,7 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
         return NSAttributedString(attachment: attachment)
     }
 
-    public func renderBlockMath(formula: String,style: STMarkdownStyle) -> NSAttributedString? {
+    public func renderBlockMath(formula: String, style: STMarkdownStyle) -> NSAttributedString? {
         guard let image = self.renderImage(
             formula: formula,
             fontSize: max(style.font.pointSize + 2, 18),
@@ -129,7 +129,7 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 }
 
 private extension STMarkdownHighFidelityMathRenderer {
-    func renderImage(formula: String, fontSize: CGFloat, textColor: UIColor, displayMode: Bool,maximumWidth: CGFloat) -> UIImage? {
+    func renderImage(formula: String, fontSize: CGFloat, textColor: UIColor, displayMode: Bool, maximumWidth: CGFloat) -> UIImage? {
         let normalized = self.normalizedFormula(formula)
         let label = MTMathUILabel()
         label.latex = normalized
@@ -163,12 +163,14 @@ private extension STMarkdownHighFidelityMathRenderer {
     }
 
     func normalizedFormula(_ formula: String) -> String {
+        // Raw-string 字面 `#"\("#` 里的反斜杠是**一个**字面字符。
+        // 早期写成 `#"\\("#` 会去匹配两个反斜杠+括号，对真实 LaTeX 输入永远不会命中。
         formula
             .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: #"\\("#, with: "")
-            .replacingOccurrences(of: #"\\)"#, with: "")
-            .replacingOccurrences(of: #"\\["#, with: "")
-            .replacingOccurrences(of: #"\\]"#, with: "")
+            .replacingOccurrences(of: #"\("#, with: "")
+            .replacingOccurrences(of: #"\)"#, with: "")
+            .replacingOccurrences(of: #"\["#, with: "")
+            .replacingOccurrences(of: #"\]"#, with: "")
             .replacingOccurrences(of: #"\'"#, with: "'")
             .replacingOccurrences(of: #"\|"#, with: "|")
     }

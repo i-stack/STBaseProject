@@ -81,20 +81,7 @@ private extension STMarkdownAttributedStringRenderer {
             let headingColor = self.style.headingTextColor ?? self.style.textColor
             return self.renderInline(nodes: content, baseFont: headingFont, textColor: headingColor, paragraphStyle: self.headingParagraphStyle(font: headingFont), kernOverride: self.style.headingKern)
         case .quote(let blocks):
-            let rendered = NSMutableAttributedString()
-            let paragraphStyle = self.bodyParagraphStyle()
-            let prefix = NSAttributedString(
-                string: "┃ ",
-                attributes: [
-                    .font: self.style.font,
-                    .foregroundColor: UIColor.systemGray,
-                    .paragraphStyle: paragraphStyle,
-                ]
-            )
-            let body = self.render(blocks: blocks)
-            rendered.append(prefix)
-            rendered.append(body)
-            return rendered
+            return self.renderQuote(blocks: blocks)
         case .list(let items):
             return self.renderList(items)
         case .codeBlock(let language, let code):
@@ -154,12 +141,56 @@ private extension STMarkdownAttributedStringRenderer {
     }
 
     func renderTable(_ table: STMarkdownTableModel) -> NSAttributedString {
+        // 早期实现把 inline 节点 render 成 NSAttributedString 后只取 `.string`，
+        // 把粗体/斜体/链接等格式全部丢掉。这里复用 `STMarkdownDefaultTableRenderer`
+        // 至少能维持等宽对齐与表头分隔，明显优于"裸文本拼接"。
+        if let rendered = STMarkdownDefaultTableRenderer().renderTable(table, style: self.style) {
+            return rendered
+        }
         let rows = ([table.header].compactMap { $0 } + table.rows)
         let strings = rows.map { row in
             row.map { self.renderInline(nodes: $0, baseFont: self.style.font, textColor: self.style.textColor).string }
                 .joined(separator: "  ")
         }
         return NSAttributedString(string: strings.joined(separator: "\n"), attributes: self.baseAttributes())
+    }
+
+    /// 渲染引用块。
+    ///
+    /// 与早期"只在最前面拼一个 `┃ `"的实现不同，这里对每一行（含多段、跨段以及空行）都补上
+    /// 左侧竖线，遵循 CommonMark 视觉语义；同时引用 `STMarkdownStyle.blockquoteLineColor`
+    /// 作为竖线颜色（之前是硬编码 `UIColor.systemGray`，使该 style 字段沦为 dead config）。
+    func renderQuote(blocks: [STMarkdownRenderBlock]) -> NSAttributedString {
+        let body = NSMutableAttributedString(attributedString: self.render(blocks: blocks))
+        guard body.length > 0 else { return body }
+
+        let lineColor = self.style.blockquoteLineColor ?? UIColor.systemGray
+        let prefixGlyph = "▎  "
+        let prefixAttributes: [NSAttributedString.Key: Any] = [
+            .font: self.style.font,
+            .foregroundColor: lineColor,
+        ]
+
+        // 收集每个段落的起点（按 NSString.paragraphRange 切分，覆盖 \n / \r\n / 段落分隔符）。
+        let nsString = body.string as NSString
+        var paragraphStarts: [Int] = []
+        var cursor = 0
+        while cursor < nsString.length {
+            let paraRange = nsString.paragraphRange(for: NSRange(location: cursor, length: 0))
+            // 跳过纯空段（length == 0 或仅含空白）—— 不想在分隔空行上多画竖线。
+            let snippet = nsString.substring(with: paraRange)
+            if snippet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+                paragraphStarts.append(paraRange.location)
+            }
+            cursor = NSMaxRange(paraRange)
+        }
+
+        // 倒序插入避免索引漂移。
+        for location in paragraphStarts.reversed() {
+            let prefix = NSAttributedString(string: prefixGlyph, attributes: prefixAttributes)
+            body.insert(prefix, at: location)
+        }
+        return body
     }
 
     func renderInline(
@@ -337,9 +368,10 @@ private extension STMarkdownAttributedStringRenderer {
                 let child = NSMutableAttributedString(attributedString: self.render(blocks: trailingBlocks))
                 self.offsetParagraphStyles(in: child, by: layout.contentIndent)
                 if child.length > 0 {
-                    if leadingBlocks.isEmpty == false {
-                        result.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
-                    }
+                    // leading 段落已包含内联文本且后跟 `\n`；这里补一个分隔即可。
+                    // 当 leading 为空（列表项以 quote / codeBlock / list 等块级元素开头），
+                    // marker 后没有任何换行，直接 append 会让 marker 与块内容挤在同一行。
+                    result.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
                     result.append(child)
                 }
             }

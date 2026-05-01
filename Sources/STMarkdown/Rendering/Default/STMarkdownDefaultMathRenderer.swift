@@ -135,10 +135,12 @@ private extension STMarkdownDefaultMathRenderer {
         result = result.replacingOccurrences(of: "\r\n", with: " ")
         result = result.replacingOccurrences(of: "\n", with: " ")
         result = result.replacingOccurrences(of: "\r", with: " ")
-        result = result.replacingOccurrences(of: #"\\("#, with: "")
-        result = result.replacingOccurrences(of: #"\\)"#, with: "")
-        result = result.replacingOccurrences(of: #"\\["#, with: "")
-        result = result.replacingOccurrences(of: #"\\]"#, with: "")
+        // Raw-string 字面 `#"\("#` 里反斜杠是单字面字符；之前的 `#"\\("#`
+        // 实际去匹配两个反斜杠+括号，对真实输入永远不会命中。
+        result = result.replacingOccurrences(of: #"\("#, with: "")
+        result = result.replacingOccurrences(of: #"\)"#, with: "")
+        result = result.replacingOccurrences(of: #"\["#, with: "")
+        result = result.replacingOccurrences(of: #"\]"#, with: "")
 
         for (command, replacement) in Self.commandMap {
             result = result.replacingOccurrences(of: command, with: replacement)

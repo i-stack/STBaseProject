@@ -81,8 +81,39 @@ private extension STMarkdownDefaultTableRenderer {
         guard let firstRow = rows.first else { return [] }
         return firstRow.indices.map { column in
             rows.reduce(0) { partialResult, row in
-                max(partialResult, row[column].count)
+                max(partialResult, self.displayWidth(of: row[column]))
             }
+        }
+    }
+
+    /// 基于 Unicode East Asian Width 属性近似估算等宽字体下的单元宽度。
+    /// CJK 全角字符占 2 个等宽格子，其余占 1，能避免中英混排时的列错位。
+    func displayWidth(of string: String) -> Int {
+        var width = 0
+        for scalar in string.unicodeScalars {
+            width += self.isWideScalar(scalar) ? 2 : 1
+        }
+        return width
+    }
+
+    func isWideScalar(_ scalar: Unicode.Scalar) -> Bool {
+        switch scalar.value {
+        case 0x1100...0x115F,   // Hangul Jamo
+             0x2E80...0x303E,   // CJK Radicals Supplement / Kangxi
+             0x3041...0x33FF,   // Hiragana / Katakana / CJK Symbols
+             0x3400...0x4DBF,   // CJK Extension A
+             0x4E00...0x9FFF,   // CJK Unified Ideographs
+             0xA000...0xA4CF,   // Yi
+             0xAC00...0xD7A3,   // Hangul Syllables
+             0xF900...0xFAFF,   // CJK Compatibility Ideographs
+             0xFE30...0xFE4F,   // CJK Compatibility Forms
+             0xFF00...0xFF60,   // Fullwidth forms
+             0xFFE0...0xFFE6,
+             0x20000...0x2FFFD, // CJK Extension B-F
+             0x30000...0x3FFFD:
+            return true
+        default:
+            return false
         }
     }
 
@@ -94,7 +125,7 @@ private extension STMarkdownDefaultTableRenderer {
             .backgroundColor: style.tableBackgroundColor ?? UIColor.secondarySystemBackground,
         ]
         let rendered = row.enumerated().map { index, column in
-            let paddingCount = max(0, columnWidths[index] - column.count)
+            let paddingCount = max(0, columnWidths[index] - self.displayWidth(of: column))
             return " \(column)\(String(repeating: " ", count: paddingCount)) "
         }
         .joined(separator: "│")

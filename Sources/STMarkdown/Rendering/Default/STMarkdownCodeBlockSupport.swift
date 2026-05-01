@@ -51,11 +51,16 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
         self.code = code
         self.style = style
         self.contentInsets = style.codeBlockContentInsets
-        let autoHeight = max(
-            ceil(UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold).lineHeight),
-            18
-        )
-        self.headerHeight = style.codeBlockHeaderHeight > 0 ? style.codeBlockHeaderHeight : autoHeight
+        let hasLanguage = self.language?.isEmpty == false
+        if hasLanguage {
+            let autoHeight = max(
+                ceil(UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold).lineHeight),
+                18
+            )
+            self.headerHeight = style.codeBlockHeaderHeight > 0 ? style.codeBlockHeaderHeight : autoHeight
+        } else {
+            self.headerHeight = 0
+        }
 
         let codeFont = UIFont.st_monospacedSystemFont(
             ofSize: max(style.font.pointSize - 1, 12),
@@ -229,7 +234,8 @@ public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
             ofSize: max(style.font.pointSize - 2, 12),
             weight: .semibold
         )
-        let separatorSpacing = style.codeBlockSeparatorSpacing
+        let hasHeader = language?.isEmpty == false && headerHeight > 0
+        let separatorSpacing = hasHeader ? style.codeBlockSeparatorSpacing : 0
         let buttonRowReservedWidth = style.codeBlockButtonRowReservedWidth
         let blockHeight = contentInsets.top + headerHeight + separatorSpacing + bodyHeight + contentInsets.bottom
         let format = UIGraphicsImageRendererFormat.default()
@@ -251,31 +257,33 @@ public struct STMarkdownCodeBlockRenderer: STMarkdownCodeBlockRendering {
                 path.stroke()
             }
 
-            let headerText = (language?.isEmpty == false ? language?.uppercased() : "CODE") ?? "CODE"
-            let headerTextSize = (headerText as NSString).size(withAttributes: [.font: headerFont])
-            let headerTextY = contentInsets.top + max((headerHeight - headerTextSize.height) / 2, 0)
-            let headerRect = CGRect(
-                x: contentInsets.left,
-                y: headerTextY,
-                width: max(contentWidth - buttonRowReservedWidth, 1),
-                height: headerTextSize.height
-            )
-            (headerText as NSString).draw(
-                in: headerRect,
-                withAttributes: [
-                    .font: headerFont,
-                    .foregroundColor: headerColor,
-                ]
-            )
+            if hasHeader, let language {
+                let headerText = language.uppercased()
+                let headerTextSize = (headerText as NSString).size(withAttributes: [.font: headerFont])
+                let headerTextY = contentInsets.top + max((headerHeight - headerTextSize.height) / 2, 0)
+                let headerRect = CGRect(
+                    x: contentInsets.left,
+                    y: headerTextY,
+                    width: max(contentWidth - buttonRowReservedWidth, 1),
+                    height: headerTextSize.height
+                )
+                (headerText as NSString).draw(
+                    in: headerRect,
+                    withAttributes: [
+                        .font: headerFont,
+                        .foregroundColor: headerColor,
+                    ]
+                )
 
-            let separatorRect = CGRect(
-                x: contentInsets.left,
-                y: contentInsets.top + headerHeight + separatorSpacing / 2,
-                width: contentWidth,
-                height: 1
-            )
-            cgContext.setFillColor((style.horizontalRuleColor ?? UIColor.separator).withAlphaComponent(0.35).cgColor)
-            cgContext.fill(separatorRect)
+                let separatorRect = CGRect(
+                    x: contentInsets.left,
+                    y: contentInsets.top + headerHeight + separatorSpacing / 2,
+                    width: contentWidth,
+                    height: 1
+                )
+                cgContext.setFillColor((style.horizontalRuleColor ?? UIColor.separator).withAlphaComponent(0.35).cgColor)
+                cgContext.fill(separatorRect)
+            }
 
             let codeRect = CGRect(
                 x: contentInsets.left,
@@ -461,7 +469,8 @@ public enum STMarkdownCodeSyntaxHighlighter {
         }
         guard !words.isEmpty else { return [] }
         let joined = words.joined(separator: "|")
-        return ["(?<![\\w$])(?:\(joined))(?![\\w$])".replacingOccurrences(of: "\\(joined)", with: joined)]
+        // `\(joined)` 已在字符串插值阶段被替换为关键字列表；这里的字面量已无需二次处理。
+        return ["(?<![\\w$])(?:\(joined))(?![\\w$])"]
     }
 
     private static func tagPatterns(for language: String) -> [String] {

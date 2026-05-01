@@ -81,17 +81,40 @@ public class STMarkdownMermaidRenderer: NSObject {
         let renderWidth = max(width, 200)
         wv.frame = CGRect(x: 0, y: 0, width: renderWidth, height: 1)
         let theme = isDark ? "dark" : "default"
-        let escaped = code
+        // 反引号模板里只需要转义 `\`、`` ` ``、`$` 三类字符即可。
+        let escapedCode = code
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "`", with: "\\`")
             .replacingOccurrences(of: "$", with: "\\$")
-        let js = "renderMermaid(`\(escaped)`, '\(theme)', '\(key)');"
+        // key 可能包含用户输入（cacheKey 里拼了 code），若直接放单引号里会被 JS 解释器注入。
+        // 用 JSON 序列化一次拿到安全字面量，既转义引号也处理换行/反斜杠。
+        let encodedKey = Self.jsStringLiteral(for: key)
+        let encodedTheme = Self.jsStringLiteral(for: theme)
+        let js = "renderMermaid(`\(escapedCode)`, \(encodedTheme), \(encodedKey));"
         wv.evaluateJavaScript(js) { [weak self] _, error in
             if let error = error {
                 print("[STMarkdownMermaidRenderer] JS eval error: \(error.localizedDescription)")
                 self?.finalize(key: key, image: nil)
             }
         }
+    }
+
+    /// 以 JSON 字面量方式把 Swift 字符串编码成 JS 可直接嵌入的字符串（含首尾引号）。
+    /// 兜底采用最保守的字符转义，保证在任何输入下都不会构成 JS 注入。
+    private static func jsStringLiteral(for value: String) -> String {
+        if let data = try? JSONSerialization.data(withJSONObject: [value], options: []),
+           let json = String(data: data, encoding: .utf8),
+           json.count >= 2 {
+            // JSONSerialization 输出形如 `["..."]`，去掉外层方括号即得字符串字面量。
+            let inner = json.dropFirst().dropLast()
+            return String(inner)
+        }
+        let escaped = value
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "'", with: "\\'")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "\\r")
+        return "'\(escaped)'"
     }
 
     // MARK: - Snapshot
@@ -147,7 +170,8 @@ public class STMarkdownMermaidRenderer: NSObject {
         <script>
         async function renderMermaid(code, theme, key) {
           try {
-            mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'loose' });
+            // 使用 antiscript 禁用 <script> 注入；flowchart click 仍可用纯文本/URL。
+            mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'antiscript' });
             const id = 'mg' + Date.now();
             const { svg } = await mermaid.render(id, code);
             document.getElementById('output').innerHTML = svg;
@@ -170,13 +194,32 @@ extension STMarkdownMermaidRenderer: WKNavigationDelegate {
         self.isWebViewReady = true
         self.drainQueue()
     }
-    
+
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         print("[STMarkdownMermaidRenderer] Navigation failed: \(error.localizedDescription)")
+        self.failAllPendingCallbacks()
     }
-    
+
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         print("[STMarkdownMermaidRenderer] Provisional navigation failed: \(error.localizedDescription)")
+        self.failAllPendingCallbacks()
+    }
+}
+
+// MARK: - Failure Handling
+private extension STMarkdownMermaidRenderer {
+    /// HTML/资源加载失败时，把所有挂起的回调以 `nil` 兜底通知，避免调用方永远等待。
+    /// 同时清空渲染队列与就绪标记，下一次 `renderAsync` 仍会尝试重建 WebView。
+    func failAllPendingCallbacks() {
+        let snapshots = self.pendingCallbacks
+        self.pendingCallbacks.removeAll()
+        self.renderQueue.removeAll()
+        self.isRendering = false
+        self.isWebViewReady = false
+        self.webView = nil
+        for callbacks in snapshots.values {
+            callbacks.forEach { $0(nil) }
+        }
     }
 }
 

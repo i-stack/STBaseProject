@@ -67,7 +67,12 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
             context: nil
         )
 
-        let headerText = language?.uppercased() ?? "CODE"
+        let headerText: String
+        if let language, language.isEmpty == false {
+            headerText = language.uppercased()
+        } else {
+            headerText = ""
+        }
         let headerHeight = headerText.isEmpty ? 0 : ceil(headerFont.lineHeight)
         let separatorSpacing: CGFloat = headerText.isEmpty ? 0 : 8
         let codeHeight = max(ceil(codeBounds.height), ceil(codeFont.lineHeight))
