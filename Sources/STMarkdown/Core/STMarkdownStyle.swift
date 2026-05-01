@@ -7,6 +7,12 @@
 
 import UIKit
 
+/// Markdown 样式配置。
+///
+/// - Note: 含有大量 `UIColor` / `UIFont` / `UIEdgeInsets` 字段。UIKit 官方并未将其声明为
+///   `Sendable`，但这些值在读写已有实例的 API 边界上是实践安全的，因此用
+///   `@unchecked Sendable` 抑制编译器提示。`headingFontProvider` 已显式约束为 `@Sendable`，
+///   调用方务必确保自定义闭包捕获的状态亦满足 `Sendable`。
 public struct STMarkdownStyle: @unchecked Sendable {
     public var font: UIFont
     /// 加粗字体（nil 时由 STMarkdownFontResolver.boldFont(from: font) 自动推导）
@@ -23,7 +29,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
     /// 标题字间距（nil 时沿用 kern）
     public var headingKern: CGFloat?
     /// 自定义标题字体（按 level 1-6 返回），nil 时使用默认 headingFont(for:)
-    public var headingFontProvider: ((Int) -> UIFont)?
+    ///
+    /// 闭包被标注为 `@Sendable`，调用方必须保证它捕获的状态也满足 `Sendable`，
+    /// 以免样式在跨线程使用时引入 data race。
+    public var headingFontProvider: (@Sendable (Int) -> UIFont)?
     public var linkColor: UIColor?
     public var inlineCodeTextColor: UIColor?
     public var codeBlockTextColor: UIColor?
@@ -101,7 +110,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         bodyTextInsets: UIEdgeInsets = .zero,
         headingTextColor: UIColor? = nil,
         headingKern: CGFloat? = nil,
-        headingFontProvider: ((Int) -> UIFont)? = nil,
+        headingFontProvider: (@Sendable (Int) -> UIFont)? = nil,
         linkColor: UIColor? = nil,
         inlineCodeTextColor: UIColor? = nil,
         codeBlockTextColor: UIColor? = nil,
@@ -212,14 +221,24 @@ public struct STMarkdownStyle: @unchecked Sendable {
 
     public var resolvedDisplayScale: CGFloat {
         if self.displayScale > 0 { return self.displayScale }
-        if #available(iOS 17.0, *) {
-            return UITraitCollection.current.displayScale
+        // iOS 13+ 起优先使用当前 trait 环境，避免 multi-scene 下 `UIScreen.main` 结果失真。
+        if #available(iOS 13.0, *) {
+            let scale = UITraitCollection.current.displayScale
+            if scale > 0 { return scale }
         }
         return UIScreen.main.scale
     }
 }
 
 public enum STMarkdownFontResolver {
+    /// `UIFont.Weight` rawValue 在相邻级别间相差约 0.23。
+    /// 这里留一个较保守的阈值，用于判断 `withSymbolicTraits(.traitBold)` 是否实际让字重上升；
+    /// 若升幅不足，则走 `systemFont(weight: .bold)` 兜底以避免 "regular→semibold" 的降级误判。
+    private static let boldWeightBumpThreshold: CGFloat = 0.1
+
+    /// 开启斜体失败时使用的几何倾斜（obliqueness）兜底值，经验值 0.16 接近大多数西文字体斜体角度。
+    private static let fallbackObliqueness: CGFloat = 0.16
+
     private static func fontWeight(of font: UIFont) -> CGFloat {
         let traits = font.fontDescriptor.object(forKey: .traits) as? [UIFontDescriptor.TraitKey: Any]
         if let weight = traits?[.weight] as? CGFloat {
@@ -247,7 +266,7 @@ public enum STMarkdownFontResolver {
             let baseWeight = fontWeight(of: font)
             let resolvedWeight = fontWeight(of: resolved)
             if resolved.fontDescriptor.symbolicTraits.contains(.traitBold),
-               resolvedWeight > baseWeight + 0.1 {
+               resolvedWeight > baseWeight + boldWeightBumpThreshold {
                 return resolved
             }
         }
@@ -268,17 +287,19 @@ public enum STMarkdownFontResolver {
 
     public static func italicObliqueness(from font: UIFont) -> CGFloat? {
         let italic = italicFont(from: font)
-        guard italic.fontDescriptor.symbolicTraits.contains(.traitItalic) == false else {
+        // 若能真实拿到斜体字形，则无需倾斜模拟。
+        guard !italic.fontDescriptor.symbolicTraits.contains(.traitItalic) else {
             return nil
         }
-        return 0.16
+        return fallbackObliqueness
     }
 
     public static func boldItalicObliqueness(from font: UIFont) -> CGFloat? {
         let boldItalic = boldItalicFont(from: font)
-        guard boldItalic.fontDescriptor.symbolicTraits.contains(.traitItalic) == false else {
+        // 若能真实拿到粗斜体字形，则无需倾斜模拟。
+        guard !boldItalic.fontDescriptor.symbolicTraits.contains(.traitItalic) else {
             return nil
         }
-        return 0.16
+        return fallbackObliqueness
     }
 }

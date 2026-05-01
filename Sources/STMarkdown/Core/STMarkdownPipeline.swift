@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct STMarkdownPipelineConfiguration {
+public struct STMarkdownPipelineConfiguration: Sendable {
     public var enableInputSanitizer: Bool
     public var sanitizerRules: [any STMarkdownRule]
     public var debug: Bool
@@ -51,11 +51,15 @@ public struct STMarkdownPipelineResult: Sendable {
     }
 }
 
-public final class STMarkdownPipeline {
+public final class STMarkdownPipeline: Sendable {
     public let configuration: STMarkdownPipelineConfiguration
     public let parser: any STMarkdownStructureParsing
     public let semanticNormalizer: STMarkdownSemanticNormalizer
     public let renderAdapter: any STMarkdownRenderAdapting
+
+    /// 预先构建的 sanitizer；当配置禁用时为 nil。
+    /// 缓存实例可避免高频 `process(_:)` 调用的重复初始化开销。
+    private let sanitizer: STMarkdownInputSanitizer?
 
     public init(
         configuration: STMarkdownPipelineConfiguration = STMarkdownPipelineConfiguration(),
@@ -68,12 +72,14 @@ public final class STMarkdownPipeline {
             normalizers: configuration.semanticNormalizers
         )
         self.renderAdapter = renderAdapter
+        self.sanitizer = configuration.enableInputSanitizer
+            ? STMarkdownInputSanitizer(rules: configuration.sanitizerRules)
+            : nil
     }
 
     public func process(_ rawMarkdown: String) -> STMarkdownPipelineResult {
         let sanitizationResult: STMarkdownSanitizationResult
-        if self.configuration.enableInputSanitizer {
-            let sanitizer = STMarkdownInputSanitizer(rules: self.configuration.sanitizerRules)
+        if let sanitizer = self.sanitizer {
             sanitizationResult = sanitizer.sanitize(rawMarkdown, debug: self.configuration.debug)
         } else {
             sanitizationResult = STMarkdownSanitizationResult(

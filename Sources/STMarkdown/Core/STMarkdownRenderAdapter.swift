@@ -7,7 +7,12 @@
 
 import Foundation
 
-public protocol STMarkdownRenderAdapting {
+/// Transforms a parsed `STMarkdownDocument` into a flattened `STMarkdownRenderDocument`
+/// suitable for the rendering pipeline.
+///
+/// Conformances must be stateless (or internally thread-safe) so that a single adapter
+/// instance can be shared across concurrent pipeline invocations.
+public protocol STMarkdownRenderAdapting: Sendable {
     func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument
 }
 
@@ -27,6 +32,8 @@ private extension STMarkdownRenderAdapter {
         case .heading(let level, let content):
             return .heading(level: level, content: content)
         case .quote(let blocks):
+            // Quote 内嵌 list 时不推进 listLevel：产品侧把引用块视作视觉"容器"，
+            // 不改变列表的逻辑嵌套深度（层级仍以真实 list 节点计算）。
             return .quote(blocks.map { self.makeRenderBlock(from: $0, listLevel: listLevel) })
         case .list(let kind, let items):
             return .list(self.flattenListItems(kind: kind, items: items, level: listLevel))

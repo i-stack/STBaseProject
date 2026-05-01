@@ -8,7 +8,7 @@
 import Foundation
 import Markdown
 
-public protocol STMarkdownStructureParsing {
+public protocol STMarkdownStructureParsing: Sendable {
     func parse(_ markdown: String) -> STMarkdownDocument
 }
 

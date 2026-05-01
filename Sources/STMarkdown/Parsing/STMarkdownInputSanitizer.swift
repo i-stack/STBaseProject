@@ -358,7 +358,7 @@ public struct STTableDelimiterNormalizationRule: STMarkdownRule {
     }
 }
 
-public struct STMarkdownInputSanitizer {
+public struct STMarkdownInputSanitizer: Sendable {
     public static let defaultRules: [any STMarkdownRule] = [
         STHtmlNormalizeRule(),
         STPageReferenceCleanupRule(),

@@ -28,9 +28,8 @@ public enum STMarkdownTypography {
             return UIFont.st_systemFont(ofSize: 18, weight: .semibold)
         case 4:
             return UIFont.st_systemFont(ofSize: 17, weight: .semibold)
-        case 5:
-            return UIFont.st_systemFont(ofSize: 16, weight: .medium)
         default:
+            // level 5、6 共用更小字重，避免与 H4 混淆。
             return UIFont.st_systemFont(ofSize: 16, weight: .medium)
         }
     }
@@ -76,7 +75,25 @@ public struct STMarkdownListLayout {
     public let markerIndent: CGFloat
     public let contentIndent: CGFloat
     public let baselineOffset: CGFloat
-    public let paragraphStyle: NSMutableParagraphStyle
+    /// 段落样式。对外暴露为不可变类型，避免外部修改污染其他使用该 layout 的段落。
+    /// 若确需微调，请自行 `paragraphStyle.mutableCopy()` 后再改写。
+    public let paragraphStyle: NSParagraphStyle
+
+    public init(
+        markerText: String,
+        markerFont: UIFont,
+        markerIndent: CGFloat,
+        contentIndent: CGFloat,
+        baselineOffset: CGFloat,
+        paragraphStyle: NSParagraphStyle
+    ) {
+        self.markerText = markerText
+        self.markerFont = markerFont
+        self.markerIndent = markerIndent
+        self.contentIndent = contentIndent
+        self.baselineOffset = baselineOffset
+        self.paragraphStyle = paragraphStyle
+    }
 }
 
 public enum STMarkdownListStyleResolver {
@@ -145,22 +162,32 @@ public enum STMarkdownListStyleResolver {
         ]
         paragraphStyle.defaultTabInterval = max(1, contentIndent)
 
+        // 对外暴露不可变副本，防止调用方意外篡改。
+        let immutableParagraphStyle = (paragraphStyle.copy() as? NSParagraphStyle) ?? paragraphStyle
+
         return STMarkdownListLayout(
             markerText: markerText,
             markerFont: markerFont,
             markerIndent: markerIndent,
             contentIndent: contentIndent,
             baselineOffset: baselineOffset,
-            paragraphStyle: paragraphStyle
+            paragraphStyle: immutableParagraphStyle
         )
     }
 
+    /// 为列表项的"后续行 / 续段"统一缩进。
+    ///
+    /// - Parameters:
+    ///   - firstLineIndent: 列表项首行（marker 所在行）的左缩进。仅保留参数以兼容旧 API；
+    ///     续行段落真正使用的是 `contentIndent`，从而保证视觉上与正文对齐。
+    ///   - contentIndent: 正文起点缩进，续行的 `firstLineHeadIndent` / `headIndent` 均对齐于此。
     public static func applyContinuationIndent(
         to attributed: NSMutableAttributedString,
         firstLineIndent: CGFloat,
         contentIndent: CGFloat,
         style: STMarkdownStyle
     ) {
+        _ = firstLineIndent // 保留以兼容旧调用方；续段以 contentIndent 为准。
         let string = attributed.string as NSString
         var location = 0
         while location < attributed.length {
@@ -168,8 +195,9 @@ public enum STMarkdownListStyleResolver {
             guard range.length > 0 else { break }
             let existing = attributed.attribute(.paragraphStyle, at: range.location, effectiveRange: nil) as? NSParagraphStyle
             let paragraph = (existing?.mutableCopy() as? NSMutableParagraphStyle) ?? NSMutableParagraphStyle()
-            paragraph.firstLineHeadIndent = firstLineIndent
-            paragraph.headIndent = firstLineIndent
+            // 续段的首行与后续行都应对齐到 contentIndent，避免退回 marker 列形成视觉错位。
+            paragraph.firstLineHeadIndent = contentIndent
+            paragraph.headIndent = contentIndent
             paragraph.minimumLineHeight = style.lineHeight
             paragraph.maximumLineHeight = style.lineHeight
             paragraph.paragraphSpacing = style.listItemSpacing

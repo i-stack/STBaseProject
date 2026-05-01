@@ -9,14 +9,27 @@ import UIKit
 
 public enum STMarkdownPresets {
     public static let `default` = STMarkdownStyle.default
-    public static let defaultAdvancedRenderers = STMarkdownAdvancedRenderers(
-        inlineMathRenderer: STMarkdownHighFidelityMathRenderer(),
-        blockMathRenderer: STMarkdownHighFidelityMathRenderer(),
-        codeBlockRenderer: STMarkdownCodeBlockRenderer(),
-        tableRenderer: STMarkdownTableAttachmentRenderer(),
-        imageRenderer: STMarkdownAsyncImageRenderer(),
-        horizontalRuleRenderer: STMarkdownDefaultHorizontalRuleRenderer()
-    )
+
+    /// 构造一组默认的高级渲染器实例。
+    ///
+    /// 高级渲染器（图片、表格、代码块等）通常持有内部缓存或可变状态，因此
+    /// **每个调用方应单独持有自己的实例**，避免跨场景共享导致的并发污染。
+    /// 故采用工厂方法返回新实例，禁止使用全局单例。
+    public static func makeDefaultAdvancedRenderers() -> STMarkdownAdvancedRenderers {
+        STMarkdownAdvancedRenderers(
+            inlineMathRenderer: STMarkdownHighFidelityMathRenderer(),
+            blockMathRenderer: STMarkdownHighFidelityMathRenderer(),
+            codeBlockRenderer: STMarkdownCodeBlockRenderer(),
+            tableRenderer: STMarkdownTableAttachmentRenderer(),
+            imageRenderer: STMarkdownAsyncImageRenderer(),
+            horizontalRuleRenderer: STMarkdownDefaultHorizontalRuleRenderer()
+        )
+    }
+
+    @available(*, deprecated, message: "Use makeDefaultAdvancedRenderers() to avoid sharing renderer instances.")
+    public static var defaultAdvancedRenderers: STMarkdownAdvancedRenderers {
+        self.makeDefaultAdvancedRenderers()
+    }
 
     public static let article = STMarkdownStyle(
         font: .st_systemFont(ofSize: 17, weight: .regular),
