@@ -37,7 +37,7 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 在 `Podfile` 中添加：
 
 ```ruby
-pod 'STBaseProject', '~> 1.1.5'
+pod 'STBaseProject', '~> 1.0.0'
 ```
 
 然后执行：
@@ -56,7 +56,7 @@ pod install
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.1.5")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.0.0")
 ]
 ```
 
@@ -83,7 +83,7 @@ dependencies: [
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.1.5")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.0.0")
 ],
 targets: [
     .target(
@@ -100,11 +100,11 @@ targets: [
 ### CocoaPods（按 Subspec 选择）
 
 ```ruby
-pod 'STBaseProject/STBase', '~> 1.1.5'
-pod 'STBaseProject/STContacts', '~> 1.1.5'
-pod 'STBaseProject/STLocation', '~> 1.1.5'
-# pod 'STBaseProject/STMedia', '~> 1.1.5'
-# pod 'STBaseProject/STMarkdown', '~> 1.1.5'
+pod 'STBaseProject/STBase', '~> 1.0.0'
+pod 'STBaseProject/STContacts', '~> 1.0.0'
+pod 'STBaseProject/STLocation', '~> 1.0.0'
+# pod 'STBaseProject/STMedia', '~> 1.0.0'
+# pod 'STBaseProject/STMarkdown', '~> 1.0.0'
 ```
 
 <a id="quick-start"></a>
