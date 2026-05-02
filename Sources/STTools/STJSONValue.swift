@@ -182,15 +182,32 @@ public enum STJSONValue: Codable {
 
 public extension STJSONValue {
     init(_ value: Any) {
+        // NSNumber 路径优先：JSONSerialization / KVC 取出来的数值都是桥接 NSNumber，
+        // 直接用 `as? Bool` / `as? Int` 顺序匹配会让所有 Bool 都命中 Int（`NSNumber(true) as? Int == 1`）。
+        if let number = value as? NSNumber {
+            // 区分布尔：CFBooleanRef 的 typeID 与 NSNumber 不同
+            if CFGetTypeID(number) == CFBooleanGetTypeID() {
+                self = .bool(number.boolValue)
+                return
+            }
+            let objCType = String(cString: number.objCType)
+            switch objCType {
+            case "f", "d":
+                self = .double(number.doubleValue)
+            default:
+                self = .int(number.intValue)
+            }
+            return
+        }
         switch value {
         case let string as String:
             self = .string(string)
+        case let bool as Bool:
+            self = .bool(bool)
         case let int as Int:
             self = .int(int)
         case let double as Double:
             self = .double(double)
-        case let bool as Bool:
-            self = .bool(bool)
         case let array as [Any]:
             self = .array(array.map { STJSONValue($0) })
         case let dict as [String: Any]:
