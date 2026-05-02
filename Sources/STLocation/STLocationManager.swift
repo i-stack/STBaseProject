@@ -99,9 +99,7 @@ public enum STLocationError: Error, LocalizedError {
     case locationServicesDisabled
     case timeout
     case networkError
-    /// geocodingFailed 携带底层错误，便于排查是网络问题还是区域不支持
     case geocodingFailed(Error?)
-    /// 已有请求进行中，拒绝并发调用
     case busy
     case unknown(Error)
 
@@ -132,8 +130,6 @@ public protocol STLocationManagerProtocol: AnyObject {
     func st_clearLocationCache()
 }
 
-// MARK: - Internal protocols for testability
-
 protocol STCLLocationManaging: AnyObject {
     var delegate: CLLocationManagerDelegate? { get set }
     var desiredAccuracy: CLLocationAccuracy { get set }
@@ -154,15 +150,13 @@ extension CLLocationManager: STCLLocationManaging {
 
 protocol STCLGeocoderProtocol: AnyObject {
     var isGeocoding: Bool { get }
-    func reverseGeocodeLocation(_ location: CLLocation, completionHandler: @escaping CLGeocodeCompletionHandler)
+    func reverseGeocodeLocation(_ location: CLLocation, completionHandler: @escaping @Sendable ([CLPlacemark]?, Error?) -> Void)
     func cancelGeocode()
 }
 
 extension CLGeocoder: STCLGeocoderProtocol {}
 
 // MARK: - STLocationManager
-
-/// 所有可变状态由 @MainActor 隔离，CLLocationManager 始终在主线程操作。
 @MainActor
 public class STLocationManager: NSObject {
 
@@ -172,14 +166,12 @@ public class STLocationManager: NSObject {
     private var locationCompletion: ((Result<STLocationInfo, STLocationError>) -> Void)?
     private var permissionCompletion: ((CLAuthorizationStatus) -> Void)?
     private var isUpdating = false
-    /// 连续更新模式：success 时不停止 CLLocationManager，继续推送位置
     private var isContinuousUpdating = false
     /// 每次新请求自增，用于丢弃 stop→start 竞态中残留的过期 geocoding 结果
     private var requestGeneration: Int = 0
     private var lastLocationInfo: STLocationInfo?
     private var lastLocationTime: Date?
     private var timeoutTask: Task<Void, Never>?
-
     private var clManager: STCLLocationManaging
     private let geocoder: STCLGeocoderProtocol
 
@@ -193,7 +185,6 @@ public class STLocationManager: NSObject {
         manager.distanceFilter = self.currentConfig.distanceFilter
     }
 
-    /// 仅供测试使用，通过依赖注入替换底层实现
     init(clManager: STCLLocationManaging, geocoder: STCLGeocoderProtocol) {
         self.clManager = clManager
         self.geocoder = geocoder
@@ -202,10 +193,7 @@ public class STLocationManager: NSObject {
     }
 }
 
-// MARK: - STLocationManagerProtocol
-
 extension STLocationManager: STLocationManagerProtocol {
-
     public func st_configure(with config: STLocationConfig) {
         self.currentConfig = config
         self.clManager.desiredAccuracy = config.desiredAccuracy
@@ -304,10 +292,7 @@ extension STLocationManager: STLocationManagerProtocol {
     }
 }
 
-// MARK: - Private helpers
-
 extension STLocationManager {
-
     private static func isLocationAccessAuthorized(_ status: CLAuthorizationStatus) -> Bool {
         #if os(macOS)
         return status == .authorizedAlways
@@ -338,12 +323,13 @@ extension STLocationManager {
 
     private func processLocation(_ location: CLLocation) {
         let age = Date().timeIntervalSince(location.timestamp)
-        // 位置数据过旧时跳过，等待更新的数据或超时兜底
         guard age < self.currentConfig.maximumAge else { return }
         // CLGeocoder 不支持并发，跳过已在进行中时收到的重复更新
         guard !self.geocoder.isGeocoding else { return }
-        // 捕获当前世代号，用于检测 stop→start 竞态下的过期 geocoding 结果
         let capturedGeneration = self.requestGeneration
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+        let timestamp = location.timestamp
         self.geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
@@ -356,8 +342,8 @@ extension STLocationManager {
                 let locationInfo = STLocationInfo(
                     name: placemark.name,
                     country: placemark.country,
-                    latitude: location.coordinate.latitude,
-                    longitude: location.coordinate.longitude,
+                    latitude: latitude,
+                    longitude: longitude,
                     locality: placemark.locality,
                     subLocality: placemark.subLocality,
                     thoroughfare: placemark.thoroughfare,
@@ -365,7 +351,7 @@ extension STLocationManager {
                     isoCountryCode: placemark.isoCountryCode,
                     administrativeArea: placemark.administrativeArea,
                     postalCode: placemark.postalCode,
-                    timestamp: location.timestamp
+                    timestamp: timestamp
                 )
                 self.lastLocationInfo = locationInfo
                 self.lastLocationTime = Date()
@@ -376,10 +362,8 @@ extension STLocationManager {
 
     private func finishRequest(with result: Result<STLocationInfo, STLocationError>) {
         if self.isContinuousUpdating, case .success = result {
-            // 连续模式下成功：回调但保持 CLLocationManager 运行，等待下次位置推送
             self.locationCompletion?(result)
         } else {
-            // 单次模式，或连续模式下发生错误：停止一切并交付最终结果
             let completion = self.locationCompletion
             self.locationCompletion = nil
             self.isUpdating = false
@@ -391,10 +375,7 @@ extension STLocationManager {
     }
 }
 
-// MARK: - CLLocationManagerDelegate
-
 extension STLocationManager: CLLocationManagerDelegate {
-
     nonisolated public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         let status = manager.authorizationStatus
         Task { @MainActor [weak self] in
