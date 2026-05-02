@@ -8,6 +8,14 @@
 import UIKit
 import Combine
 
+/// 用于 objc_setAssociatedObject 的引用型 key，避免对可变 static var 取地址造成的未定义行为。
+private final class STAssociationKey {}
+
+@inline(__always)
+private func st_keyPointer(_ key: STAssociationKey) -> UnsafeRawPointer {
+    return UnsafeRawPointer(Unmanaged.passUnretained(key).toOpaque())
+}
+
 public enum STLayoutMode {
     case scroll     // UIScrollView（默认）
     case fixed      // 普通容器，不可滚动
@@ -29,13 +37,18 @@ open class STBaseView: UIView {
     
     /// scroll 模式使用的 UIScrollView。可通过 init(scrollView:) 在初始化时注入自定义实例。
     /// open 允许子类（含跨模块）override 此 getter（如将 collectionView 作为 scrollView 代理）。
-    open private(set) var scrollView: UIScrollView = STBaseView.makeDefaultScrollView()
+    open private(set) lazy var scrollView: UIScrollView = STBaseView.makeDefaultScrollView()
+    /// 标记 scrollView 是否由内部创建（用于判断是否允许 configureScrollBehavior 覆盖外观/滚动配置）。
+    private var _isInternallyCreatedScrollView: Bool = true
     /// contentView 是内容容器，子视图应添加到此视图。
     /// 在 .scroll 模式下位于 scrollView 内部；在 .fixed 模式下直接贴合 self。
     public private(set) lazy var contentView: UIView = self.makeContentView()
     
     private var _tableView: UITableView?
     private var _collectionView: UICollectionView?
+    /// 标记 _tableView 是否由 STBaseView 内部懒创建（true）还是外部注入（false），
+    /// 用于 st_tableViewStyle 判断是否允许销毁重建。
+    private var _isInternallyCreatedTableView: Bool = false
     public private(set) var tableViewStyle: UITableView.Style = .plain
 
     private var keyboardObserverTokens: [NSObjectProtocol] = []
@@ -63,6 +76,7 @@ open class STBaseView: UIView {
     public init(scrollView: UIScrollView) {
         super.init(frame: .zero)
         self.scrollView = scrollView
+        self._isInternallyCreatedScrollView = false
         self.setupBase()
     }
 
@@ -91,7 +105,10 @@ open class STBaseView: UIView {
     ///   - tableView: 自定义 UITableView，传 nil 则使用内部默认实例（仅 .table 模式生效）
     ///   - collectionView: 自定义 UICollectionView，传 nil 则使用内部默认实例（仅 .collection 模式生效）
     public func configure(layoutMode: STLayoutMode, scrollDirection: STScrollDirection = .vertical, tableView: UITableView? = nil, collectionView: UICollectionView? = nil) {
-        if let tv = tableView { self._tableView = tv }
+        if let tv = tableView {
+            self._tableView = tv
+            self._isInternallyCreatedTableView = false
+        }
         if let cv = collectionView { self._collectionView = cv }
         self.layoutMode = layoutMode
         self.scrollDirection = scrollDirection
@@ -234,6 +251,8 @@ open class STBaseView: UIView {
     }
 
     private func configureScrollBehavior() {
+        // 注入的外部 scrollView 保留使用者原配置，仅对内部默认实例进行定制。
+        guard self._isInternallyCreatedScrollView else { return }
         self.scrollView.alwaysBounceVertical = (self.scrollDirection == .vertical || self.scrollDirection == .both)
         self.scrollView.alwaysBounceHorizontal = (self.scrollDirection == .horizontal || self.scrollDirection == .both)
         self.scrollView.showsVerticalScrollIndicator = (self.scrollDirection == .vertical || self.scrollDirection == .both)
@@ -280,16 +299,19 @@ open class STBaseView: UIView {
 
     open override func safeAreaInsetsDidChange() {
         super.safeAreaInsetsDidChange()
+        // tableView / collectionView 使用 contentInsetAdjustmentBehavior = .never，
+        // 所以 safeArea 不会自动折进 adjustedContentInset，需要手动把底部 safeArea
+        // 写入 contentInset.bottom，否则内容会压到 home indicator。
+        // 同时若存在 STRefreshHeaderView / STLoadMoreFooterView，还要保留它们
+        // 已注入的额外占位（refreshing / loading / noMore 状态下 +height）。
         switch self.layoutMode {
         case .table:
             if let tv = self._tableView {
-                tv.contentInset.bottom = safeAreaInsets.bottom
-                tv.verticalScrollIndicatorInsets.bottom = safeAreaInsets.bottom
+                self.st_applyBaseSafeAreaInset(to: tv)
             }
         case .collection:
             if let cv = self._collectionView {
-                cv.contentInset.bottom = safeAreaInsets.bottom
-                cv.verticalScrollIndicatorInsets.bottom = safeAreaInsets.bottom
+                self.st_applyBaseSafeAreaInset(to: cv)
             }
         default:
             break
@@ -300,7 +322,7 @@ open class STBaseView: UIView {
         super.traitCollectionDidChange(previousTraitCollection)
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
         let currentStyle = self.traitCollection.userInterfaceStyle
-        guard previousStyle != currentStyle, previousStyle != .unspecified else { return }
+        guard previousStyle != currentStyle else { return }
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
         self.st_appearanceDidChange(resolvedStyle: style == .unspecified ? .light : style)
     }
@@ -359,7 +381,9 @@ open class STBaseView: UIView {
         guard self.layoutMode == .scroll else { return }
         let children = self.contentView.subviews
         guard let last = children.last else { return }
-        let found = (last.constraints + self.contentView.constraints + last.superview!.constraints).contains { c in
+        let superviewConstraints = last.superview?.constraints ?? []
+        let candidates = last.constraints + self.contentView.constraints + superviewConstraints
+        let found = candidates.contains { c in
             return (c.firstItem as? UIView) == last && (c.firstAttribute == .bottom) && (c.secondItem as? UIView) == self.contentView
         }
         if !found {
@@ -371,6 +395,7 @@ open class STBaseView: UIView {
     private var tableView: UITableView {
         if _tableView == nil {
             _tableView = self.makeTableView(self.tableViewStyle)
+            _isInternallyCreatedTableView = true
         }
         return _tableView!
     }
@@ -420,21 +445,47 @@ open class STBaseView: UIView {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .clear
+        collectionView.contentInsetAdjustmentBehavior = .never
         return collectionView
     }
 }
 
 extension STBaseView {
+    /// 设置 layoutMode。注意：仅记录模式，需要调用 st_done() 或 configure(...) 才会真正安装结构。
     @discardableResult
     public func st_layoutMode(_ mode: STLayoutMode) -> Self {
         self.layoutMode = mode
         return self
     }
 
-    /// 设置 table 模式的 style（仅影响内部默认创建的 tableView，注入自定义 tableView 时无效）
+    /// 设置 table 模式的 style。
+    /// - 如果尚未实例化内部默认 tableView，则仅记录 style 等待后续创建。
+    /// - 如果当前正在 .table 模式且已存在内部默认实例，则销毁旧实例并用新 style 重建。
+    /// - 若外部注入过自定义 tableView，此方法不会影响已注入实例。
+    ///
+    /// ⚠️ 重建 tableView 会丢弃所有已在旧 table 上配置的状态：delegate / dataSource /
+    /// cell 注册 / contentOffset / 以及已挂载的 pull-to-refresh / load-more 控件。
+    /// 重建后调用方需要自行重新配置。推荐在创建 tableView 之前一次性确定 style。
     @discardableResult
     public func st_tableViewStyle(_ style: UITableView.Style) -> Self {
+        guard self.tableViewStyle != style else { return self }
         self.tableViewStyle = style
+        // 若已经存在由内部创建的 tableView，则销毁重建以让新 style 生效
+        if self._tableView != nil, self._isInternallyCreatedTableView {
+            #if DEBUG
+            assertionFailure("STBaseView.st_tableViewStyle(_:) called after the internal tableView was created. All table configuration (delegate/dataSource/cell registration/pull-to-refresh/load-more) will be lost and must be re-applied.")
+            #endif
+            // 先拆除挂在旧 table 上的刷新控件，避免 KVO token 继续持有旧 scrollView（泄漏），
+            // 并清掉 self 上的 associated object，防止后续 st_beginRefreshing / st_endLoadMore
+            // 作用到已脱离视图层级的旧实例上。
+            self.st_removePullToRefresh()
+            self.st_removeLoadMore()
+            self._tableView?.removeFromSuperview()
+            self._tableView = nil
+            if self.layoutMode == .table {
+                self.installLayoutStructure()
+            }
+        }
         return self
     }
 
@@ -442,6 +493,7 @@ extension STBaseView {
     @discardableResult
     public func st_tableView(_ tableView: UITableView) -> Self {
         self._tableView = tableView
+        self._isInternallyCreatedTableView = false
         return self
     }
 
@@ -452,6 +504,7 @@ extension STBaseView {
         return self
     }
 
+    /// 设置滚动方向。仅 .scroll 模式下 configureScrollBehavior 会应用；需要调用 st_done() 生效。
     @discardableResult
     public func st_scrollDirection(_ direction: STScrollDirection) -> Self {
         self.scrollDirection = direction
@@ -479,10 +532,21 @@ extension STBaseView {
 
 // MARK: - Section System
 open class STSection: UIView {
-    
-    public var inset: UIEdgeInsets
-        public var spacing: CGFloat
-        private let stackView: UIStackView
+
+    /// 直接赋值即可动态调整（通过 `didSet` 更新约束，不会产生约束泄漏）。
+    public var inset: UIEdgeInsets {
+        didSet { self.applyInsetToConstraints() }
+    }
+    /// 直接赋值即可动态调整。
+    public var spacing: CGFloat {
+        didSet { self.stackView.spacing = self.spacing }
+    }
+    private let stackView: UIStackView
+    // 持有 stackView 的 4 条边约束引用，便于改 inset 时直接改 constant，避免约束泄漏
+    private var topConstraint: NSLayoutConstraint!
+    private var leadingConstraint: NSLayoutConstraint!
+    private var trailingConstraint: NSLayoutConstraint!
+    private var bottomConstraint: NSLayoutConstraint!
 
         public init(inset: UIEdgeInsets = .zero, spacing: CGFloat = 0) {
             self.inset = inset
@@ -509,12 +573,11 @@ open class STSection: UIView {
             self.stackView.distribution = .fill
             self.stackView.translatesAutoresizingMaskIntoConstraints = false
             self.addSubview(self.stackView)
-            NSLayoutConstraint.activate([
-                self.stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: self.inset.top),
-                self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.inset.left),
-                self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.inset.right),
-                self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.inset.bottom)
-            ])
+            self.topConstraint = self.stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: self.inset.top)
+            self.leadingConstraint = self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.inset.left)
+            self.trailingConstraint = self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.inset.right)
+            self.bottomConstraint = self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.inset.bottom)
+            NSLayoutConstraint.activate([self.topConstraint, self.leadingConstraint, self.trailingConstraint, self.bottomConstraint])
         }
 
         /// Add multiple views (arranged) to this section (chainable)
@@ -538,45 +601,64 @@ open class STSection: UIView {
         /// Clear all arranged subviews
         @discardableResult
         public func clear() -> Self {
-            for v in self.stackView.arrangedSubviews {
+            let snapshot = self.stackView.arrangedSubviews
+            for v in snapshot {
                 self.stackView.removeArrangedSubview(v)
                 v.removeFromSuperview()
             }
             return self
         }
 
-        /// Update spacing (dynamically)
+        /// Update spacing (chainable) — equivalent to directly assigning `self.spacing`.
         @discardableResult
         public func setSpacing(_ spacing: CGFloat) -> Self {
             self.spacing = spacing
-            self.stackView.spacing = spacing
             return self
         }
 
-        /// Update inset (dynamically) — updates constraints by removing and readding
+        /// Update inset (chainable) — equivalent to directly assigning `self.inset`.
+        /// The setter tunes the 4 retained constraints, so there's no constraint leak.
         @discardableResult
         public func setInset(_ inset: UIEdgeInsets) -> Self {
             self.inset = inset
-            NSLayoutConstraint.deactivate(self.constraints.filter { constraint in
-                return constraint.firstItem as? UIView == self.stackView || constraint.secondItem as? UIView == self.stackView
-            })
-            NSLayoutConstraint.activate([
-                self.stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: self.inset.top),
-                self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.inset.left),
-                self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.inset.right),
-                self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.inset.bottom)
-            ])
             return self
+        }
+
+        private func applyInsetToConstraints() {
+            self.topConstraint?.constant = self.inset.top
+            self.leadingConstraint?.constant = self.inset.left
+            self.trailingConstraint?.constant = -self.inset.right
+            self.bottomConstraint?.constant = -self.inset.bottom
         }
 }
 
 extension STBaseView {
-    public func st_addSection(_ section: STSection) {
+
+    /// 用于跟踪每个 section 与 container.bottom 之间"末尾"约束，便于添加新 section 时拆除并复用为 inter-section 约束。
+    private static let sectionBottomConstraintKey = STAssociationKey()
+
+    private var st_lastSectionBottomConstraint: NSLayoutConstraint? {
+        get { objc_getAssociatedObject(self, st_keyPointer(Self.sectionBottomConstraintKey)) as? NSLayoutConstraint }
+        set { objc_setAssociatedObject(self, st_keyPointer(Self.sectionBottomConstraintKey), newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+
+    /// 将一个 section 添加到 contentContainer。会自动维护链尾的 bottom 约束，
+    /// 在 .scroll 模式下保证 contentView 高度可被正确计算。
+    /// - Parameter interSectionSpacing: 与上一个 section 的间距（默认使用 section.spacing 的语义已被废弃，建议显式指定）。
+    public func st_addSection(_ section: STSection, interSectionSpacing: CGFloat? = nil) {
         let container = self.contentContainer()
         container.addSubview(section)
         section.translatesAutoresizingMaskIntoConstraints = false
+
+        // 移除旧的"末尾 -> container.bottom"约束（若存在）
+        if let oldBottom = self.st_lastSectionBottomConstraint {
+            oldBottom.isActive = false
+            self.st_lastSectionBottomConstraint = nil
+        }
+
+        let topSpacing = interSectionSpacing ?? section.spacing
         if let last = container.subviews.dropLast().last {
-            section.topAnchor.constraint(equalTo: last.bottomAnchor, constant: section.spacing).isActive = true
+            section.topAnchor.constraint(equalTo: last.bottomAnchor, constant: topSpacing).isActive = true
         } else {
             section.topAnchor.constraint(equalTo: container.topAnchor, constant: section.inset.top).isActive = true
         }
@@ -584,17 +666,34 @@ extension STBaseView {
             section.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: section.inset.left),
             section.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -section.inset.right)
         ])
+
+        // 在 .scroll 模式下，必须建立 section.bottom -> container.bottom 的约束才能算出 contentSize。
+        // 在 .fixed 模式下也建立此约束以保证布局完整；在 table/collection 容器下不强制。
+        if self.layoutMode == .scroll || self.layoutMode == .fixed {
+            let bottom = section.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -section.inset.bottom)
+            bottom.priority = .defaultHigh
+            bottom.isActive = true
+            self.st_lastSectionBottomConstraint = bottom
+        }
+
         self.setNeedsLayout()
     }
 }
 
 // MARK: - State Pages (loading / empty / error)
+/// 状态视图默认文案配置。使用者可在 App 启动时修改以支持国际化或自定义文本。
+public enum STStatePageDefaults {
+    public static var loadingText: String = "Loading…"
+    public static var emptyText: String = "No Data"
+    public static var errorText: String = "Error"
+}
+
 extension STBaseView {
-    
-    private struct StateKeys {
-        static var loading: UInt8 = 0
-        static var empty: UInt8 = 0
-        static var error: UInt8 = 0
+
+    private enum StateKeys {
+        static let loading = STAssociationKey()
+        static let empty = STAssociationKey()
+        static let error = STAssociationKey()
     }
 
     private func st_makeStateView(_ text: String) -> UIView {
@@ -613,9 +712,7 @@ extension STBaseView {
         return v
     }
 
-    public func st_showLoading() {
-        self.st_hideAllStates()
-        let v = self.st_makeStateView("Loading…")
+    private func st_installStateView(_ v: UIView, key: STAssociationKey) {
         self.addSubview(v)
         NSLayoutConstraint.activate([
             v.topAnchor.constraint(equalTo: self.topAnchor),
@@ -623,70 +720,96 @@ extension STBaseView {
             v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
         ])
-        objc_setAssociatedObject(self, &StateKeys.loading, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(self, st_keyPointer(key), v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
-    public func st_showEmpty(_ text: String = "No Data") {
+    public func st_showLoading(_ text: String? = nil) {
         self.st_hideAllStates()
-        let v = self.st_makeStateView(text)
-        self.addSubview(v)
-        NSLayoutConstraint.activate([
-            v.topAnchor.constraint(equalTo: self.topAnchor),
-            v.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            v.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            v.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-        ])
-        objc_setAssociatedObject(self, &StateKeys.empty, v, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        let v = self.st_makeStateView(text ?? STStatePageDefaults.loadingText)
+        self.st_installStateView(v, key: StateKeys.loading)
+    }
+
+    public func st_showEmpty(_ text: String? = nil) {
+        self.st_hideAllStates()
+        let v = self.st_makeStateView(text ?? STStatePageDefaults.emptyText)
+        self.st_installStateView(v, key: StateKeys.empty)
+    }
+
+    /// 显示错误状态视图。
+    public func st_showError(_ text: String? = nil) {
+        self.st_hideAllStates()
+        let v = self.st_makeStateView(text ?? STStatePageDefaults.errorText)
+        self.st_installStateView(v, key: StateKeys.error)
     }
 
     public func st_hideAllStates() {
-        self.st_removeStateView(with: &StateKeys.loading)
-        self.st_removeStateView(with: &StateKeys.empty)
-        self.st_removeStateView(with: &StateKeys.error)
+        self.st_removeStateView(with: StateKeys.loading)
+        self.st_removeStateView(with: StateKeys.empty)
+        self.st_removeStateView(with: StateKeys.error)
     }
 
-    private func st_removeStateView(with key: UnsafeRawPointer) {
-        if let v = objc_getAssociatedObject(self, key) as? UIView {
+    private func st_removeStateView(with key: STAssociationKey) {
+        let ptr = st_keyPointer(key)
+        if let v = objc_getAssociatedObject(self, ptr) as? UIView {
             v.removeFromSuperview()
-            objc_setAssociatedObject(self, key, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, ptr, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }
 
 // MARK: - Dynamic Gradient Navigation Bar Support
 open class STGradientNavigationBar: UIView {
-    
-    public var startColor: UIColor = .clear { didSet { self.setNeedsLayout() } }
-    public var endColor: UIColor = .black { didSet { self.setNeedsLayout() } }
+
+    public var startColor: UIColor = .clear { didSet { self.updateGradientColors() } }
+    public var endColor: UIColor = .black { didSet { self.updateGradientColors() } }
     public var height: CGFloat = 88 { didSet { self.invalidateIntrinsicContentSize() } }
 
     private let gradientLayer = CAGradientLayer()
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
+        self.setupGradient()
+    }
+    required public init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.setupGradient()
+    }
+
+    private func setupGradient() {
+        self.gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        self.gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        self.updateGradientColors()
         self.layer.addSublayer(self.gradientLayer)
     }
-    required public init?(coder: NSCoder) { super.init(coder: coder) }
+
+    private func updateGradientColors() {
+        self.gradientLayer.colors = [self.startColor.cgColor, self.endColor.cgColor]
+    }
 
     public override func layoutSubviews() {
         super.layoutSubviews()
+        // frame 更新仍需每次布局同步；颜色/起止点已在属性变化/初始化时设置。
         self.gradientLayer.frame = self.bounds
-        self.gradientLayer.colors = [self.startColor.cgColor, self.endColor.cgColor]
-        self.gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
-        self.gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
     }
 
     public override var intrinsicContentSize: CGSize {
         return CGSize(width: UIView.noIntrinsicMetric, height: self.height)
     }
+
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        // 动态色适配：当 trait 变化导致 UIColor -> cgColor 对应分辨率变化时需重算
+        if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            self.updateGradientColors()
+        }
+    }
 }
 
 // MARK: - Refresh & Load More
 
-private struct STRefreshKeys {
-    // 值本身无意义，仅用内存地址作为 objc_setAssociatedObject 的 key
-    static var header: UInt8 = 0
-    static var footer: UInt8 = 0
+private enum STRefreshKeys {
+    static let header = STAssociationKey()
+    static let footer = STAssociationKey()
 }
 
 extension STBaseView {
@@ -704,6 +827,28 @@ extension STBaseView {
         }
     }
 
+    /// safeArea 变化时通知刷新控件重新校准基准 inset。
+    fileprivate func st_notifyRefreshControlsSafeAreaChanged() {
+        if let header = objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.header)) as? STRefreshHeaderView {
+            header.safeAreaInsetsDidChangeFromHost()
+        }
+        if let footer = objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.footer)) as? STLoadMoreFooterView {
+            footer.safeAreaInsetsDidChangeFromHost()
+        }
+    }
+
+    /// 把底部 safeArea 写入 contentInset.bottom（同时叠加刷新控件已注入的增量），
+    /// 并把 scroll indicator 底部也对齐 safeArea；最后通知刷新控件以新基准重校准。
+    /// 仅用于 .table / .collection 模式，因为这两种内部创建的 scrollView 使用
+    /// contentInsetAdjustmentBehavior = .never，不会自动把 safeArea 折进来。
+    fileprivate func st_applyBaseSafeAreaInset(to sv: UIScrollView) {
+        let baseBottom = self.safeAreaInsets.bottom
+        let footerExtra = (objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.footer)) as? STLoadMoreFooterView)?.injectedInsetBottom ?? 0
+        sv.contentInset.bottom = baseBottom + footerExtra
+        sv.verticalScrollIndicatorInsets.bottom = baseBottom
+        self.st_notifyRefreshControlsSafeAreaChanged()
+    }
+
     // MARK: Pull-to-Refresh
 
     /// 添加下拉刷新。必须在 configure(layoutMode: .table/.collection) 之后调用。
@@ -715,24 +860,25 @@ extension STBaseView {
         self.st_removePullToRefresh()
         let header = STRefreshHeaderView(content: content)
         header.attach(to: sv, action: action)
-        objc_setAssociatedObject(self, &STRefreshKeys.header, header, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(self, st_keyPointer(STRefreshKeys.header), header, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
     /// 结束刷新动画，恢复 contentInset。
     public func st_endRefreshing() {
-        (objc_getAssociatedObject(self, &STRefreshKeys.header) as? STRefreshHeaderView)?.endRefreshing()
+        (objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.header)) as? STRefreshHeaderView)?.endRefreshing()
     }
 
     /// 程序化触发下拉刷新（如首次进入页面自动加载）。
     public func st_beginRefreshing() {
-        (objc_getAssociatedObject(self, &STRefreshKeys.header) as? STRefreshHeaderView)?.beginRefreshing()
+        (objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.header)) as? STRefreshHeaderView)?.beginRefreshing()
     }
 
     /// 移除下拉刷新控件。
     public func st_removePullToRefresh() {
-        if let header = objc_getAssociatedObject(self, &STRefreshKeys.header) as? STRefreshHeaderView {
+        let ptr = st_keyPointer(STRefreshKeys.header)
+        if let header = objc_getAssociatedObject(self, ptr) as? STRefreshHeaderView {
             header.removeFromSuperview()
-            objc_setAssociatedObject(self, &STRefreshKeys.header, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, ptr, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 
@@ -747,24 +893,25 @@ extension STBaseView {
         self.st_removeLoadMore()
         let footer = STLoadMoreFooterView(content: content)
         footer.attach(to: sv, action: action)
-        objc_setAssociatedObject(self, &STRefreshKeys.footer, footer, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        objc_setAssociatedObject(self, st_keyPointer(STRefreshKeys.footer), footer, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
     /// 结束加载动画。`hasMore = false` 时显示"无更多数据"并锁定，不再自动触发。
     public func st_endLoadMore(hasMore: Bool = true) {
-        (objc_getAssociatedObject(self, &STRefreshKeys.footer) as? STLoadMoreFooterView)?.endLoading(hasMore: hasMore)
+        (objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.footer)) as? STLoadMoreFooterView)?.endLoading(hasMore: hasMore)
     }
 
     /// 重置加载更多为初始 idle 状态（换页或重新请求时调用）。
     public func st_resetLoadMore() {
-        (objc_getAssociatedObject(self, &STRefreshKeys.footer) as? STLoadMoreFooterView)?.resetToIdle()
+        (objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.footer)) as? STLoadMoreFooterView)?.resetToIdle()
     }
 
     /// 移除上拉加载更多控件。
     public func st_removeLoadMore() {
-        if let footer = objc_getAssociatedObject(self, &STRefreshKeys.footer) as? STLoadMoreFooterView {
+        let ptr = st_keyPointer(STRefreshKeys.footer)
+        if let footer = objc_getAssociatedObject(self, ptr) as? STLoadMoreFooterView {
             footer.removeFromSuperview()
-            objc_setAssociatedObject(self, &STRefreshKeys.footer, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, ptr, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }
