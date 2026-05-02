@@ -58,11 +58,6 @@ let package = Package(
         .target(
             name: "STMedia",
             path: "Sources/STMedia"
-        ),
-        .testTarget(
-            name: "STLocationTests",
-            dependencies: ["STLocation"],
-            path: "Tests/STLocationTests"
         )
     ],
     swiftLanguageVersions: [.v5]
