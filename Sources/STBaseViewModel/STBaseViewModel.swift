@@ -7,10 +7,11 @@
 
 import UIKit
 import Combine
+import CryptoKit
 import Foundation
 
 // MARK: - 错误类型枚举
-public enum STBaseError: LocalizedError {
+public enum STBaseError: LocalizedError, Equatable {
     case success
     case networkError(String)
     case dataError(String)
@@ -19,7 +20,7 @@ public enum STBaseError: LocalizedError {
     case origin(error: Error)
     case originErrorDescription(reason: String)
     case unknown
-    
+
     public var errorDescription: String? {
         switch self {
         case .success:
@@ -40,7 +41,7 @@ public enum STBaseError: LocalizedError {
             return "未知错误"
         }
     }
-    
+
     public var errorCode: Int {
         switch self {
         case .success:
@@ -61,10 +62,29 @@ public enum STBaseError: LocalizedError {
             return -9999
         }
     }
+
+    public static func == (lhs: STBaseError, rhs: STBaseError) -> Bool {
+        switch (lhs, rhs) {
+        case (.success, .success),
+             (.unknown, .unknown):
+            return true
+        case (.networkError(let l), .networkError(let r)),
+             (.dataError(let l), .dataError(let r)),
+             (.validationError(let l), .validationError(let r)),
+             (.originErrorDescription(let l), .originErrorDescription(let r)):
+            return l == r
+        case (.businessError(let lc, let lm), .businessError(let rc, let rm)):
+            return lc == rc && lm == rm
+        case (.origin(let l), .origin(let r)):
+            return (l as NSError) == (r as NSError)
+        default:
+            return false
+        }
+    }
 }
 
 // MARK: - 加载状态枚举
-public enum STLoadingState {
+public enum STLoadingState: Equatable {
     case idle
     case loading
     case loaded
@@ -73,7 +93,7 @@ public enum STLoadingState {
 }
 
 // MARK: - 刷新状态枚举
-public enum STRefreshState {
+public enum STRefreshState: Equatable {
     case idle
     case refreshing
     case noMoreData
@@ -82,17 +102,17 @@ public enum STRefreshState {
 
 // MARK: - 缓存配置
 public struct STCacheConfig {
-    var enableCache: Bool = false
-    var cacheKey: String = ""
-    var cacheExpiration: TimeInterval = 300 // 5分钟
-    var cachePolicy: STCachePolicy = .memory
-    
-    public enum STCachePolicy {
+    public var enableCache: Bool
+    public var cacheKey: String
+    public var cacheExpiration: TimeInterval
+    public var cachePolicy: STCachePolicy
+
+    public enum STCachePolicy: Equatable {
         case memory
         case disk
         case both
     }
-    
+
     public init(enableCache: Bool = false,
                 cacheKey: String = "",
                 cacheExpiration: TimeInterval = 300,
@@ -105,41 +125,50 @@ public struct STCacheConfig {
 }
 
 open class STBaseViewModel: NSObject {
-    
-    public var loadingState = CurrentValueSubject<STLoadingState, Never>(.idle)
-    public var refreshState = CurrentValueSubject<STRefreshState, Never>(.idle)
-    public var error = PassthroughSubject<STBaseError, Never>()
-    public var dataUpdated = PassthroughSubject<Void, Never>()
+
+    public let loadingState = CurrentValueSubject<STLoadingState, Never>(.idle)
+    public let refreshState = CurrentValueSubject<STRefreshState, Never>(.idle)
+    public let errorPublisher = PassthroughSubject<STBaseError, Never>()
+    public let dataUpdated = PassthroughSubject<Void, Never>()
     public var requestConfig = STRequestConfig()
     public var cacheConfig = STCacheConfig()
     public var httpSession = STHTTPSession.shared
     public var requestHeaders = STRequestHeaders()
-    
-    public var cancellables = Set<AnyCancellable>()
-    private var cache = NSCache<NSString, AnyObject>()
-    private var retryCount = 0
-    
+    public var jsonDecoder: JSONDecoder = JSONDecoder()
+    public var jsonEncoder: JSONEncoder = JSONEncoder()
+
+    public private(set) var cancellables = Set<AnyCancellable>()
+    private let cache = NSCache<NSString, STMemoryCacheEntry>()
+    private let stateLock = NSLock()
+    private var inflightRequests = [STDataRequest]()
+
     deinit {
-        self.cancellables.removeAll()
-        self.cache.removeAllObjects()
         STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
-    
+
     public override init() {
         super.init()
         self.st_setupBindings()
     }
-    
+
     private func st_setupBindings() {
-        self.loadingState.sink { [weak self] state in
-            self?.st_handleLoadingStateChange(state)
-        }.store(in: &self.cancellables)
-        
-        self.refreshState.sink { [weak self] state in
-            self?.st_handleRefreshStateChange(state)
-        }.store(in: &self.cancellables)
+        self.loadingState
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.st_handleLoadingStateChange(state)
+            }
+            .store(in: &self.cancellables)
+
+        self.refreshState
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                self?.st_handleRefreshStateChange(state)
+            }
+            .store(in: &self.cancellables)
     }
-    
+
     private func st_handleLoadingStateChange(_ state: STLoadingState) {
         switch state {
         case .loading:
@@ -154,7 +183,7 @@ open class STBaseViewModel: NSObject {
             break
         }
     }
-    
+
     private func st_handleRefreshStateChange(_ state: STRefreshState) {
         switch state {
         case .refreshing:
@@ -167,45 +196,26 @@ open class STBaseViewModel: NSObject {
             break
         }
     }
-    
+
     // MARK: - 可重写的方法
-    open func st_onLoading() {
-        // 子类可以重写此方法
-    }
-    
-    open func st_onLoaded() {
-        // 子类可以重写此方法
-    }
-    
+    open func st_onLoading() {}
+    open func st_onLoaded() {}
     open func st_onFailed(_ error: STBaseError) {
-        // 子类可以重写此方法
-        self.error.send(error)
+        self.errorPublisher.send(error)
     }
-    
-    open func st_onEmpty() {
-        // 子类可以重写此方法
-    }
-    
-    open func st_onRefreshing() {
-        // 子类可以重写此方法
-    }
-    
-    open func st_onNoMoreData() {
-        // 子类可以重写此方法
-    }
-    
+    open func st_onEmpty() {}
+    open func st_onRefreshing() {}
+    open func st_onNoMoreData() {}
     open func st_onRefreshFailed(_ error: STBaseError) {
-        // 子类可以重写此方法
-        self.error.send(error)
+        self.errorPublisher.send(error)
     }
-    
+
     // MARK: - 网络请求核心方法
     public func st_requestPublisher<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
         return self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
-        .prefix(1)
         .tryMap { [weak self] response -> T in
             guard let self = self else {
                 throw STBaseError.unknown
@@ -231,37 +241,62 @@ open class STBaseViewModel: NSObject {
                 guard let self = self else { return }
                 if case .failure(let error) = completion {
                     self.loadingState.send(.failed(error))
-                    if self.retryCount < self.requestConfig.retryCount {
-                        self.retryCount += 1
-                    }
                 }
             }
         ).eraseToAnyPublisher()
     }
 
     public func st_request<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.st_requestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType, responseType: responseType)
+        var token: AnyCancellable?
+        token = self.st_requestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType, responseType: responseType)
         .sink(
-            receiveCompletion: { state in
+            receiveCompletion: { [weak self] state in
                 if case .failure(let error) = state {
                     completion(.failure(error))
+                }
+                if let token = token {
+                    self?.st_removeCancellable(token)
                 }
             },
             receiveValue: { value in
                 completion(.success(value))
             }
-        ).store(in: &self.cancellables)
+        )
+        if let token = token {
+            self.st_storeCancellable(token)
+        }
     }
 
     open func st_dispatchRequestPublisher(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType) -> AnyPublisher<STHTTPResponse, Never> {
-        self.httpSession.request(url,method: method, parameters: parameters, encoding: encodingType, headers: self.requestHeaders, requestConfig: self.requestConfig).responsePublisher.eraseToAnyPublisher()
+        let request = self.httpSession.request(url, method: method, parameters: parameters, encoding: encodingType, headers: self.requestHeaders, requestConfig: self.requestConfig)
+        self.st_trackInflight(request)
+        return request.responsePublisher
+            .handleEvents(
+                receiveCompletion: { [weak self] _ in
+                    self?.st_untrackInflight(request)
+                },
+                receiveCancel: { [weak self] in
+                    self?.st_untrackInflight(request)
+                }
+            )
+            .eraseToAnyPublisher()
     }
 
     open func st_dispatchRequest(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType, completion: @escaping (STHTTPResponse) -> Void) {
-        self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType).sink(receiveValue: completion).store(in: &self.cancellables)
+        var token: AnyCancellable?
+        token = self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
+            .sink { [weak self] response in
+                completion(response)
+                if let token = token {
+                    self?.st_removeCancellable(token)
+                }
+            }
+        if let token = token {
+            self.st_storeCancellable(token)
+        }
     }
 
-    public func st_getPublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_getPublisher<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .get, parameters: parameters, responseType: responseType)
     }
 
@@ -269,40 +304,41 @@ open class STBaseViewModel: NSObject {
         self.st_requestPublisher(url: url, method: .post, parameters: parameters, responseType: responseType)
     }
 
-    public func st_putPublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_putPublisher<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .put, parameters: parameters, responseType: responseType)
     }
 
-    public func st_deletePublisher<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+    public func st_deletePublisher<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .delete, parameters: parameters, responseType: responseType)
     }
-    
+
     public func st_get<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .get, parameters: parameters, responseType: responseType, completion: completion)
     }
-    
+
     public func st_post<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .post, parameters: parameters, responseType: responseType, completion: completion)
     }
-    
+
     public func st_put<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .put, parameters: parameters, responseType: responseType, completion: completion)
     }
-    
-    public func st_delete<T: Codable>(url: String,parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
+
+    public func st_delete<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.st_request(url: url, method: .delete, parameters: parameters, responseType: responseType, completion: completion)
     }
-    
+
+    /// 直接基于已构造好的 URLRequest 发起请求；保留原始 headers / body / 超时等定制
     public func st_request<T: Codable>(_ request: URLRequest, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         guard let url = request.url?.absoluteString else {
             completion(.failure(.dataError("无效的 URL")))
             return
         }
         let method = STHTTPMethod(rawValue: request.httpMethod ?? "GET") ?? .get
-        let parameters = st_extractParameters(from: request)
-        self.st_request(url: url,method: method, parameters: parameters, responseType: responseType, completion: completion)
+        let parameters = self.st_extractParameters(from: request)
+        self.st_request(url: url, method: method, parameters: parameters, responseType: responseType, completion: completion)
     }
-    
+
     // MARK: - 参数提取（用于 URLRequest）
     private func st_extractParameters(from request: URLRequest) -> [String: Any]? {
         if let httpMethod = request.httpMethod, httpMethod.uppercased() == "GET" {
@@ -313,7 +349,7 @@ open class STBaseViewModel: NSObject {
         }
         return nil
     }
-    
+
     private func st_extractQueryParameters(from url: URL?) -> [String: Any]? {
         guard let url = url,
               let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
@@ -326,40 +362,40 @@ open class STBaseViewModel: NSObject {
         }
         return parameters.isEmpty ? nil : parameters
     }
-    
+
     private func st_extractBodyParameters(from data: Data) -> [String: Any]? {
-        do {
-            let json = try JSONSerialization.jsonObject(with: data)
-            return json as? [String: Any]
-        } catch {
-            if let string = String(data: data, encoding: .utf8) {
-                return self.st_parseFormData(string)
-            }
+        if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            return json
         }
-        return nil
+        guard let string = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+        return self.st_parseFormData(string)
     }
-    
+
     private func st_parseFormData(_ formString: String) -> [String: Any]? {
         let pairs = formString.components(separatedBy: "&")
         var parameters: [String: Any] = [:]
         for pair in pairs {
             let components = pair.components(separatedBy: "=")
             if components.count == 2 {
-                let key = components[0].removingPercentEncoding ?? components[0]
-                let value = components[1].removingPercentEncoding ?? components[1]
+                let rawKey = components[0].replacingOccurrences(of: "+", with: " ")
+                let rawValue = components[1].replacingOccurrences(of: "+", with: " ")
+                let key = rawKey.removingPercentEncoding ?? rawKey
+                let value = rawValue.removingPercentEncoding ?? rawValue
                 parameters[key] = value
             }
         }
         return parameters.isEmpty ? nil : parameters
     }
-    
+
     // MARK: - 响应处理
     private func st_decodeResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> Result<T, STBaseError> {
         guard let data = httpResponse.data, !data.isEmpty else {
             return .failure(.dataError("响应数据为空"))
         }
         do {
-            return .success(try JSONDecoder().decode(responseType, from: data))
+            return .success(try self.jsonDecoder.decode(responseType, from: data))
         } catch DecodingError.keyNotFound(let key, let context) {
             let message = "JSON解析失败：缺少必需的字段 '\(key.stringValue)'，路径：\(context.codingPath.map { $0.stringValue }.joined(separator: "."))"
             self.st_logDecodeError("keyNotFound", message: message, data: data)
@@ -390,7 +426,7 @@ open class STBaseViewModel: NSObject {
         }
         STLog(log)
     }
-    
+
     private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
         let result = self.st_resultFromHTTPResponse(httpResponse, responseType: responseType)
         switch result {
@@ -407,7 +443,7 @@ open class STBaseViewModel: NSObject {
         }
         return .failure(self.st_convertHTTPError(httpResponse.error))
     }
-    
+
     private func st_convertHTTPError(_ error: Error?) -> STBaseError {
         if let httpError = error as? STHTTPError {
             switch httpError {
@@ -432,106 +468,146 @@ open class STBaseViewModel: NSObject {
             return STBaseError.unknown
         }
     }
-    
+
     private func st_handleSuccess<T>(_ result: T, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.loadingState.send(.loaded)
         completion(.success(result))
         self.dataUpdated.send()
     }
-    
+
     private func st_handleError<T>(_ error: STBaseError, completion: @escaping (Result<T, STBaseError>) -> Void) {
         self.loadingState.send(.failed(error))
         completion(.failure(error))
-        if self.retryCount < self.requestConfig.retryCount {
-            self.retryCount += 1
-        }
     }
-    
+
     // MARK: - 缓存管理
-    public func st_setCache(_ object: Any, forKey key: String) {
-        let cacheKey = NSString(string: key)
-        self.cache.setObject(object as AnyObject, forKey: cacheKey)
+    /// 写入缓存。需要 `cacheConfig.enableCache == true` 且 key 非空。
+    public func st_setCache<T: Codable>(_ object: T, forKey key: String) {
+        guard self.cacheConfig.enableCache, !key.isEmpty else { return }
+        guard let data = self.st_encodeCachePayload(object) else { return }
+
+        let entry = STMemoryCacheEntry(data: data, expiration: Date().addingTimeInterval(self.cacheConfig.cacheExpiration))
+        self.cache.setObject(entry, forKey: NSString(string: key))
+
         if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
-            self.st_saveToDisk(object: object, forKey: key)
+            self.st_saveToDisk(data: data, expiration: entry.expiration, forKey: key)
         }
     }
-    
-    public func st_getCache(forKey key: String) -> Any? {
-        let cacheKey = NSString(string: key)
-        if let cachedObject = self.cache.object(forKey: cacheKey) {
-            return cachedObject
+
+    /// 读取缓存（解码为指定类型），过期或不存在返回 nil。
+    public func st_getCache<T: Codable>(forKey key: String, as type: T.Type) -> T? {
+        guard self.cacheConfig.enableCache, !key.isEmpty else { return nil }
+        let nsKey = NSString(string: key)
+
+        if let entry = self.cache.object(forKey: nsKey) {
+            if entry.expiration > Date() {
+                return self.st_decodeCachePayload(entry.data, as: type)
+            }
+            self.cache.removeObject(forKey: nsKey)
         }
-        if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
-            return self.st_loadFromDisk(forKey: key)
+
+        if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both,
+           let payload = self.st_loadFromDisk(forKey: key) {
+            if payload.expiration > Date() {
+                self.cache.setObject(STMemoryCacheEntry(data: payload.data, expiration: payload.expiration), forKey: nsKey)
+                return self.st_decodeCachePayload(payload.data, as: type)
+            }
+            self.st_removeFromDisk(forKey: key)
         }
         return nil
     }
-    
+
     public func st_removeCache(forKey key: String) {
-        let cacheKey = NSString(string: key)
-        self.cache.removeObject(forKey: cacheKey)
+        guard !key.isEmpty else { return }
+        self.cache.removeObject(forKey: NSString(string: key))
         if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
             self.st_removeFromDisk(forKey: key)
         }
     }
-    
+
     public func st_clearCache() {
         self.cache.removeAllObjects()
         if self.cacheConfig.cachePolicy == .disk || self.cacheConfig.cachePolicy == .both {
             self.st_clearDiskCache()
         }
     }
-    
-    // MARK: - 磁盘缓存
-    private func st_saveToDisk(object: Any, forKey key: String) {
-        guard let data = try? JSONSerialization.data(withJSONObject: object) else { return }
-        let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-        let fileURL = cacheDirectory?.appendingPathComponent("\(key).cache")
-        if let fileURL = fileURL {
-            try? data.write(to: fileURL)
-        }
-    }
-    
-    private func st_loadFromDisk(forKey key: String) -> Any? {
-        let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-        let fileURL = cacheDirectory?.appendingPathComponent("\(key).cache")
-        guard let fileURL = fileURL,
-              let data = try? Data(contentsOf: fileURL),
-              let object = try? JSONSerialization.jsonObject(with: data) else {
+
+    private func st_encodeCachePayload<T: Codable>(_ object: T) -> Data? {
+        do {
+            return try self.jsonEncoder.encode(object)
+        } catch {
+            STLog("[STBaseViewModel] 缓存编码失败: \(error.localizedDescription)")
             return nil
         }
-        return object
     }
-    
-    private func st_removeFromDisk(forKey key: String) {
-        let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-        let fileURL = cacheDirectory?.appendingPathComponent("\(key).cache")
-        if let fileURL = fileURL {
-            try? FileManager.default.removeItem(at: fileURL)
+
+    private func st_decodeCachePayload<T: Codable>(_ data: Data, as type: T.Type) -> T? {
+        do {
+            return try self.jsonDecoder.decode(type, from: data)
+        } catch {
+            STLog("[STBaseViewModel] 缓存解码失败: \(error.localizedDescription)")
+            return nil
         }
     }
-    
+
+    // MARK: - 磁盘缓存
+    private struct STDiskCachePayload: Codable {
+        let data: Data
+        let expiration: Date
+    }
+
+    private func st_diskCacheURL(forKey key: String) -> URL? {
+        guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        let safeName = self.st_safeCacheFileName(forKey: key)
+        return cacheDirectory.appendingPathComponent("\(safeName).cache")
+    }
+
+    private func st_safeCacheFileName(forKey key: String) -> String {
+        let digest = SHA256.hash(data: Data(key.utf8))
+        return digest.map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func st_saveToDisk(data: Data, expiration: Date, forKey key: String) {
+        guard let fileURL = self.st_diskCacheURL(forKey: key) else { return }
+        let payload = STDiskCachePayload(data: data, expiration: expiration)
+        do {
+            let encoded = try self.jsonEncoder.encode(payload)
+            try encoded.write(to: fileURL, options: .atomic)
+        } catch {
+            STLog("[STBaseViewModel] 磁盘缓存写入失败: \(error.localizedDescription)")
+        }
+    }
+
+    private func st_loadFromDisk(forKey key: String) -> STDiskCachePayload? {
+        guard let fileURL = self.st_diskCacheURL(forKey: key),
+              let data = try? Data(contentsOf: fileURL),
+              let payload = try? self.jsonDecoder.decode(STDiskCachePayload.self, from: data) else {
+            return nil
+        }
+        return payload
+    }
+
+    private func st_removeFromDisk(forKey key: String) {
+        guard let fileURL = self.st_diskCacheURL(forKey: key) else { return }
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
     private func st_clearDiskCache() {
-        let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
-        let cacheFiles = try? FileManager.default.contentsOfDirectory(at: cacheDirectory!, includingPropertiesForKeys: nil)
-        cacheFiles?.forEach { fileURL in
+        guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first,
+              let cacheFiles = try? FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil) else {
+            return
+        }
+        cacheFiles.forEach { fileURL in
             if fileURL.pathExtension == "cache" {
                 try? FileManager.default.removeItem(at: fileURL)
             }
         }
     }
-    
+
     // MARK: - 数据验证
-    public func st_validateData<T>(_ data: T) -> Bool {
-        // 子类可以重写此方法进行数据验证
-        return true
-    }
-    
-    public func st_validateResponse<T>(_ response: T) -> Bool {
-        // 子类可以重写此方法进行响应验证
-        return true
-    }
-    
+    open func st_validateData<T>(_ data: T) -> Bool { true }
+    open func st_validateResponse<T>(_ response: T) -> Bool { true }
+
     // MARK: - 工具方法
     public func st_createRequest(url: URL, method: String = "GET", body: Data? = nil) -> URLRequest {
         var request = URLRequest(url: url)
@@ -549,9 +625,9 @@ open class STBaseViewModel: NSObject {
         }
         return request
     }
-    
+
     public func st_parseJSON<T: Codable>(_ data: Data, type: T.Type) -> Result<T, STBaseError> {
-        let result = data.decodeResult(type)
+        let result = data.decodeResult(type, using: self.jsonDecoder)
         switch result {
         case .success(let decoded):
             return .success(decoded)
@@ -559,9 +635,9 @@ open class STBaseViewModel: NSObject {
             return .failure(STBaseError.dataError("JSON解析失败: \(error.localizedDescription)"))
         }
     }
-    
+
     public func st_toJSON<T: Codable>(_ object: T) -> Result<Data, STBaseError> {
-        let result = object.encodeToJSONData()
+        let result = object.encodeToJSONData(using: self.jsonEncoder)
         switch result {
         case .success(let data):
             return .success(data)
@@ -569,7 +645,7 @@ open class STBaseViewModel: NSObject {
             return .failure(STBaseError.dataError("JSON编码失败: \(error.localizedDescription)"))
         }
     }
-    
+
     // MARK: - 文件上传和下载
     public func st_upload<T: Codable>(url: String, parameters: [String: Any]? = nil, files: [STUploadFile], responseType: T.Type, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (Result<T, STBaseError>) -> Void) {
         if self.requestConfig.showLoading {
@@ -577,44 +653,114 @@ open class STBaseViewModel: NSObject {
         }
         let uploadRequest = self.httpSession.upload(url, files: files, parameters: parameters, headers: self.requestHeaders, requestConfig: self.requestConfig)
         if let progress = progress {
-            uploadRequest.progressPublisher.sink(receiveValue: progress).store(in: &self.cancellables)
+            uploadRequest.progressPublisher
+                .sink(receiveValue: progress)
+                .store(in: &self.cancellables)
         }
-        uploadRequest.responsePublisher.sink { [weak self] response in
+        var token: AnyCancellable?
+        token = uploadRequest.responsePublisher.sink { [weak self] response in
             self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
-        }.store(in: &self.cancellables)
+            if let token = token {
+                self?.st_removeCancellable(token)
+            }
+        }
+        if let token = token {
+            self.st_storeCancellable(token)
+        }
     }
-    
-    public func st_download(url: String, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (URL?, STBaseError?) -> Void) {
+
+    /// 真正基于 URLSession download task 的下载，避免大文件全量入内存。
+    /// 默认会写入到调用方提供的 destination；若未提供则使用临时目录中的随机文件。
+    public func st_download(url: String, destination: URL? = nil, progress: ((STDownloadProgress) -> Void)? = nil, completion: @escaping (URL?, STBaseError?) -> Void) {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        self.httpSession.request(url, method: .get, parameters: nil, encoding: .json, headers: self.requestHeaders, requestConfig: self.requestConfig).responsePublisher.sink { [weak self] response in
-            if response.isSuccess, let data = response.data {
-                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-                do {
-                    try data.write(to: tempURL)
-                    self?.loadingState.send(.loaded)
-                    completion(tempURL, nil)
-                } catch {
-                    let error = STBaseError.dataError("文件保存失败")
-                    self?.loadingState.send(.failed(error))
-                    completion(nil, error)
-                }
-            } else {
-                let error = self?.st_convertHTTPError(response.error) ?? STBaseError.unknown
-                self?.loadingState.send(.failed(error))
-                completion(nil, error)
+        let targetURL = destination ?? FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let downloadRequest = self.httpSession.download(
+            url,
+            to: targetURL,
+            method: .get,
+            parameters: nil,
+            encoding: .url,
+            headers: self.requestHeaders,
+            interceptor: nil,
+            options: .default,
+            resumeData: nil,
+            requestConfig: self.requestConfig
+        )
+        if let progress = progress {
+            downloadRequest.progressPublisher
+                .sink(receiveValue: progress)
+                .store(in: &self.cancellables)
+        }
+        var token: AnyCancellable?
+        token = downloadRequest.responsePublisher.sink(receiveCompletion: { [weak self] state in
+            if case .failure(let error) = state {
+                let baseError = self?.st_convertHTTPError(error) ?? STBaseError.origin(error: error)
+                self?.loadingState.send(.failed(baseError))
+                completion(nil, baseError)
             }
-        }.store(in: &self.cancellables)
+            if let token = token {
+                self?.st_removeCancellable(token)
+            }
+        }, receiveValue: { [weak self] fileURL in
+            self?.loadingState.send(.loaded)
+            completion(fileURL, nil)
+        })
+        if let token = token {
+            self.st_storeCancellable(token)
+        }
     }
-    
+
     // MARK: - 内存管理
     public func st_cleanup() {
+        self.stateLock.lock()
+        let requests = self.inflightRequests
+        self.inflightRequests.removeAll()
+        self.stateLock.unlock()
+        requests.forEach { _ = $0.cancel() }
+
         self.cancellables.removeAll()
         self.cache.removeAllObjects()
-        self.retryCount = 0
         self.loadingState.send(.idle)
         self.refreshState.send(.idle)
+    }
+
+    // MARK: - 内部辅助
+    private func st_storeCancellable(_ cancellable: AnyCancellable) {
+        self.stateLock.lock()
+        self.cancellables.insert(cancellable)
+        self.stateLock.unlock()
+    }
+
+    private func st_removeCancellable(_ cancellable: AnyCancellable) {
+        self.stateLock.lock()
+        self.cancellables.remove(cancellable)
+        self.stateLock.unlock()
+    }
+
+    private func st_trackInflight(_ request: STDataRequest) {
+        self.stateLock.lock()
+        self.inflightRequests.append(request)
+        self.stateLock.unlock()
+    }
+
+    private func st_untrackInflight(_ request: STDataRequest) {
+        self.stateLock.lock()
+        if let index = self.inflightRequests.firstIndex(where: { $0 === request }) {
+            self.inflightRequests.remove(at: index)
+        }
+        self.stateLock.unlock()
+    }
+}
+
+/// 内存缓存条目（NSCache 要求 class 类型）
+private final class STMemoryCacheEntry {
+    let data: Data
+    let expiration: Date
+    init(data: Data, expiration: Date) {
+        self.data = data
+        self.expiration = expiration
     }
 }
 
@@ -622,27 +768,27 @@ open class STBaseViewModel: NSObject {
 extension STBaseViewModel {
     public func st_bindLoadingState<T: AnyObject>(to object: T, keyPath: ReferenceWritableKeyPath<T, Bool>) {
         self.loadingState
-            .map { state in
-                switch state {
-                case .loading:
-                    return true
-                default:
-                    return false
-                }
+            .map { state -> Bool in
+                if case .loading = state { return true }
+                return false
             }
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .assign(to: keyPath, on: object)
             .store(in: &self.cancellables)
     }
-    
+
     public func st_bindError<T: AnyObject>(to object: T, keyPath: ReferenceWritableKeyPath<T, String?>) {
-        error
+        self.errorPublisher
             .map { $0.errorDescription }
+            .receive(on: DispatchQueue.main)
             .assign(to: keyPath, on: object)
             .store(in: &self.cancellables)
     }
-    
+
     public func st_bindDataUpdate<T: AnyObject>(to object: T, action: @escaping (T) -> Void) {
         self.dataUpdated
+            .receive(on: DispatchQueue.main)
             .sink { [weak object] _ in
                 if let object = object {
                     action(object)
@@ -650,19 +796,20 @@ extension STBaseViewModel {
             }
             .store(in: &self.cancellables)
     }
-    
+
     /// 设置认证 Token
     public func st_setAuthToken(_ token: String, type: STAuthorizationType) {
         self.requestHeaders.st_setAuthorization(token, type: type)
     }
-    
+
     /// 设置自定义认证头
     public func st_setCustomAuth(_ value: String) {
         self.requestHeaders.st_setCustomAuthorization(value)
     }
-    
-    /// 调试方法：打印原始响应数据
+
+    /// 调试方法：打印原始响应数据。仅 DEBUG 编译生效，避免线上泄露敏感数据。
     public func st_debugResponse(_ response: STHTTPResponse) {
+        #if DEBUG
         STLog("=== HTTP 响应调试信息 ===")
         STLog("状态码: \(response.statusCode)")
         STLog("是否成功: \(response.isSuccess)")
@@ -680,31 +827,49 @@ extension STBaseViewModel {
         if let error = response.error {
             STLog("错误信息: \(error.localizedDescription)")
         }
+        #endif
     }
-    
+
     /// 设置自定义请求头
     public func st_setCustomHeaders(_ headers: [String: String]) {
         self.requestHeaders.st_setHeaders(headers)
     }
-    
+
     /// 清除认证信息
     public func st_clearAuth() {
         self.requestHeaders.st_removeHeader(forKey: "Authorization")
     }
-    
+
     /// 检查网络状态
     public func st_checkNetworkStatus() -> STNetworkReachabilityStatus {
         return self.httpSession.st_checkNetworkStatus()
     }
-    
-    /// 等待网络可用
-    public func st_waitForNetwork(completion: @escaping () -> Void) {
+
+    /// 等待网络可用。
+    /// - Parameters:
+    ///   - timeout: 总超时秒数；默认 30 秒，超过后回调 `false` 而不再继续轮询。
+    ///   - pollInterval: 轮询间隔，默认 1 秒。
+    ///   - completion: `true` 表示网络已可达，`false` 表示超时或视图模型已释放。
+    public func st_waitForNetwork(timeout: TimeInterval = 30, pollInterval: TimeInterval = 1.0, completion: @escaping (Bool) -> Void) {
+        let deadline = Date().addingTimeInterval(timeout)
+        self.st_pollNetwork(deadline: deadline, pollInterval: pollInterval, completion: completion)
+    }
+
+    private func st_pollNetwork(deadline: Date, pollInterval: TimeInterval, completion: @escaping (Bool) -> Void) {
         if self.httpSession.st_checkNetworkStatus() != .notReachable {
-            completion()
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.st_waitForNetwork(completion: completion)
+            completion(true)
+            return
+        }
+        if Date() >= deadline {
+            completion(false)
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + pollInterval) { [weak self] in
+            guard let self = self else {
+                completion(false)
+                return
             }
+            self.st_pollNetwork(deadline: deadline, pollInterval: pollInterval, completion: completion)
         }
     }
 }
