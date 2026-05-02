@@ -75,7 +75,12 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
         }
         let headerHeight = headerText.isEmpty ? 0 : ceil(headerFont.lineHeight)
         let separatorSpacing: CGFloat = headerText.isEmpty ? 0 : 8
-        let codeHeight = max(ceil(codeBounds.height), ceil(codeFont.lineHeight))
+        // `boundingRect` 已经按 paragraphStyle.lineSpacing 参与排版，不能再按行数叠加
+        // lineSpacing，否则会把多行代码块高度显著放大。这里只补一个固定像素级余量，
+        // 用于覆盖字体 leading / 像素取整导致的末行裁切。
+        let measured = ceil(codeBounds.height)
+        let safetyPadding = min(max(style.bodyLineSpacing, 2), 4)
+        let codeHeight = max(measured + safetyPadding, ceil(codeFont.lineHeight))
         let blockHeight = insets.top + headerHeight + separatorSpacing + codeHeight + insets.bottom
 
         let format = UIGraphicsImageRendererFormat.default()

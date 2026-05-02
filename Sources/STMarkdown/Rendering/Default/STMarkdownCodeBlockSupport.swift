@@ -31,6 +31,26 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
         return cache
     }()
 
+    /// 调整缓存容量上限。
+    ///
+    /// `STMarkdownCodeBlockAttachment` 的渲染缓存用 `NSCache` 实现，默认 `countLimit = 48`。
+    /// 若同一 app 内会渲染多套主题（例如 light/dark + 不同 accent 色），48 槽位可能被快速挤满，
+    /// 导致每次切换都触发重绘。宿主可在 app 启动时显式提高限制：
+    ///
+    /// ```swift
+    /// STMarkdownCodeBlockAttachment.configureRenderCache(countLimit: 256)
+    /// ```
+    ///
+    /// - Parameter countLimit: 新的最大条目数。小于 1 时回退为 1，避免误设为无限缓存。
+    public static func configureRenderCache(countLimit: Int) {
+        Self.renderCache.countLimit = max(1, countLimit)
+    }
+
+    /// 清空当前缓存。在切换主题或低内存场景下可以主动调用。
+    public static func clearRenderCache() {
+        Self.renderCache.removeAllObjects()
+    }
+
     public let language: String?
     public let code: String
     public let style: STMarkdownStyle
@@ -102,12 +122,17 @@ public final class STMarkdownCodeBlockAttachment: NSTextAttachment {
             textColor: style.codeBlockTextColor ?? style.textColor,
             paragraphStyle: paragraphStyle
         )
+        // `boundingRect` 已经按 paragraphStyle.lineSpacing 参与排版，不能再按行数叠加
+        // lineSpacing，否则会把多行代码块高度显著放大并触发过早折叠。这里只补一个
+        // 固定像素级余量，用于覆盖字体 leading / 像素取整导致的末行裁切。
+        let measuredHeight = ceil(highlightedBody.boundingRect(
+            with: CGSize(width: codeWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            context: nil
+        ).height)
+        let safetyPadding = min(max(style.bodyLineSpacing, 2), 4)
         let fullBodyHeight = max(
-            ceil(highlightedBody.boundingRect(
-                with: CGSize(width: codeWidth, height: .greatestFiniteMagnitude),
-                options: [.usesLineFragmentOrigin, .usesFontLeading],
-                context: nil
-            ).height),
+            measuredHeight + safetyPadding,
             ceil(codeFont.lineHeight)
         )
         self.isCollapsed = forceCollapsed || fullBodyHeight > Self.collapsedBodyMaxHeight
