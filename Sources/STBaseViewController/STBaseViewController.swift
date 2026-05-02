@@ -16,6 +16,19 @@ public enum STNavBtnShowType {
     case onlyShowTitle
 }
 
+/// 默认导航栏按钮与标题布局数值；与 `STBaseViewController` 内置约束实现配套。
+/// 若子类重写 `st_leftButtonConstraints` / `st_rightButtonConstraints` / `st_titleLabelConstraints`，请同步调整标题最大宽度等约束。
+public enum STDefaultNavigationBarItemMetrics {
+    public static let horizontalInset: CGFloat = 8
+    public static let buttonMinTouchSize: CGFloat = 44
+    /// 按钮与标题之间的默认间距（与 `horizontalInset` 一致）
+    public static let titleToButtonSpacing: CGFloat = horizontalInset
+    /// 单侧为标题预留的横向空间：边距 + 最小触摸宽度
+    public static var reservedWidthPerSide: CGFloat { horizontalInset + buttonMinTouchSize }
+    /// `titleLabel.width <= container.width + constant` 中的 constant（两侧各 `reservedWidthPerSide`）
+    public static var titleMaxWidthLayoutConstant: CGFloat { -2 * reservedWidthPerSide }
+}
+
 open class STBaseViewController: UIViewController {
 
     public private(set) var navigationBarView = UIView()
@@ -27,11 +40,31 @@ open class STBaseViewController: UIViewController {
     public private(set) var leftBtn = UIButton(type: .custom)
     public private(set) var rightBtn = UIButton(type: .custom)
 
-    public var navBarBackgroundColor: UIColor = .white
-    public var navBarTitleColor: UIColor = .black
-    public var buttonTitleColor: UIColor = .systemBlue
-    public var buttonTitleFont: UIFont = .st_systemFont(ofSize: 16)
-    public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20)
+    public var navBarBackgroundColor: UIColor = .white {
+        didSet {
+            if self.liquidGlassContainerView == nil {
+                self.navigationBarView.backgroundColor = self.navBarBackgroundColor
+            }
+        }
+    }
+    public var navBarTitleColor: UIColor = .black {
+        didSet { self.titleLabel.textColor = self.navBarTitleColor }
+    }
+    public var buttonTitleColor: UIColor = .systemBlue {
+        didSet {
+            self.leftBtn.setTitleColor(self.buttonTitleColor, for: .normal)
+            self.rightBtn.setTitleColor(self.buttonTitleColor, for: .normal)
+        }
+    }
+    public var buttonTitleFont: UIFont = .st_systemFont(ofSize: 16) {
+        didSet {
+            self.leftBtn.titleLabel?.font = self.buttonTitleFont
+            self.rightBtn.titleLabel?.font = self.buttonTitleFont
+        }
+    }
+    public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20) {
+        didSet { self.titleLabel.font = self.navBarTitleFont }
+    }
     public lazy var navBarHeight: CGFloat = STDeviceAdapter.navigationBarHeight
 
     public var leftBtnImage: UIImage? {
@@ -60,26 +93,48 @@ open class STBaseViewController: UIViewController {
 
     private var appearanceCancellable: AnyCancellable?
     private var contentOffsetObservation: NSKeyValueObservation?
-    public var leftBtnConstraints: [NSLayoutConstraint] = []
-    public var rightBtnConstraints: [NSLayoutConstraint] = []
-    public var titleLabelConstraints: [NSLayoutConstraint] = []
+    private var lastAppliedInterfaceStyle: UIUserInterfaceStyle?
+    public var leftBtnConstraints: [NSLayoutConstraint] = [] {
+        didSet {
+            NSLayoutConstraint.deactivate(oldValue)
+            NSLayoutConstraint.activate(self.leftBtnConstraints)
+        }
+    }
+    public var rightBtnConstraints: [NSLayoutConstraint] = [] {
+        didSet {
+            NSLayoutConstraint.deactivate(oldValue)
+            NSLayoutConstraint.activate(self.rightBtnConstraints)
+        }
+    }
+    public var titleLabelConstraints: [NSLayoutConstraint] = [] {
+        didSet {
+            NSLayoutConstraint.deactivate(oldValue)
+            NSLayoutConstraint.activate(self.titleLabelConstraints)
+        }
+    }
 
     open override func viewDidLoad() {
         super.viewDidLoad()
         self.setupNavigationBar()
         self.setupAppearanceObservation()
         self.setupLocalizationObservation()
-        self.finalizeLayout()
+        self.applyDefaultNavigationBarStyle()
+        self.st_updateLocalizedTexts()
     }
 
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(self.prefersSystemNavigationBarHidden, animated: false)
+        if let nav = self.navigationController,
+           nav.isNavigationBarHidden != self.prefersSystemNavigationBarHidden {
+            nav.setNavigationBarHidden(self.prefersSystemNavigationBarHidden, animated: animated)
+        }
     }
 
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.view.bringSubviewToFront(self.navigationBarView)
+        if self.view.subviews.last !== self.navigationBarView {
+            self.view.bringSubviewToFront(self.navigationBarView)
+        }
     }
 
     deinit {
@@ -98,55 +153,71 @@ open class STBaseViewController: UIViewController {
         self.navigationBarView.addSubview(self.navigationBarItemsView)
         NSLayoutConstraint.activate([
             self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            self.navigationBarView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
-            self.navigationBarView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            self.navigationBarView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.navigationBarView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor)
         ])
 
         NSLayoutConstraint.activate([
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
             self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
-            self.navigationBarItemsView.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
-            self.navigationBarItemsView.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor)
+            self.navigationBarItemsView.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
+            self.navigationBarItemsView.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])
 
         self.navigationBarItemsView.addSubview(self.titleLabel)
+        self.configureDefaultTitleLabelAppearance()
         self.titleLabelConstraints = self.st_titleLabelConstraints(in: self.navigationBarItemsView)
-        NSLayoutConstraint.activate(self.titleLabelConstraints)
 
         self.navigationBarItemsView.addSubview(self.leftBtn)
         self.leftBtnConstraints = self.st_leftButtonConstraints(in: self.navigationBarItemsView)
-        NSLayoutConstraint.activate(self.leftBtnConstraints)
 
         self.navigationBarItemsView.addSubview(self.rightBtn)
         self.rightBtnConstraints = self.st_rightButtonConstraints(in: self.navigationBarItemsView)
-        NSLayoutConstraint.activate(self.rightBtnConstraints)
 
         self.leftBtn.addTarget(self, action: #selector(self.onLeftBtnTap), for: .touchUpInside)
         self.rightBtn.addTarget(self, action: #selector(self.onRightBtnTap), for: .touchUpInside)
+
+        self.view.bringSubviewToFront(self.navigationBarView)
+    }
+
+    private func configureDefaultTitleLabelAppearance() {
+        self.titleLabel.numberOfLines = 1
+        self.titleLabel.lineBreakMode = .byTruncatingTail
+        self.titleLabel.textAlignment = .center
+        self.titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        self.titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
     }
 
     /// 子类重写此方法以自定义左按钮约束
     open func st_leftButtonConstraints(in container: UIView) -> [NSLayoutConstraint] {
-        let widthConstraint = self.leftBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
-        widthConstraint.priority = .required
+        let inset = STDefaultNavigationBarItemMetrics.horizontalInset
+        let minSize = STDefaultNavigationBarItemMetrics.buttonMinTouchSize
+        let gap = STDefaultNavigationBarItemMetrics.titleToButtonSpacing
+        let avoidTitleOverlap = self.leftBtn.trailingAnchor.constraint(lessThanOrEqualTo: self.titleLabel.leadingAnchor, constant: -gap)
+        avoidTitleOverlap.priority = .defaultHigh
         return [
-            self.leftBtn.leftAnchor.constraint(equalTo: container.leftAnchor, constant: 8),
+            self.leftBtn.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: inset),
             self.leftBtn.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            widthConstraint,
-            self.leftBtn.heightAnchor.constraint(equalToConstant: 44)
+            self.leftBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: minSize),
+            self.leftBtn.heightAnchor.constraint(equalToConstant: minSize),
+            avoidTitleOverlap
         ]
     }
 
     /// 子类重写此方法以自定义右按钮约束
     open func st_rightButtonConstraints(in container: UIView) -> [NSLayoutConstraint] {
-        let widthConstraint = self.rightBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: 44)
-        widthConstraint.priority = .required
+        let inset = STDefaultNavigationBarItemMetrics.horizontalInset
+        let minSize = STDefaultNavigationBarItemMetrics.buttonMinTouchSize
+        let gap = STDefaultNavigationBarItemMetrics.titleToButtonSpacing
+        let avoidTitleOverlap = self.rightBtn.leadingAnchor.constraint(greaterThanOrEqualTo: self.titleLabel.trailingAnchor, constant: gap)
+        avoidTitleOverlap.priority = .defaultHigh
         return [
-            self.rightBtn.rightAnchor.constraint(equalTo: container.rightAnchor, constant: -8),
+            self.rightBtn.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -inset),
             self.rightBtn.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            widthConstraint,
-            self.rightBtn.heightAnchor.constraint(equalToConstant: 44)
+            self.rightBtn.widthAnchor.constraint(greaterThanOrEqualToConstant: minSize),
+            self.rightBtn.heightAnchor.constraint(equalToConstant: minSize),
+            avoidTitleOverlap
         ]
     }
 
@@ -154,13 +225,45 @@ open class STBaseViewController: UIViewController {
     open func st_titleLabelConstraints(in container: UIView) -> [NSLayoutConstraint] {
         return [
             self.titleLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            self.titleLabel.centerXAnchor.constraint(equalTo: container.centerXAnchor)
+            self.titleLabel.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            self.titleLabel.widthAnchor.constraint(
+                lessThanOrEqualTo: container.widthAnchor,
+                constant: STDefaultNavigationBarItemMetrics.titleMaxWidthLayoutConstant
+            )
         ]
     }
 
-    private func finalizeLayout() {
+    /// 替换左按钮约束；自动停用旧约束、启用新约束
+    @discardableResult
+    public func st_replaceLeftButtonConstraints(_ builder: (UIView) -> [NSLayoutConstraint]) -> Self {
+        self.leftBtnConstraints = builder(self.navigationBarItemsView)
+        return self
+    }
+
+    /// 替换右按钮约束；自动停用旧约束、启用新约束
+    @discardableResult
+    public func st_replaceRightButtonConstraints(_ builder: (UIView) -> [NSLayoutConstraint]) -> Self {
+        self.rightBtnConstraints = builder(self.navigationBarItemsView)
+        return self
+    }
+
+    /// 替换标题约束；自动停用旧约束、启用新约束
+    @discardableResult
+    public func st_replaceTitleLabelConstraints(_ builder: (UIView) -> [NSLayoutConstraint]) -> Self {
+        self.titleLabelConstraints = builder(self.navigationBarItemsView)
+        return self
+    }
+
+    private func applyDefaultNavigationBarStyle() {
+        if self.liquidGlassContainerView == nil {
+            self.navigationBarView.backgroundColor = self.navBarBackgroundColor
+        }
+        self.titleLabel.textColor = self.navBarTitleColor
+        self.titleLabel.font = self.navBarTitleFont
         self.leftBtn.titleLabel?.font = self.buttonTitleFont
         self.rightBtn.titleLabel?.font = self.buttonTitleFont
+        self.leftBtn.setTitleColor(self.buttonTitleColor, for: .normal)
+        self.rightBtn.setTitleColor(self.buttonTitleColor, for: .normal)
     }
 
     private func setupLocalizationObservation() {
@@ -198,13 +301,20 @@ open class STBaseViewController: UIViewController {
 
     private func st_refreshAppearance(animated: Bool = false) {
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
+        let targetOverride: UIUserInterfaceStyle
         switch STAppearanceManager.shared.currentMode {
-        case .system: self.overrideUserInterfaceStyle = .unspecified
-        case .light:  self.overrideUserInterfaceStyle = .light
-        case .dark:   self.overrideUserInterfaceStyle = .dark
+        case .system: targetOverride = .unspecified
+        case .light:  targetOverride = .light
+        case .dark:   targetOverride = .dark
+        }
+        if self.overrideUserInterfaceStyle != targetOverride {
+            self.overrideUserInterfaceStyle = targetOverride
         }
 
         let resolvedStyle: UIUserInterfaceStyle = style == .unspecified ? .light : style
+        if self.lastAppliedInterfaceStyle == resolvedStyle { return }
+        self.lastAppliedInterfaceStyle = resolvedStyle
+
         let applyBlock = { [weak self] in
             guard let strongSelf = self else { return }
             strongSelf.st_appearanceDidChange(resolvedStyle: resolvedStyle)
@@ -222,32 +332,22 @@ open class STBaseViewController: UIViewController {
     }
 
     public func st_showNavBtnType(type: STNavBtnShowType) {
+        let hideBar = (type == .none)
+        self.navigationBarView.isHidden = hideBar
+        self.navigationBarItemsView.isHidden = hideBar
         switch type {
         case .showLeftBtn:
             self.leftBtn.isHidden = false
             self.rightBtn.isHidden = true
-            self.navigationBarView.isHidden = false
-            self.navigationBarItemsView.isHidden = false
         case .showRightBtn:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = false
-            self.navigationBarView.isHidden = false
-            self.navigationBarItemsView.isHidden = false
         case .showBothBtn:
             self.leftBtn.isHidden = false
             self.rightBtn.isHidden = false
-            self.navigationBarView.isHidden = false
-            self.navigationBarItemsView.isHidden = false
-        case .onlyShowTitle:
+        case .onlyShowTitle, .none:
             self.leftBtn.isHidden = true
             self.rightBtn.isHidden = true
-            self.navigationBarView.isHidden = false
-            self.navigationBarItemsView.isHidden = false
-        case .none:
-            self.leftBtn.isHidden = true
-            self.rightBtn.isHidden = true
-            self.navigationBarView.isHidden = true
-            self.navigationBarItemsView.isHidden = true
         }
     }
 
@@ -260,9 +360,6 @@ open class STBaseViewController: UIViewController {
     @discardableResult
     open func st_setNavigationBarColor(_ color: UIColor) -> Self {
         self.navBarBackgroundColor = color
-        if self.liquidGlassContainerView == nil {
-            self.navigationBarView.backgroundColor = color
-        }
         return self
     }
 
@@ -282,29 +379,36 @@ open class STBaseViewController: UIViewController {
 
     @discardableResult
     open func st_enableGradientNavigationBar(startColor: UIColor, endColor: UIColor) -> Self {
+        self.navGradientBar?.removeFromSuperview()
         let gradient = STGradientNavigationBar()
         gradient.startColor = startColor
         gradient.endColor = endColor
         gradient.translatesAutoresizingMaskIntoConstraints = false
-        self.navigationBarView.addSubview(gradient)
+        // 始终插在 gradient 层次最底部（液态玻璃容器若存在则在其下方），并在玻璃启用时默认隐藏，
+        // 与 st_enableLiquidGlass() 的语义保持一致："Liquid Glass 优先，Gradient 让位"
+        self.navigationBarView.insertSubview(gradient, at: 0)
+        if self.liquidGlassContainerView != nil {
+            gradient.isHidden = true
+        }
         NSLayoutConstraint.activate([
             gradient.topAnchor.constraint(equalTo: self.navigationBarView.topAnchor),
             gradient.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
-            gradient.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
-            gradient.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor)
+            gradient.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
+            gradient.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])
         self.navGradientBar = gradient
         return self
     }
 
     @discardableResult
-    open func st_linkScrollAlpha(_ scrollView: UIScrollView) -> Self {
+    open func st_linkScrollAlpha(_ scrollView: UIScrollView, threshold: CGFloat = 120) -> Self {
         self.contentOffsetObservation?.invalidate()
+        let clampedThreshold = max(1, threshold)
         self.contentOffsetObservation = scrollView.observe(
             \.contentOffset, options: [.new, .initial],
             changeHandler: { [weak self] scroll, _ in
                 guard let self = self else { return }
-                let alpha = max(0, min(1, scroll.contentOffset.y / 120))
+                let alpha = max(0, min(1, scroll.contentOffset.y / clampedThreshold))
                 self.navigationBarView.alpha = alpha
                 self.navGradientBar?.alpha = alpha
             })
@@ -361,8 +465,8 @@ extension STBaseViewController {
         NSLayoutConstraint.activate([
             container.topAnchor.constraint(equalTo: self.navigationBarView.topAnchor),
             container.bottomAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
-            container.leftAnchor.constraint(equalTo: self.navigationBarView.leftAnchor),
-            container.rightAnchor.constraint(equalTo: self.navigationBarView.rightAnchor)
+            container.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
+            container.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])
         self.liquidGlassContainerView = container
         self.navigationBarView.backgroundColor = .clear
@@ -371,6 +475,7 @@ extension STBaseViewController {
     }
 
     public func st_disableLiquidGlass() {
+        guard self.liquidGlassContainerView != nil else { return }
         self.liquidGlassContainerView?.removeFromSuperview()
         self.liquidGlassContainerView = nil
         self.navigationBarView.backgroundColor = self.navBarBackgroundColor
