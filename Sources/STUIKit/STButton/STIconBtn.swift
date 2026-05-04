@@ -174,12 +174,15 @@ open class STIconBtn: STBtn {
 
     open override func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
         let icon = self.iconContentInsets
-        var inset = config.contentInsets
-        inset.top += icon.top
-        inset.bottom += icon.bottom
-        inset.leading += icon.left
-        inset.trailing += icon.right
-        config.contentInsets = inset
+        // `iconContentInsets` 以绝对值语义写入 `config.contentInsets`。
+        // 如需在此之上额外叠加自定义 padding，请通过 `onConfigurationUpdate` 修改传入的 `config.contentInsets`；
+        // 直接写 `self.configuration?.contentInsets` 会在下一次 update 时被 `iconContentInsets` 覆盖。
+        config.contentInsets = NSDirectionalEdgeInsets(
+            top: icon.top,
+            leading: icon.left,
+            bottom: icon.bottom,
+            trailing: icon.right
+        )
 
         let hasImage = self.currentImage != nil
         let hasTitle = !(self.currentTitle?.isEmpty ?? true) || self.currentAttributedTitle != nil
