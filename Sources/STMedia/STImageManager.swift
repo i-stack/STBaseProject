@@ -42,7 +42,7 @@ public struct STImageManagerModel {
     }
 }
 
-public struct STImageManagerConfiguration {
+public struct STImageManagerConfiguration: Sendable {
     public var allowsEditing: Bool = true
     public var showsCameraControls: Bool = true
     public var cameraDevice: UIImagePickerController.CameraDevice = .rear

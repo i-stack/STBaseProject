@@ -216,122 +216,90 @@ open class STBtn: UIButton {
     }
     
     /// 内容水平对齐时的边距（IBInspectable）
-    /// 当 contentHorizontalAlignment 为 .left 或 .right 时，此属性控制内容与边缘的间距
-    /// 使用示例：
-    /// ```
-    /// button.contentHorizontalAlignment = .left
-    /// button.contentHorizontalPadding = 16  // 左边距 16
-    /// ```
-    /// 注意：布局更新会在下一个布局周期自动生效，无需手动调用 `setNeedsLayout()`
-    /// `layoutSubviews` 方法会在系统需要时自动调用，并更新边距
+    /// 当 contentHorizontalAlignment 为 .left/.right/.leading/.trailing 时，此属性在 `UIButton.Configuration.contentInsets` 之上叠加额外间距。
     @IBInspectable open var contentHorizontalPadding: CGFloat = 0 {
         didSet {
             guard oldValue != self.contentHorizontalPadding else { return }
-            self.setNeedsLayout()
+            self.setNeedsUpdateConfiguration()
         }
     }
-    
+
+    open override var contentHorizontalAlignment: UIControl.ContentHorizontalAlignment {
+        get { super.contentHorizontalAlignment }
+        set {
+            super.contentHorizontalAlignment = newValue
+            self.setNeedsUpdateConfiguration()
+        }
+    }
+
+    /// 基础 `contentInsets` 快照，在首次安装 Configuration 时捕获。
+    /// 每次 `configurationUpdateHandler` 触发都会将 `contentInsets` 先重置为该快照，
+    /// 再叠加水平 padding / 子类图标内边距，避免多次触发时增量累加（高亮、动态字体等会反复触发 update）。
+    /// 若外部整体替换了 `self.configuration`，请调用 `refreshBaseContentInsets()` 同步新的基线。
+    private var baseContentInsets: NSDirectionalEdgeInsets = .zero
+
     private func setupButton() {
         self.titleLabel?.adjustsFontForContentSizeCategory = true
         self.titleLabel?.textAlignment = .natural
         self.imageView?.contentMode = .scaleAspectFit
+        self.installModernButtonConfiguration()
     }
-    
+
+    /// `contentEdgeInsets` 在启用 `UIButton.Configuration` 后被废弃（iOS 16 起全面迁移）；
+    /// 通过 `configurationUpdateHandler` 在每次 update 中基于快照重算 `contentInsets`。
+    private func installModernButtonConfiguration() {
+        if self.configuration == nil {
+            self.configuration = UIButton.Configuration.plain()
+        }
+        self.baseContentInsets = self.configuration?.contentInsets ?? .zero
+        self.configurationUpdateHandler = { [weak self] button in
+            guard let self, var config = button.configuration else { return }
+            config.contentInsets = self.baseContentInsets
+            self.refineButtonConfiguration(button, configuration: &config)
+            button.configuration = config
+        }
+        self.setNeedsUpdateConfiguration()
+    }
+
+    /// 若外部替换了 `self.configuration`，调用此方法重新捕获基线以保证水平 padding / 图标内边距正确叠加。
+    public func refreshBaseContentInsets() {
+        self.baseContentInsets = self.configuration?.contentInsets ?? .zero
+        self.setNeedsUpdateConfiguration()
+    }
+
+    /// 子类（如 `STIconBtn`）覆写以写入图文布局，再调用 `super` 叠加水平边距。
+    /// 调用前 `config.contentInsets` 已被重置为 `baseContentInsets`，可直接做 `+=` 增量。
+    open func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
+        let layoutDirection = UIView.userInterfaceLayoutDirection(for: button.semanticContentAttribute)
+        let (extraLeading, extraTrailing) = self.horizontalPaddingExtras(layoutDirection: layoutDirection)
+        var inset = config.contentInsets
+        inset.leading += extraLeading
+        inset.trailing += extraTrailing
+        config.contentInsets = inset
+    }
+
+    private func horizontalPaddingExtras(layoutDirection: UIUserInterfaceLayoutDirection) -> (CGFloat, CGFloat) {
+        guard self.contentHorizontalPadding > 0 else { return (0, 0) }
+        let alignment = self.contentHorizontalAlignment
+        let padding = self.contentHorizontalPadding
+        switch alignment {
+        case .left:
+            return layoutDirection == .rightToLeft ? (0, padding) : (padding, 0)
+        case .right:
+            return layoutDirection == .rightToLeft ? (padding, 0) : (0, padding)
+        case .leading:
+            return (padding, 0)
+        case .trailing:
+            return (0, padding)
+        default:
+            return (0, 0)
+        }
+    }
+
     open override func layoutSubviews() {
         super.layoutSubviews()
-        self.updateContentHorizontalPadding()
         self.updateGradientLayerFrame()
         self.updateLiquidGlassFrame()
-    }
-    
-    /// 更新内容水平对齐时的边距
-    private func updateContentHorizontalPadding() {
-        guard self.contentHorizontalPadding > 0 else {
-            // 如果边距为 0，清除水平方向的边距，保留垂直方向的边距
-            let currentInsets = self.contentEdgeInsets
-            if currentInsets.left != 0 || currentInsets.right != 0 {
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: currentInsets.top,
-                    left: 0,
-                    bottom: currentInsets.bottom,
-                    right: 0
-                )
-            }
-            return
-        }
-        
-        // 保存当前的垂直边距
-        let currentInsets = self.contentEdgeInsets
-        let top = currentInsets.top
-        let bottom = currentInsets.bottom
-        
-        // 根据 contentHorizontalAlignment 设置水平边距
-        switch self.contentHorizontalAlignment {
-        case .left:
-            // 左对齐时，只设置左边距
-            self.contentEdgeInsets = UIEdgeInsets(
-                top: top,
-                left: self.contentHorizontalPadding,
-                bottom: bottom,
-                right: 0
-            )
-        case .right:
-            // 右对齐时，只设置右边距
-            self.contentEdgeInsets = UIEdgeInsets(
-                top: top,
-                left: 0,
-                bottom: bottom,
-                right: self.contentHorizontalPadding
-            )
-        case .leading:
-            // Leading 对齐时，根据布局方向设置
-            if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
-                // RTL 布局，设置右边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: 0,
-                    bottom: bottom,
-                    right: self.contentHorizontalPadding
-                )
-            } else {
-                // LTR 布局，设置左边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: self.contentHorizontalPadding,
-                    bottom: bottom,
-                    right: 0
-                )
-            }
-        case .trailing:
-            // Trailing 对齐时，根据布局方向设置
-            if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
-                // RTL 布局，设置左边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: self.contentHorizontalPadding,
-                    bottom: bottom,
-                    right: 0
-                )
-            } else {
-                // LTR 布局，设置右边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: 0,
-                    bottom: bottom,
-                    right: self.contentHorizontalPadding
-                )
-            }
-        default:
-            // 居中对齐等其他情况，清除水平边距
-            if currentInsets.left != 0 || currentInsets.right != 0 {
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: 0,
-                    bottom: bottom,
-                    right: 0
-                )
-            }
-        }
     }
     
     /// 设置圆角按钮

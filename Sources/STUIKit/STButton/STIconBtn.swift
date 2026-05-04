@@ -69,7 +69,7 @@ open class STIconBtn: STBtn {
         didSet {
             guard oldValue != iconPosition else { return }
             self.invalidateIntrinsicContentSize()
-            self.setNeedsLayout()
+            self.setNeedsUpdateConfiguration()
         }
     }
 
@@ -78,7 +78,7 @@ open class STIconBtn: STBtn {
         didSet {
             guard oldValue != spacing else { return }
             self.invalidateIntrinsicContentSize()
-            self.setNeedsLayout()
+            self.setNeedsUpdateConfiguration()
         }
     }
 
@@ -87,7 +87,7 @@ open class STIconBtn: STBtn {
         didSet {
             guard oldValue != iconContentInsets else { return }
             self.invalidateIntrinsicContentSize()
-            self.setNeedsLayout()
+            self.setNeedsUpdateConfiguration()
         }
     }
     
@@ -169,93 +169,32 @@ open class STIconBtn: STBtn {
     /// ```
     public func updateLayout() {
         self.invalidateIntrinsicContentSize()
-        self.setNeedsLayout()
+        self.setNeedsUpdateConfiguration()
     }
 
-    open override func layoutSubviews() {
-        super.layoutSubviews()
-        self.updateIconLayout()
-    }
+    open override func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
+        let icon = self.iconContentInsets
+        var inset = config.contentInsets
+        inset.top += icon.top
+        inset.bottom += icon.bottom
+        inset.leading += icon.left
+        inset.trailing += icon.right
+        config.contentInsets = inset
 
-    open override func contentRect(forBounds bounds: CGRect) -> CGRect {
-        super.contentRect(forBounds: bounds).inset(by: self.iconContentInsets)
-    }
-
-    open override var intrinsicContentSize: CGSize {
-        let baseSize = self.computedContentSize()
-        return CGSize(
-            width: baseSize.width + self.iconContentInsets.left + self.iconContentInsets.right,
-            height: baseSize.height + self.iconContentInsets.top + self.iconContentInsets.bottom
-        )
-    }
-
-    open override func sizeThatFits(_ size: CGSize) -> CGSize {
-        let baseSize = self.computedContentSize()
-        return CGSize(
-            width: min(size.width, baseSize.width + self.iconContentInsets.left + self.iconContentInsets.right),
-            height: min(size.height, baseSize.height + self.iconContentInsets.top + self.iconContentInsets.bottom)
-        )
-    }
-
-    private func updateIconLayout() {
-        var newImageInsets = UIEdgeInsets.zero
-        var newTitleInsets = UIEdgeInsets.zero
-        defer {
-            if self.imageEdgeInsets != newImageInsets { self.imageEdgeInsets = newImageInsets }
-            if self.titleEdgeInsets != newTitleInsets { self.titleEdgeInsets = newTitleInsets }
-        }
-        guard
-            let imageSize = self.currentImageSize(),
-            let titleSize = self.currentTitleSize()
-        else { return }
-        let halfSpace = self.spacing / 2
+        let hasImage = self.currentImage != nil
+        let hasTitle = !(self.currentTitle?.isEmpty ?? true) || self.currentAttributedTitle != nil
         switch self.iconPosition {
         case .left:
-            newImageInsets = UIEdgeInsets(top: 0, left: -halfSpace, bottom: 0, right: halfSpace)
-            newTitleInsets = UIEdgeInsets(top: 0, left: halfSpace, bottom: 0, right: -halfSpace)
+            config.imagePlacement = .leading
         case .right:
-            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width + halfSpace, bottom: 0, right: -(titleSize.width + halfSpace))
-            newTitleInsets = UIEdgeInsets(top: 0, left: -(imageSize.width + halfSpace), bottom: 0, right: imageSize.width + halfSpace)
+            config.imagePlacement = .trailing
         case .top:
-            newImageInsets = UIEdgeInsets(top: -(titleSize.height + self.spacing), left: titleSize.width / 2, bottom: 0, right: -titleSize.width / 2)
-            newTitleInsets = UIEdgeInsets(top: 0, left: -imageSize.width / 2, bottom: -(imageSize.height + self.spacing), right: imageSize.width / 2)
+            config.imagePlacement = .top
         case .bottom:
-            newImageInsets = UIEdgeInsets(top: 0, left: titleSize.width / 2, bottom: -(titleSize.height + self.spacing), right: -titleSize.width / 2)
-            newTitleInsets = UIEdgeInsets(top: -(imageSize.height + self.spacing), left: -imageSize.width / 2, bottom: 0, right: imageSize.width / 2)
+            config.imagePlacement = .bottom
         }
-    }
+        config.imagePadding = (hasImage && hasTitle) ? self.spacing : 0
 
-    private func computedContentSize() -> CGSize {
-        let imageSize = self.currentImageSize() ?? .zero
-        let titleSize = self.currentTitleSize() ?? .zero
-        let hasImage = imageSize != .zero
-        let hasTitle = titleSize != .zero
-        let actualSpacing = (hasImage && hasTitle) ? self.spacing : 0
-
-        switch self.iconPosition {
-        case .left, .right:
-            return CGSize(
-                width: imageSize.width + titleSize.width + actualSpacing,
-                height: max(imageSize.height, titleSize.height)
-            )
-        case .top, .bottom:
-            return CGSize(
-                width: max(imageSize.width, titleSize.width),
-                height: imageSize.height + titleSize.height + actualSpacing
-            )
-        }
-    }
-    
-    private func currentImageSize() -> CGSize? {
-        guard self.currentImage != nil else { return nil }
-        let imageSize = self.imageView?.intrinsicContentSize ?? .zero
-        return imageSize == .zero ? nil : imageSize
-    }
-    
-    private func currentTitleSize() -> CGSize? {
-        let hasTitle = !(self.currentTitle?.isEmpty ?? true) || self.currentAttributedTitle != nil
-        guard hasTitle else { return nil }
-        let titleSize = self.titleLabel?.intrinsicContentSize ?? .zero
-        return titleSize == .zero ? nil : titleSize
+        super.refineButtonConfiguration(button, configuration: &config)
     }
 }
