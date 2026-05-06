@@ -7,8 +7,6 @@
 
 import UIKit
 
-// MARK: - Bar Heights
-
 public struct STBarHeightsConfiguration: Sendable, Equatable {
 
     public var navigationBarRegularHeight: CGFloat = 64.0
@@ -19,8 +17,6 @@ public struct STBarHeightsConfiguration: Sendable, Equatable {
 
     public init() {}
 }
-
-// MARK: - Scale Strategy
 
 public struct STScaleStrategy: Sendable, Equatable {
 
@@ -34,14 +30,9 @@ public struct STScaleStrategy: Sendable, Equatable {
         self.rounding = rounding
     }
 
-    /// 默认策略:不做 clamp,向上对齐到物理像素(保护分割线/细边框/最小间距不被压小)
     public static let `default` = STScaleStrategy()
-
-    /// iPad 场景常用策略:限制最大缩放倍率,避免字号/间距过度放大
     public static let padFriendly = STScaleStrategy(maxScale: 1.3)
 }
-
-// MARK: - Device Metrics Snapshot
 
 public struct STDeviceMetrics: Sendable, Equatable {
     public let screenBounds: CGRect
@@ -52,16 +43,12 @@ public struct STDeviceMetrics: Sendable, Equatable {
     public let isNotchScreen: Bool
 }
 
-// MARK: - Protocol Abstraction
-
 public protocol STDeviceAdapting: AnyObject {
     var designSize: CGSize? { get }
     var barHeights: STBarHeightsConfiguration { get }
     var scaleStrategy: STScaleStrategy { get }
     var currentMetrics: STDeviceMetrics { get }
 }
-
-// MARK: - STDeviceAdapter
 
 /// 设备/屏幕适配器。
 ///
@@ -71,16 +58,12 @@ public protocol STDeviceAdapting: AnyObject {
 public final class STDeviceAdapter: STDeviceAdapting {
 
     public static let shared = STDeviceAdapter()
-
-    public static let configurationDidChangeNotification = Notification.Name("STDeviceAdapterConfigurationDidChange")
-
     public private(set) var designSize: CGSize?
     public private(set) var barHeights = STBarHeightsConfiguration()
     public private(set) var scaleStrategy: STScaleStrategy = .default
+    public static let configurationDidChangeNotification = Notification.Name("STDeviceAdapterConfigurationDidChange")
 
     private init() {}
-
-    // MARK: - Configuration
 
     public func configure(designSize: CGSize?) {
         if let size = designSize, (size.width <= 0 || size.height <= 0) {
@@ -118,7 +101,7 @@ public final class STDeviceAdapter: STDeviceAdapting {
         self.postConfigurationChange()
     }
 
-    /// 仅用于测试:重置所有配置到初始值
+    /// 重置所有配置到初始值
     public func reset() {
         self.designSize = nil
         self.barHeights = STBarHeightsConfiguration()
@@ -130,26 +113,24 @@ public final class STDeviceAdapter: STDeviceAdapting {
         NotificationCenter.default.post(name: STDeviceAdapter.configurationDidChangeNotification, object: self)
     }
 
-    // MARK: - Scaling
-
     public static var widthScale: CGFloat {
-        guard let designSize = shared.designSize else { return 1.0 }
-        let raw = screenWidth / designSize.width
-        return clamped(raw, strategy: shared.scaleStrategy)
+        guard let designSize = self.shared.designSize else { return 1.0 }
+        let raw = self.screenWidth / designSize.width
+        return clamped(raw, strategy: self.shared.scaleStrategy)
     }
 
     public static var heightScale: CGFloat {
-        guard let designSize = shared.designSize else { return 1.0 }
-        let raw = screenHeight / designSize.height
-        return clamped(raw, strategy: shared.scaleStrategy)
+        guard let designSize = self.shared.designSize else { return 1.0 }
+        let raw = self.screenHeight / designSize.height
+        return clamped(raw, strategy: self.shared.scaleStrategy)
     }
 
     public static func scaledValue(_ value: CGFloat) -> CGFloat {
-        scaled(value, multiplier: widthScale)
+        scaled(value, multiplier: self.widthScale)
     }
 
     public static func scaledHeightValue(_ value: CGFloat) -> CGFloat {
-        scaled(value, multiplier: heightScale)
+        scaled(value, multiplier: self.heightScale)
     }
 
     public static func scaledWidth(_ value: CGFloat) -> CGFloat {
@@ -170,100 +151,75 @@ public final class STDeviceAdapter: STDeviceAdapting {
         scaledValue(value)
     }
 
-    // MARK: - Screen Metrics (scene-based)
-
     /// 屏幕/窗口尺寸。
     /// 优先级:key window.bounds → active scene.screen.bounds → `UIScreen.main.bounds`(退化兜底)。
     /// 最后一档是 iOS 16+ 已弃用的 `UIScreen.main`,但 App 启动早期(AppDelegate.didFinishLaunching
     /// 期间、`makeKeyAndVisible` 之前)只有这条路径能返回非零尺寸。
     public static var screenBounds: CGRect {
-        if let window = activeKeyWindow { return window.bounds }
-        if let scene = activeWindowScene { return scene.screen.bounds }
-        return fallbackMainScreenBounds
+        if let window = self.activeKeyWindow { return window.bounds }
+        if let scene = self.activeWindowScene { return scene.screen.bounds }
+        return self.fallbackMainScreenBounds
     }
 
-    public static var screenWidth: CGFloat { screenBounds.width }
-    public static var screenHeight: CGFloat { screenBounds.height }
-    public static var screenSize: CGSize { screenBounds.size }
+    public static var screenWidth: CGFloat { self.screenBounds.width }
+    public static var screenHeight: CGFloat { self.screenBounds.height }
+    public static var screenSize: CGSize { self.screenBounds.size }
 
     public static var screenScale: CGFloat {
-        if let scale = activeWindowScene?.screen.scale { return scale }
-        if let scale = activeKeyWindow?.screen.scale { return scale }
-        return fallbackMainScreenScale
+        if let scale = self.activeWindowScene?.screen.scale { return scale }
+        if let scale = self.activeKeyWindow?.screen.scale { return scale }
+        return self.fallbackMainScreenScale
     }
 
-    // MARK: - Safe Area / Status Bar
-
     public static var safeAreaInsets: UIEdgeInsets {
-        activeKeyWindow?.safeAreaInsets ?? .zero
+        self.activeKeyWindow?.safeAreaInsets ?? .zero
     }
 
     public static var statusBarHeight: CGFloat {
-        activeWindowScene?.statusBarManager?.statusBarFrame.height ?? 0
+        self.activeWindowScene?.statusBarManager?.statusBarFrame.height ?? 0
     }
 
     /// 是否为带 home indicator 的全面屏设备(刘海/灵动岛/iPad Pro with home indicator)。
     /// 判据:idiom==.phone 且底部安全区 > 0;对于 iPad,通常不需要"刘海"这个概念,返回 false。
     public static var isNotchScreen: Bool {
         guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
-        return safeAreaInsets.bottom > 0 || safeAreaInsets.top > 20
+        return self.safeAreaInsets.bottom > 0 || self.safeAreaInsets.top > 20
     }
 
-    // MARK: - Bar Heights
-
     public static var navigationBarHeight: CGFloat {
-        isNotchScreen
-        ? shared.barHeights.navigationBarSafeAreaHeight
-        : shared.barHeights.navigationBarRegularHeight
+        self.isNotchScreen
+        ? self.shared.barHeights.navigationBarSafeAreaHeight
+        : self.shared.barHeights.navigationBarRegularHeight
     }
 
     public static var navigationBarContainerHeight: CGFloat {
-        shared.barHeights.navigationBarContainerHeight
+        self.shared.barHeights.navigationBarContainerHeight
     }
 
     public static var tabBarHeight: CGFloat {
-        isNotchScreen
-        ? shared.barHeights.tabBarSafeAreaHeight
-        : shared.barHeights.tabBarRegularHeight
+        self.isNotchScreen
+        ? self.shared.barHeights.tabBarSafeAreaHeight
+        : self.shared.barHeights.tabBarRegularHeight
     }
 
-    public static var bottomSafeAreaHeight: CGFloat { safeAreaInsets.bottom }
+    public static var bottomSafeAreaHeight: CGFloat { self.safeAreaInsets.bottom }
 
-    public static var safeTabBarHeight: CGFloat { tabBarHeight + bottomSafeAreaHeight }
+    public static var safeTabBarHeight: CGFloat { self.tabBarHeight + self.bottomSafeAreaHeight }
 
     public static var contentHeight: CGFloat {
-        screenHeight - navigationBarHeight - statusBarHeight
+        self.screenHeight - self.navigationBarHeight - self.statusBarHeight
     }
 
     public static var contentHeightWithTabBar: CGFloat {
-        screenHeight - navigationBarHeight - statusBarHeight - tabBarHeight
+        self.screenHeight - self.navigationBarHeight - self.statusBarHeight - self.tabBarHeight
     }
-
-    // MARK: - Orientation (scene-based, reliable)
 
     public static var interfaceOrientation: UIInterfaceOrientation {
-        activeWindowScene?.interfaceOrientation ?? .portrait
+        self.activeWindowScene?.interfaceOrientation ?? .portrait
     }
 
-    public static var isLandscape: Bool { interfaceOrientation.isLandscape }
-    public static var isPortrait: Bool { interfaceOrientation.isPortrait }
-
-    /// 已弃用:请改用 `interfaceOrientation`(返回 `UIInterfaceOrientation`)。
-    /// 保留此兼容入口以减少外部调用方升级成本;内部不再使用 `UIDevice.current.orientation`
-    /// (需要显式 beginGeneratingDeviceOrientationNotifications,且 faceUp/faceDown 时不反映界面方向)。
-    @available(*, deprecated, renamed: "interfaceOrientation", message: "Use interfaceOrientation; UIDevice.current.orientation is unreliable.")
-    public static var orientation: UIDeviceOrientation {
-        switch interfaceOrientation {
-        case .portrait:           return .portrait
-        case .portraitUpsideDown: return .portraitUpsideDown
-        case .landscapeLeft:      return .landscapeLeft
-        case .landscapeRight:     return .landscapeRight
-        case .unknown:            return .unknown
-        @unknown default:         return .unknown
-        }
-    }
-
-    // MARK: - Snapshot
+    public static var isLandscape: Bool { self.interfaceOrientation.isLandscape }
+    public static var isPortrait: Bool { self.interfaceOrientation.isPortrait }
 
     public var currentMetrics: STDeviceMetrics {
         STDeviceMetrics(
@@ -276,9 +232,17 @@ public final class STDeviceAdapter: STDeviceAdapting {
         )
     }
 
-    public static var currentMetrics: STDeviceMetrics { shared.currentMetrics }
+    public static var currentMetrics: STDeviceMetrics { self.shared.currentMetrics }
 
-    // MARK: - Private
+    /// UIKit 访问入口必须在主线程。DEBUG 构建强校验,Release 构建不引入成本。
+    /// UIApplication.connectedScenes / UIWindow.safeAreaInsets / UIScreen.main 等 API
+    /// 文档均要求主线程,后台调用可能读到脏状态或触发不可预期行为。
+    @inline(__always)
+    private static func assertMainThread(_ function: StaticString = #function) {
+        #if DEBUG
+        dispatchPrecondition(condition: .onQueue(.main))
+        #endif
+    }
 
     /// 选择 scene 的优先级:
     /// 1. foregroundActive 且包含 key window(最可信)
@@ -288,6 +252,7 @@ public final class STDeviceAdapter: STDeviceAdapting {
     /// 5. 第一个可用 UIWindowScene
     /// 避免 iPad 多窗口/外接屏时选到非当前 UI 的 scene。
     private static var activeWindowScene: UIWindowScene? {
+        assertMainThread()
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         if let s = scenes.first(where: { $0.activationState == .foregroundActive && $0.windows.contains(where: \.isKeyWindow) }) {
             return s
@@ -306,7 +271,8 @@ public final class STDeviceAdapter: STDeviceAdapting {
 
     /// 优先返回 key window;退化到 scene 内任意可见 window。
     private static var activeKeyWindow: UIWindow? {
-        guard let scene = activeWindowScene else { return nil }
+        assertMainThread()
+        guard let scene = self.activeWindowScene else { return nil }
         if let key = scene.windows.first(where: \.isKeyWindow) { return key }
         return scene.windows.first
     }
@@ -315,6 +281,7 @@ public final class STDeviceAdapter: STDeviceAdapting {
     /// 冷启动阶段仍是唯一可用的屏幕尺寸来源。封装在此以集中管理弃用告警。
     @available(iOS, introduced: 13.0)
     private static var fallbackMainScreenBounds: CGRect {
+        assertMainThread()
         #if swift(>=5.9)
         if #available(iOS 16.0, *) {
             // 继续使用 UIScreen.main;Apple 并未提供无 scene 场景下的等价替代。
@@ -324,6 +291,7 @@ public final class STDeviceAdapter: STDeviceAdapting {
     }
 
     private static var fallbackMainScreenScale: CGFloat {
+        assertMainThread()
         return UIScreen.main.scale
     }
 
