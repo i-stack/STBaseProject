@@ -61,7 +61,6 @@ public final class STDeviceAdapter: STDeviceAdapting {
     public private(set) var designSize: CGSize?
     public private(set) var barHeights = STBarHeightsConfiguration()
     public private(set) var scaleStrategy: STScaleStrategy = .default
-    public static let configurationDidChangeNotification = Notification.Name("STDeviceAdapterConfigurationDidChange")
 
     private init() {}
 
@@ -71,7 +70,6 @@ public final class STDeviceAdapter: STDeviceAdapting {
         } else {
             self.designSize = designSize
         }
-        self.postConfigurationChange()
     }
 
     public func configureNavigationBar(regularHeight: CGFloat, safeAreaHeight: CGFloat, containerHeight: CGFloat? = nil) {
@@ -81,24 +79,20 @@ public final class STDeviceAdapter: STDeviceAdapting {
         if let containerHeight = containerHeight, containerHeight >= 0 {
             self.barHeights.navigationBarContainerHeight = containerHeight
         }
-        self.postConfigurationChange()
     }
 
     public func configureTabBar(regularHeight: CGFloat, safeAreaHeight: CGFloat) {
         guard regularHeight >= 0, safeAreaHeight >= 0 else { return }
         self.barHeights.tabBarRegularHeight = regularHeight
         self.barHeights.tabBarSafeAreaHeight = safeAreaHeight
-        self.postConfigurationChange()
     }
 
     public func applyBarHeights(_ configuration: STBarHeightsConfiguration) {
         self.barHeights = configuration
-        self.postConfigurationChange()
     }
 
     public func configureScaleStrategy(_ strategy: STScaleStrategy) {
         self.scaleStrategy = strategy
-        self.postConfigurationChange()
     }
 
     /// 重置所有配置到初始值
@@ -106,11 +100,6 @@ public final class STDeviceAdapter: STDeviceAdapting {
         self.designSize = nil
         self.barHeights = STBarHeightsConfiguration()
         self.scaleStrategy = .default
-        self.postConfigurationChange()
-    }
-
-    private func postConfigurationChange() {
-        NotificationCenter.default.post(name: STDeviceAdapter.configurationDidChangeNotification, object: self)
     }
 
     public static var widthScale: CGFloat {
