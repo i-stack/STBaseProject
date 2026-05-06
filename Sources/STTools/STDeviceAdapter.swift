@@ -9,13 +9,20 @@ import UIKit
 
 public struct STBarHeightsConfiguration: Sendable, Equatable {
 
-    public var navigationBarRegularHeight: CGFloat = 64.0
-    public var navigationBarSafeAreaHeight: CGFloat = 88.0
-    public var navigationBarContainerHeight: CGFloat = 50.0
-    public var tabBarRegularHeight: CGFloat = 49.0
-    public var tabBarSafeAreaHeight: CGFloat = 83.0
+    /// 导航栏内容高度(不含状态栏)。`nil` 表示使用 iOS 标准值 44。
+    public var navigationBarContentHeight: CGFloat?
+    /// STBaseViewController 自定义导航栏容器高度。`nil` 表示使用 iOS 标准值 44。
+    public var navigationBarContainerHeight: CGFloat?
+    /// TabBar 内容高度(不含底部安全区)。`nil` 表示使用 iOS 标准值 49。
+    public var tabBarContentHeight: CGFloat?
 
     public init() {}
+}
+
+private enum STBarDefaults {
+    static let navigationBarContentHeight: CGFloat = 44.0
+    static let navigationBarContainerHeight: CGFloat = 44.0
+    static let tabBarContentHeight: CGFloat = 49.0
 }
 
 public struct STScaleStrategy: Sendable, Equatable {
@@ -72,19 +79,20 @@ public final class STDeviceAdapter: STDeviceAdapting {
         }
     }
 
-    public func configureNavigationBar(regularHeight: CGFloat, safeAreaHeight: CGFloat, containerHeight: CGFloat? = nil) {
-        guard regularHeight >= 0, safeAreaHeight >= 0 else { return }
-        self.barHeights.navigationBarRegularHeight = regularHeight
-        self.barHeights.navigationBarSafeAreaHeight = safeAreaHeight
-        if let containerHeight = containerHeight, containerHeight >= 0 {
+    public func configureNavigationBar(contentHeight: CGFloat? = nil, containerHeight: CGFloat? = nil) {
+        if let contentHeight = contentHeight {
+            guard contentHeight >= 0 else { return }
+            self.barHeights.navigationBarContentHeight = contentHeight
+        }
+        if let containerHeight = containerHeight {
+            guard containerHeight >= 0 else { return }
             self.barHeights.navigationBarContainerHeight = containerHeight
         }
     }
 
-    public func configureTabBar(regularHeight: CGFloat, safeAreaHeight: CGFloat) {
-        guard regularHeight >= 0, safeAreaHeight >= 0 else { return }
-        self.barHeights.tabBarRegularHeight = regularHeight
-        self.barHeights.tabBarSafeAreaHeight = safeAreaHeight
+    public func configureTabBar(contentHeight: CGFloat) {
+        guard contentHeight >= 0 else { return }
+        self.barHeights.tabBarContentHeight = contentHeight
     }
 
     public func applyBarHeights(_ configuration: STBarHeightsConfiguration) {
@@ -175,32 +183,35 @@ public final class STDeviceAdapter: STDeviceAdapting {
         return self.safeAreaInsets.bottom > 0 || self.safeAreaInsets.top > 20
     }
 
+    public static var navigationBarContentHeight: CGFloat {
+        self.shared.barHeights.navigationBarContentHeight ?? STBarDefaults.navigationBarContentHeight
+    }
+
+    /// 导航栏总高 = 状态栏 + 导航栏内容。状态栏高度随设备/场景动态变化。
     public static var navigationBarHeight: CGFloat {
-        self.isNotchScreen
-        ? self.shared.barHeights.navigationBarSafeAreaHeight
-        : self.shared.barHeights.navigationBarRegularHeight
+        self.statusBarHeight + self.navigationBarContentHeight
     }
 
     public static var navigationBarContainerHeight: CGFloat {
-        self.shared.barHeights.navigationBarContainerHeight
+        self.shared.barHeights.navigationBarContainerHeight ?? STBarDefaults.navigationBarContainerHeight
     }
 
+    /// TabBar 自身高度(不含底部安全区)。
     public static var tabBarHeight: CGFloat {
-        self.isNotchScreen
-        ? self.shared.barHeights.tabBarSafeAreaHeight
-        : self.shared.barHeights.tabBarRegularHeight
+        self.shared.barHeights.tabBarContentHeight ?? STBarDefaults.tabBarContentHeight
     }
 
     public static var bottomSafeAreaHeight: CGFloat { self.safeAreaInsets.bottom }
 
+    /// TabBar + 底部安全区,用于贴齐屏幕底部的完整占位高度。
     public static var safeTabBarHeight: CGFloat { self.tabBarHeight + self.bottomSafeAreaHeight }
 
     public static var contentHeight: CGFloat {
-        self.screenHeight - self.navigationBarHeight - self.statusBarHeight
+        self.screenHeight - self.navigationBarHeight
     }
 
     public static var contentHeightWithTabBar: CGFloat {
-        self.screenHeight - self.navigationBarHeight - self.statusBarHeight - self.tabBarHeight
+        self.screenHeight - self.navigationBarHeight - self.safeTabBarHeight
     }
 
     public static var interfaceOrientation: UIInterfaceOrientation {

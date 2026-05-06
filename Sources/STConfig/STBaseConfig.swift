@@ -15,8 +15,8 @@ public final class STBaseConfig {
 
     /// 设置默认基础配置
     /// - 设计基准尺寸：iPhone X (375x812)
-    /// - 导航栏：64 / 88
-    /// - TabBar：49 / 83
+    /// - 导航栏内容:iOS 标准 44
+    /// - TabBar 内容:iOS 标准 49
     public func applyDefaultConfiguration() {
         self.configureInterface(designSize: CGSize(width: 375, height: 812))
     }
@@ -32,44 +32,46 @@ public final class STBaseConfig {
         STDeviceAdapter.shared.configure(designSize: size)
     }
 
-    /// 配置自定义导航栏高度
+    /// 配置自定义导航栏高度。传 `nil` 则使用 iOS 标准默认值。
     /// - Parameters:
-    ///   - regularHeight: 普通设备导航栏高度（默认64）
-    ///   - safeAreaHeight: 刘海屏设备导航栏高度（默认88）
-    ///   - containerHeight: 导航栏容器高度（默认50，可选）
-    public func configureNavigationBar(regularHeight: CGFloat, safeAreaHeight: CGFloat, containerHeight: CGFloat? = nil) {
-        guard regularHeight >= 0, safeAreaHeight >= 0 else {
-            STLog("⚠️ STBaseConfig: 导航栏高度无效，忽略")
+    ///   - contentHeight: 导航栏内容高度(不含状态栏),iOS 标准为 44
+    ///   - containerHeight: STBaseViewController 自定义容器高度,iOS 标准为 44
+    public func configureNavigationBar(contentHeight: CGFloat? = nil, containerHeight: CGFloat? = nil) {
+        if let contentHeight = contentHeight, contentHeight < 0 {
+            STLog("⚠️ STBaseConfig: 导航栏 contentHeight 无效，忽略")
             return
         }
-        STDeviceAdapter.shared.configureNavigationBar(regularHeight: regularHeight, safeAreaHeight: safeAreaHeight, containerHeight: containerHeight)
-    }
-
-    /// 配置自定义 TabBar 高度
-    public func configureTabBar(regularHeight: CGFloat, safeAreaHeight: CGFloat) {
-        guard regularHeight >= 0, safeAreaHeight >= 0 else {
-            STLog("⚠️ STBaseConfig: TabBar 高度无效，忽略")
+        if let containerHeight = containerHeight, containerHeight < 0 {
+            STLog("⚠️ STBaseConfig: 导航栏 containerHeight 无效，忽略")
             return
         }
-        STDeviceAdapter.shared.configureTabBar(regularHeight: regularHeight, safeAreaHeight: safeAreaHeight)
+        STDeviceAdapter.shared.configureNavigationBar(contentHeight: contentHeight, containerHeight: containerHeight)
     }
 
-    /// 配置完整的界面尺寸
+    /// 配置自定义 TabBar 高度(不含底部安全区)。iOS 标准为 49。
+    public func configureTabBar(contentHeight: CGFloat) {
+        guard contentHeight >= 0 else {
+            STLog("⚠️ STBaseConfig: TabBar contentHeight 无效，忽略")
+            return
+        }
+        STDeviceAdapter.shared.configureTabBar(contentHeight: contentHeight)
+    }
+
+    /// 配置完整的界面尺寸。各 bar 高度传 `nil` 表示使用 iOS 标准默认值。
     public func configureInterface(
         designSize: CGSize,
-        navigationBarRegularHeight: CGFloat = 64,
-        navigationBarSafeAreaHeight: CGFloat = 88,
-        navigationBarContainerHeight: CGFloat = 50,
-        tabBarRegularHeight: CGFloat = 49,
-        tabBarSafeAreaHeight: CGFloat = 83
+        navigationBarContentHeight: CGFloat? = nil,
+        navigationBarContainerHeight: CGFloat? = nil,
+        tabBarContentHeight: CGFloat? = nil
     ) {
         self.configureDesignSize(designSize)
         self.configureNavigationBar(
-            regularHeight: navigationBarRegularHeight,
-            safeAreaHeight: navigationBarSafeAreaHeight,
+            contentHeight: navigationBarContentHeight,
             containerHeight: navigationBarContainerHeight
         )
-        self.configureTabBar(regularHeight: tabBarRegularHeight, safeAreaHeight: tabBarSafeAreaHeight)
+        if let tabBarContentHeight = tabBarContentHeight {
+            self.configureTabBar(contentHeight: tabBarContentHeight)
+        }
     }
 
     /// 使用完整的高度模型配置
