@@ -468,6 +468,17 @@ extension STBaseViewController {
             container.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
             container.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])
+        // 把标题/按钮迁入 effect 的 contentView，让系统玻璃对其内容做 vibrancy 自适应。
+        // removeFromSuperview 会一并销毁 items view 的所有约束（含决定 navigationBarView 高度的 bottom 约束），必须重建。
+        self.navigationBarItemsView.removeFromSuperview()
+        container.contentView.addSubview(self.navigationBarItemsView)
+        NSLayoutConstraint.activate([
+            self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor),
+            self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
+            self.navigationBarItemsView.leadingAnchor.constraint(equalTo: container.contentView.leadingAnchor),
+            self.navigationBarItemsView.trailingAnchor.constraint(equalTo: container.contentView.trailingAnchor)
+        ])
         self.liquidGlassContainerView = container
         self.navigationBarView.backgroundColor = .clear
         self.navGradientBar?.isHidden = true
@@ -476,9 +487,48 @@ extension STBaseViewController {
 
     public func st_disableLiquidGlass() {
         guard self.liquidGlassContainerView != nil else { return }
+        // 迁回 navigationBarView 并重建完整约束（含决定 nav 栏高度的 bottom 约束）
+        self.navigationBarItemsView.removeFromSuperview()
+        self.navigationBarView.addSubview(self.navigationBarItemsView)
+        NSLayoutConstraint.activate([
+            self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor),
+            self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
+            self.navigationBarItemsView.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
+            self.navigationBarItemsView.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
+        ])
         self.liquidGlassContainerView?.removeFromSuperview()
         self.liquidGlassContainerView = nil
         self.navigationBarView.backgroundColor = self.navBarBackgroundColor
         self.navGradientBar?.isHidden = false
+    }
+
+    /// 滚动到阈值以上时淡入玻璃，回到顶部时还原为透明；期间标题/按钮始终可见。
+    /// 优于 `st_linkScrollAlpha`：后者连 title/button 也一起透明掉。
+    @discardableResult
+    open func st_linkLiquidGlassVisibility(_ scrollView: UIScrollView, threshold: CGFloat = 20) -> Self {
+        self.contentOffsetObservation?.invalidate()
+        let clampedThreshold = max(1, threshold)
+        // 初始：默认隐藏玻璃，等滚动再淡入
+        if let container = self.liquidGlassContainerView as? UIVisualEffectView {
+            container.effect = nil
+        }
+        var lastVisible = false
+        self.contentOffsetObservation = scrollView.observe(
+            \.contentOffset, options: [.new],
+            changeHandler: { [weak self] scroll, _ in
+                guard let self = self else { return }
+                let adjusted = scroll.contentOffset.y + scroll.adjustedContentInset.top
+                let shouldShow = adjusted > clampedThreshold
+                if lastVisible == shouldShow { return }
+                lastVisible = shouldShow
+                let targetEffect: UIVisualEffect? = shouldShow ? STGlassEffectFactory.makeVisualEffect() : nil
+                UIView.animate(withDuration: 0.22) {
+                    if let container = self.liquidGlassContainerView as? UIVisualEffectView {
+                        container.effect = targetEffect
+                    }
+                }
+            })
+        return self
     }
 }
