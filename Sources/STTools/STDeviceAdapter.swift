@@ -50,11 +50,6 @@ public protocol STDeviceAdapting: AnyObject {
     var currentMetrics: STDeviceMetrics { get }
 }
 
-/// 设备/屏幕适配器。
-///
-/// **线程要求**:本类型的所有公开方法与静态属性都会访问 `UIApplication` / `UIWindow` / `UIScreen`,
-/// 仅能在主线程调用。目前未以 `@MainActor` 约束(为避免 UIFont 扩展与 STMarkdown 渲染层产生级联 actor 迁移)。
-/// 后续计划:待 STMarkdown 渲染层并发模型梳理后,整体加上 `@MainActor`。
 public final class STDeviceAdapter: STDeviceAdapting {
 
     public static let shared = STDeviceAdapter()
@@ -65,11 +60,11 @@ public final class STDeviceAdapter: STDeviceAdapting {
     private init() {}
 
     public func configure(designSize: CGSize?) {
-        if let size = designSize, (size.width <= 0 || size.height <= 0) {
+        guard let size = designSize, size.width > 0, size.height > 0 else {
             self.designSize = nil
-        } else {
-            self.designSize = designSize
+            return
         }
+        self.designSize = designSize
     }
 
     public func configureNavigationBar(contentHeight: CGFloat) {
@@ -109,30 +104,22 @@ public final class STDeviceAdapter: STDeviceAdapting {
         return clamped(raw, strategy: self.shared.scaleStrategy)
     }
 
-    public static func scaledValue(_ value: CGFloat) -> CGFloat {
+    public static func scaledWidth(_ value: CGFloat) -> CGFloat {
         scaled(value, multiplier: self.widthScale)
     }
 
-    public static func scaledHeightValue(_ value: CGFloat) -> CGFloat {
+    public static func scaledHeight(_ value: CGFloat) -> CGFloat {
         scaled(value, multiplier: self.heightScale)
     }
 
-    public static func scaledWidth(_ value: CGFloat) -> CGFloat {
-        scaledValue(value)
-    }
-
-    public static func scaledHeight(_ value: CGFloat) -> CGFloat {
-        scaledHeightValue(value)
-    }
-
-    /// 注意:字体缩放建议使用 `UIFont.st_preferredFont(ofSize:forTextStyle:)` 以联动 Dynamic Type。
+    /// 字体缩放建议使用 `UIFont.st_preferredFont(ofSize:forTextStyle:)` 以联动 Dynamic Type。
     /// 本方法仅按设计稿宽度等比缩放,不响应系统字号设置。
     public static func scaledFontSize(_ value: CGFloat) -> CGFloat {
-        scaledValue(value)
+        scaledWidth(value)
     }
 
     public static func scaledSpacing(_ value: CGFloat) -> CGFloat {
-        scaledValue(value)
+        scaledWidth(value)
     }
 
     /// 屏幕/窗口尺寸。
@@ -140,6 +127,7 @@ public final class STDeviceAdapter: STDeviceAdapting {
     /// 最后一档是 iOS 16+ 已弃用的 `UIScreen.main`,但 App 启动早期(AppDelegate.didFinishLaunching
     /// 期间、`makeKeyAndVisible` 之前)只有这条路径能返回非零尺寸。
     public static var screenBounds: CGRect {
+        assertMainThread()
         if let window = self.activeKeyWindow { return window.bounds }
         if let scene = self.activeWindowScene { return scene.screen.bounds }
         return self.fallbackMainScreenBounds
@@ -150,22 +138,26 @@ public final class STDeviceAdapter: STDeviceAdapting {
     public static var screenSize: CGSize { self.screenBounds.size }
 
     public static var screenScale: CGFloat {
+        assertMainThread()
         if let scale = self.activeWindowScene?.screen.scale { return scale }
         if let scale = self.activeKeyWindow?.screen.scale { return scale }
         return self.fallbackMainScreenScale
     }
 
     public static var safeAreaInsets: UIEdgeInsets {
-        self.activeKeyWindow?.safeAreaInsets ?? .zero
+        assertMainThread()
+        return self.activeKeyWindow?.safeAreaInsets ?? .zero
     }
 
     public static var statusBarHeight: CGFloat {
-        self.activeWindowScene?.statusBarManager?.statusBarFrame.height ?? 0
+        assertMainThread()
+        return self.activeWindowScene?.statusBarManager?.statusBarFrame.height ?? 0
     }
 
     /// 是否为带 home indicator 的全面屏设备(刘海/灵动岛/iPad Pro with home indicator)。
     /// 判据:idiom==.phone 且底部安全区 > 0;对于 iPad,通常不需要"刘海"这个概念,返回 false。
     public static var isNotchScreen: Bool {
+        assertMainThread()
         guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
         return self.safeAreaInsets.bottom > 0 || self.safeAreaInsets.top > 20
     }
