@@ -2,34 +2,33 @@
 //  STGlassEffectFactory.swift
 //  STBaseProject
 //
-//  Created by Codex on 2026/4/29.
+//  Created by 寒江孤影 on 2026/4/29.
 //
 
 import UIKit
-import Foundation
 
 enum STGlassEffectFactory {
-    static func makeVisualEffect() -> UIVisualEffect {
-        if #available(iOS 26.0, *),
-           let glassEffect = self.makeRuntimeGlassEffect() {
-            return glassEffect
+    enum Style {
+        case regular
+        case clear
+    }
+
+    static func makeVisualEffect(style: Style = .clear, isInteractive: Bool = true) -> UIVisualEffect {
+        if #available(iOS 26.0, *) {
+            return Self.makeSystemGlassEffect(style: style, isInteractive: isInteractive)
         }
         return UIBlurEffect(style: .systemUltraThinMaterial)
     }
 
     @available(iOS 26.0, *)
-    private static func makeRuntimeGlassEffect() -> UIVisualEffect? {
-        guard let glassType = NSClassFromString("UIGlassEffect") as? NSObject.Type else {
-            return nil
+    private static func makeSystemGlassEffect(style: Style, isInteractive: Bool) -> UIVisualEffect {
+        let systemStyle: UIGlassEffect.Style
+        switch style {
+        case .regular: systemStyle = .regular
+        case .clear: systemStyle = .clear
         }
-
-        let effectSelector = NSSelectorFromString("effect")
-        if glassType.responds(to: effectSelector),
-           let unmanaged = glassType.perform(effectSelector),
-           let effect = unmanaged.takeUnretainedValue() as? UIVisualEffect {
-            return effect
-        }
-
-        return glassType.init() as? UIVisualEffect
+        let glass = UIGlassEffect(style: systemStyle)
+        glass.isInteractive = isInteractive
+        return glass
     }
 }

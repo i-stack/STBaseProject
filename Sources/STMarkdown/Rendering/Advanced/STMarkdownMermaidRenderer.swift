@@ -10,7 +10,7 @@ import WebKit
 
 /// WKWebView 离屏渲染 Mermaid 图表，结果缓存为 UIImage。
 /// - 全局单例，序列化渲染队列（避免并发冲突），缓存复用
-/// - Mermaid.js 从 SPM Bundle 资源包加载（Bundle.module）
+/// - Mermaid.js 优先从 STMarkdown 资源包加载（SPM：`Bundle.module`；CocoaPods：`STBaseProject_STMarkdown.bundle`）
 @MainActor
 public class STMarkdownMermaidRenderer: NSObject {
 
@@ -158,11 +158,24 @@ public class STMarkdownMermaidRenderer: NSObject {
         self.drainQueue()
     }
 
+    private static func markdownResourcesBundle() -> Bundle {
+#if SWIFT_PACKAGE
+        return Bundle.module
+#else
+        let containing = Bundle(for: STMarkdownMermaidRenderer.self)
+        if let url = containing.url(forResource: "STBaseProject_STMarkdown", withExtension: "bundle"),
+           let bundle = Bundle(url: url) {
+            return bundle
+        }
+        return containing
+#endif
+    }
+
     private func scaffoldHTML() -> String {
         // 将 mermaid.js 内容内联到 HTML 中，避免 loadHTMLString(baseURL:nil) 的
         // file:// 跨 origin 限制导致脚本加载被 WebKit 安全策略阻断。
         let mermaidScript: String
-        if let url = Bundle.module.url(forResource: "mermaid.min", withExtension: "js"),
+        if let url = Self.markdownResourcesBundle().url(forResource: "mermaid.min", withExtension: "js"),
            let content = try? String(contentsOf: url, encoding: .utf8) {
             mermaidScript = "<script>\(content)</script>"
         } else {

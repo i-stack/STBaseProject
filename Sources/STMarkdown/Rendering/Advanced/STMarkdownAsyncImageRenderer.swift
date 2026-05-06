@@ -201,7 +201,9 @@ private extension STMarkdownImageLoading {
     }
 }
 
-final class STMarkdownAsyncImageAttachment: NSTextAttachment, STMarkdownRefreshableAttachment {
+/// @unchecked Sendable: 所有存储属性为 `let` 不可变；`refreshRegistry` 自身由 `NSLock` 保护；
+/// `NSTextAttachment.image` / `bounds` 的写入仅发生在 `@MainActor` 路径（`configurePlaceholder` / 图片加载回调内部会回到主线程再刷新）。
+final class STMarkdownAsyncImageAttachment: NSTextAttachment, STMarkdownRefreshableAttachment, @unchecked Sendable {
 
     private let refreshRegistry = STMarkdownRefreshObserverRegistry()
     private let loader: STMarkdownImageLoading

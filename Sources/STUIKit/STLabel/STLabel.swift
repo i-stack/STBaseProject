@@ -69,7 +69,7 @@ open class STLabel: UILabel, STLocalizable {
     
     @IBInspectable open var cornerRadius: CGFloat {
         set {
-            layer.cornerRadius = newValue
+            self.layer.cornerRadius = newValue
             self.st_updateLiquidGlassCornerRadius()
         }
         get {
@@ -88,7 +88,7 @@ open class STLabel: UILabel, STLocalizable {
     
     @IBInspectable open var borderWidth: CGFloat {
         set {
-            layer.borderWidth = newValue > 0 ? newValue : 0
+            self.layer.borderWidth = newValue > 0 ? newValue : 0
         }
         get {
             return layer.borderWidth
@@ -97,7 +97,7 @@ open class STLabel: UILabel, STLocalizable {
     
     @IBInspectable open var borderColor: UIColor? {
         set {
-            layer.borderColor = newValue?.cgColor
+            self.layer.borderColor = newValue?.cgColor
         }
         get {
             guard let color = self.layer.borderColor else { return nil }

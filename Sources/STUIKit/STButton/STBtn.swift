@@ -21,6 +21,12 @@ public enum STBtnBackgroundStyle: Int {
 @IBDesignable
 open class STBtn: UIButton {
     
+    /// 通用标识符，已废弃。
+    /// `Any?` 无法提供类型安全、也无法稳定契约化。请改用：
+    /// - 字符串标识：`stringIdentifier`
+    /// - 整数标识：`tag`（UIKit 原生）
+    /// - 无障碍/UI 测试标识：`accessibilityIdentifier`
+    @available(*, deprecated, message: "Use stringIdentifier, tag, or accessibilityIdentifier instead.")
     open var identifier: Any?
     
     private var gradientLayer: CAGradientLayer?
@@ -28,6 +34,8 @@ open class STBtn: UIButton {
     private var gradientStartPoint: CGPoint = CGPoint(x: 0, y: 0)
     private var gradientEndPoint: CGPoint = CGPoint(x: 1, y: 1)
     private var liquidGlassView: STLiquidGlassView?
+    /// 按 `UIControl.State.rawValue` 存储的 Configuration 背景色，由 `st_setBackgroundColor(_:for:)` 维护。
+    private var stateBackgroundColors: [UInt: UIColor] = [:]
     
     public var backgroundStyle: STBtnBackgroundStyle = .normal {
         didSet {
@@ -86,6 +94,12 @@ open class STBtn: UIButton {
     /// ```
     @IBInspectable open var stringIdentifier: String?
     
+    /// 传入 Localization **key**，setter 通过 `String.localized` 扩展立即解析为当前语言文案并写入 `.normal` title。
+    ///
+    /// 行为说明：
+    /// - 传入值是 key（会查 `Localizable.strings`），不是最终文案；
+    /// - 原始 key 通过关联对象保存，可通过 getter 回读；
+    /// - 解析发生在赋值时刻，**不会自动响应运行时语言切换**；如需切换语言后刷新，请重新赋值或在语言切换通知中再次调用。
     @IBInspectable open var localizedTitle: String {
         get {
             return objc_getAssociatedObject(self, &STBtnLocalizationKey.localizedTitleKey) as? String ?? ""
@@ -95,7 +109,9 @@ open class STBtn: UIButton {
             self.setTitle(newValue.localized, for: .normal)
         }
     }
-    
+
+    /// 传入 Localization **key**，setter 通过 `String.localized` 扩展立即解析为当前语言文案并写入 `.selected` title。
+    /// 行为与 `localizedTitle` 一致，**不会自动响应运行时语言切换**。
     @IBInspectable open var localizedSelectedTitle: String {
         get {
             return objc_getAssociatedObject(self, &STBtnLocalizationKey.localizedSelectedTitleKey) as? String ?? ""
@@ -120,6 +136,7 @@ open class STBtn: UIButton {
             self.layer.cornerRadius = newValue
             self.updateGradientLayerCornerRadius()
             self.updateLiquidGlassCornerRadius()
+            self.setNeedsUpdateConfiguration()
         }
         get {
             return self.layer.cornerRadius
@@ -145,6 +162,11 @@ open class STBtn: UIButton {
         }
     }
     
+    /// 是否将 `titleLabel.font` 替换为项目级字体 `UIFont.st_systemFont(ofSize:)`。
+    ///
+    /// ⚠️ 命名保留是为向后兼容，**不是 `adjustsFontSizeToFitWidth` 语义的自动缩放**：
+    /// 它只在开启时读取当前字号、用项目字体重建一个同字号的 `UIFont`，用于统一品牌字体。
+    /// 如需"文本自动缩放以适配宽度"，请另设 `titleLabel?.adjustsFontSizeToFitWidth` 与 `minimumScaleFactor`。
     @IBInspectable open var autoAdaptFontSize: Bool = true {
         didSet {
             if self.autoAdaptFontSize {
@@ -215,123 +237,170 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 内容水平对齐时的边距（IBInspectable）
-    /// 当 contentHorizontalAlignment 为 .left 或 .right 时，此属性控制内容与边缘的间距
-    /// 使用示例：
-    /// ```
-    /// button.contentHorizontalAlignment = .left
-    /// button.contentHorizontalPadding = 16  // 左边距 16
-    /// ```
-    /// 注意：布局更新会在下一个布局周期自动生效，无需手动调用 `setNeedsLayout()`
-    /// `layoutSubviews` 方法会在系统需要时自动调用，并更新边距
-    @IBInspectable open var contentHorizontalPadding: CGFloat = 0 {
+    /// STBtn 上次写入 `config.background.backgroundColor` 的值。
+    /// `stateBackgroundColors` 被清空后，仅在"当前背景色仍等于我们上次写入的值"时才清掉 `backgroundColor`，
+    /// 避免误伤调用方通过 `onConfigurationUpdate` 另行设置的背景色。
+    private var lastManagedBackgroundColor: UIColor?
+    private var hasPreservedSystemStateTransformers = false
+    private var preservedImageColorTransformer: UIConfigurationColorTransformer?
+    private var preservedBackgroundColorTransformer: UIConfigurationColorTransformer?
+
+    /// 是否屏蔽 `UIButton.Configuration` 的系统默认状态效果
+    /// （`highlighted` 下标题/图标 alpha 衰减、`disabled` 灰化、background 自动 tint）。
+    ///
+    /// - `false`（**默认**）：保留 UIKit 原生状态反馈，STBtn 行为等同 UIButton，
+    ///   开发者使用 `UIButton.Configuration.filled/tinted/gray()`、设置 `baseBackgroundColor`、
+    ///   读取系统 `highlighted` tint 等标准 API 都符合 Apple 文档预期。
+    /// - `true`：屏蔽系统状态效果，标题色 / 图标色 / 背景色完全由调用方通过
+    ///   `setTitleColor(_:for:)` / `setImage(_:for:)` / `st_setBackgroundColor(_:for:)` /
+    ///   `onConfigurationUpdate` 接口显式接管。适合强品牌规范、不允许系统 tint 干扰的场景。
+    ///
+    /// ⚠️ 从 2.x 起默认值从 `true` 翻转为 `false`；若升级后视觉变化明显，
+    /// 在按钮创建后显式设置 `btn.suppressesSystemStateEffects = true` 即可恢复旧行为。
+    public var suppressesSystemStateEffects: Bool = false {
         didSet {
-            guard oldValue != self.contentHorizontalPadding else { return }
-            self.setNeedsLayout()
+            guard oldValue != self.suppressesSystemStateEffects else { return }
+            if self.suppressesSystemStateEffects {
+                self.preserveSystemStateTransformersIfNeeded()
+            } else {
+                self.restorePreservedSystemStateTransformers()
+            }
+            self.setNeedsUpdateConfiguration()
         }
     }
-    
+
+    /// 外部扩展点：每次 Configuration 更新时在 STBtn 内部逻辑 **之后** 调用，
+    /// 允许调用方追加字段调整而不必直接接管 `configurationUpdateHandler`。
+    /// ⚠️ 请勿直接给 `self.configurationUpdateHandler` 赋值 —— 那会把 STBtn 的 `contentInsets`、
+    /// state 背景、字体注入等逻辑全部覆盖。所有"每次 update 要做的事"都应写在这里。
+    ///
+    /// 赋值后会自动触发一次 `setNeedsUpdateConfiguration()`，使闭包"设置即生效"。
+    ///
+    /// 使用示例：
+    /// ```
+    /// button.onConfigurationUpdate = { btn, config in
+    ///     config.background.strokeColor = btn.isSelected ? .systemBlue : .clear
+    ///     config.background.strokeWidth = 1
+    /// }
+    /// ```
+    public var onConfigurationUpdate: ((UIButton, inout UIButton.Configuration) -> Void)? {
+        didSet {
+            self.setNeedsUpdateConfiguration()
+        }
+    }
+
     private func setupButton() {
         self.titleLabel?.adjustsFontForContentSizeCategory = true
         self.titleLabel?.textAlignment = .natural
+        self.titleLabel?.numberOfLines = 1
+        self.titleLabel?.lineBreakMode = .byTruncatingTail
         self.imageView?.contentMode = .scaleAspectFit
+        self.installModernButtonConfiguration()
     }
-    
+
+    /// 安装现代化 `UIButton.Configuration`，以及 update handler 用于：
+    /// - 注入 `titleLabel.font` 到 `attributedTitle`（存量调用点用 `titleLabel.font` 设字体）
+    /// - 根据 `suppressesSystemStateEffects` 选择性屏蔽系统状态效果
+    /// - 同步 corner radius 与 state 背景色
+    /// - 回调 `onConfigurationUpdate` 扩展点
+    ///
+    /// **不管理 `contentInsets`** —— 调用方直接写 `configuration?.contentInsets` 或通过 `onConfigurationUpdate` 修改。
+    private func installModernButtonConfiguration() {
+        if self.configuration == nil {
+            self.configuration = UIButton.Configuration.plain()
+        }
+        self.configurationUpdateHandler = { [weak self] button in
+            guard let self, var config = button.configuration else { return }
+            // 单行 + 尾部省略，匹配迁移前 UIButton 的默认行为；
+            // Configuration 默认允许多行，中文无词边界会被按字符纵向拆开
+            config.titleLineBreakMode = .byTruncatingTail
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { [weak self] attrs in
+                // Configuration 生效后 titleLabel.font 不再驱动渲染；
+                // 保留 titleLabel.font 作为字体入口（大量存量调用点都这么写），
+                // 通过 transformer 每次渲染时把它注入到 attributedTitle —— 字体注入**永远执行**，
+                // 与 `suppressesSystemStateEffects` 无关，因为它不是状态效果、只是字体来源适配。
+                var updated = attrs
+                guard let self else { return updated }
+                if let font = self.titleLabel?.font {
+                    updated.font = font
+                }
+                // 仅在开关打开时显式接管 foregroundColor，阻断系统在 highlighted/disabled 下
+                // 对标题色做 alpha 衰减 / 灰化；关闭时（默认）保留系统原生状态反馈。
+                if self.suppressesSystemStateEffects,
+                   let color = self.titleColor(for: self.state) {
+                    updated.foregroundColor = color
+                }
+                return updated
+            }
+            // 图标 tint 的系统变换：开关打开时关掉系统在 highlighted/disabled 下的 alpha 衰减。
+            if self.suppressesSystemStateEffects {
+                config.imageColorTransformer = UIConfigurationColorTransformer { $0 }
+            }
+            self.refineButtonConfiguration(button, configuration: &config)
+            self.onConfigurationUpdate?(button, &config)
+            button.configuration = config
+            // Configuration 应用 attributedTitle 时会回写 titleLabel，可能把 numberOfLines 重置成 0；
+            // 这里重新锁回单行，保证中文窄 label 不会按字符拆行
+            self.titleLabel?.numberOfLines = 1
+            self.titleLabel?.lineBreakMode = .byTruncatingTail
+        }
+        self.setNeedsUpdateConfiguration()
+    }
+
+    private func preserveSystemStateTransformersIfNeeded() {
+        guard !self.hasPreservedSystemStateTransformers else { return }
+        self.preservedImageColorTransformer = self.configuration?.imageColorTransformer
+        self.preservedBackgroundColorTransformer = self.configuration?.background.backgroundColorTransformer
+        self.hasPreservedSystemStateTransformers = true
+    }
+
+    private func restorePreservedSystemStateTransformers() {
+        guard self.hasPreservedSystemStateTransformers else { return }
+        if var config = self.configuration {
+            config.imageColorTransformer = self.preservedImageColorTransformer
+            config.background.backgroundColorTransformer = self.preservedBackgroundColorTransformer
+            self.configuration = config
+        }
+        self.preservedImageColorTransformer = nil
+        self.preservedBackgroundColorTransformer = nil
+        self.hasPreservedSystemStateTransformers = false
+    }
+
+    /// 子类（如 `STIconBtn`）覆写此方法以写入图文布局 / `contentInsets` 等 Configuration 字段。
+    /// 调用时机：每次 `configurationUpdateHandler` 触发，在字体/状态 transformer 之后、`onConfigurationUpdate` 之前。
+    open func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
+        // 让 Configuration 管理的 background 子视图与 `layer.cornerRadius` 对齐，
+        // 避免 `masksToBounds = false`（如 `st_setShadow`）或 `config.background.backgroundColor`
+        // 非空时背景按 0 半径绘制、把 `layer.cornerRadius` 盖住。
+        config.background.cornerRadius = self.layer.cornerRadius
+        let resolvedBackgroundColor = self.resolvedStateBackgroundColor(for: button.state)
+        // 开关打开时阻断系统在 highlighted/selected 下对 background 的 tint 过渡；
+        // 关闭时（默认）保留系统原生反馈，`filled/tinted/gray` 等 preset 表现等同 UIButton。
+        if self.suppressesSystemStateEffects {
+            config.background.backgroundColorTransformer = UIConfigurationColorTransformer { $0 }
+            // `plain()` 风格在 selected/highlighted 下可能仍会绘制系统态底色；
+            // 当调用方未显式提供状态背景时，主动清为透明，确保视觉完全由外界接管。
+            if resolvedBackgroundColor == nil {
+                config.baseBackgroundColor = .clear
+                config.background.backgroundColor = .clear
+            }
+        }
+        if let color = resolvedBackgroundColor {
+            config.background.backgroundColor = color
+            self.lastManagedBackgroundColor = color
+        } else if let managed = self.lastManagedBackgroundColor,
+                  config.background.backgroundColor == managed {
+            // 调用方把 `stateBackgroundColors` 全清空了：仅当"当前背景色仍是我们上次写入的值"才清除，
+            // 避免把 `onConfigurationUpdate` 等外部路径写入的背景色误覆盖。
+            config.background.backgroundColor = nil
+            self.lastManagedBackgroundColor = nil
+        }
+    }
+
     open override func layoutSubviews() {
         super.layoutSubviews()
-        self.updateContentHorizontalPadding()
         self.updateGradientLayerFrame()
         self.updateLiquidGlassFrame()
-    }
-    
-    /// 更新内容水平对齐时的边距
-    private func updateContentHorizontalPadding() {
-        guard self.contentHorizontalPadding > 0 else {
-            // 如果边距为 0，清除水平方向的边距，保留垂直方向的边距
-            let currentInsets = self.contentEdgeInsets
-            if currentInsets.left != 0 || currentInsets.right != 0 {
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: currentInsets.top,
-                    left: 0,
-                    bottom: currentInsets.bottom,
-                    right: 0
-                )
-            }
-            return
-        }
-        
-        // 保存当前的垂直边距
-        let currentInsets = self.contentEdgeInsets
-        let top = currentInsets.top
-        let bottom = currentInsets.bottom
-        
-        // 根据 contentHorizontalAlignment 设置水平边距
-        switch self.contentHorizontalAlignment {
-        case .left:
-            // 左对齐时，只设置左边距
-            self.contentEdgeInsets = UIEdgeInsets(
-                top: top,
-                left: self.contentHorizontalPadding,
-                bottom: bottom,
-                right: 0
-            )
-        case .right:
-            // 右对齐时，只设置右边距
-            self.contentEdgeInsets = UIEdgeInsets(
-                top: top,
-                left: 0,
-                bottom: bottom,
-                right: self.contentHorizontalPadding
-            )
-        case .leading:
-            // Leading 对齐时，根据布局方向设置
-            if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
-                // RTL 布局，设置右边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: 0,
-                    bottom: bottom,
-                    right: self.contentHorizontalPadding
-                )
-            } else {
-                // LTR 布局，设置左边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: self.contentHorizontalPadding,
-                    bottom: bottom,
-                    right: 0
-                )
-            }
-        case .trailing:
-            // Trailing 对齐时，根据布局方向设置
-            if UIView.userInterfaceLayoutDirection(for: self.semanticContentAttribute) == .rightToLeft {
-                // RTL 布局，设置左边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: self.contentHorizontalPadding,
-                    bottom: bottom,
-                    right: 0
-                )
-            } else {
-                // LTR 布局，设置右边距
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: 0,
-                    bottom: bottom,
-                    right: self.contentHorizontalPadding
-                )
-            }
-        default:
-            // 居中对齐等其他情况，清除水平边距
-            if currentInsets.left != 0 || currentInsets.right != 0 {
-                self.contentEdgeInsets = UIEdgeInsets(
-                    top: top,
-                    left: 0,
-                    bottom: bottom,
-                    right: 0
-                )
-            }
-        }
     }
     
     /// 设置圆角按钮
@@ -384,11 +453,55 @@ open class STBtn: UIButton {
     ///   - radius: 阴影半径
     ///   - opacity: 阴影透明度
     public override func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
-        layer.shadowColor = color.cgColor
-        layer.shadowOffset = offset
-        layer.shadowRadius = radius
-        layer.shadowOpacity = opacity
-        layer.masksToBounds = false
+        self.layer.shadowColor = color.cgColor
+        self.layer.shadowOffset = offset
+        self.layer.shadowRadius = radius
+        self.layer.shadowOpacity = opacity
+        self.layer.masksToBounds = false
+    }
+
+    /// 按状态设置按钮背景色（写入 `UIButton.Configuration.background.backgroundColor`）。
+    ///
+    /// 命中优先级：`disabled` > `highlighted` > `selected` > `normal`；未设置的状态回退到 `.normal`。
+    /// 传入 `nil` 清除该状态的设置。
+    ///
+    /// 使用示例：
+    /// ```
+    /// button.st_setBackgroundColor(.systemBlue, for: .normal)
+    /// button.st_setBackgroundColor(.systemIndigo, for: .highlighted)
+    /// button.st_setBackgroundColor(.systemGray3, for: .disabled)
+    /// ```
+    public func st_setBackgroundColor(_ color: UIColor?, for state: UIControl.State) {
+        let key = state.rawValue
+        if let color {
+            self.stateBackgroundColors[key] = color
+        } else {
+            self.stateBackgroundColors.removeValue(forKey: key)
+        }
+        self.setNeedsUpdateConfiguration()
+    }
+
+    /// 读取指定状态下已设置的背景色（不含回退推导）。
+    public func st_backgroundColor(for state: UIControl.State) -> UIColor? {
+        return self.stateBackgroundColors[state.rawValue]
+    }
+
+    /// 按当前 `button.state` 解析实际命中的背景色，内部使用。
+    private func resolvedStateBackgroundColor(for state: UIControl.State) -> UIColor? {
+        guard !self.stateBackgroundColors.isEmpty else { return nil }
+        if let color = self.stateBackgroundColors[state.rawValue] {
+            return color
+        }
+        if state.contains(.disabled), let color = self.stateBackgroundColors[UIControl.State.disabled.rawValue] {
+            return color
+        }
+        if state.contains(.highlighted), let color = self.stateBackgroundColors[UIControl.State.highlighted.rawValue] {
+            return color
+        }
+        if state.contains(.selected), let color = self.stateBackgroundColors[UIControl.State.selected.rawValue] {
+            return color
+        }
+        return self.stateBackgroundColors[UIControl.State.normal.rawValue]
     }
     
     private func updateFontSize() {

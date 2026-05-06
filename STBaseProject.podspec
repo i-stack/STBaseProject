@@ -50,13 +50,28 @@ Pod::Spec.new do |s|
     media.source_files = 'Sources/STMedia/*.swift'
   end
 
-  # s.subspec 'STMarkdown' do |markdown|
-  #   markdown.source_files = 'Sources/STMarkdown/*.swift'
-  #   markdown.dependency 'Markdown'
-  #   markdown.dependency 'SwiftMath'
-  #   markdown.resource_bundles = {
-  #     'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
-  #   }
-  # end
+  # SPM parity (Package.swift): Markdown + SwiftMath modules via CocoaPods:
+  # - swift-markdown-pod tracks github.com/GIKICoder/swift-markdown (≈ swift-markdown + swift-cmark GFM); not identical git pin as SPM `swiftlang/swift-markdown` branch main.
+  # - SwiftMath-pod wraps github.com/GIKICoder/SwiftMath; SPM uses github.com/mgriebling/SwiftMath — bump both intentionally when you need matching upstreams.
+  # swift-markdown-pod merges CAtomic into Markdown.framework; downstream Swift still needs the CAtomic modulemap flags below when compiling/importing Markdown.
+  s.subspec 'STMarkdown' do |markdown|
+    markdown.source_files = 'Sources/STMarkdown/**/*.swift'
+    # STShimmerTextView lives in STUIKit and is referenced by STMarkdownStreamingTextView,
+    # so the full core subspec is required as a transitive dep.
+    markdown.dependency 'STBaseProject/STBaseProject'
+    markdown.dependency 'swift-markdown-pod', '~> 1.0'
+    # Pre-release tag from CocoaPods trunk; constraint required so `pod lib lint` / installs resolve.
+    markdown.dependency 'SwiftMath-pod', '>= 2.0.1.pod'
+    markdown.resource_bundles = {
+      'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
+    }
+    ca_atomic = '$(inherited) -Xcc -fmodule-map-file="$(PODS_ROOT)/swift-markdown-pod/Sources/CAtomic/include/module.modulemap" -Xcc -I"$(PODS_ROOT)/swift-markdown-pod/Sources/CAtomic/include"'
+    markdown.pod_target_xcconfig = {
+      'OTHER_SWIFT_FLAGS' => ca_atomic
+    }
+    markdown.user_target_xcconfig = {
+      'OTHER_SWIFT_FLAGS' => ca_atomic
+    }
+  end
 
 end
