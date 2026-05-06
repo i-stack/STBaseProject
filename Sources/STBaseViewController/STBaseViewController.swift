@@ -62,7 +62,7 @@ open class STBaseViewController: UIViewController {
     public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20) {
         didSet { self.titleLabel.font = self.navBarTitleFont }
     }
-    public lazy var navBarHeight: CGFloat = STDeviceAdapter.navigationBarHeight
+    public var navBarHeight: CGFloat { STDeviceAdapter.navigationBarHeight }
 
     public var leftBtnImage: UIImage? {
         didSet {
@@ -428,7 +428,7 @@ open class STBaseViewController: UIViewController {
 
 extension STBaseViewController {
     public static func st_setAppearanceMode(_ mode: STAppearanceMode, animated: Bool = true) {
-        STAppearanceManager.shared.st_apply(mode: mode)
+        STAppearanceManager.shared.apply(mode: mode)
     }
 
     public static func st_getCurrentAppearanceMode() -> STAppearanceMode {
