@@ -373,12 +373,19 @@ open class STBtn: UIButton {
         // 避免 `masksToBounds = false`（如 `st_setShadow`）或 `config.background.backgroundColor`
         // 非空时背景按 0 半径绘制、把 `layer.cornerRadius` 盖住。
         config.background.cornerRadius = self.layer.cornerRadius
+        let resolvedBackgroundColor = self.resolvedStateBackgroundColor(for: button.state)
         // 开关打开时阻断系统在 highlighted/selected 下对 background 的 tint 过渡；
         // 关闭时（默认）保留系统原生反馈，`filled/tinted/gray` 等 preset 表现等同 UIButton。
         if self.suppressesSystemStateEffects {
             config.background.backgroundColorTransformer = UIConfigurationColorTransformer { $0 }
+            // `plain()` 风格在 selected/highlighted 下可能仍会绘制系统态底色；
+            // 当调用方未显式提供状态背景时，主动清为透明，确保视觉完全由外界接管。
+            if resolvedBackgroundColor == nil {
+                config.baseBackgroundColor = .clear
+                config.background.backgroundColor = .clear
+            }
         }
-        if let color = self.resolvedStateBackgroundColor(for: button.state) {
+        if let color = resolvedBackgroundColor {
             config.background.backgroundColor = color
             self.lastManagedBackgroundColor = color
         } else if let managed = self.lastManagedBackgroundColor,
