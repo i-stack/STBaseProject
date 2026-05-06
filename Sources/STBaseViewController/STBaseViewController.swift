@@ -31,15 +31,12 @@ public enum STDefaultNavigationBarItemMetrics {
 
 open class STBaseViewController: UIViewController {
 
+    public private(set) var titleLabel = STLabel()
+    public private(set) var leftBtn = STIconBtn(type: .custom)
+    public private(set) var rightBtn = STIconBtn(type: .custom)
     public private(set) var navigationBarView = UIView()
     public private(set) var navigationBarItemsView = UIView()
     public private(set) var navGradientBar: STGradientNavigationBar?
-    public var contentTopAnchor: NSLayoutYAxisAnchor { self.navigationBarView.bottomAnchor }
-
-    public private(set) var titleLabel = UILabel()
-    public private(set) var leftBtn = UIButton(type: .custom)
-    public private(set) var rightBtn = UIButton(type: .custom)
-
     public var navBarBackgroundColor: UIColor = .white {
         didSet {
             if self.liquidGlassContainerView == nil {
@@ -90,7 +87,7 @@ open class STBaseViewController: UIViewController {
     public var statusBarHidden: Bool = false
     public var statusBarStyle: UIStatusBarStyle = .default
     open var prefersSystemNavigationBarHidden: Bool { true }
-
+    public var contentTopAnchor: NSLayoutYAxisAnchor { self.navigationBarView.bottomAnchor }
     private var appearanceCancellable: AnyCancellable?
     private var contentOffsetObservation: NSKeyValueObservation?
     private var lastAppliedInterfaceStyle: UIUserInterfaceStyle?
