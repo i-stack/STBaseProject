@@ -9,20 +9,13 @@ import UIKit
 
 public struct STBarHeightsConfiguration: Sendable, Equatable {
 
-    /// 导航栏内容高度(不含状态栏)。`nil` 表示使用 iOS 标准值 44。
-    public var navigationBarContentHeight: CGFloat?
-    /// STBaseViewController 自定义导航栏容器高度。`nil` 表示使用 iOS 标准值 44。
-    public var navigationBarContainerHeight: CGFloat?
-    /// TabBar 内容高度(不含底部安全区)。`nil` 表示使用 iOS 标准值 49。
-    public var tabBarContentHeight: CGFloat?
+    /// 导航栏内部 items 容器(navigationBarItemsView,承载 title / leftBtn / rightBtn)的高度。
+    /// 设计图上通常 44(iOS 标准)或 50。整个导航栏总高随设备状态栏动态计算为 statusBar + 此值。
+    public var navigationBarContentHeight: CGFloat = 44.0
+    /// TabBar 内容高度(不含底部安全区)。iOS 标准值 49。
+    public var tabBarContentHeight: CGFloat = 49.0
 
     public init() {}
-}
-
-private enum STBarDefaults {
-    static let navigationBarContentHeight: CGFloat = 44.0
-    static let navigationBarContainerHeight: CGFloat = 44.0
-    static let tabBarContentHeight: CGFloat = 49.0
 }
 
 public struct STScaleStrategy: Sendable, Equatable {
@@ -79,15 +72,9 @@ public final class STDeviceAdapter: STDeviceAdapting {
         }
     }
 
-    public func configureNavigationBar(contentHeight: CGFloat? = nil, containerHeight: CGFloat? = nil) {
-        if let contentHeight = contentHeight {
-            guard contentHeight >= 0 else { return }
-            self.barHeights.navigationBarContentHeight = contentHeight
-        }
-        if let containerHeight = containerHeight {
-            guard containerHeight >= 0 else { return }
-            self.barHeights.navigationBarContainerHeight = containerHeight
-        }
+    public func configureNavigationBar(contentHeight: CGFloat) {
+        guard contentHeight >= 0 else { return }
+        self.barHeights.navigationBarContentHeight = contentHeight
     }
 
     public func configureTabBar(contentHeight: CGFloat) {
@@ -183,28 +170,31 @@ public final class STDeviceAdapter: STDeviceAdapting {
         return self.safeAreaInsets.bottom > 0 || self.safeAreaInsets.top > 20
     }
 
+    /// 导航栏内部 items 容器(navigationBarItemsView)高度,由配置固定。
     public static var navigationBarContentHeight: CGFloat {
-        self.shared.barHeights.navigationBarContentHeight ?? STBarDefaults.navigationBarContentHeight
+        self.shared.barHeights.navigationBarContentHeight
     }
 
-    /// 导航栏总高 = 状态栏 + 导航栏内容。状态栏高度随设备/场景动态变化。
+    /// 整个导航栏总高(从 view.top 到 navigationBarView.bottom) = 顶部安全区高度 + items 高度。
+    /// 与 STBaseViewController 的真实布局口径一致(items 顶部锚定 safeAreaLayoutGuide.top)。
+    /// 随设备动态变化(SE 64 / 刘海 88 / 灵动岛 ≈98);statusBarHidden、通话热点等状态下也能与实际渲染保持一致。
     public static var navigationBarHeight: CGFloat {
-        self.statusBarHeight + self.navigationBarContentHeight
-    }
-
-    public static var navigationBarContainerHeight: CGFloat {
-        self.shared.barHeights.navigationBarContainerHeight ?? STBarDefaults.navigationBarContainerHeight
+        self.safeAreaInsets.top + self.navigationBarContentHeight
     }
 
     /// TabBar 自身高度(不含底部安全区)。
     public static var tabBarHeight: CGFloat {
-        self.shared.barHeights.tabBarContentHeight ?? STBarDefaults.tabBarContentHeight
+        self.shared.barHeights.tabBarContentHeight
     }
 
-    public static var bottomSafeAreaHeight: CGFloat { self.safeAreaInsets.bottom }
+    public static var bottomSafeAreaHeight: CGFloat { 
+        self.safeAreaInsets.bottom 
+    }
 
     /// TabBar + 底部安全区,用于贴齐屏幕底部的完整占位高度。
-    public static var safeTabBarHeight: CGFloat { self.tabBarHeight + self.bottomSafeAreaHeight }
+    public static var safeTabBarHeight: CGFloat { 
+        self.tabBarHeight + self.bottomSafeAreaHeight 
+    }
 
     public static var contentHeight: CGFloat {
         self.screenHeight - self.navigationBarHeight

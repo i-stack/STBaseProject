@@ -32,20 +32,15 @@ public final class STBaseConfig {
         STDeviceAdapter.shared.configure(designSize: size)
     }
 
-    /// 配置自定义导航栏高度。传 `nil` 则使用 iOS 标准默认值。
-    /// - Parameters:
-    ///   - contentHeight: 导航栏内容高度(不含状态栏),iOS 标准为 44
-    ///   - containerHeight: STBaseViewController 自定义容器高度,iOS 标准为 44
-    public func configureNavigationBar(contentHeight: CGFloat? = nil, containerHeight: CGFloat? = nil) {
-        if let contentHeight = contentHeight, contentHeight < 0 {
+    /// 配置自定义导航栏 items 容器高度(navigationBarItemsView)。
+    /// - Parameter contentHeight: items 容器(title / leftBtn / rightBtn 所在)高度,iOS 标准为 44,设计图常用 50。
+    ///   整个导航栏总高由 status bar 动态相加得出,可通过 `STDeviceAdapter.navigationBarHeight` 读取。
+    public func configureNavigationBar(contentHeight: CGFloat) {
+        guard contentHeight >= 0 else {
             STLog("⚠️ STBaseConfig: 导航栏 contentHeight 无效，忽略")
             return
         }
-        if let containerHeight = containerHeight, containerHeight < 0 {
-            STLog("⚠️ STBaseConfig: 导航栏 containerHeight 无效，忽略")
-            return
-        }
-        STDeviceAdapter.shared.configureNavigationBar(contentHeight: contentHeight, containerHeight: containerHeight)
+        STDeviceAdapter.shared.configureNavigationBar(contentHeight: contentHeight)
     }
 
     /// 配置自定义 TabBar 高度(不含底部安全区)。iOS 标准为 49。
@@ -57,18 +52,16 @@ public final class STBaseConfig {
         STDeviceAdapter.shared.configureTabBar(contentHeight: contentHeight)
     }
 
-    /// 配置完整的界面尺寸。各 bar 高度传 `nil` 表示使用 iOS 标准默认值。
+    /// 配置完整的界面尺寸。各 bar 高度传 `nil` 表示使用默认值。
     public func configureInterface(
         designSize: CGSize,
         navigationBarContentHeight: CGFloat? = nil,
-        navigationBarContainerHeight: CGFloat? = nil,
         tabBarContentHeight: CGFloat? = nil
     ) {
         self.configureDesignSize(designSize)
-        self.configureNavigationBar(
-            contentHeight: navigationBarContentHeight,
-            containerHeight: navigationBarContainerHeight
-        )
+        if let navigationBarContentHeight = navigationBarContentHeight {
+            self.configureNavigationBar(contentHeight: navigationBarContentHeight)
+        }
         if let tabBarContentHeight = tabBarContentHeight {
             self.configureTabBar(contentHeight: tabBarContentHeight)
         }

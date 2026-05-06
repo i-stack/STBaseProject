@@ -157,7 +157,7 @@ open class STBaseViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
+            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight),
             self.navigationBarItemsView.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
             self.navigationBarItemsView.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])
@@ -472,7 +472,7 @@ extension STBaseViewController {
         NSLayoutConstraint.activate([
             self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor),
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
+            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight),
             self.navigationBarItemsView.leadingAnchor.constraint(equalTo: container.contentView.leadingAnchor),
             self.navigationBarItemsView.trailingAnchor.constraint(equalTo: container.contentView.trailingAnchor)
         ])
@@ -490,7 +490,7 @@ extension STBaseViewController {
         NSLayoutConstraint.activate([
             self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor),
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContainerHeight),
+            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight),
             self.navigationBarItemsView.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
             self.navigationBarItemsView.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])
