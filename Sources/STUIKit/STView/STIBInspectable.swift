@@ -133,9 +133,7 @@ extension NSLayoutConstraint {
             return 1.0
         }
     }
-    
-    // MARK: - 适配方法
-    
+        
     /// 执行约束适配
     private func adaptConstraintIfNeeded() {
         guard _autoConstant && !_isAdapted else { return }
@@ -147,7 +145,7 @@ extension NSLayoutConstraint {
         case .height:
             adaptedValue = STDeviceAdapter.scaledHeight(originalValue)
         case .both:
-            adaptedValue = STDeviceAdapter.scaledValue(originalValue)
+            adaptedValue = STDeviceAdapter.scaledWidth(originalValue)
         case .spacing:
             adaptedValue = STDeviceAdapter.scaledSpacing(originalValue)
         case .margin:
