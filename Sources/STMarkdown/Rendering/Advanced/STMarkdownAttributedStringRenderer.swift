@@ -485,7 +485,15 @@ private extension STMarkdownAttributedStringRenderer {
         }
     }
 
-    func listLayout(for item: STMarkdownRenderListItem) -> (markerText: String, markerFont: UIFont, contentIndent: CGFloat, baselineOffset: CGFloat, paragraphStyle: NSMutableParagraphStyle) {
+    struct ListLayout {
+        let markerText: String
+        let markerFont: UIFont
+        let contentIndent: CGFloat
+        let baselineOffset: CGFloat
+        let paragraphStyle: NSMutableParagraphStyle
+    }
+
+    func listLayout(for item: STMarkdownRenderListItem) -> ListLayout {
         let firstLineIndent = CGFloat(item.level) * self.style.listIndentPerLevel
         let markerFont: UIFont
         let markerText: String
@@ -528,7 +536,13 @@ private extension STMarkdownAttributedStringRenderer {
         ]
         paragraphStyle.defaultTabInterval = max(1, contentIndent)
 
-        return (markerText, markerFont, contentIndent, baselineOffset, paragraphStyle)
+        return ListLayout(
+            markerText: markerText,
+            markerFont: markerFont,
+            contentIndent: contentIndent,
+            baselineOffset: baselineOffset,
+            paragraphStyle: paragraphStyle
+        )
     }
 
     func applyListContentStyle(

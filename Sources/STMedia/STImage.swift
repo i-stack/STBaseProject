@@ -63,22 +63,22 @@ extension UIImage {
         let alpha = cgImage.alphaInfo
         let hasAlpha = alpha != .none && alpha != .noneSkipFirst && alpha != .noneSkipLast
         if hasAlpha {
-            if let png = self.pngData(), png.count > 0 { return png }
+            if let png = self.pngData(), !png.isEmpty { return png }
             return self.jpegData(compressionQuality: 1.0) ?? Data()
         } else {
-            if let jpeg = self.jpegData(compressionQuality: 1.0), jpeg.count > 0 { return jpeg }
+            if let jpeg = self.jpegData(compressionQuality: 1.0), !jpeg.isEmpty { return jpeg }
             return self.pngData() ?? Data()
         }
     }
 
     public func toBase64() -> String {
         let data = toData()
-        return data.count > 0 ? data.base64EncodedString() : ""
+        return !data.isEmpty ? data.base64EncodedString() : ""
     }
 
     /// 从已有 Data 直接检测图片格式，避免重复编码
     public static func format(from data: Data) -> STImageFormat {
-        guard data.count > 0 else { return .undefined }
+        guard !data.isEmpty else { return .undefined }
         var firstByte: UInt8 = 0
         data.copyBytes(to: &firstByte, count: 1)
         switch firstByte {
@@ -249,7 +249,7 @@ extension UIImage {
     private static func compressImageBySize(_ image: UIImage, maxFileSize: Int, format: STImageFormat) -> Data? {
         let originalData = format == .png ? image.pngData() : image.jpegData(compressionQuality: 0.8)
         var scaleFactor: CGFloat = 1.0
-        if let data = originalData, data.count > 0 {
+        if let data = originalData, !data.isEmpty {
             scaleFactor = min(sqrt(CGFloat(maxFileSize) / CGFloat(data.count)), 1.0)
         }
         for _ in 0..<5 {

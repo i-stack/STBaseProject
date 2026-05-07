@@ -334,9 +334,10 @@ public class STTabBarItemView: UIView {
     
     private func updateBadgeUI() {
         guard let model = self.itemModel else { return }
-        if model.badge.count > 0 {
+        let badgeCount = model.badge.count
+        if badgeCount > 0 {
             self.badgeLabel.isHidden = false
-            self.badgeLabel.text = model.badge.count > 99 ? "99+" : "\(model.badge.count)"
+            self.badgeLabel.text = badgeCount > 99 ? "99+" : "\(badgeCount)"
             self.badgeLabel.backgroundColor = model.badge.backgroundColor
             self.badgeLabel.textColor = model.badge.textColor
         } else {

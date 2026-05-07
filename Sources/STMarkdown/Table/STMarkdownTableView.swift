@@ -111,13 +111,15 @@ public final class STMarkdownTableView: UIView {
                     contentInsets: cellInsets
                 )
             },
-            fillWidth: true,
-            containerWidth: containerWidth,
-            minimumRowHeight: 35,
-            minimumColumnWidth: 56,
-            maximumColumnWidth: 360,
-            interItemSpacing: 0.5,
-            lineSpacing: 0.5
+            metrics: STMarkdownTableGridLayout.ComputeSizeMetrics(
+                fillWidth: true,
+                containerWidth: containerWidth,
+                minimumRowHeight: 35,
+                minimumColumnWidth: 56,
+                maximumColumnWidth: 360,
+                interItemSpacing: 0.5,
+                lineSpacing: 0.5
+            )
         )
     }
 

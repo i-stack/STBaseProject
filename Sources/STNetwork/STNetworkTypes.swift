@@ -312,3 +312,24 @@ public struct STDownloadOptions {
         self.removePreviousFile = removePreviousFile
     }
 }
+
+// MARK: - 下载调度
+/// 将 download 的一组可选参数聚合，减少函数参数数量并方便复用。
+public struct STDownloadDispatch {
+    public var options: STDownloadOptions
+    public var resumeData: Data?
+    public var interceptor: STInterceptor?
+    public var requestConfig: STRequestConfig?
+
+    public static let `default` = STDownloadDispatch()
+
+    public init(options: STDownloadOptions = .default,
+                resumeData: Data? = nil,
+                interceptor: STInterceptor? = nil,
+                requestConfig: STRequestConfig? = nil) {
+        self.options = options
+        self.resumeData = resumeData
+        self.interceptor = interceptor
+        self.requestConfig = requestConfig
+    }
+}

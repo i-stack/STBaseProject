@@ -33,9 +33,16 @@ public class STMarkdownMermaidRenderer: NSObject {
         return cache
     }()
     private var pendingCallbacks: [String: [@Sendable (UIImage?) -> Void]] = [:]
-    private var renderQueue: [(code: String, width: CGFloat, theme: STMarkdownThemeMode, key: String)] = []
+    private var renderQueue: [RenderTask] = []
     private var isWebViewReady = false
     private var isRendering = false
+
+    private struct RenderTask {
+        let code: String
+        let width: CGFloat
+        let theme: STMarkdownThemeMode
+        let key: String
+    }
 
     private override init() { super.init() }
 
@@ -55,7 +62,7 @@ public class STMarkdownMermaidRenderer: NSObject {
             self.pendingCallbacks[key]!.append(completion)
         } else {
             self.pendingCallbacks[key] = [completion]
-            self.renderQueue.append((code: code, width: width, theme: theme, key: key))
+            self.renderQueue.append(RenderTask(code: code, width: width, theme: theme, key: key))
         }
         self.ensureWebViewReady()
         self.drainQueue()

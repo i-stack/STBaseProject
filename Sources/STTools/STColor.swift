@@ -212,33 +212,40 @@ public extension UIColor {
     /// - Parameter other: 叠加在当前颜色上的目标颜色
     /// - Returns: 混合后的颜色
     func blending(with other: UIColor) -> UIColor? {
-        func components(of color: UIColor) -> (CGFloat, CGFloat, CGFloat, CGFloat)? {
+        struct RGBA {
+            let red: CGFloat
+            let green: CGFloat
+            let blue: CGFloat
+            let alpha: CGFloat
+        }
+
+        func components(of color: UIColor) -> RGBA? {
             var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
             if color.getRed(&r, green: &g, blue: &b, alpha: &a) {
-                return (r, g, b, a)
+                return RGBA(red: r, green: g, blue: b, alpha: a)
             }
             var white: CGFloat = 0
             if color.getWhite(&white, alpha: &a) {
-                return (white, white, white, a)
+                return RGBA(red: white, green: white, blue: white, alpha: a)
             }
             return nil
         }
 
-        guard let (baseRed, baseGreen, baseBlue, baseAlpha) = components(of: self),
-              let (sourceRed, sourceGreen, sourceBlue, sourceAlpha) = components(of: other)
+        guard let base = components(of: self),
+              let source = components(of: other)
         else {
             return nil
         }
 
-        let outputAlpha = sourceAlpha + baseAlpha * (1.0 - sourceAlpha)
+        let outputAlpha = source.alpha + base.alpha * (1.0 - source.alpha)
         guard outputAlpha > 0 else {
             return UIColor(red: 0, green: 0, blue: 0, alpha: 0)
         }
 
         return UIColor(
-            red: (sourceRed * sourceAlpha + baseRed * baseAlpha * (1.0 - sourceAlpha)) / outputAlpha,
-            green: (sourceGreen * sourceAlpha + baseGreen * baseAlpha * (1.0 - sourceAlpha)) / outputAlpha,
-            blue: (sourceBlue * sourceAlpha + baseBlue * baseAlpha * (1.0 - sourceAlpha)) / outputAlpha,
+            red: (source.red * source.alpha + base.red * base.alpha * (1.0 - source.alpha)) / outputAlpha,
+            green: (source.green * source.alpha + base.green * base.alpha * (1.0 - source.alpha)) / outputAlpha,
+            blue: (source.blue * source.alpha + base.blue * base.alpha * (1.0 - source.alpha)) / outputAlpha,
             alpha: outputAlpha
         )
     }

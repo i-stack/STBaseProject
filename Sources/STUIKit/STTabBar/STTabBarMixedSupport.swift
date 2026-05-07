@@ -85,8 +85,9 @@ public class STTabBarMixedSupport {
             .font: font
         ], for: .selected)
         
-        if customItem.badge.count > 0 {
-            item.badgeValue = customItem.badge.count > 99 ? "99+" : "\(customItem.badge.count)"
+        let badgeCount = customItem.badge.count
+        if badgeCount > 0 {
+            item.badgeValue = badgeCount > 99 ? "99+" : "\(badgeCount)"
             item.badgeColor = customItem.badge.backgroundColor
         }
         

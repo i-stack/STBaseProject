@@ -246,7 +246,7 @@ open class STTextField: UITextField {
     }
     
     public func configAttributed(text: String, textColor: UIColor) -> Void {
-        if text.count > 0 {
+        if !text.isEmpty {
             let placeholderAttributedString = NSMutableAttributedString(attributedString: NSAttributedString.init(string: text))
             placeholderAttributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: placeholderAttributedString.length))
             self.attributedPlaceholder = placeholderAttributedString

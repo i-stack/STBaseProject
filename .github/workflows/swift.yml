@@ -1,5 +1,5 @@
-# This workflow will build a Swift project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+# 库仓 CI：只做静态检查 + SPM 构建烟囱测试。
+# 业务测试（466 单测 + UI 测试）在 i-stack/STBaseProjectExample 仓库的 tests.yml 中跑。
 
 name: Swift
 
@@ -11,40 +11,48 @@ on:
 
 jobs:
   build:
-
-    runs-on: macos-latest
+    runs-on: macos-15
+    timeout-minutes: 20
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Check try? policy
-      run: bash .github/check_try_question_mark.sh
-    - name: SwiftLint
-      run: |
-        if ! command -v swiftlint >/dev/null 2>&1; then
-          brew install swiftlint
-        fi
-        swiftlint version
-        # 不加 --strict：warning 不阻断 CI，仅 .swiftlint.yml 中明确为 error 级别的规则会失败构建。
-        # 待存量 warning 清零后可改为 --strict 提升门槛。
-        swiftlint --reporter github-actions-logging
-    - name: Build
-      run: xcodebuild -scheme STBaseProject-Package -destination 'generic/platform=iOS Simulator' build
-    - name: Build For Testing
-      run: xcodebuild -scheme STBaseProject-Package -destination 'generic/platform=iOS Simulator' build-for-testing
-    - name: Run Tests Without Building
-      shell: bash
-      run: |
-        set -euo pipefail
+      - uses: actions/checkout@v4
 
-        DESTINATIONS="$(xcodebuild -scheme STBaseProject-Package -showdestinations 2>/dev/null)"
-        SIMULATOR_ID="$(printf '%s\n' "$DESTINATIONS" | awk '/platform:iOS Simulator/ && /OS:/ { if (match($0, /id:[^,}]+/)) { value = substr($0, RSTART + 3, RLENGTH - 3); gsub(/[[:space:]]/, "", value); print value; exit } }')"
+      - name: Check try? policy
+        run: bash .github/check_try_question_mark.sh
 
-        if [ -z "${SIMULATOR_ID:-}" ]; then
-          echo "No available iOS Simulator destination found."
-          echo "Full xcodebuild -showdestinations output:"
-          printf '%s\n' "$DESTINATIONS"
-          exit 1
-        fi
+      - name: SwiftLint
+        run: |
+          if ! command -v swiftlint >/dev/null 2>&1; then
+            brew install swiftlint
+          fi
+          swiftlint version
+          # 不加 --strict：warning 不阻断 CI，仅 .swiftlint.yml 中明确为 error 级别的规则会失败构建。
+          # 待存量 warning 清零后可改为 --strict 提升门槛。
+          swiftlint --reporter github-actions-logging
 
-        echo "Using iOS Simulator id: $SIMULATOR_ID"
-        xcodebuild -scheme STBaseProject-Package -destination "id=$SIMULATOR_ID" test-without-building
+      - name: Resolve SPM dependencies
+        run: xcodebuild -resolvePackageDependencies -scheme STBaseProject-Package
+
+      - name: Build (iOS Simulator)
+        run: |
+          xcodebuild \
+            -scheme STBaseProject-Package \
+            -destination 'generic/platform=iOS Simulator' \
+            build
+
+  # 库 main 分支有更新时，触发 STBaseProjectExample 仓重新跑全量测试。
+  # 仅在 push 到 main 时触发，避免 PR 阶段把下游测试也拉满。
+  # notify-example:
+  #   needs: build
+  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Trigger STBaseProjectExample tests
+  #       uses: peter-evans/repository-dispatch@v3
+  #       with:
+  #         # 需要在仓库 Settings → Secrets and variables → Actions 中配置 EXAMPLE_REPO_PAT
+  #         # PAT 至少需要 repo 写权限，用于触发 i-stack/STBaseProjectExample 的 repository_dispatch
+  #         token: ${{ secrets.EXAMPLE_REPO_PAT }}
+  #         repository: i-stack/STBaseProjectExample
+  #         event-type: stbaseproject-updated
+  #         client-payload: '{"sha": "${{ github.sha }}", "ref": "${{ github.ref }}"}'

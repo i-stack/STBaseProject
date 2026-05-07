@@ -214,7 +214,11 @@ req.cancel(byProducingResumeData: { data in
 
 // 3) 稍后恢复
 let saved = UserDefaults.standard.data(forKey: "pause.bigzip")
-STHTTPSession.shared.download("https://.../big.zip", to: dst, resumeData: saved)
+STHTTPSession.shared.download(
+    "https://.../big.zip",
+    to: dst,
+    dispatch: STDownloadDispatch(resumeData: saved)
+)
     .response { result in print(result) }
 ```
 
@@ -226,7 +230,11 @@ let opts = STDownloadOptions(
     createIntermediateDirectories: true,  // 不存在时自动创建父目录
     removePreviousFile: true              // 目标已存在时先删除
 )
-session.download("...", to: dst, options: opts)
+session.download(
+    "...",
+    to: dst,
+    dispatch: STDownloadDispatch(options: opts)
+)
 ```
 
 ---

@@ -270,21 +270,18 @@ open class STHTTPSession: NSObject {
         parameters: [String: Any]? = nil,
         encoding: STParameterEncoder.EncodingType = .url,
         headers: STRequestHeaders? = nil,
-        interceptor: STInterceptor? = nil,
-        options: STDownloadOptions = .default,
-        resumeData: Data? = nil,
-        requestConfig: STRequestConfig? = nil
+        dispatch: STDownloadDispatch = .default
     ) -> STDownloadRequest {
-        let config = requestConfig ?? self.defaultRequestConfig
+        let config = dispatch.requestConfig ?? self.defaultRequestConfig
         let destination: STDownloadRequest.Destination = { _, _ in destinationURL }
         let downloadRequest = STDownloadRequest(
             destination: destination,
-            downloadOptions: options,
+            downloadOptions: dispatch.options,
             maxRetryCount: config.retryCount,
             retryDelay: config.retryDelay
         )
         downloadRequest.session = self
-        if let resumeData = resumeData {
+        if let resumeData = dispatch.resumeData {
             downloadRequest.didReceiveResumeData(resumeData)
         }
 
@@ -296,9 +293,9 @@ open class STHTTPSession: NSObject {
                 parameters: parameters,
                 encoding: encoding,
                 headers: headers ?? self?.defaultRequestHeaders ?? STRequestHeaders(),
-                interceptor: interceptor,
+                interceptor: dispatch.interceptor,
                 config: config,
-                resumeData: resumeData
+                resumeData: dispatch.resumeData
             )
         }
         return downloadRequest

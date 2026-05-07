@@ -117,12 +117,4 @@ custom_rules:
     message: "Bool 旗参可读性差，建议改为枚举（如 case enabled / disabled）。"
     severity: warning
 
-  st_chinese_only_doc:
-    name: "Public doc should include English"
-    regex: '^\s*///\s*[一-鿿]+[^/]*$\n^(?!\s*///)'
-    message: "公共 API 文档建议提供英文版本（中文可保留作为辅助说明）。"
-    severity: warning
-    excluded:
-      - "Sources/STLocalizable/.*"
-
 reporter: "xcode"

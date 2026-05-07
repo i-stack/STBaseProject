@@ -38,10 +38,7 @@ public protocol STHTTPSessionProviding: AnyObject {
         parameters: [String: Any]?,
         encoding: STParameterEncoder.EncodingType,
         headers: STRequestHeaders?,
-        interceptor: STInterceptor?,
-        options: STDownloadOptions,
-        resumeData: Data?,
-        requestConfig: STRequestConfig?
+        dispatch: STDownloadDispatch
     ) -> STDownloadRequest
 
     func st_checkNetworkStatus() -> STNetworkReachabilityStatus

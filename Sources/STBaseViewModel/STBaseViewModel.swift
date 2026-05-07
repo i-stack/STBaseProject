@@ -810,10 +810,12 @@ open class STBaseViewModel: NSObject {
             parameters: nil,
             encoding: .url,
             headers: self.requestHeaders,
-            interceptor: nil,
-            options: .default,
-            resumeData: nil,
-            requestConfig: self.requestConfig
+            dispatch: STDownloadDispatch(
+                options: .default,
+                resumeData: nil,
+                interceptor: nil,
+                requestConfig: self.requestConfig
+            )
         )
         if let progress = progress {
             downloadRequest.progressPublisher
