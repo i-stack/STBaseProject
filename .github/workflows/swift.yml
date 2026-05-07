@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Check try? policy
+      run: bash .github/check_try_question_mark.sh
     - name: Build
       run: xcodebuild -scheme STBaseProject-Package -destination 'generic/platform=iOS Simulator' build
     - name: Build For Testing

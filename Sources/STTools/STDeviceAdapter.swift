@@ -53,55 +53,82 @@ public protocol STDeviceAdapting: AnyObject {
 public final class STDeviceAdapter: STDeviceAdapting {
 
     public static let shared = STDeviceAdapter()
-    public private(set) var designSize: CGSize?
-    public private(set) var barHeights = STBarHeightsConfiguration()
-    public private(set) var scaleStrategy: STScaleStrategy = .default
+    private let configurationLock = NSLock()
+    private var storedDesignSize: CGSize?
+    private var storedBarHeights = STBarHeightsConfiguration()
+    private var storedScaleStrategy: STScaleStrategy = .default
+
+    public var designSize: CGSize? {
+        self.withConfigurationLock { self.storedDesignSize }
+    }
+
+    public var barHeights: STBarHeightsConfiguration {
+        self.withConfigurationLock { self.storedBarHeights }
+    }
+
+    public var scaleStrategy: STScaleStrategy {
+        self.withConfigurationLock { self.storedScaleStrategy }
+    }
 
     private init() {}
 
     public func configure(designSize: CGSize?) {
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
         guard let size = designSize, size.width > 0, size.height > 0 else {
-            self.designSize = nil
+            self.storedDesignSize = nil
             return
         }
-        self.designSize = designSize
+        self.storedDesignSize = designSize
     }
 
     public func configureNavigationBar(contentHeight: CGFloat) {
         guard contentHeight >= 0 else { return }
-        self.barHeights.navigationBarContentHeight = contentHeight
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        self.storedBarHeights.navigationBarContentHeight = contentHeight
     }
 
     public func configureTabBar(contentHeight: CGFloat) {
         guard contentHeight >= 0 else { return }
-        self.barHeights.tabBarContentHeight = contentHeight
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        self.storedBarHeights.tabBarContentHeight = contentHeight
     }
 
     public func applyBarHeights(_ configuration: STBarHeightsConfiguration) {
-        self.barHeights = configuration
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        self.storedBarHeights = configuration
     }
 
     public func configureScaleStrategy(_ strategy: STScaleStrategy) {
-        self.scaleStrategy = strategy
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        self.storedScaleStrategy = strategy
     }
 
     /// 重置所有配置到初始值
     public func reset() {
-        self.designSize = nil
-        self.barHeights = STBarHeightsConfiguration()
-        self.scaleStrategy = .default
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        self.storedDesignSize = nil
+        self.storedBarHeights = STBarHeightsConfiguration()
+        self.storedScaleStrategy = .default
     }
 
     public static var widthScale: CGFloat {
-        guard let designSize = self.shared.designSize else { return 1.0 }
+        let snapshot = self.shared.configurationSnapshot()
+        guard let designSize = snapshot.designSize else { return 1.0 }
         let raw = self.screenWidth / designSize.width
-        return clamped(raw, strategy: self.shared.scaleStrategy)
+        return clamped(raw, strategy: snapshot.scaleStrategy)
     }
 
     public static var heightScale: CGFloat {
-        guard let designSize = self.shared.designSize else { return 1.0 }
+        let snapshot = self.shared.configurationSnapshot()
+        guard let designSize = snapshot.designSize else { return 1.0 }
         let raw = self.screenHeight / designSize.height
-        return clamped(raw, strategy: self.shared.scaleStrategy)
+        return clamped(raw, strategy: snapshot.scaleStrategy)
     }
 
     public static func scaledWidth(_ value: CGFloat) -> CGFloat {
@@ -215,6 +242,22 @@ public final class STDeviceAdapter: STDeviceAdapting {
     }
 
     public static var currentMetrics: STDeviceMetrics { self.shared.currentMetrics }
+
+    private func withConfigurationLock<T>(_ body: () -> T) -> T {
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        return body()
+    }
+
+    private func configurationSnapshot() -> (designSize: CGSize?, barHeights: STBarHeightsConfiguration, scaleStrategy: STScaleStrategy) {
+        self.withConfigurationLock {
+            (
+                designSize: self.storedDesignSize,
+                barHeights: self.storedBarHeights,
+                scaleStrategy: self.storedScaleStrategy
+            )
+        }
+    }
 
     /// UIKit 访问入口必须在主线程。DEBUG 构建强校验,Release 构建不引入成本。
     /// UIApplication.connectedScenes / UIWindow.safeAreaInsets / UIScreen.main 等 API

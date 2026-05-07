@@ -36,18 +36,30 @@ Pod::Spec.new do |s|
       'Sources/STMedia/**/*.swift',
       'Sources/STMarkdown/**/*.swift'
     ]
+    base.resource_bundles = {
+      'STBaseProject_Privacy' => ['Sources/PrivacyInfo.xcprivacy']
+    }
   end
 
   s.subspec 'STContacts' do |contacts|
     contacts.source_files = 'Sources/STContacts/*.swift'
+    contacts.resource_bundles = {
+      'STBaseProject_STContacts_Privacy' => ['Sources/STContacts/PrivacyInfo.xcprivacy']
+    }
   end
 
   s.subspec 'STLocation' do |location|
     location.source_files = 'Sources/STLocation/*.swift'
+    location.resource_bundles = {
+      'STBaseProject_STLocation_Privacy' => ['Sources/STLocation/PrivacyInfo.xcprivacy']
+    }
   end
 
   s.subspec 'STMedia' do |media|
     media.source_files = 'Sources/STMedia/*.swift'
+    media.resource_bundles = {
+      'STBaseProject_STMedia_Privacy' => ['Sources/STMedia/PrivacyInfo.xcprivacy']
+    }
   end
 
   # SPM parity (Package.swift): Markdown + SwiftMath modules via CocoaPods:

@@ -513,7 +513,12 @@ private extension STDeviceInfo {
     }
 
     static func fileSystemAttributes() -> [FileAttributeKey: Any] {
-        (try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())) ?? [:]
+        do {
+            return try FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory())
+        } catch {
+            STLog("[STDeviceInfo] 读取文件系统属性失败: \(error.localizedDescription)", level: .warning)
+            return [:]
+        }
     }
 
     static func freeMemoryBytes() -> Int64 {

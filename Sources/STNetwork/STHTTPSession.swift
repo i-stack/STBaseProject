@@ -57,7 +57,12 @@ public final class STParameterEncoder {
     }
 
     public static func st_encodeJSON(_ parameters: [String: Any]) -> Data? {
-        return try? JSONSerialization.data(withJSONObject: parameters)
+        do {
+            return try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            STLog("[STHTTPSession] JSON 参数编码失败: \(error.localizedDescription)", level: .warning)
+            return nil
+        }
     }
 
     public static func st_encodeFormData(_ parameters: [String: Any]) -> Data? {
@@ -782,8 +787,14 @@ extension STHTTPSession: URLSessionDelegate, URLSessionDataDelegate, URLSessionT
             return
         }
         if self.sslPinningConfig.allowInvalidCertificates {
+            #if DEBUG
+            // 仅 DEBUG 构建放行无效证书，便于本地联调；Release 构建忽略此开关，避免成为中间人攻击入口。
+            STLog("[STHTTPSession] ⚠️ allowInvalidCertificates 已启用（仅 DEBUG 生效）：\(challenge.protectionSpace.host)")
             completionHandler(.useCredential, URLCredential(trust: serverTrust))
             return
+            #else
+            assertionFailure("allowInvalidCertificates 在 Release 构建中被忽略；请勿在生产环境依赖此开关。")
+            #endif
         }
         if self.sslPinningConfig.validateHost {
             let host = challenge.protectionSpace.host as CFString

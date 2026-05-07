@@ -17,6 +17,8 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 - [安装方式](#installation)
 - [按需加载](#modular-import)
 - [快速开始](#quick-start)
+- [隐私与权限](#privacy-permissions)
+- [错误处理规范](#error-handling)
 - [文档导航](#docs-navigation)
 - [业务接入概览](#integration-overview)
 - [模块使用概览](#module-overview)
@@ -106,6 +108,39 @@ pod 'STBaseProject/STLocation', '~> 1.3.0'
 # pod 'STBaseProject/STMedia', '~> 1.3.0'
 # pod 'STBaseProject/STMarkdown', '~> 1.3.0'
 ```
+
+<a id="privacy-permissions"></a>
+## 隐私与权限
+
+STBaseProject 已随 SPM target 与 CocoaPods subspec 提供 `PrivacyInfo.xcprivacy`。这些隐私清单只声明 SDK 自身访问的隐私相关 API，不会替 App 自动补齐运行时权限说明。消费方如果调用下列能力，必须在 App Target 的 `Info.plist` 中配置对应 usage description。
+
+| 模块 | 能力 | 必需 Info.plist Key |
+| --- | --- | --- |
+| `STMedia` | 相机拍照、扫码 | `NSCameraUsageDescription` |
+| `STMedia` | 读取/选择照片 | `NSPhotoLibraryUsageDescription` |
+| `STMedia` | 录制含音频的视频或扩展媒体能力 | `NSMicrophoneUsageDescription` |
+| `STLocation` | 使用期间定位、反地理编码 | `NSLocationWhenInUseUsageDescription` |
+| `STContacts` | 联系人读取 | `NSContactsUsageDescription` |
+
+示例：
+
+```xml
+<key>NSCameraUsageDescription</key>
+<string>用于拍摄照片或扫码</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>用于选择照片</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>用于获取当前位置</string>
+<key>NSContactsUsageDescription</key>
+<string>用于读取联系人</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>用于录制音频</string>
+```
+
+<a id="error-handling"></a>
+## 错误处理规范
+
+仓库通过 `.github/check_try_question_mark.sh` 与 CI 限制 `try?` 使用范围。边界 IO、Keychain、网络发送、证书/加密等安全敏感路径必须使用 `do/catch` 或 `Result<T, Error>`，并保留可诊断错误信息。`try?` 仅允许用于明确可丢弃失败的探测场景，例如 Codable 多类型解码尝试、JSON 解析探测、正则编译探测和可取消的 `Task.sleep`。
 
 <a id="quick-start"></a>
 ## ⚡ 快速开始

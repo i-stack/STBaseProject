@@ -691,28 +691,43 @@ open class STBaseViewModel: NSObject {
     }
 
     private func st_loadFromDisk(forKey key: String) -> STDiskCachePayload? {
-        guard let fileURL = self.st_diskCacheURL(forKey: key),
-              let data = try? Data(contentsOf: fileURL),
-              let payload = try? self.jsonDecoder.decode(STDiskCachePayload.self, from: data) else {
+        guard let fileURL = self.st_diskCacheURL(forKey: key) else {
             return nil
         }
-        return payload
+        do {
+            let data = try Data(contentsOf: fileURL)
+            return try self.jsonDecoder.decode(STDiskCachePayload.self, from: data)
+        } catch {
+            STLog("[STBaseViewModel] 磁盘缓存读取失败: \(error.localizedDescription)")
+            return nil
+        }
     }
 
     private func st_removeFromDisk(forKey key: String) {
         guard let fileURL = self.st_diskCacheURL(forKey: key) else { return }
-        try? FileManager.default.removeItem(at: fileURL)
+        do {
+            try FileManager.default.removeItem(at: fileURL)
+        } catch {
+            STLog("[STBaseViewModel] 磁盘缓存删除失败: \(error.localizedDescription)")
+        }
     }
 
     private func st_clearDiskCache() {
-        guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first,
-              let cacheFiles = try? FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil) else {
+        guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             return
         }
-        cacheFiles.forEach { fileURL in
-            if fileURL.pathExtension == "cache" {
-                try? FileManager.default.removeItem(at: fileURL)
+        do {
+            let cacheFiles = try FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
+            cacheFiles.forEach { fileURL in
+                guard fileURL.pathExtension == "cache" else { return }
+                do {
+                    try FileManager.default.removeItem(at: fileURL)
+                } catch {
+                    STLog("[STBaseViewModel] 清理磁盘缓存失败: \(error.localizedDescription)")
+                }
             }
+        } catch {
+            STLog("[STBaseViewModel] 读取缓存目录失败: \(error.localizedDescription)")
         }
     }
 

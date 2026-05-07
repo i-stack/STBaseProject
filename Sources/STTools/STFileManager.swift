@@ -64,12 +64,22 @@ public enum STFileSystem {
 
     public static func readString(fromFileAt path: String, encoding: String.Encoding = .utf8) -> String {
         guard fileStatus(at: path).exists else { return "" }
-        return (try? String(contentsOfFile: path, encoding: encoding)) ?? ""
+        do {
+            return try String(contentsOfFile: path, encoding: encoding)
+        } catch {
+            STLog("[STFileSystem] 读取文件失败: \(path), error: \(error.localizedDescription)", level: .warning)
+            return ""
+        }
     }
 
     public static func readData(fromFileAt path: String) -> Data? {
         guard fileStatus(at: path).exists else { return nil }
-        return try? Data(contentsOf: URL(fileURLWithPath: path))
+        do {
+            return try Data(contentsOf: URL(fileURLWithPath: path))
+        } catch {
+            STLog("[STFileSystem] 读取数据失败: \(path), error: \(error.localizedDescription)", level: .warning)
+            return nil
+        }
     }
 
     public static func fileStatus(at path: String) -> (exists: Bool, isDirectory: Bool) {
@@ -79,7 +89,12 @@ public enum STFileSystem {
     }
 
     public static func attributes(ofItemAt path: String) -> [FileAttributeKey: Any]? {
-        try? FileManager.default.attributesOfItem(atPath: path)
+        do {
+            return try FileManager.default.attributesOfItem(atPath: path)
+        } catch {
+            STLog("[STFileSystem] 读取文件属性失败: \(path), error: \(error.localizedDescription)", level: .warning)
+            return nil
+        }
     }
 
     public static func fileSize(atPath path: String) -> Int64 {
@@ -169,7 +184,12 @@ public enum STFileSystem {
     }
 
     public static func contentsOfDirectory(at path: String) -> [String] {
-        (try? FileManager.default.contentsOfDirectory(atPath: path)) ?? []
+        do {
+            return try FileManager.default.contentsOfDirectory(atPath: path)
+        } catch {
+            STLog("[STFileSystem] 读取目录失败: \(path), error: \(error.localizedDescription)", level: .warning)
+            return []
+        }
     }
 
     public static func fullPathsOfDirectory(at path: String) -> [String] {
@@ -203,7 +223,12 @@ public enum STFileSystem {
     }
 
     public static func readString(from url: URL, encoding: String.Encoding = .utf8) -> String? {
-        try? String(contentsOf: url, encoding: encoding)
+        do {
+            return try String(contentsOf: url, encoding: encoding)
+        } catch {
+            STLog("[STFileSystem] 读取 URL 失败: \(url.path), error: \(error.localizedDescription)", level: .warning)
+            return nil
+        }
     }
 
     @discardableResult

@@ -78,8 +78,14 @@ public struct STLogRecord: Codable, Identifiable, Sendable {
     }
 
     func jsonLine(using encoder: JSONEncoder) -> String? {
-        guard let data = try? encoder.encode(self),
-              var line = String(data: data, encoding: .utf8) else {
+        let data: Data
+        do {
+            data = try encoder.encode(self)
+        } catch {
+            STLog("[STLogRecord] 日志编码失败: \(error.localizedDescription)", level: .warning)
+            return nil
+        }
+        guard var line = String(data: data, encoding: .utf8) else {
             return nil
         }
         if !line.hasSuffix("\n") {

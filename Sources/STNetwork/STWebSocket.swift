@@ -279,7 +279,11 @@ private extension STWebSocket {
         let queued = self.offlineQueue
         self.offlineQueue.removeAll()
         for (data, context) in queued {
-            try? await self.performSend(data: data, context: context, on: conn)
+            do {
+                try await self.performSend(data: data, context: context, on: conn)
+            } catch {
+                STLog("[STWebSocket] 离线队列发送失败: \(error.localizedDescription)", level: .warning)
+            }
         }
     }
 }
@@ -317,7 +321,11 @@ private extension STWebSocket {
 
         if let pingMsg = self.config.heartbeat.pingMessage {
             // 应用层心跳
-            try? await self.send(text: pingMsg)
+            do {
+                try await self.send(text: pingMsg)
+            } catch {
+                STLog("[STWebSocket] 心跳发送失败: \(error.localizedDescription)", level: .warning)
+            }
         } else {
             // NWProtocol 原生 Ping
             guard let conn = self.connection else { return }

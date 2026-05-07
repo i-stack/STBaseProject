@@ -208,7 +208,10 @@ public extension STSecurityConfig {
 
     static func st_detectSSLPinning(session: STHTTPSession = .shared) -> Bool {
         let config = session.sslPinningConfig
-        guard config.enabled, !config.allowInvalidCertificates else { return false }
+        guard config.enabled else { return false }
+        #if DEBUG
+        guard !config.allowInvalidCertificates else { return false }
+        #endif
         return !config.certificates.isEmpty || !config.publicKeyHashes.isEmpty
     }
 

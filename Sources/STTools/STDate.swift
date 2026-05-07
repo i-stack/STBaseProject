@@ -11,27 +11,34 @@ private final class STDateFormatterCache {
     static let shared = STDateFormatterCache()
 
     private var formatters: [String: DateFormatter] = [:]
-    private let queue = DispatchQueue(label: "com.stbase.dateformattercache", attributes: .concurrent)
+    private let lock = NSLock()
 
     private init() {}
 
-    func formatter(for format: String, timeZone: TimeZone? = nil, locale: Locale? = nil) -> DateFormatter {
+    func string(from date: Date, format: String, timeZone: TimeZone? = nil, locale: Locale? = nil) -> String {
+        self.lock.lock()
+        defer { self.lock.unlock() }
+        return self.formatterLocked(for: format, timeZone: timeZone, locale: locale).string(from: date)
+    }
+
+    func date(from string: String, format: String, timeZone: TimeZone? = nil, locale: Locale? = nil) -> Date? {
+        self.lock.lock()
+        defer { self.lock.unlock() }
+        return self.formatterLocked(for: format, timeZone: timeZone, locale: locale).date(from: string)
+    }
+
+    private func formatterLocked(for format: String, timeZone: TimeZone? = nil, locale: Locale? = nil) -> DateFormatter {
         let key = "\(format)_\(timeZone?.identifier ?? "default")_\(locale?.identifier ?? "default")"
-        return queue.sync {
-            if let formatter = formatters[key] {
-                return formatter
-            }
-
-            let formatter = DateFormatter()
-            formatter.dateFormat = format
-            formatter.timeZone = timeZone ?? .current
-            formatter.locale = locale ?? .current
-
-            queue.async(flags: .barrier) {
-                self.formatters[key] = formatter
-            }
+        if let formatter = self.formatters[key] {
             return formatter
         }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.timeZone = timeZone ?? .current
+        formatter.locale = locale ?? .current
+        self.formatters[key] = formatter
+        return formatter
     }
 }
 
@@ -49,7 +56,7 @@ public extension Date {
     }
 
     func formatted(_ format: String = "yyyy-MM-dd HH:mm:ss") -> String {
-        STDateFormatterCache.shared.formatter(for: format).string(from: self)
+        STDateFormatterCache.shared.string(from: self, format: format)
     }
 
     var timestampMilliseconds: TimeInterval {
@@ -67,8 +74,8 @@ public extension Date {
     var minute: Int { Calendar.current.component(.minute, from: self) }
     var second: Int { Calendar.current.component(.second, from: self) }
     var weekday: Int { Calendar.current.component(.weekday, from: self) }
-    var weekdayName: String { STDateFormatterCache.shared.formatter(for: "EEEE").string(from: self) }
-    var monthName: String { STDateFormatterCache.shared.formatter(for: "MMMM").string(from: self) }
+    var weekdayName: String { STDateFormatterCache.shared.string(from: self, format: "EEEE") }
+    var monthName: String { STDateFormatterCache.shared.string(from: self, format: "MMMM") }
     var isToday: Bool { Calendar.current.isDateInToday(self) }
     var isYesterday: Bool { Calendar.current.isDateInYesterday(self) }
     var isTomorrow: Bool { Calendar.current.isDateInTomorrow(self) }
@@ -174,7 +181,7 @@ public extension Date {
 
 public extension String {
     func date(using format: String = "yyyy-MM-dd HH:mm:ss") -> Date? {
-        STDateFormatterCache.shared.formatter(for: format).date(from: self)
+        STDateFormatterCache.shared.date(from: self, format: format)
     }
 
     var smartDate: Date? {

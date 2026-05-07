@@ -27,7 +27,6 @@ let package = Package(
         )
     ],
     dependencies: [
-        // 通过 revision 锁定，保证可复现构建。升级时同步更新 Package.resolved。
         .package(url: "https://github.com/swiftlang/swift-markdown.git", revision: "55d66d9a9e8d4fd3f48d111b0d437e82fe451903"),
         .package(url: "https://github.com/mgriebling/SwiftMath.git", revision: "48ff188ba118c37d024551238041113560ab09b9")
     ],
@@ -45,23 +44,31 @@ let package = Package(
                 "STMedia"
             ],
             resources: [
-                .process("STMarkdown/Resources")
+                .process("STMarkdown/Resources"),
+                .copy("PrivacyInfo.xcprivacy")
             ]
         ),
         .target(
             name: "STContacts",
-            path: "Sources/STContacts"
+            path: "Sources/STContacts",
+            resources: [
+                .copy("PrivacyInfo.xcprivacy")
+            ]
         ),
         .target(
             name: "STLocation",
-            path: "Sources/STLocation"
+            path: "Sources/STLocation",
+            resources: [
+                .copy("PrivacyInfo.xcprivacy")
+            ]
         ),
         .target(
             name: "STMedia",
-            path: "Sources/STMedia"
+            path: "Sources/STMedia",
+            resources: [
+                .copy("PrivacyInfo.xcprivacy")
+            ]
         )
-        // 单元测试位于 STBaseProjectExample/STBaseProjectExampleTests/，
-        // 通过 Xcode 的 STBaseProjectExample workspace 运行；SPM 不直接暴露 testTarget。
     ],
     swiftLanguageVersions: [.v5]
 )

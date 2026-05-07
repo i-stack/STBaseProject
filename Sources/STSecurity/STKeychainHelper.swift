@@ -154,7 +154,13 @@ public class STKeychainHelper {
     ///   - sync: 同步设置（可选）
     /// - Throws: STKeychainError
     public static func st_saveData(_ key: String, data: Data, accessControl: STKeychainAccessControl? = nil, sync: STKeychainSync = .none) throws {
-        try? st_delete(key)
+        do {
+            try st_delete(key)
+        } catch STKeychainError.itemNotFound {
+            // 保存前删除旧值，未存在是可接受状态。
+        } catch {
+            throw error
+        }
         var query = st_baseQuery(for: key)
         query[kSecValueData as String] = data
         if let accessControl = accessControl {

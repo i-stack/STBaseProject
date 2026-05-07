@@ -126,9 +126,10 @@ public struct STHUDConfig {
 }
 
 /// 功能强大的 HUD 提示组件，支持多种类型、主题和自定义配置
+@MainActor
 public class STHUD: NSObject {
 
-    public var progressHUD: STProgressHUD?
+    fileprivate var progressHUD: STProgressHUD?
     public var theme: STHUDTheme = STHUDTheme()
     public static let sharedHUD: STHUD = STHUD()
     public var defaultIconPosition: STHUDIconPosition = .top
@@ -241,6 +242,7 @@ public class STHUD: NSObject {
     ///   - config: HUD 配置
     ///   - completion: HUD 隐藏后的回调（仅 autoHide 为 true 时有意义；手动关闭场景请使用 hide 后手动执行逻辑）
     internal func show(with config: STHUDConfig, completion: (() -> Void)? = nil) {
+        dispatchPrecondition(condition: .onQueue(.main))
         self.completionHandler = completion
 
         // config.theme 不为 nil 时，临时替换 self.theme 以应用本次调用的主题；
@@ -425,6 +427,7 @@ public class STHUD: NSObject {
     /// 配置手动隐藏的 HUD
     /// - Parameter showInView: 显示视图
     internal func configManualHiddenHUD(showInView: UIView) {
+        dispatchPrecondition(condition: .onQueue(.main))
         if self.progressHUD?.superview != nil {
             self.progressHUD?.hide(animated: true)
         }
@@ -601,10 +604,12 @@ public class STHUD: NSObject {
 
 // MARK: - STHUD 代理实现
 extension STHUD: STProgressHUDDelegate {
-    public func hudWasHidden(_ hud: STProgressHUD) {
-        let handler = self.completionHandler
-        self.completionHandler = nil
-        handler?()
+    nonisolated public func hudWasHidden(_ hud: STProgressHUD) {
+        Task { @MainActor [weak self] in
+            let handler = self?.completionHandler
+            self?.completionHandler = nil
+            handler?()
+        }
     }
 }
 

@@ -62,16 +62,27 @@ public struct STFontFamilyConfig: Sendable, Equatable {
 public final class STFontManager {
 
     public static let shared = STFontManager()
-    public private(set) var fontFamily: STFontFamilyConfig = .system
+    private let configurationLock = NSLock()
+    private var storedFontFamily: STFontFamilyConfig = .system
+
+    public var fontFamily: STFontFamilyConfig {
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        return self.storedFontFamily
+    }
 
     private init() {}
 
     public func configure(fontFamily: STFontFamilyConfig) {
-        self.fontFamily = fontFamily
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        self.storedFontFamily = fontFamily
     }
 
     public func reset() {
-        self.fontFamily = .system
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        self.storedFontFamily = .system
     }
 }
 

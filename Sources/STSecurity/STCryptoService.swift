@@ -46,16 +46,21 @@ public class STCryptoService {
     public static let shared = STCryptoService()
 
     private var defaultConfig: STCryptoConfig = .aes256GCM
+    private let configLock = NSLock()
 
     private init() {}
 
     // MARK: - 配置
 
     public func st_setDefaultConfig(_ config: STCryptoConfig) {
+        self.configLock.lock()
+        defer { self.configLock.unlock() }
         self.defaultConfig = config
     }
 
     public func st_getDefaultConfig() -> STCryptoConfig {
+        self.configLock.lock()
+        defer { self.configLock.unlock() }
         return self.defaultConfig
     }
 
@@ -263,10 +268,11 @@ public extension STCryptoService {
     }
 
     static func st_verifyDataIntegrity(_ data: Data, encryptedData: Data, keyString: String, config: STCryptoConfig = .aes256GCM) -> Bool {
-        guard let decryptedData = try? st_decryptData(encryptedData, keyString: keyString, config: config) else {
+        do {
+            return data == (try st_decryptData(encryptedData, keyString: keyString, config: config))
+        } catch {
             return false
         }
-        return data == decryptedData
     }
 }
 

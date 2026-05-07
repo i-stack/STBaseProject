@@ -105,6 +105,7 @@ public final class STLogManager {
     static let shared = STLogManager()
 
     private static var currentConfiguration = Configuration()
+    private static let configurationLock = NSLock()
     private let queue = DispatchQueue(label: "com.stbase.log.manager", qos: .utility)
     private var handlers: [STLogHandler] = []
     private var memoryBuffer: [STLogRecord] = []
@@ -113,8 +114,22 @@ public final class STLogManager {
         self.rebuildHandlers()
     }
 
+    /// 线程安全地获取当前配置快照。Configuration 是值类型，复制后即可无锁读取。
+    private static func snapshotConfiguration() -> Configuration {
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        return self.currentConfiguration
+    }
+
+    /// 线程安全地修改配置。
+    private static func mutateConfiguration(_ block: (inout Configuration) -> Void) {
+        self.configurationLock.lock()
+        defer { self.configurationLock.unlock() }
+        block(&self.currentConfiguration)
+    }
+
     public static var configuration: Configuration {
-        self.currentConfiguration
+        self.snapshotConfiguration()
     }
 
     /// 在应用启动阶段配置日志系统。
@@ -146,7 +161,7 @@ public final class STLogManager {
     /// ))
     /// ```
     public class func bootstrap(_ configuration: Configuration) {
-        self.currentConfiguration = configuration
+        self.mutateConfiguration { $0 = configuration }
         self.shared.queue.async {
             self.shared.rebuildHandlers()
         }
@@ -164,7 +179,7 @@ public final class STLogManager {
     /// STLogManager.setCloudTransport(transport)
     /// ```
     public class func setCloudTransport(_ transport: STLogCloudTransport?) {
-        self.currentConfiguration.cloudTransport = transport
+        self.mutateConfiguration { $0.cloudTransport = transport }
         self.shared.queue.async {
             self.shared.rebuildHandlers()
         }
@@ -176,11 +191,12 @@ public final class STLogManager {
     }
 
     func log(_ record: STLogRecord) {
-        guard record.level >= Self.currentConfiguration.minimumLevel else { return }
+        let snapshot = Self.snapshotConfiguration()
+        guard record.level >= snapshot.minimumLevel else { return }
         self.queue.async {
             self.memoryBuffer.append(record)
-            if self.memoryBuffer.count > Self.currentConfiguration.retainedLogCountForDisplay {
-                self.memoryBuffer.removeFirst(self.memoryBuffer.count - Self.currentConfiguration.retainedLogCountForDisplay)
+            if self.memoryBuffer.count > snapshot.retainedLogCountForDisplay {
+                self.memoryBuffer.removeFirst(self.memoryBuffer.count - snapshot.retainedLogCountForDisplay)
             }
 
             self.handlers.forEach { $0.handle(record: record) }
@@ -249,11 +265,12 @@ public final class STLogManager {
     }
 
     private func rebuildHandlers() {
-        STLogFileWriter.shared.updateConfiguration(Self.currentConfiguration)
+        let snapshot = Self.snapshotConfiguration()
+        STLogFileWriter.shared.updateConfiguration(snapshot)
         let fileHandler = STLogFileWriter.shared
         let consoleHandler = STConsoleLogHandler()
         var newHandlers: [STLogHandler] = [consoleHandler, fileHandler]
-        if Self.currentConfiguration.cloudTransport != nil {
+        if snapshot.cloudTransport != nil {
             newHandlers.append(STCloudLogHandler())
         }
         self.handlers = newHandlers

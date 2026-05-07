@@ -65,12 +65,17 @@ public struct STLogEntry {
     static func prettyMessage(from content: String) -> String {
         let trimmed = content.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return "" }
-        if let data = trimmed.data(using: .utf8),
-           let object = try? JSONSerialization.jsonObject(with: data, options: []),
-           JSONSerialization.isValidJSONObject(object),
-           let prettyData = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted]),
-           let prettyString = String(data: prettyData, encoding: .utf8) {
-            return prettyString
+        if let data = trimmed.data(using: .utf8) {
+            do {
+                let object = try JSONSerialization.jsonObject(with: data, options: [])
+                guard JSONSerialization.isValidJSONObject(object) else { return trimmed }
+                let prettyData = try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted])
+                if let prettyString = String(data: prettyData, encoding: .utf8) {
+                    return prettyString
+                }
+            } catch {
+                return trimmed
+            }
         }
         return trimmed
     }

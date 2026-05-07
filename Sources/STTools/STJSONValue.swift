@@ -417,7 +417,13 @@ public enum STJSONUtils {
     }
 
     public static func readJSON(fromFile path: String) -> Any? {
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
+        let data: Data
+        do {
+            data = try Data(contentsOf: URL(fileURLWithPath: path))
+        } catch {
+            STLog("[STJSONValue] 读取 JSON 文件失败: \(path), error: \(error.localizedDescription)", level: .warning)
+            return nil
+        }
         return data.jsonObject()
     }
 
@@ -438,8 +444,14 @@ public enum STJSONUtils {
     }
 
     public static func decodeBundleJSON<T: Codable>(named name: String, as type: T.Type, bundle: Bundle = .main) -> T? {
-        guard let path = bundle.path(forResource: name, ofType: "json"),
-              let data = try? Data(contentsOf: URL(fileURLWithPath: path)) else { return nil }
+        guard let path = bundle.path(forResource: name, ofType: "json") else { return nil }
+        let data: Data
+        do {
+            data = try Data(contentsOf: URL(fileURLWithPath: path))
+        } catch {
+            STLog("[STJSONValue] 读取 Bundle JSON 失败: \(path), error: \(error.localizedDescription)", level: .warning)
+            return nil
+        }
         return data.decoded(type)
     }
 

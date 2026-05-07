@@ -116,12 +116,16 @@ public class STMarkdownMermaidRenderer: NSObject {
     /// 以 JSON 字面量方式把 Swift 字符串编码成 JS 可直接嵌入的字符串（含首尾引号）。
     /// 兜底采用最保守的字符转义，保证在任何输入下都不会构成 JS 注入。
     private static func jsStringLiteral(for value: String) -> String {
-        if let data = try? JSONSerialization.data(withJSONObject: [value], options: []),
-           let json = String(data: data, encoding: .utf8),
-           json.count >= 2 {
-            // JSONSerialization 输出形如 `["..."]`，去掉外层方括号即得字符串字面量。
-            let inner = json.dropFirst().dropLast()
-            return String(inner)
+        do {
+            let data = try JSONSerialization.data(withJSONObject: [value], options: [])
+            if let json = String(data: data, encoding: .utf8),
+               json.count >= 2 {
+                // JSONSerialization 输出形如 `["..."]`，去掉外层方括号即得字符串字面量。
+                let inner = json.dropFirst().dropLast()
+                return String(inner)
+            }
+        } catch {
+            STLog("[STMarkdownMermaidRenderer] JS 字符串编码失败: \(error.localizedDescription)", level: .warning)
         }
         let escaped = value
             .replacingOccurrences(of: "\\", with: "\\\\")
@@ -175,9 +179,14 @@ public class STMarkdownMermaidRenderer: NSObject {
         // 将 mermaid.js 内容内联到 HTML 中，避免 loadHTMLString(baseURL:nil) 的
         // file:// 跨 origin 限制导致脚本加载被 WebKit 安全策略阻断。
         let mermaidScript: String
-        if let url = Self.markdownResourcesBundle().url(forResource: "mermaid.min", withExtension: "js"),
-           let content = try? String(contentsOf: url, encoding: .utf8) {
-            mermaidScript = "<script>\(content)</script>"
+        if let url = Self.markdownResourcesBundle().url(forResource: "mermaid.min", withExtension: "js") {
+            do {
+                let content = try String(contentsOf: url, encoding: .utf8)
+                mermaidScript = "<script>\(content)</script>"
+            } catch {
+                STLog("[STMarkdownMermaidRenderer] 读取 mermaid 资源失败: \(error.localizedDescription)", level: .warning)
+                mermaidScript = "<script src=\"https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js\"></script>"
+            }
         } else {
             // CDN 降级：需要网络，仅 baseURL 非 nil 时生效
             mermaidScript = "<script src=\"https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js\"></script>"

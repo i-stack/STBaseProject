@@ -271,8 +271,11 @@ public class STScanManager: NSObject {
                 guard let self else { return }
                 guard let device = AVCaptureDevice.default(for: .video) else { return }
                 self.device = device
-                guard let input = try? AVCaptureDeviceInput(device: device) else {
-                    print("[STScanManager] AVCaptureDeviceInput 创建失败，请检查相机权限或设备状态")
+                let input: AVCaptureDeviceInput
+                do {
+                    input = try AVCaptureDeviceInput(device: device)
+                } catch {
+                    print("[STScanManager] AVCaptureDeviceInput 创建失败: \(error.localizedDescription)")
                     return
                 }
                 self.input = input
