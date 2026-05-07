@@ -7,6 +7,14 @@
 
 import Foundation
 
+/// Layout mode for `STLogRecord.formatted(layout:)`.
+public enum STLogFormatLayout: Equatable {
+    /// One field per line.
+    case multiline
+    /// All fields joined with " | ".
+    case singleLine
+}
+
 public struct STLogRecord: Codable, Identifiable, Sendable {
     public typealias Metadata = [String: String]
 
@@ -57,7 +65,7 @@ public struct STLogRecord: Codable, Identifiable, Sendable {
         return [self.label, self.message, self.fileName, self.function, self.thread, values].joined(separator: " ").lowercased()
     }
 
-    public func formatted(multiline: Bool = true) -> String {
+    public func formatted(layout: STLogFormatLayout = .multiline) -> String {
         let metadataText = self.metadata
             .sorted { $0.key < $1.key }
             .map { "\($0.key)=\($0.value)" }
@@ -74,7 +82,7 @@ public struct STLogRecord: Codable, Identifiable, Sendable {
             "message: \(self.message)"
         ].compactMap { $0 }
 
-        return multiline ? lines.joined(separator: "\n") : lines.joined(separator: " | ")
+        return layout == .multiline ? lines.joined(separator: "\n") : lines.joined(separator: " | ")
     }
 
     func jsonLine(using encoder: JSONEncoder) -> String? {

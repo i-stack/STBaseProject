@@ -103,10 +103,10 @@ public class STCustomTabBar: UIView {
     public func setSelectedIndex(_ index: Int) {
         guard index >= 0, index < self.itemViews.count else { return }
         if self.selectedIndex < self.itemViews.count {
-            self.itemViews[self.selectedIndex].updateSelection(false)
+            self.itemViews[self.selectedIndex].updateSelection(.deselected)
         }
         self.selectedIndex = index
-        self.itemViews[self.selectedIndex].updateSelection(true)
+        self.itemViews[self.selectedIndex].updateSelection(.selected)
     }
     
     public func updateBadgeCount(at index: Int, count: Int) {
@@ -149,7 +149,7 @@ public class STCustomTabBar: UIView {
         self.itemViews.removeAll()
         for (index, model) in self.itemModels.enumerated() {
             let itemView = STTabBarItemView()
-            itemView.configure(with: model, config: self.config, isSelected: index == self.selectedIndex) { [weak self] in
+            itemView.configure(with: model, config: self.config, selection: index == self.selectedIndex ? .selected : .deselected) { [weak self] in
                 self?.handleItemTap(at: index)
             }
             contentView.addSubview(itemView)

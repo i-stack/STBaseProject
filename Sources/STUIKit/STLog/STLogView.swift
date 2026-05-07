@@ -55,7 +55,7 @@ public struct STLogEntry {
             function: record.function,
             line: record.line,
             message: STLogEntry.prettyMessage(from: record.message),
-            rawContent: record.formatted(multiline: true),
+            rawContent: record.formatted(layout: .multiline),
             label: record.label,
             metadata: record.metadata,
             thread: record.thread

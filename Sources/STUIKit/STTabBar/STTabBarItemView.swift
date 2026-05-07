@@ -7,6 +7,14 @@
 
 import UIKit
 
+/// Selection state for `STTabBarItemView`.
+public enum STTabBarItemSelection: Equatable {
+    case selected
+    case deselected
+
+    public var isSelected: Bool { self == .selected }
+}
+
 public class STTabBarItemView: UIView {
     
     private var itemModel: STTabBarItemModel?
@@ -90,12 +98,12 @@ public class STTabBarItemView: UIView {
     /// - Parameters:
     ///   - model: Item 数据模型
     ///   - config: TabBar 配置
-    ///   - isSelected: 是否选中
+    ///   - selection: 选中状态
     ///   - tapAction: 点击回调
-    public func configure(with model: STTabBarItemModel, config: STTabBarConfig? = nil, isSelected: Bool = false, tapAction: (() -> Void)? = nil) {
+    public func configure(with model: STTabBarItemModel, config: STTabBarConfig? = nil, selection: STTabBarItemSelection = .deselected, tapAction: (() -> Void)? = nil) {
         self.itemModel = model
         self.config = config
-        self.isSelected = isSelected
+        self.isSelected = selection.isSelected
         self.tapAction = tapAction
         self.lastEffectiveBarHeightUsed = -1
         self.updateUI()
@@ -110,8 +118,9 @@ public class STTabBarItemView: UIView {
     }
     
     /// 更新选中状态
-    /// - Parameter selected: 是否选中
-    public func updateSelection(_ selected: Bool) {
+    /// - Parameter selection: 新的选中状态
+    public func updateSelection(_ selection: STTabBarItemSelection) {
+        let selected = selection.isSelected
         guard self.isSelected != selected else { return }
         self.isSelected = selected
         if let config = config, config.enableAnimation {

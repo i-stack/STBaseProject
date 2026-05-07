@@ -15,7 +15,7 @@ protocol STLogHandler: AnyObject {
 final class STConsoleLogHandler: STLogHandler {
     func handle(record: STLogRecord) {
 #if DEBUG
-        print(record.formatted(multiline: true))
+        print(record.formatted(layout: .multiline))
 #endif
     }
 
