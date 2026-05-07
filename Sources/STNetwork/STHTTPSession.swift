@@ -210,6 +210,27 @@ open class STHTTPSession: NSObject {
     }
 
     @discardableResult
+    public func request(
+        _ request: URLRequest,
+        interceptor: STInterceptor? = nil,
+        requestConfig: STRequestConfig? = nil
+    ) -> STDataRequest {
+        let config = requestConfig ?? self.defaultRequestConfig
+        let dataRequest = STDataRequest(maxRetryCount: config.retryCount, retryDelay: config.retryDelay)
+        dataRequest.session = self
+
+        Task { [weak self] in
+            await self?.executeData(
+                dataRequest,
+                initial: request,
+                interceptor: interceptor,
+                config: config
+            )
+        }
+        return dataRequest
+    }
+
+    @discardableResult
     public func upload(
         _ urlString: String,
         files: [STUploadFile],

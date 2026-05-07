@@ -132,7 +132,7 @@ open class STBaseViewModel: NSObject {
     public let dataUpdated = PassthroughSubject<Void, Never>()
     public var requestConfig = STRequestConfig()
     public var cacheConfig = STCacheConfig()
-    public var httpSession = STHTTPSession.shared
+    public var httpSession: STHTTPSessionProviding = STHTTPSession.shared
     public var requestHeaders = STRequestHeaders()
     public var jsonDecoder: JSONDecoder = JSONDecoder()
     public var jsonEncoder: JSONEncoder = JSONEncoder()
@@ -141,6 +141,8 @@ open class STBaseViewModel: NSObject {
     private let cache = NSCache<NSString, STMemoryCacheEntry>()
     private let stateLock = NSLock()
     private var inflightRequests = [STDataRequest]()
+    private var activeLoadingRequestCount = 0
+    private var pendingLoadingFailure: STBaseError?
 
     deinit {
         STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
@@ -151,6 +153,12 @@ open class STBaseViewModel: NSObject {
         self.st_setupBindings()
     }
 
+    /// 依赖注入构造器：用于测试或自定义 HTTP 会话替换默认单例。
+    public convenience init(httpSession: STHTTPSessionProviding) {
+        self.init()
+        self.httpSession = httpSession
+    }
+
     private func st_setupBindings() {
         self.loadingState
             .removeDuplicates()
@@ -158,7 +166,7 @@ open class STBaseViewModel: NSObject {
             .sink { [weak self] state in
                 self?.st_handleLoadingStateChange(state)
             }
-            .store(in: &self.cancellables)
+            .st_store(in: self)
 
         self.refreshState
             .removeDuplicates()
@@ -166,7 +174,7 @@ open class STBaseViewModel: NSObject {
             .sink { [weak self] state in
                 self?.st_handleRefreshStateChange(state)
             }
-            .store(in: &self.cancellables)
+            .st_store(in: self)
     }
 
     private func st_handleLoadingStateChange(_ state: STLoadingState) {
@@ -212,38 +220,54 @@ open class STBaseViewModel: NSObject {
 
     // MARK: - 网络请求核心方法
     public func st_requestPublisher<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
-        if self.requestConfig.showLoading {
-            self.loadingState.send(.loading)
-        }
-        return self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
-        .tryMap { [weak self] response -> T in
+        Deferred { [weak self] () -> AnyPublisher<T, STBaseError> in
             guard let self = self else {
-                throw STBaseError.unknown
+                return Fail(error: STBaseError.unknown).eraseToAnyPublisher()
             }
-            let result = self.st_resultFromHTTPResponse(response, responseType: responseType)
-            switch result {
-            case .success(let value):
-                return value
-            case .failure(let error):
-                throw error
+            let shouldShowLoading = self.requestConfig.showLoading
+            if shouldShowLoading {
+                self.st_beginLoadingRequest()
             }
-        }.mapError { error -> STBaseError in
-            if let baseError = error as? STBaseError {
-                return baseError
-            }
-            return STBaseError.origin(error: error)
-        }.handleEvents(
-            receiveOutput: { [weak self] _ in
-                self?.loadingState.send(.loaded)
-                self?.dataUpdated.send()
-            },
-            receiveCompletion: { [weak self] completion in
-                guard let self = self else { return }
-                if case .failure(let error) = completion {
-                    self.loadingState.send(.failed(error))
+            return self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
+                .tryMap { [weak self] response -> T in
+                    guard let self = self else {
+                        throw STBaseError.unknown
+                    }
+                    let result = self.st_resultFromHTTPResponse(response, responseType: responseType)
+                    switch result {
+                    case .success(let value):
+                        return value
+                    case .failure(let error):
+                        throw error
+                    }
                 }
-            }
-        ).eraseToAnyPublisher()
+                .mapError { error -> STBaseError in
+                    if let baseError = error as? STBaseError {
+                        return baseError
+                    }
+                    return STBaseError.origin(error: error)
+                }
+                .handleEvents(
+                    receiveOutput: { [weak self] _ in
+                        self?.dataUpdated.send()
+                    },
+                    receiveCompletion: { [weak self] completion in
+                        guard shouldShowLoading else { return }
+                        switch completion {
+                        case .finished:
+                            self?.st_finishLoadingRequest(.loaded)
+                        case .failure(let error):
+                            self?.st_finishLoadingRequest(.failed(error))
+                        }
+                    },
+                    receiveCancel: { [weak self] in
+                        guard shouldShowLoading else { return }
+                        self?.st_cancelLoadingRequest()
+                    }
+                )
+                .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
 
     public func st_request<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
@@ -268,7 +292,23 @@ open class STBaseViewModel: NSObject {
     }
 
     open func st_dispatchRequestPublisher(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType) -> AnyPublisher<STHTTPResponse, Never> {
-        let request = self.httpSession.request(url, method: method, parameters: parameters, encoding: encodingType, headers: self.requestHeaders, requestConfig: self.requestConfig)
+        let request = self.httpSession.request(url, method: method, parameters: parameters, encoding: encodingType, headers: self.requestHeaders, interceptor: nil, requestConfig: self.requestConfig)
+        return self.st_responsePublisher(for: request)
+    }
+
+    open func st_dispatchRequestPublisher(_ request: URLRequest) -> AnyPublisher<STHTTPResponse, Never> {
+        guard let httpSession = self.httpSession as? STHTTPURLRequestSessionProviding else {
+            return Just(STHTTPResponse(
+                data: nil,
+                response: nil,
+                error: STBaseError.originErrorDescription(reason: "当前 HTTP 会话不支持 URLRequest 请求")
+            )).eraseToAnyPublisher()
+        }
+        let dataRequest = httpSession.request(request, interceptor: nil, requestConfig: self.requestConfig)
+        return self.st_responsePublisher(for: dataRequest)
+    }
+
+    private func st_responsePublisher(for request: STDataRequest) -> AnyPublisher<STHTTPResponse, Never> {
         self.st_trackInflight(request)
         return request.responsePublisher
             .handleEvents(
@@ -276,6 +316,7 @@ open class STBaseViewModel: NSObject {
                     self?.st_untrackInflight(request)
                 },
                 receiveCancel: { [weak self] in
+                    request.cancel()
                     self?.st_untrackInflight(request)
                 }
             )
@@ -330,13 +371,82 @@ open class STBaseViewModel: NSObject {
 
     /// 直接基于已构造好的 URLRequest 发起请求；保留原始 headers / body / 超时等定制
     public func st_request<T: Codable>(_ request: URLRequest, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        guard let url = request.url?.absoluteString else {
+        guard request.url != nil else {
             completion(.failure(.dataError("无效的 URL")))
             return
         }
-        let method = STHTTPMethod(rawValue: request.httpMethod ?? "GET") ?? .get
-        let parameters = self.st_extractParameters(from: request)
-        self.st_request(url: url, method: method, parameters: parameters, responseType: responseType, completion: completion)
+        var token: AnyCancellable?
+        token = self.st_requestPublisher(request, responseType: responseType)
+            .sink(
+                receiveCompletion: { [weak self] state in
+                    if case .failure(let error) = state {
+                        completion(.failure(error))
+                    }
+                    if let token = token {
+                        self?.st_removeCancellable(token)
+                    }
+                },
+                receiveValue: { value in
+                    completion(.success(value))
+                }
+            )
+        if let token = token {
+            self.st_storeCancellable(token)
+        }
+    }
+
+    public func st_requestPublisher<T: Codable>(_ request: URLRequest, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
+        guard request.url != nil else {
+            return Fail(error: STBaseError.dataError("无效的 URL")).eraseToAnyPublisher()
+        }
+        return Deferred { [weak self] () -> AnyPublisher<T, STBaseError> in
+            guard let self = self else {
+                return Fail(error: STBaseError.unknown).eraseToAnyPublisher()
+            }
+            let shouldShowLoading = self.requestConfig.showLoading
+            if shouldShowLoading {
+                self.st_beginLoadingRequest()
+            }
+            return self.st_dispatchRequestPublisher(request)
+                .tryMap { [weak self] response -> T in
+                    guard let self = self else {
+                        throw STBaseError.unknown
+                    }
+                    let result = self.st_resultFromHTTPResponse(response, responseType: responseType)
+                    switch result {
+                    case .success(let value):
+                        return value
+                    case .failure(let error):
+                        throw error
+                    }
+                }
+                .mapError { error -> STBaseError in
+                    if let baseError = error as? STBaseError {
+                        return baseError
+                    }
+                    return STBaseError.origin(error: error)
+                }
+                .handleEvents(
+                    receiveOutput: { [weak self] _ in
+                        self?.dataUpdated.send()
+                    },
+                    receiveCompletion: { [weak self] completion in
+                        guard shouldShowLoading else { return }
+                        switch completion {
+                        case .finished:
+                            self?.st_finishLoadingRequest(.loaded)
+                        case .failure(let error):
+                            self?.st_finishLoadingRequest(.failed(error))
+                        }
+                    },
+                    receiveCancel: { [weak self] in
+                        guard shouldShowLoading else { return }
+                        self?.st_cancelLoadingRequest()
+                    }
+                )
+                .eraseToAnyPublisher()
+        }
+        .eraseToAnyPublisher()
     }
 
     // MARK: - 参数提取（用于 URLRequest）
@@ -445,7 +555,9 @@ open class STBaseViewModel: NSObject {
     }
 
     private func st_convertHTTPError(_ error: Error?) -> STBaseError {
-        if let httpError = error as? STHTTPError {
+        if let baseError = error as? STBaseError {
+            return baseError
+        } else if let httpError = error as? STHTTPError {
             switch httpError {
             case .networkError(let networkError):
                 return STBaseError.networkError(networkError.localizedDescription)
@@ -651,11 +763,11 @@ open class STBaseViewModel: NSObject {
         if self.requestConfig.showLoading {
             self.loadingState.send(.loading)
         }
-        let uploadRequest = self.httpSession.upload(url, files: files, parameters: parameters, headers: self.requestHeaders, requestConfig: self.requestConfig)
+        let uploadRequest = self.httpSession.upload(url, files: files, parameters: parameters, headers: self.requestHeaders, interceptor: nil, requestConfig: self.requestConfig)
         if let progress = progress {
             uploadRequest.progressPublisher
                 .sink(receiveValue: progress)
-                .store(in: &self.cancellables)
+                .st_store(in: self)
         }
         var token: AnyCancellable?
         token = uploadRequest.responsePublisher.sink { [weak self] response in
@@ -691,7 +803,7 @@ open class STBaseViewModel: NSObject {
         if let progress = progress {
             downloadRequest.progressPublisher
                 .sink(receiveValue: progress)
-                .store(in: &self.cancellables)
+                .st_store(in: self)
         }
         var token: AnyCancellable?
         token = downloadRequest.responsePublisher.sink(receiveCompletion: { [weak self] state in
@@ -720,14 +832,14 @@ open class STBaseViewModel: NSObject {
         self.stateLock.unlock()
         requests.forEach { _ = $0.cancel() }
 
-        self.cancellables.removeAll()
+        self.st_removeAllCancellables()
         self.cache.removeAllObjects()
         self.loadingState.send(.idle)
         self.refreshState.send(.idle)
     }
 
     // MARK: - 内部辅助
-    private func st_storeCancellable(_ cancellable: AnyCancellable) {
+    fileprivate func st_storeCancellable(_ cancellable: AnyCancellable) {
         self.stateLock.lock()
         self.cancellables.insert(cancellable)
         self.stateLock.unlock()
@@ -751,6 +863,70 @@ open class STBaseViewModel: NSObject {
             self.inflightRequests.remove(at: index)
         }
         self.stateLock.unlock()
+    }
+
+    private func st_removeAllCancellables() {
+        self.stateLock.lock()
+        self.cancellables.removeAll()
+        self.activeLoadingRequestCount = 0
+        self.pendingLoadingFailure = nil
+        self.stateLock.unlock()
+    }
+
+    private func st_beginLoadingRequest() {
+        self.stateLock.lock()
+        self.activeLoadingRequestCount += 1
+        let shouldSendLoading = self.activeLoadingRequestCount == 1
+        self.stateLock.unlock()
+
+        if shouldSendLoading {
+            self.loadingState.send(.loading)
+        }
+    }
+
+    private func st_finishLoadingRequest(_ terminalState: STLoadingState) {
+        self.stateLock.lock()
+        if case .failed(let error) = terminalState {
+            self.pendingLoadingFailure = error
+        }
+        if self.activeLoadingRequestCount > 0 {
+            self.activeLoadingRequestCount -= 1
+        }
+        let shouldSendTerminalState = self.activeLoadingRequestCount == 0
+        let stateToSend: STLoadingState
+        if shouldSendTerminalState, let pendingLoadingFailure = self.pendingLoadingFailure {
+            stateToSend = .failed(pendingLoadingFailure)
+            self.pendingLoadingFailure = nil
+        } else {
+            stateToSend = terminalState
+        }
+        self.stateLock.unlock()
+
+        if shouldSendTerminalState {
+            self.loadingState.send(stateToSend)
+        }
+    }
+
+    private func st_cancelLoadingRequest() {
+        self.stateLock.lock()
+        if self.activeLoadingRequestCount > 0 {
+            self.activeLoadingRequestCount -= 1
+        }
+        let shouldSendIdle = self.activeLoadingRequestCount == 0
+        if shouldSendIdle {
+            self.pendingLoadingFailure = nil
+        }
+        self.stateLock.unlock()
+
+        if shouldSendIdle {
+            self.loadingState.send(.idle)
+        }
+    }
+}
+
+private extension AnyCancellable {
+    func st_store(in viewModel: STBaseViewModel) {
+        viewModel.st_storeCancellable(self)
     }
 }
 
