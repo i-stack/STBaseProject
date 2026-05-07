@@ -17,6 +17,17 @@ extension STProgressHUDDelegate {
     func hudWasHidden(_ hud: STProgressHUD) {}
 }
 
+/// HUD animation behavior used by show/hide APIs.
+public enum STHUDAnimation: Equatable {
+    case none
+    case fade
+    case zoom
+    case zoomIn
+    case zoomOut
+
+    public var isAnimated: Bool { self != .none }
+}
+
 public class STProgressHUD: UIView {
 
     public enum HudMode {
@@ -151,15 +162,32 @@ public class STProgressHUD: UIView {
     }
 
     @discardableResult
-    public class func show(addedToView view: UIView, animated: Bool) -> STProgressHUD {
+    public class func show(addedToView view: UIView, animation: STHUDAnimation = .fade) -> STProgressHUD {
         let hud = STProgressHUD(withView: view)
         hud.removeFromSuperViewOnHide = true
         view.addSubview(hud)
-        hud.show(animated: animated)
+        hud.show(animation: animation)
         return hud
     }
 
+    @available(*, deprecated, renamed: "show(addedToView:animation:)")
     @discardableResult
+    // swiftlint:disable:next st_avoid_bool_flag_param
+    public class func show(addedToView view: UIView, animated: Bool) -> STProgressHUD {
+        return show(addedToView: view, animation: animated ? .fade : .none)
+    }
+
+    @discardableResult
+    public class func hide(addedToView view: UIView, animation: STHUDAnimation = .fade) -> Bool {
+        guard let hud = hudForView(view) else { return false }
+        hud.removeFromSuperViewOnHide = true
+        hud.hide(animation: animation)
+        return true
+    }
+
+    @available(*, deprecated, renamed: "hide(addedToView:animation:)")
+    @discardableResult
+    // swiftlint:disable:next st_avoid_bool_flag_param
     public class func hide(addedToView view: UIView, animated: Bool) -> Bool {
         guard let hud = hudForView(view) else { return false }
         hud.removeFromSuperViewOnHide = true
@@ -171,7 +199,39 @@ public class STProgressHUD: UIView {
         return view.subviews.reversed().first { $0 is STProgressHUD } as? STProgressHUD
     }
 
+    public func show(animation: STHUDAnimation = .fade) {
+        self.animationType = animation.hudAnimation
+        self.showCore(animated: animation.isAnimated)
+    }
+
+    @available(*, deprecated, renamed: "show(animation:)")
+    // swiftlint:disable:next st_avoid_bool_flag_param
     public func show(animated: Bool) {
+        self.showCore(animated: animated)
+    }
+
+    public func hide(animation: STHUDAnimation = .fade) {
+        self.animationType = animation.hudAnimation
+        self.hideCore(animated: animation.isAnimated)
+    }
+
+    @available(*, deprecated, renamed: "hide(animation:)")
+    // swiftlint:disable:next st_avoid_bool_flag_param
+    public func hide(animated: Bool) {
+        self.hideCore(animated: animated)
+    }
+
+    public func hide(animation: STHUDAnimation = .fade, afterDelay delay: TimeInterval) {
+        self.hideCore(animation: animation, afterDelay: delay)
+    }
+
+    @available(*, deprecated, renamed: "hide(animation:afterDelay:)")
+    // swiftlint:disable:next st_avoid_bool_flag_param
+    public func hide(animated: Bool, afterDelay delay: TimeInterval) {
+        self.hideCore(animation: animated ? self.animationType.stHUDAnimation : .none, afterDelay: delay)
+    }
+
+    private func showCore(animated: Bool) {
         assert(Thread.isMainThread, "STProgressHUD needs to be accessed on the main thread.")
         self.minShowTimer?.invalidate()
         self.isUseAnimation = animated
@@ -191,7 +251,7 @@ public class STProgressHUD: UIView {
         }
     }
 
-    public func hide(animated: Bool) {
+    private func hideCore(animated: Bool) {
         assert(Thread.isMainThread, "STProgressHUD needs to be accessed on the main thread.")
         self.graceTimer?.invalidate()
         self.isUseAnimation = animated
@@ -214,12 +274,12 @@ public class STProgressHUD: UIView {
         self.hideUsingAnimation(self.isUseAnimation)
     }
 
-    public func hide(animated: Bool, afterDelay delay: TimeInterval) {
+    private func hideCore(animation: STHUDAnimation, afterDelay delay: TimeInterval) {
         let timer = Timer(
             timeInterval: delay,
             target: self,
             selector: #selector(handleHideTimer(_:)),
-            userInfo: animated,
+            userInfo: animation,
             repeats: false
         )
         RunLoop.current.add(timer, forMode: .common)
@@ -572,8 +632,8 @@ private extension STProgressHUD {
     }
 
     @objc func handleHideTimer(_ timer: Timer) {
-        guard let animated = timer.userInfo as? Bool else { return }
-        self.hide(animated: animated)
+        guard let animation = timer.userInfo as? STHUDAnimation else { return }
+        self.hide(animation: animation)
     }
 
     @objc func updateProgressFromProgressObject() {
@@ -587,6 +647,28 @@ private extension STProgressHUD {
         self.frame = self.superview?.bounds ?? self.frame
     }
     #endif
+}
+
+public extension STHUDAnimation {
+    var hudAnimation: STProgressHUD.HudAnimation {
+        switch self {
+        case .none, .fade: return .fade
+        case .zoom: return .zoom
+        case .zoomIn: return .zoomIn
+        case .zoomOut: return .zoomOut
+        }
+    }
+}
+
+public extension STProgressHUD.HudAnimation {
+    var stHUDAnimation: STHUDAnimation {
+        switch self {
+        case .fade: return .fade
+        case .zoom: return .zoom
+        case .zoomIn: return .zoomIn
+        case .zoomOut: return .zoomOut
+        }
+    }
 }
 
 public class STProgressHUDBackgroundView: UIView {

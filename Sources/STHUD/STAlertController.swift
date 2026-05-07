@@ -12,6 +12,13 @@ public enum STAlertStyle: Int, @unchecked Sendable {
     case alert = 1
 }
 
+// MARK: - 点击动作后是否自动关闭
+/// Auto-dismiss toggle for tap actions. Prefer this over the legacy `Bool` setter for clearer call-sites.
+public enum STAlertAutoDismiss: Equatable {
+    case enabled
+    case disabled
+}
+
 // MARK: - 统一按钮模型（系统/自定义均可复用）
 public enum STSystemActionStyle {
     case `default`
@@ -182,8 +189,16 @@ open class STAlertController: UIViewController {
     }
 
     /// 是否在点击动作后自动关闭，默认 true
+    @available(*, deprecated, renamed: "setAutoDismiss(_:)")
+    // swiftlint:disable:next st_avoid_bool_flag_param
     public func setAutoDismissOnAction(_ enabled: Bool) {
         self.autoDismissOnAction = enabled
+    }
+
+    /// 设置点击动作后是否自动关闭（类型化 API）。
+    /// - Parameter autoDismiss: `.enabled` 点击后自动关闭；`.disabled` 保持弹窗。
+    public func setAutoDismiss(_ autoDismiss: STAlertAutoDismiss) {
+        self.autoDismissOnAction = (autoDismiss == .enabled)
     }
     
     public func animateIn() {

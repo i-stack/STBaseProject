@@ -39,6 +39,13 @@ public enum STHUDShadow: Equatable {
     case disabled
 }
 
+enum AutoHide: Equatable {
+    case enabled
+    case disabled
+
+    var isEnabled: Bool { self == .enabled }
+}
+
 // MARK: - HUD 主题配置
 public struct STHUDTheme {
     public var backgroundColor: UIColor
@@ -204,7 +211,7 @@ public class STHUD: NSObject {
 
     /// 设置阴影
     /// - Parameter enabled: 是否启用阴影
-    @available(*, deprecated, message: "Use setShadow(_:) with STHUDShadow for clearer call-sites.")
+    @available(*, deprecated, renamed: "setShadow(_:)")
     // swiftlint:disable:next st_avoid_bool_flag_param
     public func setShadowEnabled(_ enabled: Bool) {
         self.theme.shadowEnabled = enabled
@@ -279,7 +286,7 @@ public class STHUD: NSObject {
             .first?.windows.first(where: \.isKeyWindow)
         if let window = keyWindow {
             if self.progressHUD?.superview != nil {
-                self.progressHUD?.hide(animated: true)
+                self.progressHUD?.hide(animation: .fade)
             }
             self.progressHUD = STProgressHUD.init(withView: window)
             self.configCommonProperty()
@@ -328,10 +335,10 @@ public class STHUD: NSObject {
         self.progressHUD?.offset = offset
 
         // 显示 HUD
-        self.progressHUD?.show(animated: true)
+        self.progressHUD?.show(animation: .fade)
 
         if config.autoHide {
-            self.progressHUD?.hide(animated: true, afterDelay: config.hideDelay)
+            self.progressHUD?.hide(animation: .fade, afterDelay: config.hideDelay)
         }
     }
         
@@ -342,13 +349,13 @@ public class STHUD: NSObject {
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
     ///   - completion: HUD 隐藏后的回调
-    internal func showSuccess(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
+    internal func showSuccess(title: String, detailText: String? = nil, autoHide: AutoHide = .enabled, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .success,
             title: title,
             detailText: detailText,
             iconName: self.theme.successIconName,
-            autoHide: autoHide,
+            autoHide: autoHide.isEnabled,
             hideDelay: 2.0,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
@@ -362,13 +369,13 @@ public class STHUD: NSObject {
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
     ///   - completion: HUD 隐藏后的回调
-    internal func showError(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
+    internal func showError(title: String, detailText: String? = nil, autoHide: AutoHide = .enabled, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .error,
             title: title,
             detailText: detailText,
             iconName: self.theme.errorIconName,
-            autoHide: autoHide,
+            autoHide: autoHide.isEnabled,
             hideDelay: 3.0,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
@@ -382,13 +389,13 @@ public class STHUD: NSObject {
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
     ///   - completion: HUD 隐藏后的回调
-    internal func showWarning(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
+    internal func showWarning(title: String, detailText: String? = nil, autoHide: AutoHide = .enabled, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .warning,
             title: title,
             detailText: detailText,
             iconName: self.theme.warningIconName,
-            autoHide: autoHide,
+            autoHide: autoHide.isEnabled,
             hideDelay: 2.5,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
@@ -402,13 +409,13 @@ public class STHUD: NSObject {
     ///   - autoHide: 是否自动隐藏
     ///   - iconPosition: 图标位置，nil 时使用 defaultIconPosition
     ///   - completion: HUD 隐藏后的回调
-    internal func showInfo(title: String, detailText: String? = nil, autoHide: Bool = true, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
+    internal func showInfo(title: String, detailText: String? = nil, autoHide: AutoHide = .enabled, iconPosition: STHUDIconPosition? = nil, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .info,
             title: title,
             detailText: detailText,
             iconName: self.theme.infoIconName,
-            autoHide: autoHide,
+            autoHide: autoHide.isEnabled,
             iconPosition: iconPosition ?? self.defaultIconPosition
         )
         self.show(with: config, completion: completion)
@@ -434,12 +441,12 @@ public class STHUD: NSObject {
     ///   - detailText: 详细文本
     ///   - autoHide: 是否自动隐藏
     ///   - completion: HUD 隐藏后的回调
-    internal func showText(title: String, detailText: String? = nil, autoHide: Bool = true, completion: (() -> Void)? = nil) {
+    internal func showText(title: String, detailText: String? = nil, autoHide: AutoHide = .enabled, completion: (() -> Void)? = nil) {
         let config = STHUDConfig(
             type: .text,
             title: title,
             detailText: detailText,
-            autoHide: autoHide,
+            autoHide: autoHide.isEnabled,
             hideDelay: 2.0
         )
         self.show(with: config, completion: completion)
@@ -450,7 +457,7 @@ public class STHUD: NSObject {
     internal func configManualHiddenHUD(showInView: UIView) {
         dispatchPrecondition(condition: .onQueue(.main))
         if self.progressHUD?.superview != nil {
-            self.progressHUD?.hide(animated: true)
+            self.progressHUD?.hide(animation: .fade)
         }
         self.progressHUD = STProgressHUD.init(withView: showInView)
         self.configCommonProperty()
@@ -493,20 +500,20 @@ public class STHUD: NSObject {
     }
         
     /// 隐藏 HUD
-    /// - Parameter animated: 是否动画
-    internal func hide(animated: Bool) {
+    /// - Parameter animation: 动画方式
+    internal func hide(animation: STHUDAnimation = .fade) {
         if self.progressHUD?.superview != nil {
-            self.progressHUD?.hide(animated: animated)
+            self.progressHUD?.hide(animation: animation)
         }
     }
-    
+
     /// 延迟隐藏 HUD
     /// - Parameters:
-    ///   - animated: 是否动画
+    ///   - animation: 动画方式
     ///   - afterDelay: 延迟时间
-    internal func hide(animated: Bool, afterDelay: TimeInterval) {
+    internal func hide(animation: STHUDAnimation = .fade, afterDelay: TimeInterval) {
         if self.progressHUD?.superview != nil {
-            self.progressHUD?.hide(animated: animated, afterDelay: afterDelay)
+            self.progressHUD?.hide(animation: animation, afterDelay: afterDelay)
         }
     }
      
@@ -706,7 +713,7 @@ public extension STHUD {
     /// 全局关闭加载指示器
     static func st_dismiss() {
         DispatchQueue.main.async {
-            self.sharedHUD.hide(animated: true)
+            self.sharedHUD.hide(animation: .fade)
         }
     }
 
@@ -731,10 +738,10 @@ public extension STHUD {
         }
         do {
             let result = try await task()
-            DispatchQueue.main.async { self.sharedHUD.hide(animated: true) }
+            DispatchQueue.main.async { self.sharedHUD.hide(animation: .fade) }
             return result
         } catch {
-            DispatchQueue.main.async { self.sharedHUD.hide(animated: true) }
+            DispatchQueue.main.async { self.sharedHUD.hide(animation: .fade) }
             throw error
         }
     }
@@ -810,7 +817,7 @@ public extension UIView {
                 STHUD.sharedHUD.configManualHiddenHUD(showInView: targetView)
                 STHUD.sharedHUD.progressHUD?.label.text = text
                 STHUD.sharedHUD.progressHUD?.detailsLabel.text = detailText
-                STHUD.sharedHUD.progressHUD?.show(animated: true)
+                STHUD.sharedHUD.progressHUD?.show(animation: .fade)
             } else {
                 STHUD.sharedHUD.showLoading(title: text, detailText: detailText)
             }
@@ -820,7 +827,7 @@ public extension UIView {
     /// 关闭 HUD
     func st_dismiss() {
         DispatchQueue.main.async {
-            STHUD.sharedHUD.hide(animated: true)
+            STHUD.sharedHUD.hide(animation: .fade)
         }
     }
 
