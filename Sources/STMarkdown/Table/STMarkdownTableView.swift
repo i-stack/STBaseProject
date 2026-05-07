@@ -174,7 +174,10 @@ extension STMarkdownTableView: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: STMarkdownTableCell.reuseIdentifier,
             for: indexPath
-        ) as! STMarkdownTableCell
+        )
+        guard let cell = cell as? STMarkdownTableCell else {
+            return cell
+        }
 
         if let tableData,
            indexPath.section < tableData.cells.count,

@@ -32,6 +32,13 @@ public enum STHUDType {
     case text         // 纯文本 Toast（无图标，自动隐藏）
 }
 
+// MARK: - HUD 阴影开关
+/// Shadow toggle for HUD theme. Prefer this over the legacy `Bool` setter for clearer call-sites.
+public enum STHUDShadow: Equatable {
+    case enabled
+    case disabled
+}
+
 // MARK: - HUD 主题配置
 public struct STHUDTheme {
     public var backgroundColor: UIColor
@@ -50,6 +57,12 @@ public struct STHUDTheme {
     public var iconSize: CGSize
     public var labelFont: UIFont?
     public var detailLabelFont: UIFont?
+
+    /// 类型化阴影开关。底层仍用 Bool 存储，便于现有持久化/编码兼容。
+    public var shadow: STHUDShadow {
+        get { self.shadowEnabled ? .enabled : .disabled }
+        set { self.shadowEnabled = (newValue == .enabled) }
+    }
 
     public init(backgroundColor: UIColor = UIColor.black.withAlphaComponent(0.8),
                 textColor: UIColor = .white,
@@ -191,8 +204,16 @@ public class STHUD: NSObject {
 
     /// 设置阴影
     /// - Parameter enabled: 是否启用阴影
+    @available(*, deprecated, message: "Use setShadow(_:) with STHUDShadow for clearer call-sites.")
+    // swiftlint:disable:next st_avoid_bool_flag_param
     public func setShadowEnabled(_ enabled: Bool) {
         self.theme.shadowEnabled = enabled
+    }
+
+    /// 设置阴影（类型化 API）。
+    /// - Parameter shadow: `.enabled` 启用阴影；`.disabled` 关闭。
+    public func setShadow(_ shadow: STHUDShadow) {
+        self.theme.shadow = shadow
     }
 
     /// 设置成功图标

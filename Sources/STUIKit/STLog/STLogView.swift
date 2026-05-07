@@ -425,7 +425,12 @@ extension STLogView: UITableViewDataSource, UITableViewDelegate {
     }
 
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "STLogTableViewCell", for: indexPath) as! STLogTableViewCell
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: "STLogTableViewCell",
+            for: indexPath
+        ) as? STLogTableViewCell else {
+            return UITableViewCell(style: .subtitle, reuseIdentifier: nil)
+        }
         guard indexPath.row < self.displayedLogEntries.count else { return cell }
         cell.configure(with: self.displayedLogEntries[indexPath.row])
         return cell

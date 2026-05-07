@@ -1,0 +1,128 @@
+# SwiftLint 配置 —— STBaseProject
+# 与 .github/check_try_question_mark.sh 互补：try? 政策由专门脚本兜底，本文件聚焦
+# 其他反模式：强解包、as!、过长文件、Bool 旗参痕迹、`@objc` 滥用等。
+#
+# 渐进式落地策略：
+# - 严重项标 error（as!、Markdown 外 try! 在源码区）
+# - 风格项标 warning，先看清存量数量再考虑收紧
+# - 大量历史代码可以通过 `disabled_rules` 精确豁免
+
+included:
+  - Sources
+
+excluded:
+  - Sources/STMarkdown/Resources
+  - .build
+  - DerivedData
+
+# 默认规则中需要关闭或软化的
+disabled_rules:
+  - todo                          # TODO/FIXME 不视为告警
+  - identifier_name               # 历史命名以 st_ / ST 前缀为主，先不卡
+  - type_name                     # 同上
+  - trailing_whitespace           # 历史空白多，独立 PR 清理
+  - opening_brace                 # 与历史风格不一致
+  - line_length                   # 由下方自定义长度覆盖
+  - force_try                     # 由 st_no_force_try_outside_markdown 精准限制，允许 STMarkdown 静态正则
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - explicit_init
+  - first_where
+  - last_where
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - sorted_first_last
+  - prohibited_super_call
+  - overridden_super_call
+  - closure_end_indentation
+  - closure_spacing
+  - contains_over_filter_count
+  - contains_over_first_not_nil
+  - convenience_type
+  - discouraged_optional_boolean  # ★ 标记 Optional<Bool>，常是 Bool 旗参的延伸坏味
+  - fallthrough
+  - fatal_error_message
+  - flatmap_over_map_reduce
+  - force_unwrapping              # ★ 强解包警告（不直接 error，避免一次性失血）
+  - implicitly_unwrapped_optional # ★ 隐式解包变量
+  - joined_default_parameter
+  - literal_expression_end_indentation
+  - lower_acl_than_parent         # ★ 子声明可见性高于父类型时报警
+  - modifier_order
+  - operator_usage_whitespace
+  - redundant_string_enum_value
+  - sorted_imports
+  - toggle_bool
+
+force_cast: error                 # as! 直接 error
+
+analyzer_rules:
+  - unused_import
+  - unused_declaration
+
+# === 规则参数化 ===
+line_length:
+  warning: 220
+  error: 300
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_comments: true
+
+function_body_length:
+  warning: 120
+  error: 250
+
+type_body_length:
+  warning: 600
+  error: 1000
+
+file_length:
+  warning: 1200
+  error: 2500
+  ignore_comment_only_lines: true
+
+cyclomatic_complexity:
+  warning: 15
+  error: 30
+
+nesting:
+  type_level: 3
+
+# === 自定义规则 ===
+custom_rules:
+  st_no_force_try_outside_markdown:
+    name: "try! outside STMarkdown is forbidden"
+    regex: '\\btry!'
+    match_kinds:
+      - keyword
+    message: "try! 仅在 STMarkdown 静态正则编译路径允许，其它位置请使用 do/catch。"
+    severity: error
+    excluded:
+      - "Sources/STMarkdown/.*"
+
+  st_no_print:
+    name: "Use STLog instead of print"
+    regex: '(?<![\w.])print\('
+    message: "请使用 STLog(...) 输出日志，避免 print 在生产环境泄露。"
+    severity: warning
+    excluded:
+      - "Sources/STUIKit/STLog/.*"          # 日志模块自身
+      - "Sources/STMarkdown/Resources/.*"
+
+  st_avoid_bool_flag_param:
+    name: "Avoid trailing Bool parameters (use enum)"
+    regex: '\bfunc\s+\w+\([^)]*\b(enabled|disabled|isEnabled|on|off|flag)\s*:\s*Bool\s*\)'
+    message: "Bool 旗参可读性差，建议改为枚举（如 case enabled / disabled）。"
+    severity: warning
+
+  st_chinese_only_doc:
+    name: "Public doc should include English"
+    regex: '^\s*///\s*[一-鿿]+[^/]*$\n^(?!\s*///)'
+    message: "公共 API 文档建议提供英文版本（中文可保留作为辅助说明）。"
+    severity: warning
+    excluded:
+      - "Sources/STLocalizable/.*"
+
+reporter: "xcode"

@@ -18,6 +18,15 @@ jobs:
     - uses: actions/checkout@v4
     - name: Check try? policy
       run: bash .github/check_try_question_mark.sh
+    - name: SwiftLint
+      run: |
+        if ! command -v swiftlint >/dev/null 2>&1; then
+          brew install swiftlint
+        fi
+        swiftlint version
+        # 不加 --strict：warning 不阻断 CI，仅 .swiftlint.yml 中明确为 error 级别的规则会失败构建。
+        # 待存量 warning 清零后可改为 --strict 提升门槛。
+        swiftlint --reporter github-actions-logging
     - name: Build
       run: xcodebuild -scheme STBaseProject-Package -destination 'generic/platform=iOS Simulator' build
     - name: Build For Testing

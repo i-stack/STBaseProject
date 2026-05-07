@@ -594,7 +594,11 @@ open class STBaseModel: NSObject {
             // 同上，必须早于 [String: Any] 分支。
             let copy = NSMutableDictionary(capacity: mutableDict.count)
             for (k, v) in mutableDict {
-                copy.setObject(st_deepCopy(value: v), forKey: k as! NSCopying)
+                guard let key = k as? NSCopying else {
+                    assertionFailure("NSMutableDictionary key does not conform to NSCopying.")
+                    continue
+                }
+                copy.setObject(st_deepCopy(value: v), forKey: key)
             }
             return copy
         case let array as [Any]:
