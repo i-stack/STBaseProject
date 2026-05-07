@@ -14,6 +14,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-markdown.git",
       "state" : {
+        "branch" : "main",
         "revision" : "55d66d9a9e8d4fd3f48d111b0d437e82fe451903"
       }
     },
@@ -22,6 +23,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/mgriebling/SwiftMath.git",
       "state" : {
+        "branch" : "main",
         "revision" : "48ff188ba118c37d024551238041113560ab09b9"
       }
     }

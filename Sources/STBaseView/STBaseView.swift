@@ -887,7 +887,7 @@ extension STBaseView {
     /// 添加上拉加载更多。必须在 configure(layoutMode: .table/.collection) 之后调用。
     /// - Parameters:
     ///   - content: 显示内容（`.animation` 仅 spinner / `.text` 文字 / `.imageAndText` 图片+文字）
-    ///   - action: 加载回调，完成后调用 `st_endLoadMore(hasMore:)`
+    ///   - action: 加载回调，完成后调用 `st_endLoadMore(paging:)`
     public func st_addLoadMore(content: STLoadMoreContent = .animation, action: @escaping () -> Void) {
         guard let sv = self.st_refreshScrollView() else { return }
         self.st_removeLoadMore()
@@ -896,9 +896,9 @@ extension STBaseView {
         objc_setAssociatedObject(self, st_keyPointer(STRefreshKeys.footer), footer, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
 
-    /// 结束加载动画。`hasMore = false` 时显示"无更多数据"并锁定，不再自动触发。
-    public func st_endLoadMore(hasMore: Bool = true) {
-        (objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.footer)) as? STLoadMoreFooterView)?.endLoading(hasMore: hasMore)
+    /// 结束加载动画。`.exhausted` 时显示"无更多数据"并锁定，不再自动触发。
+    public func st_endLoadMore(paging: STPagingState = .hasMore) {
+        (objc_getAssociatedObject(self, st_keyPointer(STRefreshKeys.footer)) as? STLoadMoreFooterView)?.endLoading(paging: paging)
     }
 
     /// 重置加载更多为初始 idle 状态（换页或重新请求时调用）。

@@ -7,6 +7,14 @@
 
 import UIKit
 
+/// Safe-area adaptation toggle for `STScanView`.
+public enum STSafeAreaAdaptation: Sendable, Equatable {
+    case enabled
+    case disabled
+
+    public var isEnabled: Bool { self == .enabled }
+}
+
 public struct STScanViewConfiguration {
     public var scanAreaMargin: CGFloat = 60.0
     public var scanLineHeight: CGFloat = 5.0
@@ -393,8 +401,8 @@ extension STScanView {
         setupAccessibility()
     }
 
-    public func setSafeAreaAdaptation(enabled: Bool) {
-        self.configuration.automaticSafeAreaAdaptation = enabled
+    public func setSafeAreaAdaptation(_ adaptation: STSafeAreaAdaptation) {
+        self.configuration.automaticSafeAreaAdaptation = adaptation.isEnabled
         setNeedsDisplay()
         setNeedsLayout()
     }

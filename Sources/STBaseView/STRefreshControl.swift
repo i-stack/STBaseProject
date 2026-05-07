@@ -7,6 +7,16 @@
 
 import UIKit
 
+/// Paging state reported to load-more footers after a fetch completes.
+public enum STPagingState: Sendable, Equatable {
+    /// More pages are available; footer returns to idle.
+    case hasMore
+    /// No more pages; footer locks into the "no more" display state.
+    case exhausted
+
+    public var hasMore: Bool { self == .hasMore }
+}
+
 /// 下拉刷新内容配置
 public enum STRefreshContent {
     /// 仅默认 spinner 动画
@@ -438,14 +448,15 @@ public final class STLoadMoreFooterView: UIView {
     }
 
     // MARK: Public API
-    /// 结束加载状态。`hasMore = false` 时显示"无更多"状态并锁定。
-    public func endLoading(hasMore: Bool) {
-        if hasMore {
+    /// 结束加载状态。`.exhausted` 时显示"无更多"状态并锁定。
+    public func endLoading(paging: STPagingState) {
+        switch paging {
+        case .hasMore:
             if let sv = self.attachedScrollView {
                 self.setEffectiveInsetBottom(self.originalInsetBottom, on: sv)
             }
             self.state = .idle
-        } else {
+        case .exhausted:
             self.state = .noMore
             if let sv = self.attachedScrollView {
                 // noMore 时保持 footer 可见

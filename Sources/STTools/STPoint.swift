@@ -21,13 +21,11 @@ public enum STGeometry {
         start: CGPoint,
         end: CGPoint
     ) -> CGFloat {
-        let _ = center
-        let chordLength = distance(between: start, and: end)
-        let cosine = (2 * pow(radius, 2) - pow(chordLength, 2)) / (2 * pow(radius, 2))
-        var angle = 180 / Double.pi * Double(acosf(Float(cosine)))
-        if start.x > end.x {
-            angle = 360 - angle
-        }
-        return CGFloat(angle)
+        let startVector = CGVector(dx: start.x - center.x, dy: start.y - center.y)
+        let endVector = CGVector(dx: end.x - center.x, dy: end.y - center.y)
+        let startAngle = atan2(startVector.dy, startVector.dx)
+        let endAngle = atan2(endVector.dy, endVector.dx)
+        let angle = (endAngle - startAngle) * 180 / .pi
+        return angle >= 0 ? angle : angle + 360
     }
 }

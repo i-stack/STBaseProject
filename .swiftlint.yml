@@ -112,8 +112,8 @@ custom_rules:
       - "Sources/STMarkdown/Resources/.*"
 
   st_avoid_bool_flag_param:
-    name: "Avoid trailing Bool parameters (use enum)"
-    regex: '\bfunc\s+\w+\([^)]*\b(enabled|disabled|isEnabled|on|off|flag)\s*:\s*Bool\s*\)'
+    name: "Avoid Bool flag parameters (use enum)"
+    regex: '\b(?<!override\s)func\s+\w+\([^)]*(?:\b(?:enabled|disabled|on|off|flag|animated|immediately|prettyPrinted|fromEnd|ellipsis|uppercase|sync|force|reset|notify|selected|highlighted|displayMode|imageReady|iconOnLeft|animatingIn)|\b(?:is|has|can|should|allows?|enable|disable|use|uses|include|exclude|show|hide|needs|wants|requires)[A-Z]\w*)\s*:\s*Bool(?:\s*=\s*[^,\)\n]+)?(?=\s*[,)\n])'
     message: "Bool 旗参可读性差，建议改为枚举（如 case enabled / disabled）。"
     severity: warning
 

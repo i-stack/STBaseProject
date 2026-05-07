@@ -7,6 +7,16 @@
 
 import Foundation
 
+/// First-fire timing for `STTimer.start`.
+public enum STTimerFirstFire: Sendable, Equatable {
+    /// Fire once immediately on start, then every `interval`.
+    case immediate
+    /// Wait one full `interval` before the first fire.
+    case afterInterval
+
+    public var isImmediate: Bool { self == .immediate }
+}
+
 public final class STTimer {
 
     public typealias STTimerHandler = (STTimer) -> Void
@@ -45,14 +55,14 @@ public final class STTimer {
 
     /// 启动定时器
     /// - Parameters:
-    ///   - immediately: 是否立即触发一次，默认 false（等待第一个 interval 后触发）
+    ///   - firstFire: 首次触发时机，默认 `.afterInterval`（等待第一个 interval 后触发）
     ///   - handler: 触发回调，在主线程执行，参数为定时器自身
-    public func start(immediately: Bool = false, handler: @escaping STTimerHandler) {
+    public func start(firstFire: STTimerFirstFire = .afterInterval, handler: @escaping STTimerHandler) {
         self.queue.async { [weak self] in
             guard let self, self.state == .idle else { return }
             self.handler = handler
             self.fireCount = 0
-            self.createAndResumeTimer(immediately: immediately)
+            self.createAndResumeTimer(firstFire: firstFire)
             self.state = .running
         }
     }
@@ -90,10 +100,10 @@ public final class STTimer {
         self.queue.sync { state == .paused }
     }
 
-    private func createAndResumeTimer(immediately: Bool) {
+    private func createAndResumeTimer(firstFire: STTimerFirstFire) {
         self.timer?.cancel()
         let source = DispatchSource.makeTimerSource(flags: [], queue: self.queue)
-        let deadline: DispatchTime = immediately ? .now() : .now() + self.interval
+        let deadline: DispatchTime = firstFire.isImmediate ? .now() : .now() + self.interval
         source.schedule(deadline: deadline, repeating: .milliseconds(Int(self.interval * 1000)), leeway: self.leeway)
         source.setEventHandler { [weak self] in
             self?.handleFire()
