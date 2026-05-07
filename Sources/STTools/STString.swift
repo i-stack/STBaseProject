@@ -302,4 +302,127 @@ public extension String {
             .stringByReplacingMatches(in: self, options: [], range: range, withTemplate: "$1_$2")
             .lowercased() ?? self
     }
+
+    // MARK: - Substring Helpers
+
+    /// 返回首次/末次出现 needle 之后的子串，未命中则原样返回
+    /// - Parameters:
+    ///   - needle: 目标子串
+    ///   - fromEnd: true 表示从末尾反向搜索
+    func substring(after needle: String, fromEnd: Bool = false) -> String {
+        let options: String.CompareOptions = fromEnd ? .backwards : []
+        guard let range = range(of: needle, options: options) else { return self }
+        return String(self[range.upperBound...])
+    }
+
+    /// 返回首次/末次出现 needle 之前的子串，未命中则原样返回
+    func substring(before needle: String, fromEnd: Bool = false) -> String {
+        let options: String.CompareOptions = fromEnd ? .backwards : []
+        guard let range = range(of: needle, options: options) else { return self }
+        return String(self[..<range.lowerBound])
+    }
+
+    /// 返回 leftCap 与 rightCap 之间的子串
+    func substring(between leftCap: String, and rightCap: String) -> String {
+        substring(after: leftCap).substring(before: rightCap)
+    }
+
+    /// 重复移除开头匹配 needle 的部分
+    func trimmingPrefix(_ needle: String) -> String {
+        guard !needle.isEmpty else { return self }
+        var result = self
+        while result.hasPrefix(needle) {
+            result.removeFirst(needle.count)
+        }
+        return result
+    }
+
+    /// 重复移除结尾匹配 needle 的部分
+    func trimmingSuffix(_ needle: String) -> String {
+        guard !needle.isEmpty else { return self }
+        var result = self
+        while result.hasSuffix(needle) {
+            result.removeLast(needle.count)
+        }
+        return result
+    }
+
+    /// 重复移除两端匹配 needle 的部分
+    func trimming(both needle: String) -> String {
+        trimmingPrefix(needle).trimmingSuffix(needle)
+    }
+
+    // MARK: - HTML / Whitespace / Summarize
+
+    /// HTML 实体转义（& < > " '）
+    var htmlEscaped: String {
+        var output = replacingOccurrences(of: "&", with: "&amp;")
+        output = output.replacingOccurrences(of: "\"", with: "&quot;")
+        output = output.replacingOccurrences(of: "'", with: "&#39;")
+        output = output.replacingOccurrences(of: "<", with: "&lt;")
+        output = output.replacingOccurrences(of: ">", with: "&gt;")
+        return output
+    }
+
+    /// 将所有连续空白（包括换行）压缩为单个空格，并修剪两端
+    var normalizedWhitespace: String {
+        let whitespace = CharacterSet.whitespacesAndNewlines
+        let components = unicodeScalars
+            .split(whereSeparator: { whitespace.contains($0) })
+            .map { String(String.UnicodeScalarView($0)) }
+        return components.joined(separator: " ")
+    }
+
+    /// 将字符串截断到指定长度；若在中间，则回退到最近的空白处，再可选追加省略号
+    /// - Parameters:
+    ///   - length: 最大字符数
+    ///   - ellipsis: 超过长度时是否追加 `…`
+    func summarized(toLength length: Int, ellipsis: Bool = true) -> String {
+        guard count > length, length > 0 else { return self }
+        let endIndex = index(startIndex, offsetBy: length)
+        var truncated = String(self[..<endIndex])
+        if let spaceRange = truncated.rangeOfCharacter(from: .whitespacesAndNewlines, options: .backwards) {
+            truncated = String(truncated[..<spaceRange.lowerBound])
+        }
+        return ellipsis ? truncated + "\u{2026}" : truncated
+    }
+
+    /// 使用正则匹配并通过 block 逐个替换；block 的入参为匹配结果和捕获组
+    /// - Parameters:
+    ///   - regex: 已构造的 NSRegularExpression
+    ///   - replacement: 接收 (match, captureGroups) 返回替换串
+    func replacingMatches(
+        of regex: NSRegularExpression,
+        using replacement: (NSTextCheckingResult, [String]) -> String
+    ) -> String {
+        let ns = self as NSString
+        let matches = regex.matches(in: self, options: [], range: NSRange(location: 0, length: ns.length))
+        guard !matches.isEmpty else { return self }
+
+        let result = NSMutableString(string: self)
+        var offset = 0
+        for match in matches {
+            var groups: [String] = []
+            for groupIndex in 0...regex.numberOfCaptureGroups {
+                let captureRange = match.range(at: groupIndex)
+                if captureRange.location == NSNotFound {
+                    groups.append("")
+                } else {
+                    groups.append(ns.substring(with: captureRange))
+                }
+            }
+            let replacementString = replacement(match, groups)
+            let adjustedRange = NSRange(location: match.range.location + offset, length: match.range.length)
+            result.replaceCharacters(in: adjustedRange, with: replacementString)
+            offset += replacementString.utf16.count - match.range.length
+        }
+        return result as String
+    }
+
+    /// URL 查询字符串严格百分号编码：移除 query 分隔符等保留字符，使单个字段可作为值安全拼接
+    var strictURLQueryEncoded: String {
+        var allowed = CharacterSet.urlQueryAllowed
+        allowed.remove(charactersIn: "?=&+:;@/$!'()\",*")
+        return addingPercentEncoding(withAllowedCharacters: allowed) ?? self
+    }
 }

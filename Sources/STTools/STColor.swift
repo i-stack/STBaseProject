@@ -127,3 +127,127 @@ private extension UIColor {
         return UIColor(cgColor: cgColor)
     }
 }
+
+// MARK: - Color Modification
+
+public extension UIColor {
+
+    /// 通过 block 修改 RGBA 分量后生成新颜色；若当前颜色只支持灰度，则 R=G=B=white
+    /// - Parameter modify: 传入可变的 red/green/blue/alpha
+    /// - Returns: 新的 UIColor
+    func modifyingRGBA(_ modify: (_ red: inout CGFloat, _ green: inout CGFloat, _ blue: inout CGFloat, _ alpha: inout CGFloat) -> Void) -> UIColor {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        if !getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            var white: CGFloat = 0
+            if getWhite(&white, alpha: &alpha) {
+                red = white
+                green = white
+                blue = white
+            } else {
+                return self
+            }
+        }
+        modify(&red, &green, &blue, &alpha)
+        return UIColor(
+            red: max(0, min(1, red)),
+            green: max(0, min(1, green)),
+            blue: max(0, min(1, blue)),
+            alpha: max(0, min(1, alpha))
+        )
+    }
+
+    /// 通过 block 修改 HSBA 分量后生成新颜色
+    func modifyingHSBA(_ modify: (_ hue: inout CGFloat, _ saturation: inout CGFloat, _ brightness: inout CGFloat, _ alpha: inout CGFloat) -> Void) -> UIColor {
+        var hue: CGFloat = 0
+        var saturation: CGFloat = 0
+        var brightness: CGFloat = 0
+        var alpha: CGFloat = 0
+        if !getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha) {
+            var white: CGFloat = 0
+            if getWhite(&white, alpha: &alpha) {
+                hue = 0
+                saturation = 0
+                brightness = white
+            } else {
+                return self
+            }
+        }
+        modify(&hue, &saturation, &brightness, &alpha)
+        return UIColor(
+            hue: max(0, min(1, hue)),
+            saturation: max(0, min(1, saturation)),
+            brightness: max(0, min(1, brightness)),
+            alpha: max(0, min(1, alpha))
+        )
+    }
+
+    /// 生成 CSS 风格颜色字符串 `rgba(r, g, b, a)`，便于注入 WebView 样式
+    var cssColorString: String {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        if getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            return Self.cssColorString(red: red, green: green, blue: blue, alpha: alpha)
+        }
+        var white: CGFloat = 0
+        if getWhite(&white, alpha: &alpha) {
+            return Self.cssColorString(red: white, green: white, blue: white, alpha: alpha)
+        }
+        return "rgba(0, 0, 0, 1)"
+    }
+
+    private static func cssColorString(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat) -> String {
+        let r = Int(round(max(0, min(1, red)) * 255))
+        let g = Int(round(max(0, min(1, green)) * 255))
+        let b = Int(round(max(0, min(1, blue)) * 255))
+        let a = max(0, min(1, alpha))
+        return String(format: "rgba(%d, %d, %d, %.3g)", locale: Locale(identifier: "en_US_POSIX"), r, g, b, Double(a))
+    }
+
+    /// 按 source-over 方式与另一颜色混合
+    /// - Parameter other: 叠加在当前颜色上的目标颜色
+    /// - Returns: 混合后的颜色
+    func blending(with other: UIColor) -> UIColor? {
+        func components(of color: UIColor) -> (CGFloat, CGFloat, CGFloat, CGFloat)? {
+            var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+            if color.getRed(&r, green: &g, blue: &b, alpha: &a) {
+                return (r, g, b, a)
+            }
+            var white: CGFloat = 0
+            if color.getWhite(&white, alpha: &a) {
+                return (white, white, white, a)
+            }
+            return nil
+        }
+
+        guard let (baseRed, baseGreen, baseBlue, baseAlpha) = components(of: self),
+              let (sourceRed, sourceGreen, sourceBlue, sourceAlpha) = components(of: other)
+        else {
+            return nil
+        }
+
+        let outputAlpha = sourceAlpha + baseAlpha * (1.0 - sourceAlpha)
+        guard outputAlpha > 0 else {
+            return UIColor(red: 0, green: 0, blue: 0, alpha: 0)
+        }
+
+        return UIColor(
+            red: (sourceRed * sourceAlpha + baseRed * baseAlpha * (1.0 - sourceAlpha)) / outputAlpha,
+            green: (sourceGreen * sourceAlpha + baseGreen * baseAlpha * (1.0 - sourceAlpha)) / outputAlpha,
+            blue: (sourceBlue * sourceAlpha + baseBlue * baseAlpha * (1.0 - sourceAlpha)) / outputAlpha,
+            alpha: outputAlpha
+        )
+    }
+
+    /// 十六进制整数值（0xRRGGBB）创建颜色
+    static func color(hexValue: UInt32, alpha: CGFloat = 1.0) -> UIColor {
+        let red = CGFloat((hexValue & 0xFF0000) >> 16) / 255.0
+        let green = CGFloat((hexValue & 0x00FF00) >> 8) / 255.0
+        let blue = CGFloat(hexValue & 0x0000FF) / 255.0
+        return UIColor(red: red, green: green, blue: blue, alpha: alpha)
+    }
+}

@@ -335,4 +335,283 @@ extension UIImage {
             PHAssetChangeRequest.creationRequestForAsset(from: self)
         }
     }
+
+    // MARK: - Factory
+
+    /// 使用纯色生成指定尺寸的图片
+    /// - Parameters:
+    ///   - color: 填充颜色
+    ///   - size: 图片尺寸
+    ///   - scale: 渲染倍率，默认使用主屏幕倍率
+    public static func solidColor(_ color: UIColor, size: CGSize, scale: CGFloat = UIScreen.main.scale) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { ctx in
+            color.setFill()
+            ctx.fill(CGRect(origin: .zero, size: size))
+        }
+    }
+
+    /// 使用纯色生成可拉伸的单像素图，常用于给 UIButton/UINavigationBar 设置背景
+    public static func stretchableSolidColor(_ color: UIColor) -> UIImage {
+        solidColor(color, size: CGSize(width: 1, height: 1), scale: 1.0)
+            .resizableImage(withCapInsets: .zero, resizingMode: .stretch)
+    }
+
+    /// 使用绘制闭包生成图像（背景透明，使用主屏幕倍率）
+    public static func draw(size: CGSize, actions: (UIGraphicsImageRendererContext) -> Void) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image(actions: actions)
+    }
+
+    // MARK: - Masking / Tinting
+
+    /// 用指定颜色填充非透明像素，保持原图的 alpha 通道；
+    /// 与 `tinted(with:)` 的区别：该方法完全覆盖颜色而非混合
+    public func masked(with color: UIColor) -> UIImage {
+        let rect = CGRect(origin: .zero, size: size)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { ctx in
+            draw(in: rect)
+            ctx.cgContext.setFillColor(color.cgColor)
+            ctx.cgContext.setBlendMode(.sourceAtop)
+            ctx.cgContext.fill(rect)
+        }
+    }
+
+    /// 以 `sourceAtop` 方式叠加颜色，生成着色图
+    public func tinted(with color: UIColor) -> UIImage {
+        let rect = CGRect(origin: .zero, size: size)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { _ in
+            draw(in: rect)
+            color.setFill()
+            UIRectFillUsingBlendMode(rect, .sourceAtop)
+        }
+    }
+
+    /// 按指定名称加载资源图，并使用目标颜色着色（等价于 FCUtilities 的 `fc_maskedImageNamed:color:`）
+    public static func masked(named name: String, color: UIColor) -> UIImage? {
+        UIImage(named: name)?.masked(with: color)
+    }
+
+    /// 将图像转换为去饱和（灰度）版本
+    public func desaturated() -> UIImage {
+        let rect = CGRect(origin: .zero, size: size)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { ctx in
+            draw(in: rect)
+            ctx.cgContext.setFillColor(UIColor.black.cgColor)
+            ctx.cgContext.setBlendMode(.saturation)
+            ctx.cgContext.fill(rect)
+        }
+    }
+
+    // MARK: - Padding / Additional Drawing
+
+    /// 在图像外围填充指定颜色的内边距
+    /// - Parameters:
+    ///   - color: 填充颜色
+    ///   - insets: 边距（会自动取绝对值）
+    public func padded(with color: UIColor, insets: UIEdgeInsets) -> UIImage {
+        let top = abs(insets.top)
+        let bottom = abs(insets.bottom)
+        let left = abs(insets.left)
+        let right = abs(insets.right)
+        let newSize = CGSize(
+            width: size.width + left + right,
+            height: size.height + top + bottom
+        )
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: newSize, format: format)
+        return renderer.image { ctx in
+            let entireRect = CGRect(origin: .zero, size: newSize)
+            color.setFill()
+            ctx.fill(entireRect)
+            draw(in: entireRect.inset(by: UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)))
+        }
+    }
+
+    /// 在当前图像上追加额外的绘制操作
+    public func withAdditionalDrawing(_ actions: (UIGraphicsImageRendererContext) -> Void) -> UIImage {
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { ctx in
+            draw(in: CGRect(origin: .zero, size: size))
+            actions(ctx)
+        }
+    }
+
+    // MARK: - Rounded Corners
+
+    /// 以 iOS 风格的连续曲率圆角裁剪图像
+    /// - Parameter cornerRadius: 圆角半径
+    public func roundedImage(cornerRadius: CGFloat) -> UIImage {
+        let rect = CGRect(origin: .zero, size: size)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { _ in
+            UIBezierPath(
+                roundedRect: rect,
+                byRoundingCorners: .allCorners,
+                cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+            ).addClip()
+            draw(in: rect)
+        }
+    }
+
+    /// 以连续曲率圆角裁剪图像并绘制指定颜色/宽度的边框
+    public func roundedImage(cornerRadius: CGFloat, borderColor: UIColor, borderWidth: CGFloat) -> UIImage {
+        let halfBorder = borderWidth / 2.0
+        let outputRect = CGRect(origin: .zero, size: size)
+        let imageRect = outputRect.insetBy(dx: borderWidth, dy: borderWidth)
+        let borderRect = outputRect.insetBy(dx: halfBorder, dy: halfBorder)
+        let imageCornerRadius = max(0, cornerRadius - borderWidth)
+
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        format.opaque = false
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        return renderer.image { ctx in
+            ctx.cgContext.saveGState()
+            UIBezierPath(
+                roundedRect: imageRect,
+                byRoundingCorners: .allCorners,
+                cornerRadii: CGSize(width: imageCornerRadius, height: imageCornerRadius)
+            ).addClip()
+            draw(in: imageRect)
+            ctx.cgContext.restoreGState()
+
+            let path = UIBezierPath(
+                roundedRect: borderRect,
+                byRoundingCorners: .allCorners,
+                cornerRadii: CGSize(width: cornerRadius, height: cornerRadius)
+            )
+            path.lineWidth = borderWidth
+            borderColor.setStroke()
+            path.stroke()
+        }
+    }
+
+    // MARK: - Pixel Enumeration / Similarity
+
+    /// 遍历每个像素，回调 (x, y, r, g, b, a)
+    public func enumeratePixels(_ body: (_ x: Int, _ y: Int, _ r: UInt8, _ g: UInt8, _ b: UInt8, _ a: UInt8) -> Void) {
+        guard let cgImage else { return }
+        let width = cgImage.width
+        let height = cgImage.height
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else { return }
+
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        var rawData = [UInt8](repeating: 0, count: height * bytesPerRow)
+
+        guard let context = CGContext(
+            data: &rawData,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        ) else { return }
+
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        for y in 0..<height {
+            for x in 0..<width {
+                let offset = (y * bytesPerRow) + x * bytesPerPixel
+                body(x, y, rawData[offset], rawData[offset + 1], rawData[offset + 2], rawData[offset + 3])
+            }
+        }
+    }
+
+    /// 与相同尺寸的另一张图比较相似度：1.0 完全相同，0.0 完全不同
+    /// - Parameter other: 相同尺寸的另一张图像
+    /// - Returns: 相似度或 nil（尺寸或数据不兼容）
+    public func similarity(to other: UIImage) -> Float? {
+        guard let a = cgImage, let b = other.cgImage else { return nil }
+        let width = a.width
+        let height = a.height
+        guard b.width == width, b.height == height else { return nil }
+        guard let colorSpace = CGColorSpace(name: CGColorSpace.sRGB) else { return nil }
+
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        var dataA = [UInt8](repeating: 0, count: height * bytesPerRow)
+        var dataB = [UInt8](repeating: 0, count: height * bytesPerRow)
+
+        let bitmapInfo = CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder32Big.rawValue
+        guard let ctxA = CGContext(
+            data: &dataA, width: width, height: height, bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: bitmapInfo
+        ), let ctxB = CGContext(
+            data: &dataB, width: width, height: height, bitsPerComponent: 8,
+            bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: bitmapInfo
+        ) else { return nil }
+
+        ctxA.draw(a, in: CGRect(x: 0, y: 0, width: width, height: height))
+        ctxB.draw(b, in: CGRect(x: 0, y: 0, width: width, height: height))
+
+        var totalDifference: Float = 0
+        for y in 0..<height {
+            for x in 0..<width {
+                let offset = (y * bytesPerRow) + x * bytesPerPixel
+                let dr = Int(dataA[offset]) - Int(dataB[offset])
+                let dg = Int(dataA[offset + 1]) - Int(dataB[offset + 1])
+                let db = Int(dataA[offset + 2]) - Int(dataB[offset + 2])
+                let da = Int(dataA[offset + 3]) - Int(dataB[offset + 3])
+                let diffSquared = dr * dr + dg * dg + db * db + da * da
+                totalDifference += Swift.min(1.0, Float(diffSquared) / Float(4 * 255 * 255))
+            }
+        }
+
+        return 1.0 - (totalDifference / Float(width * height))
+    }
+
+    // MARK: - Decoding
+
+    /// 从 Data 解码为 UIImage，可选缩放到最大边长
+    /// - Parameters:
+    ///   - data: 图片数据
+    ///   - maxOutputDimension: 最大输出尺寸（>0 时启用缩略），0 表示原尺寸
+    public static func decoded(from data: Data, maxOutputDimension: Int = 0) -> UIImage? {
+        guard !data.isEmpty else { return nil }
+        let options: [CFString: Any] = [kCGImageSourceShouldCache: false]
+        guard let source = CGImageSourceCreateWithData(data as CFData, options as CFDictionary) else {
+            return nil
+        }
+
+        let cgImage: CGImage?
+        if maxOutputDimension > 0 {
+            let thumbOptions: [CFString: Any] = [
+                kCGImageSourceCreateThumbnailFromImageAlways: true,
+                kCGImageSourceShouldCacheImmediately: true,
+                kCGImageSourceCreateThumbnailWithTransform: true,
+                kCGImageSourceThumbnailMaxPixelSize: maxOutputDimension
+            ]
+            cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, thumbOptions as CFDictionary)
+        } else {
+            let decodeOptions: [CFString: Any] = [kCGImageSourceShouldCacheImmediately: true]
+            cgImage = CGImageSourceCreateImageAtIndex(source, 0, decodeOptions as CFDictionary)
+        }
+        return cgImage.map { UIImage(cgImage: $0) }
+    }
 }
