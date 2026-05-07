@@ -56,7 +56,7 @@ public struct STHUDTheme {
     public var warningColor: UIColor
     public var infoColor: UIColor
     public var cornerRadius: CGFloat
-    public var shadowEnabled: Bool
+    public var shadow: STHUDShadow
     public var successIconName: String?
     public var errorIconName: String?
     public var warningIconName: String?
@@ -64,12 +64,6 @@ public struct STHUDTheme {
     public var iconSize: CGSize
     public var labelFont: UIFont?
     public var detailLabelFont: UIFont?
-
-    /// 类型化阴影开关。底层仍用 Bool 存储，便于现有持久化/编码兼容。
-    public var shadow: STHUDShadow {
-        get { self.shadowEnabled ? .enabled : .disabled }
-        set { self.shadowEnabled = (newValue == .enabled) }
-    }
 
     public init(backgroundColor: UIColor = UIColor.black.withAlphaComponent(0.8),
                 textColor: UIColor = .white,
@@ -79,7 +73,7 @@ public struct STHUDTheme {
                 warningColor: UIColor = .systemOrange,
                 infoColor: UIColor = .systemBlue,
                 cornerRadius: CGFloat = 8,
-                shadowEnabled: Bool = true,
+                shadow: STHUDShadow = .enabled,
                 successIconName: String? = nil,
                 errorIconName: String? = nil,
                 warningIconName: String? = nil,
@@ -95,7 +89,7 @@ public struct STHUDTheme {
         self.warningColor = warningColor
         self.infoColor = infoColor
         self.cornerRadius = cornerRadius
-        self.shadowEnabled = shadowEnabled
+        self.shadow = shadow
         self.successIconName = successIconName
         self.errorIconName = errorIconName
         self.warningIconName = warningIconName
@@ -210,14 +204,6 @@ public class STHUD: NSObject {
     }
 
     /// 设置阴影
-    /// - Parameter enabled: 是否启用阴影
-    @available(*, deprecated, renamed: "setShadow(_:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
-    public func setShadowEnabled(_ enabled: Bool) {
-        self.theme.shadowEnabled = enabled
-    }
-
-    /// 设置阴影（类型化 API）。
     /// - Parameter shadow: `.enabled` 启用阴影；`.disabled` 关闭。
     public func setShadow(_ shadow: STHUDShadow) {
         self.theme.shadow = shadow
@@ -489,11 +475,13 @@ public class STHUD: NSObject {
         
         if let hud = self.progressHUD {
             hud.bezelView.layer.cornerRadius = self.theme.cornerRadius
-            if self.theme.shadowEnabled {
+            if self.theme.shadow == .enabled {
                 hud.bezelView.layer.shadowColor = UIColor.black.cgColor
                 hud.bezelView.layer.shadowOffset = CGSize(width: 0, height: 2)
                 hud.bezelView.layer.shadowRadius = 4
                 hud.bezelView.layer.shadowOpacity = 0.3
+            } else {
+                hud.bezelView.layer.shadowOpacity = 0
             }
         }
         self.progressHUD?.mode = self.hudMode
