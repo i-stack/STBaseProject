@@ -15,10 +15,10 @@ public struct STMarkdownDefaultImageRenderer: STMarkdownImageRendering {
         altText: String,
         title: String?,
         style: STMarkdownStyle,
-        inline: Bool
+        placement: STMarkdownImagePlacement
     ) -> NSAttributedString? {
-        let label = self.displayLabel(url: url, altText: altText, inline: inline)
-        if inline {
+        let label = self.displayLabel(url: url, altText: altText, placement: placement)
+        if placement.isInline {
             return self.renderInlineImage(label: label, style: style)
         }
         return self.renderBlockImage(label: label, title: title, style: style)
@@ -26,14 +26,14 @@ public struct STMarkdownDefaultImageRenderer: STMarkdownImageRendering {
 }
 
 private extension STMarkdownDefaultImageRenderer {
-    func displayLabel(url: String, altText: String, inline: Bool) -> String {
+    func displayLabel(url: String, altText: String, placement: STMarkdownImagePlacement) -> String {
         if altText.isEmpty == false {
             return altText
         }
         if let lastPath = URL(string: url)?.lastPathComponent, lastPath.isEmpty == false {
-            return inline ? lastPath : "[image] \(lastPath)"
+            return placement.isInline ? lastPath : "[image] \(lastPath)"
         }
-        return inline ? "[img]" : "[image]"
+        return placement.isInline ? "[img]" : "[image]"
     }
 
     func renderInlineImage(label: String, style: STMarkdownStyle) -> NSAttributedString {

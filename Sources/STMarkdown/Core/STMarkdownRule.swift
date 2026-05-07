@@ -16,11 +16,11 @@ public protocol STMarkdownRule: Sendable {
 }
 
 public struct STMarkdownPreprocessContext: Sendable {
-    public let isDebug: Bool
+    public let debugMode: STMarkdownDebugMode
     public private(set) var appliedRules: [String] = []
 
-    public init(isDebug: Bool = false) {
-        self.isDebug = isDebug
+    public init(debugMode: STMarkdownDebugMode = .disabled) {
+        self.debugMode = debugMode
     }
 
     public mutating func markApplied(_ rule: any STMarkdownRule) {
@@ -30,6 +30,14 @@ public struct STMarkdownPreprocessContext: Sendable {
     public mutating func markApplied(_ ruleName: String) {
         self.appliedRules.append(ruleName)
     }
+}
+
+/// Toggle for verbose diagnostics during markdown preprocessing.
+public enum STMarkdownDebugMode: Sendable, Equatable {
+    case enabled
+    case disabled
+
+    public var isEnabled: Bool { self == .enabled }
 }
 
 enum STMarkdownRegexFactory {

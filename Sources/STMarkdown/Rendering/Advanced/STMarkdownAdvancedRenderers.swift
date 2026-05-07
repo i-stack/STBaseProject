@@ -25,7 +25,15 @@ public protocol STMarkdownTableRendering {
 }
 
 public protocol STMarkdownImageRendering {
-    func renderImage(url: String, altText: String, title: String?, style: STMarkdownStyle, inline: Bool) -> NSAttributedString?
+    func renderImage(url: String, altText: String, title: String?, style: STMarkdownStyle, placement: STMarkdownImagePlacement) -> NSAttributedString?
+}
+
+/// Placement of a markdown image: inline with text vs block-level (centered, with caption).
+public enum STMarkdownImagePlacement: Sendable, Equatable {
+    case inline
+    case block
+
+    public var isInline: Bool { self == .inline }
 }
 
 public protocol STMarkdownHorizontalRuleRendering {

@@ -208,7 +208,7 @@ final class STMarkdownAsyncImageAttachment: NSTextAttachment, STMarkdownRefresha
     private let refreshRegistry = STMarkdownRefreshObserverRegistry()
     private let loader: STMarkdownImageLoading
     private let style: STMarkdownStyle
-    private let inline: Bool
+    private let placement: STMarkdownImagePlacement
     private let url: URL
     private let altText: String
     private let blockMaxSize: CGSize
@@ -218,14 +218,14 @@ final class STMarkdownAsyncImageAttachment: NSTextAttachment, STMarkdownRefresha
         url: URL,
         altText: String,
         style: STMarkdownStyle,
-        inline: Bool,
+        placement: STMarkdownImagePlacement,
         loader: STMarkdownImageLoading,
         blockMaxSize: CGSize? = nil
     ) {
         self.url = url
         self.altText = altText
         self.style = style
-        self.inline = inline
+        self.placement = placement
         self.loader = loader
         self.blockMaxSize = Self.normalizedBlockMaxSize(blockMaxSize)
         super.init(data: nil, ofType: nil)
@@ -266,7 +266,7 @@ private extension STMarkdownAsyncImageAttachment {
 
     func configurePlaceholder() {
         let tint = self.style.imagePlaceholderTextColor ?? self.style.textColor.withAlphaComponent(0.7)
-        let placeholderImage = UIImage(systemName: self.inline ? "photo" : "photo.on.rectangle")?
+        let placeholderImage = UIImage(systemName: self.placement.isInline ? "photo" : "photo.on.rectangle")?
             .withTintColor(tint, renderingMode: .alwaysOriginal)
         placeholderImage?.accessibilityLabel = self.accessibilityLabelForCurrentState(imageReady: false)
         self.image = placeholderImage
@@ -297,7 +297,7 @@ private extension STMarkdownAsyncImageAttachment {
     }
 
     func placeholderBounds() -> CGRect {
-        if self.inline {
+        if self.placement.isInline {
             let side = max(self.style.font.capHeight, 14)
             let y = (self.style.font.capHeight - side) / 2
             return CGRect(x: 0, y: y, width: side, height: side)
@@ -312,7 +312,7 @@ private extension STMarkdownAsyncImageAttachment {
         guard size.width > 0, size.height > 0 else {
             return self.placeholderBounds()
         }
-        if self.inline {
+        if self.placement.isInline {
             let targetHeight = max(self.style.font.capHeight, 14)
             let scale = targetHeight / size.height
             let targetWidth = size.width * scale
@@ -352,7 +352,7 @@ public struct STMarkdownAsyncImageRenderer: STMarkdownImageRendering {
         self.blockMaxSize = blockMaxSize
     }
 
-    public func renderImage(url: String, altText: String, title: String?, style: STMarkdownStyle, inline: Bool) -> NSAttributedString? {
+    public func renderImage(url: String, altText: String, title: String?, style: STMarkdownStyle, placement: STMarkdownImagePlacement) -> NSAttributedString? {
         guard let resolvedURL = self.resolveURL(from: url) else {
             return nil
         }
@@ -360,11 +360,11 @@ public struct STMarkdownAsyncImageRenderer: STMarkdownImageRendering {
             url: resolvedURL,
             altText: altText,
             style: style,
-            inline: inline,
+            placement: placement,
             loader: self.loader,
             blockMaxSize: self.blockMaxSize
         )
-        if inline {
+        if placement.isInline {
             return NSAttributedString(attachment: attachment)
         }
         let result = NSMutableAttributedString(attachment: attachment)

@@ -59,7 +59,7 @@ public final class STMarkdownTableCell: UICollectionViewCell {
         self.contentLabel.attributedText = cellData.attributedContent
 
         let bgColor = style.tableBackgroundColor ?? UIColor.secondarySystemBackground
-        self.contentView.backgroundColor = cellData.isHeader
+        self.contentView.backgroundColor = cellData.role.isHeader
             ? bgColor.withAlphaComponent(0.92)
             : bgColor
     }

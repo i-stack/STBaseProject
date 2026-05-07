@@ -112,7 +112,7 @@ private extension STMarkdownAttributedStringRenderer {
                 altText: altText,
                 title: title,
                 style: self.style,
-                inline: false
+                placement: .block
             ) {
                 return rendered
             }
@@ -330,7 +330,7 @@ private extension STMarkdownAttributedStringRenderer {
                     altText: alt,
                     title: title,
                     style: self.style,
-                    inline: true
+                    placement: .inline
                 ) {
                     // 同 inline math：让 attachment 继承 paragraph / kern / link，
                     // 嵌在链接里的图片点击区域才能覆盖到 attachment glyph。

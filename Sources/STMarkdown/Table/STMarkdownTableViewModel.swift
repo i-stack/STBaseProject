@@ -7,16 +7,24 @@
 
 import UIKit
 
+/// Semantic role of a markdown table cell (header row vs body row).
+public enum STMarkdownTableCellRole: Sendable, Equatable {
+    case header
+    case body
+
+    public var isHeader: Bool { self == .header }
+}
+
 /// 表格 cell 的渲染数据：包含带样式的 NSAttributedString 和 citation 信息
 public struct STMarkdownTableCellData {
     public let attributedContent: NSAttributedString
     public let citations: [String]
-    public let isHeader: Bool
+    public let role: STMarkdownTableCellRole
 
-    public init(attributedContent: NSAttributedString, citations: [String], isHeader: Bool) {
+    public init(attributedContent: NSAttributedString, citations: [String], role: STMarkdownTableCellRole) {
         self.attributedContent = attributedContent
         self.citations = citations
-        self.isHeader = isHeader
+        self.role = role
     }
 }
 
@@ -57,9 +65,9 @@ public final class STMarkdownTableViewModel {
 
         var builtCells: [[STMarkdownTableCellData]] = []
         for (rowIndex, row) in allRows.enumerated() {
-            let isHeader = self.hasHeader && rowIndex == 0
-            let font = isHeader ? headerFont : bodyFont
-            let textColor = isHeader ? headerTextColor : bodyTextColor
+            let role: STMarkdownTableCellRole = (self.hasHeader && rowIndex == 0) ? .header : .body
+            let font = role.isHeader ? headerFont : bodyFont
+            let textColor = role.isHeader ? headerTextColor : bodyTextColor
             var rowCells: [STMarkdownTableCellData] = []
             for colIndex in 0..<maxCols {
                 let nodes = colIndex < row.count ? row[colIndex] : []
@@ -87,7 +95,7 @@ public final class STMarkdownTableViewModel {
                 rowCells.append(STMarkdownTableCellData(
                     attributedContent: processed,
                     citations: citations,
-                    isHeader: isHeader
+                    role: role
                 ))
             }
             builtCells.append(rowCells)

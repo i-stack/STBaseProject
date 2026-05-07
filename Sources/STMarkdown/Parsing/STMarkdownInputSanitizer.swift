@@ -387,7 +387,7 @@ public struct STMarkdownInputSanitizer: Sendable {
             )
         }
 
-        var context = STMarkdownPreprocessContext(isDebug: debug)
+        var context = STMarkdownPreprocessContext(debugMode: debug ? .enabled : .disabled)
         var result = text
         for rule in self.rules {
             guard rule.shouldApply(to: result) else { continue }
