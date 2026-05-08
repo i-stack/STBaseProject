@@ -9,30 +9,30 @@ import Foundation
 
 open class STBaseModel: NSObject {
 
-    private let st_lock = NSLock()
+    private let lock = NSLock()
 
-    private func st_withLock<T>(_ body: () throws -> T) rethrows -> T {
-        st_lock.lock()
-        defer { st_lock.unlock() }
+    private func withLock<T>(_ body: () throws -> T) rethrows -> T {
+        self.lock.lock()
+        defer { self.lock.unlock() }
         return try body()
     }
 
     /// 存储原始数据
-    private var _st_rawData: [String: STJSONValue] = [:]
+    private var rawDataStorage: [String: STJSONValue] = [:]
 
     /// 存储处理后的数据
-    private var _st_processedData: [String: Any] = [:]
+    private var processedDataStorage: [String: Any] = [:]
 
     /// 线程安全的原始数据访问
-    private var st_rawData: [String: STJSONValue] {
-        get { st_withLock { _st_rawData } }
-        set { st_withLock { _st_rawData = newValue } }
+    private var rawData: [String: STJSONValue] {
+        get { withLock { rawDataStorage } }
+        set { withLock { rawDataStorage = newValue } }
     }
 
     /// 线程安全的处理数据访问
-    private var st_processedData: [String: Any] {
-        get { st_withLock { _st_processedData } }
-        set { st_withLock { _st_processedData = newValue } }
+    private var processedData: [String: Any] {
+        get { withLock { processedDataStorage } }
+        set { withLock { processedDataStorage = newValue } }
     }
 
     /// 是否启用灵活模式
@@ -47,7 +47,6 @@ open class STBaseModel: NSObject {
     }
 
     public required init?(coder: NSCoder) {
-        // NSObject 本身没有 init?(coder:)；保留 NSCoding 入口仅是为 storyboard / NSKeyedUnarchiver 流程占位。
         super.init()
     }
 
@@ -57,19 +56,17 @@ open class STBaseModel: NSObject {
         let properties = self.st_propertyNames()
         let reverseMapping = type(of: self).st_reverseKeyMapping()
         let nestedTypes = type(of: self).st_nestedModelTypes()
-
         for propertyName in properties {
             let jsonKey = reverseMapping[propertyName] ?? propertyName
             let codingKey = STCodingKeys(stringValue: jsonKey)
             guard container.contains(codingKey) else { continue }
             let jsonValue = try container.decode(STJSONValue.self, forKey: codingKey)
-            self.st_assign(jsonValue: jsonValue,
-                           toProperty: propertyName,
-                           nestedType: nestedTypes[propertyName])
+            self.assign(jsonValue: jsonValue,
+                        toProperty: propertyName,
+                        nestedType: nestedTypes[propertyName])
         }
     }
 
-    /// 从字典初始化
     public convenience init(from dictionary: [String: Any]) {
         self.init()
         self.st_update(from: dictionary)
@@ -88,8 +85,6 @@ open class STBaseModel: NSObject {
         STLog("Key = \(key) isUndefinedKey", level: .warning)
     }
 
-    // MARK: - 工具方法
-
     /// 子类重写此方法以提供 JSON 键名到属性名的映射
     /// 返回 [JSON键名: 属性名] 的字典
     /// 例如: ["user_name": "userName", "phone_number": "phoneNumber"]
@@ -100,23 +95,21 @@ open class STBaseModel: NSObject {
     /// 获取反向映射 (属性名 -> JSON键名)，结果按类缓存。
     fileprivate class func st_reverseKeyMapping() -> [String: String] {
         let key = ObjectIdentifier(self)
-        st_propertyNamesCacheLock.lock()
-        if let cached = st_reverseKeyMappingCache[key] {
-            st_propertyNamesCacheLock.unlock()
+        propertyNamesCacheLock.lock()
+        if let cached = reverseKeyMappingCache[key] {
+            propertyNamesCacheLock.unlock()
             return cached
         }
-        st_propertyNamesCacheLock.unlock()
-
+        propertyNamesCacheLock.unlock()
         let mapping = st_keyMapping()
         var reversed: [String: String] = [:]
         reversed.reserveCapacity(mapping.count)
         for (jsonKey, propertyName) in mapping {
             reversed[propertyName] = jsonKey
         }
-
-        st_propertyNamesCacheLock.lock()
-        st_reverseKeyMappingCache[key] = reversed
-        st_propertyNamesCacheLock.unlock()
+        propertyNamesCacheLock.lock()
+        reverseKeyMappingCache[key] = reversed
+        propertyNamesCacheLock.unlock()
         return reversed
     }
 
@@ -128,27 +121,26 @@ open class STBaseModel: NSObject {
     }
 
     /// `STBaseModel` 自身声明、不应该出现在 JSON 序列化结果里的内部属性名。
-    private static let st_reservedPropertyNames: Set<String> = [
+    private static let reservedPropertyNames: Set<String> = [
         "st_isFlexibleMode"
     ]
 
     /// 类级别的属性名缓存，避免每次 encode/decode 都走 runtime 反射。
-    private static let st_propertyNamesCacheLock = NSLock()
-    private static var st_propertyNamesCache: [ObjectIdentifier: [String]] = [:]
-    private static var st_propertyAttributesCache: [ObjectIdentifier: [String: STPropertyType]] = [:]
-    private static var st_reverseKeyMappingCache: [ObjectIdentifier: [String: String]] = [:]
-    private static var st_optionalPropertyNamesCache: [ObjectIdentifier: Set<String>] = [:]
+    private static let propertyNamesCacheLock = NSLock()
+    private static var propertyNamesCache: [ObjectIdentifier: [String]] = [:]
+    private static var propertyAttributesCache: [ObjectIdentifier: [String: STPropertyType]] = [:]
+    private static var reverseKeyMappingCache: [ObjectIdentifier: [String: String]] = [:]
+    private static var optionalPropertyNamesCache: [ObjectIdentifier: Set<String>] = [:]
 
     /// 获取模型的所有属性名称（沿父类链向上枚举，不会越过 `STBaseModel` 自身）。
-    open class func st_propertyNames() -> [String] {
+    public class func st_propertyNames() -> [String] {
         let key = ObjectIdentifier(self)
-        st_propertyNamesCacheLock.lock()
-        if let cached = st_propertyNamesCache[key] {
-            st_propertyNamesCacheLock.unlock()
+        propertyNamesCacheLock.lock()
+        if let cached = propertyNamesCache[key] {
+            propertyNamesCacheLock.unlock()
             return cached
         }
-        st_propertyNamesCacheLock.unlock()
-
+        propertyNamesCacheLock.unlock()
         var collected: [String] = []
         var attributes: [String: STPropertyType] = [:]
         var seen = Set<String>()
@@ -159,7 +151,7 @@ open class STBaseModel: NSObject {
                 for i in 0..<Int(count) {
                     let property = properties[i]
                     let name = String(cString: property_getName(property))
-                    if st_reservedPropertyNames.contains(name) { continue }
+                    if reservedPropertyNames.contains(name) { continue }
                     if seen.insert(name).inserted {
                         collected.append(name)
                         let attrs = property_getAttributes(property).flatMap { String(cString: $0) } ?? ""
@@ -170,33 +162,30 @@ open class STBaseModel: NSObject {
             }
             current = class_getSuperclass(cls)
         }
-
-        st_propertyNamesCacheLock.lock()
-        st_propertyNamesCache[key] = collected
-        st_propertyAttributesCache[key] = attributes
-        st_propertyNamesCacheLock.unlock()
+        propertyNamesCacheLock.lock()
+        propertyNamesCache[key] = collected
+        propertyAttributesCache[key] = attributes
+        propertyNamesCacheLock.unlock()
         return collected
     }
 
     /// 获取属性的运行时类型描述（已缓存）。
     fileprivate class func st_propertyType(for name: String) -> STPropertyType? {
-        // 先确保缓存被构建
         _ = st_propertyNames()
         let key = ObjectIdentifier(self)
-        st_propertyNamesCacheLock.lock()
-        defer { st_propertyNamesCacheLock.unlock() }
-        return st_propertyAttributesCache[key]?[name]
+        propertyNamesCacheLock.lock()
+        defer { propertyNamesCacheLock.unlock() }
+        return propertyAttributesCache[key]?[name]
     }
 
     /// 获取当前实例的所有属性名称
-    open func st_propertyNames() -> [String] {
+    public func st_propertyNames() -> [String] {
         return type(of: self).st_propertyNames()
     }
 
-    /// 将模型转换为字典
-    open func st_toDictionary() -> [String: Any] {
+    public func st_toDictionary() -> [String: Any] {
         if self.st_isFlexibleMode {
-            return self.st_processedData
+            return self.processedData
         }
         var dict: [String: Any] = [:]
         let properties = self.st_propertyNames()
@@ -211,34 +200,32 @@ open class STBaseModel: NSObject {
     }
 
     /// 从字典更新模型属性
-    open func st_update(from dictionary: [String: Any]) {
+    public func st_update(from dictionary: [String: Any]) {
         if self.st_isFlexibleMode {
-            self.st_updateFlexible(from: dictionary)
+            self.updateFlexible(from: dictionary)
         } else {
-            self.st_updateStandard(from: dictionary)
+            self.updateStandard(from: dictionary)
         }
     }
 
     /// 清空所有数据
-    private func st_clearAllData() {
-        self._st_rawData.removeAll()
-        self._st_processedData.removeAll()
+    private func clearAllData() {
+        self.rawDataStorage.removeAll()
+        self.processedDataStorage.removeAll()
     }
 
     /// 标准模式更新
-    private func st_updateStandard(from dictionary: [String: Any]) {
+    private func updateStandard(from dictionary: [String: Any]) {
         let mapping = type(of: self).st_keyMapping()
         let nestedTypes = type(of: self).st_nestedModelTypes()
-
         for (key, value) in dictionary {
             let propertyName = mapping[key] ?? key
-            guard self.st_hasSetter(for: propertyName) else { continue }
-
+            guard self.hasSetter(for: propertyName) else { continue }
             if let nestedModelType = nestedTypes[propertyName] {
                 if let nestedDict = value as? [String: Any] {
                     let nestedModel = nestedModelType.init()
                     nestedModel.st_update(from: nestedDict)
-                    self.st_safeSetValue(nestedModel, forProperty: propertyName)
+                    self.safeSetValue(nestedModel, forProperty: propertyName)
                 } else if let nestedArray = value as? [Any] {
                     let models = nestedArray.compactMap { element -> STBaseModel? in
                         guard let dict = element as? [String: Any] else { return nil }
@@ -246,22 +233,22 @@ open class STBaseModel: NSObject {
                         model.st_update(from: dict)
                         return model
                     }
-                    self.st_safeSetValue(models, forProperty: propertyName)
+                    self.safeSetValue(models, forProperty: propertyName)
                 } else if value is NSNull {
-                    self.st_safeSetValue(nil, forProperty: propertyName)
+                    self.safeSetValue(nil, forProperty: propertyName)
                 } else {
-                    self.st_safeSetValue(value, forProperty: propertyName)
+                    self.safeSetValue(value, forProperty: propertyName)
                 }
             } else if value is NSNull {
-                self.st_safeSetValue(nil, forProperty: propertyName)
+                self.safeSetValue(nil, forProperty: propertyName)
             } else {
-                self.st_safeSetValue(value, forProperty: propertyName)
+                self.safeSetValue(value, forProperty: propertyName)
             }
         }
     }
 
     /// 判断属性是否拥有 KVC setter，用于过滤只读属性 / 计算属性。
-    private func st_hasSetter(for propertyName: String) -> Bool {
+    private func hasSetter(for propertyName: String) -> Bool {
         guard let first = propertyName.first else { return false }
         let setterName = "set\(first.uppercased())\(propertyName.dropFirst()):"
         return self.responds(to: NSSelectorFromString(setterName))
@@ -273,9 +260,8 @@ open class STBaseModel: NSObject {
     /// nil 写入策略（对象类型）：Obj-C runtime attributes 没有稳定的 nullability 信息，但 Swift
     /// `Mirror` 可以按声明类型看出 Optional。只有声明为 Optional 的对象属性才允许 KVC 写 nil；
     /// 非 Optional 引用属性（`@objc var foo: Foo = Foo()`）写 nil 会导致后续访问崩溃，这里跳过。
-    private func st_safeSetValue(_ value: Any?, forProperty propertyName: String) {
+    private func safeSetValue(_ value: Any?, forProperty propertyName: String) {
         guard let value = value else {
-            // nil 写入：先按 ObjC type encoding 过滤明确不可空的标量，再用 Mirror 判断对象属性可空性。
             if let type = type(of: self).st_propertyType(for: propertyName), !type.allowsNil {
                 STLog("Skip setting nil to non-optional property: \(propertyName)", level: .warning)
                 return
@@ -287,13 +273,10 @@ open class STBaseModel: NSObject {
             self.setValue(nil, forKey: propertyName)
             return
         }
-
         guard let type = type(of: self).st_propertyType(for: propertyName) else {
-            // 缺少属性元数据时退回普通 KVC（理论上不会走到，st_hasSetter 已过滤）。
             self.setValue(value, forKey: propertyName)
             return
         }
-
         if let coerced = type.coerce(value) {
             self.setValue(coerced, forKey: propertyName)
         } else {
@@ -301,18 +284,14 @@ open class STBaseModel: NSObject {
         }
     }
 
-    /// 用 Swift `Mirror` 判断某个属性在声明处是否为 `Optional`。结果按类型缓存，
-    /// 避免每次 nil 写都重建 Mirror。
     fileprivate class func st_isOptionalProperty(_ propertyName: String) -> Bool {
         let key = ObjectIdentifier(self)
-        st_propertyNamesCacheLock.lock()
-        if let cached = st_optionalPropertyNamesCache[key] {
-            st_propertyNamesCacheLock.unlock()
+        propertyNamesCacheLock.lock()
+        if let cached = optionalPropertyNamesCache[key] {
+            propertyNamesCacheLock.unlock()
             return cached.contains(propertyName)
         }
-        st_propertyNamesCacheLock.unlock()
-
-        // 构造一个默认实例用于反射，遍历自身与父类的所有 Swift 声明属性。
+        propertyNamesCacheLock.unlock()
         let instance = self.init()
         var optionals: Set<String> = []
         var mirror: Mirror? = Mirror(reflecting: instance)
@@ -325,26 +304,22 @@ open class STBaseModel: NSObject {
             }
             mirror = m.superclassMirror
         }
-
-        st_propertyNamesCacheLock.lock()
-        st_optionalPropertyNamesCache[key] = optionals
-        st_propertyNamesCacheLock.unlock()
+        propertyNamesCacheLock.lock()
+        optionalPropertyNamesCache[key] = optionals
+        propertyNamesCacheLock.unlock()
         return optionals.contains(propertyName)
     }
 
     /// 把 `STJSONValue` 写到 KVC 属性，必要时构造嵌套 `STBaseModel`。
     /// 用于 `init(from decoder:)` 这条入口。
-    private func st_assign(jsonValue: STJSONValue,
-                           toProperty propertyName: String,
-                           nestedType: STBaseModel.Type?) {
-        guard self.st_hasSetter(for: propertyName) else { return }
-
+    private func assign(jsonValue: STJSONValue, toProperty propertyName: String, nestedType: STBaseModel.Type?) {
+        guard self.hasSetter(for: propertyName) else { return }
         if let nestedType = nestedType {
             switch jsonValue {
             case .object(let dict):
                 let nestedModel = nestedType.init()
                 nestedModel.st_update(from: dict.mapValues { $0.value })
-                self.st_safeSetValue(nestedModel, forProperty: propertyName)
+                self.safeSetValue(nestedModel, forProperty: propertyName)
             case .array(let items):
                 let models = items.compactMap { item -> STBaseModel? in
                     guard case .object(let dict) = item else { return nil }
@@ -352,127 +327,125 @@ open class STBaseModel: NSObject {
                     model.st_update(from: dict.mapValues { $0.value })
                     return model
                 }
-                self.st_safeSetValue(models, forProperty: propertyName)
+                self.safeSetValue(models, forProperty: propertyName)
             case .null:
-                self.st_safeSetValue(nil, forProperty: propertyName)
+                self.safeSetValue(nil, forProperty: propertyName)
             default:
-                self.st_safeSetValue(jsonValue.value, forProperty: propertyName)
+                self.safeSetValue(jsonValue.value, forProperty: propertyName)
             }
             return
         }
-
         switch jsonValue {
         case .null:
-            self.st_safeSetValue(nil, forProperty: propertyName)
+            self.safeSetValue(nil, forProperty: propertyName)
         default:
-            self.st_safeSetValue(jsonValue.value, forProperty: propertyName)
+            self.safeSetValue(jsonValue.value, forProperty: propertyName)
         }
     }
 
-    /// 灵活模式更新
-    private func st_updateFlexible(from dictionary: [String: Any]) {
-        st_withLock {
-            self.st_clearAllData()
+    private func updateFlexible(from dictionary: [String: Any]) {
+        withLock {
+            self.clearAllData()
             for (key, value) in dictionary {
-                self._st_rawData[key] = STJSONValue(value)
+                self.rawDataStorage[key] = STJSONValue(value)
             }
-            self.st_processRawData()
+            self.processRawData()
         }
     }
 
     /// 处理原始数据
-    private func st_processRawData() {
-        self._st_processedData.removeAll()
-        for (key, jsonValue) in self._st_rawData {
+    private func processRawData() {
+        self.processedDataStorage.removeAll()
+        for (key, jsonValue) in self.rawDataStorage {
             switch jsonValue {
             case .string(let value):
-                self._st_processedData[key] = value
+                self.processedDataStorage[key] = value
             case .int(let value):
-                self._st_processedData[key] = value
+                self.processedDataStorage[key] = value
             case .double(let value):
-                self._st_processedData[key] = value
+                self.processedDataStorage[key] = value
             case .bool(let value):
-                self._st_processedData[key] = value
+                self.processedDataStorage[key] = value
             case .array(let value):
-                self._st_processedData[key] = value.map { $0.value }
+                self.processedDataStorage[key] = value.map { $0.value }
             case .object(let value):
-                self._st_processedData[key] = value.mapValues { $0.value }
+                self.processedDataStorage[key] = value.mapValues { $0.value }
             case .null:
-                self._st_processedData[key] = NSNull()
+                self.processedDataStorage[key] = NSNull()
             }
         }
     }
 
     /// 获取原始值
-    open func st_getRawValue(forKey key: String) -> STJSONValue? {
-        guard self.st_assertFlexibleMode(api: #function) else { return nil }
-        return self.st_rawData[key]
+    public func st_getRawValue(forKey key: String) -> STJSONValue? {
+        guard self.assertFlexibleMode(api: #function) else { return nil }
+        return self.rawData[key]
     }
 
     /// 获取处理后的值
-    open func st_getValue(forKey key: String) -> Any? {
-        guard self.st_assertFlexibleMode(api: #function) else { return nil }
-        return self.st_processedData[key]
+    public func st_getValue(forKey key: String) -> Any? {
+        guard self.assertFlexibleMode(api: #function) else { return nil }
+        return self.processedData[key]
     }
 
     /// 安全获取字符串值
-    open func st_getString(forKey key: String, default defaultValue: String = "") -> String {
-        guard self.st_assertFlexibleMode(api: #function) else { return defaultValue }
-        return self.st_rawData[key]?.string(or: defaultValue) ?? defaultValue
+    public func st_getString(forKey key: String, default defaultValue: String = "") -> String {
+        guard self.assertFlexibleMode(api: #function) else { return defaultValue }
+        return self.rawData[key]?.string(or: defaultValue) ?? defaultValue
     }
 
     /// 安全获取整数值
-    open func st_getInt(forKey key: String, default defaultValue: Int = 0) -> Int {
-        guard self.st_assertFlexibleMode(api: #function) else { return defaultValue }
-        return self.st_rawData[key]?.int(or: defaultValue) ?? defaultValue
+    public func st_getInt(forKey key: String, default defaultValue: Int = 0) -> Int {
+        guard self.assertFlexibleMode(api: #function) else { return defaultValue }
+        return self.rawData[key]?.int(or: defaultValue) ?? defaultValue
     }
 
     /// 安全获取双精度值
-    open func st_getDouble(forKey key: String, default defaultValue: Double = 0.0) -> Double {
-        guard self.st_assertFlexibleMode(api: #function) else { return defaultValue }
-        return self.st_rawData[key]?.double(or: defaultValue) ?? defaultValue
+    public func st_getDouble(forKey key: String, default defaultValue: Double = 0.0) -> Double {
+        guard self.assertFlexibleMode(api: #function) else { return defaultValue }
+        return self.rawData[key]?.double(or: defaultValue) ?? defaultValue
     }
 
     /// 安全获取布尔值
-    open func st_getBool(forKey key: String, default defaultValue: Bool = false) -> Bool {
-        guard self.st_assertFlexibleMode(api: #function) else { return defaultValue }
-        return self.st_rawData[key]?.bool(or: defaultValue) ?? defaultValue
+    public func st_getBool(forKey key: String, default defaultValue: Bool = false) -> Bool {
+        guard self.assertFlexibleMode(api: #function) else { return defaultValue }
+        return self.rawData[key]?.bool(or: defaultValue) ?? defaultValue
     }
 
     /// 安全获取数组值
-    open func st_getArray(forKey key: String, default defaultValue: [STJSONValue] = []) -> [STJSONValue] {
-        guard self.st_assertFlexibleMode(api: #function) else { return defaultValue }
-        return self.st_rawData[key]?.array(or: defaultValue) ?? defaultValue
+    public func st_getArray(forKey key: String, default defaultValue: [STJSONValue] = []) -> [STJSONValue] {
+        guard self.assertFlexibleMode(api: #function) else { return defaultValue }
+        return self.rawData[key]?.array(or: defaultValue) ?? defaultValue
     }
 
     /// 安全获取字典值
-    open func st_getDictionary(forKey key: String, default defaultValue: [String: STJSONValue] = [:]) -> [String: STJSONValue] {
-        guard self.st_assertFlexibleMode(api: #function) else { return defaultValue }
-        return self.st_rawData[key]?.object(or: defaultValue) ?? defaultValue
+    public func st_getDictionary(forKey key: String, default defaultValue: [String: STJSONValue] = [:]) -> [String: STJSONValue] {
+        guard self.assertFlexibleMode(api: #function) else { return defaultValue }
+        return self.rawData[key]?.object(or: defaultValue) ?? defaultValue
     }
 
     /// 转换为原始数据字典
-    open func st_toRawDictionary() -> [String: STJSONValue] {
-        guard self.st_assertFlexibleMode(api: #function) else { return [:] }
-        return self.st_rawData
+    public func st_toRawDictionary() -> [String: STJSONValue] {
+        guard self.assertFlexibleMode(api: #function) else { return [:] }
+        return self.rawData
     }
 
     /// 获取所有键
-    open func st_getAllKeys() -> [String] {
-        guard self.st_assertFlexibleMode(api: #function) else { return [] }
-        return Array(self.st_rawData.keys)
+    public func st_getAllKeys() -> [String] {
+        guard self.assertFlexibleMode(api: #function) else { return [] }
+        return Array(self.rawData.keys)
     }
 
     /// 检查是否包含键
-    open func st_containsKey(_ key: String) -> Bool {
-        guard self.st_assertFlexibleMode(api: #function) else { return false }
-        return self.st_rawData.keys.contains(key)
+    public func st_containsKey(_ key: String) -> Bool {
+        guard self.assertFlexibleMode(api: #function) else { return false }
+        return self.rawData.keys.contains(key)
     }
 
     /// 这些 API 仅在灵活模式下生效；非灵活模式调用属于编程错误，DEBUG 下断言提示，
     /// Release 下记录警告日志并返回默认值。
     @inline(__always)
-    private func st_assertFlexibleMode(api: String) -> Bool {
+    private func assertFlexibleMode(api: String) -> Bool {
         if self.st_isFlexibleMode { return true }
         STLog("\(api) requires st_isFlexibleMode == true; returning default value.", level: .warning)
         assertionFailure("\(api) called without enabling st_isFlexibleMode")
@@ -492,8 +465,8 @@ open class STBaseModel: NSObject {
     }
 
     /// 获取数据类型枚举值。
-    open func st_valueKind(forKey key: String) -> STValueKind {
-        guard self.st_isFlexibleMode, let value = self.st_rawData[key] else { return .undefined }
+    public func st_valueKind(forKey key: String) -> STValueKind {
+        guard self.st_isFlexibleMode, let value = self.rawData[key] else { return .undefined }
         switch value {
         case .string: return .string
         case .int: return .int
@@ -506,7 +479,7 @@ open class STBaseModel: NSObject {
     }
 
     /// 获取数据类型字符串描述（保留以兼容旧调用方；新代码请用 `st_valueKind`）。
-    open func st_getValueType(forKey key: String) -> String {
+    public func st_getValueType(forKey key: String) -> String {
         switch st_valueKind(forKey: key) {
         case .undefined: return "undefined"
         case .string: return "String"
@@ -519,7 +492,6 @@ open class STBaseModel: NSObject {
         }
     }
 
-    // MARK: - 模型描述
     open override var description: String {
         if self.st_isFlexibleMode {
             let className = String(describing: type(of: self))
@@ -555,24 +527,20 @@ open class STBaseModel: NSObject {
     /// 语义：
     /// - 返回与原对象同子类类型的全新实例；
     /// - 标准模式：嵌套属性（`STBaseModel` / `[STBaseModel]` / `[String: STBaseModel]`）递归 `st_copy()`；
-    /// - 灵活模式：`_st_rawData` 由 `STJSONValue` 枚举值组成（值语义），通过 `st_update(from:)` 重建即可；
+    /// - 灵活模式：`rawData` 由 `STJSONValue` 枚举值组成（值语义），通过 `st_update(from:)` 重建即可；
     /// - 标量 / 不可变值类型（`String`、`Int` 等）直接复用，不做克隆。
-    open func st_copy() -> STBaseModel {
+    public func st_copy() -> STBaseModel {
         let newInstance = type(of: self).init()
         newInstance.st_isFlexibleMode = self.st_isFlexibleMode
-
         if self.st_isFlexibleMode {
-            // STJSONValue 是值类型，rawData 字典里的所有节点都是 deep-by-value，st_update 会重建。
             newInstance.st_update(from: self.st_toDictionary())
             return newInstance
         }
-
-        // 标准模式：逐属性递归深拷贝。
         let properties = self.st_propertyNames()
         for propertyName in properties {
             guard let value = self.value(forKey: propertyName) else { continue }
             let copied = STBaseModel.st_deepCopy(value: value)
-            newInstance.st_safeSetValue(copied, forProperty: propertyName)
+            newInstance.safeSetValue(copied, forProperty: propertyName)
         }
         return newInstance
     }
@@ -591,7 +559,6 @@ open class STBaseModel: NSObject {
             }
             return copy
         case let mutableDict as NSMutableDictionary:
-            // 同上，必须早于 [String: Any] 分支。
             let copy = NSMutableDictionary(capacity: mutableDict.count)
             for (k, v) in mutableDict {
                 guard let key = k as? NSCopying else {
@@ -622,37 +589,37 @@ open class STBaseModel: NSObject {
     open override func isEqual(_ object: Any?) -> Bool {
         guard let other = object as? STBaseModel else { return false }
         guard type(of: self) == type(of: other) else { return false }
-        return self.st_normalizedDictionary().isEqual(other.st_normalizedDictionary())
+        return self.normalizedDictionary().isEqual(other.normalizedDictionary())
     }
 
     open override var hash: Int {
-        return self.st_normalizedDictionary().hash
+        return self.normalizedDictionary().hash
     }
 
     /// 把模型转换为 JSON 友好的、可与 NSDictionary 互比的归一化字典，
     /// 使 `isEqual` 与 `hash` 共用同一份语义，保证 `a == b ⇒ hash(a) == hash(b)`。
-    private func st_normalizedDictionary() -> NSDictionary {
+    private func normalizedDictionary() -> NSDictionary {
         let dict = self.st_toDictionary()
-        let normalized = st_normalize(dict) as? [String: Any] ?? [:]
+        let normalized = normalize(dict) as? [String: Any] ?? [:]
         return NSDictionary(dictionary: normalized)
     }
 
     /// 递归把任意值标准化为 `NSDictionary` / `NSArray` / `NSObject`。
-    private func st_normalize(_ value: Any) -> Any {
+    private func normalize(_ value: Any) -> Any {
         switch value {
         case let model as STBaseModel:
-            return model.st_normalizedDictionary()
+            return model.normalizedDictionary()
         case let dict as [String: Any]:
             var result: [String: Any] = [:]
             result.reserveCapacity(dict.count)
             for (key, sub) in dict {
-                result[key] = st_normalize(sub)
+                result[key] = normalize(sub)
             }
             return result
         case let array as [Any]:
-            return array.map { st_normalize($0) }
+            return array.map { normalize($0) }
         case let jsonValue as STJSONValue:
-            return st_normalize(jsonValue.value)
+            return normalize(jsonValue.value)
         case is NSNull:
             return NSNull()
         default:
@@ -661,7 +628,7 @@ open class STBaseModel: NSObject {
     }
 
     /// 从字典数组创建模型数组
-    open class func st_fromArray(_ array: [[String: Any]]) -> [STBaseModel] {
+    public class func st_fromArray(_ array: [[String: Any]]) -> [STBaseModel] {
         return array.map { dict in
             let model = self.init()
             model.st_update(from: dict)
@@ -670,7 +637,7 @@ open class STBaseModel: NSObject {
     }
 
     /// 从 JSON Data 解析模型数组
-    open class func st_fromJSONArray(_ data: Data) -> [STBaseModel]? {
+    public class func st_fromJSONArray(_ data: Data) -> [STBaseModel]? {
         guard let array = data.jsonArray as? [[String: Any]] else { return nil }
         return st_fromArray(array)
     }
@@ -681,7 +648,7 @@ extension STBaseModel: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: STCodingKeys.self)
         if self.st_isFlexibleMode {
-            let rawData = self.st_rawData
+            let rawData = self.rawData
             for (key, jsonValue) in rawData {
                 try container.encode(jsonValue, forKey: STCodingKeys(stringValue: key))
             }
@@ -692,7 +659,6 @@ extension STBaseModel: Codable {
                 guard let value = self.value(forKey: propertyName) else { continue }
                 let jsonKey = reverseMapping[propertyName] ?? propertyName
                 let codingKey = STCodingKeys(stringValue: jsonKey)
-                // 优先识别嵌套模型 / 嵌套模型数组 / 嵌套模型字典，递归编码而不是退化成字符串。
                 if let nestedModel = value as? STBaseModel {
                     try container.encode(nestedModel, forKey: codingKey)
                 } else if let nestedArray = value as? [STBaseModel] {
@@ -734,9 +700,7 @@ fileprivate struct STPropertyType {
         case floating                           // f, d
         case unknown(String)
     }
-
     let kind: Kind
-    /// 属性是否允许 nil（对象类型恒允许；带 _Nullable 标记的也允许）。
     let allowsNil: Bool
 
     init(attributes: String) {
@@ -837,15 +801,12 @@ fileprivate struct STPropertyType {
     }
 
     private static func coerceObject(_ value: Any, expectedClassName: String?) -> Any? {
-        // 没有具体类名（裸 id）时直接接受
         guard let className = expectedClassName else { return value }
         let resolvedClass: AnyClass? = NSClassFromString(className)
-        // 已经是期望类
         if let cls = resolvedClass,
            let object = value as? NSObject, object.isKind(of: cls) {
             return object
         }
-        // 数字 -> NSString 等常见容错
         switch className {
         case "NSString":
             if let string = value as? String { return string }
@@ -860,9 +821,6 @@ fileprivate struct STPropertyType {
         case "NSArray":
             return value as? [Any]
         case "NSMutableArray":
-            // Swift 的 [Any] 通过 KVC 写入会桥接成不可变的 _SwiftDeferredNSArray，
-            // 属性声明为 NSMutableArray 时再调用 .add(_:) 会因不识别 selector 崩溃。
-            // 显式构造可变实例保证后续 mutation 调用安全。
             if let mutable = value as? NSMutableArray { return mutable }
             if let array = value as? NSArray { return NSMutableArray(array: array) }
             if let array = value as? [Any] { return NSMutableArray(array: array) }
@@ -875,10 +833,7 @@ fileprivate struct STPropertyType {
             if let dict = value as? [AnyHashable: Any] { return NSMutableDictionary(dictionary: dict) }
             return nil
         default:
-            // 类名可被 Obj-C runtime 解析但实例类型不匹配 —— 直接拒绝，
-            // 避免 KVC 把错误类型写进 @objc 属性引发后续崩溃。
             if resolvedClass != nil { return nil }
-            // 解析不到的类名（纯 Swift 非 @objc 类等）无法校验，放行由 KVC 处理。
             return value
         }
     }

@@ -21,3 +21,6 @@ DerivedData/
 build-tools/
 AGENTS.md
 scripts/
+
+# Personal AI assistant configs
+.cursorrules
