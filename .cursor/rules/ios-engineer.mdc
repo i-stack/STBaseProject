@@ -1,0 +1,36 @@
+---
+description: ios-engineer skill usage and audit rules
+alwaysApply: true
+---
+<!-- managed-block:ios-engineer:begin (auto-generated from scripts/templates/agent-preamble.md.tmpl — do not edit; run scripts/sync-agent-preamble.sh) -->
+# ios-engineer skill usage
+
+执行 iOS / Swift / SwiftUI / UIKit / Xcode 工程任务前，必须先加载并遵循 `ios-engineer` SKILL 规则（SKILL.md + references/rule_index.md 中 `status=active` 的 IR / SYM / ROUTE / OUT 条目）。
+
+SKILL 规则位于 `~/.cursor/skills/ios-engineer/`，可直接加载。
+
+# ios-engineer skill audit
+
+完成 iOS / Swift / SwiftUI / UIKit / Xcode 工程任务后，在最终回答末尾追加一个 `<usage-audit>` 块。
+
+格式（K-V 标签，固定 kebab-case）：
+
+```
+<usage-audit>
+tool: cursor
+task-type: <layout | parameter-pass-through | concurrency | review | migration | mcp-control | other>
+prompt-summary: <5-200 字符脱敏摘要，禁贴原始 prompt / 源码片段 / 可识别项目名>
+expected-rules: <逗号分隔，如 IR-005, ROUTE-007>
+hit-rules: <逗号分隔；不确定就留空，绝不凭印象猜>
+deviations: <分号分隔；没有就留空>
+outcome: <pass | partial | fail>
+evolution-signal: <none | 修正表达 | 新增能力 | 合并重复 | 退役规则>
+</usage-audit>
+```
+
+可选字段：`session-id: <id>`（默认省略 = null）。
+
+Rule ID 词表取自 `~/.cursor/skills/ios-engineer/references/rule_index.md`，仅使用 `status=active` 的 ID（IR-NNN / SYM-NNN / ROUTE-NNN / OUT-NNN）。完整 schema、写入协议、self-grading 偏差告示见同目录下 `usage_ledger.md` §1-§7。
+
+**非 iOS 工程任务不输出这个块**：写文档、答 API 问题、通用重构、元工程 / 自进化讨论 / SkillOps 维护本身都跳过。task-type 落不进 7 选 1 时也跳过。
+<!-- managed-block:ios-engineer:end -->
