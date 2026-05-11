@@ -75,11 +75,12 @@ dependencies: [
 
 ### Swift Package Manager（按 Product 选择）
 
-- `STBaseProject`：基础能力（UI、网络、安全、工具）
+- `STBaseProject`：基础能力（含 Markdown 渲染，依赖 `swift-markdown`、`SwiftMath`；使用 `import STBaseProject` 即可）
 - `STContacts`：联系人权限与读取
 - `STLocation`：定位与地理编码
 - `STMedia`：图片处理、扫码、截图
-- `STMarkdown`：Markdown 渲染
+
+与 CocoaPods 的差异：CocoaPods 下 `STMarkdown` 为可选 subspec；SPM 将 Markdown 合入 `STBaseProject` product，无法在不拉取 `swift-markdown` / `SwiftMath` 的前提下单独「只要核心」。
 
 示例：
 
@@ -101,12 +102,20 @@ targets: [
 
 ### CocoaPods（按 Subspec 选择）
 
+核心 subspec 名为 `STBaseProject`（与 Pod 名相同）。若使用 `:subspecs`，**列表会覆盖** `default_subspecs`，需要基础能力时请把 `STBaseProject` 一并写上，否则只会安装列出的扩展 subspec。
+
 ```ruby
-pod 'STBaseProject/STBase', '~> 1.3.0'
-pod 'STBaseProject/STContacts', '~> 1.3.0'
-pod 'STBaseProject/STLocation', '~> 1.3.0'
-# pod 'STBaseProject/STMedia', '~> 1.3.0'
-# pod 'STBaseProject/STMarkdown', '~> 1.3.0'
+# 默认：仅核心（等价于 default_subspecs）
+pod 'STBaseProject', '~> 1.3.0'
+
+# 核心 + 定位（按需把 STContacts、STMedia、STMarkdown 加入数组即可）
+pod 'STBaseProject', '~> 1.3.0', :subspecs => ['STBaseProject', 'STLocation']
+
+# 核心 + 多个扩展示例
+# pod 'STBaseProject', '~> 1.3.0', :subspecs => ['STBaseProject', 'STLocation', 'STContacts', 'STMedia']
+
+# 仅安装某个扩展、不要核心（一般少见；扩展模块不依赖核心时可单独拉取）
+# pod 'STBaseProject/STLocation', '~> 1.3.0'
 ```
 
 <a id="privacy-permissions"></a>
