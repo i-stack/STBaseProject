@@ -17,9 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 默认 xcode-select 常为旧版；脚本按 Info.plist 版本号选 /Applications 下最高的 Xcode（见 .github/scripts/select_xcode_ci.sh）。
+      # 默认 xcode-select 常为旧版；脚本按 Info.plist 版本号选 /Applications 下最高的 Xcode（见 .github/select_xcode_ci.sh）。
       - name: Select Xcode
-        run: bash .github/scripts/select_xcode_ci.sh
+        run: bash "${GITHUB_WORKSPACE}/.github/select_xcode_ci.sh"
 
       - name: Check try? policy
         run: bash .github/check_try_question_mark.sh
