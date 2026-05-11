@@ -27,6 +27,8 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '16.0'
   s.swift_versions = %w[5.0 5.1 5.2 5.3 5.4 5.5 5.6 5.7 5.8 5.9 5.10 5.11]
   s.requires_arc = true
+  # 使用 :subspecs 时会覆盖本默认值；需要核心时请显式包含 'STBaseProject'，例如：
+  # pod 'STBaseProject', '~> x.y.z', :subspecs => ['STBaseProject', 'STLocation']
   s.default_subspecs = ['STBaseProject']
 
   s.subspec 'STBaseProject' do |base|
@@ -63,17 +65,10 @@ Pod::Spec.new do |s|
     }
   end
 
-  # SPM parity (Package.swift): Markdown + SwiftMath modules via CocoaPods:
-  # - swift-markdown-pod tracks github.com/GIKICoder/swift-markdown (≈ swift-markdown + swift-cmark GFM); not identical git pin as SPM `swiftlang/swift-markdown` branch main.
-  # - SwiftMath-pod wraps github.com/GIKICoder/SwiftMath; SPM uses github.com/mgriebling/SwiftMath — bump both intentionally when you need matching upstreams.
-  # swift-markdown-pod merges CAtomic into Markdown.framework; downstream Swift still needs the CAtomic modulemap flags below when compiling/importing Markdown.
   s.subspec 'STMarkdown' do |markdown|
     markdown.source_files = 'Sources/STMarkdown/**/*.swift'
-    # STShimmerTextView lives in STUIKit and is referenced by STMarkdownStreamingTextView,
-    # so the full core subspec is required as a transitive dep.
     markdown.dependency 'STBaseProject/STBaseProject'
     markdown.dependency 'swift-markdown-pod', '~> 1.0'
-    # Pre-release tag from CocoaPods trunk; constraint required so `pod lib lint` / installs resolve.
     markdown.dependency 'SwiftMath-pod', '>= 2.0.1.pod'
     markdown.resource_bundles = {
       'STBaseProject_STMarkdown' => ['Sources/STMarkdown/Resources/*']
