@@ -9,11 +9,12 @@
 Pod::Spec.new do |s|
   s.name = 'STBaseProject'
   s.version = '1.3.0'
-  s.summary = 'Modular iOS foundation library with MVVM base abstractions.'
+  s.summary = 'Modular iOS foundation: MVVM bases, networking, security, UIKit, Markdown, localization (SPM & CocoaPods).'
   s.description = <<-DESC
-    STBaseProject provides modular iOS foundation components built on MVVM base types.
-    It includes reusable UI components and shared utilities for networking, localization, image handling, and security.
-    Available via CocoaPods subspecs and Swift Package Manager.
+    STBaseProject is an iOS 16+ modular foundation toolkit distributed via CocoaPods subspecs and Swift Package Manager.
+    It includes STBaseViewController/STBaseViewModel patterns, STHTTPSession with interceptors and optional SSL pinning,
+    Keychain and crypto helpers, UIKit components and dialogs, Markdown rendering (including tables and extensions),
+    localization utilities, plus optional modules for Contacts, Location, and Media (camera/scan/screenshot).
   DESC
 
   s.homepage = 'https://github.com/i-stack/STBaseProject'
