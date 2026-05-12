@@ -217,6 +217,8 @@ STBaseProject 已随 SPM target 与 CocoaPods subspec 提供 `PrivacyInfo.xcpriv
 - UIKit 组件：`STUIKit`
 - 通用工具：`STTools`
 
+**本地 Demo**：克隆后在仓库根目录执行 `cd Example && pod install`，再用 Xcode 打开根目录的 `STBaseProject.xcworkspace`（内含 `Example/STBaseProjectExample.xcodeproj` 与 CocoaPods 生成的 `Pods`）。Demo 通过本地 SPM 引用同仓根目录的 `Package.swift`，与发布到 GitHub 的集成方式一致。
+
 <a id="features"></a>
 ## 🎯 主要功能
 

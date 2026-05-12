@@ -1,0 +1,36 @@
+# Demo 与 CocoaPods 脚手架：在 `Example/` 执行 `pod install` 后，请打开仓库根目录的 `STBaseProject.xcworkspace`。
+platform :ios, '16.0'
+
+target 'STBaseProjectExample' do
+  use_frameworks!
+
+  # Mirrors SPM `Package.swift` (Markdown + SwiftMath); STMarkdown subspec pulls STBaseProject core transitively.
+#  pod 'STBaseProject/STMarkdown', path: '..'
+
+  target 'STBaseProjectExampleTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'STBaseProjectExampleUITests' do
+    # Pods for testing
+  end
+
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      deployment = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+      if deployment && deployment.to_f < 12.0
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
+      end
+      if target.name.include?('swift-markdown')
+        existing = config.build_settings['OTHER_CFLAGS'] || '$(inherited)'
+        unless existing.to_s.include?('incomplete-umbrella')
+          config.build_settings['OTHER_CFLAGS'] = "#{existing} -Wno-incomplete-umbrella"
+        end
+      end
+    end
+  end
+end
