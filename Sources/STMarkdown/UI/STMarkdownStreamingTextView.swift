@@ -8,6 +8,10 @@
 import UIKit
 
 public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
+    internal enum SmartStreamingRenderMode {
+        case full
+        case incremental
+    }
 
     public var tokenFadeDuration: TimeInterval {
         get { self.shimmerTextView.tokenFadeDuration }
@@ -34,6 +38,9 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     /// 上一帧已交给 ``setMarkdown(_:animated:)`` 的「安全前缀」展示串（经 ``stripUnclosedTailMarkers``）。
     /// 当缓冲器仅增长尾部、``committedSafePrefix`` 不变时跳过整段重解析，降低流式 CPU 占用（对齐对比文档 P0）。
     private var lastSmartStreamRenderedDisplayMarkdown: String?
+    private var lastSmartStreamRenderedCanonicalMarkdown: String?
+    private var lastSmartStreamRenderDocument: STMarkdownRenderDocument?
+    internal private(set) var lastSmartStreamingRenderMode: SmartStreamingRenderMode?
 
     /// 是否处于 ``beginSmartMarkdownStreaming()`` 开启的智能缓冲流式会话中。
     public var isSmartMarkdownStreamingActive: Bool {
@@ -264,6 +271,9 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.smartStreamBuffer = nil
         self.smartStreamingSessionActive = false
         self.lastSmartStreamRenderedDisplayMarkdown = nil
+        self.lastSmartStreamRenderedCanonicalMarkdown = nil
+        self.lastSmartStreamRenderDocument = nil
+        self.lastSmartStreamingRenderMode = nil
         let md = Self.stripUnclosedTailMarkers(in: snapshot)
         self.isApplyingSmartStreamMarkdownUpdate = true
         defer { self.isApplyingSmartStreamMarkdownUpdate = false }
@@ -285,6 +295,9 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.smartStreamBuffer = nil
         self.smartStreamingSessionActive = false
         self.lastSmartStreamRenderedDisplayMarkdown = nil
+        self.lastSmartStreamRenderedCanonicalMarkdown = nil
+        self.lastSmartStreamRenderDocument = nil
+        self.lastSmartStreamingRenderMode = nil
     }
 
     private func applySmartStreamingPresentation(animated: Bool, force: Bool = false) {
@@ -298,18 +311,180 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         }
         self.isApplyingSmartStreamMarkdownUpdate = true
         defer { self.isApplyingSmartStreamMarkdownUpdate = false }
-        self.setMarkdown(md, animated: animated)
+        let rendered = self.renderSmartStreamingDisplayMarkdown(md, forceFull: force)
+        self.applySetMarkdownAnimatedDiff(markdown: md, displayRendered: rendered, animated: animated)
         self.lastSmartStreamRenderedDisplayMarkdown = md
         self.rawMarkdown = accumulated
+    }
+
+    private func renderSmartStreamingDisplayMarkdown(_ markdown: String, forceFull: Bool) -> NSAttributedString {
+        let canonicalMarkdown = self.canonicalMarkdownForIncremental(from: markdown)
+
+        if forceFull == false,
+           let previousCanonical = self.lastSmartStreamRenderedCanonicalMarkdown,
+           let previousDocument = self.lastSmartStreamRenderDocument,
+           previousCanonical.isEmpty == false,
+           canonicalMarkdown.count >= previousCanonical.count,
+           canonicalMarkdown.hasPrefix(previousCanonical) {
+            let incremental = self.engine.processIncremental(
+                STMarkdownIncrementalParameters(
+                    canonicalMarkdown: canonicalMarkdown,
+                    lastCommittedExclusiveEnd: previousCanonical.count,
+                    currentSafeExclusiveEnd: canonicalMarkdown.count,
+                    contextWindowSize: 200,
+                    previousTotalRenderBlockCount: previousDocument.blocks.count
+                )
+            )
+            let mergedDocument = self.normalizedMergedIncrementalRenderDocument(
+                incremental.mergedRenderDocument(previous: previousDocument)
+            )
+            self.updateTableOfContents(from: mergedDocument)
+            self.lastSmartStreamRenderedCanonicalMarkdown = canonicalMarkdown
+            self.lastSmartStreamRenderDocument = mergedDocument
+            self.lastSmartStreamingRenderMode = .incremental
+            return self.render(document: mergedDocument)
+        }
+
+        let (rendered, renderDocument) = self.renderWithDocument(markdown)
+        self.lastSmartStreamRenderedCanonicalMarkdown = canonicalMarkdown
+        self.lastSmartStreamRenderDocument = renderDocument
+        self.lastSmartStreamingRenderMode = .full
+        return rendered
+    }
+
+    private func canonicalMarkdownForIncremental(from markdown: String) -> String {
+        let configuration = self.engine.pipeline.configuration
+        guard configuration.enableInputSanitizer else {
+            return markdown
+        }
+        let sanitizer = STMarkdownInputSanitizer(rules: configuration.sanitizerRules)
+        return sanitizer.sanitize(markdown, debug: configuration.debug).sanitizedText
+    }
+
+    private func render(document: STMarkdownRenderDocument) -> NSAttributedString {
+        if let customRenderer = self.customDocumentRenderer {
+            return customRenderer(document)
+        }
+        return self.renderer.render(document: document)
+    }
+
+    private func normalizedMergedIncrementalRenderDocument(
+        _ document: STMarkdownRenderDocument
+    ) -> STMarkdownRenderDocument {
+        var slugger = STMarkdownAnchorSlugRegistry()
+        let blocks = document.blocks.enumerated().map {
+            self.normalizedMergedRenderBlock(
+                $0.element,
+                path: ["b:\($0.offset)"],
+                slugger: &slugger
+            )
+        }
+        return STMarkdownRenderDocument(blocks: blocks)
+    }
+
+    private func normalizedMergedRenderBlock(
+        _ block: STMarkdownRenderBlock,
+        path: [String],
+        slugger: inout STMarkdownAnchorSlugRegistry
+    ) -> STMarkdownRenderBlock {
+        switch block {
+        case .paragraph(let metadata, let inlines):
+            return .paragraph(
+                self.rebasedMetadata(metadata, kind: .paragraph, path: path),
+                inlines
+            )
+        case .heading(let metadata, level: let level, anchorId: _, content: let content):
+            let anchorId = slugger.uniqueAnchorId(forPlainTitle: content.st_plainTextForTOC())
+            return .heading(
+                self.rebasedMetadata(metadata, kind: .heading, path: path),
+                level: level,
+                anchorId: anchorId,
+                content: content
+            )
+        case .quote(let metadata, let blocks):
+            return .quote(
+                self.rebasedMetadata(metadata, kind: .quote, path: path),
+                blocks.enumerated().map {
+                    self.normalizedMergedRenderBlock(
+                        $0.element,
+                        path: path + ["q:\($0.offset)"],
+                        slugger: &slugger
+                    )
+                }
+            )
+        case .list(let metadata, let items):
+            return .list(
+                self.rebasedMetadata(metadata, kind: .list, path: path),
+                items.enumerated().map { index, item in
+                    let itemPath = path + ["li:\(index)"]
+                    return STMarkdownRenderListItem(
+                        blocks: item.blocks.enumerated().map {
+                            self.normalizedMergedRenderBlock(
+                                $0.element,
+                                path: itemPath + ["b:\($0.offset)"],
+                                slugger: &slugger
+                            )
+                        },
+                        ordered: item.ordered,
+                        level: item.level,
+                        orderedIndex: item.orderedIndex,
+                        checkbox: item.checkbox
+                    )
+                }
+            )
+        case .codeBlock(let metadata, language: let language, code: let code):
+            return .codeBlock(
+                self.rebasedMetadata(metadata, kind: .codeBlock, path: path),
+                language: language,
+                code: code
+            )
+        case .table(let metadata, let table):
+            return .table(self.rebasedMetadata(metadata, kind: .table, path: path), table)
+        case .mathBlock(let metadata, let latex):
+            return .mathBlock(self.rebasedMetadata(metadata, kind: .mathBlock, path: path), latex)
+        case .image(let metadata, url: let url, altText: let altText, title: let title):
+            return .image(
+                self.rebasedMetadata(metadata, kind: .image, path: path),
+                url: url,
+                altText: altText,
+                title: title
+            )
+        case .thematicBreak(let metadata):
+            return .thematicBreak(self.rebasedMetadata(metadata, kind: .thematicBreak, path: path))
+        case .details(let metadata, summary: let summary, body: let body):
+            return .details(
+                self.rebasedMetadata(metadata, kind: .details, path: path),
+                summary: summary,
+                body: body.enumerated().map {
+                    self.normalizedMergedRenderBlock(
+                        $0.element,
+                        path: path + ["d:\($0.offset)"],
+                        slugger: &slugger
+                    )
+                }
+            )
+        case .rawHTML(let metadata, let html):
+            return .rawHTML(self.rebasedMetadata(metadata, kind: .rawHTML, path: path), html)
+        }
+    }
+
+    private func rebasedMetadata(
+        _ metadata: STMarkdownRenderBlockMetadata,
+        kind: STMarkdownRenderBlockKind,
+        path: [String]
+    ) -> STMarkdownRenderBlockMetadata {
+        STMarkdownRenderBlockMetadata(
+            id: path.joined(separator: "/"),
+            path: path,
+            kind: kind,
+            revealPolicy: metadata.revealPolicy
+        )
     }
 
     private func renderWithDocument(_ markdown: String) -> (NSAttributedString, STMarkdownRenderDocument) {
         let result = self.engine.process(markdown)
         self.updateTableOfContents(from: result)
-        if let customRenderer = self.customDocumentRenderer {
-            return (customRenderer(result.renderDocument), result.renderDocument)
-        }
-        return (self.renderer.render(document: result.renderDocument), result.renderDocument)
+        return (self.render(document: result.renderDocument), result.renderDocument)
     }
 
     private func applyFullReplace(markdown: String, rendered: NSAttributedString) {

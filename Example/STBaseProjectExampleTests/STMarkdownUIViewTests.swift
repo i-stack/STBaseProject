@@ -140,6 +140,61 @@ final class STMarkdownUIViewTests: XCTestCase {
         XCTAssertLessThan(self.foregroundAlpha(in: visible, at: tailRange.location), 0.5)
     }
 
+    func testSmartStreamingSecondCommittedFrameUsesIncrementalMergedRenderPath() {
+        let view = STMarkdownStreamingTextView()
+        view.tokenFadeDuration = 0
+        view.markdownStyle.streamMinModuleLength = 1
+
+        let p1 = String(repeating: "a", count: 98)
+        let p2 = String(repeating: "b", count: 98)
+        let p3 = String(repeating: "c", count: 98)
+        let p4 = String(repeating: "d", count: 98)
+        let p5 = String(repeating: "e", count: 98)
+
+        view.beginSmartMarkdownStreaming()
+        view.appendSmartMarkdownStreamingChunk([p1, p2, p3, p4].joined(separator: "\n\n") + "\n\n")
+        XCTAssertEqual(view.lastSmartStreamingRenderMode, .full)
+
+        view.appendSmartMarkdownStreamingChunk(p5 + "\n\n")
+
+        XCTAssertEqual(view.lastSmartStreamingRenderMode, .incremental)
+        let rendered = view.attributedText.string
+        XCTAssertTrue(rendered.contains(p1))
+        XCTAssertTrue(rendered.contains(p5))
+    }
+
+    func testSmartStreamingFinalConvergenceKeepsDuplicateHeadingAnchorsUnique() {
+        let view = STMarkdownStreamingTextView()
+        view.tokenFadeDuration = 0
+        view.markdownStyle.streamMinModuleLength = 1
+
+        view.beginSmartMarkdownStreaming()
+        view.appendSmartMarkdownStreamingChunk("## Same\n\nBody 1\n\n")
+        XCTAssertEqual(view.tableOfContents.map(\.anchorId), ["same"])
+
+        view.appendSmartMarkdownStreamingChunk("## Same\n\nBody 2")
+        view.appendSmartMarkdownStreamingChunk("\n\nTail 3\n\n")
+        view.endSmartMarkdownStreaming(flushPending: true)
+
+        XCTAssertEqual(view.tableOfContents.map(\.anchorId), ["same", "same-1"])
+    }
+
+    func testSmartStreamingIncrementalPathRespectsSanitizerCanonicalization() {
+        let view = STMarkdownStreamingTextView()
+        view.tokenFadeDuration = 0
+        view.markdownStyle.streamMinModuleLength = 1
+
+        view.beginSmartMarkdownStreaming()
+        view.appendSmartMarkdownStreamingChunk("<a href=\"https://example.com\">Example</a>\n\n")
+        XCTAssertEqual(view.attributedText.string, "Example")
+
+        view.appendSmartMarkdownStreamingChunk("Tail\n\n")
+
+        XCTAssertEqual(view.lastSmartStreamingRenderMode, .incremental)
+        XCTAssertTrue(view.attributedText.string.contains("Example"))
+        XCTAssertTrue(view.attributedText.string.contains("Tail"))
+    }
+
     private func foregroundAlpha(in attributed: NSAttributedString, at index: Int) -> CGFloat {
         guard index >= 0, index < attributed.length else { return 1 }
         guard let color = attributed.attribute(.foregroundColor, at: index, effectiveRange: nil) as? UIColor else {
