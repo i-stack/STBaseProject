@@ -458,6 +458,12 @@ private extension STMarkdownAttributedStringRenderer {
                 supAttrs[.font] = superscriptFont
                 supAttrs[.baselineOffset] = useFont.ascender * 0.35
                 supAttrs[.stMarkdownFootnoteLabel] = label
+                if let fnURL = STMarkdownFootnoteDeepLink.url(label: label) {
+                    supAttrs[.link] = fnURL
+                    if let linkColor = self.style.linkColor {
+                        supAttrs[.foregroundColor] = linkColor
+                    }
+                }
                 result.append(NSAttributedString(string: glyph, attributes: supAttrs))
             case .inlineRawHTML(let raw):
                 switch self.style.rawHTMLPolicy {

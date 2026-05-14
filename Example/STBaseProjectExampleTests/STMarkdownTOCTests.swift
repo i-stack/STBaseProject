@@ -36,4 +36,12 @@ final class STMarkdownTOCTests: XCTestCase {
         XCTAssertEqual(received.count, 1)
         XCTAssertFalse(received[0].isEmpty)
     }
+
+    @MainActor
+    func testScrollableMarkdownViewWithTOCPanelUpdatesPipelineTOC() {
+        let v = STScrollableMarkdownView(frame: CGRect(x: 0, y: 0, width: 360, height: 500))
+        v.showsTableOfContents = true
+        v.setMarkdown("# One\n\n## Two\n\nBody.\n")
+        XCTAssertGreaterThanOrEqual(v.markdownTextView.tableOfContents.count, 2)
+    }
 }

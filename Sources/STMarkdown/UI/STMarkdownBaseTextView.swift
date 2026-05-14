@@ -33,6 +33,9 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
 
     public var engine: STMarkdownEngine
     public var onLinkTap: ((URL) -> Void)?
+    public var onFootnoteTap: ((String) -> Void)?
+    /// 目录随管线刷新时回调（含流式 ``STMarkdownStreamingTextView`` 每帧更新）；用于侧栏 TOC 与正文同帧对齐。
+    public var onTableOfContentsChange: (([STMarkdownTOCItem]) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
     /// 内容高度变化回调；相对 ``contentLayoutHeightNotificationThreshold`` 防抖，避免频繁抖动。
     ///
@@ -204,11 +207,13 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
 
     internal func updateTableOfContents(from result: STMarkdownPipelineResult) {
         self.tableOfContents = result.tableOfContents
+        self.onTableOfContentsChange?(self.tableOfContents)
     }
 
     /// 从渲染 AST 刷新目录（供流式 ``STMarkdownPipeline/processIncremental`` 合并结果等路径使用）。
     internal func updateTableOfContents(from renderDocument: STMarkdownRenderDocument) {
         self.tableOfContents = STMarkdownTOCExtraction.items(from: renderDocument)
+        self.onTableOfContentsChange?(self.tableOfContents)
     }
 
     internal func renderMarkdown(_ markdown: String) -> NSAttributedString {
@@ -236,6 +241,12 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         let selection = NSRange(location: range.location, length: 0)
         self.textView.selectedRange = selection
         return true
+    }
+
+    /// 与 ``scrollToHeadingAnchor`` 等价；命名对齐常见 TOC API（对比文档 §6.3）。
+    @discardableResult
+    public func scrollToTOCItem(anchorId: String, animated: Bool) -> Bool {
+        return self.scrollToHeadingAnchor(id: anchorId, animated: animated)
     }
 
     /// 查询标题锚点在富文本中的 UTF-16 范围（便于外层 ``UIScrollView`` 自行滚动）。
@@ -346,6 +357,7 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
     internal func resetBaseState() {
         self.rawMarkdown = ""
         self.tableOfContents = []
+        self.onTableOfContentsChange?([])
         for token in self.attachmentRefreshTokens {
             token.invalidate()
         }
@@ -444,6 +456,10 @@ extension STMarkdownBaseTextView: UITextViewDelegate {
         in characterRange: NSRange,
         interaction: UITextItemInteraction
     ) -> Bool {
+        if let label = STMarkdownFootnoteDeepLink.label(from: url) {
+            self.onFootnoteTap?(label)
+            return false
+        }
         self.onLinkTap?(url)
         return false
     }
@@ -456,6 +472,11 @@ extension STMarkdownBaseTextView: UITextViewDelegate {
     ) -> UIAction? {
         guard case let .link(url) = textItem.content else {
             return defaultAction
+        }
+        if let label = STMarkdownFootnoteDeepLink.label(from: url) {
+            return UIAction { [weak self] _ in
+                self?.onFootnoteTap?(label)
+            }
         }
         return UIAction { [weak self] _ in
             self?.onLinkTap?(url)
