@@ -16,6 +16,8 @@ import Foundation
 /// - Note: ``STMarkdownRenderBlock/heading(level:anchorId:content:)`` 的 `anchorId` 须与
 ///   ``STMarkdownTOCItem/anchorId``、``NSAttributedString.Key/stMarkdownHeadingAnchor`` 一致；
 ///   自定义适配器若无法生成 slug，可对纯文本标题使用稳定哈希并保证文档内唯一。
+/// - Important: 正式 adapter 必须产出结构化 `metadata.path/id`（如 `b:0/q:0`）；
+///   不要复用兼容工厂里的通用 metadata 作为正式渲染路径标识。
 public protocol STMarkdownRenderAdapting: Sendable {
     func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument
 }

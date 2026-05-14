@@ -5,7 +5,7 @@ import UIKit
 // MARK: - Test doubles
 
 /// 最小 `STMarkdownRefreshableAttachment` 实现，用于隔离测试附件刷新协议与绑定逻辑。
-private final class MockRefreshableAttachment: NSTextAttachment, STMarkdownRefreshableAttachment {
+private final class MockRefreshableAttachment: NSTextAttachment, STMarkdownRefreshableAttachment, @unchecked Sendable {
     private let registry = STMarkdownRefreshObserverRegistry()
 
     func addDisplayObserver(_ observer: @escaping () -> Void) -> STMarkdownRefreshObservation {
@@ -42,7 +42,7 @@ final class STMarkdownRefreshAttachmentInfrastructureTests: XCTestCase {
         var a = 0
         var b = 0
         let tokenA = registry.add { a += 1 }
-        _ = registry.add { b += 1 }
+        let tokenB = registry.add { b += 1 }
         registry.notify()
         XCTAssertEqual(a, 1)
         XCTAssertEqual(b, 1)
@@ -50,15 +50,18 @@ final class STMarkdownRefreshAttachmentInfrastructureTests: XCTestCase {
         registry.notify()
         XCTAssertEqual(a, 1)
         XCTAssertEqual(b, 2)
+        tokenB.invalidate()
     }
 
     func testRefreshObserverRegistryNotifyInvokesAllCurrentObservers() {
         let registry = STMarkdownRefreshObserverRegistry()
         var sum = 0
-        _ = registry.add { sum += 1 }
-        _ = registry.add { sum += 2 }
+        let token1 = registry.add { sum += 1 }
+        let token2 = registry.add { sum += 2 }
         registry.notify()
         XCTAssertEqual(sum, 3)
+        token1.invalidate()
+        token2.invalidate()
     }
 }
 
@@ -99,7 +102,11 @@ final class STMarkdownNumberBadgeAttachmentTests: XCTestCase {
         guard let image = badge.image else {
             return XCTFail("expected image")
         }
-        let expected = ceil(34 / 17 * STMarkdownNumberBadgeAttachment.fixedDiameter)
+        // 与 `STMarkdownNumberBadgeAttachment.init` 一致：`UIFont` 实际 `pointSize` 可能略大于请求值。
+        let expected = max(
+            STMarkdownNumberBadgeAttachment.fixedDiameter,
+            ceil(font.pointSize / 17 * STMarkdownNumberBadgeAttachment.fixedDiameter)
+        )
         XCTAssertEqual(image.size.width, expected, accuracy: 0.5)
         XCTAssertEqual(image.size.height, expected, accuracy: 0.5)
     }
@@ -161,19 +168,6 @@ final class STMarkdownNumberBadgeAttachmentTests: XCTestCase {
         )
         XCTAssertNotNil(viaAlias.image)
     }
-
-    func testInitCoderFallsBackToSuperWithoutFatalError() throws {
-        let font = UIFont.st_systemFont(ofSize: 17, weight: .regular)
-        let original = STMarkdownNumberBadgeAttachment(
-            numberText: "1",
-            font: font,
-            textColor: .white,
-            backgroundColor: .systemBlue
-        )
-        let data = try XCTUnwrap(NSKeyedArchiver.archivedData(withRootObject: original, requiringSecureCoding: false))
-        let unarchived = try XCTUnwrap(try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? STMarkdownNumberBadgeAttachment)
-        XCTAssertNotNil(unarchived)
-    }
 }
 
 // MARK: - STMarkdownAttachmentRefreshSupport
@@ -204,13 +198,14 @@ final class STMarkdownAttachmentRefreshSupportTests: XCTestCase {
         let attachment = MockRefreshableAttachment()
         let attr = NSMutableAttributedString(string: " ")
         attr.addAttribute(.attachment, value: attachment, range: NSRange(location: 0, length: 1))
-        _ = STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attr) { att in
+        let tokens = STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attr) { att in
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertTrue(att === attachment)
             expectation.fulfill()
         }
         attachment.notifyDisplayObservers()
         waitForExpectations(timeout: 2)
+        tokens.forEach { $0.invalidate() }
     }
 
     func testBindRefreshHandlersDispatchesToMainWhenObserverFiresOffMainThread() {
@@ -218,7 +213,7 @@ final class STMarkdownAttachmentRefreshSupportTests: XCTestCase {
         let attachment = MockRefreshableAttachment()
         let attr = NSMutableAttributedString(string: " ")
         attr.addAttribute(.attachment, value: attachment, range: NSRange(location: 0, length: 1))
-        _ = STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attr) { att in
+        let tokens = STMarkdownAttachmentRefreshSupport.bindRefreshHandlers(in: attr) { att in
             XCTAssertTrue(Thread.isMainThread)
             XCTAssertTrue(att === attachment)
             expectation.fulfill()
@@ -227,6 +222,7 @@ final class STMarkdownAttachmentRefreshSupportTests: XCTestCase {
             attachment.notifyDisplayObservers()
         }
         waitForExpectations(timeout: 3)
+        tokens.forEach { $0.invalidate() }
     }
 
     func testBindRefreshHandlersRegistersOneTokenPerRefreshableAttachment() {

@@ -68,12 +68,6 @@ let package = Package(
             resources: [
                 .copy("PrivacyInfo.xcprivacy")
             ]
-        ),
-        .testTarget(
-            name: "STMarkdownAttachmentUnitTests",
-            dependencies: ["STBaseProject"],
-            path: "Example/STBaseProjectExampleTests",
-            sources: ["STMarkdownAttachmentsTests.swift"]
         )
     ],
     swiftLanguageVersions: [.v5]

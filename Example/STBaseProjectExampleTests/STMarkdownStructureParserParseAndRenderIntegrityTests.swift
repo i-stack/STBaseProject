@@ -123,6 +123,21 @@ private func st_firstParagraphInlines(_ document: STMarkdownDocument) -> [STMark
     return nil
 }
 
+private func st_assertStructuredMetadata(
+    _ metadata: STMarkdownRenderBlockMetadata,
+    expectedPath: [String],
+    expectedKind: STMarkdownRenderBlockKind,
+    expectedRevealPolicy: STMarkdownRevealPolicy,
+    file: StaticString = #filePath,
+    line: UInt = #line
+) {
+    XCTAssertEqual(metadata.path, expectedPath, file: file, line: line)
+    XCTAssertEqual(metadata.id, expectedPath.joined(separator: "/"), file: file, line: line)
+    XCTAssertEqual(metadata.kind, expectedKind, file: file, line: line)
+    XCTAssertEqual(metadata.revealPolicy, expectedRevealPolicy, file: file, line: line)
+    XCTAssertFalse(metadata.id.hasPrefix("compat/"), file: file, line: line)
+}
+
 final class STMarkdownStructureParserParseAndRenderIntegrityTests: XCTestCase {
 
     // MARK: - 解析：结构是否被识别为 AST 节点（而非整段原文）
@@ -344,6 +359,141 @@ final class STMarkdownStructureParserParseAndRenderIntegrityTests: XCTestCase {
         XCTAssertTrue(plain.contains("粗里"))
         XCTAssertTrue(plain.contains("斜粗尾"))
         XCTAssertTrue(plain.contains("链"))
+    }
+
+    func testRenderAdapterProducesStructuredMetadataIDsForNestedBlocks() {
+        let document = STMarkdownDocument(blocks: [
+            .heading(level: 1, content: [.text("Title")]),
+            .quote([
+                .paragraph([.text("quoted")]),
+                .list(
+                    kind: .unordered,
+                    items: [
+                        STMarkdownListItemNode(blocks: [.paragraph([.text("item")])]),
+                    ]
+                ),
+            ]),
+            .details(
+                summary: [.text("More")],
+                body: [.paragraph([.text("Hidden")])]
+            ),
+        ])
+
+        let renderDocument = STMarkdownRenderAdapter().adapt(document)
+        XCTAssertEqual(renderDocument.blocks.count, 3)
+
+        guard case .heading(let headingMeta, level: let level, anchorId: let anchorId, content: _)
+            = renderDocument.blocks[0] else {
+            return XCTFail("首块应为 heading")
+        }
+        XCTAssertEqual(level, 1)
+        XCTAssertEqual(anchorId, "title")
+        st_assertStructuredMetadata(
+            headingMeta,
+            expectedPath: ["b:0"],
+            expectedKind: .heading,
+            expectedRevealPolicy: .inlineProgressive
+        )
+
+        guard case .quote(let quoteMeta, let quoteBlocks) = renderDocument.blocks[1] else {
+            return XCTFail("第二块应为 quote")
+        }
+        st_assertStructuredMetadata(
+            quoteMeta,
+            expectedPath: ["b:1"],
+            expectedKind: .quote,
+            expectedRevealPolicy: .containerThenContent
+        )
+        XCTAssertEqual(quoteBlocks.count, 2)
+        st_assertStructuredMetadata(
+            quoteBlocks[0].metadata,
+            expectedPath: ["b:1", "q:0"],
+            expectedKind: .paragraph,
+            expectedRevealPolicy: .inlineProgressive
+        )
+
+        guard case .list(let listMeta, let items) = quoteBlocks[1] else {
+            return XCTFail("quote 第二个子块应为 list")
+        }
+        st_assertStructuredMetadata(
+            listMeta,
+            expectedPath: ["b:1", "q:1"],
+            expectedKind: .list,
+            expectedRevealPolicy: .containerThenContent
+        )
+        XCTAssertEqual(items.count, 1)
+        XCTAssertEqual(items[0].blocks.count, 1)
+        st_assertStructuredMetadata(
+            items[0].blocks[0].metadata,
+            expectedPath: ["b:1", "q:1", "li:0", "b:0"],
+            expectedKind: .paragraph,
+            expectedRevealPolicy: .inlineProgressive
+        )
+
+        guard case .details(let detailsMeta, summary: let summary, body: let body) = renderDocument.blocks[2] else {
+            return XCTFail("第三块应为 details")
+        }
+        XCTAssertEqual(summary, [.text("More")])
+        st_assertStructuredMetadata(
+            detailsMeta,
+            expectedPath: ["b:2"],
+            expectedKind: .details,
+            expectedRevealPolicy: .containerThenContent
+        )
+        XCTAssertEqual(body.count, 1)
+        st_assertStructuredMetadata(
+            body[0].metadata,
+            expectedPath: ["b:2", "d:0"],
+            expectedKind: .paragraph,
+            expectedRevealPolicy: .inlineProgressive
+        )
+    }
+
+    func testRenderAdapterAppendsFootnoteSectionUsingStructuredTopLevelIDs() {
+        let parser = STMarkdownStructureParser()
+        let document = parser.parse(
+            """
+            Body[^a].
+
+            [^a]: note body
+            """
+        )
+
+        let renderDocument = STMarkdownRenderAdapter().adapt(document)
+        XCTAssertEqual(renderDocument.blocks.count, 4)
+
+        st_assertStructuredMetadata(
+            renderDocument.blocks[0].metadata,
+            expectedPath: ["b:0"],
+            expectedKind: .paragraph,
+            expectedRevealPolicy: .inlineProgressive
+        )
+        st_assertStructuredMetadata(
+            renderDocument.blocks[1].metadata,
+            expectedPath: ["b:1"],
+            expectedKind: .thematicBreak,
+            expectedRevealPolicy: .atomicBlock
+        )
+        st_assertStructuredMetadata(
+            renderDocument.blocks[2].metadata,
+            expectedPath: ["b:2"],
+            expectedKind: .paragraph,
+            expectedRevealPolicy: .inlineProgressive
+        )
+        st_assertStructuredMetadata(
+            renderDocument.blocks[3].metadata,
+            expectedPath: ["b:3"],
+            expectedKind: .paragraph,
+            expectedRevealPolicy: .inlineProgressive
+        )
+
+        guard case .paragraph(_, let headingInlines) = renderDocument.blocks[2],
+              case .paragraph(_, let footnoteInlines) = renderDocument.blocks[3] else {
+            return XCTFail("脚注尾部应追加两个 paragraph")
+        }
+        XCTAssertEqual(headingInlines, [.strong([.text("脚注")])])
+        XCTAssertTrue(footnoteInlines.contains(.text(" ")))
+        XCTAssertTrue(footnoteInlines.contains(.text("note body")))
     }
 
     // MARK: - 流式：每个中间态都不允许出现 Markdown 定界符
