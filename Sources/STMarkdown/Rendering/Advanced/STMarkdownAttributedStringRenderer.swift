@@ -267,6 +267,9 @@ private extension STMarkdownAttributedStringRenderer {
         if let linkDestination, let url = URL(string: linkDestination) {
             attributes[.link] = url
             attributes[.foregroundColor] = self.style.linkColor ?? .systemBlue
+            attributes[.underlineStyle] = self.style.linkUnderlineEnabled
+                ? NSUnderlineStyle.single.rawValue
+                : 0
         }
         for node in nodes {
             switch node {
@@ -364,11 +367,11 @@ private extension STMarkdownAttributedStringRenderer {
     }
 
     func renderList(_ items: [STMarkdownRenderListItem]) -> NSAttributedString {
-        let result = NSMutableAttributedString()
+        let inner = NSMutableAttributedString()
 
         for (index, item) in items.enumerated() {
             if index > 0 {
-                result.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
+                inner.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
             }
 
             let layout = self.listLayout(for: item)
@@ -378,7 +381,7 @@ private extension STMarkdownAttributedStringRenderer {
                 .paragraphStyle: layout.paragraphStyle,
                 .baselineOffset: layout.baselineOffset,
             ]
-            result.append(NSAttributedString(string: layout.markerText, attributes: markerAttributes))
+            inner.append(NSAttributedString(string: layout.markerText, attributes: markerAttributes))
 
             let leadingBlocks = self.leadingListBlocks(for: item)
             if leadingBlocks.isEmpty == false {
@@ -389,7 +392,7 @@ private extension STMarkdownAttributedStringRenderer {
                     contentIndent: layout.contentIndent,
                     lineHeight: self.resolveLineHeight(for: leadingBlocks.first)
                 )
-                result.append(renderedLeading)
+                inner.append(renderedLeading)
             }
 
             let trailingBlocks = self.trailingListBlocks(for: item)
@@ -397,16 +400,38 @@ private extension STMarkdownAttributedStringRenderer {
                 let child = NSMutableAttributedString(attributedString: self.render(blocks: trailingBlocks))
                 self.offsetParagraphStyles(in: child, by: layout.contentIndent)
                 if child.length > 0 {
-                    // leading 段落已包含内联文本且后跟 `\n`；这里补一个分隔即可。
-                    // 当 leading 为空（列表项以 quote / codeBlock / list 等块级元素开头），
-                    // marker 后没有任何换行，直接 append 会让 marker 与块内容挤在同一行。
-                    result.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
-                    result.append(child)
+                    inner.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
+                    inner.append(child)
                 }
             }
         }
 
+        let result = NSMutableAttributedString()
+        if let top = self.transparentLineSpacer(minHeight: self.style.listTopPadding) {
+            result.append(top)
+        }
+        result.append(inner)
+        if let bottom = self.transparentLineSpacer(minHeight: self.style.listBottomPadding) {
+            result.append(bottom)
+        }
         return result
+    }
+
+    /// 用透明换行 + 行高模拟垂直留白（与块级分隔策略一致）。
+    func transparentLineSpacer(minHeight: CGFloat) -> NSAttributedString? {
+        guard minHeight > 0 else { return nil }
+        let separatorStyle = NSMutableParagraphStyle()
+        separatorStyle.minimumLineHeight = minHeight
+        separatorStyle.maximumLineHeight = minHeight
+        separatorStyle.lineBreakMode = .byWordWrapping
+        return NSAttributedString(
+            string: "\n",
+            attributes: [
+                .font: self.style.font,
+                .foregroundColor: UIColor.clear,
+                .paragraphStyle: separatorStyle,
+            ]
+        )
     }
 
     func baseAttributes() -> [NSAttributedString.Key: Any] {

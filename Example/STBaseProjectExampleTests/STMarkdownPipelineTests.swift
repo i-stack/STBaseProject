@@ -2547,4 +2547,94 @@ final class STMarkdownPipelineTests: XCTestCase {
             "高度差应接近真实行间距增量，不能按错误估算行数过度放大"
         )
     }
+
+    func testMalformedTableNormalizerRemovesStandalonePipeRow() {
+        let raw = """
+| a | b |
+| --- | --- |
+| 1 | 2 |
+||
+| 3 | 4 |
+"""
+        let fixed = STMarkdownMalformedTableNormalizer.normalize(raw)
+        let trimmedLines = fixed.split(separator: "\n").map {
+            $0.trimmingCharacters(in: .whitespaces)
+        }
+        XCTAssertFalse(trimmedLines.contains("||"))
+    }
+
+    func testMalformedTableNormalizerRemovesSpuriousBlankInsideTable() {
+        let raw = """
+| a | b |
+| --- | --- |
+| 1 | 2 |
+
+| 3 | 4 |
+"""
+        let fixed = STMarkdownMalformedTableNormalizer.normalize(raw)
+        XCTAssertFalse(fixed.contains("| 1 | 2 |\n\n| 3 |"))
+    }
+
+    func testPlainTextStreamingHeuristic() {
+        XCTAssertTrue(STMarkdownStreamingTextView.isLikelyMarkdownFreePlainText("Hello world"))
+        XCTAssertFalse(STMarkdownStreamingTextView.isLikelyMarkdownFreePlainText("# Title"))
+    }
+
+    func testStreamBufferDefersUnclosedFence() {
+        let buffer = STMarkdownStreamBuffer(minModuleLength: 5)
+        let r1 = buffer.append("```swift\nlet x = 1")
+        XCTAssertTrue(r1.completeModules.isEmpty)
+        XCTAssertTrue(r1.hasPendingStructure)
+        XCTAssertEqual(r1.pendingType, .codeBlock)
+        XCTAssertTrue(buffer.committedSafePrefix.isEmpty)
+    }
+
+    func testStreamBufferFlushReleasesTail() {
+        let buffer = STMarkdownStreamBuffer(minModuleLength: 5)
+        _ = buffer.append("```\npartial")
+        XCTAssertTrue(buffer.committedSafePrefix.isEmpty)
+        let tail = buffer.flush()
+        XCTAssertFalse(tail.isEmpty)
+        XCTAssertEqual(buffer.committedSafePrefix, buffer.fullAccumulatedText)
+    }
+
+    func testStreamBufferSplitsOnSecondH1() {
+        let buffer = STMarkdownStreamBuffer(minModuleLength: 2)
+        _ = buffer.append("# A\n\nAlpha paragraph with enough characters.\n\n")
+        // 前导换行使「未提交起点」严格早于第二个 H1 行首，避免边界与起点重合导致本帧无模块输出。
+        let r2 = buffer.append("\n# B\n\nBeta.\n\n")
+        XCTAssertFalse(r2.completeModules.isEmpty)
+        XCTAssertTrue(buffer.committedSafePrefix.contains("# A"))
+        XCTAssertFalse(buffer.committedSafePrefix.contains("# B"))
+    }
+
+    func testMarkdownStyleStreamMinModuleLengthDefault() {
+        XCTAssertGreaterThanOrEqual(STMarkdownStyle.default.streamMinModuleLength, 1)
+    }
+
+    func testLinkUnderlineStyleReflectsStyleFlag() {
+        var style = STMarkdownStyle.default
+        style.linkUnderlineEnabled = false
+        let renderer = STMarkdownAttributedStringRenderer(style: style)
+        let doc = STMarkdownRenderDocument(blocks: [
+            .paragraph([
+                .link(destination: "https://example.com", children: [.text("Click")]),
+            ]),
+        ])
+        let rendered = renderer.render(document: doc)
+        var foundLink = false
+        rendered.enumerateAttribute(.link, in: NSRange(location: 0, length: rendered.length)) { value, _, _ in
+            if value != nil {
+                foundLink = true
+            }
+        }
+        XCTAssertTrue(foundLink)
+        let underline = rendered.attribute(
+            .underlineStyle,
+            at: 0,
+            longestEffectiveRange: nil,
+            in: NSRange(location: 0, length: rendered.length)
+        ) as? Int
+        XCTAssertEqual(underline, 0)
+    }
 }

@@ -34,6 +34,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
     /// 以免样式在跨线程使用时引入 data race。
     public var headingFontProvider: (@Sendable (Int) -> UIFont)?
     public var linkColor: UIColor?
+    /// 是否为 `[text](url)` 等链接绘制下划线（默认 true，与系统链接观感一致）。
+    public var linkUnderlineEnabled: Bool
     public var inlineCodeTextColor: UIColor?
     /// 行内代码背景色。nil 时沿用 codeBlockBackgroundColor 或不绘制背景。
     public var inlineCodeBackgroundColor: UIColor?
@@ -56,6 +58,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var listHeadIndent: CGFloat
     public var listMarkerWidth: CGFloat
     public var listMarkerColor: UIColor?
+    /// 整块列表顶部额外留白（不改变列表项内部排版）。
+    public var listTopPadding: CGFloat
+    /// 整块列表底部额外留白。
+    public var listBottomPadding: CGFloat
     public var headingLineHeightMultiplier: CGFloat
     /// 块级元素之间的默认间距
     public var blockSpacing: CGFloat
@@ -99,6 +105,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var codeBlockSeparatorSpacing: CGFloat
     /// 代码块按钮行预留宽度
     public var codeBlockButtonRowReservedWidth: CGFloat
+    /// 智能流式缓冲（``STMarkdownStreamBuffer``）的最小模块长度，过小会导致更频繁的模块切分。
+    public var streamMinModuleLength: Int
 
     public init(
         font: UIFont,
@@ -114,6 +122,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         headingKern: CGFloat? = nil,
         headingFontProvider: (@Sendable (Int) -> UIFont)? = nil,
         linkColor: UIColor? = nil,
+        linkUnderlineEnabled: Bool = true,
         inlineCodeTextColor: UIColor? = nil,
         inlineCodeBackgroundColor: UIColor? = nil,
         codeBlockTextColor: UIColor? = nil,
@@ -139,6 +148,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         listHeadIndent: CGFloat = 24,
         listMarkerWidth: CGFloat = 18,
         listMarkerColor: UIColor? = nil,
+        listTopPadding: CGFloat = 0,
+        listBottomPadding: CGFloat = 0,
         headingLineHeightMultiplier: CGFloat = 1.25,
         blockSpacing: CGFloat = 16,
         headingTopSpacing: [CGFloat]? = nil,
@@ -156,7 +167,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         citationBadgeTextColor: UIColor? = nil,
         codeBlockHeaderHeight: CGFloat = 0,
         codeBlockSeparatorSpacing: CGFloat = 8,
-        codeBlockButtonRowReservedWidth: CGFloat = 120
+        codeBlockButtonRowReservedWidth: CGFloat = 120,
+        streamMinModuleLength: Int = 20
     ) {
         self.font = font
         self.boldFont = boldFont
@@ -171,6 +183,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.headingKern = headingKern
         self.headingFontProvider = headingFontProvider
         self.linkColor = linkColor
+        self.linkUnderlineEnabled = linkUnderlineEnabled
         self.inlineCodeTextColor = inlineCodeTextColor
         self.inlineCodeBackgroundColor = inlineCodeBackgroundColor
         self.codeBlockTextColor = codeBlockTextColor
@@ -196,6 +209,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.listHeadIndent = listHeadIndent
         self.listMarkerWidth = listMarkerWidth
         self.listMarkerColor = listMarkerColor
+        self.listTopPadding = listTopPadding
+        self.listBottomPadding = listBottomPadding
         self.headingLineHeightMultiplier = headingLineHeightMultiplier
         self.blockSpacing = blockSpacing
         self.headingTopSpacing = headingTopSpacing
@@ -214,6 +229,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.codeBlockHeaderHeight = codeBlockHeaderHeight
         self.codeBlockSeparatorSpacing = codeBlockSeparatorSpacing
         self.codeBlockButtonRowReservedWidth = codeBlockButtonRowReservedWidth
+        self.streamMinModuleLength = max(1, streamMinModuleLength)
     }
 
     public static let `default` = STMarkdownStyle(

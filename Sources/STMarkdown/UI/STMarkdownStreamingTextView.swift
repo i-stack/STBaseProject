@@ -26,6 +26,23 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         set { self.shimmerTextView.animateAcrossNewlines = newValue }
     }
 
+    private var smartStreamBuffer: STMarkdownStreamBuffer?
+    private var smartStreamingSessionActive = false
+    private var isApplyingSmartStreamMarkdownUpdate = false
+    /// 上一帧已交给 ``setMarkdown(_:animated:)`` 的「安全前缀」展示串（经 ``stripUnclosedTailMarkers``）。
+    /// 当缓冲器仅增长尾部、``committedSafePrefix`` 不变时跳过整段重解析，降低流式 CPU 占用（对齐对比文档 P0）。
+    private var lastSmartStreamRenderedDisplayMarkdown: String?
+
+    /// 是否处于 ``beginSmartMarkdownStreaming()`` 开启的智能缓冲流式会话中。
+    public var isSmartMarkdownStreamingActive: Bool {
+        self.smartStreamingSessionActive
+    }
+
+    /// 会话中的完整累积 Markdown（含尚未通过模块检测的尾部）；非会话中为 `nil`。
+    public var smartStreamingAccumulatedText: String? {
+        self.smartStreamBuffer?.fullAccumulatedText
+    }
+
     private var shimmerTextView: STShimmerTextView {
         guard let textView = self.textView as? STShimmerTextView else {
             preconditionFailure("STMarkdownStreamingTextView requires STShimmerTextView")
@@ -77,6 +94,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     public func reset() {
+        self.cancelSmartMarkdownStreamingSession()
         self.shimmerTextView.reset()
         self.resetBaseState()
     }
@@ -86,6 +104,9 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
+        if self.smartStreamingSessionActive && !self.isApplyingSmartStreamMarkdownUpdate {
+            self.cancelSmartMarkdownStreamingSession()
+        }
         let markdownForRender = animated
             ? Self.stripUnclosedTailMarkers(in: markdown)
             : markdown
@@ -184,15 +205,86 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     public func appendMarkdownFragment(_ fragment: String, animated: Bool = true) {
         guard fragment.isEmpty == false else { return }
+        if self.smartStreamingSessionActive {
+            self.appendSmartMarkdownStreamingChunk(fragment)
+            return
+        }
         self.setMarkdown(self.rawMarkdown + fragment, animated: animated)
     }
 
     public func updateStreamingMarkdown(_ fullMarkdown: String) {
+        self.cancelSmartMarkdownStreamingSession()
         self.setMarkdown(fullMarkdown, animated: true)
     }
 
+    /// 开始智能流式会话：先 ``reset()``，再用 ``STMarkdownStreamBuffer`` 按安全模块边界累积 chunk。
+    public func beginSmartMarkdownStreaming() {
+        self.reset()
+        self.smartStreamBuffer = STMarkdownStreamBuffer(
+            minModuleLength: self.markdownStyle.streamMinModuleLength
+        )
+        self.smartStreamingSessionActive = true
+    }
+
+    /// 向智能流式缓冲追加一段 chunk 并刷新显示（仅显示已通过检测的安全前缀 + 尾部裁剪）。
+    public func appendSmartMarkdownStreamingChunk(_ chunk: String) {
+        guard chunk.isEmpty == false else { return }
+        guard self.smartStreamingSessionActive, let buffer = self.smartStreamBuffer else {
+            self.setMarkdown(self.rawMarkdown + chunk, animated: true)
+            return
+        }
+        buffer.updateMinModuleLength(self.markdownStyle.streamMinModuleLength)
+        _ = buffer.append(chunk)
+        self.applySmartStreamingPresentation(animated: true)
+    }
+
+    /// 结束智能流式会话；默认 ``flush`` 后按完整累积文本做一次非动画收敛。
+    public func endSmartMarkdownStreaming(flushPending: Bool = true) {
+        guard self.smartStreamingSessionActive, let buffer = self.smartStreamBuffer else { return }
+        if flushPending {
+            _ = buffer.flush()
+        }
+        let snapshot = buffer.fullAccumulatedText
+        self.smartStreamBuffer = nil
+        self.smartStreamingSessionActive = false
+        self.lastSmartStreamRenderedDisplayMarkdown = nil
+        let md = Self.stripUnclosedTailMarkers(in: snapshot)
+        self.isApplyingSmartStreamMarkdownUpdate = true
+        defer { self.isApplyingSmartStreamMarkdownUpdate = false }
+        self.setMarkdown(md, animated: false)
+        self.rawMarkdown = snapshot
+        self.publishContentLayoutHeightNotificationIfNeeded(force: true)
+    }
+
     internal override func configurationDidChangeRerender() {
-        self.setMarkdown(self.rawMarkdown, animated: false)
+        if self.smartStreamingSessionActive {
+            self.smartStreamBuffer?.updateMinModuleLength(self.markdownStyle.streamMinModuleLength)
+            self.applySmartStreamingPresentation(animated: false, force: true)
+        } else {
+            self.setMarkdown(self.rawMarkdown, animated: false)
+        }
+    }
+
+    private func cancelSmartMarkdownStreamingSession() {
+        self.smartStreamBuffer = nil
+        self.smartStreamingSessionActive = false
+        self.lastSmartStreamRenderedDisplayMarkdown = nil
+    }
+
+    private func applySmartStreamingPresentation(animated: Bool, force: Bool = false) {
+        guard let buffer = self.smartStreamBuffer else { return }
+        let accumulated = buffer.fullAccumulatedText
+        let committed = buffer.committedSafePrefix
+        let md = Self.stripUnclosedTailMarkers(in: committed)
+        if force == false, md == self.lastSmartStreamRenderedDisplayMarkdown {
+            self.rawMarkdown = accumulated
+            return
+        }
+        self.isApplyingSmartStreamMarkdownUpdate = true
+        defer { self.isApplyingSmartStreamMarkdownUpdate = false }
+        self.setMarkdown(md, animated: animated)
+        self.lastSmartStreamRenderedDisplayMarkdown = md
+        self.rawMarkdown = accumulated
     }
 
     private func applyFullReplace(markdown: String, rendered: NSAttributedString) {
@@ -429,4 +521,24 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         pattern: #"(?m)(?:^|\n)\t*[●▪]\t"#,
         options: []
     )
+
+    /// 启发式判断文本是否**不太可能**含有常见 Markdown 块级/行内标记。
+    ///
+    /// 适用于宿主自行缓冲 LLM 输出时决定是否采用更细粒度（例如按单行 `\n`）的提交策略；
+    /// 与 ``setMarkdown(_:animated:)`` 内置的尾部定界符裁剪正交，可独立使用。
+    public static func isLikelyMarkdownFreePlainText(_ text: String) -> Bool {
+        let blockMarkers = [
+            "#", "> ", "```", "---", "***",
+            "- ", "* ", "+ ", "| ",
+            "1. ", "2. ", "3. ",
+            "![", "](",
+        ]
+        for marker in blockMarkers where text.contains(marker) {
+            return false
+        }
+        if text.contains("**") || text.contains("__") || text.contains("`") || text.contains("$$") {
+            return false
+        }
+        return true
+    }
 }
