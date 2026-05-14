@@ -248,8 +248,8 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
     // MARK: STMarkdownRenderDocument
 
     func testRenderDocumentInitializerAndEquality() {
-        let r = STMarkdownRenderDocument(blocks: [.thematicBreak])
-        let same = STMarkdownRenderDocument(blocks: [.thematicBreak])
+        let r = STMarkdownRenderDocument(blocks: [.thematicBreak()])
+        let same = STMarkdownRenderDocument(blocks: [.thematicBreak()])
         XCTAssertEqual(r, same)
         st_requireSendable(r)
     }
@@ -276,7 +276,7 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
             .mathBlock("a+b"),
             .image(url: "https://img", altText: "x", title: "y"),
             .image(url: "https://img2", altText: "x2", title: nil),
-            .thematicBreak,
+            .thematicBreak(),
             .details(summary: [.text("sum")], body: [.paragraph([.text("bd")])]),
             .rawHTML("<p/>"),
         ]
@@ -301,7 +301,7 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
         XCTAssertEqual(item.checkbox, .unchecked)
         XCTAssertEqual(item.content, [.text("a")])
         XCTAssertEqual(item.childBlocks.count, 1)
-        if case .codeBlock(_, let code)? = item.childBlocks.first {
+        if case .codeBlock(_, language: _, code: let code)? = item.childBlocks.first {
             XCTAssertEqual(code, "b")
         } else {
             XCTFail("childBlocks 首项应为 codeBlock")
@@ -320,7 +320,7 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
         XCTAssertEqual(item.content, [.text("lead")])
         XCTAssertEqual(item.childBlocks.count, 1)
         XCTAssertEqual(item.checkbox, .checked)
-        if case .quote(let inner)? = item.childBlocks.first {
+        if case .quote(_, let inner)? = item.childBlocks.first {
             XCTAssertFalse(inner.isEmpty)
         } else {
             XCTFail("期望 childBlocks 首块为 quote")

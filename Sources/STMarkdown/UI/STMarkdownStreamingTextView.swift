@@ -29,6 +29,8 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     private var smartStreamBuffer: STMarkdownStreamBuffer?
     private var smartStreamingSessionActive = false
     private var isApplyingSmartStreamMarkdownUpdate = false
+    private var streamingAnimationGeneration: Int = 0
+    private var pendingStreamingSuffixWorkItem: DispatchWorkItem?
     /// 上一帧已交给 ``setMarkdown(_:animated:)`` 的「安全前缀」展示串（经 ``stripUnclosedTailMarkers``）。
     /// 当缓冲器仅增长尾部、``committedSafePrefix`` 不变时跳过整段重解析，降低流式 CPU 占用（对齐对比文档 P0）。
     private var lastSmartStreamRenderedDisplayMarkdown: String?
@@ -42,6 +44,9 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     public var smartStreamingAccumulatedText: String? {
         self.smartStreamBuffer?.fullAccumulatedText
     }
+
+    /// `containerThenContent` 命中时，容器/块级前缀先上屏，再等待这一小段间隔后让尾部正文继续逐字动画。
+    public var containerRevealGapDuration: TimeInterval = 0.06
 
     private var shimmerTextView: STShimmerTextView {
         guard let textView = self.textView as? STShimmerTextView else {
@@ -95,6 +100,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     public func reset() {
+        self.invalidatePendingStreamingAnimation()
         self.cancelSmartMarkdownStreamingSession()
         self.shimmerTextView.reset()
         self.resetBaseState()
@@ -105,6 +111,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
+        self.invalidatePendingStreamingAnimation()
         if self.smartStreamingSessionActive && !self.isApplyingSmartStreamMarkdownUpdate {
             self.cancelSmartMarkdownStreamingSession()
         }
@@ -306,6 +313,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     private func applyFullReplace(markdown: String, rendered: NSAttributedString) {
+        self.invalidatePendingStreamingAnimation()
         self.rawMarkdown = markdown
         self.shimmerTextView.setRenderedAttributedText(rendered)
         self.finalizeRenderUpdate(rendered: rendered)
@@ -313,7 +321,20 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     private func applyAppendDelta(markdown: String, delta: NSAttributedString) {
         self.rawMarkdown = markdown
-        self.shimmerTextView.appendAttributedText(delta, animated: true)
+        self.invalidatePendingStreamingAnimation()
+        let plan = self.streamingAnimationPlan(for: delta)
+        if plan.immediatePrefix.length > 0 {
+            self.shimmerTextView.appendAttributedText(plan.immediatePrefix, animated: false)
+            self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+        }
+        if let animatedSuffix = plan.animatedSuffix, animatedSuffix.length > 0 {
+            self.enqueueAnimatedStreamingSuffix(
+                animatedSuffix,
+                trailingSuffix: plan.trailingSuffix,
+                shouldDelay: plan.requiresContainerGap
+            )
+            return
+        }
         self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
     }
 
@@ -324,12 +345,166 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         animate: Bool
     ) {
         self.rawMarkdown = markdown
-        self.shimmerTextView.replaceTrailingAttributedText(
-            from: location,
-            with: trailing,
-            animateNewPortion: animate
-        )
+        self.invalidatePendingStreamingAnimation()
+        if animate {
+            let plan = self.streamingAnimationPlan(for: trailing)
+            if let animatedSuffix = plan.animatedSuffix, animatedSuffix.length > 0 {
+                self.shimmerTextView.replaceTrailingAttributedText(
+                    from: location,
+                    with: plan.immediatePrefix,
+                    animateNewPortion: false
+                )
+                self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+                self.enqueueAnimatedStreamingSuffix(
+                    animatedSuffix,
+                    trailingSuffix: plan.trailingSuffix,
+                    shouldDelay: plan.requiresContainerGap
+                )
+                return
+            } else {
+                self.shimmerTextView.replaceTrailingAttributedText(
+                    from: location,
+                    with: trailing,
+                    animateNewPortion: false
+                )
+            }
+        } else {
+            self.shimmerTextView.replaceTrailingAttributedText(
+                from: location,
+                with: trailing,
+                animateNewPortion: false
+            )
+        }
         self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+    }
+
+    /// 按尾部 reveal policy 把增量切成"立即显示前缀 + 可动画后缀"。
+    /// 规则：
+    /// 1. 仅当尾部最后一个 render block 的 reveal policy 是 `inlineProgressive` 时，才对该 block 动画；
+    /// 2. `atomicBlock` / `containerThenContent` 本身立即上屏；
+    /// 3. 这样 quote/list/details 等容器可先稳定出现，再让最后一个正文 block 继续逐字输出。
+    private func streamingAnimationPlan(for attributedText: NSAttributedString) -> (
+        immediatePrefix: NSAttributedString,
+        animatedSuffix: NSAttributedString?,
+        trailingSuffix: NSAttributedString?,
+        requiresContainerGap: Bool
+    ) {
+        guard attributedText.length > 0 else {
+            return (NSAttributedString(), nil, nil, false)
+        }
+
+        guard let suffixRange = self.trailingAnimatedBlockRange(in: attributedText) else {
+            return (attributedText, nil, nil, false)
+        }
+
+        let suffixEnd = suffixRange.location + suffixRange.length
+        let trailingLength = attributedText.length - suffixEnd
+        let trailingSuffix: NSAttributedString? = trailingLength > 0
+            ? attributedText.attributedSubstring(from: NSRange(location: suffixEnd, length: trailingLength))
+            : nil
+
+        if suffixRange.location == 0 {
+            return (NSAttributedString(), attributedText.attributedSubstring(from: suffixRange), trailingSuffix, false)
+        }
+
+        let immediatePrefix = attributedText.attributedSubstring(
+            from: NSRange(location: 0, length: suffixRange.location)
+        )
+        let animatedSuffix = attributedText.attributedSubstring(from: suffixRange)
+        return (
+            immediatePrefix,
+            animatedSuffix,
+            trailingSuffix,
+            self.containsContainerRevealPolicy(in: immediatePrefix)
+        )
+    }
+
+    private func trailingAnimatedBlockRange(in attributedText: NSAttributedString) -> NSRange? {
+        guard attributedText.length > 0 else { return nil }
+
+        var cursor = attributedText.length - 1
+        while cursor >= 0 {
+            var blockRange = NSRange(location: 0, length: 0)
+            guard let blockID = attributedText.attribute(
+                .stMarkdownBlockID,
+                at: cursor,
+                effectiveRange: &blockRange
+            ) as? String,
+            blockID.isEmpty == false else {
+                return nil
+            }
+
+            if blockID == "__separator__" {
+                cursor = blockRange.location - 1
+                continue
+            }
+
+            guard let revealRaw = attributedText.attribute(
+                .stMarkdownRevealPolicy,
+                at: cursor,
+                effectiveRange: nil
+            ) as? String,
+            let revealPolicy = STMarkdownRevealPolicy(rawValue: revealRaw) else {
+                return nil
+            }
+
+            if revealPolicy == .inlineProgressive {
+                return blockRange
+            }
+            return nil
+        }
+
+        return nil
+    }
+
+    private func containsContainerRevealPolicy(in attributedText: NSAttributedString) -> Bool {
+        guard attributedText.length > 0 else { return false }
+        let fullRange = NSRange(location: 0, length: attributedText.length)
+        var found = false
+        attributedText.enumerateAttribute(.stMarkdownRevealPolicy, in: fullRange, options: []) { value, _, stop in
+            guard let raw = value as? String,
+                  let policy = STMarkdownRevealPolicy(rawValue: raw),
+                  policy == .containerThenContent else {
+                return
+            }
+            found = true
+            stop.pointee = true
+        }
+        return found
+    }
+
+    private func enqueueAnimatedStreamingSuffix(
+        _ suffix: NSAttributedString,
+        trailingSuffix: NSAttributedString?,
+        shouldDelay: Bool
+    ) {
+        let generation = self.streamingAnimationGeneration
+        let applySuffix = { [weak self] in
+            guard let self, self.streamingAnimationGeneration == generation else { return }
+            self.pendingStreamingSuffixWorkItem = nil
+            self.shimmerTextView.appendAttributedText(suffix, animated: true)
+            if let trailingSuffix, trailingSuffix.length > 0 {
+                self.shimmerTextView.appendAttributedText(trailingSuffix, animated: false)
+            }
+            self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+        }
+
+        if shouldDelay, self.containerRevealGapDuration > 0 {
+            let workItem = DispatchWorkItem(block: applySuffix)
+            self.pendingStreamingSuffixWorkItem = workItem
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + self.containerRevealGapDuration,
+                execute: workItem
+            )
+        } else {
+            applySuffix()
+        }
+    }
+
+    private func invalidatePendingStreamingAnimation() {
+        self.streamingAnimationGeneration += 1
+        self.pendingStreamingSuffixWorkItem?.cancel()
+        self.pendingStreamingSuffixWorkItem = nil
     }
 
     private func render(_ markdown: String) -> NSAttributedString {

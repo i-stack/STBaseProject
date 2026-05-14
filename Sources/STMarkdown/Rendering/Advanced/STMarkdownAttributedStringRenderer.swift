@@ -75,6 +75,9 @@ private extension STMarkdownAttributedStringRenderer {
                         .font: self.style.font,
                         .foregroundColor: UIColor.clear,
                         .paragraphStyle: separatorStyle,
+                        .stMarkdownBlockID: "__separator__",
+                        .stMarkdownBlockKind: "separator",
+                        .stMarkdownRevealPolicy: STMarkdownRevealPolicy.atomicBlock.rawValue,
                     ]
                 ))
             }
@@ -84,15 +87,16 @@ private extension STMarkdownAttributedStringRenderer {
     }
 
     func render(block: STMarkdownRenderBlock, footnoteOrdinals: [String: Int]) -> NSAttributedString {
+        let rendered: NSAttributedString
         switch block {
-        case .paragraph(let inlines):
-            return self.renderInline(
+        case let .paragraph(_, inlines):
+            rendered = self.renderInline(
                 nodes: inlines,
                 baseFont: self.style.font,
                 textColor: self.style.textColor,
                 footnoteOrdinals: footnoteOrdinals
             )
-        case .heading(let level, let anchorId, let content):
+        case let .heading(_, level: level, anchorId: anchorId, content: content):
             let headingFont = self.headingFont(for: level)
             let headingColor = self.style.headingTextColor ?? self.style.textColor
             let body = self.renderInline(
@@ -107,34 +111,34 @@ private extension STMarkdownAttributedStringRenderer {
             if out.length > 0 {
                 out.addAttribute(.stMarkdownHeadingAnchor, value: anchorId, range: NSRange(location: 0, length: out.length))
             }
-            return out
-        case .quote(let blocks):
-            return self.renderQuote(blocks: blocks, footnoteOrdinals: footnoteOrdinals)
-        case .list(let items):
-            return self.renderList(items, footnoteOrdinals: footnoteOrdinals)
-        case .codeBlock(let language, let code):
+            rendered = out
+        case let .quote(_, blocks):
+            rendered = self.renderQuote(blocks: blocks, footnoteOrdinals: footnoteOrdinals)
+        case let .list(_, items):
+            rendered = self.renderList(items, footnoteOrdinals: footnoteOrdinals)
+        case let .codeBlock(_, language: language, code: code):
             if let rendered = self.advancedRenderers.codeBlockRenderer?.renderCodeBlock(
                 language: language,
                 code: code,
                 style: self.style
             ) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return self.renderCodeBlock(language: language, code: code)
-        case .table(let table):
+            rendered = self.renderCodeBlock(language: language, code: code)
+        case let .table(_, table):
             if let rendered = self.advancedRenderers.tableRenderer?.renderTable(table, style: self.style) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return self.renderTable(table)
-        case .mathBlock(let latex):
+            rendered = self.renderTable(table)
+        case let .mathBlock(_, latex):
             if let rendered = self.advancedRenderers.blockMathRenderer?.renderBlockMath(
                 formula: latex,
                 style: self.style
             ) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return NSAttributedString(string: latex, attributes: self.baseAttributes())
-        case .image(let url, let altText, let title):
+            rendered = NSAttributedString(string: latex, attributes: self.baseAttributes())
+        case let .image(_, url: url, altText: altText, title: title):
             if let rendered = self.advancedRenderers.imageRenderer?.renderImage(
                 url: url,
                 altText: altText,
@@ -142,19 +146,20 @@ private extension STMarkdownAttributedStringRenderer {
                 style: self.style,
                 placement: .block
             ) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return NSAttributedString(string: altText.isEmpty ? "[image]" : altText, attributes: self.baseAttributes())
-        case .thematicBreak:
+            rendered = NSAttributedString(string: altText.isEmpty ? "[image]" : altText, attributes: self.baseAttributes())
+        case .thematicBreak(_):
             if let rendered = self.advancedRenderers.horizontalRuleRenderer?.renderHorizontalRule(style: self.style) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return NSAttributedString(string: "———", attributes: self.baseAttributes())
-        case .details(let summary, let body):
-            return self.renderDetails(summary: summary, body: body, footnoteOrdinals: footnoteOrdinals)
-        case .rawHTML(let html):
-            return self.renderRawHTMLBlock(html)
+            rendered = NSAttributedString(string: "———", attributes: self.baseAttributes())
+        case let .details(_, summary: summary, body: body):
+            rendered = self.renderDetails(summary: summary, body: body, footnoteOrdinals: footnoteOrdinals)
+        case let .rawHTML(_, html):
+            rendered = self.renderRawHTMLBlock(html)
         }
+        return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
     }
 
     func renderDetails(
@@ -712,7 +717,7 @@ private extension STMarkdownAttributedStringRenderer {
         }
 
         switch firstBlock {
-        case .paragraph, .heading:
+        case .paragraph(_, _), .heading(_, _, _, _):
             return [firstBlock]
         default:
             return []
@@ -725,7 +730,7 @@ private extension STMarkdownAttributedStringRenderer {
         }
 
         switch firstBlock {
-        case .paragraph, .heading:
+        case .paragraph(_, _), .heading(_, _, _, _):
             return Array(item.blocks.dropFirst())
         default:
             return item.blocks
@@ -738,7 +743,7 @@ private extension STMarkdownAttributedStringRenderer {
         }
 
         switch block {
-        case .heading(let level, _, _):
+        case let .heading(_, level: level, anchorId: _, content: _):
             let font = self.headingFont(for: level)
             return font.pointSize * self.style.headingLineHeightMultiplier
         default:
@@ -787,13 +792,13 @@ private extension STMarkdownAttributedStringRenderer {
 
     func leadingBlockSpacing(for block: STMarkdownRenderBlock) -> CGFloat {
         switch block {
-        case .heading(let level, _, _):
+        case let .heading(_, level: level, anchorId: _, content: _):
             if let topSpacings = self.style.headingTopSpacing,
                level >= 1, level <= topSpacings.count {
                 return topSpacings[level - 1]
             }
             return self.style.blockSpacing
-        case .list:
+        case .list(_, _):
             return self.style.listItemSpacing
         default:
             return self.style.blockSpacing
@@ -802,16 +807,42 @@ private extension STMarkdownAttributedStringRenderer {
 
     func trailingBlockSpacing(for block: STMarkdownRenderBlock) -> CGFloat {
         switch block {
-        case .heading(let level, _, _):
+        case let .heading(_, level: level, anchorId: _, content: _):
             if let bottomSpacings = self.style.headingBottomSpacing,
                level >= 1, level <= bottomSpacings.count {
                 return bottomSpacings[level - 1]
             }
             return self.style.blockSpacing
-        case .list:
+        case .list(_, _):
             return self.style.listItemSpacing
         default:
             return self.style.blockSpacing
+        }
+    }
+
+    func applyBlockMetadata(
+        to rendered: NSAttributedString,
+        metadata: STMarkdownRenderBlockMetadata
+    ) -> NSAttributedString {
+        guard rendered.length > 0 else { return rendered }
+        let mutable = NSMutableAttributedString(attributedString: rendered)
+        let fullRange = NSRange(location: 0, length: mutable.length)
+        self.fillMissingAttribute(.stMarkdownBlockID, value: metadata.id, in: mutable, range: fullRange)
+        self.fillMissingAttribute(.stMarkdownBlockKind, value: metadata.kind.rawValue, in: mutable, range: fullRange)
+        self.fillMissingAttribute(.stMarkdownRevealPolicy, value: metadata.revealPolicy.rawValue, in: mutable, range: fullRange)
+        return mutable
+    }
+
+    func fillMissingAttribute(
+        _ key: NSAttributedString.Key,
+        value: Any,
+        in attributed: NSMutableAttributedString,
+        range: NSRange
+    ) {
+        attributed.enumerateAttribute(key, in: range) { existing, subrange, _ in
+            if existing == nil {
+                attributed.addAttribute(key, value: value, range: subrange)
+            }
         }
     }
 }

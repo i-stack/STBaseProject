@@ -15,6 +15,12 @@ extension NSAttributedString.Key {
     public static let stMarkdownHeadingAnchor = NSAttributedString.Key("STMarkdown.headingAnchor")
     /// 脚注引用在富文本上的逻辑标签（与 `[^label]` 中 `label` 一致，不含 `^`）。
     public static let stMarkdownFootnoteLabel = NSAttributedString.Key("STMarkdown.footnoteLabel")
+    /// 当前字符所属渲染块的稳定 id（例如 `b:3/li:1/b:0`）。
+    public static let stMarkdownBlockID = NSAttributedString.Key("STMarkdown.blockID")
+    /// 当前字符所属渲染块类型；值为 ``STMarkdownRenderBlockKind/rawValue``。
+    public static let stMarkdownBlockKind = NSAttributedString.Key("STMarkdown.blockKind")
+    /// 当前字符所属渲染块的 reveal 策略；值为 ``STMarkdownRevealPolicy/rawValue``。
+    public static let stMarkdownRevealPolicy = NSAttributedString.Key("STMarkdown.revealPolicy")
 }
 
 // MARK: - TOC item
@@ -119,18 +125,18 @@ enum STMarkdownTOCExtraction {
 
     private static func collect(from block: STMarkdownRenderBlock, into items: inout [STMarkdownTOCItem]) {
         switch block {
-        case .heading(let level, let anchorId, let content):
+        case .heading(_, level: let level, anchorId: let anchorId, content: let content):
             let title = content.st_plainTextForTOC()
             items.append(STMarkdownTOCItem(level: level, title: title, anchorId: anchorId))
-        case .quote(let inner):
+        case .quote(_, let inner):
             for b in inner { self.collect(from: b, into: &items) }
-        case .list(let listItems):
+        case .list(_, let listItems):
             for item in listItems {
                 for b in item.blocks {
                     self.collect(from: b, into: &items)
                 }
             }
-        case .details(_, let body):
+        case .details(_, summary: _, body: let body):
             for b in body { self.collect(from: b, into: &items) }
         case .paragraph, .codeBlock, .table, .mathBlock, .image, .thematicBreak, .rawHTML:
             break

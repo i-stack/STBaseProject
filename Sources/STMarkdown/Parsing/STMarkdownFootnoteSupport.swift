@@ -203,14 +203,17 @@ enum STMarkdownFootnoteSectionBuilder {
         let labels = orderedReferenceLabels(in: renderBlocks)
         guard labels.isEmpty == false else { return renderBlocks }
         var out = renderBlocks
-        out.append(.thematicBreak)
-        out.append(.paragraph([.strong([.text("脚注")])]))
+        var nextTopLevelIndex = renderBlocks.count
+        out.append(.thematicBreak(metadata(kind: .thematicBreak, topLevelIndex: nextTopLevelIndex)))
+        nextTopLevelIndex += 1
+        out.append(.paragraph(metadata(kind: .paragraph, topLevelIndex: nextTopLevelIndex), [.strong([.text("脚注")])]))
+        nextTopLevelIndex += 1
         for (idx, label) in labels.enumerated() {
             let ordinal = idx + 1
             let def = document.footnoteDefinitions[label]?.content ?? [.text("（未找到定义）")]
             var line: [STMarkdownInlineNode] = [.strong([.text("\(ordinal).")]), .text(" ")]
             line.append(contentsOf: def)
-            out.append(.paragraph(line))
+            out.append(.paragraph(metadata(kind: .paragraph, topLevelIndex: nextTopLevelIndex + idx), line))
         }
         return out
     }
@@ -227,23 +230,47 @@ enum STMarkdownFootnoteSectionBuilder {
 
     private static func visitRenderBlock(_ block: STMarkdownRenderBlock, order: inout [String], seen: inout Set<String>) {
         switch block {
-        case .paragraph(let inlines):
+        case .paragraph(_, let inlines):
             visitInlines(inlines, order: &order, seen: &seen)
-        case .heading(_, _, let inlines):
+        case .heading(_, level: _, anchorId: _, content: let inlines):
             visitInlines(inlines, order: &order, seen: &seen)
-        case .quote(let inner):
+        case .quote(_, let inner):
             inner.forEach { visitRenderBlock($0, order: &order, seen: &seen) }
-        case .list(let items):
+        case .list(_, let items):
             for item in items {
                 for b in item.blocks {
                     visitRenderBlock(b, order: &order, seen: &seen)
                 }
             }
-        case .details(let summary, let body):
+        case .details(_, summary: let summary, body: let body):
             visitInlines(summary, order: &order, seen: &seen)
             body.forEach { visitRenderBlock($0, order: &order, seen: &seen) }
         case .codeBlock, .table, .mathBlock, .image, .thematicBreak, .rawHTML:
             break
+        }
+    }
+
+    private static func metadata(
+        kind: STMarkdownRenderBlockKind,
+        topLevelIndex: Int
+    ) -> STMarkdownRenderBlockMetadata {
+        let path = ["b:\(topLevelIndex)"]
+        return STMarkdownRenderBlockMetadata(
+            id: path.joined(separator: "/"),
+            path: path,
+            kind: kind,
+            revealPolicy: revealPolicy(for: kind)
+        )
+    }
+
+    private static func revealPolicy(for kind: STMarkdownRenderBlockKind) -> STMarkdownRevealPolicy {
+        switch kind {
+        case .paragraph, .heading:
+            return .inlineProgressive
+        case .quote, .list, .details:
+            return .containerThenContent
+        case .codeBlock, .table, .mathBlock, .image, .thematicBreak, .rawHTML:
+            return .atomicBlock
         }
     }
 

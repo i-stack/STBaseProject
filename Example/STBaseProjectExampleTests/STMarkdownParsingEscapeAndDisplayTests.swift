@@ -44,7 +44,7 @@ private func st_renderAttributed(markdown: String) -> NSAttributedString {
 
 private func st_firstParagraphInlinesFromRender(_ document: STMarkdownRenderDocument) -> [STMarkdownInlineNode]? {
     for block in document.blocks {
-        if case .paragraph(let inlines) = block {
+        if case .paragraph(_, let inlines) = block {
             return inlines
         }
     }
@@ -77,24 +77,24 @@ private func st_collectSemanticTextSegments(from blocks: [STMarkdownRenderBlock]
     var segments: [String] = []
     for block in blocks {
         switch block {
-        case .paragraph(let inlines):
+        case .paragraph(_, let inlines):
             let t = st_joinInlinePlainText(inlines).trimmingCharacters(in: .whitespacesAndNewlines)
             if t.isEmpty == false { segments.append(t) }
-        case .heading(_, _, let inlines):
+        case .heading(_, level: _, anchorId: _, content: let inlines):
             let t = st_joinInlinePlainText(inlines).trimmingCharacters(in: .whitespacesAndNewlines)
             if t.isEmpty == false { segments.append(t) }
-        case .quote(let inner):
+        case .quote(_, let inner):
             segments.append(contentsOf: st_collectSemanticTextSegments(from: inner))
-        case .list(let items):
+        case .list(_, let items):
             for item in items {
                 segments.append(contentsOf: st_collectSemanticTextSegments(from: item.blocks))
             }
-        case .codeBlock(_, let code):
+        case .codeBlock(_, language: _, code: let code):
             let t = code.trimmingCharacters(in: .whitespacesAndNewlines)
             if t.isEmpty == false { segments.append(t) }
         case .table, .mathBlock, .image, .thematicBreak, .rawHTML:
             break
-        case .details(let summary, let inner):
+        case .details(_, summary: let summary, body: let inner):
             let t = st_joinInlinePlainText(summary).trimmingCharacters(in: .whitespacesAndNewlines)
             if t.isEmpty == false { segments.append(t) }
             segments.append(contentsOf: st_collectSemanticTextSegments(from: inner))
@@ -297,32 +297,32 @@ private func st_blockContainsText(_ block: STMarkdownBlockNode, text: String) ->
 
 private func st_renderBlockContainsText(_ block: STMarkdownRenderBlock, text: String) -> Bool {
     switch block {
-    case .paragraph(let inlines):
+    case .paragraph(_, let inlines):
         return st_joinInlinePlainText(inlines).contains(text)
-    case .heading(_, _, let inlines):
+    case .heading(_, level: _, anchorId: _, content: let inlines):
         return st_joinInlinePlainText(inlines).contains(text)
-    case .quote(let children):
+    case .quote(_, let children):
         return children.contains { st_renderBlockContainsText($0, text: text) }
-    case .list(let items):
+    case .list(_, let items):
         return items.contains { item in
             item.blocks.contains { st_renderBlockContainsText($0, text: text) }
         }
-    case .table(let table):
+    case .table(_, let table):
         let header = (table.header ?? []).flatMap { $0 }
         let rows = table.rows.flatMap { $0 }.flatMap { $0 }
         return st_joinInlinePlainText(header + rows).contains(text)
-    case .codeBlock(_, let code):
+    case .codeBlock(_, language: _, code: let code):
         return code.contains(text)
-    case .mathBlock(let formula):
+    case .mathBlock(_, let formula):
         return formula.contains(text)
-    case .image(_, let altText, let title):
+    case .image(_, url: _, altText: let altText, title: let title):
         return altText.contains(text) || (title?.contains(text) == true)
     case .thematicBreak:
         return false
-    case .details(let summary, let body):
+    case .details(_, summary: let summary, body: let body):
         return st_joinInlinePlainText(summary).contains(text)
             || body.contains { st_renderBlockContainsText($0, text: text) }
-    case .rawHTML(let html):
+    case .rawHTML(_, let html):
         return html.contains(text)
     }
 }
@@ -812,7 +812,7 @@ final class STMarkdownParsingEscapeAndDisplayTests: XCTestCase {
             )
         )
         let result = engine.process(md)
-        guard case .heading(let level, _, _)? = result.renderDocument.blocks.first else {
+        guard case .heading(_, level: let level, anchorId: _, content: _)? = result.renderDocument.blocks.first else {
             return XCTFail("期望渲染文档首块为 heading，实际：\(String(describing: result.renderDocument.blocks.first))")
         }
         XCTAssertEqual(level, 2)
@@ -958,7 +958,7 @@ final class STMarkdownParsingEscapeAndDisplayTests: XCTestCase {
             )
         )
         let result = engine.process(md)
-        guard case .list(let items)? = result.renderDocument.blocks.first,
+        guard case .list(_, let items)? = result.renderDocument.blocks.first,
               let firstItem = items.first
         else {
             return XCTFail("期望首块为列表")
@@ -1174,7 +1174,7 @@ final class STMarkdownParsingEscapeAndDisplayTests: XCTestCase {
         })
 
         let renderLists = result.renderDocument.blocks.compactMap { block -> [STMarkdownRenderListItem]? in
-            if case .list(let items) = block { return items }
+            if case .list(_, let items) = block { return items }
             return nil
         }
         XCTAssertFalse(renderLists.isEmpty, "data3 渲染 AST 应至少包含一个列表块")

@@ -114,7 +114,7 @@ final class STMarkdownPipelineTests: XCTestCase {
 
         let renderDocument = adapter.adapt(document)
 
-        guard case .list(let items)? = renderDocument.blocks.first else {
+        guard case .list(_, let items)? = renderDocument.blocks.first else {
             return XCTFail("Expected first render block to be list")
         }
 
@@ -360,8 +360,8 @@ final class STMarkdownPipelineTests: XCTestCase {
         let renderDocument = adapter.adapt(document)
 
         guard
-            case .list(let items)? = renderDocument.blocks.first,
-            case .list(let childItems)? = items.first?.childBlocks.first
+            case .list(_, let items)? = renderDocument.blocks.first,
+            case .list(_, let childItems)? = items.first?.childBlocks.first
         else {
             return XCTFail("Expected nested render list")
         }
@@ -698,7 +698,7 @@ final class STMarkdownPipelineTests: XCTestCase {
                 horizontalRuleRenderer: STMarkdownDefaultHorizontalRuleRenderer()
             )
         )
-        let document = STMarkdownRenderDocument(blocks: [.thematicBreak])
+        let document = STMarkdownRenderDocument(blocks: [.thematicBreak()])
 
         let attributed = renderer.render(document: document)
 
@@ -961,7 +961,7 @@ final class STMarkdownPipelineTests: XCTestCase {
 
         let result = engine.process(markdown)
         let tableBlocks = result.renderDocument.blocks.compactMap { block -> STMarkdownTableModel? in
-            if case .table(let m) = block { return m }
+            if case .table(_, let m) = block { return m }
             return nil
         }
 
@@ -974,7 +974,7 @@ final class STMarkdownPipelineTests: XCTestCase {
 
         let result = engine.process(markdown)
         let tableBlocks = result.renderDocument.blocks.compactMap { block -> STMarkdownTableModel? in
-            if case .table(let m) = block { return m }
+            if case .table(_, let m) = block { return m }
             return nil
         }
 
@@ -1085,7 +1085,7 @@ final class STMarkdownPipelineTests: XCTestCase {
 
         let renderDocument = adapter.adapt(document)
 
-        guard case .list(let items)? = renderDocument.blocks.first else {
+        guard case .list(_, let items)? = renderDocument.blocks.first else {
             return XCTFail("Expected list render block")
         }
 
@@ -1240,18 +1240,18 @@ final class STMarkdownPipelineTests: XCTestCase {
 
         let renderDocument = adapter.adapt(document)
 
-        guard case .list(let items)? = renderDocument.blocks.first else {
+        guard case .list(_, let items)? = renderDocument.blocks.first else {
             return XCTFail("Expected list block")
         }
 
         XCTAssertEqual(items.first?.level, 0)
 
-        guard case .list(let level1Items)? = items.first?.childBlocks.first else {
+        guard case .list(_, let level1Items)? = items.first?.childBlocks.first else {
             return XCTFail("Expected nested list at level 1")
         }
         XCTAssertEqual(level1Items.first?.level, 1)
 
-        guard case .list(let level2Items)? = level1Items.first?.childBlocks.first else {
+        guard case .list(_, let level2Items)? = level1Items.first?.childBlocks.first else {
             return XCTFail("Expected nested list at level 2")
         }
         XCTAssertEqual(level2Items.first?.level, 2)

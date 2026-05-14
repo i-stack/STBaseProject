@@ -25,7 +25,14 @@ public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
 
     public func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument {
         var slugger = STMarkdownAnchorSlugRegistry()
-        let mainBlocks = document.blocks.map { self.makeRenderBlock(from: $0, listLevel: 0, slugger: &slugger) }
+        let mainBlocks = document.blocks.enumerated().map {
+            self.makeRenderBlock(
+                from: $0.element,
+                listLevel: 0,
+                path: ["b:\($0.offset)"],
+                slugger: &slugger
+            )
+        }
         let merged = STMarkdownFootnoteSectionBuilder.appendingSectionIfNeeded(
             document: document,
             renderBlocks: mainBlocks
@@ -35,37 +42,74 @@ public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
 }
 
 private extension STMarkdownRenderAdapter {
-    func makeRenderBlock(from block: STMarkdownBlockNode, listLevel: Int, slugger: inout STMarkdownAnchorSlugRegistry) -> STMarkdownRenderBlock {
+    func makeRenderBlock(
+        from block: STMarkdownBlockNode,
+        listLevel: Int,
+        path: [String],
+        slugger: inout STMarkdownAnchorSlugRegistry
+    ) -> STMarkdownRenderBlock {
         switch block {
         case .paragraph(let inlines):
-            return .paragraph(inlines)
+            return .paragraph(self.makeMetadata(kind: .paragraph, path: path), inlines)
         case .heading(let level, let content):
             let plain = content.st_plainTextForTOC()
             let anchorId = slugger.uniqueAnchorId(forPlainTitle: plain)
-            return .heading(level: level, anchorId: anchorId, content: content)
+            return .heading(
+                self.makeMetadata(kind: .heading, path: path),
+                level: level,
+                anchorId: anchorId,
+                content: content
+            )
         case .quote(let blocks):
             // Quote 内嵌 list 时不推进 listLevel：产品侧把引用块视作视觉"容器"，
             // 不改变列表的逻辑嵌套深度（层级仍以真实 list 节点计算）。
-            return .quote(blocks.map { self.makeRenderBlock(from: $0, listLevel: listLevel, slugger: &slugger) })
+            return .quote(
+                self.makeMetadata(kind: .quote, path: path),
+                blocks.enumerated().map {
+                    self.makeRenderBlock(
+                        from: $0.element,
+                        listLevel: listLevel,
+                        path: path + ["q:\($0.offset)"],
+                        slugger: &slugger
+                    )
+                }
+            )
         case .list(let kind, let items):
-            return .list(self.flattenListItems(kind: kind, items: items, level: listLevel, slugger: &slugger))
+            return .list(
+                self.makeMetadata(kind: .list, path: path),
+                self.flattenListItems(
+                    kind: kind,
+                    items: items,
+                    level: listLevel,
+                    path: path,
+                    slugger: &slugger
+                )
+            )
         case .codeBlock(let language, let code):
-            return .codeBlock(language: language, code: code)
+            return .codeBlock(self.makeMetadata(kind: .codeBlock, path: path), language: language, code: code)
         case .table(let table):
-            return .table(table)
+            return .table(self.makeMetadata(kind: .table, path: path), table)
         case .mathBlock(let latex):
-            return .mathBlock(latex)
+            return .mathBlock(self.makeMetadata(kind: .mathBlock, path: path), latex)
         case .image(let url, let altText, let title):
-            return .image(url: url, altText: altText, title: title)
+            return .image(self.makeMetadata(kind: .image, path: path), url: url, altText: altText, title: title)
         case .thematicBreak:
-            return .thematicBreak
+            return .thematicBreak(self.makeMetadata(kind: .thematicBreak, path: path))
         case .details(let summary, let body):
             return .details(
+                self.makeMetadata(kind: .details, path: path),
                 summary: summary,
-                body: body.map { self.makeRenderBlock(from: $0, listLevel: listLevel, slugger: &slugger) }
+                body: body.enumerated().map {
+                    self.makeRenderBlock(
+                        from: $0.element,
+                        listLevel: listLevel,
+                        path: path + ["d:\($0.offset)"],
+                        slugger: &slugger
+                    )
+                }
             )
         case .rawHTML(let html):
-            return .rawHTML(html)
+            return .rawHTML(self.makeMetadata(kind: .rawHTML, path: path), html)
         }
     }
 
@@ -73,6 +117,7 @@ private extension STMarkdownRenderAdapter {
         kind: STMarkdownListKind,
         items: [STMarkdownListItemNode],
         level: Int,
+        path: [String],
         slugger: inout STMarkdownAnchorSlugRegistry
     ) -> [STMarkdownRenderListItem] {
         var result: [STMarkdownRenderListItem] = []
@@ -90,7 +135,15 @@ private extension STMarkdownRenderAdapter {
 
         for (index, item) in items.enumerated() {
             let orderedIndex = isOrdered ? startIndex + index : nil
-            let renderBlocks = item.blocks.map { self.makeRenderBlock(from: $0, listLevel: level + 1, slugger: &slugger) }
+            let itemPath = path + ["li:\(index)"]
+            let renderBlocks = item.blocks.enumerated().map {
+                self.makeRenderBlock(
+                    from: $0.element,
+                    listLevel: level + 1,
+                    path: itemPath + ["b:\($0.offset)"],
+                    slugger: &slugger
+                )
+            }
             result.append(
                 STMarkdownRenderListItem(
                     blocks: renderBlocks,
@@ -103,5 +156,25 @@ private extension STMarkdownRenderAdapter {
         }
 
         return result
+    }
+
+    func makeMetadata(kind: STMarkdownRenderBlockKind, path: [String]) -> STMarkdownRenderBlockMetadata {
+        STMarkdownRenderBlockMetadata(
+            id: path.joined(separator: "/"),
+            path: path,
+            kind: kind,
+            revealPolicy: self.revealPolicy(for: kind)
+        )
+    }
+
+    func revealPolicy(for kind: STMarkdownRenderBlockKind) -> STMarkdownRevealPolicy {
+        switch kind {
+        case .paragraph, .heading:
+            return .inlineProgressive
+        case .quote, .list, .details:
+            return .containerThenContent
+        case .codeBlock, .table, .mathBlock, .image, .thematicBreak, .rawHTML:
+            return .atomicBlock
+        }
     }
 }

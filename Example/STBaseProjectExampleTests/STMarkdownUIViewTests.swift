@@ -86,4 +86,65 @@ final class STMarkdownUIViewTests: XCTestCase {
         XCTAssertEqual(view.attributedText.string, "Configured content")
         XCTAssertEqual(view.contentTextView.textColor, .systemRed)
     }
+
+    func testStreamingPlainParagraphTailRemainsCharacterAnimated() {
+        let view = STMarkdownStreamingTextView()
+        view.tokenFadeDuration = 0.25
+        (view.contentTextView as? STShimmerTextView)?.characterStaggerInterval = 0.02
+        view.setMarkdown("Hello", animated: false)
+
+        view.appendMarkdownFragment(" world", animated: true)
+
+        let visible = view.contentTextView.attributedText ?? NSAttributedString()
+        XCTAssertEqual(visible.string, "Hello world")
+        let ns = visible.string as NSString
+        let lastIndex = ns.length - 1
+        XCTAssertLessThan(self.foregroundAlpha(in: visible, at: lastIndex), 0.5)
+    }
+
+    func testStreamingContainerThenContentDelaysOnlyTrailingInlineBlock() {
+        let view = STMarkdownStreamingTextView()
+        view.tokenFadeDuration = 0.25
+        view.containerRevealGapDuration = 0.2
+        (view.contentTextView as? STShimmerTextView)?.characterStaggerInterval = 0.02
+        view.setMarkdown("Intro", animated: false)
+
+        view.appendMarkdownFragment("\n\n> quoted line\n\nTail block", animated: true)
+
+        let immediate = view.contentTextView.attributedText?.string ?? ""
+        XCTAssertTrue(immediate.contains("quoted line"))
+        XCTAssertFalse(immediate.contains("Tail block"))
+
+        let exp = expectation(description: "wait for trailing inline block reveal scheduling")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            exp.fulfill()
+        }
+        wait(for: [exp], timeout: 1.0)
+
+        let delayed = view.contentTextView.attributedText?.string ?? ""
+        XCTAssertTrue(delayed.contains("Tail block"))
+    }
+
+    func testStreamingSeparatorTailFallsBackToPreviousInlineBlockAnimation() {
+        let view = STMarkdownStreamingTextView()
+        view.tokenFadeDuration = 0.25
+        (view.contentTextView as? STShimmerTextView)?.characterStaggerInterval = 0.02
+        view.setMarkdown("Intro", animated: false)
+
+        view.appendMarkdownFragment("\n\nTail block\n\n<div>ignored</div>", animated: true)
+
+        let visible = view.contentTextView.attributedText ?? NSAttributedString()
+        let text = visible.string as NSString
+        let tailRange = text.range(of: "Tail block")
+        XCTAssertNotEqual(tailRange.location, NSNotFound)
+        XCTAssertLessThan(self.foregroundAlpha(in: visible, at: tailRange.location), 0.5)
+    }
+
+    private func foregroundAlpha(in attributed: NSAttributedString, at index: Int) -> CGFloat {
+        guard index >= 0, index < attributed.length else { return 1 }
+        guard let color = attributed.attribute(.foregroundColor, at: index, effectiveRange: nil) as? UIColor else {
+            return 1
+        }
+        return color.cgColor.alpha
+    }
 }

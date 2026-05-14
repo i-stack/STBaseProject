@@ -87,7 +87,15 @@ open class STShimmerTextView: UITextView {
         self.textContainer.lineFragmentPadding = 0
         self.font = .st_systemFont(ofSize: 16)
         self.textColor = .label
-        self.layoutManager.allowsNonContiguousLayout = false
+        // iOS 16+ 若已启用 TextKit 2（`textLayoutManager != nil`），访问 `layoutManager` 会强制降级到
+        // TK1 兼容栈并在控制台产生 `_UITextViewEnablingCompatibilityMode` 告警；仅在经典 TK1 路径下设置。
+        if #available(iOS 16.0, *) {
+            if self.textLayoutManager == nil {
+                self.layoutManager.allowsNonContiguousLayout = false
+            }
+        } else {
+            self.layoutManager.allowsNonContiguousLayout = false
+        }
     }
 
     public func append(_ text: String) {

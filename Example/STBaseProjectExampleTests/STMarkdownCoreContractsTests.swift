@@ -48,7 +48,13 @@ final class STMarkdownCoreContractsTests: XCTestCase {
 
     func testEngineDelegatesToPipelineAndPreservesRawMarkdown() {
         let parserOutput = STMarkdownDocument(blocks: [.heading(level: 1, content: [.text("Title")])])
-        let renderOutput = STMarkdownRenderDocument(blocks: [.thematicBreak])
+        let tbMeta = STMarkdownRenderBlockMetadata(
+            id: "tb",
+            path: [],
+            kind: .thematicBreak,
+            revealPolicy: .atomicBlock
+        )
+        let renderOutput = STMarkdownRenderDocument(blocks: [.thematicBreak(tbMeta)])
         let parser = CoreMockParser(parseResult: parserOutput)
         let adapter = CoreMockRenderAdapter(adaptResult: renderOutput)
         let engine = STMarkdownEngine(
@@ -64,7 +70,7 @@ final class STMarkdownCoreContractsTests: XCTestCase {
         XCTAssertEqual(result.sourceDocument, parserOutput)
         XCTAssertEqual(result.normalizedDocument, parserOutput)
         XCTAssertEqual(result.renderDocument, renderOutput)
-        XCTAssertEqual(result.tableOfContents, [])
+        XCTAssertTrue(result.tableOfContents.isEmpty)
     }
 
     func testPipelineUsesSemanticNormalizersInOrder() {
@@ -127,8 +133,10 @@ final class STMarkdownCoreContractsTests: XCTestCase {
 
         let renderDocument = adapter.adapt(document)
 
-        guard case .quote(let quoteBlocks)? = renderDocument.blocks.first,
-              case .list(let items)? = quoteBlocks.first
+        guard let outer = renderDocument.blocks.first,
+              case .quote(_, let quoteBlocks) = outer,
+              let inner = quoteBlocks.first,
+              case .list(_, let items) = inner
         else {
             return XCTFail("Expected quote->list render structure")
         }

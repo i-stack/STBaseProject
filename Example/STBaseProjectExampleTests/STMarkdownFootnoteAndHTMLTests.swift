@@ -8,6 +8,15 @@ import STBaseProject
 
 final class STMarkdownFootnoteAndHTMLTests: XCTestCase {
 
+    private func renderMeta(_ kind: STMarkdownRenderBlockKind) -> STMarkdownRenderBlockMetadata {
+        STMarkdownRenderBlockMetadata(
+            id: "test-\(kind.rawValue)",
+            path: [],
+            kind: kind,
+            revealPolicy: .atomicBlock
+        )
+    }
+
     func testFootnoteDefinitionStrippedAndReferenceParsed() {
         let md = """
         Hello[^a] world.
@@ -30,7 +39,7 @@ final class STMarkdownFootnoteAndHTMLTests: XCTestCase {
         var style = STMarkdownStyle.default
         style.rawHTMLPolicy = .literalMonospace
         let renderer = STMarkdownAttributedStringRenderer(style: style, advancedRenderers: .empty)
-        let doc = STMarkdownRenderDocument(blocks: [.rawHTML("<div>x</div>")])
+        let doc = STMarkdownRenderDocument(blocks: [.rawHTML(self.renderMeta(.rawHTML), "<div>x</div>")])
         let attr = renderer.render(document: doc)
         XCTAssertTrue(attr.string.contains("<div>"))
     }
@@ -38,7 +47,11 @@ final class STMarkdownFootnoteAndHTMLTests: XCTestCase {
     func testDetailsRenderContainsSummaryGlyph() {
         let renderer = STMarkdownAttributedStringRenderer(style: .default, advancedRenderers: .empty)
         let doc = STMarkdownRenderDocument(blocks: [
-            .details(summary: [.text("More")], body: [.paragraph([.text("Hidden")])]),
+            .details(
+                self.renderMeta(.details),
+                summary: [.text("More")],
+                body: [.paragraph(self.renderMeta(.paragraph), [.text("Hidden")])]
+            ),
         ])
         let attr = renderer.render(document: doc)
         XCTAssertTrue(attr.string.contains("▸"))
