@@ -80,7 +80,7 @@ private func st_collectSemanticTextSegments(from blocks: [STMarkdownRenderBlock]
         case .paragraph(let inlines):
             let t = st_joinInlinePlainText(inlines).trimmingCharacters(in: .whitespacesAndNewlines)
             if t.isEmpty == false { segments.append(t) }
-        case .heading(_, let inlines):
+        case .heading(_, _, let inlines):
             let t = st_joinInlinePlainText(inlines).trimmingCharacters(in: .whitespacesAndNewlines)
             if t.isEmpty == false { segments.append(t) }
         case .quote(let inner):
@@ -286,7 +286,7 @@ private func st_renderBlockContainsText(_ block: STMarkdownRenderBlock, text: St
     switch block {
     case .paragraph(let inlines):
         return st_joinInlinePlainText(inlines).contains(text)
-    case .heading(_, let inlines):
+    case .heading(_, _, let inlines):
         return st_joinInlinePlainText(inlines).contains(text)
     case .quote(let children):
         return children.contains { st_renderBlockContainsText($0, text: text) }
@@ -794,7 +794,7 @@ final class STMarkdownParsingEscapeAndDisplayTests: XCTestCase {
             )
         )
         let result = engine.process(md)
-        guard case .heading(let level, _)? = result.renderDocument.blocks.first else {
+        guard case .heading(let level, _, _)? = result.renderDocument.blocks.first else {
             return XCTFail("期望渲染文档首块为 heading，实际：\(String(describing: result.renderDocument.blocks.first))")
         }
         XCTAssertEqual(level, 2)

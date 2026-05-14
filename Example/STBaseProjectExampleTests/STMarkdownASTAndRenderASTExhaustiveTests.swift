@@ -244,7 +244,7 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
         let table = STMarkdownTableModel(header: [[.text("H")]], rows: [[ [.text("c")] ]])
         let samples: [STMarkdownRenderBlock] = [
             .paragraph([.text("p")]),
-            .heading(level: 2, content: [.text("h")]),
+            .heading(level: 2, anchorId: "h", content: [.text("h")]),
             .quote([.paragraph([.text("q")])]),
             .list([
                 STMarkdownRenderListItem(

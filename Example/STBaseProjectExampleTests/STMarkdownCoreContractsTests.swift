@@ -61,6 +61,7 @@ final class STMarkdownCoreContractsTests: XCTestCase {
         XCTAssertEqual(result.sourceDocument, parserOutput)
         XCTAssertEqual(result.normalizedDocument, parserOutput)
         XCTAssertEqual(result.renderDocument, renderOutput)
+        XCTAssertEqual(result.tableOfContents, [])
     }
 
     func testPipelineUsesSemanticNormalizersInOrder() {

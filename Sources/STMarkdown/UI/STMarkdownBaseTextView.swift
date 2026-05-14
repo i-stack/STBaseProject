@@ -68,6 +68,9 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
 
     public internal(set) var rawMarkdown: String = ""
 
+    /// 最近一次管线渲染对应的目录（对齐对比文档 P1）；与 ``scrollToHeadingAnchor`` 使用同一套 ``anchorId``。
+    public private(set) var tableOfContents: [STMarkdownTOCItem] = []
+
     public var attributedText: NSAttributedString {
         self.currentAttributedText
     }
@@ -199,9 +202,50 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         self.textView.attributedText ?? NSAttributedString()
     }
 
+    internal func updateTableOfContents(from result: STMarkdownPipelineResult) {
+        self.tableOfContents = result.tableOfContents
+    }
+
     internal func renderMarkdown(_ markdown: String) -> NSAttributedString {
         let result = self.engine.process(markdown)
+        self.updateTableOfContents(from: result)
         return self.renderer.render(document: result.renderDocument)
+    }
+
+    /// 将可见区域滚动到指定标题锚点（``NSAttributedString.Key.stMarkdownHeadingAnchor``）。
+    /// - Returns: 是否找到对应锚点。
+    @discardableResult
+    public func scrollToHeadingAnchor(id: String, animated _: Bool) -> Bool {
+        guard let attr = self.textView.attributedText, attr.length > 0 else { return false }
+        var target: NSRange?
+        attr.enumerateAttribute(
+            .stMarkdownHeadingAnchor,
+            in: NSRange(location: 0, length: attr.length)
+        ) { value, range, stop in
+            guard let s = value as? String, s == id else { return }
+            target = range
+            stop.pointee = true
+        }
+        guard let range = target else { return false }
+        self.textView.scrollRangeToVisible(range)
+        let selection = NSRange(location: range.location, length: 0)
+        self.textView.selectedRange = selection
+        return true
+    }
+
+    /// 查询标题锚点在富文本中的 UTF-16 范围（便于外层 ``UIScrollView`` 自行滚动）。
+    public func characterRangeForHeadingAnchor(id: String) -> NSRange? {
+        guard let attr = self.textView.attributedText, attr.length > 0 else { return nil }
+        var target: NSRange?
+        attr.enumerateAttribute(
+            .stMarkdownHeadingAnchor,
+            in: NSRange(location: 0, length: attr.length)
+        ) { value, range, stop in
+            guard let s = value as? String, s == id else { return }
+            target = range
+            stop.pointee = true
+        }
+        return target
     }
 
     internal func applyConfigurationCommon(
@@ -296,6 +340,7 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
 
     internal func resetBaseState() {
         self.rawMarkdown = ""
+        self.tableOfContents = []
         for token in self.attachmentRefreshTokens {
             token.invalidate()
         }

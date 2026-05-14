@@ -1402,7 +1402,8 @@ final class STMarkdownPipelineTests: XCTestCase {
             appliedRules: [],
             sourceDocument: STMarkdownDocument(blocks: []),
             normalizedDocument: STMarkdownDocument(blocks: []),
-            renderDocument: STMarkdownRenderDocument(blocks: [])
+            renderDocument: STMarkdownRenderDocument(blocks: []),
+            tableOfContents: []
         )
         let sendableCheck: any Sendable = result
         XCTAssertNotNil(sendableCheck)

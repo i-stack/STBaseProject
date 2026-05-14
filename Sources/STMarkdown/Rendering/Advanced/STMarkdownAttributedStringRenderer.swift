@@ -76,10 +76,21 @@ private extension STMarkdownAttributedStringRenderer {
         switch block {
         case .paragraph(let inlines):
             return self.renderInline(nodes: inlines, baseFont: self.style.font, textColor: self.style.textColor)
-        case .heading(let level, let content):
+        case .heading(let level, let anchorId, let content):
             let headingFont = self.headingFont(for: level)
             let headingColor = self.style.headingTextColor ?? self.style.textColor
-            return self.renderInline(nodes: content, baseFont: headingFont, textColor: headingColor, paragraphStyle: self.headingParagraphStyle(font: headingFont), kernOverride: self.style.headingKern)
+            let body = self.renderInline(
+                nodes: content,
+                baseFont: headingFont,
+                textColor: headingColor,
+                paragraphStyle: self.headingParagraphStyle(font: headingFont),
+                kernOverride: self.style.headingKern
+            )
+            let out = NSMutableAttributedString(attributedString: body)
+            if out.length > 0 {
+                out.addAttribute(.stMarkdownHeadingAnchor, value: anchorId, range: NSRange(location: 0, length: out.length))
+            }
+            return out
         case .quote(let blocks):
             return self.renderQuote(blocks: blocks)
         case .list(let items):
@@ -623,7 +634,7 @@ private extension STMarkdownAttributedStringRenderer {
         }
 
         switch block {
-        case .heading(let level, _):
+        case .heading(let level, _, _):
             let font = self.headingFont(for: level)
             return font.pointSize * self.style.headingLineHeightMultiplier
         default:
@@ -672,7 +683,7 @@ private extension STMarkdownAttributedStringRenderer {
 
     func leadingBlockSpacing(for block: STMarkdownRenderBlock) -> CGFloat {
         switch block {
-        case .heading(let level, _):
+        case .heading(let level, _, _):
             if let topSpacings = self.style.headingTopSpacing,
                level >= 1, level <= topSpacings.count {
                 return topSpacings[level - 1]
@@ -687,7 +698,7 @@ private extension STMarkdownAttributedStringRenderer {
 
     func trailingBlockSpacing(for block: STMarkdownRenderBlock) -> CGFloat {
         switch block {
-        case .heading(let level, _):
+        case .heading(let level, _, _):
             if let bottomSpacings = self.style.headingBottomSpacing,
                level >= 1, level <= bottomSpacings.count {
                 return bottomSpacings[level - 1]

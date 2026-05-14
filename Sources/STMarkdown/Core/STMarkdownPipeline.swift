@@ -37,6 +37,8 @@ public struct STMarkdownPipelineResult: Sendable {
     public let sourceDocument: STMarkdownDocument
     public let normalizedDocument: STMarkdownDocument
     public let renderDocument: STMarkdownRenderDocument
+    /// 从 ``renderDocument`` 抽取的目录（对齐对比文档 P1）；与富文本 ``NSAttributedString.Key.stMarkdownHeadingAnchor`` 一致。
+    public let tableOfContents: [STMarkdownTOCItem]
 
     public init(
         rawMarkdown: String,
@@ -44,7 +46,8 @@ public struct STMarkdownPipelineResult: Sendable {
         appliedRules: [String],
         sourceDocument: STMarkdownDocument,
         normalizedDocument: STMarkdownDocument,
-        renderDocument: STMarkdownRenderDocument
+        renderDocument: STMarkdownRenderDocument,
+        tableOfContents: [STMarkdownTOCItem]
     ) {
         self.rawMarkdown = rawMarkdown
         self.sanitizedMarkdown = sanitizedMarkdown
@@ -52,6 +55,7 @@ public struct STMarkdownPipelineResult: Sendable {
         self.sourceDocument = sourceDocument
         self.normalizedDocument = normalizedDocument
         self.renderDocument = renderDocument
+        self.tableOfContents = tableOfContents
     }
 }
 
@@ -102,13 +106,15 @@ public final class STMarkdownPipeline: Sendable {
         let sourceDocument = self.parser.parse(parserInput)
         let normalizedDocument = self.semanticNormalizer.normalize(sourceDocument)
         let renderDocument = self.renderAdapter.adapt(normalizedDocument)
+        let tableOfContents = STMarkdownTOCExtraction.items(from: renderDocument)
         return STMarkdownPipelineResult(
             rawMarkdown: rawMarkdown,
             sanitizedMarkdown: sanitizationResult.sanitizedText,
             appliedRules: sanitizationResult.appliedRules,
             sourceDocument: sourceDocument,
             normalizedDocument: normalizedDocument,
-            renderDocument: renderDocument
+            renderDocument: renderDocument,
+            tableOfContents: tableOfContents
         )
     }
 }

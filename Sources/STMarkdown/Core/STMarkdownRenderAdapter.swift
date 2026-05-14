@@ -12,6 +12,10 @@ import Foundation
 ///
 /// Conformances must be stateless (or internally thread-safe) so that a single adapter
 /// instance can be shared across concurrent pipeline invocations.
+///
+/// - Note: ``STMarkdownRenderBlock/heading(level:anchorId:content:)`` 的 `anchorId` 须与
+///   ``STMarkdownTOCItem/anchorId``、``NSAttributedString.Key/stMarkdownHeadingAnchor`` 一致；
+///   自定义适配器若无法生成 slug，可对纯文本标题使用稳定哈希并保证文档内唯一。
 public protocol STMarkdownRenderAdapting: Sendable {
     func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument
 }
@@ -20,23 +24,27 @@ public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
     public init() {}
 
     public func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument {
-        STMarkdownRenderDocument(blocks: document.blocks.map { self.makeRenderBlock(from: $0, listLevel: 0) })
+        var slugger = STMarkdownAnchorSlugRegistry()
+        let blocks = document.blocks.map { self.makeRenderBlock(from: $0, listLevel: 0, slugger: &slugger) }
+        return STMarkdownRenderDocument(blocks: blocks)
     }
 }
 
 private extension STMarkdownRenderAdapter {
-    func makeRenderBlock(from block: STMarkdownBlockNode, listLevel: Int) -> STMarkdownRenderBlock {
+    func makeRenderBlock(from block: STMarkdownBlockNode, listLevel: Int, slugger: inout STMarkdownAnchorSlugRegistry) -> STMarkdownRenderBlock {
         switch block {
         case .paragraph(let inlines):
             return .paragraph(inlines)
         case .heading(let level, let content):
-            return .heading(level: level, content: content)
+            let plain = content.st_plainTextForTOC()
+            let anchorId = slugger.uniqueAnchorId(forPlainTitle: plain)
+            return .heading(level: level, anchorId: anchorId, content: content)
         case .quote(let blocks):
             // Quote 内嵌 list 时不推进 listLevel：产品侧把引用块视作视觉"容器"，
             // 不改变列表的逻辑嵌套深度（层级仍以真实 list 节点计算）。
-            return .quote(blocks.map { self.makeRenderBlock(from: $0, listLevel: listLevel) })
+            return .quote(blocks.map { self.makeRenderBlock(from: $0, listLevel: listLevel, slugger: &slugger) })
         case .list(let kind, let items):
-            return .list(self.flattenListItems(kind: kind, items: items, level: listLevel))
+            return .list(self.flattenListItems(kind: kind, items: items, level: listLevel, slugger: &slugger))
         case .codeBlock(let language, let code):
             return .codeBlock(language: language, code: code)
         case .table(let table):
@@ -53,7 +61,8 @@ private extension STMarkdownRenderAdapter {
     func flattenListItems(
         kind: STMarkdownListKind,
         items: [STMarkdownListItemNode],
-        level: Int
+        level: Int,
+        slugger: inout STMarkdownAnchorSlugRegistry
     ) -> [STMarkdownRenderListItem] {
         var result: [STMarkdownRenderListItem] = []
         let isOrdered: Bool
@@ -70,7 +79,7 @@ private extension STMarkdownRenderAdapter {
 
         for (index, item) in items.enumerated() {
             let orderedIndex = isOrdered ? startIndex + index : nil
-            let renderBlocks = item.blocks.map { self.makeRenderBlock(from: $0, listLevel: level + 1) }
+            let renderBlocks = item.blocks.map { self.makeRenderBlock(from: $0, listLevel: level + 1, slugger: &slugger) }
             result.append(
                 STMarkdownRenderListItem(
                     blocks: renderBlocks,

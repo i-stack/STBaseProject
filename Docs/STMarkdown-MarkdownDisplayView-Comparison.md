@@ -8,6 +8,15 @@
 
 本文汇总架构、文件映射、能力差异及在 Cursor 中的对比方式，便于后续按模块对齐或迁移。
 
+**对齐标注图例**（下文表格「对齐」列或行内标签沿用同一套语义）：
+
+| 标签 | 含义 |
+|------|------|
+| **【已对齐】** | 该维度上能力或依赖已等价覆盖（实现路径、API 名称可与 Vendor 不同）。 |
+| **【部分对齐】** | 双方均有对应能力或同类入口，但栈、交互模型或公开面仍有明显差异。 |
+| **【未对齐】** | ST 侧缺失、明确不支持或架构路线与 Vendor 不可直接等同。 |
+| （留空或 **—**） | 属仓库形态类对比，不评「能力对齐」。 |
+
 ---
 
 ## 1. 仓库与路径
@@ -27,80 +36,81 @@
 
 ## 2. 形态对比
 
-| 维度 | MarkdownDisplayView（Vendor） | STMarkdown |
-|------|--------------------------------|------------|
-| Swift 文件量 | 约 **21** 个 + `Resources/` | **45** 个 + `Resources/` |
-| 代码组织 | **少量超大文件**（如 `MarkdownDisplayView.swift`、`MarkdownParser.swift`） | **分层**、职责拆分 |
-| 最低 iOS（以各自 Package/podspec 为准） | iOS **15+**（`@available(iOS 15.0, *)` 等） | iOS **16+**（工程配置） |
-| 解析依赖 | **swift-markdown**（`import Markdown`） | **swift-markdown**（SPM `Markdown`） |
-| CocoaPods 差异（若用 Pod） | 可能经 **AppleSwiftMDWrapper** 等桥接 | **swift-markdown-pod** + CAtomic modulemap |
-| 数学公式 | **KaTeX**（字体 + `LaTeXAttachment` / `LatexMathView` 等） | **SwiftMath** + `STMarkdownMathNormalizer` |
-| **SPM 产品名** | `MarkdownDisplayView` | 合在 **`STBaseProject`** 的 `STMarkdown` 源码目录（非独立 SwiftPM 产品名） |
-| **CocoaPods 产品名** | **`MarkdownDisplayKit`**（与 SPM 名不同） | **`STBaseProject/STMarkdown`** subspec |
-| **swift-markdown 版本** | SPM：`from: "0.7.3"`（随解析器升级行为可能变） | 本仓库 `Package.swift` **固定 revision**；与 vendor 的 cmark/扩展差异需升级时单独回归 |
+| 维度 | MarkdownDisplayView（Vendor） | STMarkdown | 对齐 |
+|------|--------------------------------|------------|------|
+| Swift 文件量 | 约 **21** 个 + `Resources/` | **45** 个 + `Resources/` | — |
+| 代码组织 | **少量超大文件**（如 `MarkdownDisplayView.swift`、`MarkdownParser.swift`） | **分层**、职责拆分 | — |
+| 最低 iOS（以各自 Package/podspec 为准） | iOS **15+**（`@available(iOS 15.0, *)` 等） | iOS **16+**（工程配置） | **【未对齐】**（系统版本门槛不同） |
+| 解析依赖 | **swift-markdown**（`import Markdown`） | **swift-markdown**（SPM `Markdown`） | **【已对齐】** |
+| CocoaPods 差异（若用 Pod） | 可能经 **AppleSwiftMDWrapper** 等桥接 | **swift-markdown-pod** + CAtomic modulemap | **【部分对齐】**（均为 Pod 集成路径，桥接方案不同） |
+| 数学公式 | **KaTeX**（字体 + `LaTeXAttachment` / `LatexMathView` 等） | **SwiftMath** + `STMarkdownMathNormalizer` | **【部分对齐】**（均有公式渲染链，引擎与资源不同） |
+| **SPM 产品名** | `MarkdownDisplayView` | 合在 **`STBaseProject`** 的 `STMarkdown` 源码目录（非独立 SwiftPM 产品名） | — |
+| **CocoaPods 产品名** | **`MarkdownDisplayKit`**（与 SPM 名不同） | **`STBaseProject/STMarkdown`** subspec | — |
+| **swift-markdown 版本** | SPM：`from: "0.7.3"`（随解析器升级行为可能变） | 本仓库 `Package.swift` **固定 revision**；与 vendor 的 cmark/扩展差异需升级时单独回归 | **【部分对齐】**（同为 swift-markdown，版本策略不同） |
 
 ---
 
 ## 2.1 对外 API 入口（便于宿主对照）
 
-| 场景 | Vendor（典型） | STMarkdown（典型） |
-|------|----------------|-------------------|
-| 可滚动整页预览 | `ScrollableMarkdownViewTextKit`（`UIScrollView` + 内嵌 `MarkdownViewTextKit`） | 自嵌 `UIScrollView` + `STMarkdownTextView` / `STMarkdownStreamingTextView`，或 `STMarkdownSwiftUIView` |
-| 流式打字机 | `startStreaming(...)`、`StreamingUnit`（如 `.word`）等 | `beginSmartMarkdownStreaming()`、`appendSmartMarkdownStreamingChunk(_:)`、`endSmartMarkdownStreaming()`；或 `setMarkdown(_:animated:)` |
-| 配置对象 | `MarkdownConfiguration`（大结构体，含 `MarkdownLineSpacingConfiguration`、`SyntaxHighlightColors` 等） | `STMarkdownStyle` + `STMarkdownEngine` / `STMarkdownPipelineConfiguration` 等拆分配置 |
-| 流式触感 | `StreamingHapticFeedbackStyle` 等 | **无**同名 API；需宿主自行 `UIImpactFeedbackGenerator` |
-| Mermaid / 自定义代码块 | 协议 **`MarkdownCodeBlockRenderer`**（示例工程 `MermaidRenderer`） | **`STMarkdownCodeBlockRendering`**、`STMarkdownMermaidRenderer` 等 |
+| 场景 | Vendor（典型） | STMarkdown（典型） | 对齐 |
+|------|----------------|-------------------|------|
+| 可滚动整页预览 | `ScrollableMarkdownViewTextKit`（`UIScrollView` + 内嵌 `MarkdownViewTextKit`） | 自嵌 `UIScrollView` + `STMarkdownTextView` / `STMarkdownStreamingTextView`，或 `STMarkdownSwiftUIView` | **【部分对齐】**（能力可用，无 Vendor 同名一体化控件） |
+| 流式打字机 | `startStreaming(...)`、`StreamingUnit`（如 `.word`）等 | `beginSmartMarkdownStreaming()`、`appendSmartMarkdownStreamingChunk(_:)`、`endSmartMarkdownStreaming()`；或 `setMarkdown(_:animated:)` | **【部分对齐】**（均有流式/动画入口，粒度 API 不同） |
+| 配置对象 | `MarkdownConfiguration`（大结构体，含 `MarkdownLineSpacingConfiguration`、`SyntaxHighlightColors` 等） | `STMarkdownStyle` + `STMarkdownEngine` / `STMarkdownPipelineConfiguration` 等拆分配置 | **【部分对齐】**（均有可配置样式与管线，结构拆分不同） |
+| 流式触感 | `StreamingHapticFeedbackStyle` 等 | **无**同名 API；需宿主自行 `UIImpactFeedbackGenerator` | **【未对齐】** |
+| Mermaid / 自定义代码块 | 协议 **`MarkdownCodeBlockRenderer`**（示例工程 `MermaidRenderer`） | **`STMarkdownCodeBlockRendering`**、`STMarkdownMermaidRenderer` 等 | **【已对齐】**（均为协议化可插拔代码块渲染） |
 
 ---
 
 ## 3. 文件级映射（Vendor → STMarkdown）
 
-| Vendor 文件 | 角色 | STMarkdown 对应 / 说明 |
-|-------------|------|-------------------------|
-| `MarkdownParser.swift` | swift-markdown 遍历、`IncrementalParseResult`、`parseLock`、产出 `MarkdownRenderElement`、TOC、图片附件等 | `STMarkdownStructureParser`、`STMarkdownMathNormalizer`、`STMarkdownPipeline`、`STMarkdownRenderAdapter`、`STMarkdownInputSanitizer`、`STMarkdownMalformedTableNormalizer`。ST 以 **整段管线 `process(_:)`** 为主，**无** vendor 同款「增量 `safePosition` / `replaceCount` / 元素级回溯」公开形态 |
-| `MarkdownRenderElement.swift` | 渲染树枚举、`MarkdownConfiguration`、`MarkdownTOCItem`、`MarkdownTypewriterTextMode` 等 | `STMarkdownAST` / `STMarkdownRenderAST`、`STMarkdownStyle`。已核对：ST **有** heading/list/table/math/image 等核心块；**无** vendor 同级的 `details`、`rawHTML`、`footnote`、`TOC item` 块模型 |
-| `MarkdownRender.swift` | 元素 → 属性串 / 展示逻辑 | `STMarkdownAttributedStringRenderer` + `Rendering/Default/*`、`Rendering/Advanced/*` |
-| `MarkdownDisplayView.swift` | 总装、与 TextKit 视图协作（体量很大） | `STMarkdownBaseTextView`、`STMarkdownTextView`、`STMarkdownStreamingTextView` 等拆分 |
-| `MarkdownTextViewTK2.swift` | **TextKit 2**：`NSTextContentStorage`、`NSTextLayoutManager`、附件 Provider、`typewriterTextMode` 等 | `UITextView` / `STShimmerTextView`，**`usingTextLayoutManager: false`**（经典 TextKit 路径） |
-| `TypewriterEngine.swift` | 对子视图树（`MarkdownTextViewTK2` / `UILabel` / `UIStackView`）队列动画、`onLayoutChange` | `STShimmerTextView` + `STMarkdownStreamingTextView` 动画/增量更新；**无** vendor 同款整棵 block UI 队列 + watchdog |
-| `MarkdownStreamBuffer.swift` | `Int` 型 `lastSafePosition`、`containerWidth`、可选 `onModuleReady`（带预解析元素）、调试日志 | `STMarkdownStreamBuffer`：字符偏移持久化、`streamMinModuleLength`、**纯字符串**模块切分；**无** `containerWidth` / **无**模块内解析回调 |
-| `ScrollableMarkdownViewTextKit.swift` | `UIScrollView` 包装、`markdown`/`configuration`、`onTOCItemTap`、`tableOfContents`、`generateTOCView` 等 | **无**同名一体化控件；滚动与 TOC 由宿主或 `STMarkdownSwiftUIView` 等组合实现 |
-| `MarkdownTableSupport.swift` | 表格与 TextKit2 / 附件协作 | `Table/STMarkdownTable*.swift`、CollectionView 表格附件；与 CHANGELOG 中 **UILabel 表格 cell + `onLinkTap`** 链路不同 |
-| `CodeBlockAttachment.swift` | 代码块附件 | `STMarkdownCodeBlockAttachmentRenderer`、`STMarkdownDefaultCodeBlockRenderer` 等 |
-| `LaTeXAttachment.swift`、`LatexMathView.swift`、`LateXParser.swift`、`LateXNodeSets.swift` | KaTeX 渲染链 | `STMarkdownDefaultMathRenderer` + SwiftMath + `STMarkdownMathNormalizer` |
-| `FontLoader.swift` | KaTeX 字体注册 | ST 使用 SwiftMath / Bundle 资源，无同一套 `FontLoader` |
-| `ImageCacheManager.swift`、`ImageLoader.swift`、`ImageView.swift` | 图片缓存与展示 | `STMarkdownAsyncImageRenderer`、`STMarkdownDefaultImageRenderer` 等 |
-| `MarkdownCustomExtension.swift` | 自定义扩展元素 | `STMarkdownAdvancedRenderers`、各类 `*Rendering` 协议 |
-| `ArraySafe.swift` | 安全下标等工具 | ST 内散见于各文件，无同名单文件 |
+| Vendor 文件 | 角色 | STMarkdown 对应 / 说明 | 对齐 |
+|-------------|------|-------------------------|------|
+| `MarkdownParser.swift` | swift-markdown 遍历、`IncrementalParseResult`、`parseLock`、产出 `MarkdownRenderElement`、TOC、图片附件等 | `STMarkdownStructureParser`（解析路径 **`parseLock`** 串行化）、`STMarkdownMathNormalizer`、`STMarkdownPipeline`、`STMarkdownRenderAdapter`、`STMarkdownInputSanitizer`、`STMarkdownMalformedTableNormalizer`。ST 仍以 **整段管线 `process(_:)`** 为主，**无** vendor 同款「增量 `safePosition` / `replaceCount` / 元素级回溯」公开形态 | **【部分对齐】**（parser 级锁 **【已对齐】**；元素级增量 **【未对齐】**） |
+| `MarkdownRenderElement.swift` | 渲染树枚举、`MarkdownConfiguration`、`MarkdownTOCItem`、`MarkdownTypewriterTextMode` 等 | `STMarkdownAST` / `STMarkdownRenderAST`、`STMarkdownStyle`。`STMarkdownRenderBlock.heading` 含 **`anchorId`**；**`STMarkdownTOCItem`** + 管线 **`tableOfContents`**。仍 **无** vendor 同级的 `details`、`rawHTML`、`footnote` 块模型 | **【部分对齐】**（核心块与 TOC 数据/锚点 **【已对齐】**；`details` / `rawHTML` / `footnote` **【未对齐】**） |
+| `MarkdownRender.swift` | 元素 → 属性串 / 展示逻辑 | `STMarkdownAttributedStringRenderer` + `Rendering/Default/*`、`Rendering/Advanced/*` | **【已对齐】** |
+| `MarkdownDisplayView.swift` | 总装、与 TextKit 视图协作（体量很大） | `STMarkdownBaseTextView`、`STMarkdownTextView`、`STMarkdownStreamingTextView` 等拆分 | **【部分对齐】**（职责已覆盖，拆分为多类型） |
+| `MarkdownTextViewTK2.swift` | **TextKit 2**：`NSTextContentStorage`、`NSTextLayoutManager`、附件 Provider、`typewriterTextMode` 等 | `UITextView` / `STShimmerTextView`，**`usingTextLayoutManager: false`**（经典 TextKit 路径） | **【未对齐】**（TextKit 代际不同） |
+| `TypewriterEngine.swift` | 对子视图树（`MarkdownTextViewTK2` / `UILabel` / `UIStackView`）队列动画、`onLayoutChange` | `STShimmerTextView` + `STMarkdownStreamingTextView` 动画/增量更新；**无** vendor 同款整棵 block UI 队列 + watchdog | **【部分对齐】**（均有打字机/流式观感；视图树队列 **【未对齐】**） |
+| `MarkdownStreamBuffer.swift` | `Int` 型 `lastSafePosition`、`containerWidth`、可选 `onModuleReady`（带预解析元素）、调试日志 | `STMarkdownStreamBuffer`：字符偏移持久化、`streamMinModuleLength`、**纯字符串**模块切分；可选 **`onCompleteModules`**（仅模块字符串，**无**预解析 AST / **无** `containerWidth`） | **【部分对齐】**（安全切分思想 **【已对齐】**；`onModuleReady` 预解析 / `containerWidth` **【未对齐】**） |
+| `ScrollableMarkdownViewTextKit.swift` | `UIScrollView` 包装、`markdown`/`configuration`、`onTOCItemTap`、`tableOfContents`、`generateTOCView` 等 | **无**同名一体化控件；管线产出 **`STMarkdownPipelineResult.tableOfContents`** + ``STMarkdownBaseTextView.tableOfContents`` / ``scrollToHeadingAnchor`` / ``characterRangeForHeadingAnchor``；侧栏目录与 `onTOCItemTap` 仍由宿主组合 | **【部分对齐】**（滚动+渲染可组合；TOC 一体面 **【未对齐】**） |
+| `MarkdownTableSupport.swift` | 表格与 TextKit2 / 附件协作 | `Table/STMarkdownTable*.swift`、CollectionView 表格附件；与 CHANGELOG 中 **UILabel 表格 cell + `onLinkTap`** 链路不同 | **【部分对齐】**（均有表格能力；TK2 内嵌 vs Collection **【未对齐】**） |
+| `CodeBlockAttachment.swift` | 代码块附件 | `STMarkdownCodeBlockAttachmentRenderer`、`STMarkdownDefaultCodeBlockRenderer` 等 | **【已对齐】** |
+| `LaTeXAttachment.swift`、`LatexMathView.swift`、`LateXParser.swift`、`LateXNodeSets.swift` | KaTeX 渲染链 | `STMarkdownDefaultMathRenderer` + SwiftMath + `STMarkdownMathNormalizer` | **【部分对齐】**（公式附件链路 **【已对齐】**；KaTeX vs SwiftMath **【未对齐】**） |
+| `FontLoader.swift` | KaTeX 字体注册 | ST 使用 SwiftMath / Bundle 资源，无同一套 `FontLoader` | **【部分对齐】**（均有字体/资源加载责任；实现文件 **【未对齐】**） |
+| `ImageCacheManager.swift`、`ImageLoader.swift`、`ImageView.swift` | 图片缓存与展示 | `STMarkdownAsyncImageRenderer`、`STMarkdownDefaultImageRenderer` 等 | **【已对齐】** |
+| `MarkdownCustomExtension.swift` | 自定义扩展元素 | `STMarkdownAdvancedRenderers`、各类 `*Rendering` 协议 | **【已对齐】** |
+| `ArraySafe.swift` | 安全下标等工具 | ST 内散见于各文件，无同名单文件 | **【部分对齐】**（同类防御性用法内嵌，无 Vendor 同名文件） |
 
 ---
 
 ## 4. 能力差异摘要
 
-1. **渲染引擎**：Vendor 为 **TextKit 2**；ST 主路径为 **`UITextView` + TextKit 1**（`usingTextLayoutManager: false`）。
-2. **解析与并发**：Vendor **`MarkdownParser` 内 `parseLock` 串行化 swift-markdown**，并在视图层配合 `renderQueue`/版本锁做增量渲染保护；ST `STMarkdownEngine` / `STMarkdownPipeline` 已按 `Sendable` 设计，但**没有** vendor 同款 parser 级串行锁与增量回溯保护，是否需要补锁应以并发压测结论为准。
-3. **流式**：Vendor 缓冲器可 **`onModuleReady` 带 `MarkdownRenderElement`**，并与 **Typewriter 视图树** 配合；ST 为 **字符串级 `STMarkdownStreamBuffer`** + **富文本侧 Shimmer/增量 `setMarkdown`**。
-4. **目录 TOC**：Vendor **内置 `MarkdownTOCItem`、生成目录视图、跳转 API**；ST **无对等的一体式 TOC 公共面**（需业务自建或后续扩展）。
-5. **块级模型**：Vendor `MarkdownRenderElement` 含 **`details`、`rawHTML`**，并把 **heading/TOC/footnote** 等信息留在统一块级模型附近；ST 当前 `STMarkdownBlockNode` / `STMarkdownRenderBlock` **未定义** `details`、`rawHTML`、`footnote`、`TOC` 对等节点。
-6. **公式**：Vendor **KaTeX**；ST **SwiftMath**，命令集与排版不必一致。
-7. **表格**：Vendor 与 TextKit2 附件、手势、（文档所述）**表格内链接走 cell 选择 + `onLinkTap`** 等；ST 为 **独立表格 Collection + overlay**，交互模型不同。
-8. **脚注 / 角标**：Vendor 有 **独立脚注模型 + 延迟渲染脚注视图**；ST 侧当前更偏向 **Citation 角标**（如 `STMarkdownNumberBadgeAttachment`、表格内 citation 流程），**不能等价视为 footnote 支持**。
+1. **渲染引擎**：Vendor 为 **TextKit 2**；ST 主路径为 **`UITextView` + TextKit 1**（`usingTextLayoutManager: false`）。**【未对齐】**
+2. **解析与并发**：Vendor **`MarkdownParser` 内 `parseLock` 串行化 swift-markdown**，并在视图层配合 `renderQueue`/版本锁做增量渲染保护；ST 在 **`STMarkdownStructureParser.parse`** 使用 **`parseLock`** 串行化 cmark 路径（对齐 vendor 核心动机）；**无**视图层版本锁与 **无** 增量元素级回溯。**【部分对齐】**（parser 级锁 **【已对齐】**；视图层与元素级增量 **【未对齐】**）
+3. **流式**：Vendor 缓冲器可 **`onModuleReady` 带 `MarkdownRenderElement`**，并与 **Typewriter 视图树** 配合；ST 为 **字符串级 `STMarkdownStreamBuffer`**（可选 **`onCompleteModules`**）+ **富文本侧 Shimmer/增量 `setMarkdown`**。**【部分对齐】**（模块就绪回调 **【部分对齐】**；预解析元素与视图树 **【未对齐】**）
+4. **目录 TOC**：Vendor **内置 `MarkdownTOCItem`、生成目录视图、跳转 API**；ST 提供 **`STMarkdownTOCItem`**、**`tableOfContents`**（管线 + TextView 缓存）与 **`scrollToHeadingAnchor`** / **`characterRangeForHeadingAnchor`**；**无**内置目录视图与 **`onTOCItemTap`**（宿主组合）。**【部分对齐】**（数据与跳转 **【已对齐】**；内置目录 UI / tap **【未对齐】**）
+5. **块级模型**：Vendor `MarkdownRenderElement` 含 **`details`、`rawHTML`**，并把 **heading/TOC/footnote** 等信息留在统一块级模型附近；ST 当前 `STMarkdownBlockNode` **未定义** `details`、`rawHTML`、`footnote`；**`STMarkdownRenderBlock.heading` 含 `anchorId`** 并与 TOC 抽取一致。**【部分对齐】**（heading 锚点/TOC 数据 **【已对齐】**；扩展块与脚注 **【未对齐】**）
+6. **公式**：Vendor **KaTeX**；ST **SwiftMath**，命令集与排版不必一致。**【部分对齐】**
+7. **表格**：Vendor 与 TextKit2 附件、手势、（文档所述）**表格内链接走 cell 选择 + `onLinkTap`** 等；ST 为 **独立表格 Collection + overlay**，交互模型不同。**【部分对齐】**
+8. **脚注 / 角标**：Vendor 有 **独立脚注模型 + 延迟渲染脚注视图**；ST 侧当前更偏向 **Citation 角标**（如 `STMarkdownNumberBadgeAttachment`、表格内 citation 流程），**不能等价视为 footnote 支持**。**【未对齐】**
+9. **链接与图片点击**：双方均具备宿主回调链路（如 `onLinkTap`、图片异步渲染与点击）。**【已对齐】**（具体命名与 TK 栈细节不同，见 §4.3「交互能力」行）
 
 ## 4.3 已从源码核对的结论
 
 以下条目是本次直接对照源码后确认的结果，可视为比前文更高置信度的“实现级”结论：
 
-| 维度 | Vendor 结论 | ST 结论 | 判断 |
-|------|-------------|---------|------|
-| 流式增量解析 | `MarkdownParser.parseIncremental(...)` 返回 `safePosition`、`replaceCount`、`newElements` | `STMarkdownStreamBuffer` 只负责**字符串模块切分**，真正渲染仍走整段 `engine.process(...)` | ST **弱于** vendor |
-| 流式模块回调 | `MarkdownStreamBuffer.onModuleReady` 可回传预解析 `MarkdownRenderElement` | `STMarkdownStreamBuffer` 无模块内预解析回调 | ST **弱于** vendor |
-| 块级能力 | `MarkdownRenderElement` 含 `details`、`rawHTML`、`heading(id:...)`、`table`、`latex`、`list` | `STMarkdownBlockNode` / `STMarkdownRenderBlock` 仅含 paragraph/heading/quote/list/code/table/math/image/thematicBreak | ST **缺少** `details` / `rawHTML` / `footnote` |
-| TOC | 视图层公开 `tableOfContents`、`onTOCItemTap`、`generateTOCView()`、`scrollToTOCItem(...)` | 未检出对等公共 API；heading 仅作为普通 block 渲染 | ST **缺少一体化 TOC 面** |
-| 脚注 | 预处理 footnote，缓存并延迟渲染 footnote view | 未检出 footnote 模型/渲染链；存在 citation badge 流程 | ST **缺少 footnote** |
-| TextKit 栈 | 核心视图基于 `NSTextLayoutManager` / `NSTextContentStorage` / TK2 attachment provider | `UITextView(usingTextLayoutManager: false)` 明确走 TextKit 1 路线 | 路线不同 |
-| HTML | Vendor 存在 `rawHTML(String)` 元素与对应渲染分支 | ST `STHtmlNormalizeRule` 注释明确写明 downstream **no handling for raw HTML** | ST **明确不支持 raw HTML** |
-| 交互能力 | `onLinkTap`、`onImageTap`、TOC tap、脚注视图 | `onLinkTap`、`onSelectionChange`、`onCitationTap` | 各有侧重 |
-| 表格交互 | 表格与 TK2 attachment 深度耦合 | 表格为独立 View/Attachment + overlay/citation 区域 | 路线不同 |
+| 维度 | Vendor 结论 | ST 结论 | 判断 | 对齐 |
+|------|-------------|---------|------|------|
+| 流式增量解析 | `MarkdownParser.parseIncremental(...)` 返回 `safePosition`、`replaceCount`、`newElements` | `STMarkdownStreamBuffer` 只负责**字符串模块切分**，真正渲染仍走整段 `engine.process(...)` | ST **弱于** vendor | **【部分对齐】**（缓冲安全切分 **【已对齐】**；元素级增量 **【未对齐】**） |
+| 流式模块回调 | `MarkdownStreamBuffer.onModuleReady` 可回传预解析 `MarkdownRenderElement` | **`onCompleteModules`** 仅回传 **完整模块字符串**；无预解析 AST | ST **弱于** vendor | **【部分对齐】** |
+| 块级能力 | `MarkdownRenderElement` 含 `details`、`rawHTML`、`heading(id:...)`、`table`、`latex`、`list` | `STMarkdownBlockNode` 仍为 paragraph/heading/…；**`STMarkdownRenderBlock.heading` 含 `anchorId`** | ST **仍缺** `details` / `rawHTML` / `footnote` | **【部分对齐】** |
+| TOC | 视图层公开 `tableOfContents`、`onTOCItemTap`、`generateTOCView()`、`scrollToTOCItem(...)` | **`STMarkdownPipelineResult.tableOfContents`**、**`STMarkdownBaseTextView.tableOfContents`**、**`scrollToHeadingAnchor`** / **`characterRangeForHeadingAnchor`**；无内置目录 UI / `onTOCItemTap` | ST **弱于** vendor 一体面 | **【部分对齐】** |
+| 脚注 | 预处理 footnote，缓存并延迟渲染 footnote view | 未检出 footnote 模型/渲染链；存在 citation badge 流程 | ST **缺少 footnote** | **【未对齐】** |
+| TextKit 栈 | 核心视图基于 `NSTextLayoutManager` / `NSTextContentStorage` / TK2 attachment provider | `UITextView(usingTextLayoutManager: false)` 明确走 TextKit 1 路线 | 路线不同 | **【未对齐】** |
+| HTML | Vendor 存在 `rawHTML(String)` 元素与对应渲染分支 | ST `STHtmlNormalizeRule` 注释明确写明 downstream **no handling for raw HTML** | ST **明确不支持 raw HTML** | **【未对齐】** |
+| 交互能力 | `onLinkTap`、`onImageTap`、TOC tap、脚注视图 | `onLinkTap`、`onSelectionChange`、`onCitationTap` | 各有侧重 | **【部分对齐】**（链接/选区 **【已对齐】**；TOC tap / 脚注视图 **【未对齐】**；citation **Vendor 无对等**） |
+| 表格交互 | 表格与 TK2 attachment 深度耦合 | 表格为独立 View/Attachment + overlay/citation 区域 | 路线不同 | **【部分对齐】**（均有表格与点击区域；耦合方式 **【未对齐】**） |
 
 ---
 
@@ -118,22 +128,26 @@
 
 ## 4.2 测试与可观测性
 
-| 项目 | Vendor | STMarkdown |
-|------|--------|------------|
-| 单测位置 | `MarkdownDisplayView/Tests/MarkdownDisplayViewTests/`（Swift `Testing` 等） | `Example/STBaseProjectExampleTests/` 下 `STMarkdown*`、`STMarkdownStreamBufferTests` 等 |
-| 调试输出 | `MarkdownStreamBuffer` 等路径存在 **`print`** 日志 | ST 侧一般 **无** 同等控制台噪声；排障依赖宿主或自行埋点 |
+| 项目 | Vendor | STMarkdown | 对齐 |
+|------|--------|------------|------|
+| 单测位置 | `MarkdownDisplayView/Tests/MarkdownDisplayViewTests/`（Swift `Testing` 等） | `Example/STBaseProjectExampleTests/` 下 `STMarkdown*`、`STMarkdownStreamBufferTests` 等 | **【已对齐】**（均有模块级单测落点） |
+| 调试输出 | `MarkdownStreamBuffer` 等路径存在 **`print`** 日志 | ST 侧一般 **无** 同等控制台噪声；排障依赖宿主或自行埋点 | **【未对齐】**（可观测性策略不同） |
 
 ---
 
 ## 5. 已在 ST 侧做过的对齐方向（会话内实现，供对照）
 
+> 本节条目相对 Vendor 文档/行为属于 **【部分对齐】** 或实现侧 **【已对齐】**（语义接近，非逐行一致）。
+
 以下属于 STMarkdown 演进中与「常见流式 Markdown 组件」接近的行为，**不等同**于 vendor 逐行一致：
 
-- `STMarkdownStreamBuffer`：围栏闭合处切分、段落模式 EOF 尾段、**字符偏移**持久化 `lastSafeUpperBoundOffset`（避免 `String.Index` 跨 `+=` 失效）。
-- `STMarkdownBaseTextView`：`resolvedMarkdownMeasurementWidth()`、高度回退、`contentLayoutHeightNotificationMinInterval` 等。
-- `STMarkdownPipeline` / `STMarkdownMalformedTableNormalizer`：与 vendor 文档中的「坏表修复」类似语义。
+- **`STMarkdownStreamBuffer`** **【部分对齐】**：围栏闭合处切分、段落模式 EOF 尾段、**字符偏移**持久化 `lastSafeUpperBoundOffset`；可选 **`onCompleteModules`**（对照 vendor 模块就绪的字符串子集）。**【未对齐】** 项见 §3 `MarkdownStreamBuffer` 行。
+- **`STMarkdownBaseTextView`** **【部分对齐】**：`resolvedMarkdownMeasurementWidth()`、高度回退、`contentLayoutHeightNotificationMinInterval`；**`tableOfContents`**、**`scrollToHeadingAnchor`**、**`characterRangeForHeadingAnchor`**（TOC 数据与跳转）。
+- **`STMarkdownStructureParser`** **【部分对齐】**：**`parseLock`** 串行化 swift-markdown 解析路径（对照 vendor）。
+- **`STMarkdownPipeline` / `STMarkdownMalformedTableNormalizer`** **【部分对齐】**：坏表修复语义；管线 **`STMarkdownPipelineResult.tableOfContents`**。
+- **`STMarkdownRenderBlock.heading`** + **`NSAttributedString.Key.stMarkdownHeadingAnchor`**：渲染侧锚点与 TOC 一致。
 
-单测可参考：`STMarkdownStreamBufferTests`、`STMarkdownBaseTextViewLayoutTests`、`STMarkdownPipelineTests` 中流式相关用例。
+单测可参考：`STMarkdownStreamBufferTests`、`STMarkdownBaseTextViewLayoutTests`、`STMarkdownPipelineTests` 中流式相关用例；**`STMarkdownTOCTests`**。
 
 ---
 
@@ -155,9 +169,9 @@
 |--------|------|------|
 | P0 | **流式增量渲染链补强** | 当前 ST 已有 `STMarkdownStreamBuffer`，但渲染仍偏“整段重跑”。最优先补的是 **增量 parse / replaceCount / 安全回溯窗口**，否则长文本流式时 CPU、重排和闪动都不占优。 |
 | P0 | **流式专项测试补齐** | 继续补围栏、表格、公式、标题切换、列表/引用未闭合、Unicode chunk 边界、长文多轮 append 的单测。这个成本低，但能直接兜住后续重构。 |
-| P1 | **目录 TOC 抽取能力** | ST 已有 heading block，但缺少 heading id、TOC 数据结构、滚动定位 API。若业务里有“长文导航/知识库/AI 报告”场景，这一项收益很高。 |
+| P1 | **目录 TOC 抽取能力** | 已落地 **`STMarkdownTOCItem`**、管线 **`tableOfContents`**、**`anchorId`** + **`stMarkdownHeadingAnchor`**、**`scrollToHeadingAnchor`**；可继续补内置目录 UI / `onTOCItemTap`、与流式增量同帧刷新。 |
 | P1 | **脚注与引用语义拆分** | 当前 citation badge 更像业务增强，不等于 CommonMark footnote。若要对齐通用 Markdown 能力，应补 `footnote definition/reference` 语义模型，而不是继续堆 UI 角标。 |
-| P1 | **并发压测与线程模型定稿** | 不是先机械照搬 `parseLock`，而是先验证 `STMarkdownEngine` 在并发 `process(_:)`、流式 append、异步 attachment 刷新下是否有竞态/崩溃/性能退化，再决定是否引入 parser 级锁或 actor。 |
+| P1 | **并发压测与线程模型定稿** | 解析入口已加 **`parseLock`**；仍建议压测并发 `process(_:)`、流式 append、异步 attachment 刷新，再决定是否扩展 actor / 更广临界区。 |
 | P2 | **块级 AST 能力补齐** | 如果产品确实需要折叠块与 HTML 片段，再考虑补 `details` / `rawHTML`。这类能力应先落 AST 和 render block，再落 UI；否则后面会继续把语义写死在 renderer。 |
 | P2 | **统一公共组件面** | Vendor 的 `ScrollableMarkdownViewTextKit` 给了宿主一个“整页预览”入口。ST 现在偏散件组合，建议评估是否提供官方容器组件，统一滚动、高度通知、目录、链接、citation、流式入口。 |
 | P3 | **TextKit 2 迁移评估** | 这不是当前第一优先级。只有在明确遇到 TextKit 1 的附件布局、选区、超长文档性能或复杂交互瓶颈时，才值得单独立项评估。 |

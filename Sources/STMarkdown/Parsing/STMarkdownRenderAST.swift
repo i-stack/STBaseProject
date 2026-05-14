@@ -17,7 +17,7 @@ public struct STMarkdownRenderDocument: Hashable, Sendable {
 
 public enum STMarkdownRenderBlock: Hashable, Sendable {
     case paragraph([STMarkdownInlineNode])
-    case heading(level: Int, content: [STMarkdownInlineNode])
+    case heading(level: Int, anchorId: String, content: [STMarkdownInlineNode])
     case quote([STMarkdownRenderBlock])
     case list([STMarkdownRenderListItem])
     case codeBlock(language: String?, code: String)

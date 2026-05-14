@@ -13,12 +13,17 @@ public protocol STMarkdownStructureParsing: Sendable {
 }
 
 public struct STMarkdownStructureParser: STMarkdownStructureParsing, Sendable {
+    /// 串行化 swift-markdown / cmark 解析路径，对齐 vendor ``parseLock`` 的防护语义（多线程 + 扩展注册）。
+    private static let parseLock = NSLock()
+
     public init() {}
 
     public func parse(_ markdown: String) -> STMarkdownDocument {
         guard markdown.isEmpty == false else {
             return STMarkdownDocument(blocks: [])
         }
+        Self.parseLock.lock()
+        defer { Self.parseLock.unlock() }
         let normalized = STMarkdownMathNormalizer.normalizeBlocks(in: markdown)
         let document = Document(parsing: normalized.text)
         let blocks = self.makeBlocks(from: Array(document.children), mathMap: normalized.blockMap)

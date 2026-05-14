@@ -120,7 +120,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         let currentStr = current.string
         let renderedStr = displayRendered.string
 
-        if renderedStr.count >= currentStr.count,
+        if renderedStr.utf16.count >= currentStr.utf16.count,
            (renderedStr as NSString).hasPrefix(currentStr) {
             let prefixChanged = current.length > 0
                 && !displayRendered.attributedSubstring(
@@ -316,6 +316,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     private func render(_ markdown: String) -> NSAttributedString {
         let result = self.engine.process(markdown)
+        self.updateTableOfContents(from: result)
         if let customRenderer = self.customDocumentRenderer {
             return customRenderer(result.renderDocument)
         }

@@ -2,8 +2,7 @@
 //  STMarkdownStreamBuffer.swift
 //  STBaseProject
 //
-//  智能流式缓冲：按「安全模块」边界切分累积文本，避免未闭合围栏/公式/表格
-//  在流式中途被解析成错误排版。设计思路对齐常见 Markdown 流式组件的模块检测策略。
+//  Created by 寒江孤影 on 2019/03/16.
 //
 
 import Foundation
@@ -35,6 +34,9 @@ public final class STMarkdownStreamBuffer {
     private var lastSafeUpperBoundOffset: Int
 
     private var minModuleLength: Int
+
+    /// 本帧检测到一个或多个完整模块时的回调（对照 vendor ``onModuleReady`` 的**字符串子集**：不预解析 AST）。
+    public var onCompleteModules: (([String]) -> Void)?
 
     public init(minModuleLength: Int = 20) {
         self.minModuleLength = max(1, minModuleLength)
@@ -72,7 +74,11 @@ public final class STMarkdownStreamBuffer {
     @discardableResult
     public func append(_ text: String) -> ModuleDetectionResult {
         accumulatedText += text
-        return detectCompleteModules()
+        let result = detectCompleteModules()
+        if result.completeModules.isEmpty == false {
+            self.onCompleteModules?(result.completeModules)
+        }
+        return result
     }
 
     /// 流结束时将剩余内容全部标为已提交，返回此前未纳入安全前缀的尾部字符串。
@@ -134,7 +140,7 @@ public final class STMarkdownStreamBuffer {
         var completeModules: [String] = []
         var lastBoundary = startPosition
 
-        for boundary in boundaries where boundary > accumulatedText.startIndex {
+        for boundary in boundaries where boundary > textToAnalyze.startIndex {
             if boundary > lastBoundary {
                 let moduleText = extractModule(from: textToAnalyze, start: lastBoundary, end: boundary)
                 if !moduleText.isEmpty {
@@ -204,12 +210,9 @@ public final class STMarkdownStreamBuffer {
         }
         if latexCount % 2 != 0 { return .latexBlock }
 
-        let lines = text.components(separatedBy: .newlines)
-        if let lastNonEmpty = lines.last(where: { !$0.trimmingCharacters(in: .whitespaces).isEmpty }) {
-            let trimmed = lastNonEmpty.trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("|"), trimmed.contains("|"), !text.hasSuffix("\n\n") {
-                return .table
-            }
+        let trimmed = lastNonEmptyLineTrimmed(in: text)
+        if trimmed.hasPrefix("|"), trimmed.contains("|"), !text.hasSuffix("\n\n") {
+            return .table
         }
 
         return nil
@@ -365,5 +368,30 @@ public final class STMarkdownStreamBuffer {
         let text = accumulatedText
         guard offset > 0 else { return text.startIndex }
         return text.index(text.startIndex, offsetBy: offset, limitedBy: text.endIndex) ?? text.endIndex
+    }
+
+    /// 与 `lines.last { !$0.trimmingCharacters(in: .whitespaces).isEmpty }` 语义一致，但不分配整份按行数组，
+    /// 长文流式场景下避免 O(n) 额外内存与一次全量扫描。
+    private func lastNonEmptyLineTrimmed(in text: String) -> String {
+        guard text.isEmpty == false else { return "" }
+        var endExclusive = text.endIndex
+        while endExclusive > text.startIndex {
+            let lineStart: String.Index
+            if let r = text.range(of: "\n", options: .backwards, range: text.startIndex..<endExclusive) {
+                lineStart = r.upperBound
+            } else {
+                lineStart = text.startIndex
+            }
+            let trimmed = text[lineStart..<endExclusive].trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty {
+                if lineStart == text.startIndex {
+                    return ""
+                }
+                endExclusive = text.index(before: lineStart)
+                continue
+            }
+            return trimmed
+        }
+        return ""
     }
 }
