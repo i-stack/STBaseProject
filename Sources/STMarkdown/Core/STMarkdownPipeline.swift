@@ -117,4 +117,52 @@ public final class STMarkdownPipeline: Sendable {
             tableOfContents: tableOfContents
         )
     }
+
+    /// 对 ``canonicalMarkdown`` 的 `[parseStart, parseEnd)` 子串执行 parse → normalize → adapt，并给出
+    /// ``STMarkdownIncrementalParseResult/replaceTailCount``（对齐 Vendor ``replaceCount`` 估算语义）。
+    ///
+    /// - Note: 不跑输入 sanitizer；见 ``STMarkdownIncrementalParameters`` 说明。
+    public func processIncremental(_ parameters: STMarkdownIncrementalParameters) -> STMarkdownIncrementalParseResult {
+        let text = parameters.canonicalMarkdown
+        let lastCommitted = parameters.lastCommittedExclusiveEnd
+        let safeEnd = parameters.currentSafeExclusiveEnd
+        let window = parameters.contextWindowSize
+
+        let parseStart = max(0, lastCommitted - window)
+        let parseEnd = min(max(0, safeEnd), text.count)
+
+        guard parseStart < parseEnd else {
+            return STMarkdownIncrementalParseResult(
+                replaceTailCount: 0,
+                parseStartOffset: parseStart,
+                parseEndOffset: parseEnd,
+                windowFragment: "",
+                windowRenderDocument: STMarkdownRenderDocument(blocks: []),
+                windowTableOfContents: []
+            )
+        }
+
+        let fragment = STMarkdownIncrementalSubstring.fragment(in: text, startOffset: parseStart, endOffset: parseEnd)
+        let parserInput = STMarkdownMalformedTableNormalizer.normalize(
+            fragment,
+            enabled: self.configuration.autoFixMalformedTables
+        )
+        let sourceDocument = self.parser.parse(parserInput)
+        let normalizedDocument = self.semanticNormalizer.normalize(sourceDocument)
+        let renderDocument = self.renderAdapter.adapt(normalizedDocument)
+        let windowTOC = STMarkdownTOCExtraction.items(from: renderDocument)
+        let replaceTail = STMarkdownIncrementalReplaceCountEstimator.estimateReplaceTailCount(
+            previousTotalRenderBlockCount: parameters.previousTotalRenderBlockCount,
+            parseStart: parseStart,
+            lastCommittedExclusiveEnd: lastCommitted
+        )
+        return STMarkdownIncrementalParseResult(
+            replaceTailCount: replaceTail,
+            parseStartOffset: parseStart,
+            parseEndOffset: parseEnd,
+            windowFragment: fragment,
+            windowRenderDocument: renderDocument,
+            windowTableOfContents: windowTOC
+        )
+    }
 }

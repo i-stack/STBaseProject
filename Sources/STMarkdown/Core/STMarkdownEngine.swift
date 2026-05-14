@@ -36,4 +36,9 @@ public final class STMarkdownEngine: STMarkdownProcessing, Sendable {
     public func process(_ rawMarkdown: String) -> STMarkdownPipelineResult {
         self.pipeline.process(rawMarkdown)
     }
+
+    /// 见 ``STMarkdownPipeline/processIncremental(_:)``。
+    public func processIncremental(_ parameters: STMarkdownIncrementalParameters) -> STMarkdownIncrementalParseResult {
+        self.pipeline.processIncremental(parameters)
+    }
 }

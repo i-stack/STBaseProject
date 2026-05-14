@@ -12,6 +12,9 @@ import Foundation
 /// 流式场景下用于累积 chunk、检测可独立渲染的 Markdown 模块的缓冲器。
 ///
 /// - Note: 使用 Swift 字符串的 `Index` 与 `offsetBy(_:limitedBy:)` 做边界截取，避免流式 Unicode 截断问题。
+/// - SeeAlso: 与 ``STMarkdownStreamBuffer/lastSafeUpperBoundOffset`` 同语义的 **Character 偏移** 可传入
+///   ``STMarkdownIncrementalParameters``，由 ``STMarkdownPipeline/processIncremental(_:)`` 做回溯窗口子串解析与
+///   ``STMarkdownIncrementalParseResult/replaceTailCount`` 估算（见对比文档第 7.2.5 节）。
 public final class STMarkdownStreamBuffer {
 
     public struct ModuleDetectionResult: Sendable {

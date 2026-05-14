@@ -102,7 +102,7 @@
 
 | 维度 | Vendor 结论 | ST 结论 | 判断 | 对齐 |
 |------|-------------|---------|------|------|
-| 流式增量解析 | `MarkdownParser.parseIncremental(...)` 返回 `safePosition`、`replaceCount`、`newElements` | `STMarkdownStreamBuffer` 只负责**字符串模块切分**，真正渲染仍走整段 `engine.process(...)` | ST **弱于** vendor | **【部分对齐】**（缓冲安全切分 **【已对齐】**；元素级增量 **【未对齐】**） |
+| 流式增量解析 | `MarkdownParser.parseIncremental(...)` 返回 `safePosition`、`replaceCount`、`newElements` | **整段**仍走 `process`；**``processIncremental``** 提供回溯窗口子串 + **`replaceTailCount`** + ``windowRenderDocument``；安全上界仍由缓冲器提供 | ST **弱于** vendor 一体化 | **【部分对齐】** |
 | 流式模块回调 | `MarkdownStreamBuffer.onModuleReady` 可回传预解析 `MarkdownRenderElement` | **`onCompleteModules`** 仅回传 **完整模块字符串**；无预解析 AST | ST **弱于** vendor | **【部分对齐】** |
 | 块级能力 | `MarkdownRenderElement` 含 `details`、`rawHTML`、`heading(id:...)`、`table`、`latex`、`list` | `STMarkdownBlockNode` 仍为 paragraph/heading/…；**`STMarkdownRenderBlock.heading` 含 `anchorId`** | ST **仍缺** `details` / `rawHTML` / `footnote` | **【部分对齐】** |
 | TOC | 视图层公开 `tableOfContents`、`onTOCItemTap`、`generateTOCView()`、`scrollToTOCItem(...)` | **`STMarkdownPipelineResult.tableOfContents`**、**`STMarkdownBaseTextView.tableOfContents`**、**`scrollToHeadingAnchor`** / **`characterRangeForHeadingAnchor`**；无内置目录 UI / `onTOCItemTap` | ST **弱于** vendor 一体面 | **【部分对齐】** |
@@ -144,10 +144,10 @@
 - **`STMarkdownStreamBuffer`** **【部分对齐】**：围栏闭合处切分、段落模式 EOF 尾段、**字符偏移**持久化 `lastSafeUpperBoundOffset`；可选 **`onCompleteModules`**（对照 vendor 模块就绪的字符串子集）。**【未对齐】** 项见 §3 `MarkdownStreamBuffer` 行。
 - **`STMarkdownBaseTextView`** **【部分对齐】**：`resolvedMarkdownMeasurementWidth()`、高度回退、`contentLayoutHeightNotificationMinInterval`；**`tableOfContents`**、**`scrollToHeadingAnchor`**、**`characterRangeForHeadingAnchor`**（TOC 数据与跳转）。
 - **`STMarkdownStructureParser`** **【部分对齐】**：**`parseLock`** 串行化 swift-markdown 解析路径（对照 vendor）。
-- **`STMarkdownPipeline` / `STMarkdownMalformedTableNormalizer`** **【部分对齐】**：坏表修复语义；管线 **`STMarkdownPipelineResult.tableOfContents`**。
+- **`STMarkdownPipeline` / `STMarkdownMalformedTableNormalizer`** **【部分对齐】**：坏表修复语义；管线 **`STMarkdownPipelineResult.tableOfContents`**；**``processIncremental(_:)``**（回溯窗口子串 parse + **`replaceTailCount`** + ``mergedRenderDocument``，见 §7.2.5）。
 - **`STMarkdownRenderBlock.heading`** + **`NSAttributedString.Key.stMarkdownHeadingAnchor`**：渲染侧锚点与 TOC 一致。
 
-单测可参考：`STMarkdownStreamBufferTests`、`STMarkdownBaseTextViewLayoutTests`、`STMarkdownPipelineTests` 中流式相关用例；**`STMarkdownTOCTests`**。
+单测可参考：`STMarkdownStreamBufferTests`、`STMarkdownBaseTextViewLayoutTests`、`STMarkdownPipelineTests` 中流式相关用例；**`STMarkdownTOCTests`**、**`STMarkdownIncrementalParseTests`**。
 
 ---
 
@@ -167,7 +167,7 @@
 
 | 优先级 | 方向 | 说明 |
 |--------|------|------|
-| P0 | **流式增量渲染链补强** | 当前 ST 已有 `STMarkdownStreamBuffer`，但渲染仍偏“整段重跑”。最优先补的是 **增量 parse / replaceCount / 安全回溯窗口**，否则长文本流式时 CPU、重排和闪动都不占优。 |
+| P0 | **流式增量渲染链补强** | 已提供 **``STMarkdownPipeline/processIncremental``**（`replaceTailCount` + 窗口 ``STMarkdownRenderDocument`` + 合并 helper）；与 ``STMarkdownStreamBuffer`` 组合可逼近 Vendor 窗口策略。**仍缺**：与 TextKit 增量 `replaceCharacters` 的硬连接、内置 `findSafeBreakpoint` 与缓冲一体化。 |
 | P0 | **流式专项测试补齐** | 继续补围栏、表格、公式、标题切换、列表/引用未闭合、Unicode chunk 边界、长文多轮 append 的单测。这个成本低，但能直接兜住后续重构。 |
 | P1 | **目录 TOC 抽取能力** | 已落地 **`STMarkdownTOCItem`**、管线 **`tableOfContents`**、**`anchorId`** + **`stMarkdownHeadingAnchor`**、**`scrollToHeadingAnchor`**；可继续补内置目录 UI / `onTOCItemTap`、与流式增量同帧刷新。 |
 | P1 | **脚注与引用语义拆分** | 当前 citation badge 更像业务增强，不等于 CommonMark footnote。若要对齐通用 Markdown 能力，应补 `footnote definition/reference` 语义模型，而不是继续堆 UI 角标。 |
@@ -203,26 +203,34 @@
 
 | 概念 | Vendor | ST（当前） |
 |------|--------|------------|
-| 流式安全切分 | `lastSafePosition` 与 parser 协同 | `STMarkdownStreamBuffer` 的 **`lastSafeUpperBoundOffset`**，仅字符串边界 |
-| 解析范围 | 回溯窗口 + 子串 parse | 每次 **`STMarkdownEngine.process` → 整段管线** 为主 |
-| 增量产物 | `newElements` + **`replaceCount`** + `tocItems` | 无元素级 **`newBlocks`/`replaceTailCount`** 公开形态 |
-| 并发 | **`parseLock`** 串行化 cmark 路径 | `STMarkdownEngine` 文档约定 **Sendable** 组件时可多线程 `process`，**无** vendor 同款 parser 级锁 |
+| 流式安全切分 | `lastSafePosition` 与 parser 协同 | `STMarkdownStreamBuffer` 的 **`lastSafeUpperBoundOffset`**；与 ``STMarkdownIncrementalParameters`` 偏移对齐 | **【部分对齐】** |
+| 解析范围 | 回溯窗口 + 子串 parse | ``STMarkdownPipeline/processIncremental``：``parseStart = max(0, lastCommitted - contextWindowSize)``，`parseEnd = currentSafeExclusiveEnd` | **【部分对齐】** |
+| 增量产物 | `newElements` + **`replaceCount`** + `tocItems` | ``STMarkdownIncrementalParseResult``：**`replaceTailCount`** + **`windowRenderDocument`** + **`windowTableOfContents`** + ``mergedRenderDocument`` | **【部分对齐】** |
+| 并发 | **`parseLock`** 串行化 cmark 路径 | ``STMarkdownStructureParser`` 内 **`parseLock`** | **【已对齐】** |
 
 #### 7.2.3 ST 侧「增量 AST」若要落地，建议拆成两层
 
 1. **缓冲层（已有方向）**：继续用 `STMarkdownStreamBuffer` 决定「这一帧可安全提交给渲染器的 markdown 子串」（对齐 vendor 的 safe 边界思想，但 ST 用 UTF-16/字符偏移持久化，避免 `String.Index` 失效）。
-2. **AST / 渲染元素层（待建）**：在管线结果或旁路缓存中维护 **`[STMarkdownRenderBlock]`（或更粗的 `MarkdownRenderElement` 等价物）**，对每一帧：
-   - 仅对**尾部窗口**（例如最近 K 个 block 或最近 M 个字符对应的 span）做 **重新 parse**；
-   - 用 **`replaceTailCount`**（语义对齐 vendor `replaceCount`）替换列表尾部，再 **拼接** 已冻结前缀的 attributed 结果，或走 TextKit 的 `replaceCharacters` 等价更新。
+2. **AST / 渲染元素层（已提供公开入口）**：``STMarkdownPipeline/processIncremental(_:)`` 在管线内维护 **窗口子串 → `STMarkdownRenderDocument`**，并输出 **`replaceTailCount`**（与 Vendor ``estimateReplaceCount`` 同式）及 ``mergedRenderDocument(previous:)``；与 **TextKit `replaceCharacters`** 的硬连接、与缓冲器内置 `findSafeBreakpoint` 一体化仍为后续工作。
 
 这样文档里说的「增量 AST」才名副其实：光有字符串 `safe` 切分没有 **元素级 tail replace**，长文流式仍会整段重跑，CPU 与闪动与 vendor 不在同一量级。
 
 #### 7.2.4 `parseLock` 是否要在 ST 照搬
 
-不必先照搬 **`NSLock` 静态单例**；更合理的顺序是：
+ST 已在 ``STMarkdownStructureParser`` 解析路径上使用 **`parseLock`**（见 §3 / §5）。若仍出现并发下的 cmark 竞态，再按压测结论考虑 **actor** 或更广临界区。
 
-- 先明确 **是否存在多线程同时进入同一条 cmark / swift-markdown 路径**（共享 parser、共享扩展注册、全局缓存等）。
-- 若压测或静态审查确认 **底层非线程安全**，再在 **`STMarkdownStructureParser`（或唯一 `parseDocument` 入口）** 外包一层 **最小临界区**（`NSLock`、`os_unfair_lock`、或 **`actor` 串行 parse**），与 `Sendable` 组合关系写进文档与单测。
+#### 7.2.5 ST 已提供的增量 API（`replaceTailCount` / 窗口 parse）
+
+以下对应 Vendor ``IncrementalParseResult`` 的 **可编程子集**（子串仍走完整 parse → normalize → adapt，与 Vendor 对窗口片段调用 `parseDocument` 同构）：
+
+| 类型 / 方法 | 作用 |
+|-------------|------|
+| ``STMarkdownIncrementalParameters`` | `canonicalMarkdown`、`lastCommittedExclusiveEnd`、`currentSafeExclusiveEnd`、`contextWindowSize`（默认 200）、`previousTotalRenderBlockCount` |
+| ``STMarkdownPipeline/processIncremental(_:)`` / ``STMarkdownEngine/processIncremental(_:)`` | 计算 `parseStart = max(0, lastCommitted - window)`、`parseEnd = currentSafeEnd`，对 `[parseStart, parseEnd)` 子串跑管线（**不**跑输入 sanitizer，见参数文档） |
+| ``STMarkdownIncrementalParseResult`` | `replaceTailCount`（与 Vendor ``estimateReplaceCount`` 相同启发式）、`windowRenderDocument`、`windowTableOfContents`、`mergedRenderDocument(previous:)` |
+| ``STMarkdownIncrementalParseResult/mergedRenderBlocks`` | 纯函数尾部拼接，便于单元测试与宿主实验 |
+
+**局限（与 Vendor 全量能力仍有差距）**：未内置 `findSafeBreakpoint` / `hasPendingStructure` 与缓冲器二合一；宿主需自行把 ``STMarkdownStreamBuffer`` 的安全上界喂给 `currentSafeExclusiveEnd`。合并后的 **标题 `anchorId`** 若需全局唯一，仍应对全文再跑一次 ``process(_:)`` 或自建 slug 策略。
 
 ---
 
