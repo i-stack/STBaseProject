@@ -2,7 +2,7 @@
 //  STMarkdownTOC.swift
 //  STBaseProject
 //
-//  目录（TOC）与标题锚点：对齐对比文档 P1「heading id、TOC 数据结构、滚动定位」最小可交付面。
+//  Created by 寒江孤影 on 2019/03/16.
 //
 
 import Foundation
@@ -13,6 +13,8 @@ import UIKit
 extension NSAttributedString.Key {
     /// 标题块在富文本上的稳定锚点 id（与 ``STMarkdownTOCItem/anchorId`` 一致）。
     public static let stMarkdownHeadingAnchor = NSAttributedString.Key("STMarkdown.headingAnchor")
+    /// 脚注引用在富文本上的逻辑标签（与 `[^label]` 中 `label` 一致，不含 `^`）。
+    public static let stMarkdownFootnoteLabel = NSAttributedString.Key("STMarkdown.footnoteLabel")
 }
 
 // MARK: - TOC item
@@ -52,6 +54,10 @@ extension STMarkdownInlineNode {
             return c.map { $0.st_plainTextForTOC() }.joined()
         case .image(_, let alt, _):
             return alt
+        case .footnoteReference(let label):
+            return "[^\(label)]"
+        case .inlineRawHTML(let raw):
+            return raw
         }
     }
 }
@@ -124,7 +130,9 @@ enum STMarkdownTOCExtraction {
                     self.collect(from: b, into: &items)
                 }
             }
-        case .paragraph, .codeBlock, .table, .mathBlock, .image, .thematicBreak:
+        case .details(_, let body):
+            for b in body { self.collect(from: b, into: &items) }
+        case .paragraph, .codeBlock, .table, .mathBlock, .image, .thematicBreak, .rawHTML:
             break
         }
     }

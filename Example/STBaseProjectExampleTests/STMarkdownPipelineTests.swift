@@ -1832,7 +1832,10 @@ final class STMarkdownPipelineTests: XCTestCase {
                     }
                     return block
                 }
-                return STMarkdownDocument(blocks: blocks)
+                return STMarkdownDocument(
+                    blocks: blocks,
+                    footnoteDefinitions: document.footnoteDefinitions
+                )
             }
         }
 

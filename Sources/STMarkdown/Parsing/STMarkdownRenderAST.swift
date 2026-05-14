@@ -25,6 +25,8 @@ public enum STMarkdownRenderBlock: Hashable, Sendable {
     case mathBlock(String)
     case image(url: String, altText: String, title: String?)
     case thematicBreak
+    case details(summary: [STMarkdownInlineNode], body: [STMarkdownRenderBlock])
+    case rawHTML(String)
 }
 
 public struct STMarkdownRenderListItem: Hashable, Sendable {

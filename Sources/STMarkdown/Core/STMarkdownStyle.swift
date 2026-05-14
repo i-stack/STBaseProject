@@ -7,6 +7,14 @@
 
 import UIKit
 
+/// 块级 / 行内 HTML 的降级渲染策略（安全默认：不解析为 Attributed 富标签树）。
+public enum STMarkdownRawHTMLPolicy: Sendable, Hashable {
+    /// 不输出可见字符。
+    case suppress
+    /// 以等宽小字展示原始片段（仍应视为不可信 HTML，不做标签解析）。
+    case literalMonospace
+}
+
 /// Markdown 样式配置。
 ///
 /// - Note: 含有大量 `UIColor` / `UIFont` / `UIEdgeInsets` 字段。UIKit 官方并未将其声明为
@@ -107,6 +115,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var codeBlockButtonRowReservedWidth: CGFloat
     /// 智能流式缓冲（``STMarkdownStreamBuffer``）的最小模块长度，过小会导致更频繁的模块切分。
     public var streamMinModuleLength: Int
+    /// ``STMarkdownRenderBlock/rawHTML`` 与 ``STMarkdownInlineNode/inlineRawHTML`` 的展示策略。
+    public var rawHTMLPolicy: STMarkdownRawHTMLPolicy
 
     public init(
         font: UIFont,
@@ -168,7 +178,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         codeBlockHeaderHeight: CGFloat = 0,
         codeBlockSeparatorSpacing: CGFloat = 8,
         codeBlockButtonRowReservedWidth: CGFloat = 120,
-        streamMinModuleLength: Int = 20
+        streamMinModuleLength: Int = 20,
+        rawHTMLPolicy: STMarkdownRawHTMLPolicy = .suppress
     ) {
         self.font = font
         self.boldFont = boldFont
@@ -230,6 +241,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.codeBlockSeparatorSpacing = codeBlockSeparatorSpacing
         self.codeBlockButtonRowReservedWidth = codeBlockButtonRowReservedWidth
         self.streamMinModuleLength = max(1, streamMinModuleLength)
+        self.rawHTMLPolicy = rawHTMLPolicy
     }
 
     public static let `default` = STMarkdownStyle(

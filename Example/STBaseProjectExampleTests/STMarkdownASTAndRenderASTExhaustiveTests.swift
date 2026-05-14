@@ -27,6 +27,8 @@ private enum InlineCaseTag: String, CaseIterable {
     case image
     case softBreak
     case strikethrough
+    case footnoteReference
+    case inlineRawHTML
 }
 
 private func st_tag(forInline node: STMarkdownInlineNode) -> InlineCaseTag {
@@ -40,6 +42,8 @@ private func st_tag(forInline node: STMarkdownInlineNode) -> InlineCaseTag {
     case .image: return .image
     case .softBreak: return .softBreak
     case .strikethrough: return .strikethrough
+    case .footnoteReference: return .footnoteReference
+    case .inlineRawHTML: return .inlineRawHTML
     }
 }
 
@@ -53,6 +57,8 @@ private enum BlockCaseTag: String, CaseIterable {
     case mathBlock
     case image
     case thematicBreak
+    case details
+    case rawHTML
 }
 
 private func st_tag(forBlock node: STMarkdownBlockNode) -> BlockCaseTag {
@@ -66,6 +72,8 @@ private func st_tag(forBlock node: STMarkdownBlockNode) -> BlockCaseTag {
     case .mathBlock: return .mathBlock
     case .image: return .image
     case .thematicBreak: return .thematicBreak
+    case .details: return .details
+    case .rawHTML: return .rawHTML
     }
 }
 
@@ -79,6 +87,8 @@ private enum RenderBlockCaseTag: String, CaseIterable {
     case mathBlock
     case image
     case thematicBreak
+    case details
+    case rawHTML
 }
 
 private func st_tag(forRenderBlock node: STMarkdownRenderBlock) -> RenderBlockCaseTag {
@@ -92,6 +102,8 @@ private func st_tag(forRenderBlock node: STMarkdownRenderBlock) -> RenderBlockCa
     case .mathBlock: return .mathBlock
     case .image: return .image
     case .thematicBreak: return .thematicBreak
+    case .details: return .details
+    case .rawHTML: return .rawHTML
     }
 }
 
@@ -114,6 +126,8 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
             .image(source: "https://i2", alt: "a2", title: nil),
             .softBreak,
             .strikethrough([.text("d")]),
+            .footnoteReference(label: "n1"),
+            .inlineRawHTML("<span>x</span>"),
         ]
         let tags = samples.map { st_tag(forInline: $0) }
         XCTAssertEqual(Set(tags), Set(InlineCaseTag.allCases))
@@ -204,6 +218,8 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
             .image(url: "https://u", altText: "al", title: "t"),
             .image(url: "https://u2", altText: "a2", title: nil),
             .thematicBreak,
+            .details(summary: [.text("s")], body: [.paragraph([.text("d")])]),
+            .rawHTML("<div/>"),
         ]
         let tags = samples.map { st_tag(forBlock: $0) }
         XCTAssertEqual(Set(tags), Set(BlockCaseTag.allCases))
@@ -261,6 +277,8 @@ final class STMarkdownASTAndRenderASTExhaustiveTests: XCTestCase {
             .image(url: "https://img", altText: "x", title: "y"),
             .image(url: "https://img2", altText: "x2", title: nil),
             .thematicBreak,
+            .details(summary: [.text("sum")], body: [.paragraph([.text("bd")])]),
+            .rawHTML("<p/>"),
         ]
         let tags = samples.map { st_tag(forRenderBlock: $0) }
         XCTAssertEqual(Set(tags), Set(RenderBlockCaseTag.allCases))

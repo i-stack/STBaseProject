@@ -30,7 +30,10 @@ private struct CoreAppendNormalizer: STMarkdownSemanticNormalizing {
     let suffix: String
     func normalize(_ document: STMarkdownDocument) -> STMarkdownDocument {
         let appended = STMarkdownBlockNode.paragraph([.text(self.suffix)])
-        return STMarkdownDocument(blocks: document.blocks + [appended])
+        return STMarkdownDocument(
+            blocks: document.blocks + [appended],
+            footnoteDefinitions: document.footnoteDefinitions
+        )
     }
 }
 

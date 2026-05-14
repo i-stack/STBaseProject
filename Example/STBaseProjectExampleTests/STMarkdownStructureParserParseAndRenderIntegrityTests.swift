@@ -103,6 +103,10 @@ private func st_collectInlineKinds(_ nodes: [STMarkdownInlineNode]) -> Set<Strin
             case .strikethrough(let c):
                 kinds.insert("strikethrough")
                 walk(c)
+            case .footnoteReference:
+                kinds.insert("footnoteReference")
+            case .inlineRawHTML:
+                kinds.insert("inlineRawHTML")
             }
         }
     }

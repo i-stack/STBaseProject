@@ -92,8 +92,12 @@ private func st_collectSemanticTextSegments(from blocks: [STMarkdownRenderBlock]
         case .codeBlock(_, let code):
             let t = code.trimmingCharacters(in: .whitespacesAndNewlines)
             if t.isEmpty == false { segments.append(t) }
-        case .table, .mathBlock, .image, .thematicBreak:
+        case .table, .mathBlock, .image, .thematicBreak, .rawHTML:
             break
+        case .details(let summary, let inner):
+            let t = st_joinInlinePlainText(summary).trimmingCharacters(in: .whitespacesAndNewlines)
+            if t.isEmpty == false { segments.append(t) }
+            segments.append(contentsOf: st_collectSemanticTextSegments(from: inner))
         }
     }
     return segments
@@ -243,6 +247,10 @@ private func st_inlinePlainText(_ node: STMarkdownInlineNode) -> String {
         return st_joinInlinePlainText(c)
     case .image(_, let alt, _):
         return alt
+    case .footnoteReference(let label):
+        return "[^\(label)]"
+    case .inlineRawHTML(let raw):
+        return raw
     }
 }
 
@@ -279,6 +287,11 @@ private func st_blockContainsText(_ block: STMarkdownBlockNode, text: String) ->
         return altText.contains(text) || (title?.contains(text) == true)
     case .thematicBreak:
         return false
+    case .details(let summary, let body):
+        return st_joinInlinePlainText(summary).contains(text)
+            || body.contains { st_blockContainsText($0, text: text) }
+    case .rawHTML(let html):
+        return html.contains(text)
     }
 }
 
@@ -306,6 +319,11 @@ private func st_renderBlockContainsText(_ block: STMarkdownRenderBlock, text: St
         return altText.contains(text) || (title?.contains(text) == true)
     case .thematicBreak:
         return false
+    case .details(let summary, let body):
+        return st_joinInlinePlainText(summary).contains(text)
+            || body.contains { st_renderBlockContainsText($0, text: text) }
+    case .rawHTML(let html):
+        return html.contains(text)
     }
 }
 

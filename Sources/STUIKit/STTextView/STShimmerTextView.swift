@@ -63,6 +63,20 @@ open class STShimmerTextView: UITextView {
         self.setup()
     }
 
+    /// - Parameter usingTextLayoutManager: `true` 时使用 TextKit 2 栈（iOS 16+）；低版本系统始终为 TextKit 1。
+    public convenience init(usingTextLayoutManager: Bool) {
+        if #available(iOS 16.0, *) {
+            if usingTextLayoutManager {
+                let shell = UITextView(usingTextLayoutManager: true)
+                self.init(frame: .zero, textContainer: shell.textContainer)
+            } else {
+                self.init(frame: .zero, textContainer: nil)
+            }
+        } else {
+            self.init(frame: .zero, textContainer: nil)
+        }
+    }
+
     private func setup() {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.isEditable = false

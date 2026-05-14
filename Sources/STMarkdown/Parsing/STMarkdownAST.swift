@@ -17,6 +17,10 @@ public enum STMarkdownInlineNode: Hashable, Sendable {
     case image(source: String, alt: String, title: String?)
     case softBreak
     case strikethrough([STMarkdownInlineNode])
+    /// GFM 风格脚注引用（标签不含 `^` 前缀，例如 `"1"`、`"note"`）。
+    case footnoteReference(label: String)
+    /// swift-markdown 解析到的行内 HTML；渲染策略见 ``STMarkdownStyle/rawHTMLPolicy``。
+    case inlineRawHTML(String)
 }
 
 public enum STMarkdownCheckbox: Hashable, Sendable {
@@ -72,11 +76,28 @@ public enum STMarkdownBlockNode: Hashable, Sendable {
     case mathBlock(String)
     case image(url: String, altText: String, title: String?)
     case thematicBreak
+    /// 从 ``HTMLBlock`` 识别的 `<details>`（折叠语义由宿主 UI 承载时，渲染侧先展开为缩进块）。
+    case details(summary: [STMarkdownInlineNode], body: [STMarkdownBlockNode])
+    /// 块级原始 HTML；默认不当作富文本解析，见 ``STMarkdownRawHTMLPolicy``。
+    case rawHTML(String)
+}
+
+/// 脚注定义体（`[^label]:` 行抽取）；与 ``STMarkdownInlineNode/footnoteReference(label:)`` 配对。
+public struct STMarkdownFootnoteDefinition: Hashable, Sendable {
+    public let content: [STMarkdownInlineNode]
+
+    public init(content: [STMarkdownInlineNode]) {
+        self.content = content
+    }
 }
 
 public struct STMarkdownDocument: Hashable, Sendable {
     public let blocks: [STMarkdownBlockNode]
-    public init(blocks: [STMarkdownBlockNode]) {
+    /// 从正文剥离的脚注定义；引用仍以内联 ``STMarkdownInlineNode/footnoteReference`` 表示。
+    public let footnoteDefinitions: [String: STMarkdownFootnoteDefinition]
+
+    public init(blocks: [STMarkdownBlockNode], footnoteDefinitions: [String: STMarkdownFootnoteDefinition] = [:]) {
         self.blocks = blocks
+        self.footnoteDefinitions = footnoteDefinitions
     }
 }

@@ -58,9 +58,9 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.shimmerTextView.renderedAttributedText
     }
 
-    public init(frame: CGRect) {
+    public init(frame: CGRect, usesTextLayoutManager: Bool = false) {
         super.init(
-            textView: STShimmerTextView(usingTextLayoutManager: false),
+            textView: STShimmerTextView(usingTextLayoutManager: usesTextLayoutManager),
             frame: frame,
             style: .default,
             advancedRenderers: .empty,
@@ -72,9 +72,10 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     public convenience init(
         style: STMarkdownStyle = .default,
         advancedRenderers: STMarkdownAdvancedRenderers = .empty,
-        engine: STMarkdownEngine = STMarkdownEngine()
+        engine: STMarkdownEngine = STMarkdownEngine(),
+        usesTextLayoutManager: Bool = false
     ) {
-        self.init(frame: .zero)
+        self.init(frame: .zero, usesTextLayoutManager: usesTextLayoutManager)
         self.applyConfigurationCommon(
             style: style,
             advancedRenderers: advancedRenderers,

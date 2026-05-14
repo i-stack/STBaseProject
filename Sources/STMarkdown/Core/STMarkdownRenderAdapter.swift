@@ -25,8 +25,12 @@ public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
 
     public func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument {
         var slugger = STMarkdownAnchorSlugRegistry()
-        let blocks = document.blocks.map { self.makeRenderBlock(from: $0, listLevel: 0, slugger: &slugger) }
-        return STMarkdownRenderDocument(blocks: blocks)
+        let mainBlocks = document.blocks.map { self.makeRenderBlock(from: $0, listLevel: 0, slugger: &slugger) }
+        let merged = STMarkdownFootnoteSectionBuilder.appendingSectionIfNeeded(
+            document: document,
+            renderBlocks: mainBlocks
+        )
+        return STMarkdownRenderDocument(blocks: merged)
     }
 }
 
@@ -55,6 +59,13 @@ private extension STMarkdownRenderAdapter {
             return .image(url: url, altText: altText, title: title)
         case .thematicBreak:
             return .thematicBreak
+        case .details(let summary, let body):
+            return .details(
+                summary: summary,
+                body: body.map { self.makeRenderBlock(from: $0, listLevel: listLevel, slugger: &slugger) }
+            )
+        case .rawHTML(let html):
+            return .rawHTML(html)
         }
     }
 
