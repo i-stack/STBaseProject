@@ -91,15 +91,16 @@ final class STMarkdownStreamBufferTests: XCTestCase {
     }
 
     func testMultiAppendWithoutNewSafePrefixKeepsCommittedStable() {
-        // 使用 `##` 而非单行 `# `：单 H1 且以 `\n\n` 结尾时会触发 `shouldDeferCommitAwaitingPossibleSecondTopLevelHeading`，
-        // 后续追加若去掉该后缀，defer 解除并可能把 `lastSafe` 顶到文末，导致 committed 突然变长，与本用例「仅增长尾部」假设冲突。
+        // 1) 使用 `##` 避免单 H1 + `\n\n` 结尾触发的 `shouldDeferCommitAwaitingPossibleSecondTopLevelHeading` 与后续追加的交互。
+        // 2) `findModuleBoundaries` 在尾部「未闭合段落」上若 `tailUTF16 >= minModuleLength`，会把 `text.endIndex`
+        //    并入边界，pending 过长时 committed 会合法地扩展；本用例只追加极少字符，使 tail 仍低于阈值。
         let buffer = STMarkdownStreamBuffer(minModuleLength: 10)
         let first = buffer.append("## Section\n\nFirst block is long enough.\n\n")
         XCTAssertFalse(first.completeModules.isEmpty)
         let committedAfterFirst = buffer.committedSafePrefix
-        _ = buffer.append("still ")
-        _ = buffer.append("typing ")
-        _ = buffer.append("pending tail without new paragraph break")
+        _ = buffer.append("a")
+        _ = buffer.append("b")
+        _ = buffer.append("c")
         XCTAssertEqual(buffer.committedSafePrefix, committedAfterFirst)
     }
 

@@ -173,6 +173,86 @@
 3. **用压测结论决定并发保护形态。**  
    若压测未暴露问题，不必急着引入全局锁；若暴露 parser 级竞态，再补最小串行化保护。
 
+### 7.2 P0：增量 AST、`replaceCount`、parser 级锁（实现语义对照）
+
+本节把 vendor 源码里的名词落到「ST 若要补齐，大致要做什么」，不等同于逐 API 抄过去。
+
+#### 7.2.1 Vendor：`IncrementalParseResult` 在解决什么问题
+
+`MarkdownParser.parseIncremental(...)` 大致顺序是：`detectPendingStructure` → `findSafeBreakpoint` 得到 **`safePosition`** → 从 `lastSafePosition` 向前取 **`contextWindowSize`** 字符得到 `parseStart`，对 `[parseStart, safePosition)` 子串 **`parseDocument` + `render`**，得到 **`newElements`**；同一次调用里还会 **`extractHeadings`** 得到 **`tocItems`**。
+
+**`replaceCount`** 的含义（见 vendor 注释）：因为解析窗口**向前回溯**了 `contextWindowSize`，新解析出的块可能与「上一轮已挂到 UI 上的尾部块」在语义上重叠或已被修正，需要从**元素列表尾部**按个数丢掉/替换旧元素，避免尾部重复或结构纠错失败。实现上由 `estimateReplaceCount(previousElementCount:contextWindowSize:parseStart:lastSafePosition:)` 估算。
+
+**`parseLock`**：vendor 在真正走 swift-markdown / cmark 的路径上用 **`NSLock()`** 包一层，注释写明用于避免 **swift-cmark 在多线程并发挂载语法扩展时崩溃**；与视图侧的 `renderQueue`、版本号等是不同层级的保护。
+
+#### 7.2.2 ST：当前断点与差距
+
+| 概念 | Vendor | ST（当前） |
+|------|--------|------------|
+| 流式安全切分 | `lastSafePosition` 与 parser 协同 | `STMarkdownStreamBuffer` 的 **`lastSafeUpperBoundOffset`**，仅字符串边界 |
+| 解析范围 | 回溯窗口 + 子串 parse | 每次 **`STMarkdownEngine.process` → 整段管线** 为主 |
+| 增量产物 | `newElements` + **`replaceCount`** + `tocItems` | 无元素级 **`newBlocks`/`replaceTailCount`** 公开形态 |
+| 并发 | **`parseLock`** 串行化 cmark 路径 | `STMarkdownEngine` 文档约定 **Sendable** 组件时可多线程 `process`，**无** vendor 同款 parser 级锁 |
+
+#### 7.2.3 ST 侧「增量 AST」若要落地，建议拆成两层
+
+1. **缓冲层（已有方向）**：继续用 `STMarkdownStreamBuffer` 决定「这一帧可安全提交给渲染器的 markdown 子串」（对齐 vendor 的 safe 边界思想，但 ST 用 UTF-16/字符偏移持久化，避免 `String.Index` 失效）。
+2. **AST / 渲染元素层（待建）**：在管线结果或旁路缓存中维护 **`[STMarkdownRenderBlock]`（或更粗的 `MarkdownRenderElement` 等价物）**，对每一帧：
+   - 仅对**尾部窗口**（例如最近 K 个 block 或最近 M 个字符对应的 span）做 **重新 parse**；
+   - 用 **`replaceTailCount`**（语义对齐 vendor `replaceCount`）替换列表尾部，再 **拼接** 已冻结前缀的 attributed 结果，或走 TextKit 的 `replaceCharacters` 等价更新。
+
+这样文档里说的「增量 AST」才名副其实：光有字符串 `safe` 切分没有 **元素级 tail replace**，长文流式仍会整段重跑，CPU 与闪动与 vendor 不在同一量级。
+
+#### 7.2.4 `parseLock` 是否要在 ST 照搬
+
+不必先照搬 **`NSLock` 静态单例**；更合理的顺序是：
+
+- 先明确 **是否存在多线程同时进入同一条 cmark / swift-markdown 路径**（共享 parser、共享扩展注册、全局缓存等）。
+- 若压测或静态审查确认 **底层非线程安全**，再在 **`STMarkdownStructureParser`（或唯一 `parseDocument` 入口）** 外包一层 **最小临界区**（`NSLock`、`os_unfair_lock`、或 **`actor` 串行 parse**），与 `Sendable` 组合关系写进文档与单测。
+
+---
+
+### 7.3 P1：TOC、footnote（从「块里有标题」到「可导航产品能力」）
+
+#### 7.3.1 TOC（目录）
+
+Vendor 除 `MarkdownTOCItem` 数据结构外，还把 **`tocItems` 放进 `IncrementalParseResult`**，视图层有 **`onTOCItemTap`、`generateTOCView`、`scrollToTOCItem`** 等一体面。
+
+ST 若要做到 **P1 可交付**：
+
+- **模型**：为每个 heading 生成稳定 **锚点 id**（GitHub slug 规则或自定义），输出 **`STMarkdownTOCItem`（level、title、id、可选 sourceRange）**。
+- **抽取**：在 `STMarkdownStructureParser` / AST 遍历中集中收集，避免散落在 `STMarkdownAttributedStringRenderer`。
+- **宿主 API**：与 vendor 对齐的最小面可以是：`tableOfContents: [STMarkdownTOCItem]` + **`scrollToTOCItem(id:)`**（内部映射到 `NSRange` 或 layout fragment，驱动 `UITextView.scrollRangeToVisible` 或外层 `UIScrollView`）。
+
+#### 7.3.2 Footnote（脚注）
+
+Vendor 有 **脚注预处理、缓存、延迟脚注视图** 链路；ST 当前 **citation 角标**（如 `STMarkdownNumberBadgeAttachment`）是另一条产品语义，**不能**当作 CommonMark/GFM 风格 footnote 的完成态。
+
+P1 建议：
+
+- **AST**：增加 `footnoteReference` / `footnoteDefinition`（或扩展 swift-markdown 插件）与 **编号/反向链接** 规则。
+- **渲染**：正文角标 + 文末脚注区（或侧栏）与 **citation** 分流配置，避免两套角标语义混在一个 attachment key 上。
+
+---
+
+### 7.4 P2：`<details>`、rawHTML、TextKit 2
+
+#### 7.4.1 `details` / 折叠块
+
+Vendor `MarkdownRenderElement` 级有 **`details`** 一类块。ST 若要做：
+
+- 先 **`STMarkdownBlockNode` / `STMarkdownRenderBlock`** 扩展，再 UI（折叠态可升宿主状态，避免写死在单一 `UITextView`）。
+
+#### 7.4.2 `rawHTML`
+
+Vendor 有 **`rawHTML(String)`** 分支；ST 侧 `STHtmlNormalizeRule` 等已表明 **下游不消费原始 HTML**。若产品强需求，应单独做 **白名单标签 + 安全渲染**（甚至独立 `WKWebView` 沙箱），不宜默认并进 `NSAttributedString` 主路径。
+
+#### 7.4.3 TextKit 2
+
+Vendor 核心视图走 **`NSTextContentStorage` + `NSTextLayoutManager`**（`MarkdownTextViewTK2.swift`）；ST 主路径 **`usingTextLayoutManager: false`**（TextKit 1）。
+
+**P2 迁移**适合在出现明确瓶颈时立项，例如：超长文档排版性能、复杂附件 provider、与系统选区/无障碍行为强绑定。与 ST 当前 **表格 Collection + attachment overlay** 的组合是否迁 TK2 需要 **单独架构评估**，不宜与「流式增量 AST」同一迭代混谈。
+
 ---
 
 ## 8. 参考链接
@@ -184,11 +264,10 @@
 
 ## 9. 仍可深入补充的维度（未在文中逐条展开）
 
-若要做「实现级」迁移清单，建议后续按需补小节或链接到具体行号：
+若要做「实现级」迁移清单，建议后续按需补小节或链接到具体行号。**增量解析 / replaceCount / parser 锁 / TOC-footnote-TK2** 的落地顺序与语义已集中在 **第 7.2–7.4 节**。
 
 - **`MarkdownConfiguration` 全字段** 与 **`STMarkdownStyle` + Pipeline** 的逐项字段映射表（体量最大）。
 - **`MarkdownViewTextKit` / `MarkdownDisplayView.swift`** 内生命周期、高度通知（vendor `notifyHeightChange` 命名）与 **`STMarkdownBaseTextView.publishContentLayoutHeightNotificationIfNeeded`** 的逐项对照。
-- **增量解析**：`IncrementalParseResult.replaceCount` 回溯策略与 ST **全量重渲染** 的等价性与性能差异。
 - **无障碍**：Vendor TK2 栈与 ST `UITextView` 的 **accessibility** 差异。
 - **许可证**：若从 vendor 复制 **KaTeX 字体文件**，需单独核对字体与 KaTeX 的许可条款；ST 当前以 **SwiftMath** 为主。
 
