@@ -36,6 +36,7 @@ open class STShimmerTextView: UITextView {
     /// 为 false 时，新增 delta 中最后一个换行前的内容会立即显示，仅最后一行保留动画。
     public var animateAcrossNewlines: Bool = false
     public var suppressSystemTextMenu: Bool = false
+    public var onAnimationStateChange: ((Bool) -> Void)?
     private var displayLink: CADisplayLink?
     private var animatingTokens: [AnimatingToken] = []
     /// 最终目标态的 attributed text（全不透明），不含任何动画中间状态的 alpha 值。
@@ -51,6 +52,10 @@ open class STShimmerTextView: UITextView {
 
     public var renderedAttributedText: NSAttributedString {
         return _baseAttributedText
+    }
+
+    public var isAnimatingTextReveal: Bool {
+        self.displayLink != nil && !self.animatingTokens.isEmpty
     }
 
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
@@ -385,11 +390,16 @@ open class STShimmerTextView: UITextView {
         let link = CADisplayLink(target: self, selector: #selector(self.handleDisplayLink))
         link.add(to: .main, forMode: .common)
         self.displayLink = link
+        self.onAnimationStateChange?(true)
     }
 
     private func stopDisplayLink() {
+        let wasAnimating = self.displayLink != nil
         self.displayLink?.invalidate()
         self.displayLink = nil
+        if wasAnimating {
+            self.onAnimationStateChange?(false)
+        }
     }
 
     @objc private func handleDisplayLink() {

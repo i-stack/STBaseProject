@@ -13,6 +13,12 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         case incremental
     }
 
+    private struct PendingAnimatedSuffix {
+        let generation: Int
+        let suffix: NSAttributedString
+        let trailingSuffix: NSAttributedString?
+    }
+
     public var tokenFadeDuration: TimeInterval {
         get { self.shimmerTextView.tokenFadeDuration }
         set { self.shimmerTextView.tokenFadeDuration = newValue }
@@ -30,11 +36,17 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         set { self.shimmerTextView.animateAcrossNewlines = newValue }
     }
 
+    /// 流式动画 / 容器尾段延迟追加的兜底超时；超时后强制收口，避免宿主一直等不到完成态。
+    public var streamingAnimationWatchdogTimeout: TimeInterval = 4.0
+
     private var smartStreamBuffer: STMarkdownStreamBuffer?
     private var smartStreamingSessionActive = false
     private var isApplyingSmartStreamMarkdownUpdate = false
     private var streamingAnimationGeneration: Int = 0
     private var pendingStreamingSuffixWorkItem: DispatchWorkItem?
+    private var pendingAnimatedSuffix: PendingAnimatedSuffix?
+    private var streamingWatchdogWorkItem: DispatchWorkItem?
+    private var streamingWatchdogGeneration: Int = 0
     /// 上一帧已交给 ``setMarkdown(_:animated:)`` 的「安全前缀」展示串（经 ``stripUnclosedTailMarkers``）。
     /// 当缓冲器仅增长尾部、``committedSafePrefix`` 不变时跳过整段重解析，降低流式 CPU 占用（对齐对比文档 P0）。
     private var lastSmartStreamRenderedDisplayMarkdown: String?
@@ -45,6 +57,11 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     /// 是否处于 ``beginSmartMarkdownStreaming()`` 开启的智能缓冲流式会话中。
     public var isSmartMarkdownStreamingActive: Bool {
         self.smartStreamingSessionActive
+    }
+
+    /// true 表示没有待执行的容器延迟尾段，也没有进行中的文本 reveal 动画。
+    public var isStreamingAnimationIdle: Bool {
+        self.pendingAnimatedSuffix == nil && self.shimmerTextView.isAnimatingTextReveal == false
     }
 
     /// 会话中的完整累积 Markdown（含尚未通过模块检测的尾部）；非会话中为 `nil`。
@@ -79,6 +96,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
             engine: STMarkdownEngine(),
             accessibilityTraits: [.staticText, .updatesFrequently]
         )
+        self.installStreamingAnimationObservers()
     }
 
     public convenience init(
@@ -104,17 +122,22 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
             engine: STMarkdownEngine(),
             accessibilityTraits: [.staticText, .updatesFrequently]
         )
+        self.installStreamingAnimationObservers()
     }
 
     public func reset() {
         self.invalidatePendingStreamingAnimation()
+        self.invalidateStreamingAnimationWatchdog()
         self.cancelSmartMarkdownStreamingSession()
         self.shimmerTextView.reset()
         self.resetBaseState()
     }
 
     public func finishStreaming() {
+        self.flushPendingAnimatedSuffixIfNeeded()
         self.shimmerTextView.finishAnimations()
+        self.invalidateStreamingAnimationWatchdog()
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
     }
 
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
@@ -279,6 +302,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         defer { self.isApplyingSmartStreamMarkdownUpdate = false }
         self.setMarkdown(md, animated: false)
         self.rawMarkdown = snapshot
+        self.invalidateStreamingAnimationWatchdog()
         self.publishContentLayoutHeightNotificationIfNeeded(force: true)
     }
 
@@ -654,32 +678,107 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         shouldDelay: Bool
     ) {
         let generation = self.streamingAnimationGeneration
-        let applySuffix = { [weak self] in
-            guard let self, self.streamingAnimationGeneration == generation else { return }
-            self.pendingStreamingSuffixWorkItem = nil
-            self.shimmerTextView.appendAttributedText(suffix, animated: true)
-            if let trailingSuffix, trailingSuffix.length > 0 {
-                self.shimmerTextView.appendAttributedText(trailingSuffix, animated: false)
-            }
-            self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
-        }
+        self.pendingAnimatedSuffix = PendingAnimatedSuffix(
+            generation: generation,
+            suffix: suffix,
+            trailingSuffix: trailingSuffix
+        )
 
         if shouldDelay, self.containerRevealGapDuration > 0 {
-            let workItem = DispatchWorkItem(block: applySuffix)
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.applyPendingAnimatedSuffixIfNeeded(generation: generation, animated: true)
+            }
             self.pendingStreamingSuffixWorkItem = workItem
             DispatchQueue.main.asyncAfter(
                 deadline: .now() + self.containerRevealGapDuration,
                 execute: workItem
             )
         } else {
-            applySuffix()
+            self.applyPendingAnimatedSuffixIfNeeded(generation: generation, animated: true)
         }
+        self.feedStreamingAnimationWatchdogIfNeeded()
     }
 
     private func invalidatePendingStreamingAnimation() {
         self.streamingAnimationGeneration += 1
         self.pendingStreamingSuffixWorkItem?.cancel()
         self.pendingStreamingSuffixWorkItem = nil
+        self.pendingAnimatedSuffix = nil
+        self.invalidateStreamingAnimationWatchdog()
+    }
+
+    private func installStreamingAnimationObservers() {
+        self.shimmerTextView.onAnimationStateChange = { [weak self] _ in
+            self?.feedStreamingAnimationWatchdogIfNeeded()
+        }
+    }
+
+    private func applyPendingAnimatedSuffixIfNeeded(generation: Int, animated: Bool) {
+        guard self.streamingAnimationGeneration == generation,
+              let pending = self.pendingAnimatedSuffix,
+              pending.generation == generation else {
+            return
+        }
+        self.pendingStreamingSuffixWorkItem?.cancel()
+        self.pendingStreamingSuffixWorkItem = nil
+        self.pendingAnimatedSuffix = nil
+        self.shimmerTextView.appendAttributedText(pending.suffix, animated: animated)
+        if let trailingSuffix = pending.trailingSuffix, trailingSuffix.length > 0 {
+            self.shimmerTextView.appendAttributedText(trailingSuffix, animated: false)
+        }
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+        self.feedStreamingAnimationWatchdogIfNeeded()
+    }
+
+    private func flushPendingAnimatedSuffixIfNeeded() {
+        guard let pending = self.pendingAnimatedSuffix else { return }
+        self.pendingStreamingSuffixWorkItem?.cancel()
+        self.pendingStreamingSuffixWorkItem = nil
+        self.pendingAnimatedSuffix = nil
+        self.shimmerTextView.appendAttributedText(pending.suffix, animated: false)
+        if let trailingSuffix = pending.trailingSuffix, trailingSuffix.length > 0 {
+            self.shimmerTextView.appendAttributedText(trailingSuffix, animated: false)
+        }
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+    }
+
+    private func feedStreamingAnimationWatchdogIfNeeded() {
+        self.streamingWatchdogWorkItem?.cancel()
+        self.streamingWatchdogWorkItem = nil
+
+        guard self.streamingAnimationWatchdogTimeout > 0,
+              self.isStreamingAnimationIdle == false else {
+            return
+        }
+
+        self.streamingWatchdogGeneration += 1
+        let generation = self.streamingWatchdogGeneration
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self, self.streamingWatchdogGeneration == generation else { return }
+            self.forceFinishStreamingAnimationIfNeeded()
+        }
+        self.streamingWatchdogWorkItem = workItem
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + self.streamingAnimationWatchdogTimeout,
+            execute: workItem
+        )
+    }
+
+    private func invalidateStreamingAnimationWatchdog() {
+        self.streamingWatchdogGeneration += 1
+        self.streamingWatchdogWorkItem?.cancel()
+        self.streamingWatchdogWorkItem = nil
+    }
+
+    private func forceFinishStreamingAnimationIfNeeded() {
+        guard self.isStreamingAnimationIdle == false else {
+            self.invalidateStreamingAnimationWatchdog()
+            return
+        }
+        self.flushPendingAnimatedSuffixIfNeeded()
+        self.shimmerTextView.finishAnimations()
+        self.invalidateStreamingAnimationWatchdog()
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
     }
 
     private func render(_ markdown: String) -> NSAttributedString {
