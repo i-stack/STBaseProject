@@ -112,6 +112,14 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
             ? Self.stripUnclosedTailMarkers(in: markdown)
             : markdown
         let displayRendered = self.render(markdownForRender)
+        self.applySetMarkdownAnimatedDiff(markdown: markdown, displayRendered: displayRendered, animated: animated)
+    }
+
+    private func applySetMarkdownAnimatedDiff(
+        markdown: String,
+        displayRendered: NSAttributedString,
+        animated: Bool
+    ) {
         guard animated, !self.rawMarkdown.isEmpty else {
             self.applyFullReplace(markdown: markdown, rendered: displayRendered)
             return
@@ -288,6 +296,15 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.rawMarkdown = accumulated
     }
 
+    private func renderWithDocument(_ markdown: String) -> (NSAttributedString, STMarkdownRenderDocument) {
+        let result = self.engine.process(markdown)
+        self.updateTableOfContents(from: result)
+        if let customRenderer = self.customDocumentRenderer {
+            return (customRenderer(result.renderDocument), result.renderDocument)
+        }
+        return (self.renderer.render(document: result.renderDocument), result.renderDocument)
+    }
+
     private func applyFullReplace(markdown: String, rendered: NSAttributedString) {
         self.rawMarkdown = markdown
         self.shimmerTextView.setRenderedAttributedText(rendered)
@@ -316,12 +333,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     private func render(_ markdown: String) -> NSAttributedString {
-        let result = self.engine.process(markdown)
-        self.updateTableOfContents(from: result)
-        if let customRenderer = self.customDocumentRenderer {
-            return customRenderer(result.renderDocument)
-        }
-        return self.renderer.render(document: result.renderDocument)
+        self.renderWithDocument(markdown).0
     }
 
     /// 流式期间，若源 markdown 尾部存在**尚未闭合**的 delimiter token（例如只打了

@@ -206,6 +206,11 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         self.tableOfContents = result.tableOfContents
     }
 
+    /// 从渲染 AST 刷新目录（供流式 ``STMarkdownPipeline/processIncremental`` 合并结果等路径使用）。
+    internal func updateTableOfContents(from renderDocument: STMarkdownRenderDocument) {
+        self.tableOfContents = STMarkdownTOCExtraction.items(from: renderDocument)
+    }
+
     internal func renderMarkdown(_ markdown: String) -> NSAttributedString {
         let result = self.engine.process(markdown)
         self.updateTableOfContents(from: result)

@@ -72,4 +72,36 @@ final class STMarkdownIncrementalParseTests: XCTestCase {
         XCTAssertEqual(merged[0], prev[0])
         XCTAssertEqual(merged[1], newTail[0])
     }
+
+    /// 严格前缀增长时，在若干简单文档上合并结果应与整段 ``process`` 一致（对照对比文档 P0；复杂结构见管线单测扩展）。
+    func testIncrementalStrictPrefixGrowthMatchesFullProcess() {
+        let pipeline = STMarkdownPipeline(configuration: STMarkdownPipelineConfiguration(enableInputSanitizer: false))
+        let steps = [
+            "# A\n\n",
+            "# A\n\nSecond paragraph.",
+        ]
+        var merged: STMarkdownRenderDocument?
+        var prevDisplay = ""
+        for (i, step) in steps.enumerated() {
+            let full = pipeline.process(step).renderDocument
+            guard let currentMerged = merged else {
+                merged = full
+                prevDisplay = step
+                XCTAssertEqual(merged!.blocks, full.blocks, "initial step \(i)")
+                continue
+            }
+            let inc = pipeline.processIncremental(
+                STMarkdownIncrementalParameters(
+                    canonicalMarkdown: step,
+                    lastCommittedExclusiveEnd: prevDisplay.count,
+                    currentSafeExclusiveEnd: step.count,
+                    contextWindowSize: 200,
+                    previousTotalRenderBlockCount: currentMerged.blocks.count
+                )
+            )
+            merged = inc.mergedRenderDocument(previous: currentMerged)
+            prevDisplay = step
+            XCTAssertEqual(merged!.blocks, full.blocks, "after incremental step \(i)")
+        }
+    }
 }
