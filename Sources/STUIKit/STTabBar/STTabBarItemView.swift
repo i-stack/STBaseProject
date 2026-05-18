@@ -181,13 +181,11 @@ public class STTabBarItemView: UIView {
     
     /// 图文排版可用高度：`config.height` 与父视图（contentView）实际高度取较小，避免配置值与约束高度不一致时仍按大值排版
     private func effectiveBarHeightForImageTextLayout() -> CGFloat {
-        let configured = self.config?.height ?? 49
-        guard let superview = self.superview else { return max(1, configured) }
-        let measured = superview.bounds.height
-        if measured > 0.5 {
-            return max(1, min(configured, measured))
-        }
-        return max(1, configured)
+        let configured = max(1, self.config?.height ?? 49)
+        let measuredHeights = [self.bounds.height, self.superview?.bounds.height ?? 0]
+            .filter { $0 > 0.5 }
+        guard let measured = measuredHeights.min() else { return configured }
+        return max(1, min(configured, measured))
     }
     
     /// 将 `imageTopInset`、图标尺寸约束在可用高度内，避免 Auto Layout 无法同时满足
