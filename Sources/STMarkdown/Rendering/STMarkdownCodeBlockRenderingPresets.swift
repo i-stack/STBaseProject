@@ -30,4 +30,9 @@ public enum STMarkdownCodeBlockRenderingPresets {
     /// 富 attachment 预设：包含语法高亮、超长折叠 + 渐隐遮罩、按钮行预留以及全局缓存。
     /// 推荐生产环境优先使用。
     public typealias RichAttachment = STMarkdownCodeBlockRenderer
+
+    /// highlight.js 预设：通过 JavaScriptCore + highlight.js 生成 token 着色的 `NSAttributedString`。
+    /// 支持 20 种语言，结果按 `language|code` 为 key 缓存（10 MB）。
+    /// 适合需要真实语法着色但不需要 attachment 图像的场景；调用方最好从后台线程触发。
+    public typealias HighlightJS = STMarkdownCodeHighlighter
 }
