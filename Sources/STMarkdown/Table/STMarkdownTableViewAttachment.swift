@@ -17,7 +17,16 @@ public final class STMarkdownTableViewAttachment: NSTextAttachment {
     public let tableViewModel: STMarkdownTableViewModel
     public let style: STMarkdownStyle
     public let containerWidth: CGFloat
-    public var onCitationTap: ((String) -> Void)?
+    public var onCitationTap: ((String) -> Void)? {
+        didSet {
+            self._tableView?.onCitationTap = self.onCitationTap
+        }
+    }
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)? {
+        didSet {
+            self._tableView?.onExpandTable = self.onExpandTable
+        }
+    }
 
     private var _tableView: STMarkdownTableView?
     private var cachedSize: CGSize?
@@ -28,6 +37,9 @@ public final class STMarkdownTableViewAttachment: NSTextAttachment {
         view.tableData = self.tableViewModel
         view.onCitationTap = { [weak self] number in
             self?.onCitationTap?(number)
+        }
+        view.onExpandTable = { [weak self] tableViewModel in
+            self?.onExpandTable?(tableViewModel)
         }
         self._tableView = view
         return view

@@ -54,6 +54,12 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         }
     }
 
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)? {
+        didSet {
+            self.tableOverlayCoordinator.onExpandTable = self.onExpandTable
+        }
+    }
+
     public var isTextSelectionEnabled: Bool {
         get { self.textView.isSelectable }
         set { self.textView.isSelectable = newValue }

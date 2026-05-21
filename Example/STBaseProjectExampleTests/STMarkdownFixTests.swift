@@ -3,6 +3,7 @@
 //  1. STMarkdownMermaidRenderer.cacheKey 使用完整代码字符串，不再用 hashValue，消除碰撞风险
 //  2. STMarkdownTableViewModel 使用静态正则常量，不再在热路径重复编译
 //  3. STMarkdownTableView 添加 UICollectionViewDelegate，使 onCitationTap 回调可正常触发
+//  4. STMarkdownTableView 支持表格展开回调，宿主可呈现全屏详情页
 
 import XCTest
 import UIKit
@@ -371,5 +372,113 @@ final class STMarkdownTableViewCitationTapTests: XCTestCase {
             didSelectItemAt: IndexPath(item: 1, section: 0)
         )
         XCTAssertEqual(tappedCitation, "42", "第 1 列应触发 Citation:42 回调")
+    }
+
+    func testExpandTableTriggeredWhenSelectingCellWithoutCitation() {
+        let style = STMarkdownStyle.default
+        let tableView = STMarkdownTableView(style: style)
+        let table = STMarkdownTableModel(
+            header: nil,
+            rows: [[[.text("普通文本")]]]
+        )
+        let viewModel = STMarkdownTableViewModel(from: table, style: style)
+        tableView.tableData = viewModel
+
+        var expandedModel: STMarkdownTableViewModel?
+        tableView.onExpandTable = { expandedModel = $0 }
+
+        tableView.frame = CGRect(x: 0, y: 0, width: 375, height: 200)
+        tableView.layoutIfNeeded()
+
+        let collectionView = tableView.subviews.compactMap { $0 as? UICollectionView }.first
+        collectionView?.delegate?.collectionView?(
+            collectionView!,
+            didSelectItemAt: IndexPath(item: 0, section: 0)
+        )
+
+        XCTAssertTrue(expandedModel === viewModel, "点击无 citation 的 cell 应触发表格展开回调")
+    }
+
+    func testExpandTableNotTriggeredWhenSelectingCitationCell() {
+        let style = STMarkdownStyle.default
+        let tableView = STMarkdownTableView(style: style)
+        let table = STMarkdownTableModel(
+            header: nil,
+            rows: [[[.link(destination: "", children: [.text("Citation:7")])]]]
+        )
+        tableView.tableData = STMarkdownTableViewModel(from: table, style: style)
+
+        var expandCallCount = 0
+        var tappedCitation: String?
+        tableView.onExpandTable = { _ in expandCallCount += 1 }
+        tableView.onCitationTap = { tappedCitation = $0 }
+
+        tableView.frame = CGRect(x: 0, y: 0, width: 375, height: 200)
+        tableView.layoutIfNeeded()
+
+        let collectionView = tableView.subviews.compactMap { $0 as? UICollectionView }.first
+        collectionView?.delegate?.collectionView?(
+            collectionView!,
+            didSelectItemAt: IndexPath(item: 0, section: 0)
+        )
+
+        XCTAssertEqual(expandCallCount, 0, "citation cell 点击应优先走 citation 回调，不应误触发表格展开")
+        XCTAssertEqual(tappedCitation, "7")
+    }
+
+    func testHorizontalGradientHintHiddenForNonScrollableTable() {
+        let style = STMarkdownStyle.default
+        let tableView = STMarkdownTableView(style: style)
+        let table = STMarkdownTableModel(
+            header: nil,
+            rows: [[[.text("A")], [.text("B")]]]
+        )
+        tableView.tableData = STMarkdownTableViewModel(from: table, style: style)
+
+        tableView.frame = CGRect(x: 0, y: 0, width: 320, height: 80)
+        tableView.layoutIfNeeded()
+
+        let leftOpacity = self.gradientLayer(named: "STMarkdownTableLeftGradient", in: tableView)?.opacity
+        let rightOpacity = self.gradientLayer(named: "STMarkdownTableRightGradient", in: tableView)?.opacity
+        XCTAssertEqual(leftOpacity, 0, "窄表不应显示左侧渐变提示")
+        XCTAssertEqual(rightOpacity, 0, "窄表不应显示右侧渐变提示")
+    }
+
+    func testHorizontalGradientHintShownInitiallyForScrollableTable() {
+        let style = STMarkdownStyle.default
+        let tableView = STMarkdownTableView(style: style)
+        let wideText = String(repeating: "宽表内容", count: 24)
+        let table = STMarkdownTableModel(
+            header: nil,
+            rows: [[
+                [.text(wideText)],
+                [.text(wideText)],
+                [.text(wideText)]
+            ]]
+        )
+        tableView.tableData = STMarkdownTableViewModel(from: table, style: style)
+
+        tableView.frame = CGRect(x: 0, y: 0, width: 220, height: 80)
+        tableView.layoutIfNeeded()
+
+        let collectionView = tableView.subviews.compactMap { $0 as? UICollectionView }.first
+        XCTAssertNotNil(collectionView)
+
+        let leftLayer = self.gradientLayer(named: "STMarkdownTableLeftGradient", in: tableView)
+        let rightLayer = self.gradientLayer(named: "STMarkdownTableRightGradient", in: tableView)
+        XCTAssertEqual(leftLayer?.opacity, 0, "初始位于最左侧时不应显示左侧渐变")
+        XCTAssertEqual(rightLayer?.opacity, 1, "宽表首次出现时应显示右侧渐变提示")
+
+        guard let collectionView else { return }
+        let maxOffsetX = max(0, collectionView.contentSize.width - collectionView.bounds.width)
+        collectionView.contentOffset = CGPoint(x: maxOffsetX, y: 0)
+        collectionView.delegate?.scrollViewDidScroll?(collectionView)
+
+        XCTAssertEqual(leftLayer?.opacity, 1, "滚到最右侧后应显示左侧渐变")
+        XCTAssertEqual(rightLayer?.opacity, 0, "滚到最右侧后应隐藏右侧渐变")
+    }
+
+    private func gradientLayer(named name: String, in view: UIView) -> CAGradientLayer? {
+        view.layer.sublayers?.first(where: { $0.name == name }) as? CAGradientLayer
     }
 }

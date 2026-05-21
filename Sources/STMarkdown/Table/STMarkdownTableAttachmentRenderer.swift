@@ -11,9 +11,14 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
 
     /// 用于构建 STMarkdownTableViewModel 时传入的 advancedRenderers（主要为 inlineMath 渲染）
     public var advancedRenderers: STMarkdownAdvancedRenderers
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
 
-    public init(advancedRenderers: STMarkdownAdvancedRenderers = .empty) {
+    public init(
+        advancedRenderers: STMarkdownAdvancedRenderers = .empty,
+        onExpandTable: ((STMarkdownTableViewModel) -> Void)? = nil
+    ) {
         self.advancedRenderers = advancedRenderers
+        self.onExpandTable = onExpandTable
     }
 
     public func renderTable(_ table: STMarkdownTableModel, style: STMarkdownStyle) -> NSAttributedString? {
@@ -31,6 +36,7 @@ public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
             style: style,
             containerWidth: containerWidth > 0 ? containerWidth : 300
         )
+        attachment.onExpandTable = self.onExpandTable
         return NSAttributedString(attachment: attachment)
     }
 }

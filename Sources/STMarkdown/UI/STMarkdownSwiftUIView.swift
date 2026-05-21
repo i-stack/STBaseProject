@@ -18,6 +18,7 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
     public var onFootnoteTap: ((String) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
     public var onCitationTap: ((String) -> Void)?
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
 
     public init(
         markdown: String,
@@ -28,7 +29,8 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
         onLinkTap: ((URL) -> Void)? = nil,
         onFootnoteTap: ((String) -> Void)? = nil,
         onSelectionChange: ((String) -> Void)? = nil,
-        onCitationTap: ((String) -> Void)? = nil
+        onCitationTap: ((String) -> Void)? = nil,
+        onExpandTable: ((STMarkdownTableViewModel) -> Void)? = nil
     ) {
         self.markdown = markdown
         self.style = style
@@ -39,6 +41,7 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
         self.onFootnoteTap = onFootnoteTap
         self.onSelectionChange = onSelectionChange
         self.onCitationTap = onCitationTap
+        self.onExpandTable = onExpandTable
     }
 
     public func makeUIView(context: Context) -> STMarkdownTextView {
@@ -94,6 +97,7 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
         view.onFootnoteTap = self.onFootnoteTap
         view.onSelectionChange = self.onSelectionChange
         view.onCitationTap = self.onCitationTap
+        view.onExpandTable = self.onExpandTable
     }
 }
 
@@ -125,6 +129,7 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
     public var onFootnoteTap: ((String) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
     public var onCitationTap: ((String) -> Void)?
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
     /// 与 ``STMarkdownBaseTextView/onTableOfContentsChange`` 一致：目录随渲染刷新（含流式每帧）。
     public var onTableOfContentsChange: (([STMarkdownTOCItem]) -> Void)?
 
@@ -143,6 +148,7 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
         onFootnoteTap: ((String) -> Void)? = nil,
         onSelectionChange: ((String) -> Void)? = nil,
         onCitationTap: ((String) -> Void)? = nil,
+        onExpandTable: ((STMarkdownTableViewModel) -> Void)? = nil,
         onTableOfContentsChange: (([STMarkdownTOCItem]) -> Void)? = nil
     ) {
         self.markdown = markdown
@@ -159,6 +165,7 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
         self.onFootnoteTap = onFootnoteTap
         self.onSelectionChange = onSelectionChange
         self.onCitationTap = onCitationTap
+        self.onExpandTable = onExpandTable
         self.onTableOfContentsChange = onTableOfContentsChange
     }
 
@@ -216,6 +223,7 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
         view.onFootnoteTap = self.onFootnoteTap
         view.onSelectionChange = self.onSelectionChange
         view.onCitationTap = self.onCitationTap
+        view.onExpandTable = self.onExpandTable
         view.onTableOfContentsChange = self.onTableOfContentsChange
     }
 

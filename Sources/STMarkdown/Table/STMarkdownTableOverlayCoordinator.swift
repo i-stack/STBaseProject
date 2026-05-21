@@ -10,6 +10,7 @@ import UIKit
 final class STMarkdownTableOverlayCoordinator {
 
     var onCitationTap: ((String) -> Void)?
+    var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
 
     private weak var textView: UITextView?
     private var tableViewOverlays: [Int: STMarkdownTableView] = [:]
@@ -80,11 +81,20 @@ final class STMarkdownTableOverlayCoordinator {
                 if existing.tableData !== attachment.tableViewModel {
                     existing.tableData = attachment.tableViewModel
                 }
+                existing.onCitationTap = { [weak self] number in
+                    self?.onCitationTap?(number)
+                }
+                existing.onExpandTable = { [weak self] tableViewModel in
+                    self?.onExpandTable?(tableViewModel)
+                }
                 existing.frame = frame
             } else {
                 let tableView = attachment.tableView
                 tableView.onCitationTap = { [weak self] number in
                     self?.onCitationTap?(number)
+                }
+                tableView.onExpandTable = { [weak self] tableViewModel in
+                    self?.onExpandTable?(tableViewModel)
                 }
                 tableView.frame = frame
                 textView.addSubview(tableView)
