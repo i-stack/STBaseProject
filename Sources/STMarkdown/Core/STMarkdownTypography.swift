@@ -27,26 +27,14 @@ public enum STMarkdownTypography {
         case 3:
             return UIFont.st_systemFont(ofSize: 18, weight: .semibold)
         case 4:
-            return UIFont.st_systemFont(ofSize: 17, weight: .semibold)
+            return UIFont.st_systemFont(ofSize: 16, weight: .semibold)
         default:
-            // level 5、6 共用更小字重，避免与 H4 混淆。
-            return UIFont.st_systemFont(ofSize: 16, weight: .medium)
+            return UIFont.st_systemFont(ofSize: 15, weight: .semibold)
         }
     }
 
     public static func headingInsets(for level: Int) -> UIEdgeInsets {
-        switch level {
-        case 1:
-            return UIEdgeInsets(top: 32, left: 0, bottom: 10, right: 0)
-        case 2:
-            return UIEdgeInsets(top: 28, left: 0, bottom: 10, right: 0)
-        case 3:
-            return UIEdgeInsets(top: 24, left: 0, bottom: 8, right: 0)
-        case 4:
-            return UIEdgeInsets(top: 20, left: 0, bottom: 8, right: 0)
-        default:
-            return UIEdgeInsets(top: 16, left: 0, bottom: 6, right: 0)
-        }
+        return UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
     }
 
     public static func headingParagraphStyle(
