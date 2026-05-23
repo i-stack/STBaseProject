@@ -41,8 +41,8 @@ public final class STMarkdownTableView: UIView {
         self.gridLayout = STMarkdownTableGridLayout()
         self.collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.gridLayout)
         super.init(frame: .zero)
-        self.setupGradientLayers()
         self.setupCollectionView()
+        self.setupGradientLayers()
         self.applyStyle()
     }
 

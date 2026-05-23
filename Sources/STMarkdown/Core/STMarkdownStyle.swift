@@ -117,6 +117,13 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var streamMinModuleLength: Int
     /// ``STMarkdownRenderBlock/rawHTML`` 与 ``STMarkdownInlineNode/inlineRawHTML`` 的展示策略。
     public var rawHTMLPolicy: STMarkdownRawHTMLPolicy
+    /// 流式输出时的字符级 fade-in 动画开关。
+    /// `false` 时 ``STMarkdownStreamingTextView`` 的 ``tokenFadeDuration`` 强制为 0。
+    public var streamFadeInEnabled: Bool
+    /// 流式输出时的行级 CAGradientLayer 水平扫入动画开关。
+    /// `true` 时使用与 FluidMarkdown 相同的行级渐现效果，替代默认的字符级 foregroundColor 淡入。
+    /// `streamFadeInEnabled` 为 `false` 时此属性无效。
+    public var streamLineFadeEnabled: Bool
 
     public init(
         font: UIFont,
@@ -179,7 +186,9 @@ public struct STMarkdownStyle: @unchecked Sendable {
         codeBlockSeparatorSpacing: CGFloat = 8,
         codeBlockButtonRowReservedWidth: CGFloat = 120,
         streamMinModuleLength: Int = 20,
-        rawHTMLPolicy: STMarkdownRawHTMLPolicy = .suppress
+        rawHTMLPolicy: STMarkdownRawHTMLPolicy = .suppress,
+        streamFadeInEnabled: Bool = true,
+        streamLineFadeEnabled: Bool = false
     ) {
         self.font = font
         self.boldFont = boldFont
@@ -242,6 +251,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.codeBlockButtonRowReservedWidth = codeBlockButtonRowReservedWidth
         self.streamMinModuleLength = max(1, streamMinModuleLength)
         self.rawHTMLPolicy = rawHTMLPolicy
+        self.streamFadeInEnabled = streamFadeInEnabled
+        self.streamLineFadeEnabled = streamLineFadeEnabled
     }
 
     public static let `default` = STMarkdownStyle(

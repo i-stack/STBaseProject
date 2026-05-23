@@ -497,7 +497,7 @@ private extension STMarkdownAttributedStringRenderer {
             let layout = self.listLayout(for: item)
             let markerAttributes: [NSAttributedString.Key: Any] = [
                 .font: layout.markerFont,
-                .foregroundColor: self.style.textColor,
+                .foregroundColor: self.style.listMarkerColor ?? self.style.textColor,
                 .paragraphStyle: layout.paragraphStyle,
                 .baselineOffset: layout.baselineOffset,
             ]
@@ -657,12 +657,19 @@ private extension STMarkdownAttributedStringRenderer {
             let orderedIndex = item.orderedIndex ?? 1
             markerText = "\(orderedIndex).\t"
             let markerWidth = ceil(("\(orderedIndex)." as NSString).size(withAttributes: [.font: markerFont]).width)
-            contentIndent = firstLineIndent + markerWidth + 5
+            contentIndent = firstLineIndent + max(markerWidth + 5, self.style.listMarkerWidth)
             baselineOffset = 0
         } else {
-            markerText = item.level == 0 ? "\t●\t" : "\t○\t"
-            markerFont = .st_systemFont(ofSize: 7, weight: .regular)
-            contentIndent = firstLineIndent + 13
+            let bulletSymbol: String
+            switch item.level {
+            case 0: bulletSymbol = "●"
+            case 1: bulletSymbol = "○"
+            default: bulletSymbol = "▪"
+            }
+            markerText = "\(bulletSymbol)\t"
+            let bulletSize = max(round(self.style.font.pointSize * 0.44), 5)
+            markerFont = .st_systemFont(ofSize: bulletSize, weight: .regular)
+            contentIndent = firstLineIndent + self.style.listMarkerWidth
             let baseMidline = (self.style.font.ascender + self.style.font.descender) / 2
             let markerMidline = (markerFont.ascender + markerFont.descender) / 2
             baselineOffset = baseMidline - markerMidline

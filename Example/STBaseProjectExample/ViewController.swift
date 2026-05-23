@@ -41,7 +41,8 @@ class ViewController: BaseViewController {
         self.dataSouces["STTimer 功能测试"] = STTimerTestViewController()
         self.dataSouces["STTools 手动测试"] = STToolsManualTestViewController()
         self.dataSouces["Markdown 流式渲染测试"] = STMarkdownStreamingTestViewController()
-        
+        self.dataSouces["SSE 流式渲染测试"] = STSSEViewController(nibName: "STSSEViewController", bundle: nil)
+
         self.tableView.reloadData()
     }
 }

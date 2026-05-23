@@ -34,6 +34,15 @@ alwaysApply: true
 
 并按其中 GR-002/003/004/005/007/008 规则执行：描述不清时先输出前置确认块；锁定单一根因；按四段式输出；给最小修复；不格式化代码；声明已覆盖/未覆盖/残留风险。
 
+# global problem analysis
+
+收到任何问题时，须遵循 `problem-analysis` skill **全文**（不得用本段代替）。执行前必须先读取：
+
+- `~/.cursor/skills/problem-analysis/SKILL.md`
+- `~/.cursor/skills/problem-analysis/references/problem_analysis.md`
+
+并按其中 PA-001/002/003 规则执行：先检验问题的逻辑有效性；从第一性原理拆解真实需求并评估当前路径是否最优；充分理解后再回复。发现实质性问题时输出 `问题分析` 块，问题清晰时静默完成。
+
 # ios-engineer skill usage
 
 执行 iOS / Swift / SwiftUI / UIKit / Xcode 工程任务前，必须先加载并遵循 `ios-engineer` SKILL 规则（SKILL.md + references/rule_index.md 中 `status=active` 的 IR / SYM / ROUTE / OUT 条目）。

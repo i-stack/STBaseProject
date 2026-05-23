@@ -21,7 +21,10 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     public var tokenFadeDuration: TimeInterval {
         get { self.shimmerTextView.tokenFadeDuration }
-        set { self.shimmerTextView.tokenFadeDuration = newValue }
+        set {
+            _requestedTokenFadeDuration = newValue
+            self.shimmerTextView.tokenFadeDuration = self.markdownStyle.streamFadeInEnabled ? newValue : 0
+        }
     }
 
     public var customDocumentRenderer: ((STMarkdownRenderDocument) -> NSAttributedString)?
@@ -47,6 +50,8 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     private var pendingAnimatedSuffix: PendingAnimatedSuffix?
     private var streamingWatchdogWorkItem: DispatchWorkItem?
     private var streamingWatchdogGeneration: Int = 0
+    /// tokenFadeDuration 最后一次被外部请求设置的值；样式允许 fade 时以此值写入 shimmerTextView。
+    private var _requestedTokenFadeDuration: TimeInterval = 0.3
     /// 上一帧已交给 ``setMarkdown(_:animated:)`` 的「安全前缀」展示串（经 ``stripUnclosedTailMarkers``）。
     /// 当缓冲器仅增长尾部、``committedSafePrefix`` 不变时跳过整段重解析，降低流式 CPU 占用（对齐对比文档 P0）。
     private var lastSmartStreamRenderedDisplayMarkdown: String?
@@ -87,7 +92,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.shimmerTextView.renderedAttributedText
     }
 
-    public init(frame: CGRect, usesTextLayoutManager: Bool = false) {
+    public init(frame: CGRect, usesTextLayoutManager: Bool = true) {
         super.init(
             textView: STShimmerTextView(usingTextLayoutManager: usesTextLayoutManager),
             frame: frame,
@@ -103,7 +108,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         style: STMarkdownStyle = .default,
         advancedRenderers: STMarkdownAdvancedRenderers = .empty,
         engine: STMarkdownEngine = STMarkdownEngine(),
-        usesTextLayoutManager: Bool = false
+        usesTextLayoutManager: Bool = true
     ) {
         self.init(frame: .zero, usesTextLayoutManager: usesTextLayoutManager)
         self.applyConfigurationCommon(
@@ -115,7 +120,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     public required init?(coder: NSCoder) {
         super.init(
-            textView: STShimmerTextView(usingTextLayoutManager: false),
+            textView: STShimmerTextView(usingTextLayoutManager: true),
             coder: coder,
             style: .default,
             advancedRenderers: .empty,
@@ -307,6 +312,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     }
 
     internal override func configurationDidChangeRerender() {
+        self.syncTokenFadeDurationFromStyle()
         if self.smartStreamingSessionActive {
             self.smartStreamBuffer?.updateMinModuleLength(self.markdownStyle.streamMinModuleLength)
             self.applySmartStreamingPresentation(animated: false, force: true)
@@ -322,6 +328,23 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.lastSmartStreamRenderedCanonicalMarkdown = nil
         self.lastSmartStreamRenderDocument = nil
         self.lastSmartStreamingRenderMode = nil
+    }
+
+    internal override func applyConfigurationCommon(
+        style: STMarkdownStyle,
+        advancedRenderers: STMarkdownAdvancedRenderers,
+        engine: STMarkdownEngine
+    ) {
+        super.applyConfigurationCommon(style: style, advancedRenderers: advancedRenderers, engine: engine)
+        self.syncTokenFadeDurationFromStyle()
+    }
+
+    private func syncTokenFadeDurationFromStyle() {
+        let isLineFade = self.markdownStyle.streamFadeInEnabled && self.markdownStyle.streamLineFadeEnabled
+        self.shimmerTextView.lineFadeMode = isLineFade
+        self.shimmerTextView.tokenFadeDuration = (self.markdownStyle.streamFadeInEnabled && !isLineFade)
+            ? _requestedTokenFadeDuration
+            : 0
     }
 
     private func applySmartStreamingPresentation(animated: Bool, force: Bool = false) {

@@ -123,7 +123,7 @@ public enum STMarkdownListStyleResolver {
                 markerFont = UIFont.st_systemFont(ofSize: unorderedLevel0Size, weight: .regular)
                 contentIndent = markerIndent + unorderedLevel0Size + unorderedLevel0Spacing
             case 1:
-                markerText = "\t●\t"
+                markerText = "\t○\t"
                 markerFont = UIFont.st_systemFont(ofSize: unorderedLevel1Size, weight: .regular)
                 contentIndent = markerIndent + unorderedLevel1Size + unorderedLevel1Spacing
             default:

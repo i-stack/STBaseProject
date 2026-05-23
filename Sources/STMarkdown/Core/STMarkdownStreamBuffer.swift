@@ -101,6 +101,22 @@ public final class STMarkdownStreamBuffer {
         let startPosition = indexInCurrentText(offset: lastSafeUpperBoundOffset)
 
         if let pending = detectPendingStructure(in: textToAnalyze) {
+            if pending == .table, hasTableSeparatorRow(in: textToAnalyze) {
+                let newSlice = startPosition < textToAnalyze.endIndex
+                    ? String(textToAnalyze[startPosition...])
+                    : ""
+                let trimmed = newSlice.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !trimmed.isEmpty {
+                    lastSafeUpperBoundOffset = textToAnalyze.distance(
+                        from: textToAnalyze.startIndex, to: textToAnalyze.endIndex)
+                    return ModuleDetectionResult(
+                        completeModules: [trimmed],
+                        pendingText: "",
+                        hasPendingStructure: false,
+                        pendingType: nil
+                    )
+                }
+            }
             let pendingSlice = startPosition < textToAnalyze.endIndex
                 ? String(textToAnalyze[startPosition...])
                 : ""
@@ -396,5 +412,19 @@ public final class STMarkdownStreamBuffer {
             return trimmed
         }
         return ""
+    }
+
+    private func hasTableSeparatorRow(in text: String) -> Bool {
+        for line in text.components(separatedBy: "\n") {
+            let t = line.trimmingCharacters(in: .whitespaces)
+            guard t.hasPrefix("|") && t.contains("-") else { continue }
+            let cells = t.components(separatedBy: "|").filter { !$0.isEmpty }
+            if !cells.isEmpty && cells.allSatisfy({
+                $0.trimmingCharacters(in: .whitespaces).allSatisfy({ $0 == "-" || $0 == ":" || $0 == " " })
+            }) {
+                return true
+            }
+        }
+        return false
     }
 }
