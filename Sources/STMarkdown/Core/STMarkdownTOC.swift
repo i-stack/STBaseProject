@@ -5,10 +5,8 @@
 //  Created by 寒江孤影 on 2019/03/16.
 //
 
-import Foundation
 import UIKit
-
-// MARK: - Attributed string anchor (TextKit 1 滚动 / 宿主定位)
+import Foundation
 
 extension NSAttributedString.Key {
     /// 标题块在富文本上的稳定锚点 id（与 ``STMarkdownTOCItem/anchorId`` 一致）。
@@ -22,8 +20,6 @@ extension NSAttributedString.Key {
     /// 当前字符所属渲染块的 reveal 策略；值为 ``STMarkdownRevealPolicy/rawValue``。
     public static let stMarkdownRevealPolicy = NSAttributedString.Key("STMarkdown.revealPolicy")
 }
-
-// MARK: - TOC item
 
 /// 从 ``STMarkdownRenderDocument`` 抽取的目录项，供宿主渲染侧栏目录或跳转。
 public struct STMarkdownTOCItem: Sendable, Hashable, Equatable {
@@ -41,7 +37,6 @@ public struct STMarkdownTOCItem: Sendable, Hashable, Equatable {
 }
 
 // MARK: - Plain text for headings / TOC titles
-
 extension STMarkdownInlineNode {
     /// 递归拼接行内节点为纯文本（软换行视为空格）。
     public func st_plainTextForTOC() -> String {
@@ -75,7 +70,6 @@ extension Array where Element == STMarkdownInlineNode {
 }
 
 // MARK: - Slug + 去重（GitHub 风格简化）
-
 struct STMarkdownAnchorSlugRegistry: Sendable {
     private var used: Set<String> = []
 
@@ -113,7 +107,6 @@ struct STMarkdownAnchorSlugRegistry: Sendable {
 }
 
 // MARK: - 从渲染 AST 抽取 TOC
-
 enum STMarkdownTOCExtraction {
     static func items(from document: STMarkdownRenderDocument) -> [STMarkdownTOCItem] {
         var items: [STMarkdownTOCItem] = []

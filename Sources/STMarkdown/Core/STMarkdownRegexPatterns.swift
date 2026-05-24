@@ -2,12 +2,15 @@
 //  STMarkdownRegexPatterns.swift
 //  STBaseProject
 //
-//  集中存放 STMarkdown 框架内所有业务正则，补充 STMarkdownRule.swift 中
-//  STMarkdownRegex 已有的基础条目（HTML 链接、JSON 转义换行）。
+//  Created by 寒江孤影 on 2019/03/16.
+//
+//  集中存放 STMarkdown 框架内所有预编译正则。
 //
 //  分组：
+//    - STMarkdownRegex            HTML 链接、JSON 转义换行等基础模式
 //    - STMarkdownListRegex        列表结构匹配
 //    - STMarkdownMathRegex        数学/LaTeX 处理
+//    - STMarkdownCJKRegex         CJK 标点与强调符边界
 //    - STMarkdownCitationRegex    Citation / Webpage 标签识别与提取
 //    - STMarkdownStreamingRegex   流式输出尾部标记裁剪
 //    - STMarkdownHTMLCleanRegex   HTML 标签/注释清理
@@ -15,7 +18,24 @@
 
 import Foundation
 
-// MARK: - 列表
+public enum STMarkdownRegex {
+    /// 匹配 `<a href="..."` / `<a href='...'`（含被 JSON 反斜线转义的 `\"`）形式的链接。
+    /// - 容忍 `href` 之外的属性（如 `title`、`class`）。
+    /// - 内容部分使用非贪婪 `.*?`，避免被嵌套标签吞掉边界；同时启用 `dotMatchesLineSeparators`
+    ///   以支持跨行 anchor。
+    public static let htmlLink = STMarkdownRegexFactory.compile(
+        pattern: #"<a\s+[^>]*?href\s*=\s*\\?["']([^"']+)\\?["'][^>]*>(.*?)</a>"#,
+        options: [.caseInsensitive, .dotMatchesLineSeparators],
+        owner: "STMarkdownRegex.htmlLink"
+    )
+
+    public static let escaped2CRLF = STMarkdownRegexFactory.compile(pattern: #"\\\\r\\\\n"#, owner: "STMarkdownRegex.escaped2CRLF")
+    public static let escaped2LF = STMarkdownRegexFactory.compile(pattern: #"\\\\n(?![A-Za-z])"#, owner: "STMarkdownRegex.escaped2LF")
+    public static let escaped2CR = STMarkdownRegexFactory.compile(pattern: #"\\\\r(?![A-Za-z])"#, owner: "STMarkdownRegex.escaped2CR")
+    public static let escapedCRLF = STMarkdownRegexFactory.compile(pattern: #"\\r\\n"#, owner: "STMarkdownRegex.escapedCRLF")
+    public static let escapedLF = STMarkdownRegexFactory.compile(pattern: #"\\n(?![A-Za-z])"#, owner: "STMarkdownRegex.escapedLF")
+    public static let escapedCR = STMarkdownRegexFactory.compile(pattern: #"\\r(?![A-Za-z])"#, owner: "STMarkdownRegex.escapedCR")
+}
 
 public enum STMarkdownListRegex {
     /// `1. text` / `1.text` → 补空格（多行模式）
@@ -54,8 +74,6 @@ public enum STMarkdownListRegex {
         owner: "STMarkdownListRegex.indentedUnorderedListLine"
     )
 }
-
-// MARK: - 数学 / LaTeX
 
 public enum STMarkdownMathRegex {
     /// `[expr]` 形式的内联数学（要求含 `=`、`+`、`_`、`^`、`\` 等数学符号，避免误伤链接）
@@ -105,8 +123,6 @@ public enum STMarkdownMathRegex {
     )
 }
 
-// MARK: - CJK 强调边界
-
 public enum STMarkdownCJKRegex {
     /// 全角/中文**关闭**标点后紧跟 `*`：用于补 ZWNJ 使 right-flanking delimiter 生效
     public static let cjkEmphasisBoundary = STMarkdownRegexFactory.compile(
@@ -119,8 +135,6 @@ public enum STMarkdownCJKRegex {
         owner: "STMarkdownCJKRegex.cjkOpenQuoteAfterEmphasis"
     )
 }
-
-// MARK: - Citation / Webpage 标签
 
 public enum STMarkdownCitationRegex {
     /// `[Citation N]`（数字与 Citation 之间有空格）
@@ -177,8 +191,6 @@ public enum STMarkdownCitationRegex {
         owner: "STMarkdownCitationRegex.linkCitationDeduplicate"
     )
 }
-
-// MARK: - 流式尾部标记裁剪
 
 public enum STMarkdownStreamingRegex {
     /// 行尾不完整 Heading（`# ` / `## `）或 Blockquote（`> `）标记
@@ -276,8 +288,6 @@ public enum STMarkdownStreamingRegex {
         owner: "STMarkdownStreamingRegex.nascentListItem"
     )
 }
-
-// MARK: - HTML 清理
 
 public enum STMarkdownHTMLCleanRegex {
     /// `[[node/reference/node_end/weather]]...[[/tag]]` 双括号协议标签（跨行）

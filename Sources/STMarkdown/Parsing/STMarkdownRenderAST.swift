@@ -33,12 +33,7 @@ public struct STMarkdownRenderBlockMetadata: Hashable, Sendable {
     public let kind: STMarkdownRenderBlockKind
     public let revealPolicy: STMarkdownRevealPolicy
 
-    public init(
-        id: String,
-        path: [String],
-        kind: STMarkdownRenderBlockKind,
-        revealPolicy: STMarkdownRevealPolicy
-    ) {
+    public init(id: String, path: [String], kind: STMarkdownRenderBlockKind, revealPolicy: STMarkdownRevealPolicy) {
         self.id = id
         self.path = path
         self.kind = kind
@@ -84,17 +79,9 @@ public enum STMarkdownRenderBlock: Hashable, Sendable {
         }
     }
 
-    private static func compatibilityMetadata(
-        kind: STMarkdownRenderBlockKind,
-        revealPolicy: STMarkdownRevealPolicy
-    ) -> STMarkdownRenderBlockMetadata {
+    private static func compatibilityMetadata(kind: STMarkdownRenderBlockKind, revealPolicy: STMarkdownRevealPolicy) -> STMarkdownRenderBlockMetadata {
         let path = ["compat", kind.rawValue]
-        return STMarkdownRenderBlockMetadata(
-            id: path.joined(separator: "/"),
-            path: path,
-            kind: kind,
-            revealPolicy: revealPolicy
-        )
+        return STMarkdownRenderBlockMetadata(id: path.joined(separator: "/"), path: path, kind: kind, revealPolicy: revealPolicy)
     }
 
     public static func paragraph(_ content: [STMarkdownInlineNode]) -> Self {

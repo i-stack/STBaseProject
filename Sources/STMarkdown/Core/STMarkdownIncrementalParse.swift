@@ -2,12 +2,10 @@
 //  STMarkdownIncrementalParse.swift
 //  STBaseProject
 //
-//  元素级增量解析入口：回溯窗口子串 parse + ``replaceTailCount``（语义对齐 Vendor ``estimateReplaceCount`` / ``replaceCount``）。
+//  Created by 寒江孤影 on 2019/03/16.
 //
 
 import Foundation
-
-// MARK: - 参数与结果
 
 /// 增量解析输入。
 ///
@@ -95,15 +93,9 @@ public struct STMarkdownIncrementalParseResult: Sendable, Hashable {
     }
 }
 
-// MARK: - replaceCount 估算（对齐 Vendor ``estimateReplaceCount``）
-
 enum STMarkdownIncrementalReplaceCountEstimator {
     /// Vendor：`parseStart < lastSafePosition` 时 `max(1, backtrackChars/100)` 再 `min(previousElementCount, …)`。
-    static func estimateReplaceTailCount(
-        previousTotalRenderBlockCount: Int,
-        parseStart: Int,
-        lastCommittedExclusiveEnd: Int
-    ) -> Int {
+    static func estimateReplaceTailCount(previousTotalRenderBlockCount: Int, parseStart: Int, lastCommittedExclusiveEnd: Int) -> Int {
         guard parseStart < lastCommittedExclusiveEnd else { return 0 }
         let backtrackChars = lastCommittedExclusiveEnd - parseStart
         let estimated = max(1, backtrackChars / 100)
@@ -112,9 +104,7 @@ enum STMarkdownIncrementalReplaceCountEstimator {
 }
 
 // MARK: - 子串（Character 偏移）
-
 enum STMarkdownIncrementalSubstring {
-    /// 使用与 ``STMarkdownStreamBuffer`` 相同的 Character 偏移语义。
     static func fragment(in text: String, startOffset: Int, endOffset: Int) -> String {
         guard text.isEmpty == false, startOffset < endOffset, startOffset >= 0 else { return "" }
         let endClamped = min(endOffset, text.count)

@@ -264,7 +264,6 @@ public struct STMarkdownStyle: @unchecked Sendable {
 
     public var resolvedDisplayScale: CGFloat {
         if self.displayScale > 0 { return self.displayScale }
-        // iOS 13+ 起优先使用当前 trait 环境，避免 multi-scene 下 `UIScreen.main` 结果失真。
         if #available(iOS 13.0, *) {
             let scale = UITraitCollection.current.displayScale
             if scale > 0 { return scale }
@@ -330,7 +329,6 @@ public enum STMarkdownFontResolver {
 
     public static func italicObliqueness(from font: UIFont) -> CGFloat? {
         let italic = italicFont(from: font)
-        // 若能真实拿到斜体字形，则无需倾斜模拟。
         guard !italic.fontDescriptor.symbolicTraits.contains(.traitItalic) else {
             return nil
         }
@@ -339,7 +337,6 @@ public enum STMarkdownFontResolver {
 
     public static func boldItalicObliqueness(from font: UIFont) -> CGFloat? {
         let boldItalic = boldItalicFont(from: font)
-        // 若能真实拿到粗斜体字形，则无需倾斜模拟。
         guard !boldItalic.fontDescriptor.symbolicTraits.contains(.traitItalic) else {
             return nil
         }

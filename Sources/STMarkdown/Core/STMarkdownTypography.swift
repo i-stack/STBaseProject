@@ -37,17 +37,12 @@ public enum STMarkdownTypography {
         return UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
     }
 
-    public static func headingParagraphStyle(
-        level: Int,
-        font: UIFont,
-        style: STMarkdownStyle
-    ) -> NSMutableParagraphStyle {
+    public static func headingParagraphStyle(level: Int, font: UIFont, style: STMarkdownStyle) -> NSMutableParagraphStyle {
         let insets = headingInsets(for: level)
         let paragraphStyle = NSMutableParagraphStyle()
         let lineHeight = font.pointSize * style.headingLineHeightMultiplier
         paragraphStyle.minimumLineHeight = lineHeight
         paragraphStyle.maximumLineHeight = lineHeight
-        // paragraphSpacingBefore + 前一段落的 paragraphSpacing = headingInsets.top
         paragraphStyle.paragraphSpacingBefore = max(insets.top - style.paragraphSpacing, 0)
         paragraphStyle.paragraphSpacing = insets.bottom
         paragraphStyle.lineBreakMode = .byWordWrapping
@@ -55,16 +50,12 @@ public enum STMarkdownTypography {
     }
 }
 
-// MARK: - List Layout
-
 public struct STMarkdownListLayout {
     public let markerText: String
     public let markerFont: UIFont
     public let markerIndent: CGFloat
     public let contentIndent: CGFloat
     public let baselineOffset: CGFloat
-    /// 段落样式。对外暴露为不可变类型，避免外部修改污染其他使用该 layout 的段落。
-    /// 若确需微调，请自行 `paragraphStyle.mutableCopy()` 后再改写。
     public let paragraphStyle: NSParagraphStyle
 
     public init(
@@ -149,10 +140,7 @@ public enum STMarkdownListStyleResolver {
             NSTextTab(textAlignment: .left, location: contentIndent),
         ]
         paragraphStyle.defaultTabInterval = max(1, contentIndent)
-
-        // 对外暴露不可变副本，防止调用方意外篡改。
         let immutableParagraphStyle = (paragraphStyle.copy() as? NSParagraphStyle) ?? paragraphStyle
-
         return STMarkdownListLayout(
             markerText: markerText,
             markerFont: markerFont,
@@ -183,7 +171,6 @@ public enum STMarkdownListStyleResolver {
             guard range.length > 0 else { break }
             let existing = attributed.attribute(.paragraphStyle, at: range.location, effectiveRange: nil) as? NSParagraphStyle
             let paragraph = (existing?.mutableCopy() as? NSMutableParagraphStyle) ?? NSMutableParagraphStyle()
-            // 续段的首行与后续行都应对齐到 contentIndent，避免退回 marker 列形成视觉错位。
             paragraph.firstLineHeadIndent = contentIndent
             paragraph.headIndent = contentIndent
             paragraph.minimumLineHeight = style.lineHeight

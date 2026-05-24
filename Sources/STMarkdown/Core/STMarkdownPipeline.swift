@@ -37,7 +37,6 @@ public struct STMarkdownPipelineResult: Sendable {
     public let sourceDocument: STMarkdownDocument
     public let normalizedDocument: STMarkdownDocument
     public let renderDocument: STMarkdownRenderDocument
-    /// 从 ``renderDocument`` 抽取的目录（对齐对比文档 P1）；与富文本 ``NSAttributedString.Key.stMarkdownHeadingAnchor`` 一致。
     public let tableOfContents: [STMarkdownTOCItem]
 
     public init(

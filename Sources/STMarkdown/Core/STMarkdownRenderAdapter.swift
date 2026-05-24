@@ -7,49 +7,26 @@
 
 import Foundation
 
-/// Transforms a parsed `STMarkdownDocument` into a flattened `STMarkdownRenderDocument`
-/// suitable for the rendering pipeline.
-///
-/// Conformances must be stateless (or internally thread-safe) so that a single adapter
-/// instance can be shared across concurrent pipeline invocations.
-///
-/// - Note: ``STMarkdownRenderBlock/heading(level:anchorId:content:)`` 的 `anchorId` 须与
-///   ``STMarkdownTOCItem/anchorId``、``NSAttributedString.Key/stMarkdownHeadingAnchor`` 一致；
-///   自定义适配器若无法生成 slug，可对纯文本标题使用稳定哈希并保证文档内唯一。
-/// - Important: 正式 adapter 必须产出结构化 `metadata.path/id`（如 `b:0/q:0`）；
-///   不要复用兼容工厂里的通用 metadata 作为正式渲染路径标识。
 public protocol STMarkdownRenderAdapting: Sendable {
     func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument
 }
 
 public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
+    
     public init() {}
 
     public func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument {
         var slugger = STMarkdownAnchorSlugRegistry()
         let mainBlocks = document.blocks.enumerated().map {
-            self.makeRenderBlock(
-                from: $0.element,
-                listLevel: 0,
-                path: ["b:\($0.offset)"],
-                slugger: &slugger
-            )
+            self.makeRenderBlock(from: $0.element, listLevel: 0, path: ["b:\($0.offset)"], slugger: &slugger)
         }
-        let merged = STMarkdownFootnoteSectionBuilder.appendingSectionIfNeeded(
-            document: document,
-            renderBlocks: mainBlocks
-        )
+        let merged = STMarkdownFootnoteSectionBuilder.appendingSectionIfNeeded(document: document, renderBlocks: mainBlocks)
         return STMarkdownRenderDocument(blocks: merged)
     }
 }
 
 private extension STMarkdownRenderAdapter {
-    func makeRenderBlock(
-        from block: STMarkdownBlockNode,
-        listLevel: Int,
-        path: [String],
-        slugger: inout STMarkdownAnchorSlugRegistry
-    ) -> STMarkdownRenderBlock {
+    func makeRenderBlock(from block: STMarkdownBlockNode, listLevel: Int, path: [String], slugger: inout STMarkdownAnchorSlugRegistry) -> STMarkdownRenderBlock {
         switch block {
         case .paragraph(let inlines):
             return .paragraph(self.makeMetadata(kind: .paragraph, path: path), inlines)
@@ -63,8 +40,6 @@ private extension STMarkdownRenderAdapter {
                 content: content
             )
         case .quote(let blocks):
-            // Quote 内嵌 list 时不推进 listLevel：产品侧把引用块视作视觉"容器"，
-            // 不改变列表的逻辑嵌套深度（层级仍以真实 list 节点计算）。
             return .quote(
                 self.makeMetadata(kind: .quote, path: path),
                 blocks.enumerated().map {

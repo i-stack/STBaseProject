@@ -1,3 +1,10 @@
+//
+//  STMarkdownSemanticNormalizer.swift
+//  STBaseProject
+//
+//  Created by 寒江孤影 on 2019/03/16.
+//
+
 import Foundation
 
 public enum STMarkdownStreamingBlockKind {
@@ -10,12 +17,8 @@ public enum STMarkdownStreamingBlockKind {
     case thematicBreak
 }
 
-/// 流式 Markdown 分段、呈现生成与 reply 语义计算的统一入口。
-/// 所有方法均为纯文本处理，无 UIKit 依赖。
 public enum STMarkdownStreamingPresenter {
-
-    // MARK: - Private regex statics
-
+    
     private static let streamingPartialOrderedListMarkerRegex = try! NSRegularExpression(
         pattern: #"^\d+\.?$"#,
         options: []
@@ -46,19 +49,13 @@ public enum STMarkdownStreamingPresenter {
         options: []
     )
 
-    // MARK: - Private struct
-
     private struct StreamingBlockRange {
         let start: Int
         let endExclusive: Int
         let kind: STMarkdownStreamingBlockKind
     }
 
-    // MARK: - Public API
-
-    public static func splitStableStreamingPrefixAndActiveBlock(
-        in text: String
-    ) -> (stable: String, active: String?) {
+    public static func splitStableStreamingPrefixAndActiveBlock(in text: String) -> (stable: String, active: String?) {
         guard !text.isEmpty else { return ("", nil) }
         let lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
         let blockRanges = Self.streamingTopLevelBlockRanges(in: lines)
@@ -84,9 +81,7 @@ public enum STMarkdownStreamingPresenter {
         return active.isEmpty ? (stable, nil) : (stable, active)
     }
 
-    public static func splitStableStreamingPrefixAndActiveBlockForReply(
-        in text: String
-    ) -> (stable: String, active: String?) {
+    public static func splitStableStreamingPrefixAndActiveBlockForReply(in text: String) -> (stable: String, active: String?) {
         guard !text.isEmpty else { return ("", nil) }
         let lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
         let blockRanges = Self.streamingTopLevelBlockRanges(in: lines)
@@ -102,10 +97,7 @@ public enum STMarkdownStreamingPresenter {
             return active.isEmpty ? (stable, nil) : (stable, active)
         }
 
-        if let listAttachedRange = Self.trailingListAttachedParagraphRangeForReply(
-            in: lines,
-            blockRanges: blockRanges
-        ) {
+        if let listAttachedRange = Self.trailingListAttachedParagraphRangeForReply(in: lines, blockRanges: blockRanges) {
             let stableLines = Array(lines[..<listAttachedRange.start])
             let activeLines = Array(lines[listAttachedRange.start..<listAttachedRange.endExclusive])
             let stable = stableLines.joined(separator: "\n")
@@ -116,10 +108,7 @@ public enum STMarkdownStreamingPresenter {
         return Self.splitStableStreamingPrefixAndActiveBlock(in: text)
     }
 
-    public static func inferStreamingActiveBlockKind(
-        from activeText: String,
-        committedPrefix: String
-    ) -> STMarkdownStreamingBlockKind {
+    public static func inferStreamingActiveBlockKind(from activeText: String, committedPrefix: String) -> STMarkdownStreamingBlockKind {
         let inferred = Self.inferStreamingBlockKind(from: activeText)
         guard inferred == .paragraph else { return inferred }
         guard Self.isStreamingPartialListMarkerBlock(activeText) else { return inferred }
@@ -174,10 +163,7 @@ public enum STMarkdownStreamingPresenter {
         )
     }
 
-    public static func makeLiveReplyStreamingActivePresentation(
-        from text: String,
-        kind: STMarkdownStreamingBlockKind
-    ) -> String {
+    public static func makeLiveReplyStreamingActivePresentation(from text: String, kind: STMarkdownStreamingBlockKind) -> String {
         guard !text.isEmpty else { return "" }
         switch kind {
         case .paragraph:
@@ -197,10 +183,7 @@ public enum STMarkdownStreamingPresenter {
         }
     }
 
-    public static func makeCompletedReplyStreamingActivePresentation(
-        from text: String,
-        kind: STMarkdownStreamingBlockKind
-    ) -> String {
+    public static func makeCompletedReplyStreamingActivePresentation(from text: String, kind: STMarkdownStreamingBlockKind) -> String {
         guard !text.isEmpty else { return "" }
         switch kind {
         case .paragraph:
@@ -288,10 +271,7 @@ public enum STMarkdownStreamingPresenter {
         }
     }
 
-    public static func replyActiveText(
-        from preparedMarkdown: String,
-        committedMarkdown: String
-    ) -> String {
+    public static func replyActiveText(from preparedMarkdown: String, committedMarkdown: String) -> String {
         guard !preparedMarkdown.isEmpty else { return "" }
         guard !committedMarkdown.isEmpty else { return preparedMarkdown }
         guard preparedMarkdown.hasPrefix(committedMarkdown) else { return preparedMarkdown }
@@ -319,8 +299,6 @@ public enum STMarkdownStreamingPresenter {
         }
         return stableLines.joined(separator: "\n")
     }
-
-    // MARK: - Private helpers: block segmentation
 
     private static func streamingTopLevelBlockRanges(in lines: [String]) -> [StreamingBlockRange] {
         guard !lines.isEmpty else { return [] }
@@ -550,36 +528,26 @@ public enum STMarkdownStreamingPresenter {
         return Self.isStreamingPartialListMarkerLine(line)
     }
 
-    private static func trailingListAttachedParagraphRangeForReply(
-        in lines: [String],
-        blockRanges: [StreamingBlockRange]
-    ) -> StreamingBlockRange? {
+    private static func trailingListAttachedParagraphRangeForReply(in lines: [String], blockRanges: [StreamingBlockRange]) -> StreamingBlockRange? {
         guard blockRanges.count >= 2 else { return nil }
         let activeRange = blockRanges[blockRanges.count - 1]
         let previousRange = blockRanges[blockRanges.count - 2]
         guard activeRange.kind == .paragraph, previousRange.kind == .list else { return nil }
         guard previousRange.endExclusive == activeRange.start else { return nil }
-
         let activeLines = Array(lines[activeRange.start..<activeRange.endExclusive])
         guard activeLines.contains(where: {
             !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }) else {
             return nil
         }
-
-        return StreamingBlockRange(
-            start: previousRange.start,
-            endExclusive: activeRange.endExclusive,
-            kind: .list
-        )
+        return StreamingBlockRange(start: previousRange.start, endExclusive: activeRange.endExclusive, kind: .list)
     }
 
     private static func lastStreamingListItemStartOffset(in lines: [String]) -> Int? {
         guard !lines.isEmpty else { return nil }
         var markerIndices: [Int] = []
         for (index, line) in lines.enumerated() {
-            if STMarkdownStreamingTransforms.isStreamingListLine(line)
-                || Self.isStreamingPartialListMarkerLine(line) {
+            if STMarkdownStreamingTransforms.isStreamingListLine(line) || Self.isStreamingPartialListMarkerLine(line) {
                 markerIndices.append(index)
             }
         }
@@ -587,16 +555,12 @@ public enum STMarkdownStreamingPresenter {
         return markerIndices.last
     }
 
-    private static func shouldSplitActiveListItem(
-        in listBlockLines: [String],
-        lastItemStartOffset: Int
-    ) -> Bool {
+    private static func shouldSplitActiveListItem(in listBlockLines: [String], lastItemStartOffset: Int) -> Bool {
         guard lastItemStartOffset > 0, lastItemStartOffset < listBlockLines.count else { return false }
         let candidateLines = Array(listBlockLines[lastItemStartOffset...])
         let candidateText = candidateLines.joined(separator: "\n")
         let candidatePresentation = Self.makeActiveStreamingBlockPresentation(from: candidateText)
         guard !candidatePresentation.isEmpty else { return false }
-
         let visibleLines = candidatePresentation
             .split(separator: "\n", omittingEmptySubsequences: false)
             .map(String.init)
@@ -616,8 +580,6 @@ public enum STMarkdownStreamingPresenter {
 
         return !Self.isStreamingPartialListMarkerLine(firstVisibleLine)
     }
-
-    // MARK: - Private helpers: presentation
 
     private static func suppressTrailingThematicBreakLine(in text: String) -> String {
         guard !text.isEmpty else { return text }
@@ -1041,21 +1003,14 @@ public enum STMarkdownStreamingPresenter {
         return isSeparatorCharsOnly && trimmed.contains("-")
     }
 
-    private static func unstableTrailingTableSuffixStart(
-        in normalizedLines: [String],
-        nonEmptyIndices: [Int]
-    ) -> Int? {
+    private static func unstableTrailingTableSuffixStart(in normalizedLines: [String], nonEmptyIndices: [Int]) -> Int? {
         guard !nonEmptyIndices.isEmpty else { return nil }
-
         let recent = Array(nonEmptyIndices.suffix(4))
         guard let separatorIndex = recent.last(where: {
-            Self.isStreamingPotentialTableSeparatorLine(
-                normalizedLines[$0].trimmingCharacters(in: .whitespaces)
-            )
+            Self.isStreamingPotentialTableSeparatorLine(normalizedLines[$0].trimmingCharacters(in: .whitespaces))
         }) else {
             return nil
         }
-
         let separatorPosition = recent.firstIndex(of: separatorIndex) ?? 0
         let prefixCandidates = recent.prefix(through: separatorPosition)
         guard let suffixStartNonEmptyIndex = prefixCandidates.first(where: {
@@ -1067,18 +1022,14 @@ public enum STMarkdownStreamingPresenter {
         let nextLine: String? = nextNonEmptyAfterSeparator.map {
             normalizedLines[$0].trimmingCharacters(in: .whitespaces)
         }
-
         let dataRowIsStable: Bool = {
             guard let nextLine else { return false }
             let pipeCount = nextLine.filter { $0 == "|" }.count
             return nextLine.hasPrefix("|") && pipeCount >= 2
         }()
         guard !dataRowIsStable else { return nil }
-
         return suffixStartNonEmptyIndex
     }
-
-    // MARK: - Private helpers: misc
 
     private static func trimDanglingListMarkerSuffix(_ committed: String) -> String {
         guard !committed.isEmpty else { return committed }
@@ -1091,12 +1042,8 @@ public enum STMarkdownStreamingPresenter {
         return String(committed[committed.startIndex..<keepEnd])
     }
 
-    private static func replaceMarkdownLinksWithCitations(
-        in text: String,
-        citationURLMapping: [String: Int]
-    ) -> String {
-        STMarkdownCitationURLMatcher(citationURLMapping: citationURLMapping)
-            .replaceMarkdownLinksWithCitations(in: text)
+    private static func replaceMarkdownLinksWithCitations(in text: String, citationURLMapping: [String: Int]) -> String {
+        STMarkdownCitationURLMatcher(citationURLMapping: citationURLMapping).replaceMarkdownLinksWithCitations(in: text)
     }
 
     private static func normalizeStreamingTableDelimiters(in text: String) -> String {

@@ -7,8 +7,6 @@
 
 import Foundation
 
-// MARK: - Stream buffer
-
 /// 流式场景下用于累积 chunk、检测可独立渲染的 Markdown 模块的缓冲器。
 ///
 /// - Note: 使用 Swift 字符串的 `Index` 与 `offsetBy(_:limitedBy:)` 做边界截取，避免流式 Unicode 截断问题。
@@ -93,8 +91,6 @@ public final class STMarkdownStreamBuffer {
         lastSafeUpperBoundOffset = text.distance(from: text.startIndex, to: text.endIndex)
         return remaining
     }
-
-    // MARK: - Detection
 
     private func detectCompleteModules() -> ModuleDetectionResult {
         let textToAnalyze = accumulatedText
