@@ -35,11 +35,7 @@ public final class STMarkdownTableDetailViewController: UIViewController {
         return view
     }()
 
-    public init(
-        tableViewModel: STMarkdownTableViewModel,
-        style: STMarkdownStyle,
-        collectionSize: CGSize? = nil
-    ) {
+    public init(tableViewModel: STMarkdownTableViewModel, style: STMarkdownStyle, collectionSize: CGSize? = nil) {
         self.tableViewModel = tableViewModel
         self.style = style
         self.collectionSize = collectionSize
@@ -65,18 +61,14 @@ public final class STMarkdownTableDetailViewController: UIViewController {
 
     private func setupUI() {
         self.view.backgroundColor = self.style.tableBackgroundColor ?? UIColor.systemBackground
-
         let contentView = UIView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(contentView)
-
         self.closeButton.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(self.closeButton)
-
         self.tableView.translatesAutoresizingMaskIntoConstraints = false
         self.tableView.onCitationTap = self.onCitationTap
         contentView.addSubview(self.tableView)
-
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
             contentView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),

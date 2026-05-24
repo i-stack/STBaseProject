@@ -24,8 +24,6 @@ public final class STMarkdownURLSessionImageLoader: STMarkdownImageLoading, @unc
     public static let shared = STMarkdownURLSessionImageLoader()
     private let cache = NSCache<NSURL, UIImage>()
     private let session: URLSession
-    /// 进行中的请求表：同一 URL 在已有 dataTask 完成前，所有后续 caller 共享该任务结果，
-    /// 避免同一图像被重复下载（流式 markdown 里复用图很常见）。
     private let lock = NSLock()
     private var inFlight: [URL: STMarkdownInFlightRequest] = [:]
 
@@ -73,10 +71,8 @@ extension STMarkdownURLSessionImageLoader: STMarkdownCancellableImageLoading {
             return nil
         }
         let consumerId = UUID()
-
         self.lock.lock()
         if let existing = self.inFlight[url] {
-            // 已有进行中请求，只追加 consumer。
             existing.consumers[consumerId] = completion
             self.lock.unlock()
             return STMarkdownInFlightCancellable(loader: self, url: url, id: consumerId)
@@ -102,7 +98,6 @@ extension STMarkdownURLSessionImageLoader: STMarkdownCancellableImageLoading {
             self.deliverInFlight(url: url, image: image)
         }
         self.lock.lock()
-        // 中途可能所有 consumer 都取消：此时 `inFlight[url]` 已被清理，不应再启动任务。
         guard self.inFlight[url] != nil else {
             self.lock.unlock()
             return STMarkdownInFlightCancellable(loader: self, url: url, id: consumerId)

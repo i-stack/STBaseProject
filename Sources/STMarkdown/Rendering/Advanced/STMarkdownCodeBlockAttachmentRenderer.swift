@@ -10,11 +10,7 @@ import UIKit
 public struct STMarkdownCodeBlockAttachmentRenderer: STMarkdownCodeBlockRendering {
     public init() {}
 
-    public func renderCodeBlock(
-        language: String?,
-        code: String,
-        style: STMarkdownStyle
-    ) -> NSAttributedString? {
+    public func renderCodeBlock(language: String?, code: String, style: STMarkdownStyle) -> NSAttributedString? {
         let attachment = NSTextAttachment()
         let image = self.renderAttachmentImage(language: language, code: code, style: style)
         attachment.image = image
@@ -24,16 +20,11 @@ public struct STMarkdownCodeBlockAttachmentRenderer: STMarkdownCodeBlockRenderin
 }
 
 private extension STMarkdownCodeBlockAttachmentRenderer {
-    func renderAttachmentImage(
-        language: String?,
-        code: String,
-        style: STMarkdownStyle
-    ) -> UIImage {
+    func renderAttachmentImage(language: String?, code: String, style: STMarkdownStyle) -> UIImage {
         let headerFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 2, 12), weight: .semibold)
         let codeFont = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular)
         let insets = style.codeBlockContentInsets
         let cornerRadius = style.codeBlockCornerRadius
-
         let blockWidth: CGFloat
         if style.renderWidth > 0 {
             blockWidth = style.renderWidth
@@ -41,15 +32,12 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
             blockWidth = 280 + insets.left + insets.right
         }
         let contentWidth = blockWidth - insets.left - insets.right
-
         let backgroundColor = style.codeBlockBackgroundColor ?? UIColor.secondarySystemBackground
         let headerColor = style.codeBlockHeaderTextColor ?? style.textColor.withAlphaComponent(0.72)
         let textColor = style.codeBlockTextColor ?? style.textColor
-
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = .byCharWrapping
         paragraphStyle.lineSpacing = max(style.bodyLineSpacing, 2)
-
         let codeAttributes: [NSAttributedString.Key: Any] = [
             .font: codeFont,
             .foregroundColor: textColor,
@@ -59,14 +47,12 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
             .font: headerFont,
             .foregroundColor: headerColor,
         ]
-
         let codeAttributedText = NSAttributedString(string: code, attributes: codeAttributes)
         let codeBounds = codeAttributedText.boundingRect(
             with: CGSize(width: contentWidth, height: .greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin, .usesFontLeading],
             context: nil
         )
-
         let headerText: String
         if let language, language.isEmpty == false {
             headerText = language.uppercased()
@@ -75,67 +61,37 @@ private extension STMarkdownCodeBlockAttachmentRenderer {
         }
         let headerHeight = headerText.isEmpty ? 0 : ceil(headerFont.lineHeight)
         let separatorSpacing: CGFloat = headerText.isEmpty ? 0 : 8
-        // `boundingRect` 已经按 paragraphStyle.lineSpacing 参与排版，不能再按行数叠加
-        // lineSpacing，否则会把多行代码块高度显著放大。这里只补一个固定像素级余量，
-        // 用于覆盖字体 leading / 像素取整导致的末行裁切。
         let measured = ceil(codeBounds.height)
         let safetyPadding = min(max(style.bodyLineSpacing, 2), 4)
         let codeHeight = max(measured + safetyPadding, ceil(codeFont.lineHeight))
         let blockHeight = insets.top + headerHeight + separatorSpacing + codeHeight + insets.bottom
-
         let format = UIGraphicsImageRendererFormat.default()
         format.scale = style.resolvedDisplayScale
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: blockWidth, height: blockHeight), format: format)
-
         return renderer.image { context in
             let cgContext = context.cgContext
             let rect = CGRect(x: 0, y: 0, width: blockWidth, height: blockHeight)
             let path = UIBezierPath(roundedRect: rect, cornerRadius: cornerRadius)
             backgroundColor.setFill()
             path.fill()
-
-            // 绘制边框
             if style.codeBlockBorderWidth > 0 {
                 let borderColor = style.codeBlockBorderColor ?? UIColor.separator
                 borderColor.setStroke()
                 path.lineWidth = style.codeBlockBorderWidth
                 path.stroke()
             }
-
             var currentY = insets.top
-
             if headerText.isEmpty == false {
-                let headerRect = CGRect(
-                    x: insets.left,
-                    y: currentY,
-                    width: contentWidth,
-                    height: headerHeight
-                )
+                let headerRect = CGRect(x: insets.left, y: currentY, width: contentWidth, height: headerHeight)
                 headerText.draw(in: headerRect, withAttributes: headerAttributes)
                 currentY += headerHeight + 4
-
-                let separatorRect = CGRect(
-                    x: insets.left,
-                    y: currentY,
-                    width: contentWidth,
-                    height: 1
-                )
+                let separatorRect = CGRect(x: insets.left, y: currentY, width: contentWidth, height: 1)
                 cgContext.setFillColor((style.horizontalRuleColor ?? UIColor.separator).withAlphaComponent(0.35).cgColor)
                 cgContext.fill(separatorRect)
                 currentY += separatorSpacing - 4
             }
-
-            let codeRect = CGRect(
-                x: insets.left,
-                y: currentY,
-                width: contentWidth,
-                height: codeHeight
-            )
-            codeAttributedText.draw(
-                with: codeRect,
-                options: [.usesLineFragmentOrigin, .usesFontLeading],
-                context: nil
-            )
+            let codeRect = CGRect(x: insets.left, y: currentY, width: contentWidth, height: codeHeight)
+            codeAttributedText.draw(with: codeRect, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
         }
     }
 }

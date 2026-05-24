@@ -21,10 +21,7 @@ enum STMarkdownAttachmentRefreshSupport {
     ///   - refresh: 主线程闭包；图像就绪时会在主线程被调用，参数为触发刷新的 attachment。
     /// - Returns: 注册产生的 observation token 数组，调用方持有以控制生命周期。
     @discardableResult
-    static func bindRefreshHandlers(
-        in attributedText: NSAttributedString,
-        refresh: @escaping @MainActor (_ attachment: NSTextAttachment) -> Void
-    ) -> [STMarkdownRefreshObservation] {
+    static func bindRefreshHandlers(in attributedText: NSAttributedString, refresh: @escaping @MainActor (_ attachment: NSTextAttachment) -> Void) -> [STMarkdownRefreshObservation] {
         let range = NSRange(location: 0, length: attributedText.length)
         guard range.length > 0 else { return [] }
         var tokens: [STMarkdownRefreshObservation] = []
@@ -32,9 +29,6 @@ enum STMarkdownAttachmentRefreshSupport {
             guard let attachment = value as? STMarkdownRefreshableAttachment else { return }
             let token = attachment.addDisplayObserver { [weak attachment] in
                 guard let attachment else { return }
-                // 发射端 (`STMarkdownAsyncImageAttachment.loadImage`) 已通过
-                // `DispatchQueue.main.async` 保证回调在主线程触发；这里直接同步执行避免
-                // 多一帧延迟。若调用链未来发生变化导致不在主线程，再降级到一次主线程派发。
                 if Thread.isMainThread {
                     MainActor.assumeIsolated {
                         refresh(attachment)

@@ -221,9 +221,6 @@ private extension STMarkdownAttributedStringRenderer {
     }
 
     func renderTable(_ table: STMarkdownTableModel) -> NSAttributedString {
-        // 早期实现把 inline 节点 render 成 NSAttributedString 后只取 `.string`，
-        // 把粗体/斜体/链接等格式全部丢掉。这里复用 `STMarkdownDefaultTableRenderer`
-        // 至少能维持等宽对齐与表头分隔，明显优于"裸文本拼接"。
         if let rendered = STMarkdownDefaultTableRenderer().renderTable(table, style: self.style) {
             return rendered
         }

@@ -29,12 +29,9 @@ public final class STMarkdownTableView: UIView {
     private let collectionView: UICollectionView
     private let leftGradientLayer = CAGradientLayer()
     private let rightGradientLayer = CAGradientLayer()
-
     private let cellInsets = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
     private let gradientOverlayWidth: CGFloat = 24
     private let gradientVisibilityThreshold: CGFloat = 1
-
-    // MARK: - Init
 
     public init(style: STMarkdownStyle) {
         self.style = style
@@ -50,8 +47,6 @@ public final class STMarkdownTableView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    // MARK: - Setup
 
     private func setupCollectionView() {
         self.collectionView.register(STMarkdownTableCell.self, forCellWithReuseIdentifier: STMarkdownTableCell.reuseIdentifier)
@@ -100,8 +95,6 @@ public final class STMarkdownTableView: UIView {
         self.rightGradientLayer.colors = [UIColor.clear.cgColor, overlayColor]
     }
 
-    // MARK: - Layout
-
     public override func layoutSubviews() {
         super.layoutSubviews()
         if self.collectionView.frame != self.bounds {
@@ -119,8 +112,6 @@ public final class STMarkdownTableView: UIView {
     public override var intrinsicContentSize: CGSize {
         self.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude))
     }
-
-    // MARK: - Static Size Computation
 
     public static func computeSize(
         tableData: STMarkdownTableViewModel,
@@ -150,8 +141,6 @@ public final class STMarkdownTableView: UIView {
             )
         )
     }
-
-    // MARK: - Private
 
     private func reloadData() {
         self.gridLayout.invalidateLayout()
@@ -218,8 +207,6 @@ public final class STMarkdownTableView: UIView {
     }
 }
 
-// MARK: - UICollectionViewDelegate
-
 extension STMarkdownTableView: UICollectionViewDelegate {
     public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         self.updateHorizontalScrollHints()
@@ -238,8 +225,6 @@ extension STMarkdownTableView: UICollectionViewDelegate {
         self.onExpandTable?(tableData)
     }
 }
-
-// MARK: - UICollectionViewDataSource
 
 extension STMarkdownTableView: UICollectionViewDataSource {
 

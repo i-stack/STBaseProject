@@ -9,33 +9,19 @@ import UIKit
 
 public struct STMarkdownTableAttachmentRenderer: STMarkdownTableRendering {
 
-    /// 用于构建 STMarkdownTableViewModel 时传入的 advancedRenderers（主要为 inlineMath 渲染）
     public var advancedRenderers: STMarkdownAdvancedRenderers
     public var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
 
-    public init(
-        advancedRenderers: STMarkdownAdvancedRenderers = .empty,
-        onExpandTable: ((STMarkdownTableViewModel) -> Void)? = nil
-    ) {
+    public init(advancedRenderers: STMarkdownAdvancedRenderers = .empty, onExpandTable: ((STMarkdownTableViewModel) -> Void)? = nil) {
         self.advancedRenderers = advancedRenderers
         self.onExpandTable = onExpandTable
     }
 
     public func renderTable(_ table: STMarkdownTableModel, style: STMarkdownStyle) -> NSAttributedString? {
         guard (table.header != nil && !table.header!.isEmpty) || !table.rows.isEmpty else { return nil }
-
         let containerWidth = style.renderWidth
-        let viewModel = STMarkdownTableViewModel(
-            from: table,
-            style: style,
-            advancedRenderers: self.advancedRenderers
-        )
-
-        let attachment = STMarkdownTableViewAttachment(
-            tableViewModel: viewModel,
-            style: style,
-            containerWidth: containerWidth > 0 ? containerWidth : 300
-        )
+        let viewModel = STMarkdownTableViewModel(from: table, style: style, advancedRenderers: self.advancedRenderers)
+        let attachment = STMarkdownTableViewAttachment(tableViewModel: viewModel, style: style, containerWidth: containerWidth > 0 ? containerWidth : 300)
         attachment.onExpandTable = self.onExpandTable
         return NSAttributedString(attachment: attachment)
     }

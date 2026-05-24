@@ -8,38 +8,16 @@
 import UIKit
 
 public struct STMarkdownDefaultMathRenderer: STMarkdownInlineMathRendering, STMarkdownBlockMathRendering {
+    
     public init() {}
 
-    public func renderInlineMath(
-        formula: String,
-        style: STMarkdownStyle,
-        baseFont: UIFont,
-        textColor: UIColor
-    ) -> NSAttributedString? {
-        self.renderMath(
-            formula: formula,
-            style: style,
-            baseFont: baseFont,
-            textColor: textColor,
-            displayMode: false
-        )
+    public func renderInlineMath(formula: String, style: STMarkdownStyle, baseFont: UIFont, textColor: UIColor) -> NSAttributedString? {
+        self.renderMath(formula: formula, style: style, baseFont: baseFont, textColor: textColor, displayMode: false)
     }
 
-    public func renderBlockMath(
-        formula: String,
-        style: STMarkdownStyle
-    ) -> NSAttributedString? {
-        // 早期使用 `st_monospacedSystemFont`，但等宽字体在 iOS 上对希腊字母 / 数学符号
-        // 的 glyph 覆盖差，常出现 fallback 字形阶跃。改为以正文 font 为基线，
-        // 既保持视觉一致，也利用系统字体更全的数学符号子集。
+    public func renderBlockMath(formula: String, style: STMarkdownStyle) -> NSAttributedString? {
         let baseFont = UIFont(descriptor: style.font.fontDescriptor, size: max(style.font.pointSize, 16))
-        return self.renderMath(
-            formula: formula,
-            style: style,
-            baseFont: baseFont,
-            textColor: style.textColor,
-            displayMode: true
-        )
+        return self.renderMath(formula: formula, style: style, baseFont: baseFont, textColor: style.textColor, displayMode: true)
     }
 }
 
@@ -81,13 +59,7 @@ private extension STMarkdownDefaultMathRenderer {
         #"\\sqrt"#: "√",
     ]
 
-    func renderMath(
-        formula: String,
-        style: STMarkdownStyle,
-        baseFont: UIFont,
-        textColor: UIColor,
-        displayMode: Bool
-    ) -> NSAttributedString {
+    func renderMath(formula: String, style: STMarkdownStyle, baseFont: UIFont, textColor: UIColor, displayMode: Bool) -> NSAttributedString {
         let paragraphStyle = self.makeParagraphStyle(style: style, displayMode: displayMode)
         let normalized = self.normalize(formula)
         let result = NSMutableAttributedString()
@@ -100,36 +72,24 @@ private extension STMarkdownDefaultMathRenderer {
         var index = normalized.startIndex
         while index < normalized.endIndex {
             let character = normalized[index]
-
             if character == "^" || character == "_" {
                 let isSuperscript = character == "^"
                 let nextIndex = normalized.index(after: index)
                 let extraction = self.extractScriptContent(in: normalized, startingAt: nextIndex)
                 let content = extraction.content.isEmpty ? String(character) : extraction.content
-                result.append(
-                    self.makeScriptAttributedString(
-                        content: content,
-                        baseFont: baseFont,
-                        textColor: textColor,
-                        paragraphStyle: paragraphStyle,
-                        isSuperscript: isSuperscript
-                    )
-                )
+                result.append(self.makeScriptAttributedString(content: content, baseFont: baseFont, textColor: textColor, paragraphStyle: paragraphStyle, isSuperscript: isSuperscript))
                 index = extraction.nextIndex
                 continue
             }
-
             result.append(NSAttributedString(string: String(character), attributes: baseAttributes))
             index = normalized.index(after: index)
         }
-
         if displayMode {
             let wrapped = NSMutableAttributedString(string: "\n", attributes: baseAttributes)
             wrapped.append(result)
             wrapped.append(NSAttributedString(string: "\n", attributes: baseAttributes))
             return wrapped
         }
-
         return result
     }
 
@@ -138,37 +98,27 @@ private extension STMarkdownDefaultMathRenderer {
         result = result.replacingOccurrences(of: "\r\n", with: " ")
         result = result.replacingOccurrences(of: "\n", with: " ")
         result = result.replacingOccurrences(of: "\r", with: " ")
-        // Raw-string 字面 `#"\("#` 里反斜杠是单字面字符；之前的 `#"\\("#`
-        // 实际去匹配两个反斜杠+括号，对真实输入永远不会命中。
         result = result.replacingOccurrences(of: #"\("#, with: "")
         result = result.replacingOccurrences(of: #"\)"#, with: "")
         result = result.replacingOccurrences(of: #"\["#, with: "")
         result = result.replacingOccurrences(of: #"\]"#, with: "")
-
         for (command, replacement) in Self.commandMap {
             result = result.replacingOccurrences(of: command, with: replacement)
         }
-
         while result.contains("  ") {
             result = result.replacingOccurrences(of: "  ", with: " ")
         }
-
         return result
     }
 
-    func extractScriptContent(
-        in text: String,
-        startingAt index: String.Index
-    ) -> (content: String, nextIndex: String.Index) {
+    func extractScriptContent(in text: String, startingAt index: String.Index) -> (content: String, nextIndex: String.Index) {
         guard index < text.endIndex else {
             return ("", index)
         }
-
         if text[index] == "{" {
             var cursor = text.index(after: index)
             var depth = 1
             let start = cursor
-
             while cursor < text.endIndex {
                 if text[cursor] == "{" {
                     depth += 1
@@ -180,10 +130,8 @@ private extension STMarkdownDefaultMathRenderer {
                 }
                 cursor = text.index(after: cursor)
             }
-
             return (String(text[start...]), text.endIndex)
         }
-
         let next = text.index(after: index)
         return (String(text[index..<next]), next)
     }
