@@ -769,7 +769,7 @@ public enum STMarkdownStreamingTransforms {
         return count
     }
 
-    private static func isLikelyStreamingTableHeaderCandidate(_ line: String) -> Bool {
+    static func isLikelyStreamingTableHeaderCandidate(_ line: String) -> Bool {
         let trimmed = line.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return false }
         let pipeCount = trimmed.filter { $0 == "|" }.count
@@ -789,7 +789,7 @@ public enum STMarkdownStreamingTransforms {
         return !hasSentencePunctuation && maxCellLength <= 24
     }
 
-    private static func isStreamingListLine(_ line: String) -> Bool {
+    static func isStreamingListLine(_ line: String) -> Bool {
         let range = NSRange(location: 0, length: line.utf16.count)
         return Self.streamingAnyListRegex.firstMatch(in: line, options: [], range: range) != nil
     }

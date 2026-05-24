@@ -40,10 +40,10 @@ public enum STMarkdownDebugMode: Sendable, Equatable {
     public var isEnabled: Bool { self == .enabled }
 }
 
-enum STMarkdownRegexFactory {
+public enum STMarkdownRegexFactory {
     /// 编译一个**已知正确**的内置正则；失败视作开发期 bug，直接 trap。
     /// 仅供框架内部硬编码模式使用。
-    static func compile(
+    public static func compile(
         pattern: String,
         options: NSRegularExpression.Options = [],
         owner: String
@@ -56,7 +56,7 @@ enum STMarkdownRegexFactory {
     }
 
     /// 供动态/外部模式使用的安全编译入口。
-    static func tryCompile(
+    public static func tryCompile(
         pattern: String,
         options: NSRegularExpression.Options = []
     ) throws -> NSRegularExpression {
@@ -64,23 +64,23 @@ enum STMarkdownRegexFactory {
     }
 }
 
-enum STMarkdownRegex {
+public enum STMarkdownRegex {
     /// 匹配 `<a href="..."` / `<a href='...'`（含被 JSON 反斜线转义的 `\"`）形式的链接。
     /// - 容忍 `href` 之外的属性（如 `title`、`class`）。
     /// - 内容部分使用非贪婪 `.*?`，避免被嵌套标签吞掉边界；同时启用 `dotMatchesLineSeparators`
     ///   以支持跨行 anchor。
-    static let htmlLink = STMarkdownRegexFactory.compile(
+    public static let htmlLink = STMarkdownRegexFactory.compile(
         pattern: #"<a\s+[^>]*?href\s*=\s*\\?["']([^"']+)\\?["'][^>]*>(.*?)</a>"#,
         options: [.caseInsensitive, .dotMatchesLineSeparators],
         owner: "STMarkdownRegex.htmlLink"
     )
 
-    static let escaped2CRLF = STMarkdownRegexFactory.compile(pattern: #"\\\\r\\\\n"#, owner: "STMarkdownRegex.escaped2CRLF")
-    static let escaped2LF = STMarkdownRegexFactory.compile(pattern: #"\\\\n(?![A-Za-z])"#, owner: "STMarkdownRegex.escaped2LF")
-    static let escaped2CR = STMarkdownRegexFactory.compile(pattern: #"\\\\r(?![A-Za-z])"#, owner: "STMarkdownRegex.escaped2CR")
-    static let escapedCRLF = STMarkdownRegexFactory.compile(pattern: #"\\r\\n"#, owner: "STMarkdownRegex.escapedCRLF")
-    static let escapedLF = STMarkdownRegexFactory.compile(pattern: #"\\n(?![A-Za-z])"#, owner: "STMarkdownRegex.escapedLF")
-    static let escapedCR = STMarkdownRegexFactory.compile(pattern: #"\\r(?![A-Za-z])"#, owner: "STMarkdownRegex.escapedCR")
+    public static let escaped2CRLF = STMarkdownRegexFactory.compile(pattern: #"\\\\r\\\\n"#, owner: "STMarkdownRegex.escaped2CRLF")
+    public static let escaped2LF = STMarkdownRegexFactory.compile(pattern: #"\\\\n(?![A-Za-z])"#, owner: "STMarkdownRegex.escaped2LF")
+    public static let escaped2CR = STMarkdownRegexFactory.compile(pattern: #"\\\\r(?![A-Za-z])"#, owner: "STMarkdownRegex.escaped2CR")
+    public static let escapedCRLF = STMarkdownRegexFactory.compile(pattern: #"\\r\\n"#, owner: "STMarkdownRegex.escapedCRLF")
+    public static let escapedLF = STMarkdownRegexFactory.compile(pattern: #"\\n(?![A-Za-z])"#, owner: "STMarkdownRegex.escapedLF")
+    public static let escapedCR = STMarkdownRegexFactory.compile(pattern: #"\\r(?![A-Za-z])"#, owner: "STMarkdownRegex.escapedCR")
 }
 
 struct STMarkdownCodeFenceState {
