@@ -165,16 +165,7 @@ public final class STMarkdownTableViewModel {
     }
 
     private static func extractCitationNumber(from children: [STMarkdownInlineNode]) -> String? {
-        guard children.count == 1, case .text(let text) = children[0] else { return nil }
-        let prefix = "Citation:"
-        if text.hasPrefix(prefix) {
-            let number = String(text.dropFirst(prefix.count))
-            return number.isEmpty ? nil : number
-        }
-        if !text.isEmpty, text.allSatisfy({ $0.isNumber }) {
-            return text
-        }
-        return nil
+        STMarkdownCitationReferenceSupport.extractCitationNumber(from: children)
     }
 
     // MARK: - Strip Citations from Display

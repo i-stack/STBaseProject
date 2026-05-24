@@ -7,8 +7,6 @@
 
 import Foundation
 
-// MARK: - 定义行剥离
-
 enum STMarkdownFootnoteDefinitionScanner {
     private static let definitionLine = try! NSRegularExpression(
         pattern: #"^\[\^([^\]]+)\]:\s*(.*)$"#,

@@ -7,7 +7,6 @@
 
 import Foundation
 
-/// 将常见异常表格 Markdown 规整为更接近标准 GFM 的形态，提升 `swift-markdown` 解析成功率。
 public enum STMarkdownMalformedTableNormalizer: Sendable {
 
     /// 按开关对输入做表格规整；`enabled == false` 时原样返回。
