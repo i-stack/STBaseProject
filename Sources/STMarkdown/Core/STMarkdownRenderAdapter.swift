@@ -18,7 +18,7 @@ public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
     public func adapt(_ document: STMarkdownDocument) -> STMarkdownRenderDocument {
         var slugger = STMarkdownAnchorSlugRegistry()
         let mainBlocks = document.blocks.enumerated().map {
-            self.makeRenderBlock(from: $0.element, listLevel: 0, path: ["b:\($0.offset)"], slugger: &slugger)
+            self.makeRenderBlock(from: $0.element, listLevel: 0, unorderedDepth: 0, path: ["b:\($0.offset)"], slugger: &slugger)
         }
         let merged = STMarkdownFootnoteSectionBuilder.appendingSectionIfNeeded(document: document, renderBlocks: mainBlocks)
         return STMarkdownRenderDocument(blocks: merged)
@@ -26,7 +26,7 @@ public struct STMarkdownRenderAdapter: STMarkdownRenderAdapting, Sendable {
 }
 
 private extension STMarkdownRenderAdapter {
-    func makeRenderBlock(from block: STMarkdownBlockNode, listLevel: Int, path: [String], slugger: inout STMarkdownAnchorSlugRegistry) -> STMarkdownRenderBlock {
+    func makeRenderBlock(from block: STMarkdownBlockNode, listLevel: Int, unorderedDepth: Int, path: [String], slugger: inout STMarkdownAnchorSlugRegistry) -> STMarkdownRenderBlock {
         switch block {
         case .paragraph(let inlines):
             return .paragraph(self.makeMetadata(kind: .paragraph, path: path), inlines)
@@ -46,6 +46,7 @@ private extension STMarkdownRenderAdapter {
                     self.makeRenderBlock(
                         from: $0.element,
                         listLevel: listLevel,
+                        unorderedDepth: unorderedDepth,
                         path: path + ["q:\($0.offset)"],
                         slugger: &slugger
                     )
@@ -58,6 +59,7 @@ private extension STMarkdownRenderAdapter {
                     kind: kind,
                     items: items,
                     level: listLevel,
+                    unorderedDepth: unorderedDepth,
                     path: path,
                     slugger: &slugger
                 )
@@ -80,6 +82,7 @@ private extension STMarkdownRenderAdapter {
                     self.makeRenderBlock(
                         from: $0.element,
                         listLevel: listLevel,
+                        unorderedDepth: unorderedDepth,
                         path: path + ["d:\($0.offset)"],
                         slugger: &slugger
                     )
@@ -94,6 +97,7 @@ private extension STMarkdownRenderAdapter {
         kind: STMarkdownListKind,
         items: [STMarkdownListItemNode],
         level: Int,
+        unorderedDepth: Int,
         path: [String],
         slugger: inout STMarkdownAnchorSlugRegistry
     ) -> [STMarkdownRenderListItem] {
@@ -110,6 +114,8 @@ private extension STMarkdownRenderAdapter {
             startIndex = 1
         }
 
+        let subUnorderedDepth = isOrdered ? unorderedDepth : unorderedDepth + 1
+
         for (index, item) in items.enumerated() {
             let orderedIndex = isOrdered ? startIndex + index : nil
             let itemPath = path + ["li:\(index)"]
@@ -117,6 +123,7 @@ private extension STMarkdownRenderAdapter {
                 self.makeRenderBlock(
                     from: $0.element,
                     listLevel: level + 1,
+                    unorderedDepth: subUnorderedDepth,
                     path: itemPath + ["b:\($0.offset)"],
                     slugger: &slugger
                 )
@@ -127,7 +134,8 @@ private extension STMarkdownRenderAdapter {
                     ordered: isOrdered,
                     level: level,
                     orderedIndex: orderedIndex,
-                    checkbox: item.checkbox
+                    checkbox: item.checkbox,
+                    unorderedDepth: unorderedDepth
                 )
             )
         }

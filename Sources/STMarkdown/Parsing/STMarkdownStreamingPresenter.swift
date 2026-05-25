@@ -599,57 +599,9 @@ public enum STMarkdownStreamingPresenter {
     }
 
     private static func autoCloseDanglingEmphasisInTrailingListItem(in text: String) -> String {
-        guard !text.isEmpty else { return text }
-        var lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
-        guard let lastNonEmptyIndex = lines.lastIndex(where: {
-            !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        }) else {
-            return text
-        }
-
-        var itemStartIndex: Int?
-        var index = lastNonEmptyIndex
-        while index >= 0 {
-            let line = lines[index]
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed.isEmpty { break }
-            if STMarkdownStreamingTransforms.isStreamingListLine(line) {
-                itemStartIndex = index
-                break
-            }
-            if index == 0 { break }
-            index -= 1
-        }
-
-        guard let itemStartIndex else { return text }
-        guard itemStartIndex < lastNonEmptyIndex else { return text }
-
-        let continuationLines = lines[(itemStartIndex + 1)...lastNonEmptyIndex]
-        let hasContinuationBody = continuationLines.contains {
-            let trimmed = $0.trimmingCharacters(in: .whitespacesAndNewlines)
-            return !trimmed.isEmpty && !STMarkdownStreamingTransforms.isStreamingListLine($0)
-        }
-        guard hasContinuationBody else { return text }
-
-        let itemLine = lines[itemStartIndex]
-        let lineRange = NSRange(location: 0, length: itemLine.utf16.count)
-        guard let match = Self.listLineContentCaptureRegex.firstMatch(in: itemLine, options: [], range: lineRange),
-              match.numberOfRanges == 3,
-              let contentRange = Range(match.range(at: 2), in: itemLine) else {
-            return text
-        }
-
-        var content = String(itemLine[contentRange])
-        let markers = ["~~", "**", "__", "*", "_"]
-        for marker in markers {
-            if Self.countUnescapedOccurrences(of: marker, in: content) % 2 != 0 {
-                content += marker
-            }
-        }
-
-        let prefixEnd = contentRange.lowerBound
-        lines[itemStartIndex] = String(itemLine[..<prefixEnd]) + content
-        return lines.joined(separator: "\n")
+        // SSE 流式阶段列表项 marker 行尾部 emphasis 未闭合，后续 token 未知，不补闭合。
+        // trimIncompleteTrailingEmphasis 会在后续步骤将孤立 marker trim 掉。
+        return text
     }
 
     private static func autoCloseTrailingStandaloneStrongLine(in text: String) -> String {
@@ -670,8 +622,12 @@ public enum STMarkdownStreamingPresenter {
         guard isStandaloneStrongLine || isHeadingStrongLine else { return text }
         guard !trimmed.hasSuffix("**") else { return text }
         guard Self.countUnescapedOccurrences(of: "**", in: trimmed) == 1 else { return text }
-        let closingSuffix = line.hasSuffix("*") ? "*" : "**"
-        lines[lastNonEmptyIndex] = line + closingSuffix
+        // SSE 流式阶段尾部 ** 未闭合，后续 token 未知，不能补闭合。
+        // 将包含孤立 ** 的尾行移除，待闭合符到达后再渲染。
+        lines.removeSubrange(lastNonEmptyIndex...)
+        while let last = lines.last, last.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            lines.removeLast()
+        }
         return lines.joined(separator: "\n")
     }
 

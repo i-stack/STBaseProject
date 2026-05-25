@@ -518,7 +518,10 @@ public enum STMarkdownStreamingTransforms {
             prevChar = ch
         }
         guard backtickCount % 2 != 0 else { return text }
-        return text + "`"
+        // SSE 流式阶段尾部反引号未闭合，后续 token 未知，不补闭合。
+        // 将尾部孤立的反引号 trim 掉，待闭合符到达后再渲染整个 inline code。
+        guard let lastBacktickRange = text.range(of: "`", options: .backwards) else { return text }
+        return String(text[..<lastBacktickRange.lowerBound])
     }
 
     public static func trimTrailingSetextHeadingAmbiguity(in text: String) -> String {

@@ -658,7 +658,7 @@ private extension STMarkdownAttributedStringRenderer {
             baselineOffset = 0
         } else {
             let bulletSymbol: String
-            switch item.level {
+            switch item.unorderedDepth {
             case 0: bulletSymbol = "●"
             case 1: bulletSymbol = "○"
             default: bulletSymbol = "▪"

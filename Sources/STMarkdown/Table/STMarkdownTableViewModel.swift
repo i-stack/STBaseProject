@@ -36,6 +36,9 @@ public final class STMarkdownTableViewModel {
     public let hasHeader: Bool
     public let columnAlignments: [STMarkdownColumnAlignment]
     public let cells: [[STMarkdownTableCellData]]
+    /// `STMarkdownTableModel.rowGroups` 的直传，基于 `table.rows` 的 0-based 下标。
+    /// `hasHeader == true` 时 `cells` 的第 0 行是表头，使用时对行号 +1 对齐。
+    public let rowGroups: [[Int]]
 
     public init(
         from table: STMarkdownTableModel,
@@ -44,6 +47,7 @@ public final class STMarkdownTableViewModel {
     ) {
         self.hasHeader = table.header != nil
         self.columnAlignments = table.columnAlignments
+        self.rowGroups = table.rowGroups
 
         let renderer = STMarkdownAttributedStringRenderer(
             style: style,

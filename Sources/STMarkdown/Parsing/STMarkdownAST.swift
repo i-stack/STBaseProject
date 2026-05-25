@@ -62,6 +62,39 @@ public struct STMarkdownTableModel: Hashable, Sendable {
         self.rows = rows
         self.columnAlignments = columnAlignments
     }
+
+    /// 将数据行按"首列为空→延续同组"规则分组，返回基于 `rows` 0-based 下标的分组数组。
+    /// 首列有内容时开启新分组；首列为空且当前组非空时延续当前组。
+    /// 用于渲染层实现跨行视觉分组效果（对应 LLM 输出的空首列=合并单元格模式）。
+    public var rowGroups: [[Int]] {
+        guard !rows.isEmpty else { return [] }
+        var groups: [[Int]] = []
+        var current: [Int] = []
+        var currentGroupHeadEmpty = false
+        for (index, row) in rows.enumerated() {
+            let isEmpty = Self.isCellContentEmpty(row.first ?? [])
+            if isEmpty && !current.isEmpty && !currentGroupHeadEmpty {
+                current.append(index)
+            } else {
+                if !current.isEmpty { groups.append(current) }
+                current = [index]
+                currentGroupHeadEmpty = isEmpty
+            }
+        }
+        if !current.isEmpty { groups.append(current) }
+        return groups
+    }
+
+    private static func isCellContentEmpty(_ cell: [STMarkdownInlineNode]) -> Bool {
+        if cell.isEmpty { return true }
+        return cell.allSatisfy {
+            switch $0 {
+            case .text(let t): return t.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            case .softBreak: return true
+            default: return false
+            }
+        }
+    }
 }
 
 public enum STMarkdownBlockNode: Hashable, Sendable {

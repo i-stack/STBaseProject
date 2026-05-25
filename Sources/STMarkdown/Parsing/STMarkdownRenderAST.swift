@@ -180,6 +180,8 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
     public let blocks: [STMarkdownRenderBlock]
     public let ordered: Bool
     public let level: Int
+    /// 仅计无序列表的嵌套深度，忽略有序列表祖先。用于选择 ●/○/▪ 符号。
+    public let unorderedDepth: Int
     public let orderedIndex: Int?
     public let checkbox: STMarkdownCheckbox?
 
@@ -188,11 +190,13 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
         ordered: Bool,
         level: Int,
         orderedIndex: Int?,
-        checkbox: STMarkdownCheckbox? = nil
+        checkbox: STMarkdownCheckbox? = nil,
+        unorderedDepth: Int = 0
     ) {
         self.blocks = blocks
         self.ordered = ordered
         self.level = level
+        self.unorderedDepth = unorderedDepth
         self.orderedIndex = orderedIndex
         self.checkbox = checkbox
     }
@@ -203,7 +207,8 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
         level: Int,
         orderedIndex: Int?,
         childBlocks: [STMarkdownRenderBlock],
-        checkbox: STMarkdownCheckbox? = nil
+        checkbox: STMarkdownCheckbox? = nil,
+        unorderedDepth: Int = 0
     ) {
         var blocks: [STMarkdownRenderBlock] = []
         if content.isEmpty == false {
@@ -222,7 +227,8 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
             ordered: ordered,
             level: level,
             orderedIndex: orderedIndex,
-            checkbox: checkbox
+            checkbox: checkbox,
+            unorderedDepth: unorderedDepth
         )
     }
 
