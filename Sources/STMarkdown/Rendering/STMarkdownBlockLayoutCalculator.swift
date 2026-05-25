@@ -2,16 +2,12 @@
 //  STMarkdownBlockLayoutCalculator.swift
 //  STBaseProject
 //
+//  Created by 寒江孤影 on 2019/03/16.
+//
 
 import UIKit
 
-/// 块间距与 `NSAttributedString` 分隔符计算工具。
-///
-/// 所有方法均为纯函数，无副作用，可静态调用。
-/// 宿主（如 `NativeMarkdownView`）不再需要在内部维护等效逻辑。
 public enum STMarkdownBlockLayoutCalculator {
-
-    // MARK: - Block Spacing
 
     /// 两个相邻块之间的视觉间距（点）。
     public static func spacing(
@@ -44,6 +40,9 @@ public enum STMarkdownBlockLayoutCalculator {
         case .codeBlock, .table, .mathBlock, .image, .thematicBreak, .details, .rawHTML:
             return style.blockSpacing
         case .paragraph:
+            if isStandaloneColonHeadingParagraph(block) {
+                return pseudoHeadingTopSpacing(style: style)
+            }
             return style.blockSpacing
         }
     }
@@ -165,5 +164,21 @@ public enum STMarkdownBlockLayoutCalculator {
         if let prev = previousBlock, isListBlock(prev) { return true }
         if let next = nextBlock, isListBlock(next) { return true }
         return false
+    }
+
+    /// `paragraph(only-strong, 文本以冒号结尾)` ——LLM 用 `**xxx：**` 单行模拟标题的模式。
+    public static func isStandaloneColonHeadingParagraph(_ block: STMarkdownRenderBlock) -> Bool {
+        guard isStandaloneStrongParagraph(block),
+              case .paragraph(_, let inlines) = block else { return false }
+        let text = inlineNodesVisibleText(inlines)
+        return text.hasSuffix("：") || text.hasSuffix(":")
+    }
+
+    /// 伪标题的前导间距：等同 h3 heading top spacing，降级为 blockSpacing * 1.6。
+    public static func pseudoHeadingTopSpacing(style: STMarkdownStyle) -> CGFloat {
+        if let topSpacings = style.headingTopSpacing, topSpacings.count >= 3 {
+            return topSpacings[2]   // h3 index
+        }
+        return STMarkdownTypography.headingInsets(for: 3).top
     }
 }
