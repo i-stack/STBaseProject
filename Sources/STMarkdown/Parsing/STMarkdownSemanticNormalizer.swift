@@ -31,7 +31,13 @@ public struct STMarkdownSoftBreakCollapsingNormalizer: STMarkdownSemanticNormali
     public init() {}
 
     public func normalize(_ document: STMarkdownDocument) -> STMarkdownDocument {
-        STMarkdownDocument(blocks: document.blocks.map(self.normalizeBlock))
+        let defs = document.footnoteDefinitions.mapValues { def in
+            STMarkdownFootnoteDefinition(content: self.normalizeInlineNodes(def.content))
+        }
+        return STMarkdownDocument(
+            blocks: document.blocks.map(self.normalizeBlock),
+            footnoteDefinitions: defs
+        )
     }
 }
 
@@ -54,7 +60,12 @@ private extension STMarkdownSoftBreakCollapsingNormalizer {
                     )
                 }
             )
-        case .codeBlock, .table, .mathBlock, .image, .thematicBreak:
+        case .details(let summary, let body):
+            return .details(
+                summary: self.normalizeInlineNodes(summary),
+                body: body.map(self.normalizeBlock)
+            )
+        case .codeBlock, .table, .mathBlock, .image, .thematicBreak, .rawHTML:
             return block
         }
     }
@@ -78,11 +89,33 @@ private extension STMarkdownSoftBreakCollapsingNormalizer {
                 result.append(.link(destination: destination, children: self.normalizeInlineNodes(children)))
             case .strikethrough(let children):
                 result.append(.strikethrough(self.normalizeInlineNodes(children)))
-            default:
+            case .footnoteReference, .inlineRawHTML, .inlineMath, .code, .image, .text, .softBreak:
                 result.append(node)
             }
         }
 
         return result
+    }
+}
+
+/// heading 内容恰好是单一 `strong` 节点时剥除外层包裹（`### **text**` → `### text`）。
+/// 仅在全部内联恰好在同一个 strong 内时触发，不影响局部加粗的 heading（`### **A** B`）。
+/// 用途：避免渲染层对 heading font 和 strong bold trait 的双重叠加。
+public struct STMarkdownHeadingStandaloneStrongNormalizer: STMarkdownSemanticNormalizing {
+    public init() {}
+
+    public func normalize(_ document: STMarkdownDocument) -> STMarkdownDocument {
+        STMarkdownDocument(
+            blocks: document.blocks.map(Self.normalizeBlock),
+            footnoteDefinitions: document.footnoteDefinitions
+        )
+    }
+
+    private static func normalizeBlock(_ block: STMarkdownBlockNode) -> STMarkdownBlockNode {
+        guard case .heading(let level, let content) = block,
+              content.count == 1,
+              case .strong(let children) = content[0]
+        else { return block }
+        return .heading(level: level, content: children)
     }
 }

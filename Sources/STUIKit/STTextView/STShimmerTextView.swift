@@ -13,6 +13,20 @@ open class STShimmerTextView: UITextView {
     /// 直接以最终颜色渲染。用于 list marker、block separator、heading 等结构元素。
     public static let skipFadeInAttributeKey = NSAttributedString.Key("STShimmerTextView.skipFadeIn")
 
+    // MARK: - LineFadeLayer（行级 CAGradientLayer 遮罩扫入动画）
+    private final class LineFadeLayer: CAGradientLayer {
+        /// 动画已完成（待下次 applyLineFadeAnimation 时清理折入基底层）。
+        var isFadeComplete: Bool = false
+    }
+
+    private final class LineFadeAnimationDelegate: NSObject, CAAnimationDelegate {
+        private let onComplete: () -> Void
+        init(_ onComplete: @escaping () -> Void) { self.onComplete = onComplete }
+        func animationDidStop(_ anim: CAAnimation, finished: Bool) {
+            if finished { onComplete() }
+        }
+    }
+
     private struct AnimatingColorRun {
         let range: NSRange
         let targetColor: UIColor
@@ -35,9 +49,19 @@ open class STShimmerTextView: UITextView {
     /// 为 true 时，跨换行也保持连续字符级渐显；
     /// 为 false 时，新增 delta 中最后一个换行前的内容会立即显示，仅最后一行保留动画。
     public var animateAcrossNewlines: Bool = false
+    /// `true` 时改用 FluidMarkdown 风格的行级 CAGradientLayer 水平扫入遮罩动画，
+    /// 替代默认的字符级 foregroundColor 淡入；由 STMarkdownStreamingTextView 根据样式同步。
+    public var lineFadeMode: Bool = false
+    /// 行级扫入动画时长（秒），默认 0.15 s，与 FluidMarkdown 对齐。
+    public var lineFadeDuration: TimeInterval = 0.15
     public var suppressSystemTextMenu: Bool = false
+    public var onAnimationStateChange: ((Bool) -> Void)?
     private var displayLink: CADisplayLink?
     private var animatingTokens: [AnimatingToken] = []
+    /// 行级遮罩所用父 CALayer（挂在 self.layer.mask）。
+    private var _lineFadeMaskLayer: CALayer?
+    /// 遮罩内的基础不透明层，覆盖所有"已完成动画"的文本区域。
+    private var _lineFadeBaseLayer: CALayer?
     /// 最终目标态的 attributed text（全不透明），不含任何动画中间状态的 alpha 值。
     /// 供外部做 "已渲染前缀" 比较时使用，避免因动画过渡期 alpha < 1 导致前缀比较误判。
     private var _baseAttributedText: NSMutableAttributedString = NSMutableAttributedString()
@@ -53,6 +77,10 @@ open class STShimmerTextView: UITextView {
         return _baseAttributedText
     }
 
+    public var isAnimatingTextReveal: Bool {
+        self.displayLink != nil && !self.animatingTokens.isEmpty
+    }
+
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.setup()
@@ -61,6 +89,19 @@ open class STShimmerTextView: UITextView {
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setup()
+    }
+
+    /// - Parameter usingTextLayoutManager: `true` 时使用 TextKit 2 栈（iOS 16+）；低版本系统始终为 TextKit 1。
+    public convenience init(usingTextLayoutManager: Bool) {
+        if #available(iOS 16.0, *) {
+            // UITextView(frame:textContainer:nil) 在 iOS 16+ 默认启用 TextKit 2，
+            // 导致 textLayoutManager != nil；行级遮罩动画依赖 NSLayoutManager，
+            // 必须通过 UITextView(usingTextLayoutManager:) 显式指定版本。
+            let shell = UITextView(usingTextLayoutManager: usingTextLayoutManager)
+            self.init(frame: .zero, textContainer: shell.textContainer)
+        } else {
+            self.init(frame: .zero, textContainer: nil)
+        }
     }
 
     private func setup() {
@@ -73,7 +114,15 @@ open class STShimmerTextView: UITextView {
         self.textContainer.lineFragmentPadding = 0
         self.font = .st_systemFont(ofSize: 16)
         self.textColor = .label
-        self.layoutManager.allowsNonContiguousLayout = false
+        // iOS 16+ 若已启用 TextKit 2（`textLayoutManager != nil`），访问 `layoutManager` 会强制降级到
+        // TK1 兼容栈并在控制台产生 `_UITextViewEnablingCompatibilityMode` 告警；仅在经典 TK1 路径下设置。
+        if #available(iOS 16.0, *) {
+            if self.textLayoutManager == nil {
+                self.layoutManager.allowsNonContiguousLayout = false
+            }
+        } else {
+            self.layoutManager.allowsNonContiguousLayout = false
+        }
     }
 
     public func append(_ text: String) {
@@ -118,11 +167,23 @@ open class STShimmerTextView: UITextView {
         let appended = NSMutableAttributedString(attributedString: attributedText)
         let defaultColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         self.ensureForegroundColor(in: appended, defaultColor: defaultColor)
-        // 保存 contentOffset：UITextView 在 textStorage 修改后可能意外偏移，
-        // 导致非滚动文本视图出现上下抖动。在所有 textStorage 操作之前保存。
+        // 保存 contentOffset：UITextView 在 textStorage 修改后可能意外偏移。
         let savedOffset = self.contentOffset
-        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画，
-        // 确保前一段落完全显示后新段落才开始淡入，避免两段同时渲染的视觉问题。
+
+        // 行级 CAGradientLayer 扫入模式：文本保持全不透明，由遮罩层控制可见性。
+        if animated && self.lineFadeMode {
+            _baseAttributedText.append(appended)
+            self.textStorage.beginEditing()
+            self.textStorage.append(appended)
+            self.textStorage.endEditing()
+            if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
+            self.applyLineFadeAnimation(
+                changedRange: NSRange(location: startLocation, length: appended.length)
+            )
+            return
+        }
+
+        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画
         if animated, self.tokenFadeDuration > 0, !self.animateAcrossNewlines {
             self.finishAnimationsBeforeLastNewline()
         }
@@ -186,6 +247,7 @@ open class STShimmerTextView: UITextView {
     public func setRenderedAttributedText(_ attributedText: NSAttributedString) {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
+        self.removeLineFadeMask()
         _baseAttributedText = NSMutableAttributedString(attributedString: attributedText)
         self.textStorage.beginEditing()
         self.textStorage.setAttributedString(attributedText)
@@ -216,6 +278,7 @@ open class STShimmerTextView: UITextView {
             self.textStorage.endEditing()
         }
         self.animatingTokens.removeAll()
+        if self.lineFadeMode { self.removeLineFadeMask() }
 
         // 计算旧尾部字符串，用于后续判断哪些是"真正新增"的字符
         let oldTrailingLength = self.textStorage.length - clampedLocation
@@ -308,6 +371,7 @@ open class STShimmerTextView: UITextView {
     public func reset() {
         self.stopDisplayLink()
         self.animatingTokens.removeAll()
+        self.removeLineFadeMask()
         _baseAttributedText = NSMutableAttributedString()
         self.textStorage.beginEditing()
         self.textStorage.setAttributedString(NSAttributedString())
@@ -318,6 +382,7 @@ open class STShimmerTextView: UITextView {
         self.stopDisplayLink()
         let pendingTokens = self.animatingTokens
         self.animatingTokens.removeAll()
+        self.removeLineFadeMask()
         guard !pendingTokens.isEmpty else { return }
         self.textStorage.beginEditing()
         for token in pendingTokens {
@@ -363,11 +428,16 @@ open class STShimmerTextView: UITextView {
         let link = CADisplayLink(target: self, selector: #selector(self.handleDisplayLink))
         link.add(to: .main, forMode: .common)
         self.displayLink = link
+        self.onAnimationStateChange?(true)
     }
 
     private func stopDisplayLink() {
+        let wasAnimating = self.displayLink != nil
         self.displayLink?.invalidate()
         self.displayLink = nil
+        if wasAnimating {
+            self.onAnimationStateChange?(false)
+        }
     }
 
     @objc private func handleDisplayLink() {
@@ -584,6 +654,157 @@ open class STShimmerTextView: UITextView {
         if self.animatingTokens.isEmpty {
             self.stopDisplayLink()
         }
+    }
+
+    // MARK: - Line Fade Mask
+
+    private func removeLineFadeMask() {
+        guard _lineFadeMaskLayer != nil else { return }
+        self.layer.mask = nil
+        _lineFadeMaskLayer = nil
+        _lineFadeBaseLayer = nil
+    }
+
+    /// 对 `changedRange` 所在的最末行应用 CAGradientLayer 水平扫入遮罩动画（FluidMarkdown 风格）。
+    /// 遮罩结构：父 CALayer（mask）→ 黑色基础层（覆盖已完成行）+ LineFadeLayer（当前行动画）。
+    /// TK2（iOS 16+）优先；TK2 不可用时回退到 TK1 layoutManager。
+    private func applyLineFadeAnimation(changedRange: NSRange) {
+        guard changedRange.length > 0, self.bounds.width > 1 else { return }
+
+        if _lineFadeMaskLayer == nil {
+            let null = NSNull()
+            let mask = CALayer()
+            mask.actions = [
+                "bounds": null, "position": null,
+                "frame": null, "sublayerTransform": null, "transition": null,
+            ]
+            let base = CALayer()
+            base.backgroundColor = UIColor.black.cgColor
+            base.actions = ["bounds": null, "position": null, "frame": null, "transition": null]
+            mask.addSublayer(base)
+            _lineFadeBaseLayer = base
+            _lineFadeMaskLayer = mask
+            self.layer.mask = mask
+        }
+        guard let mask = _lineFadeMaskLayer, let base = _lineFadeBaseLayer else { return }
+        mask.frame = self.bounds
+        // FluidMarkdown 对齐：补偿滚动偏移（isScrollEnabled=false 时为 identity，仍保留以确保正确性）
+        mask.sublayerTransform = CATransform3DMakeTranslation(contentOffset.x, -contentOffset.y, 0)
+
+        if #available(iOS 16.0, *), let tlm = self.textLayoutManager {
+            applyLineFadeAnimation_tk2(changedRange: changedRange, tlm: tlm, mask: mask, base: base)
+        } else {
+            applyLineFadeAnimation_tk1(changedRange: changedRange, mask: mask, base: base)
+        }
+    }
+
+    @available(iOS 16.0, *)
+    private func applyLineFadeAnimation_tk2(
+        changedRange: NSRange,
+        tlm: NSTextLayoutManager,
+        mask: CALayer,
+        base: CALayer
+    ) {
+        guard let tcs = tlm.textContentManager else { return }
+        let docStart = tcs.documentRange.location
+        guard
+            let rs = tcs.location(docStart, offsetBy: changedRange.location),
+            let re = tcs.location(rs, offsetBy: changedRange.length),
+            let textRange = NSTextRange(location: rs, end: re)
+        else { return }
+        tlm.ensureLayout(for: textRange)
+
+        // 按 minY 分组得到最末行的 union 矩形
+        var prevMinY: CGFloat = .nan
+        var curLineRect: CGRect = .null
+        var lastLineRect: CGRect = .null
+        tlm.enumerateTextSegments(in: textRange, type: .standard, options: .rangeNotRequired) { _, sf, _, _ in
+            if abs(sf.minY - prevMinY) > 0.5 {
+                prevMinY = sf.minY
+                curLineRect = sf
+            } else {
+                curLineRect = curLineRect.union(sf)
+            }
+            lastLineRect = curLineRect
+            return true
+        }
+        guard !lastLineRect.isNull else { return }
+        installLineFadeLayer(lineRect: lastLineRect, rightEdge: lastLineRect.maxX, mask: mask, base: base)
+    }
+
+    private func applyLineFadeAnimation_tk1(changedRange: NSRange, mask: CALayer, base: CALayer) {
+        let glyphRange = self.layoutManager.glyphRange(
+            forCharacterRange: changedRange, actualCharacterRange: nil
+        )
+        self.layoutManager.enumerateLineFragments(forGlyphRange: glyphRange) { [weak self]
+            rect, usedRect, _, lineGlyphRange, _ in
+            guard let self else { return }
+            guard NSMaxRange(glyphRange) == NSMaxRange(lineGlyphRange) else { return }
+            self.installLineFadeLayer(lineRect: rect, rightEdge: usedRect.maxX, mask: mask, base: base)
+        }
+    }
+
+    /// 在遮罩层上为当前最末行追加或更新一个 LineFadeLayer。
+    /// - Parameters:
+    ///   - lineRect:  行片段矩形（用于确定 y 位置和行高）。
+    ///   - rightEdge: 行内已用文字的右边界（TK1 用 usedRect.maxX；TK2 用 segment union 的 maxX）。
+    private func installLineFadeLayer(lineRect rect: CGRect, rightEdge: CGFloat, mask: CALayer, base: CALayer) {
+        // 基础层覆盖当前行以上的所有内容
+        base.frame = CGRect(x: 0, y: 0, width: mask.bounds.width, height: rect.minY)
+
+        // lineDetectRect：稍扩展以容纳浮点误差（与 FluidMarkdown 相同）
+        let lineDetectRect = CGRect(
+            x: floor(rect.minX), y: floor(rect.minY),
+            width: ceil(rect.width), height: ceil(rect.height + 1)
+        )
+        var latestX: CGFloat = rect.minX
+        for sub in mask.sublayers ?? [] {
+            guard let fl = sub as? LineFadeLayer else { continue }
+            if lineDetectRect.contains(fl.frame) {
+                if fl.isFadeComplete {
+                    // 已完成的层：折入基础层并移除
+                    fl.removeFromSuperlayer()
+                    base.frame = CGRect(x: 0, y: 0, width: mask.bounds.width, height: rect.maxY)
+                } else {
+                    latestX = max(latestX, fl.frame.maxX)
+                }
+            } else {
+                // 其他行的旧层：基础层已覆盖，直接移除
+                fl.removeFromSuperlayer()
+            }
+        }
+
+        let newFrame = CGRect(x: latestX, y: rect.minY, width: rightEdge - latestX, height: rect.height)
+        guard newFrame.width > 0.5, newFrame.height > 0.5 else { return }
+
+        // 去重：整数像素级别比较（FluidMarkdown 用 CGRectIntegral）
+        let isDuplicate = (mask.sublayers ?? []).compactMap { $0 as? LineFadeLayer }.contains {
+            CGRectEqualToRect(CGRectIntegral($0.frame), CGRectIntegral(newFrame))
+        }
+        guard !isDuplicate else { return }
+
+        let fl = LineFadeLayer()
+        fl.startPoint = CGPoint(x: 0, y: 0.5)
+        fl.endPoint = CGPoint(x: 1, y: 0.5)
+        fl.frame = newFrame
+        // 模型值 = 最终状态（动画移除后 layer 回退到此值，无视觉跳变）
+        fl.colors = [UIColor.black.cgColor, UIColor.black.cgColor]
+
+        let anim = CAKeyframeAnimation(keyPath: "colors")
+        anim.values = [
+            [UIColor.clear.cgColor, UIColor.clear.cgColor],
+            [UIColor.black.cgColor, UIColor.clear.cgColor],
+            [UIColor.black.cgColor, UIColor.black.cgColor],
+        ]
+        anim.calculationMode = .linear
+        anim.fillMode = .both               // FluidMarkdown: kCAFillModeBoth
+        anim.isRemovedOnCompletion = true   // FluidMarkdown: removedOnCompletion = YES
+        anim.duration = lineFadeDuration
+        anim.delegate = LineFadeAnimationDelegate { [weak fl] in
+            fl?.isFadeComplete = true       // 供下次 applyLineFadeAnimation 做懒清理
+        }
+        mask.addSublayer(fl)
+        fl.add(anim, forKey: "fadeIn")
     }
 
     /// 子类可重写：禁止系统长按复制/粘贴菜单，仅使用自定义 popupMenuItems（如 Bajoseek 回复区）

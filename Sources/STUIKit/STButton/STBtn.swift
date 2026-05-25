@@ -162,9 +162,6 @@ open class STBtn: UIButton {
         }
     }
     
-    /// 是否将 `titleLabel.font` 替换为项目级字体 `UIFont.st_systemFont(ofSize:)`。
-    ///
-    /// ⚠️ 命名保留是为向后兼容，**不是 `adjustsFontSizeToFitWidth` 语义的自动缩放**：
     /// 它只在开启时读取当前字号、用项目字体重建一个同字号的 `UIFont`，用于统一品牌字体。
     /// 如需"文本自动缩放以适配宽度"，请另设 `titleLabel?.adjustsFontSizeToFitWidth` 与 `minimumScaleFactor`。
     @IBInspectable open var autoAdaptFontSize: Bool = true {
@@ -298,49 +295,41 @@ open class STBtn: UIButton {
         self.installModernButtonConfiguration()
     }
 
-    /// 安装现代化 `UIButton.Configuration`，以及 update handler 用于：
-    /// - 注入 `titleLabel.font` 到 `attributedTitle`（存量调用点用 `titleLabel.font` 设字体）
+    /// `UIButton.Configuration`，以及 update handler 用于：
+    /// - 注入 `titleLabel.font` 到 `attributedTitle`
     /// - 根据 `suppressesSystemStateEffects` 选择性屏蔽系统状态效果
     /// - 同步 corner radius 与 state 背景色
     /// - 回调 `onConfigurationUpdate` 扩展点
     ///
-    /// **不管理 `contentInsets`** —— 调用方直接写 `configuration?.contentInsets` 或通过 `onConfigurationUpdate` 修改。
     private func installModernButtonConfiguration() {
         if self.configuration == nil {
+            let xibFont = self.titleLabel?.font
             self.configuration = UIButton.Configuration.plain()
+            if let font = xibFont {
+                self.titleLabel?.font = font
+            }
         }
         self.configurationUpdateHandler = { [weak self] button in
             guard let self, var config = button.configuration else { return }
-            // 单行 + 尾部省略，匹配迁移前 UIButton 的默认行为；
-            // Configuration 默认允许多行，中文无词边界会被按字符纵向拆开
             config.titleLineBreakMode = .byTruncatingTail
             config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { [weak self] attrs in
-                // Configuration 生效后 titleLabel.font 不再驱动渲染；
-                // 保留 titleLabel.font 作为字体入口（大量存量调用点都这么写），
-                // 通过 transformer 每次渲染时把它注入到 attributedTitle —— 字体注入**永远执行**，
-                // 与 `suppressesSystemStateEffects` 无关，因为它不是状态效果、只是字体来源适配。
                 var updated = attrs
                 guard let self else { return updated }
                 if let font = self.titleLabel?.font {
                     updated.font = font
                 }
-                // 仅在开关打开时显式接管 foregroundColor，阻断系统在 highlighted/disabled 下
-                // 对标题色做 alpha 衰减 / 灰化；关闭时（默认）保留系统原生状态反馈。
                 if self.suppressesSystemStateEffects,
                    let color = self.titleColor(for: self.state) {
                     updated.foregroundColor = color
                 }
                 return updated
             }
-            // 图标 tint 的系统变换：开关打开时关掉系统在 highlighted/disabled 下的 alpha 衰减。
             if self.suppressesSystemStateEffects {
                 config.imageColorTransformer = UIConfigurationColorTransformer { $0 }
             }
             self.refineButtonConfiguration(button, configuration: &config)
             self.onConfigurationUpdate?(button, &config)
             button.configuration = config
-            // Configuration 应用 attributedTitle 时会回写 titleLabel，可能把 numberOfLines 重置成 0；
-            // 这里重新锁回单行，保证中文窄 label 不会按字符拆行
             self.titleLabel?.numberOfLines = 1
             self.titleLabel?.lineBreakMode = .byTruncatingTail
         }
@@ -369,17 +358,10 @@ open class STBtn: UIButton {
     /// 子类（如 `STIconBtn`）覆写此方法以写入图文布局 / `contentInsets` 等 Configuration 字段。
     /// 调用时机：每次 `configurationUpdateHandler` 触发，在字体/状态 transformer 之后、`onConfigurationUpdate` 之前。
     open func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
-        // 让 Configuration 管理的 background 子视图与 `layer.cornerRadius` 对齐，
-        // 避免 `masksToBounds = false`（如 `st_setShadow`）或 `config.background.backgroundColor`
-        // 非空时背景按 0 半径绘制、把 `layer.cornerRadius` 盖住。
         config.background.cornerRadius = self.layer.cornerRadius
         let resolvedBackgroundColor = self.resolvedStateBackgroundColor(for: button.state)
-        // 开关打开时阻断系统在 highlighted/selected 下对 background 的 tint 过渡；
-        // 关闭时（默认）保留系统原生反馈，`filled/tinted/gray` 等 preset 表现等同 UIButton。
         if self.suppressesSystemStateEffects {
             config.background.backgroundColorTransformer = UIConfigurationColorTransformer { $0 }
-            // `plain()` 风格在 selected/highlighted 下可能仍会绘制系统态底色；
-            // 当调用方未显式提供状态背景时，主动清为透明，确保视觉完全由外界接管。
             if resolvedBackgroundColor == nil {
                 config.baseBackgroundColor = .clear
                 config.background.backgroundColor = .clear
@@ -388,10 +370,7 @@ open class STBtn: UIButton {
         if let color = resolvedBackgroundColor {
             config.background.backgroundColor = color
             self.lastManagedBackgroundColor = color
-        } else if let managed = self.lastManagedBackgroundColor,
-                  config.background.backgroundColor == managed {
-            // 调用方把 `stateBackgroundColors` 全清空了：仅当"当前背景色仍是我们上次写入的值"才清除，
-            // 避免把 `onConfigurationUpdate` 等外部路径写入的背景色误覆盖。
+        } else if let managed = self.lastManagedBackgroundColor, config.background.backgroundColor == managed {
             config.background.backgroundColor = nil
             self.lastManagedBackgroundColor = nil
         }

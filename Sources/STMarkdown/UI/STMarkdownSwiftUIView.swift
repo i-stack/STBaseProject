@@ -15,8 +15,10 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
     public var engine: STMarkdownEngine
     public var isTextSelectionEnabled: Bool
     public var onLinkTap: ((URL) -> Void)?
+    public var onFootnoteTap: ((String) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
     public var onCitationTap: ((String) -> Void)?
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
 
     public init(
         markdown: String,
@@ -25,8 +27,10 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
         engine: STMarkdownEngine = STMarkdownEngine(),
         isTextSelectionEnabled: Bool = true,
         onLinkTap: ((URL) -> Void)? = nil,
+        onFootnoteTap: ((String) -> Void)? = nil,
         onSelectionChange: ((String) -> Void)? = nil,
-        onCitationTap: ((String) -> Void)? = nil
+        onCitationTap: ((String) -> Void)? = nil,
+        onExpandTable: ((STMarkdownTableViewModel) -> Void)? = nil
     ) {
         self.markdown = markdown
         self.style = style
@@ -34,8 +38,10 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
         self.engine = engine
         self.isTextSelectionEnabled = isTextSelectionEnabled
         self.onLinkTap = onLinkTap
+        self.onFootnoteTap = onFootnoteTap
         self.onSelectionChange = onSelectionChange
         self.onCitationTap = onCitationTap
+        self.onExpandTable = onExpandTable
     }
 
     public func makeUIView(context: Context) -> STMarkdownTextView {
@@ -88,8 +94,10 @@ public struct STMarkdownSwiftUIView: UIViewRepresentable {
 
     private func applyCallbacks(to view: STMarkdownTextView) {
         view.onLinkTap = self.onLinkTap
+        view.onFootnoteTap = self.onFootnoteTap
         view.onSelectionChange = self.onSelectionChange
         view.onCitationTap = self.onCitationTap
+        view.onExpandTable = self.onExpandTable
     }
 }
 
@@ -118,8 +126,12 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
     public var tokenFadeDuration: TimeInterval?
     public var command: STMarkdownStreamingCommand?
     public var onLinkTap: ((URL) -> Void)?
+    public var onFootnoteTap: ((String) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
     public var onCitationTap: ((String) -> Void)?
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
+    /// 与 ``STMarkdownBaseTextView/onTableOfContentsChange`` 一致：目录随渲染刷新（含流式每帧）。
+    public var onTableOfContentsChange: (([STMarkdownTOCItem]) -> Void)?
 
     public init(
         markdown: String,
@@ -133,8 +145,11 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
         tokenFadeDuration: TimeInterval? = nil,
         command: STMarkdownStreamingCommand? = nil,
         onLinkTap: ((URL) -> Void)? = nil,
+        onFootnoteTap: ((String) -> Void)? = nil,
         onSelectionChange: ((String) -> Void)? = nil,
-        onCitationTap: ((String) -> Void)? = nil
+        onCitationTap: ((String) -> Void)? = nil,
+        onExpandTable: ((STMarkdownTableViewModel) -> Void)? = nil,
+        onTableOfContentsChange: (([STMarkdownTOCItem]) -> Void)? = nil
     ) {
         self.markdown = markdown
         self.style = style
@@ -147,8 +162,11 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
         self.tokenFadeDuration = tokenFadeDuration
         self.command = command
         self.onLinkTap = onLinkTap
+        self.onFootnoteTap = onFootnoteTap
         self.onSelectionChange = onSelectionChange
         self.onCitationTap = onCitationTap
+        self.onExpandTable = onExpandTable
+        self.onTableOfContentsChange = onTableOfContentsChange
     }
 
     public func makeUIView(context: Context) -> STMarkdownStreamingTextView {
@@ -202,8 +220,11 @@ public struct STMarkdownStreamingSwiftUIView: UIViewRepresentable {
 
     private func applyCallbacks(to view: STMarkdownStreamingTextView) {
         view.onLinkTap = self.onLinkTap
+        view.onFootnoteTap = self.onFootnoteTap
         view.onSelectionChange = self.onSelectionChange
         view.onCitationTap = self.onCitationTap
+        view.onExpandTable = self.onExpandTable
+        view.onTableOfContentsChange = self.onTableOfContentsChange
     }
 
     private func applyToggles(to view: STMarkdownStreamingTextView) {

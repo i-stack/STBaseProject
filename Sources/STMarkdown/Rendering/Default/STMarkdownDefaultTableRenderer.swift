@@ -73,6 +73,10 @@ private extension STMarkdownDefaultTableRenderer {
                 return " "
             case .strikethrough(let children):
                 return self.plainText(from: children)
+            case .footnoteReference(let label):
+                return "[^\(label)]"
+            case .inlineRawHTML(let raw):
+                return raw
             }
         }.joined()
     }

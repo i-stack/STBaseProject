@@ -13,20 +13,60 @@ public protocol STMarkdownStructureParsing: Sendable {
 }
 
 public struct STMarkdownStructureParser: STMarkdownStructureParsing, Sendable {
+    /// 串行化 swift-markdown / cmark 解析路径；使用递归锁以支持脚注定义体内再解析。
+    private static let parseLock = NSRecursiveLock()
+
     public init() {}
 
     public func parse(_ markdown: String) -> STMarkdownDocument {
         guard markdown.isEmpty == false else {
             return STMarkdownDocument(blocks: [])
         }
-        let normalized = STMarkdownMathNormalizer.normalizeBlocks(in: markdown)
-        let document = Document(parsing: normalized.text)
-        let blocks = self.makeBlocks(from: Array(document.children), mathMap: normalized.blockMap)
-        return STMarkdownDocument(blocks: blocks)
+        Self.parseLock.lock()
+        defer { Self.parseLock.unlock() }
+        return self.parseUnlocked(markdown, stripFootnoteDefinitions: true)
+    }
+
+    /// 将短 Markdown 片段解析为单个段落的行内节点（脚注定义体、HTML `<summary>` 等）。
+    public func parseInlineFragment(_ markdown: String) -> [STMarkdownInlineNode] {
+        guard markdown.isEmpty == false else { return [] }
+        Self.parseLock.lock()
+        defer { Self.parseLock.unlock() }
+        let doc = self.parseUnlocked(markdown, stripFootnoteDefinitions: false)
+        if let first = doc.blocks.first, case .paragraph(let inlines) = first {
+            return inlines
+        }
+        return [.text(markdown)]
     }
 }
 
 private extension STMarkdownStructureParser {
+    func parseUnlocked(_ markdown: String, stripFootnoteDefinitions: Bool) -> STMarkdownDocument {
+        let working: String
+        let rawDefs: [String: String]
+        if stripFootnoteDefinitions {
+            let pair = STMarkdownFootnoteDefinitionScanner.stripDefinitions(from: markdown)
+            working = pair.markdown
+            rawDefs = pair.rawBodies
+        } else {
+            working = markdown
+            rawDefs = [:]
+        }
+
+        let footnoteDefs = STMarkdownFootnoteDefinitionBuilder.definitions(from: rawDefs) { [self] fragment in
+            self.parseUnlocked(fragment, stripFootnoteDefinitions: false)
+        }
+
+        let normalized = STMarkdownMathNormalizer.normalizeBlocks(in: working)
+        let document = Document(parsing: normalized.text)
+        let blocks = self.makeBlocks(from: Array(document.children), mathMap: normalized.blockMap)
+        var doc = STMarkdownDocument(blocks: blocks, footnoteDefinitions: footnoteDefs)
+        if stripFootnoteDefinitions {
+            doc = STMarkdownFootnoteInlineInjector.apply(doc)
+        }
+        return doc
+    }
+
     static let mathBlockRegex = STMarkdownRegexFactory.compile(
         pattern: #"\{\{ST_MATH_BLOCK:(\d+)\}\}"#,
         owner: "STMarkdownStructureParser.mathBlock"
@@ -98,6 +138,14 @@ private extension STMarkdownStructureParser {
                     rows: rows,
                     columnAlignments: alignments
                 )))
+                continue
+            }
+
+            if let htmlBlock = block as? HTMLBlock {
+                let classified = STMarkdownHTMLBlockClassifier.classify(html: htmlBlock.rawHTML) { [self] fragment in
+                    self.parseUnlocked(fragment, stripFootnoteDefinitions: false)
+                }
+                blocks.append(classified)
                 continue
             }
 
@@ -272,6 +320,9 @@ private extension STMarkdownStructureParser {
         }
         if let strikethrough = markup as? Strikethrough {
             return [.strikethrough(strikethrough.children.flatMap { self.inlineNodes(from: $0) })]
+        }
+        if let inlineHTML = markup as? InlineHTML {
+            return [.inlineRawHTML(inlineHTML.rawHTML)]
         }
         return markup.children.flatMap { self.inlineNodes(from: $0) }
     }

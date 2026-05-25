@@ -8,10 +8,23 @@
 import UIKit
 
 public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
+    internal enum SmartStreamingRenderMode {
+        case full
+        case incremental
+    }
+
+    private struct PendingAnimatedSuffix {
+        let generation: Int
+        let suffix: NSAttributedString
+        let trailingSuffix: NSAttributedString?
+    }
 
     public var tokenFadeDuration: TimeInterval {
         get { self.shimmerTextView.tokenFadeDuration }
-        set { self.shimmerTextView.tokenFadeDuration = newValue }
+        set {
+            _requestedTokenFadeDuration = newValue
+            self.shimmerTextView.tokenFadeDuration = self.markdownStyle.streamFadeInEnabled ? newValue : 0
+        }
     }
 
     public var customDocumentRenderer: ((STMarkdownRenderDocument) -> NSAttributedString)?
@@ -25,6 +38,44 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         get { self.shimmerTextView.animateAcrossNewlines }
         set { self.shimmerTextView.animateAcrossNewlines = newValue }
     }
+
+    /// 流式动画 / 容器尾段延迟追加的兜底超时；超时后强制收口，避免宿主一直等不到完成态。
+    public var streamingAnimationWatchdogTimeout: TimeInterval = 4.0
+
+    private var smartStreamBuffer: STMarkdownStreamBuffer?
+    private var smartStreamingSessionActive = false
+    private var isApplyingSmartStreamMarkdownUpdate = false
+    private var streamingAnimationGeneration: Int = 0
+    private var pendingStreamingSuffixWorkItem: DispatchWorkItem?
+    private var pendingAnimatedSuffix: PendingAnimatedSuffix?
+    private var streamingWatchdogWorkItem: DispatchWorkItem?
+    private var streamingWatchdogGeneration: Int = 0
+    /// tokenFadeDuration 最后一次被外部请求设置的值；样式允许 fade 时以此值写入 shimmerTextView。
+    private var _requestedTokenFadeDuration: TimeInterval = 0.3
+    /// 上一帧已交给 ``setMarkdown(_:animated:)`` 的「安全前缀」展示串（经 ``stripUnclosedTailMarkers``）。
+    /// 当缓冲器仅增长尾部、``committedSafePrefix`` 不变时跳过整段重解析，降低流式 CPU 占用（对齐对比文档 P0）。
+    private var lastSmartStreamRenderedDisplayMarkdown: String?
+    private var lastSmartStreamRenderedCanonicalMarkdown: String?
+    private var lastSmartStreamRenderDocument: STMarkdownRenderDocument?
+    internal private(set) var lastSmartStreamingRenderMode: SmartStreamingRenderMode?
+
+    /// 是否处于 ``beginSmartMarkdownStreaming()`` 开启的智能缓冲流式会话中。
+    public var isSmartMarkdownStreamingActive: Bool {
+        self.smartStreamingSessionActive
+    }
+
+    /// true 表示没有待执行的容器延迟尾段，也没有进行中的文本 reveal 动画。
+    public var isStreamingAnimationIdle: Bool {
+        self.pendingAnimatedSuffix == nil && self.shimmerTextView.isAnimatingTextReveal == false
+    }
+
+    /// 会话中的完整累积 Markdown（含尚未通过模块检测的尾部）；非会话中为 `nil`。
+    public var smartStreamingAccumulatedText: String? {
+        self.smartStreamBuffer?.fullAccumulatedText
+    }
+
+    /// `containerThenContent` 命中时，容器/块级前缀先上屏，再等待这一小段间隔后让尾部正文继续逐字动画。
+    public var containerRevealGapDuration: TimeInterval = 0.06
 
     private var shimmerTextView: STShimmerTextView {
         guard let textView = self.textView as? STShimmerTextView else {
@@ -41,23 +92,25 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.shimmerTextView.renderedAttributedText
     }
 
-    public init(frame: CGRect) {
+    public init(frame: CGRect, usesTextLayoutManager: Bool = true) {
         super.init(
-            textView: STShimmerTextView(usingTextLayoutManager: false),
+            textView: STShimmerTextView(usingTextLayoutManager: usesTextLayoutManager),
             frame: frame,
             style: .default,
             advancedRenderers: .empty,
             engine: STMarkdownEngine(),
             accessibilityTraits: [.staticText, .updatesFrequently]
         )
+        self.installStreamingAnimationObservers()
     }
 
     public convenience init(
         style: STMarkdownStyle = .default,
         advancedRenderers: STMarkdownAdvancedRenderers = .empty,
-        engine: STMarkdownEngine = STMarkdownEngine()
+        engine: STMarkdownEngine = STMarkdownEngine(),
+        usesTextLayoutManager: Bool = true
     ) {
-        self.init(frame: .zero)
+        self.init(frame: .zero, usesTextLayoutManager: usesTextLayoutManager)
         self.applyConfigurationCommon(
             style: style,
             advancedRenderers: advancedRenderers,
@@ -67,29 +120,48 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     public required init?(coder: NSCoder) {
         super.init(
-            textView: STShimmerTextView(usingTextLayoutManager: false),
+            textView: STShimmerTextView(usingTextLayoutManager: true),
             coder: coder,
             style: .default,
             advancedRenderers: .empty,
             engine: STMarkdownEngine(),
             accessibilityTraits: [.staticText, .updatesFrequently]
         )
+        self.installStreamingAnimationObservers()
     }
 
     public func reset() {
+        self.invalidatePendingStreamingAnimation()
+        self.invalidateStreamingAnimationWatchdog()
+        self.cancelSmartMarkdownStreamingSession()
         self.shimmerTextView.reset()
         self.resetBaseState()
     }
 
     public func finishStreaming() {
+        self.flushPendingAnimatedSuffixIfNeeded()
         self.shimmerTextView.finishAnimations()
+        self.invalidateStreamingAnimationWatchdog()
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
     }
 
     public func setMarkdown(_ markdown: String, animated: Bool = false) {
+        self.invalidatePendingStreamingAnimation()
+        if self.smartStreamingSessionActive && !self.isApplyingSmartStreamMarkdownUpdate {
+            self.cancelSmartMarkdownStreamingSession()
+        }
         let markdownForRender = animated
             ? Self.stripUnclosedTailMarkers(in: markdown)
             : markdown
         let displayRendered = self.render(markdownForRender)
+        self.applySetMarkdownAnimatedDiff(markdown: markdown, displayRendered: displayRendered, animated: animated)
+    }
+
+    private func applySetMarkdownAnimatedDiff(
+        markdown: String,
+        displayRendered: NSAttributedString,
+        animated: Bool
+    ) {
         guard animated, !self.rawMarkdown.isEmpty else {
             self.applyFullReplace(markdown: markdown, rendered: displayRendered)
             return
@@ -99,7 +171,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         let currentStr = current.string
         let renderedStr = displayRendered.string
 
-        if renderedStr.count >= currentStr.count,
+        if renderedStr.utf16.count >= currentStr.utf16.count,
            (renderedStr as NSString).hasPrefix(currentStr) {
             let prefixChanged = current.length > 0
                 && !displayRendered.attributedSubstring(
@@ -184,18 +256,286 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     public func appendMarkdownFragment(_ fragment: String, animated: Bool = true) {
         guard fragment.isEmpty == false else { return }
+        if self.smartStreamingSessionActive {
+            self.appendSmartMarkdownStreamingChunk(fragment)
+            return
+        }
         self.setMarkdown(self.rawMarkdown + fragment, animated: animated)
     }
 
     public func updateStreamingMarkdown(_ fullMarkdown: String) {
+        self.cancelSmartMarkdownStreamingSession()
         self.setMarkdown(fullMarkdown, animated: true)
     }
 
+    /// 开始智能流式会话：先 ``reset()``，再用 ``STMarkdownStreamBuffer`` 按安全模块边界累积 chunk。
+    public func beginSmartMarkdownStreaming() {
+        self.reset()
+        self.smartStreamBuffer = STMarkdownStreamBuffer(
+            minModuleLength: self.markdownStyle.streamMinModuleLength
+        )
+        self.smartStreamingSessionActive = true
+    }
+
+    /// 向智能流式缓冲追加一段 chunk 并刷新显示（仅显示已通过检测的安全前缀 + 尾部裁剪）。
+    public func appendSmartMarkdownStreamingChunk(_ chunk: String) {
+        guard chunk.isEmpty == false else { return }
+        guard self.smartStreamingSessionActive, let buffer = self.smartStreamBuffer else {
+            self.setMarkdown(self.rawMarkdown + chunk, animated: true)
+            return
+        }
+        buffer.updateMinModuleLength(self.markdownStyle.streamMinModuleLength)
+        _ = buffer.append(chunk)
+        self.applySmartStreamingPresentation(animated: true)
+    }
+
+    /// 结束智能流式会话；默认 ``flush`` 后按完整累积文本做一次非动画收敛。
+    public func endSmartMarkdownStreaming(flushPending: Bool = true) {
+        guard self.smartStreamingSessionActive, let buffer = self.smartStreamBuffer else { return }
+        if flushPending {
+            _ = buffer.flush()
+        }
+        let snapshot = buffer.fullAccumulatedText
+        self.smartStreamBuffer = nil
+        self.smartStreamingSessionActive = false
+        self.lastSmartStreamRenderedDisplayMarkdown = nil
+        self.lastSmartStreamRenderedCanonicalMarkdown = nil
+        self.lastSmartStreamRenderDocument = nil
+        self.lastSmartStreamingRenderMode = nil
+        let md = Self.stripUnclosedTailMarkers(in: snapshot)
+        self.isApplyingSmartStreamMarkdownUpdate = true
+        defer { self.isApplyingSmartStreamMarkdownUpdate = false }
+        self.setMarkdown(md, animated: false)
+        self.rawMarkdown = snapshot
+        self.invalidateStreamingAnimationWatchdog()
+        self.publishContentLayoutHeightNotificationIfNeeded(force: true)
+    }
+
     internal override func configurationDidChangeRerender() {
-        self.setMarkdown(self.rawMarkdown, animated: false)
+        self.syncTokenFadeDurationFromStyle()
+        if self.smartStreamingSessionActive {
+            self.smartStreamBuffer?.updateMinModuleLength(self.markdownStyle.streamMinModuleLength)
+            self.applySmartStreamingPresentation(animated: false, force: true)
+        } else {
+            self.setMarkdown(self.rawMarkdown, animated: false)
+        }
+    }
+
+    private func cancelSmartMarkdownStreamingSession() {
+        self.smartStreamBuffer = nil
+        self.smartStreamingSessionActive = false
+        self.lastSmartStreamRenderedDisplayMarkdown = nil
+        self.lastSmartStreamRenderedCanonicalMarkdown = nil
+        self.lastSmartStreamRenderDocument = nil
+        self.lastSmartStreamingRenderMode = nil
+    }
+
+    internal override func applyConfigurationCommon(
+        style: STMarkdownStyle,
+        advancedRenderers: STMarkdownAdvancedRenderers,
+        engine: STMarkdownEngine
+    ) {
+        super.applyConfigurationCommon(style: style, advancedRenderers: advancedRenderers, engine: engine)
+        self.syncTokenFadeDurationFromStyle()
+    }
+
+    private func syncTokenFadeDurationFromStyle() {
+        let isLineFade = self.markdownStyle.streamFadeInEnabled && self.markdownStyle.streamLineFadeEnabled
+        self.shimmerTextView.lineFadeMode = isLineFade
+        self.shimmerTextView.tokenFadeDuration = (self.markdownStyle.streamFadeInEnabled && !isLineFade)
+            ? _requestedTokenFadeDuration
+            : 0
+    }
+
+    private func applySmartStreamingPresentation(animated: Bool, force: Bool = false) {
+        guard let buffer = self.smartStreamBuffer else { return }
+        let accumulated = buffer.fullAccumulatedText
+        let committed = buffer.committedSafePrefix
+        let md = Self.stripUnclosedTailMarkers(in: committed)
+        if force == false, md == self.lastSmartStreamRenderedDisplayMarkdown {
+            self.rawMarkdown = accumulated
+            return
+        }
+        self.isApplyingSmartStreamMarkdownUpdate = true
+        defer { self.isApplyingSmartStreamMarkdownUpdate = false }
+        let rendered = self.renderSmartStreamingDisplayMarkdown(md, forceFull: force)
+        self.applySetMarkdownAnimatedDiff(markdown: md, displayRendered: rendered, animated: animated)
+        self.lastSmartStreamRenderedDisplayMarkdown = md
+        self.rawMarkdown = accumulated
+    }
+
+    private func renderSmartStreamingDisplayMarkdown(_ markdown: String, forceFull: Bool) -> NSAttributedString {
+        let canonicalMarkdown = self.canonicalMarkdownForIncremental(from: markdown)
+
+        if forceFull == false,
+           let previousCanonical = self.lastSmartStreamRenderedCanonicalMarkdown,
+           let previousDocument = self.lastSmartStreamRenderDocument,
+           previousCanonical.isEmpty == false,
+           canonicalMarkdown.count >= previousCanonical.count,
+           canonicalMarkdown.hasPrefix(previousCanonical) {
+            let incremental = self.engine.processIncremental(
+                STMarkdownIncrementalParameters(
+                    canonicalMarkdown: canonicalMarkdown,
+                    lastCommittedExclusiveEnd: previousCanonical.count,
+                    currentSafeExclusiveEnd: canonicalMarkdown.count,
+                    contextWindowSize: 200,
+                    previousTotalRenderBlockCount: previousDocument.blocks.count
+                )
+            )
+            let mergedDocument = self.normalizedMergedIncrementalRenderDocument(
+                incremental.mergedRenderDocument(previous: previousDocument)
+            )
+            self.updateTableOfContents(from: mergedDocument)
+            self.lastSmartStreamRenderedCanonicalMarkdown = canonicalMarkdown
+            self.lastSmartStreamRenderDocument = mergedDocument
+            self.lastSmartStreamingRenderMode = .incremental
+            return self.render(document: mergedDocument)
+        }
+
+        let (rendered, renderDocument) = self.renderWithDocument(markdown)
+        self.lastSmartStreamRenderedCanonicalMarkdown = canonicalMarkdown
+        self.lastSmartStreamRenderDocument = renderDocument
+        self.lastSmartStreamingRenderMode = .full
+        return rendered
+    }
+
+    private func canonicalMarkdownForIncremental(from markdown: String) -> String {
+        let configuration = self.engine.pipeline.configuration
+        guard configuration.enableInputSanitizer else {
+            return markdown
+        }
+        let sanitizer = STMarkdownInputSanitizer(rules: configuration.sanitizerRules)
+        return sanitizer.sanitize(markdown, debug: configuration.debug).sanitizedText
+    }
+
+    private func render(document: STMarkdownRenderDocument) -> NSAttributedString {
+        if let customRenderer = self.customDocumentRenderer {
+            return customRenderer(document)
+        }
+        return self.renderer.render(document: document)
+    }
+
+    private func normalizedMergedIncrementalRenderDocument(
+        _ document: STMarkdownRenderDocument
+    ) -> STMarkdownRenderDocument {
+        var slugger = STMarkdownAnchorSlugRegistry()
+        let blocks = document.blocks.enumerated().map {
+            self.normalizedMergedRenderBlock(
+                $0.element,
+                path: ["b:\($0.offset)"],
+                slugger: &slugger
+            )
+        }
+        return STMarkdownRenderDocument(blocks: blocks)
+    }
+
+    private func normalizedMergedRenderBlock(
+        _ block: STMarkdownRenderBlock,
+        path: [String],
+        slugger: inout STMarkdownAnchorSlugRegistry
+    ) -> STMarkdownRenderBlock {
+        switch block {
+        case .paragraph(let metadata, let inlines):
+            return .paragraph(
+                self.rebasedMetadata(metadata, kind: .paragraph, path: path),
+                inlines
+            )
+        case .heading(let metadata, level: let level, anchorId: _, content: let content):
+            let anchorId = slugger.uniqueAnchorId(forPlainTitle: content.st_plainTextForTOC())
+            return .heading(
+                self.rebasedMetadata(metadata, kind: .heading, path: path),
+                level: level,
+                anchorId: anchorId,
+                content: content
+            )
+        case .quote(let metadata, let blocks):
+            return .quote(
+                self.rebasedMetadata(metadata, kind: .quote, path: path),
+                blocks.enumerated().map {
+                    self.normalizedMergedRenderBlock(
+                        $0.element,
+                        path: path + ["q:\($0.offset)"],
+                        slugger: &slugger
+                    )
+                }
+            )
+        case .list(let metadata, let items):
+            return .list(
+                self.rebasedMetadata(metadata, kind: .list, path: path),
+                items.enumerated().map { index, item in
+                    let itemPath = path + ["li:\(index)"]
+                    return STMarkdownRenderListItem(
+                        blocks: item.blocks.enumerated().map {
+                            self.normalizedMergedRenderBlock(
+                                $0.element,
+                                path: itemPath + ["b:\($0.offset)"],
+                                slugger: &slugger
+                            )
+                        },
+                        ordered: item.ordered,
+                        level: item.level,
+                        orderedIndex: item.orderedIndex,
+                        checkbox: item.checkbox
+                    )
+                }
+            )
+        case .codeBlock(let metadata, language: let language, code: let code):
+            return .codeBlock(
+                self.rebasedMetadata(metadata, kind: .codeBlock, path: path),
+                language: language,
+                code: code
+            )
+        case .table(let metadata, let table):
+            return .table(self.rebasedMetadata(metadata, kind: .table, path: path), table)
+        case .mathBlock(let metadata, let latex):
+            return .mathBlock(self.rebasedMetadata(metadata, kind: .mathBlock, path: path), latex)
+        case .image(let metadata, url: let url, altText: let altText, title: let title):
+            return .image(
+                self.rebasedMetadata(metadata, kind: .image, path: path),
+                url: url,
+                altText: altText,
+                title: title
+            )
+        case .thematicBreak(let metadata):
+            return .thematicBreak(self.rebasedMetadata(metadata, kind: .thematicBreak, path: path))
+        case .details(let metadata, summary: let summary, body: let body):
+            return .details(
+                self.rebasedMetadata(metadata, kind: .details, path: path),
+                summary: summary,
+                body: body.enumerated().map {
+                    self.normalizedMergedRenderBlock(
+                        $0.element,
+                        path: path + ["d:\($0.offset)"],
+                        slugger: &slugger
+                    )
+                }
+            )
+        case .rawHTML(let metadata, let html):
+            return .rawHTML(self.rebasedMetadata(metadata, kind: .rawHTML, path: path), html)
+        }
+    }
+
+    private func rebasedMetadata(
+        _ metadata: STMarkdownRenderBlockMetadata,
+        kind: STMarkdownRenderBlockKind,
+        path: [String]
+    ) -> STMarkdownRenderBlockMetadata {
+        STMarkdownRenderBlockMetadata(
+            id: path.joined(separator: "/"),
+            path: path,
+            kind: kind,
+            revealPolicy: metadata.revealPolicy
+        )
+    }
+
+    private func renderWithDocument(_ markdown: String) -> (NSAttributedString, STMarkdownRenderDocument) {
+        let result = self.engine.process(markdown)
+        self.updateTableOfContents(from: result)
+        return (self.render(document: result.renderDocument), result.renderDocument)
     }
 
     private func applyFullReplace(markdown: String, rendered: NSAttributedString) {
+        self.invalidatePendingStreamingAnimation()
         self.rawMarkdown = markdown
         self.shimmerTextView.setRenderedAttributedText(rendered)
         self.finalizeRenderUpdate(rendered: rendered)
@@ -203,7 +543,20 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
 
     private func applyAppendDelta(markdown: String, delta: NSAttributedString) {
         self.rawMarkdown = markdown
-        self.shimmerTextView.appendAttributedText(delta, animated: true)
+        self.invalidatePendingStreamingAnimation()
+        let plan = self.streamingAnimationPlan(for: delta)
+        if plan.immediatePrefix.length > 0 {
+            self.shimmerTextView.appendAttributedText(plan.immediatePrefix, animated: false)
+            self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+        }
+        if let animatedSuffix = plan.animatedSuffix, animatedSuffix.length > 0 {
+            self.enqueueAnimatedStreamingSuffix(
+                animatedSuffix,
+                trailingSuffix: plan.trailingSuffix,
+                shouldDelay: plan.requiresContainerGap
+            )
+            return
+        }
         self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
     }
 
@@ -214,20 +567,246 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         animate: Bool
     ) {
         self.rawMarkdown = markdown
-        self.shimmerTextView.replaceTrailingAttributedText(
-            from: location,
-            with: trailing,
-            animateNewPortion: animate
+        self.invalidatePendingStreamingAnimation()
+        if animate {
+            let plan = self.streamingAnimationPlan(for: trailing)
+            if let animatedSuffix = plan.animatedSuffix, animatedSuffix.length > 0 {
+                self.shimmerTextView.replaceTrailingAttributedText(
+                    from: location,
+                    with: plan.immediatePrefix,
+                    animateNewPortion: false
+                )
+                self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+                self.enqueueAnimatedStreamingSuffix(
+                    animatedSuffix,
+                    trailingSuffix: plan.trailingSuffix,
+                    shouldDelay: plan.requiresContainerGap
+                )
+                return
+            } else {
+                self.shimmerTextView.replaceTrailingAttributedText(
+                    from: location,
+                    with: trailing,
+                    animateNewPortion: false
+                )
+            }
+        } else {
+            self.shimmerTextView.replaceTrailingAttributedText(
+                from: location,
+                with: trailing,
+                animateNewPortion: false
+            )
+        }
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+    }
+
+    /// 按尾部 reveal policy 把增量切成"立即显示前缀 + 可动画后缀"。
+    /// 规则：
+    /// 1. 仅当尾部最后一个 render block 的 reveal policy 是 `inlineProgressive` 时，才对该 block 动画；
+    /// 2. `atomicBlock` / `containerThenContent` 本身立即上屏；
+    /// 3. 这样 quote/list/details 等容器可先稳定出现，再让最后一个正文 block 继续逐字输出。
+    private func streamingAnimationPlan(for attributedText: NSAttributedString) -> (
+        immediatePrefix: NSAttributedString,
+        animatedSuffix: NSAttributedString?,
+        trailingSuffix: NSAttributedString?,
+        requiresContainerGap: Bool
+    ) {
+        guard attributedText.length > 0 else {
+            return (NSAttributedString(), nil, nil, false)
+        }
+
+        guard let suffixRange = self.trailingAnimatedBlockRange(in: attributedText) else {
+            return (attributedText, nil, nil, false)
+        }
+
+        let suffixEnd = suffixRange.location + suffixRange.length
+        let trailingLength = attributedText.length - suffixEnd
+        let trailingSuffix: NSAttributedString? = trailingLength > 0
+            ? attributedText.attributedSubstring(from: NSRange(location: suffixEnd, length: trailingLength))
+            : nil
+
+        if suffixRange.location == 0 {
+            return (NSAttributedString(), attributedText.attributedSubstring(from: suffixRange), trailingSuffix, false)
+        }
+
+        let immediatePrefix = attributedText.attributedSubstring(
+            from: NSRange(location: 0, length: suffixRange.location)
         )
+        let animatedSuffix = attributedText.attributedSubstring(from: suffixRange)
+        return (
+            immediatePrefix,
+            animatedSuffix,
+            trailingSuffix,
+            self.containsContainerRevealPolicy(in: immediatePrefix)
+        )
+    }
+
+    private func trailingAnimatedBlockRange(in attributedText: NSAttributedString) -> NSRange? {
+        guard attributedText.length > 0 else { return nil }
+
+        var cursor = attributedText.length - 1
+        while cursor >= 0 {
+            var blockRange = NSRange(location: 0, length: 0)
+            let rawBlockIDValue = attributedText.attribute(
+                .stMarkdownBlockID,
+                at: cursor,
+                effectiveRange: &blockRange
+            )
+            guard let blockID = rawBlockIDValue as? String,
+                  blockID.isEmpty == false else {
+                return nil
+            }
+
+            if blockID == "__separator__" {
+                cursor = blockRange.location - 1
+                continue
+            }
+
+            guard let revealRaw = attributedText.attribute(
+                .stMarkdownRevealPolicy,
+                at: cursor,
+                effectiveRange: nil
+            ) as? String,
+            let revealPolicy = STMarkdownRevealPolicy(rawValue: revealRaw) else {
+                return nil
+            }
+
+            if revealPolicy == .inlineProgressive {
+                return blockRange
+            }
+            return nil
+        }
+
+        return nil
+    }
+
+    private func containsContainerRevealPolicy(in attributedText: NSAttributedString) -> Bool {
+        guard attributedText.length > 0 else { return false }
+        let fullRange = NSRange(location: 0, length: attributedText.length)
+        var found = false
+        attributedText.enumerateAttribute(.stMarkdownRevealPolicy, in: fullRange, options: []) { value, _, stop in
+            guard let raw = value as? String,
+                  let policy = STMarkdownRevealPolicy(rawValue: raw),
+                  policy == .containerThenContent else {
+                return
+            }
+            found = true
+            stop.pointee = true
+        }
+        return found
+    }
+
+    private func enqueueAnimatedStreamingSuffix(
+        _ suffix: NSAttributedString,
+        trailingSuffix: NSAttributedString?,
+        shouldDelay: Bool
+    ) {
+        let generation = self.streamingAnimationGeneration
+        self.pendingAnimatedSuffix = PendingAnimatedSuffix(
+            generation: generation,
+            suffix: suffix,
+            trailingSuffix: trailingSuffix
+        )
+
+        if shouldDelay, self.containerRevealGapDuration > 0 {
+            let workItem = DispatchWorkItem { [weak self] in
+                self?.applyPendingAnimatedSuffixIfNeeded(generation: generation, animated: true)
+            }
+            self.pendingStreamingSuffixWorkItem = workItem
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + self.containerRevealGapDuration,
+                execute: workItem
+            )
+        } else {
+            self.applyPendingAnimatedSuffixIfNeeded(generation: generation, animated: true)
+        }
+        self.feedStreamingAnimationWatchdogIfNeeded()
+    }
+
+    private func invalidatePendingStreamingAnimation() {
+        self.streamingAnimationGeneration += 1
+        self.pendingStreamingSuffixWorkItem?.cancel()
+        self.pendingStreamingSuffixWorkItem = nil
+        self.pendingAnimatedSuffix = nil
+        self.invalidateStreamingAnimationWatchdog()
+    }
+
+    private func installStreamingAnimationObservers() {
+        self.shimmerTextView.onAnimationStateChange = { [weak self] _ in
+            self?.feedStreamingAnimationWatchdogIfNeeded()
+        }
+    }
+
+    private func applyPendingAnimatedSuffixIfNeeded(generation: Int, animated: Bool) {
+        guard self.streamingAnimationGeneration == generation,
+              let pending = self.pendingAnimatedSuffix,
+              pending.generation == generation else {
+            return
+        }
+        self.pendingStreamingSuffixWorkItem?.cancel()
+        self.pendingStreamingSuffixWorkItem = nil
+        self.pendingAnimatedSuffix = nil
+        self.shimmerTextView.appendAttributedText(pending.suffix, animated: animated)
+        if let trailingSuffix = pending.trailingSuffix, trailingSuffix.length > 0 {
+            self.shimmerTextView.appendAttributedText(trailingSuffix, animated: false)
+        }
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+        self.feedStreamingAnimationWatchdogIfNeeded()
+    }
+
+    private func flushPendingAnimatedSuffixIfNeeded() {
+        guard let pending = self.pendingAnimatedSuffix else { return }
+        self.pendingStreamingSuffixWorkItem?.cancel()
+        self.pendingStreamingSuffixWorkItem = nil
+        self.pendingAnimatedSuffix = nil
+        self.shimmerTextView.appendAttributedText(pending.suffix, animated: false)
+        if let trailingSuffix = pending.trailingSuffix, trailingSuffix.length > 0 {
+            self.shimmerTextView.appendAttributedText(trailingSuffix, animated: false)
+        }
+        self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
+    }
+
+    private func feedStreamingAnimationWatchdogIfNeeded() {
+        self.streamingWatchdogWorkItem?.cancel()
+        self.streamingWatchdogWorkItem = nil
+
+        guard self.streamingAnimationWatchdogTimeout > 0,
+              self.isStreamingAnimationIdle == false else {
+            return
+        }
+
+        self.streamingWatchdogGeneration += 1
+        let generation = self.streamingWatchdogGeneration
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self, self.streamingWatchdogGeneration == generation else { return }
+            self.forceFinishStreamingAnimationIfNeeded()
+        }
+        self.streamingWatchdogWorkItem = workItem
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + self.streamingAnimationWatchdogTimeout,
+            execute: workItem
+        )
+    }
+
+    private func invalidateStreamingAnimationWatchdog() {
+        self.streamingWatchdogGeneration += 1
+        self.streamingWatchdogWorkItem?.cancel()
+        self.streamingWatchdogWorkItem = nil
+    }
+
+    private func forceFinishStreamingAnimationIfNeeded() {
+        guard self.isStreamingAnimationIdle == false else {
+            self.invalidateStreamingAnimationWatchdog()
+            return
+        }
+        self.flushPendingAnimatedSuffixIfNeeded()
+        self.shimmerTextView.finishAnimations()
+        self.invalidateStreamingAnimationWatchdog()
         self.finalizeRenderUpdate(rendered: self.shimmerTextView.renderedAttributedText)
     }
 
     private func render(_ markdown: String) -> NSAttributedString {
-        let result = self.engine.process(markdown)
-        if let customRenderer = self.customDocumentRenderer {
-            return customRenderer(result.renderDocument)
-        }
-        return self.renderer.render(document: result.renderDocument)
+        self.renderWithDocument(markdown).0
     }
 
     /// 流式期间，若源 markdown 尾部存在**尚未闭合**的 delimiter token（例如只打了
@@ -429,4 +1008,24 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         pattern: #"(?m)(?:^|\n)\t*[●▪]\t"#,
         options: []
     )
+
+    /// 启发式判断文本是否**不太可能**含有常见 Markdown 块级/行内标记。
+    ///
+    /// 适用于宿主自行缓冲 LLM 输出时决定是否采用更细粒度（例如按单行 `\n`）的提交策略；
+    /// 与 ``setMarkdown(_:animated:)`` 内置的尾部定界符裁剪正交，可独立使用。
+    public static func isLikelyMarkdownFreePlainText(_ text: String) -> Bool {
+        let blockMarkers = [
+            "#", "> ", "```", "---", "***",
+            "- ", "* ", "+ ", "| ",
+            "1. ", "2. ", "3. ",
+            "![", "](",
+        ]
+        for marker in blockMarkers where text.contains(marker) {
+            return false
+        }
+        if text.contains("**") || text.contains("__") || text.contains("`") || text.contains("$$") {
+            return false
+        }
+        return true
+    }
 }

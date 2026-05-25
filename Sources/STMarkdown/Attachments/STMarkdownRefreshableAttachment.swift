@@ -54,7 +54,6 @@ final class STMarkdownRefreshObserverRegistry {
     private let lock = NSLock()
     private var entries: [Entry] = []
 
-    /// 注册观察者，返回用于移除的 token。
     func add(_ observer: @escaping () -> Void) -> STMarkdownRefreshObservation {
         let id = UUID()
         self.lock.lock()
@@ -65,7 +64,6 @@ final class STMarkdownRefreshObserverRegistry {
         }
     }
 
-    /// 通知所有观察者。持锁时只拷贝数组，实际回调在锁外触发，避免重入死锁。
     func notify() {
         self.lock.lock()
         let snapshot = self.entries

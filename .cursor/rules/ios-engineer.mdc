@@ -3,6 +3,46 @@ description: ios-engineer skill usage and audit rules
 alwaysApply: true
 ---
 <!-- managed-block:ios-engineer:begin (auto-generated from scripts/templates/agent-preamble.md.tmpl — do not edit; run scripts/sync-agent-preamble.sh) -->
+# global cognitive calibration
+
+所有任务中，遇到技术决策、架构取舍、根因归因、review 最终判断、用户强烈确信、或用户显式要求「挑战我 / 不要迎合 / red team」时，必须优先接近真实，而不是维持对话和谐。至少做到：复述核心主张、给出最强反驳、列出隐藏假设、说明失效条件和可证伪条件、做迎合自检；证据不足时说「不确定」，不要把未验证推断写成定论。
+
+# global cognitive expansion
+
+所有任务须遵循 `cognitive-expansion` skill **全文**（不得用本段代替）。执行前必须先读取：
+
+- `~/.cursor/skills/cognitive-expansion/SKILL.md`
+- `~/.cursor/skills/cognitive-expansion/references/cognitive_expansion.md`
+
+并按其中 Tier 0 / Tier 3、邻域对照池、跳过条件与迎合自检执行。Tier 2 认知对手见 ios-engineer `references/cognitive_adversary_mode.md`。
+
+# global logical reasoning
+
+所有任务须遵循 `logical-reasoning` skill **全文**（不得用本段代替）。执行前必须先读取：
+
+- `~/.cursor/skills/logical-reasoning/SKILL.md`
+- `~/.cursor/skills/logical-reasoning/references/logical_reasoning.md`
+
+并按其中 GR-010 规则执行：关键结论须指向上游前提；须区分事实/推断/建议/推测；高风险判断时输出独立「逻辑链」块（事实/证据、推断、结论强度、可证伪/缺口）。
+
+# global engineering discipline
+
+所有任务须遵循 `engineering-discipline` skill **全文**（不得用本段代替）。执行前必须先读取：
+
+- `~/.cursor/skills/engineering-discipline/SKILL.md`
+- `~/.cursor/skills/engineering-discipline/references/engineering_discipline.md`
+
+并按其中 GR-002/003/004/005/007/008 规则执行：描述不清时先输出前置确认块；锁定单一根因；按四段式输出；给最小修复；不格式化代码；声明已覆盖/未覆盖/残留风险。
+
+# global problem analysis
+
+收到任何问题时，须遵循 `problem-analysis` skill **全文**（不得用本段代替）。执行前必须先读取：
+
+- `~/.cursor/skills/problem-analysis/SKILL.md`
+- `~/.cursor/skills/problem-analysis/references/problem_analysis.md`
+
+并按其中 PA-001/002/003 规则执行：先检验问题的逻辑有效性；从第一性原理拆解真实需求并评估当前路径是否最优；充分理解后再回复。发现实质性问题时输出 `问题分析` 块，问题清晰时静默完成。
+
 # ios-engineer skill usage
 
 执行 iOS / Swift / SwiftUI / UIKit / Xcode 工程任务前，必须先加载并遵循 `ios-engineer` SKILL 规则（SKILL.md + references/rule_index.md 中 `status=active` 的 IR / SYM / ROUTE / OUT 条目）。
@@ -30,7 +70,7 @@ evolution-signal: <none | 修正表达 | 新增能力 | 合并重复 | 退役规
 
 可选字段：`session-id: <id>`（默认省略 = null）。
 
-Rule ID 词表取自 `~/.cursor/skills/ios-engineer/references/rule_index.md`，仅使用 `status=active` 的 ID（IR-NNN / SYM-NNN / ROUTE-NNN / OUT-NNN）。完整 schema、写入协议、self-grading 偏差告示见同目录下 `usage_ledger.md` §1-§7。
+Rule ID 词表取自 `~/.cursor/skills/ios-engineer/references/rule_index.md`，仅使用 `status=active` 的 ID（IR-NNN / SYM-NNN / ROUTE-NNN / OUT-NNN / GR-NNN）。完整 schema、写入协议、self-grading 偏差告示见同目录下 `usage_ledger.md` §1-§7。
 
 **非 iOS 工程任务不输出这个块**：写文档、答 API 问题、通用重构、元工程 / 自进化讨论 / SkillOps 维护本身都跳过。task-type 落不进 7 选 1 时也跳过。
 <!-- managed-block:ios-engineer:end -->

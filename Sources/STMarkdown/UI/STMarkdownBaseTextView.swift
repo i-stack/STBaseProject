@@ -33,10 +33,30 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
 
     public var engine: STMarkdownEngine
     public var onLinkTap: ((URL) -> Void)?
+    public var onFootnoteTap: ((String) -> Void)?
+    /// 目录随管线刷新时回调（含流式 ``STMarkdownStreamingTextView`` 每帧更新）；用于侧栏 TOC 与正文同帧对齐。
+    public var onTableOfContentsChange: (([STMarkdownTOCItem]) -> Void)?
     public var onSelectionChange: ((String) -> Void)?
+    /// 内容高度变化回调；相对 ``contentLayoutHeightNotificationThreshold`` 防抖，避免频繁抖动。
+    ///
+    /// - Note: 不影响 ``intrinsicContentSize`` 的计算与 Auto Layout  intrinsic 更新，仅控制该可选回调的触发频率。
+    public var onContentLayoutHeightChange: ((CGFloat) -> Void)?
+    /// 与 ``onContentLayoutHeightChange`` 搭配：高度变化小于该阈值（pt）时不触发回调。
+    public var contentLayoutHeightNotificationThreshold: CGFloat = 9
+    /// 已有文本但测得高度为 0 时跳过高度回调（等待后续布局 pass）。
+    public var suppressTransientZeroContentLayoutHeightNotification: Bool = true
+    /// 两次 ``onContentLayoutHeightChange`` 之间的最短间隔（秒）；0 表示不节流。用于 TableView Cell 流式输出时压低高度抖动频率。
+    public var contentLayoutHeightNotificationMinInterval: TimeInterval = 0
+
     public var onCitationTap: ((String) -> Void)? {
         didSet {
             self.tableOverlayCoordinator.onCitationTap = self.onCitationTap
+        }
+    }
+
+    public var onExpandTable: ((STMarkdownTableViewModel) -> Void)? {
+        didSet {
+            self.tableOverlayCoordinator.onExpandTable = self.onExpandTable
         }
     }
 
@@ -56,6 +76,9 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
     }
 
     public internal(set) var rawMarkdown: String = ""
+
+    /// 最近一次管线渲染对应的目录（对齐对比文档 P1）；与 ``scrollToHeadingAnchor`` 使用同一套 ``anchorId``。
+    public private(set) var tableOfContents: [STMarkdownTOCItem] = []
 
     public var attributedText: NSAttributedString {
         self.currentAttributedText
@@ -92,6 +115,8 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
     private var attachmentRefreshTokens: [STMarkdownRefreshObservation] = []
 
     private var lastLaidOutSize: CGSize = .zero
+    private var lastNotifiedContentLayoutHeight: CGFloat = -1
+    private var lastContentLayoutHeightNotifyUptime: TimeInterval = -1
 
     internal init(
         textView: UITextView,
@@ -145,18 +170,15 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
     }
 
     public override var intrinsicContentSize: CGSize {
-        let w: CGFloat
-        if self.preferredContentWidth > 0 {
-            w = self.preferredContentWidth
-        } else if self.bounds.width > 0 {
-            w = self.bounds.width
-        } else {
-            w = self.window?.bounds.width ?? UIScreen.main.bounds.width
-        }
+        let w = self.resolvedMarkdownMeasurementWidth()
         let fitting = self.textView.sizeThatFits(
             CGSize(width: w, height: .greatestFiniteMagnitude)
         )
-        return CGSize(width: UIView.noIntrinsicMetric, height: ceil(fitting.height))
+        let h = self.resolvedTextViewContentHeight(
+            width: w,
+            sizeThatFitsHeight: fitting.height
+        )
+        return CGSize(width: UIView.noIntrinsicMetric, height: h)
     }
 
     public override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -173,6 +195,7 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         )
         if sizeChanged && self.bounds.width > 0 {
             self.invalidateIntrinsicContentSize()
+            self.publishContentLayoutHeightNotificationIfNeeded(force: false)
         }
     }
 
@@ -180,16 +203,71 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         let size = self.textView.sizeThatFits(
             CGSize(width: width, height: .greatestFiniteMagnitude)
         )
-        return CGSize(width: width, height: ceil(size.height))
+        let h = self.resolvedTextViewContentHeight(width: width, sizeThatFitsHeight: size.height)
+        return CGSize(width: width, height: h)
     }
 
     internal var currentAttributedText: NSAttributedString {
         self.textView.attributedText ?? NSAttributedString()
     }
 
+    internal func updateTableOfContents(from result: STMarkdownPipelineResult) {
+        self.tableOfContents = result.tableOfContents
+        self.onTableOfContentsChange?(self.tableOfContents)
+    }
+
+    /// 从渲染 AST 刷新目录（供流式 ``STMarkdownPipeline/processIncremental`` 合并结果等路径使用）。
+    internal func updateTableOfContents(from renderDocument: STMarkdownRenderDocument) {
+        self.tableOfContents = STMarkdownTOCExtraction.items(from: renderDocument)
+        self.onTableOfContentsChange?(self.tableOfContents)
+    }
+
     internal func renderMarkdown(_ markdown: String) -> NSAttributedString {
         let result = self.engine.process(markdown)
+        self.updateTableOfContents(from: result)
         return self.renderer.render(document: result.renderDocument)
+    }
+
+    /// 将可见区域滚动到指定标题锚点（``NSAttributedString.Key.stMarkdownHeadingAnchor``）。
+    /// - Returns: 是否找到对应锚点。
+    @discardableResult
+    public func scrollToHeadingAnchor(id: String, animated _: Bool) -> Bool {
+        guard let attr = self.textView.attributedText, attr.length > 0 else { return false }
+        var target: NSRange?
+        attr.enumerateAttribute(
+            .stMarkdownHeadingAnchor,
+            in: NSRange(location: 0, length: attr.length)
+        ) { value, range, stop in
+            guard let s = value as? String, s == id else { return }
+            target = range
+            stop.pointee = true
+        }
+        guard let range = target else { return false }
+        self.textView.scrollRangeToVisible(range)
+        let selection = NSRange(location: range.location, length: 0)
+        self.textView.selectedRange = selection
+        return true
+    }
+
+    /// 与 ``scrollToHeadingAnchor`` 等价；命名对齐常见 TOC API（对比文档 §6.3）。
+    @discardableResult
+    public func scrollToTOCItem(anchorId: String, animated: Bool) -> Bool {
+        return self.scrollToHeadingAnchor(id: anchorId, animated: animated)
+    }
+
+    /// 查询标题锚点在富文本中的 UTF-16 范围（便于外层 ``UIScrollView`` 自行滚动）。
+    public func characterRangeForHeadingAnchor(id: String) -> NSRange? {
+        guard let attr = self.textView.attributedText, attr.length > 0 else { return nil }
+        var target: NSRange?
+        attr.enumerateAttribute(
+            .stMarkdownHeadingAnchor,
+            in: NSRange(location: 0, length: attr.length)
+        ) { value, range, stop in
+            guard let s = value as? String, s == id else { return }
+            target = range
+            stop.pointee = true
+        }
+        return target
     }
 
     internal func applyConfigurationCommon(
@@ -212,16 +290,88 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         self.bindAttachmentRefreshHandlers(in: rendered)
         self.markTableOverlayDirty()
         self.invalidateIntrinsicContentSize()
+        self.publishContentLayoutHeightNotificationIfNeeded(force: false)
+    }
+
+    internal func publishContentLayoutHeightNotificationIfNeeded(force: Bool = false) {
+        guard self.onContentLayoutHeightChange != nil else { return }
+        let height = self.currentMeasuredTextViewContentHeight()
+        let hasContent = !self.rawMarkdown.isEmpty || (self.textView.attributedText?.length ?? 0) > 0
+        if self.suppressTransientZeroContentLayoutHeightNotification && !force && height <= 0 && hasContent {
+            return
+        }
+        let last = self.lastNotifiedContentLayoutHeight
+        guard force || last < 0 || abs(height - last) >= self.contentLayoutHeightNotificationThreshold else {
+            return
+        }
+        if force == false,
+           self.contentLayoutHeightNotificationMinInterval > 0 {
+            let now = ProcessInfo.processInfo.systemUptime
+            if self.lastContentLayoutHeightNotifyUptime >= 0,
+               now - self.lastContentLayoutHeightNotifyUptime < self.contentLayoutHeightNotificationMinInterval {
+                return
+            }
+        }
+        self.lastNotifiedContentLayoutHeight = height
+        if self.contentLayoutHeightNotificationMinInterval > 0 {
+            self.lastContentLayoutHeightNotifyUptime = ProcessInfo.processInfo.systemUptime
+        }
+        self.onContentLayoutHeightChange?(height)
+    }
+
+    private func currentMeasuredTextViewContentHeight() -> CGFloat {
+        let w = self.resolvedMarkdownMeasurementWidth()
+        let fitting = self.textView.sizeThatFits(
+            CGSize(width: w, height: .greatestFiniteMagnitude)
+        )
+        return self.resolvedTextViewContentHeight(width: w, sizeThatFitsHeight: fitting.height)
+    }
+
+    /// Cell 流式场景下 superview 尚未完成布局时，优先用 ``preferredContentWidth``，其次用自身 bounds、再 fallback 到 TextView 的几何宽度。
+    internal func resolvedMarkdownMeasurementWidth() -> CGFloat {
+        if self.preferredContentWidth > 0 {
+            return self.preferredContentWidth
+        }
+        if self.bounds.width > 0 {
+            return self.bounds.width
+        }
+        if self.textView.bounds.width > 0 {
+            return self.textView.bounds.width
+        }
+        if self.textView.frame.width > 0 {
+            return self.textView.frame.width
+        }
+        return self.window?.bounds.width ?? UIScreen.main.bounds.width
+    }
+
+    /// 对齐常见 Markdown 组件：在 `sizeThatFits` 暂为 0 时回退 `contentSize` / `bounds` 高度，减轻 Cell 初始 pass 的 0↔实际高度跳变。
+    private func resolvedTextViewContentHeight(width: CGFloat, sizeThatFitsHeight: CGFloat) -> CGFloat {
+        var h = ceil(sizeThatFitsHeight)
+        let hasAttr = (self.textView.attributedText?.length ?? 0) > 0
+        if h <= 0, hasAttr, width > 0 {
+            let contentH = ceil(self.textView.contentSize.height)
+            if contentH > 0 {
+                h = contentH
+            }
+        }
+        if h <= 0, hasAttr, self.textView.bounds.height > 0 {
+            h = ceil(self.textView.bounds.height)
+        }
+        return h
     }
 
     internal func resetBaseState() {
         self.rawMarkdown = ""
+        self.tableOfContents = []
+        self.onTableOfContentsChange?([])
         for token in self.attachmentRefreshTokens {
             token.invalidate()
         }
         self.attachmentRefreshTokens.removeAll()
         self.tableOverlayCoordinator.reset()
         self.invalidateIntrinsicContentSize()
+        self.lastNotifiedContentLayoutHeight = -1
+        self.lastContentLayoutHeightNotifyUptime = -1
     }
 
     internal func markTableOverlayDirty() {
@@ -312,6 +462,10 @@ extension STMarkdownBaseTextView: UITextViewDelegate {
         in characterRange: NSRange,
         interaction: UITextItemInteraction
     ) -> Bool {
+        if let label = STMarkdownFootnoteDeepLink.label(from: url) {
+            self.onFootnoteTap?(label)
+            return false
+        }
         self.onLinkTap?(url)
         return false
     }
@@ -324,6 +478,11 @@ extension STMarkdownBaseTextView: UITextViewDelegate {
     ) -> UIAction? {
         guard case let .link(url) = textItem.content else {
             return defaultAction
+        }
+        if let label = STMarkdownFootnoteDeepLink.label(from: url) {
+            return UIAction { [weak self] _ in
+                self?.onFootnoteTap?(label)
+            }
         }
         return UIAction { [weak self] _ in
             self?.onLinkTap?(url)

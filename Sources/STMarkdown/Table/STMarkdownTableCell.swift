@@ -53,24 +53,15 @@ public final class STMarkdownTableCell: UICollectionViewCell {
         self.contentLabel.attributedText = nil
     }
 
-    // MARK: - Configure
-
     func configure(with cellData: STMarkdownTableCellData, style: STMarkdownStyle) {
         self.contentLabel.attributedText = cellData.attributedContent
-
         let bgColor = style.tableBackgroundColor ?? UIColor.secondarySystemBackground
         self.contentView.backgroundColor = cellData.role.isHeader
             ? bgColor.withAlphaComponent(0.92)
             : bgColor
     }
 
-    // MARK: - Static Size
-
-    static func sizeThatFits(
-        cellData: STMarkdownTableCellData,
-        constrainedWidth: CGFloat,
-        contentInsets: UIEdgeInsets
-    ) -> CGSize {
+    static func sizeThatFits(cellData: STMarkdownTableCellData, constrainedWidth: CGFloat, contentInsets: UIEdgeInsets) -> CGSize {
         let textWidth = constrainedWidth - contentInsets.left - contentInsets.right
         guard textWidth > 0 else {
             return CGSize(width: constrainedWidth, height: contentInsets.top + contentInsets.bottom)

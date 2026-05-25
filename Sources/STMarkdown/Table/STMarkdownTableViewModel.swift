@@ -36,6 +36,9 @@ public final class STMarkdownTableViewModel {
     public let hasHeader: Bool
     public let columnAlignments: [STMarkdownColumnAlignment]
     public let cells: [[STMarkdownTableCellData]]
+    /// `STMarkdownTableModel.rowGroups` 的直传，基于 `table.rows` 的 0-based 下标。
+    /// `hasHeader == true` 时 `cells` 的第 0 行是表头，使用时对行号 +1 对齐。
+    public let rowGroups: [[Int]]
 
     public init(
         from table: STMarkdownTableModel,
@@ -44,6 +47,7 @@ public final class STMarkdownTableViewModel {
     ) {
         self.hasHeader = table.header != nil
         self.columnAlignments = table.columnAlignments
+        self.rowGroups = table.rowGroups
 
         let renderer = STMarkdownAttributedStringRenderer(
             style: style,
@@ -165,16 +169,7 @@ public final class STMarkdownTableViewModel {
     }
 
     private static func extractCitationNumber(from children: [STMarkdownInlineNode]) -> String? {
-        guard children.count == 1, case .text(let text) = children[0] else { return nil }
-        let prefix = "Citation:"
-        if text.hasPrefix(prefix) {
-            let number = String(text.dropFirst(prefix.count))
-            return number.isEmpty ? nil : number
-        }
-        if !text.isEmpty, text.allSatisfy({ $0.isNumber }) {
-            return text
-        }
-        return nil
+        STMarkdownCitationReferenceSupport.extractCitationNumber(from: children)
     }
 
     // MARK: - Strip Citations from Display

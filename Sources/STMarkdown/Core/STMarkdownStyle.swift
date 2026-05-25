@@ -7,6 +7,14 @@
 
 import UIKit
 
+/// 块级 / 行内 HTML 的降级渲染策略（安全默认：不解析为 Attributed 富标签树）。
+public enum STMarkdownRawHTMLPolicy: Sendable, Hashable {
+    /// 不输出可见字符。
+    case suppress
+    /// 以等宽小字展示原始片段（仍应视为不可信 HTML，不做标签解析）。
+    case literalMonospace
+}
+
 /// Markdown 样式配置。
 ///
 /// - Note: 含有大量 `UIColor` / `UIFont` / `UIEdgeInsets` 字段。UIKit 官方并未将其声明为
@@ -34,6 +42,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
     /// 以免样式在跨线程使用时引入 data race。
     public var headingFontProvider: (@Sendable (Int) -> UIFont)?
     public var linkColor: UIColor?
+    /// 是否为 `[text](url)` 等链接绘制下划线（默认 true，与系统链接观感一致）。
+    public var linkUnderlineEnabled: Bool
     public var inlineCodeTextColor: UIColor?
     /// 行内代码背景色。nil 时沿用 codeBlockBackgroundColor 或不绘制背景。
     public var inlineCodeBackgroundColor: UIColor?
@@ -56,6 +66,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var listHeadIndent: CGFloat
     public var listMarkerWidth: CGFloat
     public var listMarkerColor: UIColor?
+    /// 整块列表顶部额外留白（不改变列表项内部排版）。
+    public var listTopPadding: CGFloat
+    /// 整块列表底部额外留白。
+    public var listBottomPadding: CGFloat
     public var headingLineHeightMultiplier: CGFloat
     /// 块级元素之间的默认间距
     public var blockSpacing: CGFloat
@@ -99,6 +113,17 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var codeBlockSeparatorSpacing: CGFloat
     /// 代码块按钮行预留宽度
     public var codeBlockButtonRowReservedWidth: CGFloat
+    /// 智能流式缓冲（``STMarkdownStreamBuffer``）的最小模块长度，过小会导致更频繁的模块切分。
+    public var streamMinModuleLength: Int
+    /// ``STMarkdownRenderBlock/rawHTML`` 与 ``STMarkdownInlineNode/inlineRawHTML`` 的展示策略。
+    public var rawHTMLPolicy: STMarkdownRawHTMLPolicy
+    /// 流式输出时的字符级 fade-in 动画开关。
+    /// `false` 时 ``STMarkdownStreamingTextView`` 的 ``tokenFadeDuration`` 强制为 0。
+    public var streamFadeInEnabled: Bool
+    /// 流式输出时的行级 CAGradientLayer 水平扫入动画开关。
+    /// `true` 时使用与 FluidMarkdown 相同的行级渐现效果，替代默认的字符级 foregroundColor 淡入。
+    /// `streamFadeInEnabled` 为 `false` 时此属性无效。
+    public var streamLineFadeEnabled: Bool
 
     public init(
         font: UIFont,
@@ -114,6 +139,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         headingKern: CGFloat? = nil,
         headingFontProvider: (@Sendable (Int) -> UIFont)? = nil,
         linkColor: UIColor? = nil,
+        linkUnderlineEnabled: Bool = true,
         inlineCodeTextColor: UIColor? = nil,
         inlineCodeBackgroundColor: UIColor? = nil,
         codeBlockTextColor: UIColor? = nil,
@@ -139,6 +165,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         listHeadIndent: CGFloat = 24,
         listMarkerWidth: CGFloat = 18,
         listMarkerColor: UIColor? = nil,
+        listTopPadding: CGFloat = 0,
+        listBottomPadding: CGFloat = 0,
         headingLineHeightMultiplier: CGFloat = 1.25,
         blockSpacing: CGFloat = 16,
         headingTopSpacing: [CGFloat]? = nil,
@@ -156,7 +184,11 @@ public struct STMarkdownStyle: @unchecked Sendable {
         citationBadgeTextColor: UIColor? = nil,
         codeBlockHeaderHeight: CGFloat = 0,
         codeBlockSeparatorSpacing: CGFloat = 8,
-        codeBlockButtonRowReservedWidth: CGFloat = 120
+        codeBlockButtonRowReservedWidth: CGFloat = 120,
+        streamMinModuleLength: Int = 20,
+        rawHTMLPolicy: STMarkdownRawHTMLPolicy = .suppress,
+        streamFadeInEnabled: Bool = true,
+        streamLineFadeEnabled: Bool = false
     ) {
         self.font = font
         self.boldFont = boldFont
@@ -171,6 +203,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.headingKern = headingKern
         self.headingFontProvider = headingFontProvider
         self.linkColor = linkColor
+        self.linkUnderlineEnabled = linkUnderlineEnabled
         self.inlineCodeTextColor = inlineCodeTextColor
         self.inlineCodeBackgroundColor = inlineCodeBackgroundColor
         self.codeBlockTextColor = codeBlockTextColor
@@ -196,6 +229,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.listHeadIndent = listHeadIndent
         self.listMarkerWidth = listMarkerWidth
         self.listMarkerColor = listMarkerColor
+        self.listTopPadding = listTopPadding
+        self.listBottomPadding = listBottomPadding
         self.headingLineHeightMultiplier = headingLineHeightMultiplier
         self.blockSpacing = blockSpacing
         self.headingTopSpacing = headingTopSpacing
@@ -214,6 +249,10 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.codeBlockHeaderHeight = codeBlockHeaderHeight
         self.codeBlockSeparatorSpacing = codeBlockSeparatorSpacing
         self.codeBlockButtonRowReservedWidth = codeBlockButtonRowReservedWidth
+        self.streamMinModuleLength = max(1, streamMinModuleLength)
+        self.rawHTMLPolicy = rawHTMLPolicy
+        self.streamFadeInEnabled = streamFadeInEnabled
+        self.streamLineFadeEnabled = streamLineFadeEnabled
     }
 
     public static let `default` = STMarkdownStyle(
@@ -225,7 +264,6 @@ public struct STMarkdownStyle: @unchecked Sendable {
 
     public var resolvedDisplayScale: CGFloat {
         if self.displayScale > 0 { return self.displayScale }
-        // iOS 13+ 起优先使用当前 trait 环境，避免 multi-scene 下 `UIScreen.main` 结果失真。
         if #available(iOS 13.0, *) {
             let scale = UITraitCollection.current.displayScale
             if scale > 0 { return scale }
@@ -291,7 +329,6 @@ public enum STMarkdownFontResolver {
 
     public static func italicObliqueness(from font: UIFont) -> CGFloat? {
         let italic = italicFont(from: font)
-        // 若能真实拿到斜体字形，则无需倾斜模拟。
         guard !italic.fontDescriptor.symbolicTraits.contains(.traitItalic) else {
             return nil
         }
@@ -300,7 +337,6 @@ public enum STMarkdownFontResolver {
 
     public static func boldItalicObliqueness(from font: UIFont) -> CGFloat? {
         let boldItalic = boldItalicFont(from: font)
-        // 若能真实拿到粗斜体字形，则无需倾斜模拟。
         guard !boldItalic.fontDescriptor.symbolicTraits.contains(.traitItalic) else {
             return nil
         }

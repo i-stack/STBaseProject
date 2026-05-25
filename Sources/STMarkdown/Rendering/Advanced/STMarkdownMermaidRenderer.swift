@@ -25,8 +25,6 @@ public class STMarkdownMermaidRenderer: NSObject {
     public static let shared = STMarkdownMermaidRenderer()
 
     private var webView: WKWebView?
-    /// 改为 `NSCache` 以便在内存紧张时自动释放，并显式限制条目数。
-    /// 早期用 `Dictionary<String, UIImage>` 无上限，长会话进程会把几十 MB 图片留到进程结束。
     private let imageCacheStore: NSCache<NSString, UIImage> = {
         let cache = NSCache<NSString, UIImage>()
         cache.countLimit = 64

@@ -8,7 +8,6 @@
 [![SPM](https://img.shields.io/badge/SPM-supported-brightgreen?style=flat)](https://github.com/i-stack/STBaseProject)
 [![iOS](https://img.shields.io/badge/iOS-16.0%2B-blue?style=flat)](https://github.com/i-stack/STBaseProject)
 [![Xcode](https://img.shields.io/badge/Xcode-15%2B-147EFB?style=flat)](https://developer.apple.com/xcode/)
-[![Stars](https://img.shields.io/github/stars/i-stack/STBaseProject?style=flat)](https://github.com/i-stack/STBaseProject/stargazers)
 
 STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 UI 组件和工具类，帮助开发者快速构建高质量的 iOS 应用。
 
@@ -217,6 +216,8 @@ STBaseProject 已随 SPM target 与 CocoaPods subspec 提供 `PrivacyInfo.xcpriv
 - 媒体能力：`STMedia`
 - UIKit 组件：`STUIKit`
 - 通用工具：`STTools`
+
+**本地 Demo**：克隆后在仓库根目录执行 `cd Example && pod install`，再用 Xcode 打开根目录的 `STBaseProject.xcworkspace`（内含 `Example/STBaseProjectExample.xcodeproj` 与 CocoaPods 生成的 `Pods`）。Demo 通过本地 SPM 引用同仓根目录的 `Package.swift`，与发布到 GitHub 的集成方式一致。
 
 <a id="features"></a>
 ## 🎯 主要功能

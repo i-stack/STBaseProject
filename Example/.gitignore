@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Xcode user data
+**/xcuserdata/
+**/*.xcuserstate
+**/xcshareddata/WorkspaceSettings.xcsettings
+**/xcshareddata/swiftpm/Package.resolved
+
+# Build outputs
+DerivedData/
+build/
+
+# CocoaPods
+Pods/

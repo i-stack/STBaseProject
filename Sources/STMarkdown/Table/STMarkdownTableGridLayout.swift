@@ -20,16 +20,12 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
     public var lineSpacing: CGFloat = 0.5
     public var minimumColumnWidth: CGFloat = 56
 
-    /// 外部提供的 cell 尺寸查询回调
     var sizeForItem: ((_ indexPath: IndexPath) -> CGSize)?
 
-    // 缓存
     private var allAttributes: [[UICollectionViewLayoutAttributes]] = []
     private var cachedContentSize: CGSize = .zero
     private var columnWidths: [CGFloat] = []
     private var rowHeights: [CGFloat] = []
-
-    // MARK: - UICollectionViewLayout
 
     public override func prepare() {
         super.prepare()
@@ -49,7 +45,6 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
             return
         }
 
-        // Step 1: 查询所有 cell 自然尺寸
         var sizeCache: [[CGSize]] = []
         for section in 0..<sections {
             var rowSizes: [CGSize] = []
@@ -59,14 +54,12 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
                 let size = self.sizeForItem?(indexPath) ?? CGSize(width: self.minimumColumnWidth, height: self.minimumRowHeight)
                 rowSizes.append(size)
             }
-            // 补齐列数
             while rowSizes.count < columns {
                 rowSizes.append(CGSize(width: self.minimumColumnWidth, height: self.minimumRowHeight))
             }
             sizeCache.append(rowSizes)
         }
 
-        // Step 2: 逐列取最大宽度
         var colWidths = Array(repeating: self.minimumColumnWidth, count: columns)
         for section in 0..<sections {
             for col in 0..<columns {
@@ -74,7 +67,6 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
             }
         }
 
-        // Step 3: 逐行取最大高度
         var rHeights = Array(repeating: self.minimumRowHeight, count: sections)
         for section in 0..<sections {
             for col in 0..<columns {
@@ -82,24 +74,20 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
             }
         }
 
-        // Step 4: fillWidth 按比例扩展
         let totalSpacing = self.interItemSpacing * CGFloat(max(columns - 1, 0))
         let naturalWidth = colWidths.reduce(0, +)
         let containerWidth = collectionView.bounds.width
-
         if self.fillWidth, naturalWidth + totalSpacing < containerWidth, naturalWidth > 0 {
             let availableWidth = containerWidth - totalSpacing
             for col in 0..<columns {
                 colWidths[col] = colWidths[col] / naturalWidth * availableWidth
             }
         } else {
-            // 限制最大列宽（仅在非 fillWidth 或超宽时）
             for col in 0..<columns {
                 colWidths[col] = min(colWidths[col], self.maximumColumnWidth)
             }
         }
 
-        // Step 5: 计算最终 frame
         var attrs: [[UICollectionViewLayoutAttributes]] = []
         var y: CGFloat = 0
         for section in 0..<sections {
@@ -148,8 +136,6 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
         return self.fillWidth && newBounds.width != collectionView.bounds.width
     }
 
-    // MARK: - Public Helpers
-
     public struct ComputeSizeMetrics {
         public var fillWidth: Bool
         public var containerWidth: CGFloat
@@ -177,17 +163,10 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
     }
 
     /// 静态计算表格尺寸（不需要 collectionView 实例）
-    public static func computeSize(
-        rows: Int,
-        columns: Int,
-        sizeForItem: (_ indexPath: IndexPath) -> CGSize,
-        metrics: ComputeSizeMetrics
-    ) -> CGSize {
+    public static func computeSize(rows: Int, columns: Int, sizeForItem: (_ indexPath: IndexPath) -> CGSize, metrics: ComputeSizeMetrics) -> CGSize {
         guard rows > 0, columns > 0 else { return .zero }
-
         var colWidths = Array(repeating: metrics.minimumColumnWidth, count: columns)
         var rowHeights = Array(repeating: metrics.minimumRowHeight, count: rows)
-
         for section in 0..<rows {
             for col in 0..<columns {
                 let size = sizeForItem(IndexPath(item: col, section: section))
@@ -198,7 +177,6 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
 
         let totalSpacing = metrics.interItemSpacing * CGFloat(max(columns - 1, 0))
         let naturalWidth = colWidths.reduce(0, +)
-
         if metrics.fillWidth, naturalWidth + totalSpacing < metrics.containerWidth, naturalWidth > 0 {
             let availableWidth = metrics.containerWidth - totalSpacing
             for col in 0..<columns {
@@ -209,7 +187,6 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
                 colWidths[col] = min(colWidths[col], metrics.maximumColumnWidth)
             }
         }
-
         let totalWidth = colWidths.reduce(0, +) + totalSpacing
         let lineSpacingTotal = metrics.lineSpacing * CGFloat(max(rows - 1, 0))
         let totalHeight = rowHeights.reduce(0, +) + lineSpacingTotal

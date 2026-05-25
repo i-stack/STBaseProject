@@ -230,6 +230,86 @@ public struct STDoubleNewlineRule: STMarkdownRule {
     }
 }
 
+/// LLM 输出中形如 `[偏头痛]`、`[咖啡因]` 的裸括号标签：cmark 将其解析为引用链接，
+/// 文档内无对应定义时回退为字面文本，方括号原样渲染。此 rule 将其去括号还原为纯文本。
+///
+/// 排除条件（不剥离）：
+/// - 后跟 `(` ——真正的 Markdown 链接
+/// - 内容为纯数字 ——citation 编号
+/// - 内容匹配 citation:N / webpage:N（大小写不限）——引用标签
+/// - 内容含 `[` 或 `]` ——双层括号结构
+/// - 位于 fenced code block 内
+public struct STBareBracketLabelCleanupRule: STMarkdownRule {
+    public let name = "STBareBracketLabelCleanupRule"
+
+    // 匹配 [xxx]，要求 xxx 不含 [ ] \n，且后面不紧跟 (
+    private static let regex = STMarkdownRegexFactory.compile(
+        pattern: #"\[([^\[\]\n]+)\](?!\()"#,
+        owner: "STBareBracketLabelCleanupRule.match"
+    )
+    // citation:N 或 webpage:N（可选冒号、可选空格）
+    private static let citationPattern = STMarkdownRegexFactory.compile(
+        pattern: #"^(?:citation|webpage)\s*:?\s*\d+$"#,
+        options: .caseInsensitive,
+        owner: "STBareBracketLabelCleanupRule.citation"
+    )
+
+    public init() {}
+
+    public func shouldApply(to text: String) -> Bool {
+        text.contains("[")
+    }
+
+    public func apply(to text: String, context: inout STMarkdownPreprocessContext) -> String {
+        let lines = text.components(separatedBy: "\n")
+        var result: [String] = []
+        result.reserveCapacity(lines.count)
+        var fenceState = STMarkdownCodeFenceState()
+
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            fenceState.ingest(trimmedLine: trimmed)
+            if fenceState.isInside {
+                result.append(line)
+                continue
+            }
+            result.append(Self.cleanLine(line))
+        }
+
+        return result.joined(separator: "\n")
+    }
+
+    private static func cleanLine(_ line: String) -> String {
+        let nsLine = line as NSString
+        let matches = Self.regex.matches(
+            in: line,
+            range: NSRange(location: 0, length: nsLine.length)
+        )
+        guard !matches.isEmpty else { return line }
+
+        var output = line
+        for match in matches.reversed() {
+            guard match.numberOfRanges >= 2,
+                  let labelRange = Range(match.range(at: 1), in: output) else { continue }
+            let label = String(output[labelRange])
+            guard !shouldKeep(label) else { continue }
+            // 用 match.range(at: 0) 对应的当前位置在 output 里重新定位
+            guard let fullRange = Range(match.range, in: output) else { continue }
+            output.replaceSubrange(fullRange, with: label)
+        }
+        return output
+    }
+
+    private static func shouldKeep(_ label: String) -> Bool {
+        // 纯数字（citation 编号 standalone）
+        if label.allSatisfy(\.isNumber) { return true }
+        // citation:N / webpage:N
+        let range = NSRange(location: 0, length: (label as NSString).length)
+        if Self.citationPattern.firstMatch(in: label, range: range) != nil { return true }
+        return false
+    }
+}
+
 public struct STTableBlankLineNormalizationRule: STMarkdownRule {
     public let name = "STTableBlankLineNormalizationRule"
 
@@ -367,6 +447,7 @@ public struct STMarkdownInputSanitizer: Sendable {
         STTableBlankLineNormalizationRule(),
         STTableDelimiterNormalizationRule(),
         STDoubleNewlineRule(),
+        STBareBracketLabelCleanupRule(),
     ]
 
     public let rules: [any STMarkdownRule]

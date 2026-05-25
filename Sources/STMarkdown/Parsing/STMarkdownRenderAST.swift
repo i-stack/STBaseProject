@@ -7,6 +7,40 @@
 
 import Foundation
 
+public enum STMarkdownRenderBlockKind: String, Hashable, Sendable {
+    case paragraph
+    case heading
+    case quote
+    case list
+    case codeBlock
+    case table
+    case mathBlock
+    case image
+    case thematicBreak
+    case details
+    case rawHTML
+}
+
+public enum STMarkdownRevealPolicy: String, Hashable, Sendable {
+    case inlineProgressive
+    case atomicBlock
+    case containerThenContent
+}
+
+public struct STMarkdownRenderBlockMetadata: Hashable, Sendable {
+    public let id: String
+    public let path: [String]
+    public let kind: STMarkdownRenderBlockKind
+    public let revealPolicy: STMarkdownRevealPolicy
+
+    public init(id: String, path: [String], kind: STMarkdownRenderBlockKind, revealPolicy: STMarkdownRevealPolicy) {
+        self.id = id
+        self.path = path
+        self.kind = kind
+        self.revealPolicy = revealPolicy
+    }
+}
+
 public struct STMarkdownRenderDocument: Hashable, Sendable {
     public let blocks: [STMarkdownRenderBlock]
 
@@ -16,21 +50,138 @@ public struct STMarkdownRenderDocument: Hashable, Sendable {
 }
 
 public enum STMarkdownRenderBlock: Hashable, Sendable {
-    case paragraph([STMarkdownInlineNode])
-    case heading(level: Int, content: [STMarkdownInlineNode])
-    case quote([STMarkdownRenderBlock])
-    case list([STMarkdownRenderListItem])
-    case codeBlock(language: String?, code: String)
-    case table(STMarkdownTableModel)
-    case mathBlock(String)
-    case image(url: String, altText: String, title: String?)
-    case thematicBreak
+    case paragraph(STMarkdownRenderBlockMetadata, [STMarkdownInlineNode])
+    case heading(STMarkdownRenderBlockMetadata, level: Int, anchorId: String, content: [STMarkdownInlineNode])
+    case quote(STMarkdownRenderBlockMetadata, [STMarkdownRenderBlock])
+    case list(STMarkdownRenderBlockMetadata, [STMarkdownRenderListItem])
+    case codeBlock(STMarkdownRenderBlockMetadata, language: String?, code: String)
+    case table(STMarkdownRenderBlockMetadata, STMarkdownTableModel)
+    case mathBlock(STMarkdownRenderBlockMetadata, String)
+    case image(STMarkdownRenderBlockMetadata, url: String, altText: String, title: String?)
+    case thematicBreak(STMarkdownRenderBlockMetadata)
+    case details(STMarkdownRenderBlockMetadata, summary: [STMarkdownInlineNode], body: [STMarkdownRenderBlock])
+    case rawHTML(STMarkdownRenderBlockMetadata, String)
+
+    public var metadata: STMarkdownRenderBlockMetadata {
+        switch self {
+        case .paragraph(let metadata, _),
+             .heading(let metadata, level: _, anchorId: _, content: _),
+             .quote(let metadata, _),
+             .list(let metadata, _),
+             .codeBlock(let metadata, language: _, code: _),
+             .table(let metadata, _),
+             .mathBlock(let metadata, _),
+             .image(let metadata, url: _, altText: _, title: _),
+             .thematicBreak(let metadata),
+             .details(let metadata, summary: _, body: _),
+             .rawHTML(let metadata, _):
+            return metadata
+        }
+    }
+
+    private static func compatibilityMetadata(kind: STMarkdownRenderBlockKind, revealPolicy: STMarkdownRevealPolicy) -> STMarkdownRenderBlockMetadata {
+        let path = ["compat", kind.rawValue]
+        return STMarkdownRenderBlockMetadata(id: path.joined(separator: "/"), path: path, kind: kind, revealPolicy: revealPolicy)
+    }
+
+    public static func paragraph(_ content: [STMarkdownInlineNode]) -> Self {
+        .paragraph(
+            Self.compatibilityMetadata(kind: .paragraph, revealPolicy: .inlineProgressive),
+            content
+        )
+    }
+
+    public static func heading(level: Int, content: [STMarkdownInlineNode]) -> Self {
+        .heading(
+            Self.compatibilityMetadata(kind: .heading, revealPolicy: .inlineProgressive),
+            level: level,
+            anchorId: "",
+            content: content
+        )
+    }
+
+    public static func heading(level: Int, anchorId: String, content: [STMarkdownInlineNode]) -> Self {
+        .heading(
+            Self.compatibilityMetadata(kind: .heading, revealPolicy: .inlineProgressive),
+            level: level,
+            anchorId: anchorId,
+            content: content
+        )
+    }
+
+    public static func quote(_ blocks: [STMarkdownRenderBlock]) -> Self {
+        .quote(
+            Self.compatibilityMetadata(kind: .quote, revealPolicy: .containerThenContent),
+            blocks
+        )
+    }
+
+    public static func list(_ items: [STMarkdownRenderListItem]) -> Self {
+        .list(
+            Self.compatibilityMetadata(kind: .list, revealPolicy: .containerThenContent),
+            items
+        )
+    }
+
+    public static func codeBlock(language: String?, code: String) -> Self {
+        .codeBlock(
+            Self.compatibilityMetadata(kind: .codeBlock, revealPolicy: .atomicBlock),
+            language: language,
+            code: code
+        )
+    }
+
+    public static func table(_ model: STMarkdownTableModel) -> Self {
+        .table(
+            Self.compatibilityMetadata(kind: .table, revealPolicy: .atomicBlock),
+            model
+        )
+    }
+
+    public static func mathBlock(_ latex: String) -> Self {
+        .mathBlock(
+            Self.compatibilityMetadata(kind: .mathBlock, revealPolicy: .atomicBlock),
+            latex
+        )
+    }
+
+    public static func image(url: String, altText: String, title: String?) -> Self {
+        .image(
+            Self.compatibilityMetadata(kind: .image, revealPolicy: .atomicBlock),
+            url: url,
+            altText: altText,
+            title: title
+        )
+    }
+
+    public static func details(summary: [STMarkdownInlineNode], body: [STMarkdownRenderBlock]) -> Self {
+        .details(
+            Self.compatibilityMetadata(kind: .details, revealPolicy: .containerThenContent),
+            summary: summary,
+            body: body
+        )
+    }
+
+    public static func rawHTML(_ html: String) -> Self {
+        .rawHTML(
+            Self.compatibilityMetadata(kind: .rawHTML, revealPolicy: .atomicBlock),
+            html
+        )
+    }
+
+    public static func thematicBreak() -> Self {
+        .thematicBreak(
+            Self.compatibilityMetadata(kind: .thematicBreak, revealPolicy: .atomicBlock)
+        )
+    }
 }
 
 public struct STMarkdownRenderListItem: Hashable, Sendable {
     public let blocks: [STMarkdownRenderBlock]
     public let ordered: Bool
     public let level: Int
+    /// 仅计无序列表的嵌套深度，忽略有序列表祖先。用于选择 ●/○/▪ 符号。
+    public let unorderedDepth: Int
     public let orderedIndex: Int?
     public let checkbox: STMarkdownCheckbox?
 
@@ -39,11 +190,13 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
         ordered: Bool,
         level: Int,
         orderedIndex: Int?,
-        checkbox: STMarkdownCheckbox? = nil
+        checkbox: STMarkdownCheckbox? = nil,
+        unorderedDepth: Int = 0
     ) {
         self.blocks = blocks
         self.ordered = ordered
         self.level = level
+        self.unorderedDepth = unorderedDepth
         self.orderedIndex = orderedIndex
         self.checkbox = checkbox
     }
@@ -54,11 +207,19 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
         level: Int,
         orderedIndex: Int?,
         childBlocks: [STMarkdownRenderBlock],
-        checkbox: STMarkdownCheckbox? = nil
+        checkbox: STMarkdownCheckbox? = nil,
+        unorderedDepth: Int = 0
     ) {
         var blocks: [STMarkdownRenderBlock] = []
         if content.isEmpty == false {
-            blocks.append(.paragraph(content))
+            let path = ["li-paragraph"]
+            let metadata = STMarkdownRenderBlockMetadata(
+                id: path.joined(separator: "/"),
+                path: path,
+                kind: .paragraph,
+                revealPolicy: .inlineProgressive
+            )
+            blocks.append(.paragraph(metadata, content))
         }
         blocks.append(contentsOf: childBlocks)
         self.init(
@@ -66,7 +227,8 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
             ordered: ordered,
             level: level,
             orderedIndex: orderedIndex,
-            checkbox: checkbox
+            checkbox: checkbox,
+            unorderedDepth: unorderedDepth
         )
     }
 
@@ -74,16 +236,27 @@ public struct STMarkdownRenderListItem: Hashable, Sendable {
     /// 当列表项以 quote / codeBlock / list 等非段落块开头时返回空数组——
     /// 此时该项的全部内容都在 `childBlocks` 里，请不要据此判空。
     public var content: [STMarkdownInlineNode] {
-        guard case .paragraph(let inlines)? = self.blocks.first else {
+        guard let first = self.blocks.first else {
             return []
         }
-        return inlines
+        switch first {
+        case .paragraph(_, let inlines):
+            return inlines
+        default:
+            return []
+        }
     }
 
     /// 列表项的子块（排除开头那个 paragraph）。
     /// 当列表项不以 paragraph 开头时返回完整 `blocks`，因为此时没有独立的文案段。
     public var childBlocks: [STMarkdownRenderBlock] {
-        guard case .paragraph? = self.blocks.first else {
+        guard let first = self.blocks.first else {
+            return self.blocks
+        }
+        switch first {
+        case .paragraph:
+            break
+        default:
             return self.blocks
         }
         return Array(self.blocks.dropFirst())

@@ -1,5 +1,5 @@
-# 库仓 CI：只做静态检查 + SPM 构建烟囱测试。
-# 业务测试（466 单测 + UI 测试）在 i-stack/STBaseProjectExample 仓库的 tests.yml 中跑。
+# 库仓 CI：静态检查 + SPM 构建烟囱测试。
+# Example 全量单测 / UI 测在同仓 `.github/workflows/example-tests.yml`（根目录 `STBaseProject.xcworkspace`）。
 
 name: Swift
 
@@ -44,19 +44,3 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             build
 
-  # 库 main 分支有更新时，触发 STBaseProjectExample 仓重新跑全量测试。
-  # 仅在 push 到 main 时触发，避免 PR 阶段把下游测试也拉满。
-  # notify-example:
-  #   needs: build
-  #   if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Trigger STBaseProjectExample tests
-  #       uses: peter-evans/repository-dispatch@v3
-  #       with:
-  #         # 需要在仓库 Settings → Secrets and variables → Actions 中配置 EXAMPLE_REPO_PAT
-  #         # PAT 至少需要 repo 写权限，用于触发 i-stack/STBaseProjectExample 的 repository_dispatch
-  #         token: ${{ secrets.EXAMPLE_REPO_PAT }}
-  #         repository: i-stack/STBaseProjectExample
-  #         event-type: stbaseproject-updated
-  #         client-payload: '{"sha": "${{ github.sha }}", "ref": "${{ github.ref }}"}'

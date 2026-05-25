@@ -18,8 +18,6 @@ public struct STMarkdownDefaultHorizontalRuleRenderer: STMarkdownHorizontalRuleR
         paragraphStyle.alignment = .natural
         paragraphStyle.lineBreakMode = .byClipping
 
-        // 优先 horizontalRuleColor → 退回 dividerColor → 再退回 textColor 28% 透明度。
-        // dividerColor 是早期遗留 dead config，在分隔线场景里语义最贴近，先于默认色。
         let color = style.horizontalRuleColor
             ?? style.dividerColor
             ?? style.textColor.withAlphaComponent(0.28)

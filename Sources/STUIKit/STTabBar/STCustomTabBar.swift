@@ -95,9 +95,9 @@ public class STCustomTabBar: UIView {
     public func configure(items: [STTabBarItemModel], config: STTabBarConfig = STTabBarConfig()) {
         self.itemModels = items
         self.config = config
+        self.updateAppearance()
         self.clampSelectedIndexForCurrentItems()
         self.setupItems()
-        self.updateAppearance()
     }
     
     public func setSelectedIndex(_ index: Int) {

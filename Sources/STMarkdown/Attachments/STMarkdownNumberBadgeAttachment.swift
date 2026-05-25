@@ -11,9 +11,6 @@ import UIKit
 /// 所有引用角标使用统一的直径（可随正文字体放大），避免不同数字（如 1 vs 12）因文本宽度差异导致圆圈大小不一致。
 public final class STMarkdownNumberBadgeAttachment: NSTextAttachment {
 
-    /// 默认角标直径，对应 17pt 正文下的视觉基线。`renderBadgeImage` 的
-    /// `diameter` 默认值引用此常量，确保两条渲染路径（TextKit 内联 / CoreGraphics 表格）
-    /// 视觉一致。实际内联渲染会随正文字体线性放大，下限保持该值。
     public static let fixedDiameter: CGFloat = 18
 
     /// - Parameters:
@@ -23,9 +20,6 @@ public final class STMarkdownNumberBadgeAttachment: NSTextAttachment {
     ///   - backgroundColor: 圆圈背景颜色
     public init(numberText: String, font: UIFont, textColor: UIColor, backgroundColor: UIColor) {
         super.init(data: nil, ofType: nil)
-
-        // 直径随正文字体线性缩放：以 17pt 正文对应 18pt 直径为基准，大字体辅助模式下
-        // 角标同步放大；低于默认 pointSize 时保持 `fixedDiameter` 下限，保证小字号可读性。
         let baseFontPointSize: CGFloat = 17
         let scaled = font.pointSize / baseFontPointSize * Self.fixedDiameter
         let diameter = max(Self.fixedDiameter, ceil(scaled))
@@ -125,7 +119,6 @@ private extension STMarkdownNumberBadgeAttachment {
         }
 
         let size = CGSize(width: diameter, height: diameter)
-        // 字号按直径线性缩放，保留原 11/10/9 的比例（17/18 ≈ 0.611）。
         let ratio: CGFloat = number.count <= 1 ? 11.0 / 18.0 : (number.count == 2 ? 10.0 / 18.0 : 9.0 / 18.0)
         let badgeFont = UIFont.st_systemFont(ofSize: diameter * ratio, weight: .semibold)
         let textAttributes: [NSAttributedString.Key: Any] = [
@@ -170,7 +163,6 @@ private extension STMarkdownNumberBadgeAttachment {
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
         resolved.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        // 量化到 0...255，避免浮点误差命中不到缓存
         let q = { (c: CGFloat) -> Int in Int((c * 255).rounded()) & 0xFF }
         return (q(red) << 24) | (q(green) << 16) | (q(blue) << 8) | q(alpha)
     }

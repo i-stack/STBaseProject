@@ -34,19 +34,30 @@ public extension STMarkdownAttributedStringRenderer {
         nodes: [STMarkdownInlineNode],
         baseFont: UIFont,
         textColor: UIColor,
-        paragraphStyle: NSMutableParagraphStyle? = nil
+        paragraphStyle: NSMutableParagraphStyle? = nil,
+        footnoteOrdinals: [String: Int]? = nil
     ) -> NSAttributedString {
         self.renderInline(
             nodes: nodes,
             baseFont: baseFont,
             textColor: textColor,
-            paragraphStyle: paragraphStyle
+            paragraphStyle: paragraphStyle,
+            italic: false,
+            bold: false,
+            linkDestination: nil,
+            kernOverride: nil,
+            footnoteOrdinals: footnoteOrdinals ?? [:]
         )
     }
 }
 
 private extension STMarkdownAttributedStringRenderer {
     func render(blocks: [STMarkdownRenderBlock]) -> NSAttributedString {
+        let footnoteOrdinals = STMarkdownFootnoteOrdinalResolver.ordinalMap(for: blocks)
+        return self.render(blocks: blocks, footnoteOrdinals: footnoteOrdinals)
+    }
+
+    func render(blocks: [STMarkdownRenderBlock], footnoteOrdinals: [String: Int]) -> NSAttributedString {
         let result = NSMutableAttributedString()
         for (index, block) in blocks.enumerated() {
             if index > 0 {
@@ -64,49 +75,70 @@ private extension STMarkdownAttributedStringRenderer {
                         .font: self.style.font,
                         .foregroundColor: UIColor.clear,
                         .paragraphStyle: separatorStyle,
+                        .stMarkdownBlockID: "__separator__",
+                        .stMarkdownBlockKind: "separator",
+                        .stMarkdownRevealPolicy: STMarkdownRevealPolicy.atomicBlock.rawValue,
                     ]
                 ))
             }
-            result.append(self.render(block: block))
+            result.append(self.render(block: block, footnoteOrdinals: footnoteOrdinals))
         }
         return result
     }
 
-    func render(block: STMarkdownRenderBlock) -> NSAttributedString {
+    func render(block: STMarkdownRenderBlock, footnoteOrdinals: [String: Int]) -> NSAttributedString {
+        let rendered: NSAttributedString
         switch block {
-        case .paragraph(let inlines):
-            return self.renderInline(nodes: inlines, baseFont: self.style.font, textColor: self.style.textColor)
-        case .heading(let level, let content):
+        case let .paragraph(_, inlines):
+            rendered = self.renderInline(
+                nodes: inlines,
+                baseFont: self.style.font,
+                textColor: self.style.textColor,
+                footnoteOrdinals: footnoteOrdinals
+            )
+        case let .heading(_, level: level, anchorId: anchorId, content: content):
             let headingFont = self.headingFont(for: level)
             let headingColor = self.style.headingTextColor ?? self.style.textColor
-            return self.renderInline(nodes: content, baseFont: headingFont, textColor: headingColor, paragraphStyle: self.headingParagraphStyle(font: headingFont), kernOverride: self.style.headingKern)
-        case .quote(let blocks):
-            return self.renderQuote(blocks: blocks)
-        case .list(let items):
-            return self.renderList(items)
-        case .codeBlock(let language, let code):
+            let body = self.renderInline(
+                nodes: content,
+                baseFont: headingFont,
+                textColor: headingColor,
+                paragraphStyle: self.headingParagraphStyle(font: headingFont),
+                kernOverride: self.style.headingKern,
+                footnoteOrdinals: footnoteOrdinals
+            )
+            let out = NSMutableAttributedString(attributedString: body)
+            if out.length > 0 {
+                out.addAttribute(.stMarkdownHeadingAnchor, value: anchorId, range: NSRange(location: 0, length: out.length))
+            }
+            rendered = out
+        case let .quote(_, blocks):
+            rendered = self.renderQuote(blocks: blocks, footnoteOrdinals: footnoteOrdinals)
+        case let .list(_, items):
+            rendered = self.renderList(items, footnoteOrdinals: footnoteOrdinals)
+        case let .codeBlock(_, language: language, code: code):
             if let rendered = self.advancedRenderers.codeBlockRenderer?.renderCodeBlock(
                 language: language,
                 code: code,
                 style: self.style
             ) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return self.renderCodeBlock(language: language, code: code)
-        case .table(let table):
+            rendered = self.renderCodeBlock(language: language, code: code)
+        case let .table(_, table):
             if let rendered = self.advancedRenderers.tableRenderer?.renderTable(table, style: self.style) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return self.renderTable(table)
-        case .mathBlock(let latex):
+            rendered = self.renderTable(table)
+        case let .mathBlock(_, latex):
             if let rendered = self.advancedRenderers.blockMathRenderer?.renderBlockMath(
                 formula: latex,
                 style: self.style
             ) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return NSAttributedString(string: latex, attributes: self.baseAttributes())
-        case .image(let url, let altText, let title):
+            rendered = NSAttributedString(string: latex, attributes: self.baseAttributes())
+        case let .image(_, url: url, altText: altText, title: title):
             if let rendered = self.advancedRenderers.imageRenderer?.renderImage(
                 url: url,
                 altText: altText,
@@ -114,14 +146,62 @@ private extension STMarkdownAttributedStringRenderer {
                 style: self.style,
                 placement: .block
             ) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return NSAttributedString(string: altText.isEmpty ? "[image]" : altText, attributes: self.baseAttributes())
-        case .thematicBreak:
+            rendered = NSAttributedString(string: altText.isEmpty ? "[image]" : altText, attributes: self.baseAttributes())
+        case .thematicBreak(_):
             if let rendered = self.advancedRenderers.horizontalRuleRenderer?.renderHorizontalRule(style: self.style) {
-                return rendered
+                return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
             }
-            return NSAttributedString(string: "———", attributes: self.baseAttributes())
+            rendered = NSAttributedString(string: "———", attributes: self.baseAttributes())
+        case let .details(_, summary: summary, body: body):
+            rendered = self.renderDetails(summary: summary, body: body, footnoteOrdinals: footnoteOrdinals)
+        case let .rawHTML(_, html):
+            rendered = self.renderRawHTMLBlock(html)
+        }
+        return self.applyBlockMetadata(to: rendered, metadata: block.metadata)
+    }
+
+    func renderDetails(
+        summary: [STMarkdownInlineNode],
+        body: [STMarkdownRenderBlock],
+        footnoteOrdinals: [String: Int]
+    ) -> NSAttributedString {
+        let out = NSMutableAttributedString()
+        let summaryAttr = self.renderInline(
+            nodes: summary,
+            baseFont: self.style.font,
+            textColor: self.style.textColor,
+            footnoteOrdinals: footnoteOrdinals
+        )
+        let prefix = NSAttributedString(string: "▸ ", attributes: self.baseAttributes())
+        out.append(prefix)
+        out.append(summaryAttr)
+        out.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
+        let bodyAttr = NSMutableAttributedString(attributedString: self.render(blocks: body, footnoteOrdinals: footnoteOrdinals))
+        if bodyAttr.length > 0 {
+            let indent = max(self.style.blockquoteIndentation, 0)
+            if indent > 0 {
+                self.offsetParagraphStyles(in: bodyAttr, by: indent)
+            }
+            out.append(bodyAttr)
+        }
+        return out
+    }
+
+    func renderRawHTMLBlock(_ html: String) -> NSAttributedString {
+        switch self.style.rawHTMLPolicy {
+        case .suppress:
+            return NSAttributedString(string: "", attributes: self.baseAttributes())
+        case .literalMonospace:
+            let trimmed = html.trimmingCharacters(in: .whitespacesAndNewlines)
+            var attrs = self.baseAttributes()
+            attrs[.font] = UIFont.st_monospacedSystemFont(
+                ofSize: max(self.style.font.pointSize - 2, 10),
+                weight: .regular
+            )
+            attrs[.foregroundColor] = self.style.textColor.withAlphaComponent(0.55)
+            return NSAttributedString(string: trimmed, attributes: attrs)
         }
     }
 
@@ -141,15 +221,12 @@ private extension STMarkdownAttributedStringRenderer {
     }
 
     func renderTable(_ table: STMarkdownTableModel) -> NSAttributedString {
-        // 早期实现把 inline 节点 render 成 NSAttributedString 后只取 `.string`，
-        // 把粗体/斜体/链接等格式全部丢掉。这里复用 `STMarkdownDefaultTableRenderer`
-        // 至少能维持等宽对齐与表头分隔，明显优于"裸文本拼接"。
         if let rendered = STMarkdownDefaultTableRenderer().renderTable(table, style: self.style) {
             return rendered
         }
         let rows = ([table.header].compactMap { $0 } + table.rows)
         let strings = rows.map { row in
-            row.map { self.renderInline(nodes: $0, baseFont: self.style.font, textColor: self.style.textColor).string }
+            row.map { self.renderInline(nodes: $0, baseFont: self.style.font, textColor: self.style.textColor, footnoteOrdinals: [:]).string }
                 .joined(separator: "  ")
         }
         return NSAttributedString(string: strings.joined(separator: "\n"), attributes: self.baseAttributes())
@@ -163,8 +240,8 @@ private extension STMarkdownAttributedStringRenderer {
     ///
     /// 另外把 `style.blockquoteIndentation`（非负）下沉到段落 `firstLineHeadIndent`/`headIndent`
     /// 中，使得长段落自动换行后内容仍保持与左竖线对齐的缩进。
-    func renderQuote(blocks: [STMarkdownRenderBlock]) -> NSAttributedString {
-        let body = NSMutableAttributedString(attributedString: self.render(blocks: blocks))
+    func renderQuote(blocks: [STMarkdownRenderBlock], footnoteOrdinals: [String: Int]) -> NSAttributedString {
+        let body = NSMutableAttributedString(attributedString: self.render(blocks: blocks, footnoteOrdinals: footnoteOrdinals))
         guard body.length > 0 else { return body }
 
         let lineColor = self.style.blockquoteLineColor ?? UIColor.systemGray
@@ -222,7 +299,8 @@ private extension STMarkdownAttributedStringRenderer {
         italic: Bool = false,
         bold: Bool = false,
         linkDestination: String? = nil,
-        kernOverride: CGFloat? = nil
+        kernOverride: CGFloat? = nil,
+        footnoteOrdinals: [String: Int] = [:]
     ) -> NSAttributedString {
         let result = NSMutableAttributedString()
         let italicFont = STMarkdownFontResolver.italicFont(from: baseFont)
@@ -267,6 +345,9 @@ private extension STMarkdownAttributedStringRenderer {
         if let linkDestination, let url = URL(string: linkDestination) {
             attributes[.link] = url
             attributes[.foregroundColor] = self.style.linkColor ?? .systemBlue
+            attributes[.underlineStyle] = self.style.linkUnderlineEnabled
+                ? NSUnderlineStyle.single.rawValue
+                : 0
         }
         for node in nodes {
             switch node {
@@ -294,7 +375,9 @@ private extension STMarkdownAttributedStringRenderer {
                     paragraphStyle: style,
                     italic: true,
                     bold: bold,
-                    linkDestination: linkDestination
+                    linkDestination: linkDestination,
+                    kernOverride: kernOverride,
+                    footnoteOrdinals: footnoteOrdinals
                 ))
             case .strong(let children):
                 result.append(self.renderInline(
@@ -304,7 +387,9 @@ private extension STMarkdownAttributedStringRenderer {
                     paragraphStyle: style,
                     italic: italic,
                     bold: true,
-                    linkDestination: linkDestination
+                    linkDestination: linkDestination,
+                    kernOverride: kernOverride,
+                    footnoteOrdinals: footnoteOrdinals
                 ))
             case .code(let code):
                 var codeAttributes = attributes
@@ -322,7 +407,9 @@ private extension STMarkdownAttributedStringRenderer {
                     paragraphStyle: style,
                     italic: italic,
                     bold: bold,
-                    linkDestination: destination
+                    linkDestination: destination,
+                    kernOverride: kernOverride,
+                    footnoteOrdinals: footnoteOrdinals
                 ))
             case .image(let source, let alt, let title):
                 if let rendered = self.advancedRenderers.imageRenderer?.renderImage(
@@ -348,7 +435,9 @@ private extension STMarkdownAttributedStringRenderer {
                     paragraphStyle: style,
                     italic: italic,
                     bold: bold,
-                    linkDestination: linkDestination
+                    linkDestination: linkDestination,
+                    kernOverride: kernOverride,
+                    footnoteOrdinals: footnoteOrdinals
                 )
                 let mutable = NSMutableAttributedString(attributedString: strikethroughRendered)
                 let strikeColor = self.style.strikethroughColor ?? textColor
@@ -357,56 +446,109 @@ private extension STMarkdownAttributedStringRenderer {
                     .strikethroughColor: strikeColor,
                 ], range: NSRange(location: 0, length: mutable.length))
                 result.append(mutable)
+            case .footnoteReference(let label):
+                let ordinal = footnoteOrdinals[label]
+                let glyph: String
+                if let ordinal, ordinal > 0 {
+                    glyph = String(ordinal)
+                } else {
+                    glyph = "[^\(label)]"
+                }
+                let superscriptSize = max(useFont.pointSize - 3, 9)
+                let superscriptFont = UIFont(descriptor: useFont.fontDescriptor, size: superscriptSize)
+                var supAttrs = attributes
+                supAttrs[.font] = superscriptFont
+                supAttrs[.baselineOffset] = useFont.ascender * 0.35
+                supAttrs[.stMarkdownFootnoteLabel] = label
+                if let fnURL = STMarkdownFootnoteDeepLink.url(label: label) {
+                    supAttrs[.link] = fnURL
+                    if let linkColor = self.style.linkColor {
+                        supAttrs[.foregroundColor] = linkColor
+                    }
+                }
+                result.append(NSAttributedString(string: glyph, attributes: supAttrs))
+            case .inlineRawHTML(let raw):
+                switch self.style.rawHTMLPolicy {
+                case .suppress:
+                    break
+                case .literalMonospace:
+                    var monoAttrs = attributes
+                    monoAttrs[.font] = UIFont.st_monospacedSystemFont(ofSize: max(baseFont.pointSize - 2, 9), weight: .regular)
+                    monoAttrs[.foregroundColor] = (self.style.inlineCodeTextColor ?? textColor).withAlphaComponent(0.72)
+                    result.append(NSAttributedString(string: raw, attributes: monoAttrs))
+                }
             }
         }
 
         return result
     }
 
-    func renderList(_ items: [STMarkdownRenderListItem]) -> NSAttributedString {
-        let result = NSMutableAttributedString()
+    func renderList(_ items: [STMarkdownRenderListItem], footnoteOrdinals: [String: Int]) -> NSAttributedString {
+        let inner = NSMutableAttributedString()
 
         for (index, item) in items.enumerated() {
             if index > 0 {
-                result.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
+                inner.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
             }
 
             let layout = self.listLayout(for: item)
             let markerAttributes: [NSAttributedString.Key: Any] = [
                 .font: layout.markerFont,
-                .foregroundColor: self.style.textColor,
+                .foregroundColor: self.style.listMarkerColor ?? self.style.textColor,
                 .paragraphStyle: layout.paragraphStyle,
                 .baselineOffset: layout.baselineOffset,
             ]
-            result.append(NSAttributedString(string: layout.markerText, attributes: markerAttributes))
+            inner.append(NSAttributedString(string: layout.markerText, attributes: markerAttributes))
 
             let leadingBlocks = self.leadingListBlocks(for: item)
             if leadingBlocks.isEmpty == false {
-                let renderedLeading = NSMutableAttributedString(attributedString: self.render(blocks: leadingBlocks))
+                let renderedLeading = NSMutableAttributedString(attributedString: self.render(blocks: leadingBlocks, footnoteOrdinals: footnoteOrdinals))
                 self.applyListContentStyle(
                     renderedLeading,
                     item: item,
                     contentIndent: layout.contentIndent,
                     lineHeight: self.resolveLineHeight(for: leadingBlocks.first)
                 )
-                result.append(renderedLeading)
+                inner.append(renderedLeading)
             }
 
             let trailingBlocks = self.trailingListBlocks(for: item)
             if trailingBlocks.isEmpty == false {
-                let child = NSMutableAttributedString(attributedString: self.render(blocks: trailingBlocks))
+                let child = NSMutableAttributedString(attributedString: self.render(blocks: trailingBlocks, footnoteOrdinals: footnoteOrdinals))
                 self.offsetParagraphStyles(in: child, by: layout.contentIndent)
                 if child.length > 0 {
-                    // leading 段落已包含内联文本且后跟 `\n`；这里补一个分隔即可。
-                    // 当 leading 为空（列表项以 quote / codeBlock / list 等块级元素开头），
-                    // marker 后没有任何换行，直接 append 会让 marker 与块内容挤在同一行。
-                    result.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
-                    result.append(child)
+                    inner.append(NSAttributedString(string: "\n", attributes: self.baseAttributes()))
+                    inner.append(child)
                 }
             }
         }
 
+        let result = NSMutableAttributedString()
+        if let top = self.transparentLineSpacer(minHeight: self.style.listTopPadding) {
+            result.append(top)
+        }
+        result.append(inner)
+        if let bottom = self.transparentLineSpacer(minHeight: self.style.listBottomPadding) {
+            result.append(bottom)
+        }
         return result
+    }
+
+    /// 用透明换行 + 行高模拟垂直留白（与块级分隔策略一致）。
+    func transparentLineSpacer(minHeight: CGFloat) -> NSAttributedString? {
+        guard minHeight > 0 else { return nil }
+        let separatorStyle = NSMutableParagraphStyle()
+        separatorStyle.minimumLineHeight = minHeight
+        separatorStyle.maximumLineHeight = minHeight
+        separatorStyle.lineBreakMode = .byWordWrapping
+        return NSAttributedString(
+            string: "\n",
+            attributes: [
+                .font: self.style.font,
+                .foregroundColor: UIColor.clear,
+                .paragraphStyle: separatorStyle,
+            ]
+        )
     }
 
     func baseAttributes() -> [NSAttributedString.Key: Any] {
@@ -512,12 +654,19 @@ private extension STMarkdownAttributedStringRenderer {
             let orderedIndex = item.orderedIndex ?? 1
             markerText = "\(orderedIndex).\t"
             let markerWidth = ceil(("\(orderedIndex)." as NSString).size(withAttributes: [.font: markerFont]).width)
-            contentIndent = firstLineIndent + markerWidth + 5
+            contentIndent = firstLineIndent + max(markerWidth + 5, self.style.listMarkerWidth)
             baselineOffset = 0
         } else {
-            markerText = item.level == 0 ? "\t●\t" : "\t○\t"
-            markerFont = .st_systemFont(ofSize: 7, weight: .regular)
-            contentIndent = firstLineIndent + 13
+            let bulletSymbol: String
+            switch item.unorderedDepth {
+            case 0: bulletSymbol = "●"
+            case 1: bulletSymbol = "○"
+            default: bulletSymbol = "▪"
+            }
+            markerText = "\(bulletSymbol)\t"
+            let bulletSize = max(round(self.style.font.pointSize * 0.44), 5)
+            markerFont = .st_systemFont(ofSize: bulletSize, weight: .regular)
+            contentIndent = firstLineIndent + self.style.listMarkerWidth
             let baseMidline = (self.style.font.ascender + self.style.font.descender) / 2
             let markerMidline = (markerFont.ascender + markerFont.descender) / 2
             baselineOffset = baseMidline - markerMidline
@@ -572,7 +721,7 @@ private extension STMarkdownAttributedStringRenderer {
         }
 
         switch firstBlock {
-        case .paragraph, .heading:
+        case .paragraph(_, _), .heading(_, _, _, _):
             return [firstBlock]
         default:
             return []
@@ -585,7 +734,7 @@ private extension STMarkdownAttributedStringRenderer {
         }
 
         switch firstBlock {
-        case .paragraph, .heading:
+        case .paragraph(_, _), .heading(_, _, _, _):
             return Array(item.blocks.dropFirst())
         default:
             return item.blocks
@@ -598,7 +747,7 @@ private extension STMarkdownAttributedStringRenderer {
         }
 
         switch block {
-        case .heading(let level, _):
+        case let .heading(_, level: level, anchorId: _, content: _):
             let font = self.headingFont(for: level)
             return font.pointSize * self.style.headingLineHeightMultiplier
         default:
@@ -647,13 +796,13 @@ private extension STMarkdownAttributedStringRenderer {
 
     func leadingBlockSpacing(for block: STMarkdownRenderBlock) -> CGFloat {
         switch block {
-        case .heading(let level, _):
+        case let .heading(_, level: level, anchorId: _, content: _):
             if let topSpacings = self.style.headingTopSpacing,
                level >= 1, level <= topSpacings.count {
                 return topSpacings[level - 1]
             }
             return self.style.blockSpacing
-        case .list:
+        case .list(_, _):
             return self.style.listItemSpacing
         default:
             return self.style.blockSpacing
@@ -662,16 +811,42 @@ private extension STMarkdownAttributedStringRenderer {
 
     func trailingBlockSpacing(for block: STMarkdownRenderBlock) -> CGFloat {
         switch block {
-        case .heading(let level, _):
+        case let .heading(_, level: level, anchorId: _, content: _):
             if let bottomSpacings = self.style.headingBottomSpacing,
                level >= 1, level <= bottomSpacings.count {
                 return bottomSpacings[level - 1]
             }
             return self.style.blockSpacing
-        case .list:
+        case .list(_, _):
             return self.style.listItemSpacing
         default:
             return self.style.blockSpacing
+        }
+    }
+
+    func applyBlockMetadata(
+        to rendered: NSAttributedString,
+        metadata: STMarkdownRenderBlockMetadata
+    ) -> NSAttributedString {
+        guard rendered.length > 0 else { return rendered }
+        let mutable = NSMutableAttributedString(attributedString: rendered)
+        let fullRange = NSRange(location: 0, length: mutable.length)
+        self.fillMissingAttribute(.stMarkdownBlockID, value: metadata.id, in: mutable, range: fullRange)
+        self.fillMissingAttribute(.stMarkdownBlockKind, value: metadata.kind.rawValue, in: mutable, range: fullRange)
+        self.fillMissingAttribute(.stMarkdownRevealPolicy, value: metadata.revealPolicy.rawValue, in: mutable, range: fullRange)
+        return mutable
+    }
+
+    func fillMissingAttribute(
+        _ key: NSAttributedString.Key,
+        value: Any,
+        in attributed: NSMutableAttributedString,
+        range: NSRange
+    ) {
+        attributed.enumerateAttribute(key, in: range) { existing, subrange, _ in
+            if existing == nil {
+                attributed.addAttribute(key, value: value, range: subrange)
+            }
         }
     }
 }
