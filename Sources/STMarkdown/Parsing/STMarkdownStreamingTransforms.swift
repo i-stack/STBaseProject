@@ -155,8 +155,9 @@ public enum STMarkdownStreamingTransforms {
                 if lastWasStripped {
                     shouldKeepNestedIndent = currentIndent > previousIndent
                 } else {
-                    let previousIsUnordered = matches(Self.streamingAnyUnorderedListRegex, in: lastNonEmptyLine)
-                    shouldKeepNestedIndent = previousIsUnordered && currentIndent >= previousIndent
+                    let previousIsList = matches(Self.streamingAnyUnorderedListRegex, in: lastNonEmptyLine)
+                        || matches(Self.streamingAnyListRegex, in: lastNonEmptyLine)
+                    shouldKeepNestedIndent = previousIsList && currentIndent >= previousIndent
                 }
                 if !shouldKeepNestedIndent {
                     lines[index] = String(rawLine.drop { $0 == " " || $0 == "\t" })
@@ -171,8 +172,9 @@ public enum STMarkdownStreamingTransforms {
                 if lastWasStripped {
                     shouldStrip = currentIndent <= previousIndent
                 } else {
-                    let previousIsUnordered = matches(Self.streamingAnyUnorderedListRegex, in: lastNonEmptyLine)
-                    shouldStrip = !previousIsUnordered
+                    let previousIsList = matches(Self.streamingAnyUnorderedListRegex, in: lastNonEmptyLine)
+                        || matches(Self.streamingAnyListRegex, in: lastNonEmptyLine)
+                    shouldStrip = !previousIsList
                 }
                 if shouldStrip {
                     lines[index] = String(rawLine.drop { $0 == " " || $0 == "\t" })
