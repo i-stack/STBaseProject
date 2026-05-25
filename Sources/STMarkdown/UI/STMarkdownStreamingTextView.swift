@@ -647,12 +647,18 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         var cursor = attributedText.length - 1
         while cursor >= 0 {
             var blockRange = NSRange(location: 0, length: 0)
-            guard let blockID = attributedText.attribute(
+            let rawBlockIDValue = attributedText.attribute(
                 .stMarkdownBlockID,
                 at: cursor,
                 effectiveRange: &blockRange
-            ) as? String,
-            blockID.isEmpty == false else {
+            )
+            // No blockID attribute at all: custom renderer without STMarkdown metadata.
+            // Fall back to treating the entire delta as inlineProgressive.
+            guard rawBlockIDValue != nil else {
+                return NSRange(location: 0, length: attributedText.length)
+            }
+            guard let blockID = rawBlockIDValue as? String,
+                  blockID.isEmpty == false else {
                 return nil
             }
 
