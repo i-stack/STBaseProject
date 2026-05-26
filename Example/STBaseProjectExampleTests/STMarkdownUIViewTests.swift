@@ -140,6 +140,30 @@ final class STMarkdownUIViewTests: XCTestCase {
         XCTAssertLessThan(self.foregroundAlpha(in: visible, at: tailRange.location), 0.5)
     }
 
+    func testStreamingLineFadeModeCreatesMaskAndReportsAnimatingState() {
+        let style = STMarkdownStyle(
+            font: .systemFont(ofSize: 16),
+            textColor: .label,
+            lineHeight: 22,
+            kern: 0,
+            streamFadeInEnabled: true,
+            streamLineFadeEnabled: true
+        )
+        let view = STMarkdownStreamingTextView(style: style, usesTextLayoutManager: false)
+        view.frame = CGRect(x: 0, y: 0, width: 240, height: 80)
+        view.layoutIfNeeded()
+        view.setMarkdown("Hello", animated: false)
+
+        var states: [Bool] = []
+        (view.contentTextView as? STShimmerTextView)?.onAnimationStateChange = { states.append($0) }
+
+        view.appendMarkdownFragment(" world", animated: true)
+
+        XCTAssertTrue(view.isStreamingAnimationIdle == false)
+        XCTAssertNotNil(view.contentTextView.layer.mask)
+        XCTAssertEqual(states.first, true)
+    }
+
     func testSmartStreamingSecondCommittedFrameUsesIncrementalMergedRenderPath() {
         let view = STMarkdownStreamingTextView()
         view.tokenFadeDuration = 0

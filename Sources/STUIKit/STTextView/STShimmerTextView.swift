@@ -9,13 +9,9 @@ import UIKit
 
 open class STShimmerTextView: UITextView {
 
-    /// 在 NSAttributedString 中标记此 key 的 range 不参与 fade-in 动画，
-    /// 直接以最终颜色渲染。用于 list marker、block separator、heading 等结构元素。
     public static let skipFadeInAttributeKey = NSAttributedString.Key("STShimmerTextView.skipFadeIn")
 
-    // MARK: - LineFadeLayer（行级 CAGradientLayer 遮罩扫入动画）
     private final class LineFadeLayer: CAGradientLayer {
-        /// 动画已完成（待下次 applyLineFadeAnimation 时清理折入基底层）。
         var isFadeComplete: Bool = false
     }
 
@@ -35,8 +31,6 @@ open class STShimmerTextView: UITextView {
     private struct AnimatingToken {
         let range: NSRange
         let startTime: CFTimeInterval
-        /// 逐字 stagger 间隔：colorRuns 中第 i 个字符的实际 startTime = startTime + i * staggerInterval。
-        /// 为 0 时所有字符同时 fade-in（原始行为）。
         let staggerInterval: TimeInterval
         let colorRuns: [AnimatingColorRun]
     }
@@ -54,6 +48,8 @@ open class STShimmerTextView: UITextView {
     public var lineFadeMode: Bool = false
     /// 行级扫入动画时长（秒），默认 0.15 s，与 FluidMarkdown 对齐。
     public var lineFadeDuration: TimeInterval = 0.15
+    /// 当前逐字输出行尾部的柔和渐隐宽度。
+    public var lineFadeTrailingWidth: CGFloat = 18
     public var suppressSystemTextMenu: Bool = false
     public var onAnimationStateChange: ((Bool) -> Void)?
     private var displayLink: CADisplayLink?
@@ -65,6 +61,7 @@ open class STShimmerTextView: UITextView {
     /// 最终目标态的 attributed text（全不透明），不含任何动画中间状态的 alpha 值。
     /// 供外部做 "已渲染前缀" 比较时使用，避免因动画过渡期 alpha < 1 导致前缀比较误判。
     private var _baseAttributedText: NSMutableAttributedString = NSMutableAttributedString()
+    private var _isLineFadeAnimating: Bool = false
 
     open var defaultTextAttributes: [NSAttributedString.Key: Any] {
         return [
@@ -78,7 +75,7 @@ open class STShimmerTextView: UITextView {
     }
 
     public var isAnimatingTextReveal: Bool {
-        self.displayLink != nil && !self.animatingTokens.isEmpty
+        (self.displayLink != nil && !self.animatingTokens.isEmpty) || self._isLineFadeAnimating
     }
 
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
@@ -94,9 +91,6 @@ open class STShimmerTextView: UITextView {
     /// - Parameter usingTextLayoutManager: `true` 时使用 TextKit 2 栈（iOS 16+）；低版本系统始终为 TextKit 1。
     public convenience init(usingTextLayoutManager: Bool) {
         if #available(iOS 16.0, *) {
-            // UITextView(frame:textContainer:nil) 在 iOS 16+ 默认启用 TextKit 2，
-            // 导致 textLayoutManager != nil；行级遮罩动画依赖 NSLayoutManager，
-            // 必须通过 UITextView(usingTextLayoutManager:) 显式指定版本。
             let shell = UITextView(usingTextLayoutManager: usingTextLayoutManager)
             self.init(frame: .zero, textContainer: shell.textContainer)
         } else {
@@ -114,8 +108,6 @@ open class STShimmerTextView: UITextView {
         self.textContainer.lineFragmentPadding = 0
         self.font = .st_systemFont(ofSize: 16)
         self.textColor = .label
-        // iOS 16+ 若已启用 TextKit 2（`textLayoutManager != nil`），访问 `layoutManager` 会强制降级到
-        // TK1 兼容栈并在控制台产生 `_UITextViewEnablingCompatibilityMode` 告警；仅在经典 TK1 路径下设置。
         if #available(iOS 16.0, *) {
             if self.textLayoutManager == nil {
                 self.layoutManager.allowsNonContiguousLayout = false
@@ -125,15 +117,24 @@ open class STShimmerTextView: UITextView {
         }
     }
 
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        guard let mask = _lineFadeMaskLayer else { return }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        mask.frame = self.bounds
+        mask.sublayerTransform = CATransform3DMakeTranslation(contentOffset.x, -contentOffset.y, 0)
+        _lineFadeBaseLayer?.frame.size.width = self.bounds.width
+        CATransaction.commit()
+    }
+
     public func append(_ text: String) {
         guard !text.isEmpty else { return }
         let startLocation = self.textStorage.length
         let baseColor = self.baseForegroundColor(from: self.defaultTextAttributes)
-        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画
         if self.tokenFadeDuration > 0, !self.animateAcrossNewlines {
             self.finishAnimationsBeforeLastNewline()
         }
-        // _baseAttributedText 记录全不透明最终态
         let baseAttr = NSAttributedString(
             string: text,
             attributes: [.font: self.font ?? UIFont.st_systemFont(ofSize: 16), .foregroundColor: baseColor]
@@ -167,10 +168,7 @@ open class STShimmerTextView: UITextView {
         let appended = NSMutableAttributedString(attributedString: attributedText)
         let defaultColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         self.ensureForegroundColor(in: appended, defaultColor: defaultColor)
-        // 保存 contentOffset：UITextView 在 textStorage 修改后可能意外偏移。
         let savedOffset = self.contentOffset
-
-        // 行级 CAGradientLayer 扫入模式：文本保持全不透明，由遮罩层控制可见性。
         if animated && self.lineFadeMode {
             _baseAttributedText.append(appended)
             self.textStorage.beginEditing()
@@ -182,13 +180,9 @@ open class STShimmerTextView: UITextView {
             )
             return
         }
-
-        // 在追加前，立即完成上一行（最后一个 \n 之前）的所有动画
         if animated, self.tokenFadeDuration > 0, !self.animateAcrossNewlines {
             self.finishAnimationsBeforeLastNewline()
         }
-        // _baseAttributedText 记录全不透明最终态，必须在 applyTransparentForegroundColors
-        // 之前追加，保留原始 alpha=1 颜色。
         _baseAttributedText.append(appended)
         let colorRuns = self.animatingColorRuns(in: appended, offset: startLocation)
         if animated {
@@ -201,27 +195,20 @@ open class STShimmerTextView: UITextView {
             if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
             return
         }
-
-        // 默认策略：当 delta 内含换行符时，最后一个 \n 之前的内容立即显示，只对最后一行做淡入。
-        // 聊天流式场景要求严格逐字输出时，会开启 animateAcrossNewlines，整个 delta 都走字符级渐显。
         let deltaString = appended.string as NSString
         let lastNLInDelta = deltaString.range(of: "\n", options: .backwards)
         if !self.animateAcrossNewlines, lastNLInDelta.location != NSNotFound {
             let splitPos = lastNLInDelta.location + lastNLInDelta.length  // local offset in delta
-            // 立即完成 splitPos 之前的 colorRuns
             self.textStorage.beginEditing()
             var trailingRuns: [AnimatingColorRun] = []
             for run in colorRuns {
                 let runLocalStart = run.range.location - startLocation
                 let runLocalEnd = runLocalStart + run.range.length
                 if runLocalEnd <= splitPos {
-                    // run 完全在 \n 之前 → 立即显示
                     self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
                 } else if runLocalStart >= splitPos {
-                    // run 完全在 \n 之后 → 保留动画
                     trailingRuns.append(run)
                 } else {
-                    // run 横跨 \n → 拆分
                     let beforeLength = splitPos - runLocalStart
                     let beforeRange = NSRange(location: run.range.location, length: beforeLength)
                     self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: beforeRange)
@@ -232,7 +219,6 @@ open class STShimmerTextView: UITextView {
             }
             self.textStorage.endEditing()
             if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
-            // 只对尾部片段（最后一个 \n 之后的内容）创建动画 token
             if !trailingRuns.isEmpty {
                 self.appendStaggeredTokens(for: trailingRuns)
                 self.startDisplayLinkIfNeeded()
@@ -254,33 +240,23 @@ open class STShimmerTextView: UITextView {
         self.textStorage.endEditing()
     }
 
-    public func replaceTrailingAttributedText(
-        from location: Int,
-        with attributedText: NSAttributedString,
-        animateNewPortion: Bool = true
-    ) {
+    public func replaceTrailingAttributedText(from location: Int, with attributedText: NSAttributedString, animateNewPortion: Bool = true) {
         let clampedLocation = max(0, min(location, self.textStorage.length))
         let savedOffset = self.contentOffset
-
-        // 1. 立即完成前缀区域内仍在动画的 token，丢弃与尾部重叠的 token
         if !self.animatingTokens.isEmpty {
             self.textStorage.beginEditing()
             for token in self.animatingTokens {
                 let tokenEnd = token.range.location + token.range.length
                 if tokenEnd <= clampedLocation {
-                    // token 在前缀区域内 → 立即完成动画
                     for run in token.colorRuns {
                         self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
                     }
                 }
-                // token 与尾部重叠 → 丢弃（即将被替换）
             }
             self.textStorage.endEditing()
         }
         self.animatingTokens.removeAll()
         if self.lineFadeMode { self.removeLineFadeMask() }
-
-        // 计算旧尾部字符串，用于后续判断哪些是"真正新增"的字符
         let oldTrailingLength = self.textStorage.length - clampedLocation
         let oldTrailingString: String
         if oldTrailingLength > 0 {
@@ -289,8 +265,6 @@ open class STShimmerTextView: UITextView {
         } else {
             oldTrailingString = ""
         }
-
-        // 2. 同步更新 _baseAttributedText：保留 [0, clampedLocation) 前缀 + 新尾部
         let clampedBaseLocation = max(0, min(location, _baseAttributedText.length))
         let newBase = NSMutableAttributedString(
             attributedString: _baseAttributedText.attributedSubstring(
@@ -299,19 +273,11 @@ open class STShimmerTextView: UITextView {
         )
         newBase.append(attributedText)
         _baseAttributedText = newBase
-
-        // 3. 替换 textStorage 中的尾部内容。
-        //    对已有文本部分（旧尾部与新尾部的公共前缀）直接以最终颜色渲染（不做 fade-in），
-        //    对真正新增的字符执行逐字 stagger fade-in 动画。
         let newTrailingString = attributedText.string
         let commonPrefixCount = oldTrailingString.commonPrefix(with: newTrailingString).utf16.count
-
-        // 准备新尾部的 appended 副本用于提取 colorRuns
         let appended = NSMutableAttributedString(attributedString: attributedText)
         let defaultColor = self.baseForegroundColor(from: self.defaultTextAttributes)
         self.ensureForegroundColor(in: appended, defaultColor: defaultColor)
-
-        // 对真正新增的部分（公共前缀之后）提取 colorRuns 并设置透明
         let newCharCount = attributedText.length - commonPrefixCount
         var newColorRuns: [AnimatingColorRun] = []
         if animateNewPortion,
@@ -322,7 +288,6 @@ open class STShimmerTextView: UITextView {
             let newPortion = appended.attributedSubstring(from: newRange)
             let newPortionMut = NSMutableAttributedString(attributedString: newPortion)
             let newPortionOffset = clampedLocation + commonPrefixCount
-            // 提取 colorRuns（从新增部分）
             let fullRange = NSRange(location: 0, length: newPortionMut.length)
             newPortionMut.enumerateAttribute(.foregroundColor, in: fullRange, options: []) { value, subrange, _ in
                 guard let color = value as? UIColor else { return }
@@ -336,7 +301,6 @@ open class STShimmerTextView: UITextView {
                     targetColor: color
                 ))
             }
-            // 将新增部分在 appended 中设为透明
             if !newColorRuns.isEmpty {
                 newPortionMut.enumerateAttribute(.foregroundColor, in: fullRange, options: []) { value, subrange, _ in
                     if newPortionMut.attribute(.attachment, at: subrange.location, effectiveRange: nil) != nil { return }
@@ -358,8 +322,6 @@ open class STShimmerTextView: UITextView {
         )
         self.textStorage.endEditing()
         if self.contentOffset != savedOffset { self.contentOffset = savedOffset }
-
-        // 对新增字符启动逐字 stagger 动画
         if !newColorRuns.isEmpty {
             self.appendStaggeredTokens(for: newColorRuns)
             self.startDisplayLinkIfNeeded()
@@ -411,7 +373,6 @@ open class STShimmerTextView: UITextView {
         let start = colorRuns.map(\.range.location).min()!
         let end = colorRuns.map { $0.range.location + $0.range.length }.max()!
         let totalLength = colorRuns.reduce(0) { $0 + $1.range.length }
-        // 字符数 ≤ 2 或 stagger 为 0 时不使用 stagger
         let stagger = (self.characterStaggerInterval > 0 && totalLength > 2)
             ? self.characterStaggerInterval : 0
         let token = AnimatingToken(
@@ -451,7 +412,6 @@ open class STShimmerTextView: UITextView {
         self.textStorage.beginEditing()
         for token in self.animatingTokens {
             if token.staggerInterval <= 0 {
-                // 无 stagger：所有 colorRuns 共享同一进度
                 let elapsed = now - token.startTime
                 let progress = min(1.0, elapsed / fadeDuration)
                 let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
@@ -460,7 +420,6 @@ open class STShimmerTextView: UITextView {
                     self.textStorage.addAttribute(.foregroundColor, value: color, range: run.range)
                 }
             } else {
-                // 有 stagger：逐字符计算进度，每个字符独立的 startTime
                 var charIndex = 0
                 for run in token.colorRuns {
                     for offset in 0..<run.range.length {
@@ -480,7 +439,6 @@ open class STShimmerTextView: UITextView {
         if self.contentOffset != savedOffset {
             self.contentOffset = savedOffset
         }
-        // 移除已完成的 token：所有字符都已完成 fade-in
         self.animatingTokens.removeAll { token in
             let totalChars = token.colorRuns.reduce(0) { $0 + $1.range.length }
             let lastCharStart = token.startTime + Double(max(0, totalChars - 1)) * token.staggerInterval
@@ -504,19 +462,13 @@ open class STShimmerTextView: UITextView {
         let range = NSRange(location: 0, length: attributedText.length)
         guard range.length > 0 else { return }
         attributedText.enumerateAttribute(.foregroundColor, in: range, options: []) { value, subrange, _ in
-            // 跳过含 NSTextAttachment 的字符（如 citation 圆圈），
-            // 它们的视觉由 attachment image 决定，不应被 alpha 动画影响。
             if attributedText.attribute(.attachment, at: subrange.location, effectiveRange: nil) != nil {
                 return
             }
-            // 跳过标记了 skipFadeIn 的 range（list marker、block separator 等结构元素），
-            // 它们需要直接以最终颜色渲染，不做 alpha 渐变。
             if attributedText.attribute(Self.skipFadeInAttributeKey, at: subrange.location, effectiveRange: nil) != nil {
                 return
             }
             let color = (value as? UIColor) ?? defaultColor
-            // 跳过已经透明的颜色（如 blockSeparator 的 UIColor.clear），
-            // 避免 withAlphaComponent(0) 将 (0,0,0,0) 变为 (0,0,0,0) 后在动画中渐变为 (0,0,0,progress)。
             var alpha: CGFloat = 0
             color.getWhite(nil, alpha: &alpha)
             if alpha < 0.01 { return }
@@ -535,15 +487,12 @@ open class STShimmerTextView: UITextView {
         var runs: [AnimatingColorRun] = []
         attributedText.enumerateAttribute(.foregroundColor, in: range, options: []) { value, subrange, _ in
             guard let color = value as? UIColor else { return }
-            // 跳过 NSTextAttachment 字符，不参与 fade-in 动画
             if attributedText.attribute(.attachment, at: subrange.location, effectiveRange: nil) != nil {
                 return
             }
-            // 跳过标记了 skipFadeIn 的 range
             if attributedText.attribute(Self.skipFadeInAttributeKey, at: subrange.location, effectiveRange: nil) != nil {
                 return
             }
-            // 跳过已透明的颜色（blockSeparator 等），它们不需要 fade-in
             var alpha: CGFloat = 0
             color.getWhite(nil, alpha: &alpha)
             if alpha < 0.01 { return }
@@ -582,37 +531,29 @@ open class STShimmerTextView: UITextView {
         let str = _baseAttributedText.string as NSString
         let len = str.length
         guard len > 0 else { return }
-        // 在 [0, len) 范围内倒序查找最后一个换行符
         let lastNLRange = str.range(of: "\n", options: .backwards, range: NSRange(location: 0, length: len))
         guard lastNLRange.location != NSNotFound else { return }
-        // boundary：最后一个 \n 之后的第一个字符位置；此位置之前的 token 全部立即完成
         let boundary = lastNLRange.location + lastNLRange.length
-
         var completedIndices: [Int] = []
         var splitReplacements: [(index: Int, newToken: AnimatingToken)] = []
         self.textStorage.beginEditing()
         for (idx, token) in self.animatingTokens.enumerated() {
             let tokenEnd = token.range.location + token.range.length
             if tokenEnd <= boundary {
-                // token 完全在 boundary 之前 → 立即完成全部动画
                 for run in token.colorRuns {
                     self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
                 }
                 completedIndices.append(idx)
             } else if token.range.location < boundary {
-                // token 横跨 boundary → 拆分：boundary 之前的部分立即完成，之后的部分保留动画
                 var beforeRuns: [AnimatingColorRun] = []
                 var afterRuns: [AnimatingColorRun] = []
                 for run in token.colorRuns {
                     let runEnd = run.range.location + run.range.length
                     if runEnd <= boundary {
-                        // run 完全在 boundary 之前
                         beforeRuns.append(run)
                     } else if run.range.location >= boundary {
-                        // run 完全在 boundary 之后
                         afterRuns.append(run)
                     } else {
-                        // run 横跨 boundary → 拆成两段
                         let beforeLength = boundary - run.range.location
                         let beforeRange = NSRange(location: run.range.location, length: beforeLength)
                         beforeRuns.append(AnimatingColorRun(range: beforeRange, targetColor: run.targetColor))
@@ -621,14 +562,12 @@ open class STShimmerTextView: UITextView {
                         afterRuns.append(AnimatingColorRun(range: afterRange, targetColor: run.targetColor))
                     }
                 }
-                // 立即完成 boundary 之前的部分
                 for run in beforeRuns {
                     self.textStorage.addAttribute(.foregroundColor, value: run.targetColor, range: run.range)
                 }
                 if afterRuns.isEmpty {
                     completedIndices.append(idx)
                 } else {
-                    // 用剩余的 afterRuns 替换原 token，保持原始 startTime
                     let afterStart = afterRuns.map(\.range.location).min() ?? boundary
                     let afterEnd = afterRuns.map { $0.range.location + $0.range.length }.max() ?? boundary
                     let newToken = AnimatingToken(
@@ -640,10 +579,8 @@ open class STShimmerTextView: UITextView {
                     splitReplacements.append((index: idx, newToken: newToken))
                 }
             }
-            // token 完全在 boundary 之后 → 不处理，继续动画
         }
         self.textStorage.endEditing()
-        // 应用拆分替换
         for replacement in splitReplacements {
             self.animatingTokens[replacement.index] = replacement.newToken
         }
@@ -656,13 +593,12 @@ open class STShimmerTextView: UITextView {
         }
     }
 
-    // MARK: - Line Fade Mask
-
     private func removeLineFadeMask() {
         guard _lineFadeMaskLayer != nil else { return }
         self.layer.mask = nil
         _lineFadeMaskLayer = nil
         _lineFadeBaseLayer = nil
+        self.setLineFadeAnimating(false)
     }
 
     /// 对 `changedRange` 所在的最末行应用 CAGradientLayer 水平扫入遮罩动画（FluidMarkdown 风格）。
@@ -670,7 +606,6 @@ open class STShimmerTextView: UITextView {
     /// TK2（iOS 16+）优先；TK2 不可用时回退到 TK1 layoutManager。
     private func applyLineFadeAnimation(changedRange: NSRange) {
         guard changedRange.length > 0, self.bounds.width > 1 else { return }
-
         if _lineFadeMaskLayer == nil {
             let null = NSNull()
             let mask = CALayer()
@@ -688,9 +623,7 @@ open class STShimmerTextView: UITextView {
         }
         guard let mask = _lineFadeMaskLayer, let base = _lineFadeBaseLayer else { return }
         mask.frame = self.bounds
-        // FluidMarkdown 对齐：补偿滚动偏移（isScrollEnabled=false 时为 identity，仍保留以确保正确性）
         mask.sublayerTransform = CATransform3DMakeTranslation(contentOffset.x, -contentOffset.y, 0)
-
         if #available(iOS 16.0, *), let tlm = self.textLayoutManager {
             applyLineFadeAnimation_tk2(changedRange: changedRange, tlm: tlm, mask: mask, base: base)
         } else {
@@ -713,8 +646,6 @@ open class STShimmerTextView: UITextView {
             let textRange = NSTextRange(location: rs, end: re)
         else { return }
         tlm.ensureLayout(for: textRange)
-
-        // 按 minY 分组得到最末行的 union 矩形
         var prevMinY: CGFloat = .nan
         var curLineRect: CGRect = .null
         var lastLineRect: CGRect = .null
@@ -749,62 +680,73 @@ open class STShimmerTextView: UITextView {
     ///   - lineRect:  行片段矩形（用于确定 y 位置和行高）。
     ///   - rightEdge: 行内已用文字的右边界（TK1 用 usedRect.maxX；TK2 用 segment union 的 maxX）。
     private func installLineFadeLayer(lineRect rect: CGRect, rightEdge: CGFloat, mask: CALayer, base: CALayer) {
-        // 基础层覆盖当前行以上的所有内容
         base.frame = CGRect(x: 0, y: 0, width: mask.bounds.width, height: rect.minY)
-
-        // lineDetectRect：稍扩展以容纳浮点误差（与 FluidMarkdown 相同）
+        let tailWidth = max(8, self.lineFadeTrailingWidth)
         let lineDetectRect = CGRect(
             x: floor(rect.minX), y: floor(rect.minY),
-            width: ceil(rect.width), height: ceil(rect.height + 1)
+            width: ceil(max(rect.width, rightEdge - rect.minX + tailWidth)),
+            height: ceil(rect.height + 1)
         )
-        var latestX: CGFloat = rect.minX
+        var previousRightEdge: CGFloat?
         for sub in mask.sublayers ?? [] {
             guard let fl = sub as? LineFadeLayer else { continue }
             if lineDetectRect.contains(fl.frame) {
-                if fl.isFadeComplete {
-                    // 已完成的层：折入基础层并移除
-                    fl.removeFromSuperlayer()
-                    base.frame = CGRect(x: 0, y: 0, width: mask.bounds.width, height: rect.maxY)
-                } else {
-                    latestX = max(latestX, fl.frame.maxX)
-                }
-            } else {
-                // 其他行的旧层：基础层已覆盖，直接移除
-                fl.removeFromSuperlayer()
+                previousRightEdge = max(previousRightEdge ?? rect.minX, fl.frame.maxX - tailWidth)
             }
+            fl.removeFromSuperlayer()
         }
-
-        let newFrame = CGRect(x: latestX, y: rect.minY, width: rightEdge - latestX, height: rect.height)
+        let lineWidth = max(0, rightEdge - rect.minX)
+        let newFrame = CGRect(
+            x: rect.minX,
+            y: rect.minY,
+            width: lineWidth + tailWidth,
+            height: rect.height
+        )
         guard newFrame.width > 0.5, newFrame.height > 0.5 else { return }
-
-        // 去重：整数像素级别比较（FluidMarkdown 用 CGRectIntegral）
-        let isDuplicate = (mask.sublayers ?? []).compactMap { $0 as? LineFadeLayer }.contains {
-            CGRectEqualToRect(CGRectIntegral($0.frame), CGRectIntegral(newFrame))
-        }
-        guard !isDuplicate else { return }
 
         let fl = LineFadeLayer()
         fl.startPoint = CGPoint(x: 0, y: 0.5)
         fl.endPoint = CGPoint(x: 1, y: 0.5)
         fl.frame = newFrame
-        // 模型值 = 最终状态（动画移除后 layer 回退到此值，无视觉跳变）
-        fl.colors = [UIColor.black.cgColor, UIColor.black.cgColor]
-
-        let anim = CAKeyframeAnimation(keyPath: "colors")
-        anim.values = [
-            [UIColor.clear.cgColor, UIColor.clear.cgColor],
-            [UIColor.black.cgColor, UIColor.clear.cgColor],
-            [UIColor.black.cgColor, UIColor.black.cgColor],
+        fl.colors = [UIColor.black.cgColor, UIColor.black.cgColor, UIColor.clear.cgColor]
+        let fadeStart = min(0.98, max(0, lineWidth / max(newFrame.width, 1)))
+        fl.locations = [NSNumber(value: 0), NSNumber(value: Double(fadeStart)), NSNumber(value: 1)]
+        let fromRightEdge = min(rightEdge, max(previousRightEdge ?? rect.minX, rect.minX))
+        let fromFadeStart = min(0.98, max(0, (fromRightEdge - rect.minX) / max(newFrame.width, 1)))
+        let anim = CABasicAnimation(keyPath: "locations")
+        anim.fromValue = [
+            NSNumber(value: 0),
+            NSNumber(value: Double(fromFadeStart)),
+            NSNumber(value: 1),
         ]
-        anim.calculationMode = .linear
-        anim.fillMode = .both               // FluidMarkdown: kCAFillModeBoth
-        anim.isRemovedOnCompletion = true   // FluidMarkdown: removedOnCompletion = YES
+        anim.toValue = [
+            NSNumber(value: 0),
+            NSNumber(value: Double(fadeStart)),
+            NSNumber(value: 1),
+        ]
+        anim.fillMode = .both
+        anim.isRemovedOnCompletion = true
         anim.duration = lineFadeDuration
-        anim.delegate = LineFadeAnimationDelegate { [weak fl] in
-            fl?.isFadeComplete = true       // 供下次 applyLineFadeAnimation 做懒清理
+        self.setLineFadeAnimating(true)
+        anim.delegate = LineFadeAnimationDelegate { [weak self, weak fl] in
+            fl?.isFadeComplete = true
+            guard let self else { return }
+            let stillAnimating = (mask.sublayers ?? []).contains {
+                guard let layer = $0 as? LineFadeLayer else { return false }
+                return layer.animation(forKey: "fadeIn") != nil
+            }
+            if !stillAnimating {
+                self.setLineFadeAnimating(false)
+            }
         }
         mask.addSublayer(fl)
         fl.add(anim, forKey: "fadeIn")
+    }
+
+    private func setLineFadeAnimating(_ isAnimating: Bool) {
+        guard self._isLineFadeAnimating != isAnimating else { return }
+        self._isLineFadeAnimating = isAnimating
+        self.onAnimationStateChange?(isAnimating)
     }
 
     /// 子类可重写：禁止系统长按复制/粘贴菜单，仅使用自定义 popupMenuItems（如 Bajoseek 回复区）
