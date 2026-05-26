@@ -28,6 +28,8 @@ public enum STMarkdownPlainTextRenderer {
         candidate = STMarkdownStreamingTransforms.trimIncompleteTrailingMarkdownSyntax(in: candidate)
         candidate = STMarkdownStreamingTransforms.trimTrailingIncompleteHtmlTag(in: candidate)
         candidate = STMarkdownStreamingTransforms.sanitizeDanglingInlineMarkdownFragments(in: candidate)
+        candidate = STMarkdownStreamingTransforms.trimIncompleteTrailingEmphasis(in: candidate)
+        candidate = STMarkdownStreamingTransforms.autoCloseTrailingInlineCode(in: candidate)
         if kind == .list {
             candidate = STMarkdownStreamingTransforms.softenTrailingListLeadingDanglingEmphasis(in: candidate)
         }
