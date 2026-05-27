@@ -100,12 +100,20 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
     }
 
     public func renderBlockMath(formula: String, style: STMarkdownStyle) -> NSAttributedString? {
+        // UIScreen.main 仅主线程安全；非主线程时 renderImage 会因主线程守卫返回 nil 走 fallback，
+        // 此处 343 作为兜底（不影响输出，renderImage 返回 nil 后由文本渲染器接管）。
+        let availableWidth: CGFloat
+        if style.renderWidth > 0 {
+            availableWidth = style.renderWidth
+        } else {
+            availableWidth = Thread.isMainThread ? UIScreen.main.bounds.width - 32 : 343
+        }
         guard let image = self.renderImage(
             formula: formula,
             fontSize: max(style.font.pointSize + 2, 18),
             textColor: style.textColor,
             displayMode: true,
-            maximumWidth: 280
+            maximumWidth: availableWidth
         ) else {
             return self.fallbackRenderer.renderBlockMath(formula: formula, style: style)
         }
@@ -138,13 +146,10 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 
 private extension STMarkdownHighFidelityMathRenderer {
     func renderImage(formula: String, fontSize: CGFloat, textColor: UIColor, displayMode: Bool, maximumWidth: CGFloat) -> UIImage? {
-        // MTMathUILabel 是 UIView，layout / layer.render(in:) 都需要在主线程访问。
-        // 上层 `STMarkdownAttributedStringRenderer.render(document:)` 没有 actor 注解，
-        // 后台调度器组装 NSAttributedString 时不能触碰 SwiftMath 的 UIView 渲染路径；
-        // 返回 nil 让调用方走纯 NSAttributedString fallback，而不是在库底层触发 crash。
-        guard Thread.isMainThread else {
-            return nil
-        }
+        // MTMathUILabel 是 UIView，其创建与 layoutIfNeeded() 都必须在主线程。
+        // STMarkdownAttributedStringRenderer.render(document:) 没有 actor 注解，
+        // 可能从后台调度器调用；此处返回 nil 让上层走纯文本 fallback，而非触发 UIKit 警告或 crash。
+        guard Thread.isMainThread else { return nil }
         let normalized = self.normalizedFormula(formula)
         let label = MTMathUILabel()
         label.latex = normalized
@@ -156,30 +161,26 @@ private extension STMarkdownHighFidelityMathRenderer {
         label.contentInsets = displayMode
             ? UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
             : UIEdgeInsets(top: 2, left: 0, bottom: 2, right: 0)
-        label.displayErrorInline = true
+        label.displayErrorInline = false
         let fittingSize = label.sizeThatFits(CGSize(width: maximumWidth, height: .greatestFiniteMagnitude))
-        guard fittingSize.width > 0, fittingSize.height > 0 else {
-            return nil
-        }
+        guard fittingSize.width > 0, fittingSize.height > 0 else { return nil }
         label.frame = CGRect(origin: .zero, size: CGSize(width: ceil(fittingSize.width), height: ceil(fittingSize.height)))
+        label.layoutIfNeeded()
+        guard let displayList = label.displayList else { return nil }
+        let size = label.bounds.size
         let format = UIGraphicsImageRendererFormat.default()
-        let renderer = UIGraphicsImageRenderer(size: label.bounds.size, format: format)
-        let image = renderer.image { context in
-            let cgContext = context.cgContext
-            // MTMathUILabel 内部使用 Core Graphics 坐标系（Y 轴向上）绘制公式。
-            // UIGraphicsImageRenderer 提供的是 UIKit 坐标系（Y 轴向下）。
-            // layer.render(in:) 不会自动处理 isGeometryFlipped=true 导致的坐标翻转，
-            // 因此需要手动翻转 Y 轴，与 SwiftMath 官方 MathImage.asImage() 的做法一致。
-            cgContext.translateBy(x: 0, y: label.bounds.size.height)
-            cgContext.scaleBy(x: 1, y: -1)
-            label.layer.render(in: cgContext)
+        let renderer = UIGraphicsImageRenderer(size: size, format: format)
+        let image = renderer.image { ctx in
+            ctx.cgContext.saveGState()
+            ctx.cgContext.translateBy(x: 0, y: size.height)
+            ctx.cgContext.scaleBy(x: 1, y: -1)
+            displayList.draw(ctx.cgContext)
+            ctx.cgContext.restoreGState()
         }
         return image.size.width > 0 && image.size.height > 0 ? image : nil
     }
 
     func normalizedFormula(_ formula: String) -> String {
-        // Raw-string 字面 `#"\("#` 里的反斜杠是**一个**字面字符。
-        // 早期写成 `#"\\("#` 会去匹配两个反斜杠+括号，对真实 LaTeX 输入永远不会命中。
         formula
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: #"\("#, with: "")
