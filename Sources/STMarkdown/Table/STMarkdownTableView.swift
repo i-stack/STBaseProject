@@ -27,11 +27,7 @@ public final class STMarkdownTableView: UIView {
 
     private let gridLayout: STMarkdownTableGridLayout
     private let collectionView: UICollectionView
-    private let leftGradientLayer = CAGradientLayer()
-    private let rightGradientLayer = CAGradientLayer()
     private let cellInsets = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
-    private let gradientOverlayWidth: CGFloat = 24
-    private let gradientVisibilityThreshold: CGFloat = 1
 
     public init(style: STMarkdownStyle) {
         self.style = style
@@ -39,7 +35,6 @@ public final class STMarkdownTableView: UIView {
         self.collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.gridLayout)
         super.init(frame: .zero)
         self.setupCollectionView()
-        self.setupGradientLayers()
         self.applyStyle()
     }
 
@@ -69,30 +64,12 @@ public final class STMarkdownTableView: UIView {
         }
     }
 
-    private func setupGradientLayers() {
-        self.leftGradientLayer.name = "STMarkdownTableLeftGradient"
-        self.leftGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
-        self.leftGradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
-        self.leftGradientLayer.opacity = 0
-
-        self.rightGradientLayer.name = "STMarkdownTableRightGradient"
-        self.rightGradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
-        self.rightGradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
-        self.rightGradientLayer.opacity = 0
-
-        self.layer.addSublayer(self.leftGradientLayer)
-        self.layer.addSublayer(self.rightGradientLayer)
-    }
-
     private func applyStyle() {
         let borderColor = self.style.tableBorderColor ?? UIColor.separator
         self.collectionView.backgroundColor = borderColor
         self.backgroundColor = borderColor
         self.gridLayout.interItemSpacing = 0.5
         self.gridLayout.lineSpacing = 0.5
-        let overlayColor = (self.style.tableBackgroundColor ?? UIColor.secondarySystemBackground).cgColor
-        self.leftGradientLayer.colors = [overlayColor, UIColor.clear.cgColor]
-        self.rightGradientLayer.colors = [UIColor.clear.cgColor, overlayColor]
     }
 
     public override func layoutSubviews() {
@@ -100,8 +77,6 @@ public final class STMarkdownTableView: UIView {
         if self.collectionView.frame != self.bounds {
             self.collectionView.frame = self.bounds
         }
-        self.layoutGradientLayers()
-        self.updateHorizontalScrollHints()
     }
 
     public override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -163,39 +138,6 @@ public final class STMarkdownTableView: UIView {
         )
     }
 
-    private func layoutGradientLayers() {
-        guard self.bounds.width > 0, self.bounds.height > 0 else { return }
-        self.leftGradientLayer.frame = CGRect(
-            x: 0,
-            y: 0,
-            width: self.gradientOverlayWidth,
-            height: self.bounds.height
-        )
-        self.rightGradientLayer.frame = CGRect(
-            x: self.bounds.width - self.gradientOverlayWidth,
-            y: 0,
-            width: self.gradientOverlayWidth,
-            height: self.bounds.height
-        )
-    }
-
-    private func updateHorizontalScrollHints() {
-        self.collectionView.layoutIfNeeded()
-        let visibleWidth = self.collectionView.bounds.width
-        let scrollableWidth = self.collectionView.contentSize.width
-        let maxOffsetX = max(0, scrollableWidth - visibleWidth)
-
-        guard visibleWidth > 0, maxOffsetX > self.gradientVisibilityThreshold else {
-            self.leftGradientLayer.opacity = 0
-            self.rightGradientLayer.opacity = 0
-            return
-        }
-
-        let offsetX = min(max(self.collectionView.contentOffset.x, 0), maxOffsetX)
-        self.leftGradientLayer.opacity = offsetX > self.gradientVisibilityThreshold ? 1 : 0
-        self.rightGradientLayer.opacity = offsetX < (maxOffsetX - self.gradientVisibilityThreshold) ? 1 : 0
-    }
-
     @objc private func handleExpandGesture(_ gestureRecognizer: UILongPressGestureRecognizer) {
         guard gestureRecognizer.state == .began else { return }
         self.expandTableIfPossible()
@@ -208,10 +150,6 @@ public final class STMarkdownTableView: UIView {
 }
 
 extension STMarkdownTableView: UICollectionViewDelegate {
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        self.updateHorizontalScrollHints()
-    }
-
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: false)
         guard let tableData,
