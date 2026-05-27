@@ -189,5 +189,10 @@ private extension STMarkdownHighFidelityMathRenderer {
             .replacingOccurrences(of: #"\]"#, with: "")
             .replacingOccurrences(of: #"\'"#, with: "'")
             .replacingOccurrences(of: #"\|"#, with: "|")
+            // SwiftMath does not support align/align* — map to its equivalent `aligned`
+            .replacingOccurrences(of: #"\begin{align*}"#, with: #"\begin{aligned}"#)
+            .replacingOccurrences(of: #"\end{align*}"#, with: #"\end{aligned}"#)
+            .replacingOccurrences(of: #"\begin{align}"#, with: #"\begin{aligned}"#)
+            .replacingOccurrences(of: #"\end{align}"#, with: #"\end{aligned}"#)
     }
 }
