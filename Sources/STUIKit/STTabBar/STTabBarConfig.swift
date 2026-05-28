@@ -39,6 +39,10 @@ public struct STTabBarConfig {
     public var selectedScale: CGFloat
     /// 未选中项透明度
     public var unselectedAlpha: CGFloat
+    /// 图文布局区域顶部偏移（从 TabBar 顶部算起，通常等于背景图视觉内容区上沿距顶距离；0 = 全高居中）
+    public var itemLayoutAreaTopInset: CGFloat
+    /// 图文布局区域底部边距（从 TabBar 底部算起，通常等于背景图视觉内容区下沿距底距离；0 = 全高居中）
+    public var itemLayoutAreaBottomInset: CGFloat
 
     public init(
         backgroundColor: UIColor = .systemBackground,
@@ -55,7 +59,9 @@ public struct STTabBarConfig {
         enableAnimation: Bool = true,
         animationDuration: TimeInterval = 0.3,
         selectedScale: CGFloat = 1.1,
-        unselectedAlpha: CGFloat = 0.7
+        unselectedAlpha: CGFloat = 0.7,
+        itemLayoutAreaTopInset: CGFloat = 0,
+        itemLayoutAreaBottomInset: CGFloat = 0
     ) {
         self.backgroundColor = backgroundColor
         self.backgroundImage = backgroundImage
@@ -72,5 +78,7 @@ public struct STTabBarConfig {
         self.animationDuration = animationDuration
         self.selectedScale = selectedScale
         self.unselectedAlpha = unselectedAlpha
+        self.itemLayoutAreaTopInset = itemLayoutAreaTopInset
+        self.itemLayoutAreaBottomInset = itemLayoutAreaBottomInset
     }
 }

@@ -195,7 +195,10 @@ public class STTabBarItemView: UIView {
         let baseH = model.layout.imageSize?.height ?? 24
         let titleH = self.titleLineHeight(for: model)
         let contentH = baseH + ImageAndTextMetrics.titleGap + titleH
-        let top = max(0, floor((barH - contentH) / 2))
+        let areaTop = self.config?.itemLayoutAreaTopInset ?? 0
+        let areaBottom = barH - (self.config?.itemLayoutAreaBottomInset ?? 0)
+        let usableH = max(contentH, areaBottom - areaTop)
+        let top = areaTop + max(0, floor((usableH - contentH) / 2))
         var iconW = baseW
         var iconH = baseH
         if top + iconH + ImageAndTextMetrics.titleGap + titleH > barH {
