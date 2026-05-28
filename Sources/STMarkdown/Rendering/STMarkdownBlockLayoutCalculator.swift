@@ -16,7 +16,7 @@ public enum STMarkdownBlockLayoutCalculator {
         style: STMarkdownStyle
     ) -> CGFloat {
         if isTableAdjacent(previousBlock: previousBlock, nextBlock: nextBlock) {
-            return 18
+            return style.blockSpacing
         }
         if case .heading = nextBlock {
             // Heading 的 paragraphSpacingBefore/paragraphSpacing 已编码了上下留白，

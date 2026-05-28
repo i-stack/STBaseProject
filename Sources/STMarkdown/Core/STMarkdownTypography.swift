@@ -34,7 +34,7 @@ public enum STMarkdownTypography {
     }
 
     public static func headingInsets(for level: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
+        return UIEdgeInsets(top: 18, left: 0, bottom: 18, right: 0)
     }
 
     public static func headingParagraphStyle(level: Int, font: UIFont, style: STMarkdownStyle) -> NSMutableParagraphStyle {
