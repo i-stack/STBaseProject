@@ -49,28 +49,31 @@ public enum STMarkdownMathNormalizer {
             }
 
             if trimmed.hasPrefix("$$") {
+                let indent = String(line.prefix(while: { $0 == " " || $0 == "\t" }))
                 let result = consumeDollarMathBlock(from: lines, start: index)
                 let currentIndex = mathMap.count
                 mathMap[currentIndex] = result.content.trimmingCharacters(in: .whitespacesAndNewlines)
                 output.append("")
-                output.append("{{ST_MATH_BLOCK:\(currentIndex)}}")
+                output.append(indent + "{{ST_MATH_BLOCK:\(currentIndex)}}")
                 output.append("")
                 index = result.nextIndex
                 continue
             }
 
             if trimmed.hasPrefix(#"\["#) {
+                let indent = String(line.prefix(while: { $0 == " " || $0 == "\t" }))
                 let result = consumeBracketMathBlock(from: lines, start: index)
                 let currentIndex = mathMap.count
                 mathMap[currentIndex] = result.content.trimmingCharacters(in: .whitespacesAndNewlines)
                 output.append("")
-                output.append("{{ST_MATH_BLOCK:\(currentIndex)}}")
+                output.append(indent + "{{ST_MATH_BLOCK:\(currentIndex)}}")
                 output.append("")
                 index = result.nextIndex
                 continue
             }
 
             if let environment = environmentName(from: trimmed) {
+                let indent = String(line.prefix(while: { $0 == " " || $0 == "\t" }))
                 let result = consumeEnvironmentMathBlock(
                     from: lines,
                     start: index,
@@ -79,7 +82,7 @@ public enum STMarkdownMathNormalizer {
                 let currentIndex = mathMap.count
                 mathMap[currentIndex] = result.content.trimmingCharacters(in: .whitespacesAndNewlines)
                 output.append("")
-                output.append("{{ST_MATH_BLOCK:\(currentIndex)}}")
+                output.append(indent + "{{ST_MATH_BLOCK:\(currentIndex)}}")
                 output.append("")
                 index = result.nextIndex
                 continue

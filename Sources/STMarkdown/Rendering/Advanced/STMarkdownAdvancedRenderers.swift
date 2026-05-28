@@ -100,8 +100,6 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
     }
 
     public func renderBlockMath(formula: String, style: STMarkdownStyle) -> NSAttributedString? {
-        // UIScreen.main 仅主线程安全；非主线程时 renderImage 会因主线程守卫返回 nil 走 fallback，
-        // 此处 343 作为兜底（不影响输出，renderImage 返回 nil 后由文本渲染器接管）。
         let availableWidth: CGFloat
         if style.renderWidth > 0 {
             availableWidth = style.renderWidth
@@ -120,11 +118,18 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 
         let attachment = NSTextAttachment()
         attachment.image = image
-        attachment.bounds = CGRect(origin: .zero, size: image.size)
+        // Scale down to fit when SwiftMath returns an image wider than the available container
+        // width (e.g. aligned rows with long \text{} content).  Scaling only the attachment
+        // bounds works because UIKit draws the image to fit those bounds.
+        let scale: CGFloat = image.size.width > availableWidth && availableWidth > 0
+            ? availableWidth / image.size.width
+            : 1.0
+        let displaySize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        attachment.bounds = CGRect(origin: .zero, size: displaySize)
 
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.minimumLineHeight = max(style.lineHeight, image.size.height)
-        paragraphStyle.maximumLineHeight = max(style.lineHeight, image.size.height)
+        paragraphStyle.minimumLineHeight = max(style.lineHeight, displaySize.height)
+        paragraphStyle.maximumLineHeight = max(style.lineHeight, displaySize.height)
         paragraphStyle.paragraphSpacing = style.paragraphSpacing
         paragraphStyle.paragraphSpacingBefore = style.lineHeight / 2
         paragraphStyle.alignment = .center
@@ -146,38 +151,20 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 
 private extension STMarkdownHighFidelityMathRenderer {
     func renderImage(formula: String, fontSize: CGFloat, textColor: UIColor, displayMode: Bool, maximumWidth: CGFloat) -> UIImage? {
-        // MTMathUILabel 是 UIView，其创建与 layoutIfNeeded() 都必须在主线程。
-        // STMarkdownAttributedStringRenderer.render(document:) 没有 actor 注解，
-        // 可能从后台调度器调用；此处返回 nil 让上层走纯文本 fallback，而非触发 UIKit 警告或 crash。
-        guard Thread.isMainThread else { return nil }
         let normalized = self.normalizedFormula(formula)
-        let label = MTMathUILabel()
-        label.latex = normalized
-        label.fontSize = fontSize
-        label.textColor = textColor
-        label.backgroundColor = .clear
-        label.labelMode = displayMode ? .display : .text
-        label.textAlignment = displayMode ? .center : .left
-        label.contentInsets = displayMode
+        let mathImage = MTMathImage(
+            latex: normalized,
+            fontSize: max(fontSize, 10),
+            textColor: textColor,
+            labelMode: displayMode ? .display : .text,
+            textAlignment: displayMode ? .center : .left
+        )
+        mathImage.contentInsets = displayMode
             ? UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
             : UIEdgeInsets(top: 2, left: 0, bottom: 2, right: 0)
-        label.displayErrorInline = false
-        let fittingSize = label.sizeThatFits(CGSize(width: maximumWidth, height: .greatestFiniteMagnitude))
-        guard fittingSize.width > 0, fittingSize.height > 0 else { return nil }
-        label.frame = CGRect(origin: .zero, size: CGSize(width: ceil(fittingSize.width), height: ceil(fittingSize.height)))
-        label.layoutIfNeeded()
-        guard let displayList = label.displayList else { return nil }
-        let size = label.bounds.size
-        let format = UIGraphicsImageRendererFormat.default()
-        let renderer = UIGraphicsImageRenderer(size: size, format: format)
-        let image = renderer.image { ctx in
-            ctx.cgContext.saveGState()
-            ctx.cgContext.translateBy(x: 0, y: size.height)
-            ctx.cgContext.scaleBy(x: 1, y: -1)
-            displayList.draw(ctx.cgContext)
-            ctx.cgContext.restoreGState()
-        }
-        return image.size.width > 0 && image.size.height > 0 ? image : nil
+        let (_, image) = mathImage.asImage()
+        guard let image, image.size.width > 0, image.size.height > 0 else { return nil }
+        return image
     }
 
     func normalizedFormula(_ formula: String) -> String {

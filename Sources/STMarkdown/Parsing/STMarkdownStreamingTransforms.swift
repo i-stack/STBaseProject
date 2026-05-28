@@ -761,15 +761,21 @@ public enum STMarkdownStreamingTransforms {
 
     private static func countUnescapedOccurrences(of token: String, in text: String) -> Int {
         guard !token.isEmpty else { return 0 }
+        let scalars = Array(text.unicodeScalars)
+        let tokenScalars = Array(token.unicodeScalars)
+        guard tokenScalars.count <= scalars.count else { return 0 }
+
         var count = 0
-        var searchStart = text.startIndex
-        while let range = text.range(of: token, range: searchStart..<text.endIndex) {
-            let escaped = range.lowerBound > text.startIndex
-                && text[text.index(before: range.lowerBound)] == "\\"
-            if !escaped {
+        var index = 0
+        while index <= scalars.count - tokenScalars.count {
+            let escaped = index > 0 && scalars[index - 1] == "\\"
+            let matches = !escaped && zip(scalars[index..<(index + tokenScalars.count)], tokenScalars).allSatisfy(==)
+            if matches {
                 count += 1
+                index += tokenScalars.count
+            } else {
+                index += 1
             }
-            searchStart = range.upperBound
         }
         return count
     }
