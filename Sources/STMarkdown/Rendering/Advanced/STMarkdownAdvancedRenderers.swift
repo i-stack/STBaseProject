@@ -168,7 +168,7 @@ private extension STMarkdownHighFidelityMathRenderer {
     }
 
     func normalizedFormula(_ formula: String) -> String {
-        formula
+        var result = formula
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: #"\("#, with: "")
             .replacingOccurrences(of: #"\)"#, with: "")
@@ -181,5 +181,52 @@ private extension STMarkdownHighFidelityMathRenderer {
             .replacingOccurrences(of: #"\end{align*}"#, with: #"\end{aligned}"#)
             .replacingOccurrences(of: #"\begin{align}"#, with: #"\begin{aligned}"#)
             .replacingOccurrences(of: #"\end{align}"#, with: #"\end{aligned}"#)
+        // SwiftMath uses Latin Modern math fonts which have no CJK glyphs. When CJK characters
+        // appear inside \text{...}, SwiftMath computes zero/incorrect advance widths for those
+        // glyphs, causing the bitmap to be allocated too narrow and clipping any content that
+        // follows (e.g. "(x-1)" appears as "(x-"). Strip CJK scalars from \text{} content so
+        // SwiftMath gets a clean layout; the surrounding math renders correctly.
+        result = Self.stripCJKFromTextCommands(in: result)
+        return result
+    }
+
+    // MARK: - CJK sanitisation
+
+    private static let textCommandRegex: NSRegularExpression = {
+        // Matches \text{ ... } with non-greedy content, stopping at the first unmatched }
+        // Simple one-level: \text{[^}]*}
+        (try? NSRegularExpression(pattern: #"\\text\{([^}]*)\}"#)) ?? NSRegularExpression()
+    }()
+
+    private static func stripCJKFromTextCommands(in formula: String) -> String {
+        guard formula.unicodeScalars.contains(where: { isCJKScalar($0) }) else { return formula }
+        let ns = formula as NSString
+        let matches = textCommandRegex.matches(in: formula, range: NSRange(location: 0, length: ns.length))
+        guard !matches.isEmpty else { return formula }
+        var result = formula
+        for match in matches.reversed() {
+            guard match.numberOfRanges >= 2 else { continue }
+            let contentRange = match.range(at: 1)
+            let content = ns.substring(with: contentRange)
+            let stripped = String(content.unicodeScalars.filter { !isCJKScalar($0) })
+            guard stripped != content else { continue }
+            // If what remains after stripping is only whitespace or empty, wipe the
+            // whole \text{...} command to avoid leaving a meaningless residual token.
+            let residual = stripped.trimmingCharacters(in: .whitespaces)
+            let replacement = residual.isEmpty ? "" : stripped
+            result = (result as NSString).replacingCharacters(in: match.range, with: "\\text{\(replacement)}")
+        }
+        return result
+    }
+
+    private static func isCJKScalar(_ scalar: Unicode.Scalar) -> Bool {
+        let v = scalar.value
+        return (0x4E00...0x9FFF).contains(v)    // CJK Unified Ideographs
+            || (0x3400...0x4DBF).contains(v)    // CJK Extension A
+            || (0x20000...0x2A6DF).contains(v)  // CJK Extension B
+            || (0x3000...0x303F).contains(v)    // CJK Symbols and Punctuation
+            || (0xFF00...0xFFEF).contains(v)    // Halfwidth/Fullwidth Forms
+            || (0x3040...0x309F).contains(v)    // Hiragana
+            || (0x30A0...0x30FF).contains(v)    // Katakana
     }
 }

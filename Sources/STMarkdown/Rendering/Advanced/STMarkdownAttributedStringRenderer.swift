@@ -789,6 +789,9 @@ private extension STMarkdownAttributedStringRenderer {
         after previousBlock: STMarkdownRenderBlock,
         before nextBlock: STMarkdownRenderBlock
     ) -> CGFloat {
+        if STMarkdownBlockLayoutCalculator.isTableAdjacent(previousBlock: previousBlock, nextBlock: nextBlock) {
+            return 18
+        }
         let trailingSpacing = self.trailingBlockSpacing(for: previousBlock)
         let leadingSpacing = self.leadingBlockSpacing(for: nextBlock)
         return max(max(trailingSpacing, leadingSpacing), 1)

@@ -15,6 +15,9 @@ public enum STMarkdownBlockLayoutCalculator {
         before nextBlock: STMarkdownRenderBlock,
         style: STMarkdownStyle
     ) -> CGFloat {
+        if isTableAdjacent(previousBlock: previousBlock, nextBlock: nextBlock) {
+            return 18
+        }
         if case .heading = nextBlock {
             // Heading 的 paragraphSpacingBefore/paragraphSpacing 已编码了上下留白，
             // 分隔符 "\n" 只是终止上一段，minimumLineHeight 对此无视觉效果，取最小值 1pt。
@@ -64,6 +67,18 @@ public enum STMarkdownBlockLayoutCalculator {
             return style.blockSpacing
         case .paragraph:
             return style.blockSpacing
+        }
+    }
+
+    public static func isTableAdjacent(
+        previousBlock: STMarkdownRenderBlock,
+        nextBlock: STMarkdownRenderBlock
+    ) -> Bool {
+        switch (previousBlock, nextBlock) {
+        case (.table, _), (_, .table):
+            return true
+        default:
+            return false
         }
     }
 
