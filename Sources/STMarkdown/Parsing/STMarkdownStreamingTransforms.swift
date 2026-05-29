@@ -95,6 +95,14 @@ public enum STMarkdownStreamingTransforms {
         pattern: #"^([ \t]{0,3})(\d+)\.\s+(.+)$"#,
         options: []
     )
+    private static let flattenedUnorderedListLineRegex = try! NSRegularExpression(
+        pattern: #"^([ \t]{0,3})[•◦▪]\s+(.+)$"#,
+        options: []
+    )
+    private static let flattenedOrderedListLineRegex = try! NSRegularExpression(
+        pattern: #"^([ \t]{0,3})(\d+)\)\s+(.+)$"#,
+        options: []
+    )
     private static let headingLineRegex = try! NSRegularExpression(
         pattern: #"^([ \t]{0,3})#{1,6}[ \t]+(.+)$"#,
         options: []
@@ -905,6 +913,46 @@ public enum STMarkdownStreamingTransforms {
             if Self.orderedListLineRegex.firstMatch(in: line, options: [], range: range) != nil {
                 output.append(Self.orderedListLineRegex.stringByReplacingMatches(
                     in: line, options: [], range: range, withTemplate: "$1$2) $3"
+                ))
+                continue
+            }
+            output.append(line)
+        }
+        return output.joined(separator: "\n")
+    }
+
+    /// Reverse of ``flattenStreamingListSyntax``: converts Unicode bullet symbols and N) markers
+    /// back to standard Markdown list syntax (`-` and `N.`) so that the STMarkdown parser
+    /// correctly identifies nested list items rather than treating them as plain-text continuations.
+    ///
+    /// Only lines with 0–3 leading spaces are processed, matching the same constraint used during
+    /// flattening. Code fences are passed through unchanged.
+    public static func unflattenStreamingListSyntax(in text: String) -> String {
+        guard !text.isEmpty else { return text }
+        var inFencedCodeBlock = false
+        var fenceToken: String?
+        var output: [String] = []
+        let lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        output.reserveCapacity(lines.count)
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
+                let token = String(trimmed.prefix(3))
+                if !inFencedCodeBlock { inFencedCodeBlock = true; fenceToken = token }
+                else if fenceToken == token { inFencedCodeBlock = false; fenceToken = nil }
+                output.append(line); continue
+            }
+            if inFencedCodeBlock { output.append(line); continue }
+            let range = NSRange(location: 0, length: (line as NSString).length)
+            if Self.flattenedUnorderedListLineRegex.firstMatch(in: line, options: [], range: range) != nil {
+                output.append(Self.flattenedUnorderedListLineRegex.stringByReplacingMatches(
+                    in: line, options: [], range: range, withTemplate: "$1- $2"
+                ))
+                continue
+            }
+            if Self.flattenedOrderedListLineRegex.firstMatch(in: line, options: [], range: range) != nil {
+                output.append(Self.flattenedOrderedListLineRegex.stringByReplacingMatches(
+                    in: line, options: [], range: range, withTemplate: "$1$2. $3"
                 ))
                 continue
             }

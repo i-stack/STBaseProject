@@ -16,7 +16,7 @@ public enum STMarkdownStreamingTextStabilizer {
             || trimmedLine.hasPrefix("▪ ") {
             return true
         }
-        return trimmedLine.range(of: #"^\d+(?:\.|）)\s+"#, options: .regularExpression) != nil
+        return trimmedLine.range(of: #"^\d+(?:\.|[)）])\s+"#, options: .regularExpression) != nil
     }
 
     public static func endsWithOrderedListLine(_ text: String) -> Bool {
@@ -27,16 +27,20 @@ public enum STMarkdownStreamingTextStabilizer {
             return false
         }
         let trimmed = lastNonEmpty.trimmingCharacters(in: .whitespaces)
-        guard let dotIndex = trimmed.firstIndex(of: "."),
-              dotIndex > trimmed.startIndex else {
-            return false
+        // Check both "1. " (standard) and "1) " (flattened-streaming form from flattenStreamingListSyntax)
+        for separator: Character in [".", ")"] {
+            guard let sepIndex = trimmed.firstIndex(of: separator),
+                  sepIndex > trimmed.startIndex else {
+                continue
+            }
+            let digits = trimmed[..<sepIndex]
+            guard !digits.isEmpty, digits.allSatisfy(\.isNumber) else {
+                continue
+            }
+            let suffix = trimmed[trimmed.index(after: sepIndex)...]
+            if suffix.first?.isWhitespace == true { return true }
         }
-        let digits = trimmed[..<dotIndex]
-        guard !digits.isEmpty, digits.allSatisfy(\.isNumber) else {
-            return false
-        }
-        let suffix = trimmed[trimmed.index(after: dotIndex)...]
-        return suffix.first?.isWhitespace == true
+        return false
     }
 
     public static func autoCloseTrailingListLineEmphasis(in line: String) -> String {
