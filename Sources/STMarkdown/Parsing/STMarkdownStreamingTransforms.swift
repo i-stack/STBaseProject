@@ -470,7 +470,8 @@ public enum STMarkdownStreamingTransforms {
             }
             guard !checkLines.isEmpty else { continue }
             let joined = checkLines.joined(separator: "\n")
-            let trimmed = Self.trimUnpairedTrailingMarker(in: joined, marker: marker, markerLen: markerLen)
+            let maskedJoined = Self.maskInlineMathContent(joined)
+            let trimmed = Self.trimUnpairedTrailingMarker(in: maskedJoined, marker: marker, markerLen: markerLen)
             if trimmed.count < joined.count {
                 let afterMarkerOffset = trimmed.count + markerLen
                 let hasContentAfterMarker: Bool
@@ -711,6 +712,59 @@ public enum STMarkdownStreamingTransforms {
             }
         }
         return false
+    }
+
+    // Replaces the content (not the delimiters) of complete \(...\) and \[...\] math spans with
+    // space characters of the same length. This prevents _ or * inside LaTeX from being counted
+    // as emphasis markers when scanning for unpaired markers.
+    private static func maskInlineMathContent(_ text: String) -> String {
+        var result = ""
+        var i = text.startIndex
+        while i < text.endIndex {
+            guard text[i] == "\\" else {
+                result.append(text[i])
+                i = text.index(after: i)
+                continue
+            }
+            let next = text.index(after: i)
+            guard next < text.endIndex else {
+                result.append(text[i])
+                i = next
+                continue
+            }
+            let nextChar = text[next]
+            guard nextChar == "(" || nextChar == "[" else {
+                result.append(text[i])
+                i = text.index(after: i)
+                continue
+            }
+            let closeChar: Character = nextChar == "(" ? ")" : "]"
+            let afterDelim = text.index(after: next)
+            var j = afterDelim
+            var found = false
+            while j < text.endIndex {
+                if text[j] == "\\" {
+                    let k = text.index(after: j)
+                    if k < text.endIndex && text[k] == closeChar {
+                        let contentLen = text.distance(from: afterDelim, to: j)
+                        result.append("\\")
+                        result.append(nextChar)
+                        result += String(repeating: " ", count: contentLen)
+                        result.append("\\")
+                        result.append(closeChar)
+                        i = text.index(after: k)
+                        found = true
+                        break
+                    }
+                }
+                j = text.index(after: j)
+            }
+            if !found {
+                result.append(text[i])
+                i = text.index(after: i)
+            }
+        }
+        return result
     }
 
     private static func trimUnpairedTrailingMarker(in line: String, marker: String, markerLen: Int) -> String {

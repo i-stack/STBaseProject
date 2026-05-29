@@ -113,6 +113,10 @@ public enum STMarkdownMathNormalizer {
         result = result.replacingOccurrences(of: "⦅ST_LATEX_PAREN_CLOSE⦆", with: #"\)"#)
         result = result.replacingOccurrences(of: "⦅ST_LATEX_BRACKET_OPEN⦆", with: #"\["#)
         result = result.replacingOccurrences(of: "⦅ST_LATEX_BRACKET_CLOSE⦆", with: #"\]"#)
+        result = result.replacingOccurrences(of: "⦅ST_MATH_LBRACKET⦆", with: "[")
+        result = result.replacingOccurrences(of: "⦅ST_MATH_RBRACKET⦆", with: "]")
+        result = result.replacingOccurrences(of: "⦅ST_MATH_ASTERISK⦆", with: "*")
+        result = result.replacingOccurrences(of: "⦅ST_MATH_BACKTICK⦆", with: "`")
         return result
     }
 
@@ -122,6 +126,71 @@ public enum STMarkdownMathNormalizer {
         result = result.replacingOccurrences(of: #"\)"#, with: "⦅ST_LATEX_PAREN_CLOSE⦆")
         result = result.replacingOccurrences(of: #"\["#, with: "⦅ST_LATEX_BRACKET_OPEN⦆")
         result = result.replacingOccurrences(of: #"\]"#, with: "⦅ST_LATEX_BRACKET_CLOSE⦆")
+        result = protectMarkdownCharsInsideMath(in: result)
+        return result
+    }
+
+    /// 在 `applyInlineSentinels` 已经把 `\(...\)` / `\[...\]` 定界符替换成 sentinel 之后，
+    /// 把 sentinel 包裹的数学区段内部仍为字面量的 `[`、`]`、`*`、`` ` `` 也换成 sentinel。
+    ///
+    /// 不处理这一步时，例如 `\(\sum_{k=1}^n k^3 = \left[\frac{n(n+1)}{2}\right]^2\)`，
+    /// 数学内部的 `[\frac{n(n+1)}{2}\right]` 会被 swift-markdown 识别为
+    /// shortcut reference link，从而拆掉 Text 节点 + 吃掉中括号，后续
+    /// `splitInlineMath` 拿不到完整的 `\(...\)` 配对，整段公式退化为纯文本。
+    ///
+    /// `_` 不需要保护：LaTeX 中 `_` 多为 intraword (`k_n`) 或紧跟标点 (`_{...`)，
+    /// 都不满足 CommonMark left-flanking 条件，无法打开 emphasis。
+    private static func protectMarkdownCharsInsideMath(in text: String) -> String {
+        let openParen = "⦅ST_LATEX_PAREN_OPEN⦆"
+        let closeParen = "⦅ST_LATEX_PAREN_CLOSE⦆"
+        let openBracket = "⦅ST_LATEX_BRACKET_OPEN⦆"
+        let closeBracket = "⦅ST_LATEX_BRACKET_CLOSE⦆"
+
+        var result = ""
+        var cursor = text.startIndex
+
+        while cursor < text.endIndex {
+            let tail = text[cursor...]
+            let parenOpen = tail.range(of: openParen)
+            let bracketOpen = tail.range(of: openBracket)
+
+            let nextOpen: (Range<String.Index>, String)?
+            switch (parenOpen, bracketOpen) {
+            case let (p?, b?):
+                nextOpen = p.lowerBound < b.lowerBound ? (p, closeParen) : (b, closeBracket)
+            case let (p?, nil):
+                nextOpen = (p, closeParen)
+            case let (nil, b?):
+                nextOpen = (b, closeBracket)
+            case (nil, nil):
+                nextOpen = nil
+            }
+
+            guard let (openRange, closingSentinel) = nextOpen else {
+                result += String(tail)
+                break
+            }
+
+            result += String(text[cursor..<openRange.upperBound])
+            cursor = openRange.upperBound
+
+            guard let closeRange = text[cursor...].range(of: closingSentinel) else {
+                // 未闭合的数学块（流式中段）：不强行保护，保持现有行为
+                result += String(text[cursor...])
+                break
+            }
+
+            let mathContent = text[cursor..<closeRange.lowerBound]
+            let protected = String(mathContent)
+                .replacingOccurrences(of: "[", with: "⦅ST_MATH_LBRACKET⦆")
+                .replacingOccurrences(of: "]", with: "⦅ST_MATH_RBRACKET⦆")
+                .replacingOccurrences(of: "*", with: "⦅ST_MATH_ASTERISK⦆")
+                .replacingOccurrences(of: "`", with: "⦅ST_MATH_BACKTICK⦆")
+            result += protected
+            result += closingSentinel
+            cursor = closeRange.upperBound
+        }
+
         return result
     }
 
