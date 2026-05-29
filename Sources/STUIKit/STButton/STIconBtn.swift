@@ -173,6 +173,8 @@ open class STIconBtn: STBtn {
     }
 
     open override func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
+        super.refineButtonConfiguration(button, configuration: &config)
+
         let icon = self.iconContentInsets
         // `iconContentInsets` 以绝对值语义写入 `config.contentInsets`。
         // 如需在此之上额外叠加自定义 padding，请通过 `onConfigurationUpdate` 修改传入的 `config.contentInsets`；
@@ -197,7 +199,5 @@ open class STIconBtn: STBtn {
             config.imagePlacement = .bottom
         }
         config.imagePadding = (hasImage && hasTitle) ? self.spacing : 0
-
-        super.refineButtonConfiguration(button, configuration: &config)
     }
 }
