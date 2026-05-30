@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name = 'STBaseProject'
-  s.version = '1.3.0'
+  s.version = '1.4.0'
   s.summary = 'Modular iOS foundation: MVVM bases, networking, security, UIKit, Markdown, localization (SPM & CocoaPods).'
   s.description = <<-DESC
     STBaseProject is an iOS 16+ modular foundation toolkit distributed via CocoaPods subspecs and Swift Package Manager.

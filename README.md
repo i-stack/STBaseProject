@@ -38,7 +38,7 @@ STBaseProject 是一个功能强大的 iOS 基础组件库，提供了丰富的 
 在 `Podfile` 中添加：
 
 ```ruby
-pod 'STBaseProject', '~> 1.3.0'
+pod 'STBaseProject', '~> 1.4.0'
 ```
 
 然后执行：
@@ -57,7 +57,7 @@ pod install
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.3.0")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.4.0")
 ]
 ```
 
@@ -85,7 +85,7 @@ dependencies: [
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.3.0")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.4.0")
 ],
 targets: [
     .target(
@@ -105,16 +105,16 @@ targets: [
 
 ```ruby
 # 默认：仅核心（等价于 default_subspecs）
-pod 'STBaseProject', '~> 1.3.0'
+pod 'STBaseProject', '~> 1.4.0'
 
 # 核心 + 定位（按需把 STContacts、STMedia、STMarkdown 加入数组即可）
-pod 'STBaseProject', '~> 1.3.0', :subspecs => ['STBaseProject', 'STLocation']
+pod 'STBaseProject', '~> 1.4.0', :subspecs => ['STBaseProject', 'STLocation']
 
 # 核心 + 多个扩展示例
-# pod 'STBaseProject', '~> 1.3.0', :subspecs => ['STBaseProject', 'STLocation', 'STContacts', 'STMedia']
+# pod 'STBaseProject', '~> 1.4.0', :subspecs => ['STBaseProject', 'STLocation', 'STContacts', 'STMedia']
 
 # 仅安装某个扩展、不要核心（一般少见；扩展模块不依赖核心时可单独拉取）
-# pod 'STBaseProject/STLocation', '~> 1.3.0'
+# pod 'STBaseProject/STLocation', '~> 1.4.0'
 ```
 
 <a id="privacy-permissions"></a>
@@ -275,13 +275,13 @@ README 仅保留能力概览与模块入口。
 仓库内提供自动发布脚本：
 
 ```bash
-./scripts/release_pod.sh 1.1.6
+./scripts/release_pod.sh 1.4.0
 ```
 
 推荐（自动创建并推送同名 tag）：
 
 ```bash
-./scripts/release_pod.sh 1.1.6 --tag --push-tag
+./scripts/release_pod.sh 1.4.0 --tag --push-tag
 ```
 
 脚本会按顺序执行：
