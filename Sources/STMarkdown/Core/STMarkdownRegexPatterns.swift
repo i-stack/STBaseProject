@@ -190,6 +190,14 @@ public enum STMarkdownCitationRegex {
         pattern: #"\[[^\]]+\]\([^)]+\)\s*(\[(?i:citation)\s*:?\s*\d+\])"#,
         owner: "STMarkdownCitationRegex.linkCitationDeduplicate"
     )
+
+    /// 将 1–20 的正整数转为对应的 Unicode 带圆圈数字字符（① ② … ⑳）。
+    /// 超出范围（或非正整数）返回 nil。
+    public static func circledNumberText(for number: String) -> String? {
+        guard let value = Int(number), value > 0, value <= 20 else { return nil }
+        guard let scalar = UnicodeScalar(0x2460 + value - 1) else { return nil }
+        return String(Character(scalar))
+    }
 }
 
 public enum STMarkdownStreamingRegex {

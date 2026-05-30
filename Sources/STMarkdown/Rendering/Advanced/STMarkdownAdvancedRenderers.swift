@@ -100,23 +100,36 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
     }
 
     public func renderBlockMath(formula: String, style: STMarkdownStyle) -> NSAttributedString? {
+        let availableWidth: CGFloat
+        if style.renderWidth > 0 {
+            availableWidth = style.renderWidth
+        } else {
+            availableWidth = Thread.isMainThread ? UIScreen.main.bounds.width - 32 : 343
+        }
         guard let image = self.renderImage(
             formula: formula,
             fontSize: max(style.font.pointSize + 2, 18),
             textColor: style.textColor,
             displayMode: true,
-            maximumWidth: 280
+            maximumWidth: availableWidth
         ) else {
             return self.fallbackRenderer.renderBlockMath(formula: formula, style: style)
         }
 
         let attachment = NSTextAttachment()
         attachment.image = image
-        attachment.bounds = CGRect(origin: .zero, size: image.size)
+        // Scale down to fit when SwiftMath returns an image wider than the available container
+        // width (e.g. aligned rows with long \text{} content).  Scaling only the attachment
+        // bounds works because UIKit draws the image to fit those bounds.
+        let scale: CGFloat = image.size.width > availableWidth && availableWidth > 0
+            ? availableWidth / image.size.width
+            : 1.0
+        let displaySize = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        attachment.bounds = CGRect(origin: .zero, size: displaySize)
 
         let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.minimumLineHeight = max(style.lineHeight, image.size.height)
-        paragraphStyle.maximumLineHeight = max(style.lineHeight, image.size.height)
+        paragraphStyle.minimumLineHeight = max(style.lineHeight, displaySize.height)
+        paragraphStyle.maximumLineHeight = max(style.lineHeight, displaySize.height)
         paragraphStyle.paragraphSpacing = style.paragraphSpacing
         paragraphStyle.paragraphSpacingBefore = style.lineHeight / 2
         paragraphStyle.alignment = .center
@@ -138,49 +151,24 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 
 private extension STMarkdownHighFidelityMathRenderer {
     func renderImage(formula: String, fontSize: CGFloat, textColor: UIColor, displayMode: Bool, maximumWidth: CGFloat) -> UIImage? {
-        // MTMathUILabel 是 UIView，layout / layer.render(in:) 都需要在主线程访问。
-        // 上层 `STMarkdownAttributedStringRenderer.render(document:)` 没有 actor 注解，
-        // 后台调度器组装 NSAttributedString 时不能触碰 SwiftMath 的 UIView 渲染路径；
-        // 返回 nil 让调用方走纯 NSAttributedString fallback，而不是在库底层触发 crash。
-        guard Thread.isMainThread else {
-            return nil
-        }
         let normalized = self.normalizedFormula(formula)
-        let label = MTMathUILabel()
-        label.latex = normalized
-        label.fontSize = fontSize
-        label.textColor = textColor
-        label.backgroundColor = .clear
-        label.labelMode = displayMode ? .display : .text
-        label.textAlignment = displayMode ? .center : .left
-        label.contentInsets = displayMode
+        let mathImage = MTMathImage(
+            latex: normalized,
+            fontSize: max(fontSize, 10),
+            textColor: textColor,
+            labelMode: displayMode ? .display : .text,
+            textAlignment: displayMode ? .center : .left
+        )
+        mathImage.contentInsets = displayMode
             ? UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
             : UIEdgeInsets(top: 2, left: 0, bottom: 2, right: 0)
-        label.displayErrorInline = true
-        let fittingSize = label.sizeThatFits(CGSize(width: maximumWidth, height: .greatestFiniteMagnitude))
-        guard fittingSize.width > 0, fittingSize.height > 0 else {
-            return nil
-        }
-        label.frame = CGRect(origin: .zero, size: CGSize(width: ceil(fittingSize.width), height: ceil(fittingSize.height)))
-        let format = UIGraphicsImageRendererFormat.default()
-        let renderer = UIGraphicsImageRenderer(size: label.bounds.size, format: format)
-        let image = renderer.image { context in
-            let cgContext = context.cgContext
-            // MTMathUILabel 内部使用 Core Graphics 坐标系（Y 轴向上）绘制公式。
-            // UIGraphicsImageRenderer 提供的是 UIKit 坐标系（Y 轴向下）。
-            // layer.render(in:) 不会自动处理 isGeometryFlipped=true 导致的坐标翻转，
-            // 因此需要手动翻转 Y 轴，与 SwiftMath 官方 MathImage.asImage() 的做法一致。
-            cgContext.translateBy(x: 0, y: label.bounds.size.height)
-            cgContext.scaleBy(x: 1, y: -1)
-            label.layer.render(in: cgContext)
-        }
-        return image.size.width > 0 && image.size.height > 0 ? image : nil
+        let (_, image) = mathImage.asImage()
+        guard let image, image.size.width > 0, image.size.height > 0 else { return nil }
+        return image
     }
 
     func normalizedFormula(_ formula: String) -> String {
-        // Raw-string 字面 `#"\("#` 里的反斜杠是**一个**字面字符。
-        // 早期写成 `#"\\("#` 会去匹配两个反斜杠+括号，对真实 LaTeX 输入永远不会命中。
-        formula
+        var result = formula
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: #"\("#, with: "")
             .replacingOccurrences(of: #"\)"#, with: "")
@@ -188,5 +176,57 @@ private extension STMarkdownHighFidelityMathRenderer {
             .replacingOccurrences(of: #"\]"#, with: "")
             .replacingOccurrences(of: #"\'"#, with: "'")
             .replacingOccurrences(of: #"\|"#, with: "|")
+            // SwiftMath does not support align/align* — map to its equivalent `aligned`
+            .replacingOccurrences(of: #"\begin{align*}"#, with: #"\begin{aligned}"#)
+            .replacingOccurrences(of: #"\end{align*}"#, with: #"\end{aligned}"#)
+            .replacingOccurrences(of: #"\begin{align}"#, with: #"\begin{aligned}"#)
+            .replacingOccurrences(of: #"\end{align}"#, with: #"\end{aligned}"#)
+        // SwiftMath uses Latin Modern math fonts which have no CJK glyphs. When CJK characters
+        // appear inside \text{...}, SwiftMath computes zero/incorrect advance widths for those
+        // glyphs, causing the bitmap to be allocated too narrow and clipping any content that
+        // follows (e.g. "(x-1)" appears as "(x-"). Strip CJK scalars from \text{} content so
+        // SwiftMath gets a clean layout; the surrounding math renders correctly.
+        result = Self.stripCJKFromTextCommands(in: result)
+        return result
+    }
+
+    // MARK: - CJK sanitisation
+
+    private static let textCommandRegex: NSRegularExpression = {
+        // Matches \text{ ... } with non-greedy content, stopping at the first unmatched }
+        // Simple one-level: \text{[^}]*}
+        (try? NSRegularExpression(pattern: #"\\text\{([^}]*)\}"#)) ?? NSRegularExpression()
+    }()
+
+    private static func stripCJKFromTextCommands(in formula: String) -> String {
+        guard formula.unicodeScalars.contains(where: { isCJKScalar($0) }) else { return formula }
+        let ns = formula as NSString
+        let matches = textCommandRegex.matches(in: formula, range: NSRange(location: 0, length: ns.length))
+        guard !matches.isEmpty else { return formula }
+        var result = formula
+        for match in matches.reversed() {
+            guard match.numberOfRanges >= 2 else { continue }
+            let contentRange = match.range(at: 1)
+            let content = ns.substring(with: contentRange)
+            let stripped = String(content.unicodeScalars.filter { !isCJKScalar($0) })
+            guard stripped != content else { continue }
+            // If what remains after stripping is only whitespace or empty, wipe the
+            // whole \text{...} command to avoid leaving a meaningless residual token.
+            let residual = stripped.trimmingCharacters(in: .whitespaces)
+            let replacement = residual.isEmpty ? "" : stripped
+            result = (result as NSString).replacingCharacters(in: match.range, with: "\\text{\(replacement)}")
+        }
+        return result
+    }
+
+    private static func isCJKScalar(_ scalar: Unicode.Scalar) -> Bool {
+        let v = scalar.value
+        return (0x4E00...0x9FFF).contains(v)    // CJK Unified Ideographs
+            || (0x3400...0x4DBF).contains(v)    // CJK Extension A
+            || (0x20000...0x2A6DF).contains(v)  // CJK Extension B
+            || (0x3000...0x303F).contains(v)    // CJK Symbols and Punctuation
+            || (0xFF00...0xFFEF).contains(v)    // Halfwidth/Fullwidth Forms
+            || (0x3040...0x309F).contains(v)    // Hiragana
+            || (0x30A0...0x30FF).contains(v)    // Katakana
     }
 }

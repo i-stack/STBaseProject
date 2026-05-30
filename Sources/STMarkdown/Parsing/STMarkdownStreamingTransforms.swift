@@ -95,6 +95,14 @@ public enum STMarkdownStreamingTransforms {
         pattern: #"^([ \t]{0,3})(\d+)\.\s+(.+)$"#,
         options: []
     )
+    private static let flattenedUnorderedListLineRegex = try! NSRegularExpression(
+        pattern: #"^([ \t]{0,3})[•◦▪]\s+(.+)$"#,
+        options: []
+    )
+    private static let flattenedOrderedListLineRegex = try! NSRegularExpression(
+        pattern: #"^([ \t]{0,3})(\d+)\)\s+(.+)$"#,
+        options: []
+    )
     private static let headingLineRegex = try! NSRegularExpression(
         pattern: #"^([ \t]{0,3})#{1,6}[ \t]+(.+)$"#,
         options: []
@@ -462,7 +470,8 @@ public enum STMarkdownStreamingTransforms {
             }
             guard !checkLines.isEmpty else { continue }
             let joined = checkLines.joined(separator: "\n")
-            let trimmed = Self.trimUnpairedTrailingMarker(in: joined, marker: marker, markerLen: markerLen)
+            let maskedJoined = Self.maskInlineMathContent(joined)
+            let trimmed = Self.trimUnpairedTrailingMarker(in: maskedJoined, marker: marker, markerLen: markerLen)
             if trimmed.count < joined.count {
                 let afterMarkerOffset = trimmed.count + markerLen
                 let hasContentAfterMarker: Bool
@@ -705,6 +714,59 @@ public enum STMarkdownStreamingTransforms {
         return false
     }
 
+    // Replaces the content (not the delimiters) of complete \(...\) and \[...\] math spans with
+    // space characters of the same length. This prevents _ or * inside LaTeX from being counted
+    // as emphasis markers when scanning for unpaired markers.
+    private static func maskInlineMathContent(_ text: String) -> String {
+        var result = ""
+        var i = text.startIndex
+        while i < text.endIndex {
+            guard text[i] == "\\" else {
+                result.append(text[i])
+                i = text.index(after: i)
+                continue
+            }
+            let next = text.index(after: i)
+            guard next < text.endIndex else {
+                result.append(text[i])
+                i = next
+                continue
+            }
+            let nextChar = text[next]
+            guard nextChar == "(" || nextChar == "[" else {
+                result.append(text[i])
+                i = text.index(after: i)
+                continue
+            }
+            let closeChar: Character = nextChar == "(" ? ")" : "]"
+            let afterDelim = text.index(after: next)
+            var j = afterDelim
+            var found = false
+            while j < text.endIndex {
+                if text[j] == "\\" {
+                    let k = text.index(after: j)
+                    if k < text.endIndex && text[k] == closeChar {
+                        let contentLen = text.distance(from: afterDelim, to: j)
+                        result.append("\\")
+                        result.append(nextChar)
+                        result += String(repeating: " ", count: contentLen)
+                        result.append("\\")
+                        result.append(closeChar)
+                        i = text.index(after: k)
+                        found = true
+                        break
+                    }
+                }
+                j = text.index(after: j)
+            }
+            if !found {
+                result.append(text[i])
+                i = text.index(after: i)
+            }
+        }
+        return result
+    }
+
     private static func trimUnpairedTrailingMarker(in line: String, marker: String, markerLen: Int) -> String {
         var positions: [String.Index] = []
         if markerLen == 1 {
@@ -761,15 +823,21 @@ public enum STMarkdownStreamingTransforms {
 
     private static func countUnescapedOccurrences(of token: String, in text: String) -> Int {
         guard !token.isEmpty else { return 0 }
+        let scalars = Array(text.unicodeScalars)
+        let tokenScalars = Array(token.unicodeScalars)
+        guard tokenScalars.count <= scalars.count else { return 0 }
+
         var count = 0
-        var searchStart = text.startIndex
-        while let range = text.range(of: token, range: searchStart..<text.endIndex) {
-            let escaped = range.lowerBound > text.startIndex
-                && text[text.index(before: range.lowerBound)] == "\\"
-            if !escaped {
+        var index = 0
+        while index <= scalars.count - tokenScalars.count {
+            let escaped = index > 0 && scalars[index - 1] == "\\"
+            let matches = !escaped && zip(scalars[index..<(index + tokenScalars.count)], tokenScalars).allSatisfy(==)
+            if matches {
                 count += 1
+                index += tokenScalars.count
+            } else {
+                index += 1
             }
-            searchStart = range.upperBound
         }
         return count
     }
@@ -899,6 +967,46 @@ public enum STMarkdownStreamingTransforms {
             if Self.orderedListLineRegex.firstMatch(in: line, options: [], range: range) != nil {
                 output.append(Self.orderedListLineRegex.stringByReplacingMatches(
                     in: line, options: [], range: range, withTemplate: "$1$2) $3"
+                ))
+                continue
+            }
+            output.append(line)
+        }
+        return output.joined(separator: "\n")
+    }
+
+    /// Reverse of ``flattenStreamingListSyntax``: converts Unicode bullet symbols and N) markers
+    /// back to standard Markdown list syntax (`-` and `N.`) so that the STMarkdown parser
+    /// correctly identifies nested list items rather than treating them as plain-text continuations.
+    ///
+    /// Only lines with 0–3 leading spaces are processed, matching the same constraint used during
+    /// flattening. Code fences are passed through unchanged.
+    public static func unflattenStreamingListSyntax(in text: String) -> String {
+        guard !text.isEmpty else { return text }
+        var inFencedCodeBlock = false
+        var fenceToken: String?
+        var output: [String] = []
+        let lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+        output.reserveCapacity(lines.count)
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") {
+                let token = String(trimmed.prefix(3))
+                if !inFencedCodeBlock { inFencedCodeBlock = true; fenceToken = token }
+                else if fenceToken == token { inFencedCodeBlock = false; fenceToken = nil }
+                output.append(line); continue
+            }
+            if inFencedCodeBlock { output.append(line); continue }
+            let range = NSRange(location: 0, length: (line as NSString).length)
+            if Self.flattenedUnorderedListLineRegex.firstMatch(in: line, options: [], range: range) != nil {
+                output.append(Self.flattenedUnorderedListLineRegex.stringByReplacingMatches(
+                    in: line, options: [], range: range, withTemplate: "$1- $2"
+                ))
+                continue
+            }
+            if Self.flattenedOrderedListLineRegex.firstMatch(in: line, options: [], range: range) != nil {
+                output.append(Self.flattenedOrderedListLineRegex.stringByReplacingMatches(
+                    in: line, options: [], range: range, withTemplate: "$1$2. $3"
                 ))
                 continue
             }

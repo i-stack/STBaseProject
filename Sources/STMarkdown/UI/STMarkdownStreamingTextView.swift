@@ -1005,7 +1005,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     )
 
     private static let unorderedListMarkerRegex = try! NSRegularExpression(
-        pattern: #"(?m)(?:^|\n)\t*[●▪]\t"#,
+        pattern: #"(?m)(?:^|\n)\t*[●○▪]\t"#,
         options: []
     )
 

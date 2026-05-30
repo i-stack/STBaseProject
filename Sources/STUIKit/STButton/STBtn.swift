@@ -358,6 +358,12 @@ open class STBtn: UIButton {
     /// 子类（如 `STIconBtn`）覆写此方法以写入图文布局 / `contentInsets` 等 Configuration 字段。
     /// 调用时机：每次 `configurationUpdateHandler` 触发，在字体/状态 transformer 之后、`onConfigurationUpdate` 之前。
     open func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
+        // iOS 26 changed UIButton.Configuration.plain() defaults: non-nil symbol config
+        // and non-zero content insets. Both are cleared here so custom PNG images render
+        // at their natural size. Callers can restore via onConfigurationUpdate.
+        config.preferredSymbolConfigurationForImage = nil
+        config.contentInsets = .zero
+        config.imagePadding = 0
         config.background.cornerRadius = self.layer.cornerRadius
         let resolvedBackgroundColor = self.resolvedStateBackgroundColor(for: button.state)
         if self.suppressesSystemStateEffects {
