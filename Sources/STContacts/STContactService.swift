@@ -31,12 +31,9 @@ public final class STContactService: @unchecked Sendable {
     ]
 }
 
-// MARK: - STContactServiceProtocol
 extension STContactService: STContactServiceProtocol {}
 
-// MARK: - Private
 private extension STContactService {
-
     func requestPermission() async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             self.contactStore.requestAccess(for: .contacts) { granted, error in
@@ -77,7 +74,6 @@ private extension STContactService {
     }
 }
 
-// MARK: - CNContact Mapping
 private extension STContact {
     init(contact: CNContact) {
         self.identifier = contact.identifier

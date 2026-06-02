@@ -156,7 +156,6 @@ protocol STCLGeocoderProtocol: AnyObject {
 
 extension CLGeocoder: STCLGeocoderProtocol {}
 
-// MARK: - STLocationManager
 @MainActor
 public class STLocationManager: NSObject {
 
@@ -167,7 +166,6 @@ public class STLocationManager: NSObject {
     private var permissionCompletion: ((CLAuthorizationStatus) -> Void)?
     private var isUpdating = false
     private var isContinuousUpdating = false
-    /// 每次新请求自增，用于丢弃 stop→start 竞态中残留的过期 geocoding 结果
     private var requestGeneration: Int = 0
     private var lastLocationInfo: STLocationInfo?
     private var lastLocationTime: Date?
@@ -272,7 +270,6 @@ extension STLocationManager: STLocationManagerProtocol {
     }
 
     public func st_stopUpdatingLocation() {
-        // 自增世代号，使所有正在进行的 geocoding 回调在检查时提前退出
         self.requestGeneration += 1
         self.isContinuousUpdating = false
         self.isUpdating = false
@@ -324,7 +321,6 @@ extension STLocationManager {
     private func processLocation(_ location: CLLocation) {
         let age = Date().timeIntervalSince(location.timestamp)
         guard age < self.currentConfig.maximumAge else { return }
-        // CLGeocoder 不支持并发，跳过已在进行中时收到的重复更新
         guard !self.geocoder.isGeocoding else { return }
         let capturedGeneration = self.requestGeneration
         let latitude = location.coordinate.latitude
@@ -333,7 +329,6 @@ extension STLocationManager {
         self.geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
-                // 若世代号已变（期间调用过 stop 或新请求），丢弃此结果
                 guard self.requestGeneration == capturedGeneration else { return }
                 guard let placemark = placemarks?.first else {
                     self.finishRequest(with: .failure(.geocodingFailed(error)))
