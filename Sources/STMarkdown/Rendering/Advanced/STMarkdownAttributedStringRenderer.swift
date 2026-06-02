@@ -757,7 +757,22 @@ private extension STMarkdownAttributedStringRenderer {
 
     func offsetParagraphStyles(in attributed: NSMutableAttributedString, by indent: CGFloat) {
         self.enumerateParagraphStyles(in: attributed) { paragraphStyle, range in
-            let resolvedStyle = paragraphStyle ?? self.bodyParagraphStyle()
+            // Attachment paragraphs (e.g. tables) must not receive bodyParagraphStyle as fallback:
+            // bodyParagraphStyle sets maximumLineHeight = lineHeight which caps the TextKit line
+            // fragment to body-text height, causing the table overlay frame to be much too small
+            // and the table content (clipsToBounds=false) to overflow and cover adjacent content.
+            var hasAttachment = false
+            attributed.enumerateAttribute(.attachment, in: range, options: [.longestEffectiveRangeNotRequired]) { value, _, stop in
+                if value != nil { hasAttachment = true; stop.pointee = true }
+            }
+            let resolvedStyle: NSMutableParagraphStyle
+            if let paragraphStyle {
+                resolvedStyle = paragraphStyle
+            } else if hasAttachment {
+                resolvedStyle = NSMutableParagraphStyle()
+            } else {
+                resolvedStyle = self.bodyParagraphStyle()
+            }
             resolvedStyle.firstLineHeadIndent += indent
             resolvedStyle.headIndent += indent
             resolvedStyle.tabStops = resolvedStyle.tabStops.map {
