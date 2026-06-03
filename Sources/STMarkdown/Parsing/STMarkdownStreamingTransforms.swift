@@ -63,8 +63,12 @@ public enum STMarkdownStreamingTransforms {
         try! NSRegularExpression(pattern: #"(?is)\b(?:citation|webpage)\s*:?\s*\d+\]?"#),
     ]
     private static let trailingTrimSearchWindow = 500
+    /// 仅匹配"整段最后一行、且该行只有光秃 list marker + 空白"的情形。
+    /// 用 `^…\Z`（而非旧的 `(?m)\n?…$`）锚定：旧写法的 `(?m)$` + 可选 `\n` + 0 缩进会让
+    /// `**…**` 行尾的强调星被误判为行尾无序 marker `*` 而被削掉，破坏已闭合的粗体（字面 `*` 泄漏）。
+    /// `^` 要求 marker 处于行首、`\Z` 要求其后到文本结尾只有空白，从而只清理真正悬空的尾部 marker。
     private static let trailingBareListMarkerRegex = try! NSRegularExpression(
-        pattern: #"(?m)\n?([ \t]{0,3}(?:[-+*]|\d+\.)[ \t]*)$"#,
+        pattern: #"(?m)^([ \t]{0,3}(?:[-+*]|\d+\.)[ \t]*)\Z"#,
         options: []
     )
     private static let trailingListDanglingEmphasisRegex = try! NSRegularExpression(
