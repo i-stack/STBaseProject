@@ -20,6 +20,11 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
     public var lineSpacing: CGFloat = 0.5
     public var minimumColumnWidth: CGFloat = 56
 
+    /// 流式表格逐行追加时为 true：让本次 batch update 中新出现（appearing）的 cell
+    /// 从 alpha 0 在最终位置原地淡入。仅在 `STMarkdownTableView` 的行追加动画期间置位，
+    /// 动画结束即复位，故 reloadData 等非动画路径不受影响。
+    var animatesAppearingItemsFade: Bool = false
+
     var sizeForItem: ((_ indexPath: IndexPath) -> CGSize)?
 
     private var allAttributes: [[UICollectionViewLayoutAttributes]] = []
@@ -129,6 +134,20 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
             return nil
         }
         return self.allAttributes[indexPath.section][indexPath.item]
+    }
+
+    /// 默认自定义 layout 会让 appearing item 直接出现在最终位置（无淡入）。
+    /// 行追加动画期间返回「最终帧位置 + alpha 0」的属性，使新插入 section 的 cell 原地淡入；
+    /// 追加发生在表尾、已有行不位移，故只有新 section 的 cell 命中 appearing 路径。
+    public override func initialLayoutAttributesForAppearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        guard self.animatesAppearingItemsFade else {
+            return super.initialLayoutAttributesForAppearingItem(at: itemIndexPath)
+        }
+        guard let attributes = self.layoutAttributesForItem(at: itemIndexPath)?.copy() as? UICollectionViewLayoutAttributes else {
+            return super.initialLayoutAttributesForAppearingItem(at: itemIndexPath)
+        }
+        attributes.alpha = 0
+        return attributes
     }
 
     public override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {

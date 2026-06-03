@@ -31,6 +31,8 @@ public final class STMarkdownTableDetailViewController: UIViewController {
 
     private lazy var tableView: STMarkdownTableView = {
         let view = STMarkdownTableView(style: self.style)
+        // 全屏页自带关闭按钮，关闭内置工具条，避免重复表头与“全屏中再全屏”。
+        view.showsHeader = false
         view.tableData = self.tableViewModel
         return view
     }()

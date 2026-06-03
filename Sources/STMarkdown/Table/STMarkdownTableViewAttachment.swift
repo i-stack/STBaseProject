@@ -27,6 +27,16 @@ public final class STMarkdownTableViewAttachment: NSTextAttachment {
             self._tableView?.onExpandTable = self.onExpandTable
         }
     }
+    public var onCopyTable: (() -> Void)? {
+        didSet {
+            self._tableView?.onCopyTable = self.onCopyTable
+        }
+    }
+    public var onDownloadTable: ((STMarkdownTableViewModel) -> Void)? {
+        didSet {
+            self._tableView?.onDownloadTable = self.onDownloadTable
+        }
+    }
 
     private var _tableView: STMarkdownTableView?
     private var cachedSize: CGSize?
@@ -40,6 +50,12 @@ public final class STMarkdownTableViewAttachment: NSTextAttachment {
         }
         view.onExpandTable = { [weak self] tableViewModel in
             self?.onExpandTable?(tableViewModel)
+        }
+        view.onCopyTable = { [weak self] in
+            self?.onCopyTable?()
+        }
+        view.onDownloadTable = { [weak self] tableViewModel in
+            self?.onDownloadTable?(tableViewModel)
         }
         self._tableView = view
         return view
