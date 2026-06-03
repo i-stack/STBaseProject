@@ -285,10 +285,18 @@ public enum STMarkdownStreamingPresenter {
         let nonEmptyIndices = normalizedLines.indices.filter {
             !normalizedLines[$0].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
-        guard let suffixStart = Self.unstableTrailingTableSuffixStart(
+        let suffixStart = Self.unstableTrailingTableSuffixStart(
             in: normalizedLines,
             nonEmptyIndices: nonEmptyIndices
-        ) else {
+        ) ?? Self.incompleteTrailingTableHeaderBlockStart(
+            in: normalizedLines,
+            nonEmptyIndices: nonEmptyIndices
+        ) ?? Self.streamingTrailingTableRowStart(
+            in: normalizedLines,
+            nonEmptyIndices: nonEmptyIndices,
+            endsWithNewline: text.hasSuffix("\n")
+        )
+        guard let suffixStart else {
             return text
         }
 
@@ -298,6 +306,67 @@ public enum STMarkdownStreamingPresenter {
             stableLines.removeLast()
         }
         return stableLines.joined(separator: "\n")
+    }
+
+    /// 表头行先于分隔行到达时（如 `| a | b |` 已到、`|---|` 未到），`unstableTrailingTableSuffixStart`
+    /// 因尾部缺少合法分隔行而放行，表头会作为普通段落被提交、原始竖线外漏。这里识别"末尾连续
+    /// pipe 行块但块内尚无合法 GFM 分隔行"的情形，返回块起点供裁剪，让 committed 停在表格之前；
+    /// 一旦分隔行 + 数据行到齐（hasValidSeparator），返回 nil 交回既有逻辑，按行逐步提交。
+    private static func incompleteTrailingTableHeaderBlockStart(in normalizedLines: [String], nonEmptyIndices: [Int]) -> Int? {
+        guard let lastIdx = nonEmptyIndices.last else { return nil }
+        guard Self.isStreamingPotentialTableConstructionLine(normalizedLines[lastIdx]) else { return nil }
+        var blockStart = lastIdx
+        var cursor = lastIdx - 1
+        while cursor >= 0 {
+            let trimmed = normalizedLines[cursor].trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty { break }
+            if !Self.isStreamingPotentialTableConstructionLine(normalizedLines[cursor]) { break }
+            blockStart = cursor
+            cursor -= 1
+        }
+        // 块内（表头之后）已存在合法分隔行 → 表格已可渲染，交回既有逻辑按行提交，不在此裁剪。
+        let hasValidSeparator = (blockStart...lastIdx).dropFirst().contains { idx in
+            Self.isStreamingPotentialTableSeparatorLine(normalizedLines[idx])
+        }
+        guard !hasValidSeparator else { return nil }
+        // 块首必须像表头：行首即 `|` 基本只可能是表格行，放宽到此可在表头只到 1 个 pipe
+        //（如 `| 类别`）时就拦下，避免半截表头逐字提交时原始竖线外漏并触发单调守卫回退级联；
+        // 仍保留表头候选判定，覆盖"无前导 | 但形似表头"的情形。避免误吃正文里的孤立 `|` 行。
+        let headerLine = normalizedLines[blockStart].trimmingCharacters(in: .whitespaces)
+        guard headerLine.hasPrefix("|")
+            || STMarkdownStreamingTransforms.isLikelyStreamingTableHeaderCandidate(headerLine) else { return nil }
+        return blockStart
+    }
+
+    /// 已成形表格（块内含合法分隔行）流式途中，最后一行数据行可能仍在逐字接收（尾部还没换行）。
+    /// 把这种"半截行"提交进 committed，会让 AST 渲染一张残缺表格，触发 TextKit 对该表格附件的
+    /// 病态排版（NSATSTypesetter 在 layoutParagraph 上 100% CPU 空转，主线程卡死、流式停摆）。
+    /// 因此流式途中只提交"已完整接收（其后已有换行）"的行：当文本不以换行结尾时，把最后一行
+    /// （正在接收的数据行）裁掉，待其换行到达后再随下一帧提交。收口（completed）路径不走本函数。
+    private static func streamingTrailingTableRowStart(in normalizedLines: [String], nonEmptyIndices: [Int], endsWithNewline: Bool) -> Int? {
+        guard !endsWithNewline else { return nil }
+        guard let lastIdx = nonEmptyIndices.last else { return nil }
+        guard Self.isStreamingPotentialTableConstructionLine(normalizedLines[lastIdx]) else { return nil }
+        // 最后一行是分隔行本身时不在此处理（交由既有逻辑）
+        guard !Self.isStreamingPotentialTableSeparatorLine(normalizedLines[lastIdx]) else { return nil }
+        var blockStart = lastIdx
+        var cursor = lastIdx - 1
+        while cursor >= 0 {
+            let trimmed = normalizedLines[cursor].trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.isEmpty { break }
+            if !Self.isStreamingPotentialTableConstructionLine(normalizedLines[cursor]) { break }
+            blockStart = cursor
+            cursor -= 1
+        }
+        // 仅当该 pipe 块是"已成形表格"（块内含合法分隔行）时才裁最后一行；
+        // 否则属于"半截表头 / 无分隔行"场景，交给 incompleteTrailingTableHeaderBlockStart。
+        let hasValidSeparator = (blockStart...lastIdx).contains { idx in
+            Self.isStreamingPotentialTableSeparatorLine(normalizedLines[idx])
+        }
+        guard hasValidSeparator else { return nil }
+        // 最后一行须在分隔行之后（是数据行），否则不裁
+        guard lastIdx > blockStart else { return nil }
+        return lastIdx
     }
 
     private static func streamingTopLevelBlockRanges(in lines: [String]) -> [StreamingBlockRange] {
@@ -968,6 +1037,19 @@ public enum STMarkdownStreamingPresenter {
             return nil
         }
         let separatorPosition = recent.firstIndex(of: separatorIndex) ?? 0
+        // 仅由 -/*/_ 组成的 thematic break（如独立的 `---`）会被 isStreamingPotentialTableSeparatorLine
+        // 误判为表格分隔行，进而把从该行起的正文整段当成"未完成表格构造"裁掉，钉死 committed 边界。
+        // 真正的 GFM 表格分隔行要么自身含 `|`，要么其紧邻上一非空行是含 pipe 的表头候选；
+        // 否则视作独立 thematic break，不属于表格构造，不触发尾部裁剪。
+        let separatorLine = normalizedLines[separatorIndex].trimmingCharacters(in: .whitespaces)
+        if !separatorLine.contains("|") {
+            let precedingIsPipeHeader = recent.prefix(separatorPosition).last.map {
+                STMarkdownStreamingTransforms.isLikelyStreamingTableHeaderCandidate(
+                    normalizedLines[$0].trimmingCharacters(in: .whitespaces)
+                )
+            } ?? false
+            if !precedingIsPipeHeader { return nil }
+        }
         let prefixCandidates = recent.prefix(through: separatorPosition)
         guard let suffixStartNonEmptyIndex = prefixCandidates.first(where: {
             Self.isStreamingPotentialTableConstructionLine(normalizedLines[$0])
