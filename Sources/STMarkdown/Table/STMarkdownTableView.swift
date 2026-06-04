@@ -67,6 +67,19 @@ public final class STMarkdownTableView: UIView {
     private let fullscreenButton = UIButton(type: .system)
     private let headerSeparator = UIView()
     private var copyResetWorkItem: DispatchWorkItem?
+    private weak var expandGesture: UILongPressGestureRecognizer?
+
+    /// 全屏详情态：开启上下/左右滚动条与回弹，并关闭内置「长按展开」手势（由详情页接管长按菜单）。
+    public var isFullScreenPresentation: Bool = false {
+        didSet {
+            guard oldValue != self.isFullScreenPresentation else { return }
+            let full = self.isFullScreenPresentation
+            self.collectionView.showsVerticalScrollIndicator = full
+            self.collectionView.bounces = full
+            self.collectionView.alwaysBounceVertical = false
+            self.expandGesture?.isEnabled = !full
+        }
+    }
 
     public init(style: STMarkdownStyle) {
         self.style = style
@@ -100,6 +113,7 @@ public final class STMarkdownTableView: UIView {
         self.collectionView.contentInset = .zero
         let expandGesture = UILongPressGestureRecognizer(target: self, action: #selector(self.handleExpandGesture(_:)))
         self.collectionView.addGestureRecognizer(expandGesture)
+        self.expandGesture = expandGesture
         self.addSubview(self.collectionView)
 
         self.gridLayout.sizeForItem = { [weak self] indexPath in
@@ -341,6 +355,34 @@ public final class STMarkdownTableView: UIView {
 
     @objc private func handleFullscreen() {
         self.expandTableIfPossible()
+    }
+
+    /// 将整张表格（含离屏行列）渲染为图片，供「复制为图片 / 保存到相册」使用。
+    /// 注意：会临时把 collectionView 放大到完整 contentSize 强制生成全部 cell 再渲染，渲染后还原。
+    public func renderFullTableImage() -> UIImage? {
+        guard self.tableData != nil else { return nil }
+        self.collectionView.layoutIfNeeded()
+        let contentSize = self.collectionView.collectionViewLayout.collectionViewContentSize
+        guard contentSize.width > 0, contentSize.height > 0 else { return nil }
+
+        let savedFrame = self.collectionView.frame
+        let savedOffset = self.collectionView.contentOffset
+        self.collectionView.frame = CGRect(origin: .zero, size: contentSize)
+        self.collectionView.setContentOffset(.zero, animated: false)
+        self.collectionView.layoutIfNeeded()
+
+        let borderColor = self.style.tableBorderColor ?? UIColor.separator
+        let renderer = UIGraphicsImageRenderer(size: contentSize)
+        let image = renderer.image { context in
+            borderColor.setFill()
+            context.fill(CGRect(origin: .zero, size: contentSize))
+            self.collectionView.layer.render(in: context.cgContext)
+        }
+
+        self.collectionView.frame = savedFrame
+        self.collectionView.setContentOffset(savedOffset, animated: false)
+        self.collectionView.layoutIfNeeded()
+        return image
     }
 
     /// 复制成功后将图标临时切换为对勾，~1.2s 后还原，提供轻量内建反馈（无需宿主接线）。
