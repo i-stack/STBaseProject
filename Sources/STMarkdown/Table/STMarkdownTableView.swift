@@ -26,6 +26,12 @@ public final class STMarkdownTableView: UIView {
     /// 是否对「纯行追加」启用逐行淡入。详情页/一次性渲染不会触发追加，默认开即可。
     public var animatesRowAppends: Bool = true
 
+    /// Streaming path: update only appended rows or changed cells when the table shape is stable.
+    /// Falls back to `tableData` assignment for all structural changes.
+    public func updateStreamingTableData(_ newValue: STMarkdownTableViewModel?) {
+        self.applyTableData(newValue, allowsCellDiff: true)
+    }
+
     private var renderedTableData: STMarkdownTableViewModel?
     private var isApplyingAppend = false
 
@@ -218,7 +224,8 @@ public final class STMarkdownTableView: UIView {
     }
 
     public override var intrinsicContentSize: CGSize {
-        self.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude))
+        let width = self.bounds.width > 1 ? self.bounds.width : UIScreen.main.bounds.width
+        return self.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
     }
 
     public static func computeSize(
@@ -261,7 +268,7 @@ public final class STMarkdownTableView: UIView {
         self.setNeedsLayout()
     }
 
-    private func applyTableData(_ newValue: STMarkdownTableViewModel?) {
+    private func applyTableData(_ newValue: STMarkdownTableViewModel?, allowsCellDiff: Bool = false) {
         let old = self.renderedTableData
         guard let newValue else {
             self.renderedTableData = nil
@@ -276,6 +283,20 @@ public final class STMarkdownTableView: UIView {
            let old,
            Self.isPureRowAppend(from: old, to: newValue) {
             self.animateRowAppend(from: old.rowCount, newData: newValue)
+        } else if allowsCellDiff,
+                  self.window != nil,
+                  self.bounds.height > 0,
+                  let old,
+                  let changedIndexPaths = Self.changedCellIndexPathsForStableShape(from: old, to: newValue) {
+            self.renderedTableData = newValue
+            guard !changedIndexPaths.isEmpty else { return }
+            UIView.performWithoutAnimation {
+                self.collectionView.reloadItems(at: changedIndexPaths)
+                self.gridLayout.invalidateLayout()
+                self.collectionView.layoutIfNeeded()
+            }
+            self.invalidateIntrinsicContentSize()
+            self.setNeedsLayout()
         } else {
             self.renderedTableData = newValue
             self.reloadData()
@@ -296,6 +317,31 @@ public final class STMarkdownTableView: UIView {
             }
         }
         return true
+    }
+
+    private static func changedCellIndexPathsForStableShape(from old: STMarkdownTableViewModel, to new: STMarkdownTableViewModel) -> [IndexPath]? {
+        guard new.columnCount == old.columnCount,
+              new.rowCount == old.rowCount,
+              new.columnCount > 0,
+              new.cells.count == old.cells.count else {
+            return nil
+        }
+        var changed: [IndexPath] = []
+        for row in 0..<old.rowCount {
+            guard row < old.cells.count, row < new.cells.count else { return nil }
+            let oldRow = old.cells[row]
+            let newRow = new.cells[row]
+            guard oldRow.count == newRow.count else { return nil }
+            for col in 0..<oldRow.count {
+                let oldText = oldRow[col].attributedContent.string
+                let newText = newRow[col].attributedContent.string
+                if oldText != newText {
+                    guard newText.hasPrefix(oldText) else { return nil }
+                    changed.append(IndexPath(item: col, section: row))
+                }
+            }
+        }
+        return changed
     }
 
     private func animateRowAppend(from oldRowCount: Int, newData: STMarkdownTableViewModel) {

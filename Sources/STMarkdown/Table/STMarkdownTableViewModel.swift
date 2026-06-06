@@ -110,6 +110,20 @@ public final class STMarkdownTableViewModel {
         self.rowCount = builtCells.count
     }
 
+    public init(
+        columnAlignments: [STMarkdownColumnAlignment],
+        cells: [[STMarkdownTableCellData]],
+        hasHeader: Bool,
+        rowGroups: [[Int]] = []
+    ) {
+        self.hasHeader = hasHeader
+        self.columnAlignments = columnAlignments
+        self.rowGroups = rowGroups
+        self.cells = cells
+        self.columnCount = cells.map(\.count).max() ?? 0
+        self.rowCount = cells.count
+    }
+
     // MARK: - Plain Text Export
 
     /// 将表格内容导出为分隔文本，供「复制 / 下载」使用。
