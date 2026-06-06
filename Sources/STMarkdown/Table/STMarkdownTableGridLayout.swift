@@ -19,6 +19,10 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
     public var interItemSpacing: CGFloat = 0.5
     public var lineSpacing: CGFloat = 0.5
     public var minimumColumnWidth: CGFloat = 56
+    /// Visual row-span groups for the first column. Values are UICollectionView section indexes.
+    public var firstColumnRowGroups: [[Int]] = [] {
+        didSet { self.mergedFirstColumnRows = Self.makeMergedFirstColumnRows(from: self.firstColumnRowGroups) }
+    }
 
     /// 流式表格逐行追加时为 true：让本次 batch update 中新出现（appearing）的 cell
     /// 从 alpha 0 在最终位置原地淡入。仅在 `STMarkdownTableView` 的行追加动画期间置位，
@@ -31,6 +35,7 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
     private var cachedContentSize: CGSize = .zero
     private var columnWidths: [CGFloat] = []
     private var rowHeights: [CGFloat] = []
+    private var mergedFirstColumnRows: [Int: (head: Int, count: Int)] = [:]
 
     public override func prepare() {
         super.prepare()
@@ -104,7 +109,24 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
                 let indexPath = IndexPath(item: item, section: section)
                 let attribute = UICollectionViewLayoutAttributes(forCellWith: indexPath)
                 let width = colWidths[item]
-                attribute.frame = CGRect(x: x, y: y, width: width, height: height)
+                if item == 0,
+                   let merged = self.mergedFirstColumnRows[section],
+                   merged.head != section {
+                    attribute.frame = .zero
+                    attribute.isHidden = true
+                } else if item == 0,
+                          let merged = self.mergedFirstColumnRows[section],
+                          merged.count > 1 {
+                    let mergedHeight = Self.mergedHeight(
+                        rowHeights: rHeights,
+                        lineSpacing: self.lineSpacing,
+                        start: section,
+                        count: merged.count
+                    )
+                    attribute.frame = CGRect(x: x, y: y, width: width, height: mergedHeight)
+                } else {
+                    attribute.frame = CGRect(x: x, y: y, width: width, height: height)
+                }
                 rowAttrs.append(attribute)
                 x += width + self.interItemSpacing
             }
@@ -210,5 +232,27 @@ public final class STMarkdownTableGridLayout: UICollectionViewLayout {
         let lineSpacingTotal = metrics.lineSpacing * CGFloat(max(rows - 1, 0))
         let totalHeight = rowHeights.reduce(0, +) + lineSpacingTotal
         return CGSize(width: totalWidth, height: totalHeight)
+    }
+
+    private static func makeMergedFirstColumnRows(from rowGroups: [[Int]]) -> [Int: (head: Int, count: Int)] {
+        var result: [Int: (head: Int, count: Int)] = [:]
+        for group in rowGroups where group.count > 1 {
+            let sorted = group.sorted()
+            guard let head = sorted.first else { continue }
+            let count = sorted.count
+            for row in sorted {
+                result[row] = (head: head, count: count)
+            }
+        }
+        return result
+    }
+
+    private static func mergedHeight(rowHeights: [CGFloat], lineSpacing: CGFloat, start: Int, count: Int) -> CGFloat {
+        guard start < rowHeights.count, count > 1 else {
+            return start < rowHeights.count ? rowHeights[start] : 0
+        }
+        let end = min(start + count, rowHeights.count)
+        let height = rowHeights[start..<end].reduce(0, +)
+        return height + lineSpacing * CGFloat(max(end - start - 1, 0))
     }
 }

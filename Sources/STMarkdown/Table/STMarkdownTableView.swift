@@ -262,6 +262,7 @@ public final class STMarkdownTableView: UIView {
     }
 
     private func reloadData() {
+        self.gridLayout.firstColumnRowGroups = self.makeFirstColumnRowGroupsForLayout(from: self.renderedTableData)
         self.gridLayout.invalidateLayout()
         self.collectionView.reloadData()
         self.invalidateIntrinsicContentSize()
@@ -289,6 +290,7 @@ public final class STMarkdownTableView: UIView {
                   let old,
                   let changedIndexPaths = Self.changedCellIndexPathsForStableShape(from: old, to: newValue) {
             self.renderedTableData = newValue
+            self.gridLayout.firstColumnRowGroups = self.makeFirstColumnRowGroupsForLayout(from: newValue)
             guard !changedIndexPaths.isEmpty else { return }
             UIView.performWithoutAnimation {
                 self.collectionView.reloadItems(at: changedIndexPaths)
@@ -352,6 +354,7 @@ public final class STMarkdownTableView: UIView {
             // 在 block 内翻转底层数据：block 前 dataSource 仍返回旧行数，block 后返回新行数，
             // 与 insertSections 的增量一致，避免 NSInternalInconsistencyException。
             self.renderedTableData = newData
+            self.gridLayout.firstColumnRowGroups = self.makeFirstColumnRowGroupsForLayout(from: newData)
             self.gridLayout.invalidateLayout()
             self.collectionView.insertSections(IndexSet(integersIn: oldRowCount..<targetRowCount))
         }, completion: { [weak self] _ in
@@ -361,6 +364,18 @@ public final class STMarkdownTableView: UIView {
             self.invalidateIntrinsicContentSize()
             self.setNeedsLayout()
         })
+    }
+
+    private func makeFirstColumnRowGroupsForLayout(from tableData: STMarkdownTableViewModel?) -> [[Int]] {
+        guard let tableData else { return [] }
+        let rowOffset = tableData.hasHeader ? 1 : 0
+        return tableData.rowGroups.map { group in
+            group.compactMap { row in
+                let section = row + rowOffset
+                return section >= 0 && section < tableData.rowCount ? section : nil
+            }
+        }
+        .filter { $0.count > 1 }
     }
 
     private func sizeForItem(at indexPath: IndexPath) -> CGSize {
