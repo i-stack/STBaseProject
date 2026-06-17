@@ -43,6 +43,7 @@ class ViewController: BaseViewController {
         self.dataSouces["Markdown 流式渲染测试"] = STMarkdownStreamingTestViewController()
         self.dataSouces["Shimmer 动画测试"] = STShimmerTextViewTestViewController()
         self.dataSouces["SSE 流式渲染测试"] = STSSEViewController(nibName: "STSSEViewController", bundle: nil)
+        self.dataSouces["BottomSheet测试"] = STBottomSheetViewController()
 
         self.tableView.reloadData()
     }
@@ -70,6 +71,33 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let key = Array(self.dataSouces.keys)[indexPath.row]
         guard let vc = self.dataSouces[key] else { return }
-        self.navigationController?.pushViewController(vc, animated: true)
+        if key == "BottomSheet测试" {
+            self.presentBootSheet()
+        } else {
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    private func presentBootSheet() {
+        let vc = STBottomSheetViewController()
+//        vc.modalPresentationStyle = .custom
+        BottomSheetTransitionManager.shared.bindDismissGesture(to: vc)
+//        if let sheet = vc.sheetPresentationController {
+//            sheet.prefersScrollingExpandsWhenScrolledToEdge = true
+//            sheet.prefersEdgeAttachedInCompactHeight = true
+//            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = false
+//            sheet.detents = [
+//                .custom(identifier: .init("half")) { context in
+//                    context.maximumDetentValue * 0.5
+//                },
+//                .large()
+//            ]
+//            sheet.selectedDetentIdentifier = .init("half")
+//            sheet.prefersGrabberVisible = true
+//        }
+        
+//        vc.modalPresentationStyle = .custom
+//        vc.transitioningDelegate = BottomSheetTransitioningDelegate.shared
+        self.present(vc, animated: true)
     }
 }

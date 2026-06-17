@@ -39,7 +39,6 @@ public final class STMarkdownTableViewAttachment: NSTextAttachment {
     }
 
     private var _tableView: STMarkdownTableView?
-    private var cachedSize: CGSize?
 
     public var tableView: STMarkdownTableView {
         if let existing = self._tableView { return existing }
@@ -89,17 +88,19 @@ public final class STMarkdownTableViewAttachment: NSTextAttachment {
         glyphPosition position: CGPoint,
         characterIndex charIndex: Int
     ) -> CGRect {
-        if let cached = self.cachedSize {
-            return CGRect(origin: .zero, size: cached)
-        }
+        // Always recompute — don't cache. TextKit may call this multiple times with
+        // different proposed widths (e.g. during streaming layout passes), and a stale
+        // cached size causes the TextKit placeholder rect to disagree with the actual
+        // table view height, producing visible height jumps.
+        //
+        // FluidMarkdown's AMTableViewAttachment doesn't cache either — it calls
+        // sizeThatFits each time through the table data source.
         let size = STMarkdownTableView.computeSize(
             tableData: self.tableViewModel,
             containerWidth: self.containerWidth,
             style: self.style
         )
-        // 宽度取容器宽度（宽表由 collection view 水平滚动处理）
         let resultSize = CGSize(width: self.containerWidth, height: size.height)
-        self.cachedSize = resultSize
         return CGRect(origin: .zero, size: resultSize)
     }
 }

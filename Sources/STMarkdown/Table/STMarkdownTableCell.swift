@@ -67,13 +67,24 @@ public final class STMarkdownTableCell: UICollectionViewCell {
             return CGSize(width: constrainedWidth, height: contentInsets.top + contentInsets.bottom)
         }
         let boundingSize = CGSize(width: textWidth, height: .greatestFiniteMagnitude)
-        let textRect = cellData.attributedContent.boundingRect(
+        // Take MAX of both measurement options, matching FluidMarkdown's approach.
+        // .usesFontLeading and .usesDeviceMetrics can return different heights for
+        // system fonts with mixed weights/inline attachments — using only one causes
+        // text view height to "jump" when TextKit and UILabel disagree on final height.
+        let textRect1 = cellData.attributedContent.boundingRect(
             with: boundingSize,
             options: [.usesLineFragmentOrigin, .usesFontLeading],
             context: nil
         )
-        let width = min(constrainedWidth, ceil(textRect.width) + contentInsets.left + contentInsets.right)
-        let height = ceil(textRect.height) + contentInsets.top + contentInsets.bottom
+        let textRect2 = cellData.attributedContent.boundingRect(
+            with: boundingSize,
+            options: [.usesLineFragmentOrigin, .usesDeviceMetrics],
+            context: nil
+        )
+        let finalHeight = ceil(max(textRect1.height, textRect2.height))
+        let finalWidth = min(constrainedWidth, ceil(max(textRect1.width, textRect2.width)))
+        let width = finalWidth + contentInsets.left + contentInsets.right
+        let height = finalHeight + contentInsets.top + contentInsets.bottom
         return CGSize(width: width, height: height)
     }
 }

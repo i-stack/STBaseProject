@@ -28,11 +28,14 @@ final class STMarkdownTableOverlayCoordinator {
     }
 
     func updateIfNeeded(attributedText: NSAttributedString, containerBounds: CGRect) {
-        let sizeChanged = containerBounds.size != self.lastTableOverlayLayoutSize
-        guard self.tableOverlayNeedsUpdate || sizeChanged else { return }
-        self.lastTableOverlayLayoutSize = containerBounds.size
-        self.tableOverlayNeedsUpdate = false
+        // Always update overlays on every layout pass — not just when markDirty was
+        // called or the container size changed. TextKit may not have finished re-laying-out
+        // glyphs on the first pass after attributedText is set, so a stale glyphRect would
+        // give the overlay the wrong (previously cached) height.  By running every pass,
+        // the overlay frame converges to match the latest glyph positions automatically.
         self.updateTableViewOverlays(attributedText: attributedText)
+        self.tableOverlayNeedsUpdate = false
+        self.lastTableOverlayLayoutSize = containerBounds.size
     }
 
     func reset() {

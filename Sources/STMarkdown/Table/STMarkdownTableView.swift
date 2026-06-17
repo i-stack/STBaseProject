@@ -282,12 +282,14 @@ public final class STMarkdownTableView: UIView {
            self.window != nil,
            self.bounds.height > 0,
            let old,
-           Self.isPureRowAppend(from: old, to: newValue) {
+           Self.isPureRowAppend(from: old, to: newValue),
+           Self.appendKeepsExistingRowGroupsStable(from: old, to: newValue) {
             self.animateRowAppend(from: old.rowCount, newData: newValue)
         } else if allowsCellDiff,
                   self.window != nil,
                   self.bounds.height > 0,
                   let old,
+                  Self.hasStableLayoutShape(from: old, to: newValue),
                   let changedIndexPaths = Self.changedCellIndexPathsForStableShape(from: old, to: newValue) {
             self.renderedTableData = newValue
             self.gridLayout.firstColumnRowGroups = self.makeFirstColumnRowGroupsForLayout(from: newValue)
@@ -301,7 +303,11 @@ public final class STMarkdownTableView: UIView {
             self.setNeedsLayout()
         } else {
             self.renderedTableData = newValue
-            self.reloadData()
+            if allowsCellDiff, self.window != nil {
+                self.reloadDataWithoutAnimation()
+            } else {
+                self.reloadData()
+            }
         }
     }
 
@@ -344,6 +350,31 @@ public final class STMarkdownTableView: UIView {
             }
         }
         return changed
+    }
+
+    private static func hasStableLayoutShape(from old: STMarkdownTableViewModel, to new: STMarkdownTableViewModel) -> Bool {
+        old.hasHeader == new.hasHeader
+            && old.columnCount == new.columnCount
+            && old.rowCount == new.rowCount
+            && old.rowGroups == new.rowGroups
+    }
+
+    private static func appendKeepsExistingRowGroupsStable(from old: STMarkdownTableViewModel, to new: STMarkdownTableViewModel) -> Bool {
+        guard old.hasHeader == new.hasHeader,
+              new.rowCount > old.rowCount else {
+            return false
+        }
+        return !new.rowGroups.contains { group in
+            group.contains { $0 < old.rowCount } && group.contains { $0 >= old.rowCount }
+        }
+    }
+
+    private func reloadDataWithoutAnimation() {
+        UIView.performWithoutAnimation {
+            self.reloadData()
+            self.collectionView.layoutIfNeeded()
+            self.layoutIfNeeded()
+        }
     }
 
     private func animateRowAppend(from oldRowCount: Int, newData: STMarkdownTableViewModel) {
