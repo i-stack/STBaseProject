@@ -11,7 +11,8 @@ import STBaseProject
 class ViewController: BaseViewController {
 
     private var dataSouces: [String: UIViewController] = [:]
-    
+    private let bottomSheetTransitionDelegate = STBottomSheetTransitionDelegate()
+
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var topConstraint: NSLayoutConstraint!
     
@@ -43,7 +44,7 @@ class ViewController: BaseViewController {
         self.dataSouces["Markdown 流式渲染测试"] = STMarkdownStreamingTestViewController()
         self.dataSouces["Shimmer 动画测试"] = STShimmerTextViewTestViewController()
         self.dataSouces["SSE 流式渲染测试"] = STSSEViewController(nibName: "STSSEViewController", bundle: nil)
-        self.dataSouces["BottomSheet测试"] = STBottomSheetViewController()
+        self.dataSouces["BottomSheet测试"] = STBottomSheetTestViewController()
 
         self.tableView.reloadData()
     }
@@ -79,7 +80,9 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     private func presentBootSheet() {
-        let vc = STBottomSheetViewController()
-        self.present(vc, animated: true)
+        let detailVC = STBottomSheetTestViewController()
+        detailVC.modalPresentationStyle = .custom
+        detailVC.transitioningDelegate = self.bottomSheetTransitionDelegate
+        self.present(detailVC, animated: true)
     }
 }
