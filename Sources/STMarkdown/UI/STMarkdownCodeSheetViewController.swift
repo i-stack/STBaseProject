@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import SnapKit
 import STBaseProject
 
 /// 代码弹窗通用底部容器 VC。
@@ -28,7 +27,7 @@ open class STMarkdownCodeSheetViewController: UIViewController {
     }
 
     private weak var managedDimmingView: UIView?
-    private var managedSheetBottomConstraint: Constraint?
+    private var managedSheetBottomConstraint: NSLayoutConstraint?
     private var didAnimateIn = false
     public var onCopyTapped: (() -> Void)?
     public var onCloseTapped: (() -> Void)?
@@ -38,8 +37,7 @@ open class STMarkdownCodeSheetViewController: UIViewController {
         }
     }
 
-    /// 可注入的图片名称/资源，供子类或宿主层覆盖默认的关闭/复制图标。
-    /// 默认值为 nil，此时使用内建图片名 fallback。
+    /// 可注入的关闭/复制图标
     public var closeImage: UIImage? {
         didSet { self.closeButton.setImage(self.closeImage, for: .normal) }
     }
@@ -48,22 +46,25 @@ open class STMarkdownCodeSheetViewController: UIViewController {
     }
 
     /// 配置底部弹窗布局。
-    /// - Parameters:
-    ///   - heightRatio: sheet 高度占父视图比例，默认 0.88
-    ///   - dimmingView: 遮罩视图
-    ///   - sheetView: 内容面板视图
     public func setupBottomSheetLayout(heightRatio: CGFloat = 0.88, dimmingView: UIView, sheetView: UIView) {
         self.managedDimmingView = dimmingView
+        dimmingView.translatesAutoresizingMaskIntoConstraints = false
+        sheetView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(dimmingView)
-        dimmingView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        NSLayoutConstraint.activate([
+            dimmingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            dimmingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            dimmingView.topAnchor.constraint(equalTo: self.view.topAnchor),
+            dimmingView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+        ])
         self.view.addSubview(sheetView)
-        sheetView.snp.makeConstraints { make in
-            make.left.right.equalToSuperview()
-            make.height.equalToSuperview().multipliedBy(heightRatio)
-            self.managedSheetBottomConstraint = make.bottom.equalToSuperview().offset(LayoutMetrics.initialSheetBottomOffset).constraint
-        }
+        NSLayoutConstraint.activate([
+            sheetView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            sheetView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            sheetView.heightAnchor.constraint(equalTo: self.view.heightAnchor, multiplier: heightRatio),
+        ])
+        self.managedSheetBottomConstraint = sheetView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: LayoutMetrics.initialSheetBottomOffset)
+        self.managedSheetBottomConstraint?.isActive = true
     }
 
     open override func viewDidAppear(_ animated: Bool) {
@@ -78,7 +79,7 @@ open class STMarkdownCodeSheetViewController: UIViewController {
         self.view.layoutIfNeeded()
         UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
             self.managedDimmingView?.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-            self.managedSheetBottomConstraint?.update(offset: 0)
+            self.managedSheetBottomConstraint?.constant = 0
             self.view.layoutIfNeeded()
         }
     }
@@ -87,7 +88,7 @@ open class STMarkdownCodeSheetViewController: UIViewController {
     public func dismissBottomSheet() {
         UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseIn) {
             self.managedDimmingView?.backgroundColor = UIColor.black.withAlphaComponent(0)
-            self.managedSheetBottomConstraint?.update(offset: 900)
+            self.managedSheetBottomConstraint?.constant = 900
             self.view.layoutIfNeeded()
         } completion: { _ in
             self.dismiss(animated: false)
@@ -103,36 +104,41 @@ open class STMarkdownCodeSheetViewController: UIViewController {
 
     /// 布局 grabber 和 close 按钮到 sheetView
     public func layoutCommonGrabberAndClose(in sheetView: UIView) {
+        self.grabberView.translatesAutoresizingMaskIntoConstraints = false
+        self.closeButton.translatesAutoresizingMaskIntoConstraints = false
         sheetView.addSubview(self.grabberView)
-        self.grabberView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(LayoutMetrics.grabberTop)
-            make.centerX.equalToSuperview()
-            make.width.equalTo(LayoutMetrics.grabberWidth)
-            make.height.equalTo(LayoutMetrics.grabberHeight)
-        }
+        NSLayoutConstraint.activate([
+            self.grabberView.topAnchor.constraint(equalTo: sheetView.topAnchor, constant: LayoutMetrics.grabberTop),
+            self.grabberView.centerXAnchor.constraint(equalTo: sheetView.centerXAnchor),
+            self.grabberView.widthAnchor.constraint(equalToConstant: LayoutMetrics.grabberWidth),
+            self.grabberView.heightAnchor.constraint(equalToConstant: LayoutMetrics.grabberHeight),
+        ])
         sheetView.addSubview(self.closeButton)
-        self.closeButton.snp.makeConstraints { make in
-            make.top.equalTo(self.grabberView.snp.bottom).offset(LayoutMetrics.closeTop)
-            make.right.equalToSuperview().offset(-LayoutMetrics.closeTrailing)
-            make.width.height.equalTo(LayoutMetrics.closeSize)
-        }
+        NSLayoutConstraint.activate([
+            self.closeButton.topAnchor.constraint(equalTo: self.grabberView.bottomAnchor, constant: LayoutMetrics.closeTop),
+            self.closeButton.trailingAnchor.constraint(equalTo: sheetView.trailingAnchor, constant: -LayoutMetrics.closeTrailing),
+            self.closeButton.widthAnchor.constraint(equalToConstant: LayoutMetrics.closeSize),
+            self.closeButton.heightAnchor.constraint(equalToConstant: LayoutMetrics.closeSize),
+        ])
     }
 
     /// 布局 copy 按钮和 title 到 sheetView
     public func layoutCommonCopyAndTitle(in sheetView: UIView, copyRightAnchor: UIView, copyCenterYAnchor: UIView, titleCenterYAnchor: UIView) {
+        self.copyButton.translatesAutoresizingMaskIntoConstraints = false
+        self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         sheetView.addSubview(self.copyButton)
-        self.copyButton.snp.makeConstraints { make in
-            make.centerY.equalTo(copyCenterYAnchor)
-            make.right.equalTo(copyRightAnchor.snp.left).offset(-LayoutMetrics.copyTrailingToRightAnchor)
-            make.width.height.equalTo(LayoutMetrics.copySize)
-        }
-
+        NSLayoutConstraint.activate([
+            self.copyButton.centerYAnchor.constraint(equalTo: copyCenterYAnchor.centerYAnchor),
+            self.copyButton.trailingAnchor.constraint(equalTo: copyRightAnchor.leadingAnchor, constant: -LayoutMetrics.copyTrailingToRightAnchor),
+            self.copyButton.widthAnchor.constraint(equalToConstant: LayoutMetrics.copySize),
+            self.copyButton.heightAnchor.constraint(equalToConstant: LayoutMetrics.copySize),
+        ])
         sheetView.addSubview(self.titleLabel)
-        self.titleLabel.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(LayoutMetrics.titleLeading)
-            make.centerY.equalTo(titleCenterYAnchor)
-            make.right.equalTo(self.copyButton.snp.left).offset(-LayoutMetrics.titleTrailingToCopy)
-        }
+        NSLayoutConstraint.activate([
+            self.titleLabel.leadingAnchor.constraint(equalTo: sheetView.leadingAnchor, constant: LayoutMetrics.titleLeading),
+            self.titleLabel.centerYAnchor.constraint(equalTo: titleCenterYAnchor.centerYAnchor),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.copyButton.leadingAnchor, constant: -LayoutMetrics.titleTrailingToCopy),
+        ])
     }
 
     @objc private func handleCloseAction() {

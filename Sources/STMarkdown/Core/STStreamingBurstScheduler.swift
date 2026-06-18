@@ -14,6 +14,8 @@ public final class STStreamingBurstScheduler {
     private var smallStep: Int = 8
     private var largeStep: Int = 15
 
+    public init() {}
+
     public func configure(threshold: Int, smallStep: Int, largeStep: Int) {
         self.threshold = max(1, threshold)
         self.smallStep = max(1, smallStep)
