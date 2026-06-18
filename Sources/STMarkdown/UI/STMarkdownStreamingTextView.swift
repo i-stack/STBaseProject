@@ -275,6 +275,16 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
             minModuleLength: self.markdownStyle.streamMinModuleLength
         )
         self.smartStreamingSessionActive = true
+
+        // 启用推测重写时，切换为带 streaming parser 的 engine
+        if self.markdownStyle.streamSpeculativeRewriteEnabled {
+            let streamingParser = STMarkdownStructureParser.streamingParser()
+            self.engine = STMarkdownEngine(
+                configuration: self.engine.pipeline.configuration,
+                parser: streamingParser,
+                renderAdapter: self.engine.pipeline.renderAdapter
+            )
+        }
     }
 
     /// 向智能流式缓冲追加一段 chunk 并刷新显示（仅显示已通过检测的安全前缀 + 尾部裁剪）。

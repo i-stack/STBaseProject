@@ -80,24 +80,6 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     private func presentBootSheet() {
         let vc = STBottomSheetViewController()
-//        vc.modalPresentationStyle = .custom
-        BottomSheetTransitionManager.shared.bindDismissGesture(to: vc)
-//        if let sheet = vc.sheetPresentationController {
-//            sheet.prefersScrollingExpandsWhenScrolledToEdge = true
-//            sheet.prefersEdgeAttachedInCompactHeight = true
-//            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = false
-//            sheet.detents = [
-//                .custom(identifier: .init("half")) { context in
-//                    context.maximumDetentValue * 0.5
-//                },
-//                .large()
-//            ]
-//            sheet.selectedDetentIdentifier = .init("half")
-//            sheet.prefersGrabberVisible = true
-//        }
-        
-//        vc.modalPresentationStyle = .custom
-//        vc.transitioningDelegate = BottomSheetTransitioningDelegate.shared
         self.present(vc, animated: true)
     }
 }
