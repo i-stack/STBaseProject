@@ -9,15 +9,6 @@ import UIKit
 
 open class STBottomSheetViewController: UIViewController {
 
-    public let contentView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemBackground
-        view.layer.cornerRadius = 24
-        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        view.clipsToBounds = true
-        return view
-    }()
-
     open weak var contentScrollView: UIScrollView?
 
     open var topInset: CGFloat {
@@ -57,18 +48,15 @@ open class STBottomSheetViewController: UIViewController {
 
     open override func viewDidLoad() {
         super.viewDidLoad()
-
         self.view.backgroundColor = .clear
         self.setupContentView()
         self.setupPanGesture()
         self.setupContent()
-
         self.containerTopConstraint.constant = self.hiddenOffset
     }
 
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-
         if self.containerTopConstraint.constant > self.hiddenOffset {
             self.containerTopConstraint.constant = self.hiddenOffset
         }
@@ -82,7 +70,6 @@ open class STBottomSheetViewController: UIViewController {
 
     public func bottomSheetScrollViewDidScroll(_ scrollView: UIScrollView) {
         let currentOffset = self.containerTopConstraint.constant
-
         if currentOffset > self.fullOffset + 1 {
             scrollView.contentOffset = .zero
             scrollView.showsVerticalScrollIndicator = false
@@ -129,11 +116,9 @@ open class STBottomSheetViewController: UIViewController {
     private func setupContentView() {
         self.view.addSubview(self.contentView)
         self.contentView.translatesAutoresizingMaskIntoConstraints = false
-
         self.containerTopConstraint = self.contentView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: self.hiddenOffset)
         let bottomConstraint = self.contentView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         bottomConstraint.priority = .defaultHigh
-
         NSLayoutConstraint.activate([
             self.containerTopConstraint,
             self.contentView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
@@ -151,7 +136,6 @@ open class STBottomSheetViewController: UIViewController {
     @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: self.view)
         let velocity = gesture.velocity(in: self.view)
-
         switch gesture.state {
         case .began:
             break
@@ -162,7 +146,6 @@ open class STBottomSheetViewController: UIViewController {
                 gesture.setTranslation(.zero, in: self.view)
                 return
             }
-
             let newConstant = self.containerTopConstraint.constant + translation.y
             if newConstant >= self.fullOffset {
                 self.containerTopConstraint.constant = newConstant
@@ -179,7 +162,6 @@ open class STBottomSheetViewController: UIViewController {
 
     private func finishPanGesture(velocity: CGPoint) {
         let currentOffset = self.containerTopConstraint.constant
-
         if velocity.y > 600 {
             if currentOffset < self.partialOffset - 50 {
                 self.animateToOffset(self.partialOffset)
@@ -188,7 +170,7 @@ open class STBottomSheetViewController: UIViewController {
             }
             return
         }
-
+        
         if velocity.y < -600 {
             self.animateToOffset(self.fullOffset)
             return
@@ -196,7 +178,6 @@ open class STBottomSheetViewController: UIViewController {
 
         let totalTransitionDistance = self.partialOffset - self.fullOffset
         let currentProgress = (currentOffset - self.fullOffset) / totalTransitionDistance
-
         if currentOffset <= self.partialOffset {
             if currentProgress > 0.40 {
                 self.animateToOffset(self.partialOffset)
@@ -219,10 +200,18 @@ open class STBottomSheetViewController: UIViewController {
             self.view.layoutIfNeeded()
         }, completion: nil)
     }
+    
+    public let contentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemBackground
+        view.layer.cornerRadius = 24
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.clipsToBounds = true
+        return view
+    }()
 }
 
 extension STBottomSheetViewController: UIGestureRecognizerDelegate {
-
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let panGesture = gestureRecognizer as? UIPanGestureRecognizer else {
             return true
@@ -242,7 +231,6 @@ extension STBottomSheetViewController: UIGestureRecognizerDelegate {
 }
 
 public class STBottomSheetPresentationController: UIPresentationController {
-
     private lazy var dimmingView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
@@ -259,15 +247,12 @@ public class STBottomSheetPresentationController: UIPresentationController {
 
     public override func presentationTransitionWillBegin() {
         guard let containerView = self.containerView else { return }
-
         self.dimmingView.frame = containerView.bounds
         containerView.insertSubview(self.dimmingView, at: 0)
-
         guard let transitionCoordinator = self.presentedViewController.transitionCoordinator else {
             self.dimmingView.alpha = 1
             return
         }
-
         transitionCoordinator.animate(alongsideTransition: { _ in
             self.dimmingView.alpha = 1
         })
@@ -279,7 +264,6 @@ public class STBottomSheetPresentationController: UIPresentationController {
             self.dimmingView.removeFromSuperview()
             return
         }
-
         transitionCoordinator.animate(alongsideTransition: { _ in
             self.dimmingView.alpha = 0
         }, completion: { _ in
@@ -289,7 +273,6 @@ public class STBottomSheetPresentationController: UIPresentationController {
 
     public override func presentationTransitionDidEnd(_ completed: Bool) {
         super.presentationTransitionDidEnd(completed)
-
         if completed {
             (self.presentedViewController as? STBottomSheetViewController)?.finishPresentationWithoutAnimation()
         } else {
@@ -299,7 +282,6 @@ public class STBottomSheetPresentationController: UIPresentationController {
 
     public override func containerViewDidLayoutSubviews() {
         super.containerViewDidLayoutSubviews()
-
         self.dimmingView.frame = self.containerView?.bounds ?? .zero
         self.presentedView?.frame = self.frameOfPresentedViewInContainerView
     }
