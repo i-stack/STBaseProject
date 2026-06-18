@@ -74,7 +74,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         self.smartStreamBuffer?.fullAccumulatedText
     }
 
-    /// `containerThenContent` 命中时，容器/块级前缀先上屏，再等待这一小段间隔后让尾部正文继续逐字动画。
+    /// `containerThenContent` 命中时，容器/块级前缀先上屏，再等待这一小段间隔后让尾部正文继续 token 动画。
     public var containerRevealGapDuration: TimeInterval = 0.06
 
     private var shimmerTextView: STShimmerTextView {
@@ -614,7 +614,7 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
     /// 规则：
     /// 1. 仅当尾部最后一个 render block 的 reveal policy 是 `inlineProgressive` 时，才对该 block 动画；
     /// 2. `atomicBlock` / `containerThenContent` 本身立即上屏；
-    /// 3. 这样 quote/list/details 等容器可先稳定出现，再让最后一个正文 block 继续逐字输出。
+    /// 3. 这样 quote/list/details 等容器可先稳定出现，再让最后一个正文 block 继续 token 输出。
     private func streamingAnimationPlan(for attributedText: NSAttributedString) -> (
         immediatePrefix: NSAttributedString,
         animatedSuffix: NSAttributedString?,
