@@ -7,6 +7,22 @@
 
 import UIKit
 
+private final class STBottomSheetRootView: UIView {
+    weak var interactiveContentView: UIView?
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let hitView = super.hitTest(point, with: event) else {
+            return nil
+        }
+        guard let interactiveContentView else {
+            return hitView
+        }
+
+        let contentPoint = interactiveContentView.convert(point, from: self)
+        return interactiveContentView.bounds.contains(contentPoint) ? hitView : nil
+    }
+}
+
 open class STBottomSheetViewController: UIViewController {
 
     open weak var contentScrollView: UIScrollView?
@@ -44,6 +60,13 @@ open class STBottomSheetViewController: UIViewController {
 
     private var fullOffset: CGFloat {
         return self.containerHeight - self.fullHeight
+    }
+
+    open override func loadView() {
+        let rootView = STBottomSheetRootView()
+        rootView.backgroundColor = .clear
+        rootView.interactiveContentView = self.contentView
+        self.view = rootView
     }
 
     open override func viewDidLoad() {
