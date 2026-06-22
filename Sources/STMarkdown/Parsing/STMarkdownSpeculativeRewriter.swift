@@ -125,28 +125,62 @@ final class STPartialStrongSpeculativeRewriter: MarkupRewriter {
 // MARK: - Text 扩展：匹配尾部部分标记
 
 extension Text {
-    /// 匹配尾部未闭合的 `**...` 或 `__...` 标记
+    /// 匹配尾部未闭合的 `**...` 或 `__...` 标记。
+    ///
+    /// 旧实现用贪婪正则 `(?:\\*\\*|__).*$`，由于 `.*$` 贪婪，`ranges(of:)` 永远只产出
+    /// 一个从**第一个** `**` 到末尾的匹配，`ranges.count == 1` 守卫永远为真。
+    /// 当 Text 节点含多个 `**`/`__`（如 `"A **b **c"`）时，推测重写把第二个标记
+    /// 卷进 Strong 内容，造成字面标记泄漏。
+    ///
+    /// 修复：显式统计所有 `**`/`__` 出现次数；奇数个时从**最后**一个位置到末尾返回 range，
+    /// 确保推测内容中不再含其他同类标记；偶数个时返回 nil，不推测。
     func matchesPartialStrong() -> Range<String.Index>? {
-        let pattern = try? Regex("(?:\\*\\*|__).*$")
-        guard let regex = pattern else { return nil }
-        let ranges = self.string.ranges(of: regex)
-        guard ranges.count == 1, let range = ranges.first,
-              range.upperBound == self.string.endIndex else {
-            return nil
+        var lastPos: String.Index? = nil
+        var count = 0
+        var search = self.string.startIndex
+        while search < self.string.endIndex {
+            var nearest: Range<String.Index>? = nil
+            for marker in ["**", "__"] {
+                if let r = self.string.range(of: marker, range: search..<self.string.endIndex) {
+                    if nearest == nil || r.lowerBound < nearest!.lowerBound { nearest = r }
+                }
+            }
+            guard let r = nearest else { break }
+            count += 1
+            lastPos = r.lowerBound
+            search = r.upperBound
         }
-        return range
+        guard count % 2 != 0, let pos = lastPos else { return nil }
+        return pos..<self.string.endIndex
     }
 
-    /// 匹配尾部未闭合的 `*...` 或 `_...` 标记
+    /// 匹配尾部未闭合的 `*...` 或 `_...` 标记（单字符 run）。
+    ///
+    /// 与 `matchesPartialStrong` 相同原因，旧实现从第一个 `*`/`_` 开始推测，
+    /// 导致内容中后续标记字面泄漏。修复同上：统计所有单字符标记 run 数量，
+    /// 奇数时从最后一个 run 到末尾返回 range，偶数时 nil。
     func matchesPartialItalic() -> Range<String.Index>? {
-        let pattern = try? Regex("(?:\\*|_).*$")
-        guard let regex = pattern else { return nil }
-        let ranges = self.string.ranges(of: regex)
-        guard ranges.count == 1, let range = ranges.first,
-              range.upperBound == self.string.endIndex else {
-            return nil
+        // 收集所有单字符 * 或 _ 的 run（只取每个 run 的起始位置）
+        var positions: [String.Index] = []
+        var i = self.string.startIndex
+        while i < self.string.endIndex {
+            let ch = self.string[i]
+            if ch == "*" || ch == "_" {
+                let runStart = i
+                var j = i
+                while j < self.string.endIndex, self.string[j] == ch { j = self.string.index(after: j) }
+                let runLen = self.string.distance(from: runStart, to: j)
+                // 仅计奇数长度的 run（偶数 run 是 ** 或 __ 已由 matchesPartialStrong 处理）
+                if runLen % 2 == 1 {
+                    positions.append(runStart)
+                }
+                i = j
+            } else {
+                i = self.string.index(after: i)
+            }
         }
-        return range
+        guard positions.count % 2 != 0, let lastPos = positions.last else { return nil }
+        return lastPos..<self.string.endIndex
     }
 }
 
