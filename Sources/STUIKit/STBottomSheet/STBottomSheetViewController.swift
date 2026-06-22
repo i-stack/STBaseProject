@@ -27,7 +27,9 @@ private final class STBottomSheetRootView: UIView {
 
 open class STBottomSheetViewController: UIViewController {
 
-    open weak var contentScrollView: UIScrollView?
+    open weak var contentScrollView: UIScrollView? {
+        didSet { contentScrollView?.showsVerticalScrollIndicator = false }
+    }
 
     #if DEBUG
     private static let diagnosticsLog = OSLog(
@@ -46,6 +48,13 @@ open class STBottomSheetViewController: UIViewController {
         return 0.5
     }
 
+    /// 子类返回内容的实际总高度（含 safeArea 底部 padding）。
+    /// - nil：沿用比例计算的默认值。
+    /// - 非 nil：以该值为上限，小于默认值时收缩，大于时保持默认值。
+    open var preferredContentHeight: CGFloat? {
+        return nil
+    }
+
     private var containerTopConstraint: NSLayoutConstraint!
 
     private var containerHeight: CGFloat {
@@ -54,11 +63,15 @@ open class STBottomSheetViewController: UIViewController {
     }
 
     private var partialHeight: CGFloat {
-        return self.containerHeight * self.partialHeightRatio
+        let max = self.containerHeight * self.partialHeightRatio
+        guard let preferred = self.preferredContentHeight else { return max }
+        return Swift.min(preferred, max)
     }
 
     private var fullHeight: CGFloat {
-        return max(self.containerHeight - self.topInset, 0)
+        let max = Swift.max(self.containerHeight - self.topInset, 0)
+        guard let preferred = self.preferredContentHeight else { return max }
+        return Swift.min(preferred, max)
     }
 
     private var hiddenOffset: CGFloat {
@@ -110,7 +123,7 @@ open class STBottomSheetViewController: UIViewController {
 
     public func bottomSheetScrollViewDidScroll(_ scrollView: UIScrollView) {
         let currentOffset = self.containerTopConstraint.constant
-        if currentOffset > self.fullOffset + self.fullOffsetTolerance {
+        if currentOffset > self.fullOffset + self.fullOffsetTolerance && scrollView.contentOffset.y > 0 {
             self.logScrollDiagnostics(
                 event: "lockScrollBeforeFull",
                 scrollView: scrollView,
@@ -118,10 +131,7 @@ open class STBottomSheetViewController: UIViewController {
                 force: true
             )
             scrollView.contentOffset = .zero
-            scrollView.showsVerticalScrollIndicator = false
         } else {
-            scrollView.showsVerticalScrollIndicator = true
-
             if scrollView.contentOffset.y < 0 {
                 self.logScrollDiagnostics(
                     event: "pullDownFromTop",
@@ -132,7 +142,11 @@ open class STBottomSheetViewController: UIViewController {
                 self.containerTopConstraint.constant -= scrollView.contentOffset.y
                 scrollView.contentOffset = .zero
             } else {
-                if currentOffset > self.fullOffset {
+                // Only snap back to fullOffset when the user is actively scrolling
+                // upward (contentOffset.y > 0). When contentOffset.y == 0, this
+                // callback was triggered by our own reset inside pullDownFromTop —
+                // snapping here would undo that movement and create an oscillation.
+                if currentOffset > self.fullOffset && scrollView.contentOffset.y > 0 {
                     self.containerTopConstraint.constant = self.fullOffset
                 }
                 self.logScrollDiagnostics(
@@ -213,6 +227,10 @@ open class STBottomSheetViewController: UIViewController {
             let newConstant = self.containerTopConstraint.constant + translation.y
             if newConstant >= self.fullOffset {
                 self.containerTopConstraint.constant = newConstant
+                // Prevent scroll view rubber-band from doubling the sheet movement
+                if newConstant > self.fullOffset {
+                    self.contentScrollView?.contentOffset = .zero
+                }
                 self.logDiagnostics(
                     "sheetOffsetChanged translationY=\(self.diagnosticValue(translation.y)) velocityY=\(self.diagnosticValue(velocity.y)) newOffset=\(self.diagnosticValue(newConstant)) fullOffset=\(self.diagnosticValue(self.fullOffset))"
                 )
@@ -248,12 +266,16 @@ open class STBottomSheetViewController: UIViewController {
         }
 
         let totalTransitionDistance = self.partialOffset - self.fullOffset
-        let currentProgress = (currentOffset - self.fullOffset) / totalTransitionDistance
         if currentOffset <= self.partialOffset {
-            if currentProgress > 0.40 {
-                self.animateToOffset(self.partialOffset)
+            if totalTransitionDistance > 1 {
+                let currentProgress = (currentOffset - self.fullOffset) / totalTransitionDistance
+                if currentProgress > 0.40 {
+                    self.animateToOffset(self.partialOffset)
+                } else {
+                    self.animateToOffset(self.fullOffset)
+                }
             } else {
-                self.animateToOffset(self.fullOffset)
+                self.animateToOffset(self.partialOffset)
             }
         } else {
             let dismissProgress = (currentOffset - self.partialOffset) / (self.hiddenOffset - self.partialOffset)
@@ -281,7 +303,13 @@ open class STBottomSheetViewController: UIViewController {
         }
 
         let location = panGesture.location(in: contentScrollView)
-        let shouldBegin = !contentScrollView.bounds.contains(location)
+        var shouldBegin = !contentScrollView.bounds.contains(location)
+
+        // When scroll is at the top and user is pulling down, let the sheet take over
+        if !shouldBegin && contentScrollView.contentOffset.y <= 0 {
+            shouldBegin = true
+        }
+
         self.logPanDiagnostics(
             event: "shouldBegin=\(shouldBegin)",
             gesture: panGesture,
@@ -390,7 +418,6 @@ extension STBottomSheetViewController: UIGestureRecognizerDelegate {
         guard let panGesture = gestureRecognizer as? UIPanGestureRecognizer else {
             return true
         }
-
         return self.shouldBeginSheetPan(panGesture)
     }
 
@@ -400,11 +427,11 @@ extension STBottomSheetViewController: UIGestureRecognizerDelegate {
 }
 
 public class STBottomSheetPresentationController: UIPresentationController {
+    
     private lazy var dimmingView: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         view.alpha = 0
-
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(self.handleDimmingViewTap))
         view.addGestureRecognizer(tapGesture)
         return view
