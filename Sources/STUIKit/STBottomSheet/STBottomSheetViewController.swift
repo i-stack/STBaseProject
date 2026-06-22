@@ -40,6 +40,8 @@ open class STBottomSheetViewController: UIViewController {
     private var lastScrollDiagnosticsTime: CFTimeInterval = 0
     #endif
 
+    private var isSheetPanning: Bool = false
+
     open var topInset: CGFloat {
         return 106
     }
@@ -139,7 +141,12 @@ open class STBottomSheetViewController: UIViewController {
                     sheetOffset: currentOffset,
                     force: true
                 )
-                self.containerTopConstraint.constant -= scrollView.contentOffset.y
+                // Pan 手势期间 sheet 已由 pan 驱动，跳过 scroll 二次移动。
+                // 无主动触摸时（isDragging=false）说明是上一次手势的橡皮筋惯性，
+                // 同样不移动 sheet，只重置 contentOffset 吸收回弹。
+                if !self.isSheetPanning && scrollView.isDragging {
+                    self.containerTopConstraint.constant -= scrollView.contentOffset.y
+                }
                 scrollView.contentOffset = .zero
             } else {
                 // Only snap back to fullOffset when the user is actively scrolling
@@ -173,11 +180,15 @@ open class STBottomSheetViewController: UIViewController {
 
     func animatePresentationTransition(duration: TimeInterval, completion: @escaping () -> Void) {
         self.containerTopConstraint.constant = self.partialOffset
-        UIView.animate(withDuration: duration, delay: 0, options: .curveEaseInOut, animations: {
-            self.view.layoutIfNeeded()
-        }, completion: { _ in
-            completion()
-        })
+        UIView.animate(
+            withDuration: duration,
+            delay: 0,
+            usingSpringWithDamping: 0.88,
+            initialSpringVelocity: 0.3,
+            options: [],
+            animations: { self.view.layoutIfNeeded() },
+            completion: { _ in completion() }
+        )
     }
 
     func animateDismissalTransition(duration: TimeInterval, completion: @escaping () -> Void) {
@@ -201,6 +212,16 @@ open class STBottomSheetViewController: UIViewController {
             self.contentView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             bottomConstraint
         ])
+        
+        self.contentView.addSubview(self.indicatorView)
+        NSLayoutConstraint.activate([
+            self.indicatorView.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor),
+            self.indicatorView.widthAnchor.constraint(equalToConstant: 38),
+            self.indicatorView.heightAnchor.constraint(equalToConstant: 5),
+            self.indicatorView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 8),
+        ])
+        
+        self.view.bringSubviewToFront(self.indicatorView)
     }
 
     private func setupPanGesture() {
@@ -215,12 +236,19 @@ open class STBottomSheetViewController: UIViewController {
         let velocity = gesture.velocity(in: self.view)
         switch gesture.state {
         case .began:
+            self.isSheetPanning = true
             self.logPanDiagnostics(event: "began", gesture: gesture)
 
         case .changed:
             self.logPanDiagnostics(event: "changed", gesture: gesture)
             if self.isFullScreen, let contentScrollView = self.contentScrollView, contentScrollView.contentOffset.y > 0, translation.y < 0 {
                 self.logPanDiagnostics(event: "ignoreUpwardWhenScrollHasOffset", gesture: gesture)
+                gesture.setTranslation(.zero, in: self.view)
+                return
+            }
+            // Pan began early (contentOffset was near-top but not 0). Hold sheet until scroll
+            // naturally returns to 0 so the user experiences one seamless downward motion.
+            if self.isFullScreen, let contentScrollView = self.contentScrollView, contentScrollView.contentOffset.y > 0, translation.y > 0 {
                 gesture.setTranslation(.zero, in: self.view)
                 return
             }
@@ -238,6 +266,7 @@ open class STBottomSheetViewController: UIViewController {
             }
 
         case .ended, .cancelled:
+            self.isSheetPanning = false
             self.logPanDiagnostics(event: "endedOrCancelled", gesture: gesture)
             self.finishPanGesture(velocity: velocity)
 
@@ -253,15 +282,15 @@ open class STBottomSheetViewController: UIViewController {
         )
         if velocity.y > 600 {
             if currentOffset < self.partialOffset - 50 {
-                self.animateToOffset(self.partialOffset)
+                self.animateToOffset(self.partialOffset, velocity: velocity.y)
             } else {
                 self.animateToDismiss()
             }
             return
         }
-        
+
         if velocity.y < -600 {
-            self.animateToOffset(self.fullOffset)
+            self.animateToOffset(self.fullOffset, velocity: velocity.y)
             return
         }
 
@@ -270,31 +299,40 @@ open class STBottomSheetViewController: UIViewController {
             if totalTransitionDistance > 1 {
                 let currentProgress = (currentOffset - self.fullOffset) / totalTransitionDistance
                 if currentProgress > 0.40 {
-                    self.animateToOffset(self.partialOffset)
+                    self.animateToOffset(self.partialOffset, velocity: velocity.y)
                 } else {
-                    self.animateToOffset(self.fullOffset)
+                    self.animateToOffset(self.fullOffset, velocity: velocity.y)
                 }
             } else {
-                self.animateToOffset(self.partialOffset)
+                self.animateToOffset(self.partialOffset, velocity: velocity.y)
             }
         } else {
             let dismissProgress = (currentOffset - self.partialOffset) / (self.hiddenOffset - self.partialOffset)
             if dismissProgress > 0.35 {
                 self.animateToDismiss()
             } else {
-                self.animateToOffset(self.partialOffset)
+                self.animateToOffset(self.partialOffset, velocity: velocity.y)
             }
         }
     }
 
-    private func animateToOffset(_ offset: CGFloat) {
+    private func animateToOffset(_ offset: CGFloat, velocity: CGFloat = 0) {
+        let distance = abs(offset - self.containerTopConstraint.constant)
         self.containerTopConstraint.constant = offset
         self.logDiagnostics(
             "animateToOffset target=\(self.diagnosticValue(offset)) fullOffset=\(self.diagnosticValue(self.fullOffset)) partialOffset=\(self.diagnosticValue(self.partialOffset)) hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
         )
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut, animations: {
-            self.view.layoutIfNeeded()
-        }, completion: nil)
+        // 将手势速度归一化为 spring initialVelocity（单位：总位移/秒），上限 30 防止过度弹跳
+        let springVelocity: CGFloat = distance > 1 ? min(abs(velocity) / distance, 30) : 0
+        UIView.animate(
+            withDuration: 0.5,
+            delay: 0,
+            usingSpringWithDamping: 0.82,
+            initialSpringVelocity: springVelocity,
+            options: [.allowUserInteraction],
+            animations: { self.view.layoutIfNeeded() },
+            completion: nil
+        )
     }
 
     private func shouldBeginSheetPan(_ panGesture: UIPanGestureRecognizer) -> Bool {
@@ -308,6 +346,15 @@ open class STBottomSheetViewController: UIViewController {
         // When scroll is at the top and user is pulling down, let the sheet take over
         if !shouldBegin && contentScrollView.contentOffset.y <= 0 {
             shouldBegin = true
+        }
+
+        // Allow pan to start early when pulling down with scroll near top (e.g. rubber-band residue).
+        // The .changed handler will hold sheet movement until contentOffset actually reaches 0.
+        if !shouldBegin {
+            let velocity = panGesture.velocity(in: self.view)
+            if velocity.y > 0 && contentScrollView.contentOffset.y < 60 {
+                shouldBegin = true
+            }
         }
 
         self.logPanDiagnostics(
@@ -403,12 +450,22 @@ open class STBottomSheetViewController: UIViewController {
         #endif
     }
     
-    public let contentView: UIView = {
+    public lazy var indicatorView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemBackground
-        view.layer.cornerRadius = 24
-        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.backgroundColor = UIColor.color(hex: "#A9A8A4")
+        view.layer.cornerRadius = 2.5
         view.clipsToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    public lazy var contentView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 24
+        view.clipsToBounds = true
+        view.backgroundColor = .systemBackground
+        view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
 }
