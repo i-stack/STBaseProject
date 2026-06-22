@@ -5,9 +5,11 @@
 //  Created by 寒江孤影 on 2026/6/16.
 //
 
+import os
 import UIKit
 
 private final class STBottomSheetRootView: UIView {
+    
     weak var interactiveContentView: UIView?
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -27,8 +29,17 @@ open class STBottomSheetViewController: UIViewController {
 
     open weak var contentScrollView: UIScrollView?
 
+    #if DEBUG
+    private static let diagnosticsLog = OSLog(
+        subsystem: Bundle.main.bundleIdentifier ?? "app",
+        category: "STBottomSheet"
+    )
+
+    private var lastScrollDiagnosticsTime: CFTimeInterval = 0
+    #endif
+
     open var topInset: CGFloat {
-        return 100
+        return 106
     }
 
     open var partialHeightRatio: CGFloat {
@@ -62,6 +73,12 @@ open class STBottomSheetViewController: UIViewController {
         return self.containerHeight - self.fullHeight
     }
 
+    private let fullOffsetTolerance: CGFloat = 24
+
+    private var isFullScreen: Bool {
+        return abs(self.containerTopConstraint.constant - self.fullOffset) < self.fullOffsetTolerance
+    }
+
     open override func loadView() {
         let rootView = STBottomSheetRootView()
         rootView.backgroundColor = .clear
@@ -93,15 +110,37 @@ open class STBottomSheetViewController: UIViewController {
 
     public func bottomSheetScrollViewDidScroll(_ scrollView: UIScrollView) {
         let currentOffset = self.containerTopConstraint.constant
-        if currentOffset > self.fullOffset + 1 {
+        if currentOffset > self.fullOffset + self.fullOffsetTolerance {
+            self.logScrollDiagnostics(
+                event: "lockScrollBeforeFull",
+                scrollView: scrollView,
+                sheetOffset: currentOffset,
+                force: true
+            )
             scrollView.contentOffset = .zero
             scrollView.showsVerticalScrollIndicator = false
         } else {
             scrollView.showsVerticalScrollIndicator = true
 
             if scrollView.contentOffset.y < 0 {
+                self.logScrollDiagnostics(
+                    event: "pullDownFromTop",
+                    scrollView: scrollView,
+                    sheetOffset: currentOffset,
+                    force: true
+                )
                 self.containerTopConstraint.constant -= scrollView.contentOffset.y
                 scrollView.contentOffset = .zero
+            } else {
+                if currentOffset > self.fullOffset {
+                    self.containerTopConstraint.constant = self.fullOffset
+                }
+                self.logScrollDiagnostics(
+                    event: "scroll",
+                    scrollView: scrollView,
+                    sheetOffset: currentOffset,
+                    force: false
+                )
             }
         }
     }
@@ -154,6 +193,7 @@ open class STBottomSheetViewController: UIViewController {
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handlePanGesture(_:)))
         panGesture.delegate = self
         self.view.addGestureRecognizer(panGesture)
+        self.logDiagnostics("setupPanGesture")
     }
 
     @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
@@ -161,21 +201,26 @@ open class STBottomSheetViewController: UIViewController {
         let velocity = gesture.velocity(in: self.view)
         switch gesture.state {
         case .began:
-            break
+            self.logPanDiagnostics(event: "began", gesture: gesture)
 
         case .changed:
-            let isFullScreen = abs(self.containerTopConstraint.constant - self.fullOffset) < 5
-            if isFullScreen, let contentScrollView = self.contentScrollView, contentScrollView.contentOffset.y > 0, translation.y < 0 {
+            self.logPanDiagnostics(event: "changed", gesture: gesture)
+            if self.isFullScreen, let contentScrollView = self.contentScrollView, contentScrollView.contentOffset.y > 0, translation.y < 0 {
+                self.logPanDiagnostics(event: "ignoreUpwardWhenScrollHasOffset", gesture: gesture)
                 gesture.setTranslation(.zero, in: self.view)
                 return
             }
             let newConstant = self.containerTopConstraint.constant + translation.y
             if newConstant >= self.fullOffset {
                 self.containerTopConstraint.constant = newConstant
+                self.logDiagnostics(
+                    "sheetOffsetChanged translationY=\(self.diagnosticValue(translation.y)) velocityY=\(self.diagnosticValue(velocity.y)) newOffset=\(self.diagnosticValue(newConstant)) fullOffset=\(self.diagnosticValue(self.fullOffset))"
+                )
                 gesture.setTranslation(.zero, in: self.view)
             }
 
         case .ended, .cancelled:
+            self.logPanDiagnostics(event: "endedOrCancelled", gesture: gesture)
             self.finishPanGesture(velocity: velocity)
 
         default:
@@ -185,6 +230,9 @@ open class STBottomSheetViewController: UIViewController {
 
     private func finishPanGesture(velocity: CGPoint) {
         let currentOffset = self.containerTopConstraint.constant
+        self.logDiagnostics(
+            "finishPan velocityY=\(self.diagnosticValue(velocity.y)) currentOffset=\(self.diagnosticValue(currentOffset)) fullOffset=\(self.diagnosticValue(self.fullOffset)) partialOffset=\(self.diagnosticValue(self.partialOffset)) hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
+        )
         if velocity.y > 600 {
             if currentOffset < self.partialOffset - 50 {
                 self.animateToOffset(self.partialOffset)
@@ -219,9 +267,112 @@ open class STBottomSheetViewController: UIViewController {
 
     private func animateToOffset(_ offset: CGFloat) {
         self.containerTopConstraint.constant = offset
+        self.logDiagnostics(
+            "animateToOffset target=\(self.diagnosticValue(offset)) fullOffset=\(self.diagnosticValue(self.fullOffset)) partialOffset=\(self.diagnosticValue(self.partialOffset)) hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
+        )
         UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut, animations: {
             self.view.layoutIfNeeded()
         }, completion: nil)
+    }
+
+    private func shouldBeginSheetPan(_ panGesture: UIPanGestureRecognizer) -> Bool {
+        guard self.isFullScreen, let contentScrollView = self.contentScrollView else {
+            return true
+        }
+
+        let location = panGesture.location(in: contentScrollView)
+        let shouldBegin = !contentScrollView.bounds.contains(location)
+        self.logPanDiagnostics(
+            event: "shouldBegin=\(shouldBegin)",
+            gesture: panGesture,
+            contentScrollView: contentScrollView,
+            location: location
+        )
+        return shouldBegin
+    }
+
+    private func diagnosticValue(_ value: CGFloat) -> String {
+        return String(format: "%.2f", Double(value))
+    }
+
+    private func diagnosticValue(_ value: Double) -> String {
+        return String(format: "%.2f", value)
+    }
+
+    private func logDiagnostics(_ message: String) {
+        #if DEBUG
+        os_log(.default, log: Self.diagnosticsLog, "[STBottomSheet] %{public}@", message)
+        #endif
+    }
+
+    private func logScrollDiagnostics(event: String, scrollView: UIScrollView, sheetOffset: CGFloat, force: Bool) {
+        #if DEBUG
+        if !force {
+            let now = CFAbsoluteTimeGetCurrent()
+            guard now - self.lastScrollDiagnosticsTime > 0.20 else {
+                return
+            }
+            self.lastScrollDiagnosticsTime = now
+        }
+
+        os_log(
+            .default,
+            log: Self.diagnosticsLog,
+            "[STBottomSheet][Scroll] %{public}@ isFull=%{public}@ sheetOffset=%{public}@ fullOffset=%{public}@ delta=%{public}@ contentOffsetY=%{public}@ adjustedTop=%{public}@ contentSizeH=%{public}@ boundsH=%{public}@ scroll=%{public}@",
+            event,
+            "\(self.isFullScreen)",
+            self.diagnosticValue(sheetOffset),
+            self.diagnosticValue(self.fullOffset),
+            self.diagnosticValue(sheetOffset - self.fullOffset),
+            self.diagnosticValue(scrollView.contentOffset.y),
+            self.diagnosticValue(scrollView.adjustedContentInset.top),
+            self.diagnosticValue(scrollView.contentSize.height),
+            self.diagnosticValue(scrollView.bounds.height),
+            String(describing: type(of: scrollView))
+        )
+        #endif
+    }
+
+    private func logPanDiagnostics(event: String, gesture: UIPanGestureRecognizer) {
+        #if DEBUG
+        self.logPanDiagnostics(
+            event: event,
+            gesture: gesture,
+            contentScrollView: self.contentScrollView,
+            location: self.contentScrollView.map { gesture.location(in: $0) }
+        )
+        #endif
+    }
+
+    private func logPanDiagnostics(event: String, gesture: UIPanGestureRecognizer, contentScrollView: UIScrollView?, location: CGPoint?) {
+        #if DEBUG
+        let translation = gesture.translation(in: self.view)
+        let velocity = gesture.velocity(in: self.view)
+        let contentOffsetY = contentScrollView?.contentOffset.y ?? .nan
+        let adjustedTop = contentScrollView?.adjustedContentInset.top ?? .nan
+        let locationX = location?.x ?? .nan
+        let locationY = location?.y ?? .nan
+        let inScroll = location.map { contentScrollView?.bounds.contains($0) ?? false } ?? false
+
+        os_log(
+            .default,
+            log: Self.diagnosticsLog,
+            "[STBottomSheet][Pan] %{public}@ state=%{public}ld isFull=%{public}@ sheetOffset=%{public}@ fullOffset=%{public}@ translationY=%{public}@ velocityY=%{public}@ inScroll=%{public}@ location=(%{public}@,%{public}@) contentOffsetY=%{public}@ adjustedTop=%{public}@ scroll=%{public}@",
+            event,
+            gesture.state.rawValue,
+            "\(self.isFullScreen)",
+            self.diagnosticValue(self.containerTopConstraint.constant),
+            self.diagnosticValue(self.fullOffset),
+            self.diagnosticValue(translation.y),
+            self.diagnosticValue(velocity.y),
+            "\(inScroll)",
+            self.diagnosticValue(locationX),
+            self.diagnosticValue(locationY),
+            self.diagnosticValue(contentOffsetY),
+            self.diagnosticValue(adjustedTop),
+            contentScrollView.map { String(describing: type(of: $0)) } ?? "nil"
+        )
+        #endif
     }
     
     public let contentView: UIView = {
@@ -240,12 +391,7 @@ extension STBottomSheetViewController: UIGestureRecognizerDelegate {
             return true
         }
 
-        let isFullScreen = abs(self.containerTopConstraint.constant - self.fullOffset) < 5
-        guard isFullScreen, let contentScrollView = self.contentScrollView, contentScrollView.contentOffset.y > 0 else {
-            return true
-        }
-
-        return panGesture.velocity(in: self.view).y <= 0
+        return self.shouldBeginSheetPan(panGesture)
     }
 
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
