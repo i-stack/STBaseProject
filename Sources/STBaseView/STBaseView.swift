@@ -46,6 +46,14 @@ open class STBaseView: UIView {
     
     private var _tableView: UITableView?
     private var _collectionView: UICollectionView?
+    /// 当前由 STBaseView 管理的 tableView 约束。
+    /// 外部赋值时会自动停用旧约束并激活新约束。
+    public var tableViewConstraints: [NSLayoutConstraint] = [] {
+        didSet {
+            NSLayoutConstraint.deactivate(oldValue)
+            NSLayoutConstraint.activate(self.tableViewConstraints)
+        }
+    }
     /// 标记 _tableView 是否由 STBaseView 内部懒创建（true）还是外部注入（false），
     /// 用于 st_tableViewStyle 判断是否允许销毁重建。
     private var _isInternallyCreatedTableView: Bool = false
@@ -231,12 +239,12 @@ open class STBaseView: UIView {
         let table = self.tableView
         self.addSubview(table)
         table.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
+        self.tableViewConstraints = [
             table.topAnchor.constraint(equalTo: topAnchor),
             table.leadingAnchor.constraint(equalTo: leadingAnchor),
             table.trailingAnchor.constraint(equalTo: trailingAnchor),
             table.bottomAnchor.constraint(equalTo: bottomAnchor)
-        ])
+        ]
     }
 
     private func installCollectionStructure() {
@@ -389,6 +397,11 @@ open class STBaseView: UIView {
         if !found {
             STLog("⚠️ STBaseView: last subview doesn't have bottom constraint to contentView. Add st_setBottomConstraintForLastSubview(_:,offset:)")
         }
+    }
+    
+    public func deactivateBaseTableViewEdgeConstraints() {
+        guard self.st_getTableView() != nil else { return }
+        self.tableViewConstraints.removeAll()
     }
     
     /// table 模式内部使用的 UITableView；外部通过 st_getTableView() 访问。
