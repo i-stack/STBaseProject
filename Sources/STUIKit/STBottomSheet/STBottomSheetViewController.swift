@@ -475,6 +475,10 @@ extension STBottomSheetViewController: UIGestureRecognizerDelegate {
         guard let panGesture = gestureRecognizer as? UIPanGestureRecognizer else {
             return true
         }
+        let velocity = panGesture.velocity(in: self.view)
+        if abs(velocity.x) > abs(velocity.y) {
+            return false
+        }
         return self.shouldBeginSheetPan(panGesture)
     }
 

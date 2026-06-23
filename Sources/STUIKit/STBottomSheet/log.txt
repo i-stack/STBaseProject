@@ -1,0 +1,52 @@
+[STBottomSheet][Pan] began state=1 isFull=false sheetOffset=422.00 fullOffset=106.00 translationY=0.00 velocityY=46.08 inScroll=true location=(184.33,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=422.00 fullOffset=106.00 translationY=0.00 velocityY=36.86 inScroll=true location=(180.00,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=36.86 newOffset=422.00 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=422.00 fullOffset=106.00 translationY=0.00 velocityY=0.00 inScroll=true location=(174.67,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=0.00 newOffset=422.00 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=422.00 fullOffset=106.00 translationY=-0.33 velocityY=-3.95 inScroll=true location=(168.67,67.67) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=-0.33 velocityY=-3.95 newOffset=421.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=421.67 fullOffset=106.00 translationY=-0.67 velocityY=-31.80 inScroll=true location=(164.00,67.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=-0.67 velocityY=-31.80 newOffset=421.00 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=421.00 fullOffset=106.00 translationY=-1.67 velocityY=-83.78 inScroll=true location=(155.00,66.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=-1.67 velocityY=-83.78 newOffset=419.33 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=419.33 fullOffset=106.00 translationY=-2.67 velocityY=-111.65 inScroll=true location=(144.33,65.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=-2.67 velocityY=-111.65 newOffset=416.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=416.67 fullOffset=106.00 translationY=-2.33 velocityY=-157.75 inScroll=true location=(133.33,65.67) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=-2.33 velocityY=-157.75 newOffset=414.33 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=414.33 fullOffset=106.00 translationY=-0.67 velocityY=-117.19 inScroll=true location=(120.33,67.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=-0.67 velocityY=-117.19 newOffset=413.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=413.67 fullOffset=106.00 translationY=0.00 velocityY=-31.47 inScroll=true location=(107.00,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=-31.47 newOffset=413.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=413.67 fullOffset=106.00 translationY=0.00 velocityY=0.00 inScroll=true location=(91.67,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=0.00 newOffset=413.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=413.67 fullOffset=106.00 translationY=0.00 velocityY=0.00 inScroll=true location=(77.33,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=0.00 newOffset=413.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=413.67 fullOffset=106.00 translationY=0.33 velocityY=3.96 inScroll=true location=(63.67,68.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.33 velocityY=3.96 newOffset=414.00 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=414.00 fullOffset=106.00 translationY=0.33 velocityY=19.81 inScroll=true location=(50.33,68.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.33 velocityY=19.81 newOffset=414.33 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=414.33 fullOffset=106.00 translationY=0.00 velocityY=15.86 inScroll=true location=(38.00,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=15.86 newOffset=414.33 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=414.33 fullOffset=106.00 translationY=0.00 velocityY=0.00 inScroll=true location=(28.00,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=0.00 newOffset=414.33 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=414.33 fullOffset=106.00 translationY=-2.33 velocityY=-27.48 inScroll=true location=(17.00,65.67) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=-2.33 velocityY=-27.48 newOffset=412.00 fullOffset=106.00
+[STBottomSheet][Pan] endedOrCancelled state=3 isFull=false sheetOffset=412.00 fullOffset=106.00 translationY=0.00 velocityY=-27.48 inScroll=true location=(17.00,68.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] finishPan velocityY=-27.48 currentOffset=412.00 fullOffset=106.00 partialOffset=422.00 hiddenOffset=844.00
+[STBottomSheet] animateToOffset target=422.00 fullOffset=106.00 partialOffset=422.00 hiddenOffset=844.00
+[STBottomSheet][Pan] began state=1 isFull=false sheetOffset=422.00 fullOffset=106.00 translationY=0.00 velocityY=94.75 inScroll=true location=(68.33,52.67) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=422.00 fullOffset=106.00 translationY=0.00 velocityY=75.80 inScroll=true location=(77.00,52.67) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=0.00 velocityY=75.80 newOffset=422.00 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=422.00 fullOffset=106.00 translationY=1.67 velocityY=20.14 inScroll=true location=(85.67,54.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=1.67 velocityY=20.14 newOffset=423.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=423.67 fullOffset=106.00 translationY=3.00 velocityY=116.45 inScroll=true location=(97.00,55.67) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=3.00 velocityY=116.45 newOffset=426.67 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=426.67 fullOffset=106.00 translationY=4.33 velocityY=194.38 inScroll=true location=(111.67,57.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=4.33 velocityY=194.38 newOffset=431.00 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=431.00 fullOffset=106.00 translationY=5.33 velocityY=268.89 inScroll=true location=(130.33,58.00) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=5.33 velocityY=268.89 newOffset=436.33 fullOffset=106.00
+[STBottomSheet][Pan] changed state=2 isFull=false sheetOffset=436.33 fullOffset=106.00 translationY=2.67 velocityY=294.13 inScroll=true location=(150.67,55.33) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] sheetOffsetChanged translationY=2.67 velocityY=294.13 newOffset=439.00 fullOffset=106.00
+[STBottomSheet][Pan] endedOrCancelled state=3 isFull=false sheetOffset=439.00 fullOffset=106.00 translationY=0.00 velocityY=294.13 inScroll=true location=(150.67,52.67) contentOffsetY=0.00 adjustedTop=0.00 scroll=UICollectionView
+[STBottomSheet] finishPan velocityY=294.13 currentOffset=439.00 fullOffset=106.00 partialOffset=422.00 hiddenOffset=844.00
+[STBottomSheet] animateToOffset target=422.00 fullOffset=106.00 partialOffset=422.00 hiddenOffset=844.00
