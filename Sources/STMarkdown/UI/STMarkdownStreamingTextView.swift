@@ -345,7 +345,19 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         advancedRenderers: STMarkdownAdvancedRenderers,
         engine: STMarkdownEngine
     ) {
-        super.applyConfigurationCommon(style: style, advancedRenderers: advancedRenderers, engine: engine)
+        var finalEngine = engine
+        if style.streamSpeculativeRewriteEnabled {
+            let isStreamingParser = engine.pipeline.parser is STMarkdownStructureParser && (engine.pipeline.parser as! STMarkdownStructureParser).hasActiveSpeculativeRewriters
+            if !isStreamingParser {
+                let streamingParser = STMarkdownStructureParser.streamingParser()
+                finalEngine = STMarkdownEngine(
+                    configuration: engine.pipeline.configuration,
+                    parser: streamingParser,
+                    renderAdapter: engine.pipeline.renderAdapter
+                )
+            }
+        }
+        super.applyConfigurationCommon(style: style, advancedRenderers: advancedRenderers, engine: finalEngine)
         self.syncTokenFadeDurationFromStyle()
     }
 
@@ -839,7 +851,52 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         working = Self.stripUnclosedDollarMathBlockTail(in: working)
         working = Self.stripUnclosedInlineTailMarkers(in: working)
         working = Self.stripBareTaskListPrefix(in: working)
+        working = Self.stripBareHeadingPrefix(in: working)
+        working = Self.stripBareBlockquotePrefix(in: working)
+        working = Self.stripBareListPrefix(in: working)
         return working
+    }
+
+    /// 末行仅为 Heading 前缀（如 `##`）且无后续文字时，暂时隐藏，
+    /// 避免流式过程中 "##" 字面字符闪一下。
+    private static func stripBareHeadingPrefix(in markdown: String) -> String {
+        let ns = markdown as NSString
+        let newline = ns.range(of: "\n", options: .backwards)
+        let lastLineStart = newline.location == NSNotFound ? 0 : newline.location + newline.length
+        let lastLine = ns.substring(from: lastLineStart)
+        let lineRange = NSRange(location: 0, length: (lastLine as NSString).length)
+        guard Self.bareHeadingPrefixRegex.firstMatch(in: lastLine, options: [], range: lineRange) != nil else {
+            return markdown
+        }
+        return ns.substring(to: lastLineStart)
+    }
+
+    /// 末行仅为 Blockquote 前缀（如 `>`）且无后续文字时，暂时隐藏，
+    /// 避免流式过程中 ">" 字面字符闪一下。
+    private static func stripBareBlockquotePrefix(in markdown: String) -> String {
+        let ns = markdown as NSString
+        let newline = ns.range(of: "\n", options: .backwards)
+        let lastLineStart = newline.location == NSNotFound ? 0 : newline.location + newline.length
+        let lastLine = ns.substring(from: lastLineStart)
+        let lineRange = NSRange(location: 0, length: (lastLine as NSString).length)
+        guard Self.bareBlockquotePrefixRegex.firstMatch(in: lastLine, options: [], range: lineRange) != nil else {
+            return markdown
+        }
+        return ns.substring(to: lastLineStart)
+    }
+
+    /// 末行仅为列表标记前缀（如 `-` 或 `1.`）且无后续文字时，暂时隐藏，
+    /// 避免流式过程中 "- " 等字面字符闪一下。
+    private static func stripBareListPrefix(in markdown: String) -> String {
+        let ns = markdown as NSString
+        let newline = ns.range(of: "\n", options: .backwards)
+        let lastLineStart = newline.location == NSNotFound ? 0 : newline.location + newline.length
+        let lastLine = ns.substring(from: lastLineStart)
+        let lineRange = NSRange(location: 0, length: (lastLine as NSString).length)
+        guard Self.bareListPrefixRegex.firstMatch(in: lastLine, options: [], range: lineRange) != nil else {
+            return markdown
+        }
+        return ns.substring(to: lastLineStart)
     }
 
     /// 若源字符串包含奇数个 ``` fence，则截断到最后一个 fence 之前（保留其前的换行），
@@ -1008,6 +1065,21 @@ public final class STMarkdownStreamingTextView: STMarkdownBaseTextView {
         return Self.unorderedListMarkerRegex.firstMatch(in: text, options: [], range: range) != nil
             || Self.orderedListMarkerRegex.firstMatch(in: text, options: [], range: range) != nil
     }
+
+    private static let bareHeadingPrefixRegex = try! NSRegularExpression(
+        pattern: #"^[ \t]*[#]{1,6}[ \t]*$"#,
+        options: []
+    )
+
+    private static let bareBlockquotePrefixRegex = try! NSRegularExpression(
+        pattern: #"^[ \t]*>[ \t]*$"#,
+        options: []
+    )
+
+    private static let bareListPrefixRegex = try! NSRegularExpression(
+        pattern: #"^[ \t]*(?:[-*+]|\d+\.)[ \t]*$"#,
+        options: []
+    )
 
     private static let orderedListMarkerRegex = try! NSRegularExpression(
         pattern: #"(?m)^\t*\d+\.\t"#,

@@ -30,6 +30,11 @@ public struct STMarkdownStructureParser: STMarkdownStructureParsing, Sendable {
         self.speculativeRewriters = speculativeRewriters
     }
 
+    /// 是否包含活跃的推测重写器
+    public var hasActiveSpeculativeRewriters: Bool {
+        !self.speculativeRewriters.isEmpty
+    }
+
     public func parse(_ markdown: String) -> STMarkdownDocument {
         guard markdown.isEmpty == false else {
             return STMarkdownDocument(blocks: [])
