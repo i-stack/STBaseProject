@@ -38,7 +38,8 @@ open class STCustomTabBarController: UITabBarController {
         self.view.bringSubviewToFront(self.customTabBar)
     }
 
-    private func shouldUseSystemTabBar() -> Bool {
+    /// 默认在 iOS 26.0 以上默认开启，子类可重载这个方法返回 false 关闭
+    open func shouldUseSystemTabBar() -> Bool {
         if #available(iOS 26.0, *) {
             return true
         }
