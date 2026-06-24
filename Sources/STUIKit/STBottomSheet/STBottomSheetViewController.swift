@@ -123,6 +123,10 @@ open class STBottomSheetViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
 
+    public func snapToPreferredHeight() {
+        self.animateToOffset(self.partialOffset)
+    }
+
     public func bottomSheetScrollViewDidScroll(_ scrollView: UIScrollView) {
         let currentOffset = self.containerTopConstraint.constant
         if currentOffset > self.fullOffset + self.fullOffsetTolerance && scrollView.contentOffset.y > 0 {
