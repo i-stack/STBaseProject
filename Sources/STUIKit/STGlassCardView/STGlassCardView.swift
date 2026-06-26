@@ -7,7 +7,7 @@
 
 import UIKit
 
-public class STGlassCardView: UIView {
+open class STGlassCardView: UIView {
 
     public struct ShadowConfiguration: Equatable {
         public var colorLight: UIColor
@@ -18,9 +18,27 @@ public class STGlassCardView: UIView {
         public var offsetDark: CGSize
         public var opacity: Float
 
+        public init(
+            colorLight: UIColor,
+            colorDark: UIColor,
+            radiusLight: CGFloat,
+            radiusDark: CGFloat,
+            offsetLight: CGSize,
+            offsetDark: CGSize,
+            opacity: Float
+        ) {
+            self.colorLight = colorLight
+            self.colorDark = colorDark
+            self.radiusLight = radiusLight
+            self.radiusDark = radiusDark
+            self.offsetLight = offsetLight
+            self.offsetDark = offsetDark
+            self.opacity = opacity
+        }
+
         public static let `default` = ShadowConfiguration(
-            colorLight: UIColor(hex: "000000").withAlphaComponent(0.08),
-            colorDark: UIColor(hex: "000000").withAlphaComponent(0.35),
+            colorLight: UIColor.color(hex: "000000").withAlphaComponent(0.08),
+            colorDark: UIColor.color(hex: "000000").withAlphaComponent(0.35),
             radiusLight: 20.0,
             radiusDark: 8.0,
             offsetLight: CGSize(width: 0, height: 4),
