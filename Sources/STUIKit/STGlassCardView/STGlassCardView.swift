@@ -185,7 +185,7 @@ open class STGlassCardView: UIView {
         self.shadowConfig = shadowConfig
     }
 
-    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.applyAnimatedShadowStyle(for: self.traitCollection.userInterfaceStyle)
