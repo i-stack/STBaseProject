@@ -2,17 +2,12 @@
 //  STStreamingMarkdownTableHostView.swift
 //  STMarkdown
 //
-//  流式表格抽出宿主：把"活跃中的流式表格"从回复 UITextView 抽出，承载一个独立的
-//  STMarkdownTableView，按行增量更新（复用其内置纯行追加 + 逐行淡入），从而避免
-//  表格行增长触发整段回复文档的 TextKit 全量重排。
+//  Created by 寒江孤影 on 2019/03/16.
 //
 
 import UIKit
 import STBaseProject
 
-/// 流式表格独立宿主视图。
-/// 当 activeBlockKind == .table 时，将表格全文抽出到该视图的 STMarkdownTableView 独立渲染，
-/// 避免逐行增长触发主 UITextView 的全量 TextKit 重排。
 public final class STStreamingMarkdownTableHostView: UIView {
 
     private let tableView: STMarkdownTableView
