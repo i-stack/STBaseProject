@@ -7,28 +7,48 @@
 
 import UIKit
 
-final class STMarkdownTableActionMenu: UIView {
+public enum STMarkdownTableAction {
+    case copyText
+    case copyImage
+    case saveImage
+}
 
-    enum Action {
-        case copyText
-        case copyImage
-        case saveImage
+public enum STMarkdownTableActionMenuIcon {
+    case systemName(String)
+    case image(UIImage)
+}
+
+public struct STMarkdownTableActionMenuItem {
+    public let title: String
+    public let icon: STMarkdownTableActionMenuIcon
+    public let action: STMarkdownTableAction
+
+    public init(title: String, icon: STMarkdownTableActionMenuIcon, action: STMarkdownTableAction) {
+        self.title = title
+        self.icon = icon
+        self.action = action
     }
 
-    var onSelect: ((Action) -> Void)?
+    public static let defaultItems: [STMarkdownTableActionMenuItem] = [
+        STMarkdownTableActionMenuItem(title: "复制", icon: .systemName("doc.on.doc"), action: .copyText),
+        STMarkdownTableActionMenuItem(title: "复制为图片", icon: .systemName("photo"), action: .copyImage),
+        STMarkdownTableActionMenuItem(title: "保存到相册", icon: .systemName("square.and.arrow.down"), action: .saveImage)
+    ]
+}
+
+final class STMarkdownTableActionMenu: UIView {
+
+    var onSelect: ((STMarkdownTableAction) -> Void)?
 
     private let card = UIView()
     private let style: STMarkdownStyle
     private let rowHeight: CGFloat = 52
     private let cardWidth: CGFloat = 200
-    private let items: [(title: String, icon: String, action: Action)] = [
-        ("复制", "doc.on.doc", .copyText),
-        ("复制为图片", "photo", .copyImage),
-        ("保存到相册", "square.and.arrow.down", .saveImage)
-    ]
+    private let items: [STMarkdownTableActionMenuItem]
 
-    init(style: STMarkdownStyle) {
+    init(style: STMarkdownStyle, items: [STMarkdownTableActionMenuItem] = STMarkdownTableActionMenuItem.defaultItems) {
         self.style = style
+        self.items = items
         super.init(frame: .zero)
         self.setupCard()
     }
@@ -68,7 +88,7 @@ final class STMarkdownTableActionMenu: UIView {
             titleLabel.frame = CGRect(x: 18, y: 0, width: self.cardWidth - 18 - 48, height: self.rowHeight)
             row.addSubview(titleLabel)
 
-            let iconView = UIImageView(image: UIImage(systemName: item.icon))
+            let iconView = UIImageView(image: item.icon.image)
             iconView.tintColor = textColor
             iconView.contentMode = .scaleAspectFit
             iconView.frame = CGRect(x: self.cardWidth - 18 - 22, y: (self.rowHeight - 22) / 2, width: 22, height: 22)
@@ -84,6 +104,7 @@ final class STMarkdownTableActionMenu: UIView {
     }
 
     func present(in container: UIView, at point: CGPoint) {
+        guard !self.items.isEmpty else { return }
         self.frame = container.bounds
         container.addSubview(self)
         let cardHeight = CGFloat(self.items.count) * self.rowHeight
@@ -127,5 +148,16 @@ final class STMarkdownTableActionMenu: UIView {
             }
         }
         super.touchesBegan(touches, with: event)
+    }
+}
+
+private extension STMarkdownTableActionMenuIcon {
+    var image: UIImage? {
+        switch self {
+        case .systemName(let name):
+            return UIImage(systemName: name)
+        case .image(let image):
+            return image
+        }
     }
 }

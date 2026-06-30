@@ -18,6 +18,7 @@ open class STMarkdownTableDetailViewController: UIViewController {
         }
     }
     public var onPortraitTransitionCompleted: (() -> Void)?
+    public var actionMenuItems: [STMarkdownTableActionMenuItem]
     public let style: STMarkdownStyle
     public let collectionSize: CGSize?
     public let tableViewModel: STMarkdownTableViewModel
@@ -38,10 +39,16 @@ open class STMarkdownTableDetailViewController: UIViewController {
         return self.isRestoringPortraitForDismissal ? .portrait : .landscapeRight
     }
     
-    public init(tableViewModel: STMarkdownTableViewModel, style: STMarkdownStyle, collectionSize: CGSize? = nil) {
+    public init(
+        tableViewModel: STMarkdownTableViewModel,
+        style: STMarkdownStyle,
+        collectionSize: CGSize? = nil,
+        actionMenuItems: [STMarkdownTableActionMenuItem] = STMarkdownTableActionMenuItem.defaultItems
+    ) {
         self.tableViewModel = tableViewModel
         self.style = style
         self.collectionSize = collectionSize
+        self.actionMenuItems = actionMenuItems
         super.init(nibName: nil, bundle: nil)
         self.modalPresentationStyle = .fullScreen
         STOrientationManager.shared.requestInterfaceOrientations(.landscapeRight)
@@ -181,7 +188,7 @@ open class STMarkdownTableDetailViewController: UIViewController {
         guard gesture.state == .began else { return }
         self.actionMenu?.removeFromSuperview()
         let point = gesture.location(in: self.rotationContainer)
-        let menu = STMarkdownTableActionMenu(style: self.style)
+        let menu = STMarkdownTableActionMenu(style: self.style, items: self.actionMenuItems)
         menu.onSelect = { [weak self] action in
             self?.performMenuAction(action)
         }
@@ -189,7 +196,7 @@ open class STMarkdownTableDetailViewController: UIViewController {
         self.actionMenu = menu
     }
 
-    private func performMenuAction(_ action: STMarkdownTableActionMenu.Action) {
+    private func performMenuAction(_ action: STMarkdownTableAction) {
         switch action {
         case .copyText:
             UIPasteboard.general.string = self.tableViewModel.plainText()
