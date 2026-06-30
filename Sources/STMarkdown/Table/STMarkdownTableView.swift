@@ -7,11 +7,6 @@
 
 import UIKit
 
-/// UICollectionView-based 表格视图，替代旧的 UIImage-based 渲染方案。
-/// 借鉴 FluidMarkdown 的 AMMarkdownTableView 设计思想：
-/// - 背景色 = border 色，cell 间隙形成网格线
-/// - section = 行, item = 列
-/// - 支持水平滚动（宽表自然溢出）
 public final class STMarkdownTableView: UIView {
 
     /// 表格数据 façade。流式逐行追加（同列数、已有行内容不变、行数严格增多）时，
@@ -34,7 +29,6 @@ public final class STMarkdownTableView: UIView {
 
     private var renderedTableData: STMarkdownTableViewModel?
     private var isApplyingAppend = false
-
 
     public var style: STMarkdownStyle = .default {
         didSet { self.applyStyle(); self.reloadData() }
@@ -129,7 +123,7 @@ public final class STMarkdownTableView: UIView {
 
     private func setupHeader() {
         self.titleLabel.text = "表格"
-        self.titleLabel.font = UIFont.st_systemFont(ofSize: 13, weight: .medium)
+        self.titleLabel.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
 
         self.copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
         self.copyButton.addTarget(self, action: #selector(self.handleCopy), for: .touchUpInside)
