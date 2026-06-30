@@ -1,12 +1,14 @@
+//
+//  STMarkdownStreamingPresentationHelpers.swift
+//  STBaseProject
+//
+//  Created by 寒江孤影 on 2026/06/04.
+//
+
 import Foundation
 
-/// Generic stateless text-stabilization helpers for streaming markdown rendering.
-/// Contains pure text-transformation utilities that have no app-specific state or
-/// business logic. Depends only on other STMarkdown types.
 public enum STMarkdownStreamingTextStabilizer {
-
-    // MARK: - List structure detection
-
+    
     public static func isListLine(_ trimmedLine: String) -> Bool {
         if trimmedLine.hasPrefix("- ")
             || trimmedLine.hasPrefix("+ ")
@@ -27,7 +29,6 @@ public enum STMarkdownStreamingTextStabilizer {
             return false
         }
         let trimmed = lastNonEmpty.trimmingCharacters(in: .whitespaces)
-        // Check both "1. " (standard) and "1) " (flattened-streaming form from flattenStreamingListSyntax)
         for separator: Character in [".", ")"] {
             guard let sepIndex = trimmed.firstIndex(of: separator),
                   sepIndex > trimmed.startIndex else {
@@ -62,8 +63,6 @@ public enum STMarkdownStreamingTextStabilizer {
         }
         return updated
     }
-
-    // MARK: - Stable preview helpers
 
     public static func committedLinePrefix(in text: String) -> String {
         guard let lastNewline = text.lastIndex(of: "\n") else { return "" }
@@ -152,8 +151,6 @@ public enum STMarkdownStreamingTextStabilizer {
         }
         return Self.containsPotentiallyUnstableMarkdownSyntax(stabilized) ? "" : stabilized
     }
-
-    // MARK: - Table helpers
 
     public static func isLikelyStreamingTableHeaderCandidate(_ line: String) -> Bool {
         let trimmed = line.trimmingCharacters(in: .whitespaces)
@@ -252,8 +249,6 @@ public enum STMarkdownStreamingTextStabilizer {
         return STMarkdownStreamingTransforms.trimTrailingMarkerOnlyEmphasisRun(in: text)
     }
 
-    // MARK: - Emphasis / marker helpers
-
     public static func autoCloseTrailingStandaloneStrongLine(in text: String) -> String {
         guard !text.isEmpty else { return text }
         var lines = text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
@@ -292,10 +287,8 @@ public enum STMarkdownStreamingTextStabilizer {
         return count
     }
 
-    /// 在单行中检测最后一个未配对的 marker 并截断。
     public static func trimUnpairedTrailingMarker(in line: String, marker: String, markerLen: Int) -> String {
         var positions: [String.Index] = []
-
         if markerLen == 1 {
             let markerChar = marker.first!
             var i = line.startIndex
@@ -349,8 +342,6 @@ public enum STMarkdownStreamingTextStabilizer {
         let lastUnpairedPos = positions.last!
         return String(line[..<lastUnpairedPos])
     }
-
-    // MARK: - Static regex
 
     public static let unorderedListLineRegex = try! NSRegularExpression(
         pattern: #"^([ \t]{0,3})[-+*]\s+(.+)$"#,

@@ -7,26 +7,14 @@
 
 import UIKit
 
-/// Mermaid 图表 `NSAttributedString` attachment 工厂。
-///
-/// 将渲染完成的 `UIImage` 或"加载中"占位图包装为适合嵌入 `UITextView` 的
-/// `NSTextAttachment`，宽度自动等比缩放至 `renderWidth`。
-///
-/// 与 `STMarkdownMermaidRenderer` 解耦：工厂只负责包装，不负责触发异步渲染。
 public enum STMarkdownMermaidAttachmentFactory {
 
     /// 将渲染完成的 Mermaid 图片包装为内嵌 attachment，宽度等比缩放至 `renderWidth`。
-    public static func imageAttachment(
-        _ image: UIImage,
-        renderWidth: CGFloat
-    ) -> NSAttributedString {
+    public static func imageAttachment(_ image: UIImage, renderWidth: CGFloat) -> NSAttributedString {
         let attachment = NSTextAttachment()
         attachment.image = image
         let scale = image.size.width > 0 ? renderWidth / image.size.width : 1.0
-        attachment.bounds = CGRect(
-            origin: .zero,
-            size: CGSize(width: renderWidth, height: image.size.height * scale)
-        )
+        attachment.bounds = CGRect(origin: .zero, size: CGSize(width: renderWidth, height: image.size.height * scale))
         return NSAttributedString(attachment: attachment)
     }
 

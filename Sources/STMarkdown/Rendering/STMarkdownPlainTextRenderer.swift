@@ -1,3 +1,10 @@
+//
+//  STMarkdownPlainTextRenderer.swift
+//  STBaseProject
+//
+//  Created by 寒江孤影 on 2026/06/04.
+//
+
 import Foundation
 
 public enum STMarkdownPlainTextRenderer {

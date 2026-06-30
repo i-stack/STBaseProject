@@ -8,13 +8,10 @@
 import UIKit
 
 public struct STMarkdownDefaultCodeBlockRenderer: STMarkdownCodeBlockRendering {
+    
     public init() {}
 
-    public func renderCodeBlock(
-        language: String?,
-        code: String,
-        style: STMarkdownStyle
-    ) -> NSAttributedString? {
+    public func renderCodeBlock(language: String?, code: String, style: STMarkdownStyle) -> NSAttributedString? {
         let result = NSMutableAttributedString()
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.minimumLineHeight = style.lineHeight
