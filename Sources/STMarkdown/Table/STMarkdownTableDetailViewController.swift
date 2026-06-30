@@ -2,20 +2,14 @@
 //  STMarkdownTableDetailViewController.swift
 //  STBaseProject
 //
-//  Created by Codex on 2026/05/21.
+//  Created by 寒江孤影 on 2026/05/21.
 //
 
 import UIKit
 
-/// 表格全屏详情页。
-/// - 通过容器旋转 90° 模拟横屏（App 为竖屏锁定，避免改全局方向支持）。
-/// - 顶栏：返回 / 复制 / 下载。
-/// - 长按表格弹出浮层菜单：复制 / 复制为图片 / 保存到相册。
-public final class STMarkdownTableDetailViewController: UIViewController {
-
-    public let tableViewModel: STMarkdownTableViewModel
-    public let style: STMarkdownStyle
-    public let collectionSize: CGSize?
+open class STMarkdownTableDetailViewController: UIViewController {
+    
+    public var onDismiss: (() -> Void)?
     public var onCitationTap: ((String) -> Void)? {
         didSet {
             if self.isViewLoaded {
@@ -23,58 +17,73 @@ public final class STMarkdownTableDetailViewController: UIViewController {
             }
         }
     }
-
-    /// 横屏内容容器（旋转 90°）。顶栏 + 表格都放在这里，使用横屏逻辑尺寸布局。
-    private let rotationContainer = UIView()
-    private let topBar = UIView()
-
-    private lazy var backButton: UIButton = self.makeToolButton(systemName: "chevron.left", action: #selector(self.handleBack))
-    private lazy var copyButton: UIButton = self.makeToolButton(systemName: "doc.on.doc", action: #selector(self.handleCopy))
-    private lazy var downloadButton: UIButton = self.makeToolButton(systemName: "square.and.arrow.down", action: #selector(self.handleDownload))
+    public var onPortraitTransitionCompleted: (() -> Void)?
+    public let style: STMarkdownStyle
+    public let collectionSize: CGSize?
+    public let tableViewModel: STMarkdownTableViewModel
+    
     private var copyResetWorkItem: DispatchWorkItem?
+    private var isRestoringPortraitForDismissal = false
     private weak var actionMenu: STMarkdownTableActionMenu?
 
-    private lazy var tableView: STMarkdownTableView = {
-        let view = STMarkdownTableView(style: self.style)
-        view.showsHeader = false
-        view.isFullScreenPresentation = true
-        view.tableData = self.tableViewModel
-        return view
-    }()
+    override public var shouldAutorotate: Bool {
+        return true
+    }
 
+    override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return [.portrait, .landscapeRight]
+    }
+
+    override public var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        return self.isRestoringPortraitForDismissal ? .portrait : .landscapeRight
+    }
+    
     public init(tableViewModel: STMarkdownTableViewModel, style: STMarkdownStyle, collectionSize: CGSize? = nil) {
         self.tableViewModel = tableViewModel
         self.style = style
         self.collectionSize = collectionSize
         super.init(nibName: nil, bundle: nil)
         self.modalPresentationStyle = .fullScreen
+        STOrientationManager.shared.requestInterfaceOrientations(.landscapeRight)
     }
 
     @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public override var prefersStatusBarHidden: Bool { true }
-
-    public override func viewDidLoad() {
+    open override func viewDidLoad() {
         super.viewDidLoad()
         self.setupUI()
     }
 
-    public override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        self.layoutRotatedContent()
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        STOrientationManager.shared.requestInterfaceOrientations(.landscapeRight, in: self.view.window?.windowScene)
     }
 
-    // MARK: - Setup
+    open override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        guard self.isBeingDismissed || self.navigationController?.isBeingDismissed == true else { return }
+        STOrientationManager.shared.restoreDefaultInterfaceOrientations(in: self.view.window?.windowScene)
+    }
 
-    private func setupUI() {
+    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        guard self.isRestoringPortraitForDismissal else { return }
+        coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+            self?.onPortraitTransitionCompleted?()
+        }
+    }
+
+    open func setupUI() {
         self.view.backgroundColor = self.style.tableBackgroundColor ?? UIColor.systemBackground
 
+        self.rotationContainer.translatesAutoresizingMaskIntoConstraints = false
         self.rotationContainer.backgroundColor = .clear
         self.view.addSubview(self.rotationContainer)
 
+        self.topBar.translatesAutoresizingMaskIntoConstraints = false
         self.topBar.backgroundColor = .clear
         self.rotationContainer.addSubview(self.topBar)
 
@@ -89,9 +98,21 @@ public final class STMarkdownTableDetailViewController: UIViewController {
         self.topBar.addSubview(buttonStack)
 
         self.tableView.onCitationTap = self.onCitationTap
+        self.tableView.translatesAutoresizingMaskIntoConstraints = false
         self.rotationContainer.addSubview(self.tableView)
 
+        let safeArea = self.rotationContainer.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
+            self.rotationContainer.topAnchor.constraint(equalTo: self.view.topAnchor),
+            self.rotationContainer.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.rotationContainer.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.rotationContainer.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+
+            self.topBar.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 12),
+            self.topBar.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 16),
+            self.topBar.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -16),
+            self.topBar.heightAnchor.constraint(equalToConstant: 44),
+
             self.backButton.leadingAnchor.constraint(equalTo: self.topBar.leadingAnchor),
             self.backButton.centerYAnchor.constraint(equalTo: self.topBar.centerYAnchor),
             self.backButton.widthAnchor.constraint(equalToConstant: 40),
@@ -99,39 +120,18 @@ public final class STMarkdownTableDetailViewController: UIViewController {
 
             buttonStack.trailingAnchor.constraint(equalTo: self.topBar.trailingAnchor),
             buttonStack.centerYAnchor.constraint(equalTo: self.topBar.centerYAnchor),
-            buttonStack.heightAnchor.constraint(equalToConstant: 40)
+            buttonStack.heightAnchor.constraint(equalToConstant: 40),
+
+            self.tableView.topAnchor.constraint(equalTo: self.topBar.bottomAnchor, constant: 8),
+            self.tableView.leadingAnchor.constraint(equalTo: self.topBar.leadingAnchor),
+            self.tableView.trailingAnchor.constraint(equalTo: self.topBar.trailingAnchor),
+            self.tableView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -12)
         ])
 
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.handleLongPress(_:)))
         self.tableView.addGestureRecognizer(longPress)
-    }
-
-    /// 将 rotationContainer 旋转为横屏，并在其中以横屏逻辑尺寸布局顶栏 + 表格。
-    private func layoutRotatedContent() {
-        let bounds = self.view.bounds
-        // 横屏逻辑尺寸：宽高互换
-        let landscapeSize = CGSize(width: bounds.height, height: bounds.width)
-        self.rotationContainer.bounds = CGRect(origin: .zero, size: landscapeSize)
-        self.rotationContainer.center = CGPoint(x: bounds.midX, y: bounds.midY)
-        self.rotationContainer.transform = CGAffineTransform(rotationAngle: .pi / 2)
-
-        // 安全区重映射（顺时针旋转 90°）：容器左=设备上(刘海)、容器右=设备下(Home 指示器)
-        let safe = self.view.safeAreaInsets
-        let leftInset = max(safe.top, 16)
-        let rightInset = max(safe.bottom, 16)
-        let topInset: CGFloat = 12
-        let bottomInset: CGFloat = 12
-        let contentWidth = landscapeSize.width - leftInset - rightInset
-        let topBarHeight: CGFloat = 44
-
-        self.topBar.frame = CGRect(x: leftInset, y: topInset, width: contentWidth, height: topBarHeight)
-        let tableY = self.topBar.frame.maxY + 8
-        self.tableView.frame = CGRect(
-            x: leftInset,
-            y: tableY,
-            width: contentWidth,
-            height: landscapeSize.height - tableY - bottomInset
-        )
+        
+        self.backButton.contentHorizontalAlignment = .left
     }
 
     private func makeToolButton(systemName: String, action: Selector) -> UIButton {
@@ -144,9 +144,14 @@ public final class STMarkdownTableDetailViewController: UIViewController {
         return button
     }
 
-    // MARK: - Top bar actions
-
     @objc private func handleBack() {
+        self.isRestoringPortraitForDismissal = true
+        self.setNeedsUpdateOfSupportedInterfaceOrientations()
+        if let onDismiss {
+            onDismiss()
+            return
+        }
+        STOrientationManager.shared.restoreDefaultInterfaceOrientations(in: self.view.window?.windowScene)
         self.dismiss(animated: true)
     }
 
@@ -171,8 +176,6 @@ public final class STMarkdownTableDetailViewController: UIViewController {
         self.copyResetWorkItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: workItem)
     }
-
-    // MARK: - Long press menu
 
     @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began else { return }
@@ -202,8 +205,6 @@ public final class STMarkdownTableDetailViewController: UIViewController {
         }
     }
 
-    // MARK: - Share
-
     private func presentShareSheet(items: [Any], sourceView: UIView) {
         let activity = UIActivityViewController(activityItems: items, applicationActivities: nil)
         if let popover = activity.popoverPresentationController {
@@ -213,4 +214,35 @@ public final class STMarkdownTableDetailViewController: UIViewController {
         }
         self.present(activity, animated: true)
     }
+    
+    /// 横屏内容容器。顶栏 + 表格都放在这里，跟随系统横屏 bounds 布局。
+    public lazy var rotationContainer: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    public lazy var topBar: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    public lazy var backButton: UIButton = {
+        return self.makeToolButton(systemName: "chevron.left", action: #selector(self.handleBack))
+    }()
+    
+    public lazy var copyButton: UIButton = {
+        return self.makeToolButton(systemName: "doc.on.doc", action: #selector(self.handleCopy))
+    }()
+    
+    public lazy var downloadButton: UIButton = {
+        return self.makeToolButton(systemName: "square.and.arrow.down", action: #selector(self.handleDownload))
+    }()
+    
+    public lazy var tableView: STMarkdownTableView = {
+        let view = STMarkdownTableView(style: self.style)
+        view.showsHeader = false
+        view.isFullScreenPresentation = true
+        view.tableData = self.tableViewModel
+        return view
+    }()
 }

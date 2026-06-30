@@ -8,7 +8,6 @@
 import UIKit
 import WebKit
 
-/// Color-scheme mode for Mermaid chart rendering.
 public enum STMarkdownThemeMode: Sendable, Equatable {
     case light
     case dark
@@ -103,6 +102,7 @@ public class STMarkdownMermaidRenderer: NSObject {
         let themeName = theme.isDark ? "dark" : "default"
         // 反引号模板里只需要转义 `\`、`` ` ``、`$` 三类字符即可。
         let escapedCode = code
+            .replacingOccurrences(of: "\\|", with: "#124;")
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "`", with: "\\`")
             .replacingOccurrences(of: "$", with: "\\$")
@@ -213,15 +213,17 @@ public class STMarkdownMermaidRenderer: NSObject {
         <body>
         <div id="output"></div>
         <script>
-        async function renderMermaid(code, theme, key) {
+        function renderMermaid(code, theme, key) {
           try {
-            // 使用 antiscript 禁用 <script> 注入；flowchart click 仍可用纯文本/URL。
             mermaid.initialize({ startOnLoad: false, theme: theme, securityLevel: 'antiscript' });
             const id = 'mg' + Date.now();
-            const { svg } = await mermaid.render(id, code);
-            document.getElementById('output').innerHTML = svg;
-            const height = document.getElementById('output').scrollHeight;
-            window.webkit.messageHandlers.mermaidDone.postMessage({ key: key, height: height });
+            mermaid.render(id, code).then(function(result) {
+              document.getElementById('output').innerHTML = result.svg;
+              const height = document.getElementById('output').scrollHeight;
+              window.webkit.messageHandlers.mermaidDone.postMessage({ key: key, height: height });
+            }).catch(function(e) {
+              window.webkit.messageHandlers.mermaidError.postMessage({ key: key, error: e.message || String(e) });
+            });
           } catch (e) {
             window.webkit.messageHandlers.mermaidError.postMessage({ key: key, error: e.message || String(e) });
           }

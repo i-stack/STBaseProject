@@ -2,13 +2,11 @@
 //  STMarkdownTableActionMenu.swift
 //  STBaseProject
 //
-//  Created by Codex on 2026/06/04.
+//  Created by 寒江孤影 on 2026/06/04.
 //
 
 import UIKit
 
-/// 表格长按浮层菜单：复制 / 复制为图片 / 保存到相册。
-/// 圆角卡片 + 竖排「标题 + 图标」行，点击外部或选项后自动消失。
 final class STMarkdownTableActionMenu: UIView {
 
     enum Action {
@@ -19,11 +17,10 @@ final class STMarkdownTableActionMenu: UIView {
 
     var onSelect: ((Action) -> Void)?
 
-    private let style: STMarkdownStyle
     private let card = UIView()
+    private let style: STMarkdownStyle
     private let rowHeight: CGFloat = 52
     private let cardWidth: CGFloat = 200
-
     private let items: [(title: String, icon: String, action: Action)] = [
         ("复制", "doc.on.doc", .copyText),
         ("复制为图片", "photo", .copyImage),
@@ -86,19 +83,15 @@ final class STMarkdownTableActionMenu: UIView {
         }
     }
 
-    /// 在 container 内、长按点附近弹出，并对 container 全屏铺一层透明遮罩用于点击外部关闭。
     func present(in container: UIView, at point: CGPoint) {
         self.frame = container.bounds
         container.addSubview(self)
-
         let cardHeight = CGFloat(self.items.count) * self.rowHeight
         var originX = point.x
         var originY = point.y
-        // 防止越界
         originX = min(max(8, originX), container.bounds.width - self.cardWidth - 8)
         originY = min(max(8, originY), container.bounds.height - cardHeight - 8)
         self.card.frame = CGRect(x: originX, y: originY, width: self.cardWidth, height: cardHeight)
-
         self.card.transform = CGAffineTransform(scaleX: 0.92, y: 0.92)
         self.card.alpha = 0
         UIView.animate(withDuration: 0.18, delay: 0, options: [.curveEaseOut]) {
@@ -126,7 +119,6 @@ final class STMarkdownTableActionMenu: UIView {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        // 点击卡片外部关闭
         if let touch = touches.first {
             let location = touch.location(in: self)
             if !self.card.frame.contains(location) {
