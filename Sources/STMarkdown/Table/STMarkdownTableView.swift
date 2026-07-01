@@ -7,7 +7,60 @@
 
 import UIKit
 
-public final class STMarkdownTableView: UIView {
+// MARK: - STMarkdownTableHeaderItem
+
+/// 顶部工具条的单个按钮描述。外界可组合内置工厂方法或自定义，赋给 `STMarkdownTableView.headerItems`。
+public struct STMarkdownTableHeaderItem {
+    public let identifier: String
+    public let image: UIImage?
+    /// handler 在主线程调用，参数为触发按钮的 tableView，便于访问数据或调用 renderFullTableImage()。
+    public let handler: (STMarkdownTableView) -> Void
+
+    public init(identifier: String, image: UIImage?, handler: @escaping (STMarkdownTableView) -> Void) {
+        self.identifier = identifier
+        self.image = image
+        self.handler = handler
+    }
+
+    /// 复制按钮：将表格纯文本写入剪贴板，并触发 onCopyTable 回调。
+    public static func copy() -> STMarkdownTableHeaderItem {
+        STMarkdownTableHeaderItem(
+            identifier: "copy",
+            image: UIImage(systemName: "doc.on.doc")
+        ) { tableView in
+            guard let tableData = tableView.tableData else { return }
+            UIPasteboard.general.string = tableData.plainText()
+            tableView.onCopyTable?()
+            tableView.showCopyFeedback()
+        }
+    }
+
+    /// 下载按钮：触发 onDownloadTable 回调，由宿主实现具体保存逻辑。
+    public static func download() -> STMarkdownTableHeaderItem {
+        STMarkdownTableHeaderItem(
+            identifier: "download",
+            image: UIImage(systemName: "square.and.arrow.down")
+        ) { tableView in
+            guard let tableData = tableView.tableData else { return }
+            tableView.onDownloadTable?(tableData)
+        }
+    }
+
+    /// 全屏按钮：触发 onExpandTable 回调，与长按展开行为一致。
+    public static func fullscreen() -> STMarkdownTableHeaderItem {
+        STMarkdownTableHeaderItem(
+            identifier: "fullscreen",
+            image: UIImage(systemName: "arrow.up.left.and.arrow.down.right")
+        ) { tableView in
+            guard let tableData = tableView.tableData else { return }
+            tableView.onExpandTable?(tableData)
+        }
+    }
+}
+
+// MARK: - STMarkdownTableView
+
+open class STMarkdownTableView: UIView {
 
     /// 表格数据 façade。流式逐行追加（同列数、已有行内容不变、行数严格增多）时，
     /// 用 `performBatchUpdates` 插入新 section 并逐行淡入；否则全量 `reloadData()`。
@@ -31,7 +84,11 @@ public final class STMarkdownTableView: UIView {
     private var isApplyingAppend = false
 
     public var style: STMarkdownStyle = .default {
-        didSet { self.applyStyle(); self.reloadData() }
+        didSet {
+            self.applyStyle()
+            self.applyStyleHeaderItems()
+            self.reloadData()
+        }
     }
 
     public var onCitationTap: ((String) -> Void)?
@@ -39,13 +96,24 @@ public final class STMarkdownTableView: UIView {
     public var onCopyTable: (() -> Void)?
     public var onDownloadTable: ((STMarkdownTableViewModel) -> Void)?
 
+    /// 顶部工具条按钮列表。默认为 [copy, download, fullscreen]，赋新值后立即重建按钮栈。
+    /// 赋空数组可隐藏所有按钮但保留标题行；配合 showsHeader=false 可完全隐藏工具条。
+    public var headerItems: [STMarkdownTableHeaderItem] = [] {
+        didSet { self.rebuildButtonStack() }
+    }
+
+    /// 顶部工具条左侧标题，默认 "表格"。
+    public var headerTitle: String = "表格" {
+        didSet { self.titleLabel.text = self.headerTitle }
+    }
+
     /// 顶部工具条高度（圆角卡片化后预留给「表格 / 复制 / 下载 / 全屏」）。
-    public static let headerHeight: CGFloat = 44
+    public static let headerHeight: CGFloat = 41
     /// 整块表格圆角半径。
     public var cornerRadius: CGFloat = 10 {
         didSet { self.layer.cornerRadius = self.cornerRadius }
     }
-    /// 是否展示顶部工具条。全屏详情页关闭（自带关闭按钮，避免重复表头与“全屏中再全屏”）。
+    /// 是否展示顶部工具条。全屏详情页关闭（自带关闭按钮，避免重复表头与"全屏中再全屏"）。
     public var showsHeader: Bool = true {
         didSet {
             guard oldValue != self.showsHeader else { return }
@@ -55,18 +123,18 @@ public final class STMarkdownTableView: UIView {
         }
     }
 
+    /// 单元格内边距，影响列宽/行高计算，与 computeSize 保持一致。
+    public var cellInsets: UIEdgeInsets = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
+
     private let gridLayout: STMarkdownTableGridLayout
     private let collectionView: UICollectionView
-    private let cellInsets = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
 
     private let headerBar = UIView()
     private let titleLabel = UILabel()
     private let buttonStack = UIStackView()
-    private let copyButton = UIButton(type: .system)
-    private let downloadButton = UIButton(type: .system)
-    private let fullscreenButton = UIButton(type: .system)
     private let headerSeparator = UIView()
     private var copyResetWorkItem: DispatchWorkItem?
+    private weak var copyButtonRef: UIButton?
     private weak var expandGesture: UILongPressGestureRecognizer?
 
     /// 全屏详情态：开启上下/左右滚动条与回弹，并关闭内置「长按展开」手势（由详情页接管长按菜单）。
@@ -88,14 +156,14 @@ public final class STMarkdownTableView: UIView {
         super.init(frame: .zero)
         self.clipsToBounds = true
         self.layer.cornerRadius = self.cornerRadius
-        self.layer.borderWidth = 0.5
+        self.layer.borderWidth = 1
         self.setupCollectionView()
         self.setupHeader()
+        self.headerItems = style.tableHeaderItems ?? self.makeDefaultHeaderItems()
         self.applyStyle()
     }
 
-    @available(*, unavailable)
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -122,28 +190,12 @@ public final class STMarkdownTableView: UIView {
     }
 
     private func setupHeader() {
-        self.titleLabel.text = "表格"
+        self.titleLabel.text = self.headerTitle
         self.titleLabel.font = UIFont.st_systemFont(ofSize: 14, weight: .medium)
-
-        self.copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
-        self.copyButton.addTarget(self, action: #selector(self.handleCopy), for: .touchUpInside)
-        self.downloadButton.setImage(UIImage(systemName: "square.and.arrow.down"), for: .normal)
-        self.downloadButton.addTarget(self, action: #selector(self.handleDownload), for: .touchUpInside)
-        self.fullscreenButton.setImage(UIImage(systemName: "arrow.up.left.and.arrow.down.right"), for: .normal)
-        self.fullscreenButton.addTarget(self, action: #selector(self.handleFullscreen), for: .touchUpInside)
-
-        let imageConfig = UIImage.SymbolConfiguration(pointSize: 15, weight: .regular)
-        for button in [self.copyButton, self.downloadButton, self.fullscreenButton] {
-            button.setPreferredSymbolConfiguration(imageConfig, forImageIn: .normal)
-            button.widthAnchor.constraint(equalToConstant: 30).isActive = true
-        }
 
         self.buttonStack.axis = .horizontal
         self.buttonStack.alignment = .center
         self.buttonStack.spacing = 6
-        self.buttonStack.addArrangedSubview(self.copyButton)
-        self.buttonStack.addArrangedSubview(self.downloadButton)
-        self.buttonStack.addArrangedSubview(self.fullscreenButton)
 
         self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.buttonStack.translatesAutoresizingMaskIntoConstraints = false
@@ -168,22 +220,59 @@ public final class STMarkdownTableView: UIView {
         ])
     }
 
+    /// 从 headerItems 重建 buttonStack 中的所有按钮，每次 headerItems 变更时调用。
+    private func rebuildButtonStack() {
+        self.buttonStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 15, weight: .regular)
+        let buttonWidth = self.style.tableHeaderButtonWidth
+        let secondaryColor = (self.style.tableHeaderTextColor ?? self.style.textColor).withAlphaComponent(0.6)
+
+        for item in self.headerItems {
+            let button = UIButton(type: .system)
+            let isSystemSymbol = item.image?.isSymbolImage ?? false
+            if isSystemSymbol {
+                button.setPreferredSymbolConfiguration(symbolConfig, forImageIn: .normal)
+            }
+            button.setImage(item.image, for: .normal)
+            button.tintColor = secondaryColor
+            button.widthAnchor.constraint(equalToConstant: buttonWidth).isActive = true
+            button.accessibilityIdentifier = item.identifier
+            button.addAction(UIAction { [weak self] _ in
+                guard let self else { return }
+                item.handler(self)
+            }, for: .touchUpInside)
+            if item.identifier == "copy" {
+                self.copyButtonRef = button
+            }
+            self.buttonStack.addArrangedSubview(button)
+        }
+    }
+
     private func applyStyle() {
         let borderColor = self.style.tableBorderColor ?? UIColor.separator
         self.collectionView.backgroundColor = borderColor
         self.backgroundColor = borderColor
         self.gridLayout.interItemSpacing = 0.5
         self.gridLayout.lineSpacing = 0.5
+        self.gridLayout.minimumRowHeight = self.style.tableMinimumRowHeight
         self.layer.borderColor = borderColor.cgColor
+        self.layer.maskedCorners = self.style.tableCornerMask
 
-        let headerBg = self.style.tableBackgroundColor ?? UIColor.secondarySystemBackground
+        let headerBg = self.style.tableHeaderBarBackgroundColor
+            ?? self.style.tableBackgroundColor
+            ?? UIColor.secondarySystemBackground
         let secondaryColor = (self.style.tableHeaderTextColor ?? self.style.textColor).withAlphaComponent(0.6)
         self.headerBar.backgroundColor = headerBg
         self.headerSeparator.backgroundColor = borderColor
         self.titleLabel.textColor = secondaryColor
-        for button in [self.copyButton, self.downloadButton, self.fullscreenButton] {
-            button.tintColor = secondaryColor
+        self.buttonStack.arrangedSubviews.compactMap { $0 as? UIButton }.forEach {
+            $0.tintColor = secondaryColor
         }
+    }
+
+    /// style 变更时同步按钮项（优先用 style.tableHeaderItems，否则 makeDefaultHeaderItems）。
+    private func applyStyleHeaderItems() {
+        self.headerItems = self.style.tableHeaderItems ?? self.makeDefaultHeaderItems()
     }
 
     public override func layoutSubviews() {
@@ -243,7 +332,7 @@ public final class STMarkdownTableView: UIView {
             metrics: STMarkdownTableGridLayout.ComputeSizeMetrics(
                 fillWidth: true,
                 containerWidth: containerWidth,
-                minimumRowHeight: 35,
+                minimumRowHeight: style.tableMinimumRowHeight,
                 minimumColumnWidth: 56,
                 maximumColumnWidth: 360,
                 interItemSpacing: 0.5,
@@ -419,28 +508,29 @@ public final class STMarkdownTableView: UIView {
 
     @objc private func handleExpandGesture(_ gestureRecognizer: UILongPressGestureRecognizer) {
         guard gestureRecognizer.state == .began else { return }
-        self.expandTableIfPossible()
-    }
-
-    private func expandTableIfPossible() {
         guard let tableData else { return }
         self.onExpandTable?(tableData)
     }
 
-    @objc private func handleCopy() {
-        guard let tableData else { return }
-        UIPasteboard.general.string = tableData.plainText()
-        self.onCopyTable?()
-        self.showCopyFeedback()
+    // MARK: - Open Overridable
+
+    /// 返回顶部工具条的默认按钮列表 [复制, 下载, 全屏]。子类可 override 替换默认集合。
+    /// 外界也可在初始化后直接赋 headerItems 覆盖，无需子类化。
+    open func makeDefaultHeaderItems() -> [STMarkdownTableHeaderItem] {
+        [.copy(), .download(), .fullscreen()]
     }
 
-    @objc private func handleDownload() {
-        guard let tableData else { return }
-        self.onDownloadTable?(tableData)
-    }
-
-    @objc private func handleFullscreen() {
-        self.expandTableIfPossible()
+    /// 复制成功后的视觉反馈。默认将图标切换为对勾，~1.2s 后还原。
+    /// 子类可 override 接入宿主 Toast/HUD 系统。
+    open func showCopyFeedback() {
+        self.copyResetWorkItem?.cancel()
+        let originalImage = self.copyButtonRef?.image(for: .normal)
+        self.copyButtonRef?.setImage(UIImage(systemName: "checkmark"), for: .normal)
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.copyButtonRef?.setImage(originalImage, for: .normal)
+        }
+        self.copyResetWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: workItem)
     }
 
     /// 将整张表格（含离屏行列）渲染为图片，供「复制为图片 / 保存到相册」使用。
@@ -469,17 +559,6 @@ public final class STMarkdownTableView: UIView {
         self.collectionView.setContentOffset(savedOffset, animated: false)
         self.collectionView.layoutIfNeeded()
         return image
-    }
-
-    /// 复制成功后将图标临时切换为对勾，~1.2s 后还原，提供轻量内建反馈（无需宿主接线）。
-    private func showCopyFeedback() {
-        self.copyResetWorkItem?.cancel()
-        self.copyButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-        let workItem = DispatchWorkItem { [weak self] in
-            self?.copyButton.setImage(UIImage(systemName: "doc.on.doc"), for: .normal)
-        }
-        self.copyResetWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2, execute: workItem)
     }
 }
 

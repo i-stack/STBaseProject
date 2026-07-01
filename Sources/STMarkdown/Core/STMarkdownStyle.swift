@@ -54,6 +54,18 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var tableHeaderTextColor: UIColor?
     public var tableBorderColor: UIColor?
     public var tableBackgroundColor: UIColor?
+    /// 顶部工具条背景色（nil 时回退到 tableBackgroundColor → secondarySystemBackground）
+    public var tableHeaderBarBackgroundColor: UIColor?
+    /// 表格行最小高度，同步影响 UICollectionView 布局与 computeSize
+    public var tableMinimumRowHeight: CGFloat
+    /// 单元格字体，非 nil 时在 configure 阶段覆盖 attributedContent 中的字体大小（保留粗/斜等修饰）
+    public var tableFont: UIFont?
+    /// 工具条按钮项（nil → makeDefaultHeaderItems()；外界通过 style 统一分发）
+    public var tableHeaderItems: [STMarkdownTableHeaderItem]?
+    /// 工具条按钮触控区宽度
+    public var tableHeaderButtonWidth: CGFloat
+    /// 容器圆角蒙版，默认四角全圆
+    public var tableCornerMask: CACornerMask
     public var imagePlaceholderTextColor: UIColor?
     public var imagePlaceholderBackgroundColor: UIColor?
     public var imagePlaceholderCaptionColor: UIColor?
@@ -158,6 +170,13 @@ public struct STMarkdownStyle: @unchecked Sendable {
         tableHeaderTextColor: UIColor? = nil,
         tableBorderColor: UIColor? = nil,
         tableBackgroundColor: UIColor? = nil,
+        tableHeaderBarBackgroundColor: UIColor? = nil,
+        tableMinimumRowHeight: CGFloat = 35,
+        tableFont: UIFont? = nil,
+        tableHeaderItems: [STMarkdownTableHeaderItem]? = nil,
+        tableHeaderButtonWidth: CGFloat = 30,
+        tableCornerMask: CACornerMask = [.layerMinXMinYCorner, .layerMaxXMinYCorner,
+                                         .layerMinXMaxYCorner, .layerMaxXMaxYCorner],
         imagePlaceholderTextColor: UIColor? = nil,
         imagePlaceholderBackgroundColor: UIColor? = nil,
         imagePlaceholderCaptionColor: UIColor? = nil,
@@ -223,6 +242,12 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.tableHeaderTextColor = tableHeaderTextColor
         self.tableBorderColor = tableBorderColor
         self.tableBackgroundColor = tableBackgroundColor
+        self.tableHeaderBarBackgroundColor = tableHeaderBarBackgroundColor
+        self.tableMinimumRowHeight = tableMinimumRowHeight
+        self.tableFont = tableFont
+        self.tableHeaderItems = tableHeaderItems
+        self.tableHeaderButtonWidth = tableHeaderButtonWidth
+        self.tableCornerMask = tableCornerMask
         self.imagePlaceholderTextColor = imagePlaceholderTextColor
         self.imagePlaceholderBackgroundColor = imagePlaceholderBackgroundColor
         self.imagePlaceholderCaptionColor = imagePlaceholderCaptionColor
