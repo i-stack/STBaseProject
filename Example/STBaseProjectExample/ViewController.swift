@@ -11,7 +11,8 @@ import STBaseProject
 class ViewController: BaseViewController {
 
     private var dataSouces: [String: UIViewController] = [:]
-    
+    private let bottomSheetTransitionDelegate = STBottomSheetTransitionDelegate()
+
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var topConstraint: NSLayoutConstraint!
     
@@ -41,7 +42,9 @@ class ViewController: BaseViewController {
         self.dataSouces["STTimer 功能测试"] = STTimerTestViewController()
         self.dataSouces["STTools 手动测试"] = STToolsManualTestViewController()
         self.dataSouces["Markdown 流式渲染测试"] = STMarkdownStreamingTestViewController()
+        self.dataSouces["Shimmer 动画测试"] = STShimmerTextViewTestViewController()
         self.dataSouces["SSE 流式渲染测试"] = STSSEViewController(nibName: "STSSEViewController", bundle: nil)
+        self.dataSouces["BottomSheet测试"] = STBottomSheetTestViewController()
 
         self.tableView.reloadData()
     }
@@ -69,6 +72,17 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let key = Array(self.dataSouces.keys)[indexPath.row]
         guard let vc = self.dataSouces[key] else { return }
-        self.navigationController?.pushViewController(vc, animated: true)
+        if key == "BottomSheet测试" {
+            self.presentBootSheet()
+        } else {
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    private func presentBootSheet() {
+        let detailVC = STBottomSheetTestViewController()
+        detailVC.modalPresentationStyle = .custom
+        detailVC.transitioningDelegate = self.bottomSheetTransitionDelegate
+        self.present(detailVC, animated: true)
     }
 }

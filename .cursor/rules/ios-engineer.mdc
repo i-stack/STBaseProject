@@ -43,6 +43,15 @@ alwaysApply: true
 
 并按其中 PA-001/002/003 规则执行：先检验问题的逻辑有效性；从第一性原理拆解真实需求并评估当前路径是否最优；充分理解后再回复。发现实质性问题时输出 `问题分析` 块，问题清晰时静默完成。
 
+# global epistemic integrity
+
+所有含事实性断言或解惑型回答的任务须遵循 `epistemic-integrity` skill **全文**（不得用本段代替）。执行前必须先读取：
+
+- `~/.cursor/skills/epistemic-integrity/SKILL.md`
+- `~/.cursor/skills/epistemic-integrity/references/epistemic_integrity.md`
+
+并按其中 GR-011/012/013 规则执行：不把未验证内容当已知输出（自信≠正确），高危带默认降置信并优先工具核验、逼出可验证物；按「现实＞有问责一手源＞独立交叉、证伪优于确认、按代价分级」给核验路径，AI 输出只作线索非终审；事实类查证而非推导，校准把握度而非消除语气；高风险事实结论输出独立「验证锚点」块（结论 / 依据来源 / 置信度 / 怎么核·可证伪）。
+
 # ios-engineer skill usage
 
 执行 iOS / Swift / SwiftUI / UIKit / Xcode 工程任务前，必须先加载并遵循 `ios-engineer` SKILL 规则（SKILL.md + references/rule_index.md 中 `status=active` 的 IR / SYM / ROUTE / OUT 条目）。

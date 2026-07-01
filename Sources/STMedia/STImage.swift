@@ -8,7 +8,6 @@
 import UIKit
 import Photos
 
-// MARK: - STImageError
 public enum STImageError: LocalizedError {
     case invalidData
     case photoLibraryPermissionDenied
@@ -21,7 +20,6 @@ public enum STImageError: LocalizedError {
     }
 }
 
-// MARK: - 图片格式枚举
 public enum STImageFormat: String, CaseIterable {
     case png = "png"
     case gif = "gif"
@@ -36,7 +34,6 @@ public enum STImageFormat: String, CaseIterable {
     public var fileExtension: String { return rawValue }
 }
 
-// MARK: - 水印位置枚举
 public enum WatermarkPosition {
     case topLeft
     case topRight
@@ -45,17 +42,14 @@ public enum WatermarkPosition {
     case center
 }
 
-// MARK: - UIImage 扩展
 extension UIImage {
 
-    // CIContext 创建开销大，全局复用
     private static let sharedCIContext = CIContext()
 
     public static func isEmpty(_ image: UIImage) -> Bool {
         return image.cgImage == nil && image.ciImage == nil
     }
 
-    /// 编码为 Data：有 alpha 通道优先 PNG，无 alpha 优先 JPEG（与 getFormat() 保持一致）
     public func toData() -> Data {
         guard let cgImage = self.cgImage else {
             return self.pngData() ?? Data()
@@ -76,7 +70,6 @@ extension UIImage {
         return !data.isEmpty ? data.base64EncodedString() : ""
     }
 
-    /// 从已有 Data 直接检测图片格式，避免重复编码
     public static func format(from data: Data) -> STImageFormat {
         guard !data.isEmpty else { return .undefined }
         var firstByte: UInt8 = 0
@@ -120,7 +113,6 @@ extension UIImage {
         return fmt == .undefined ? nil : fmt.rawValue
     }
 
-    // MARK: - 图片处理
     public static func resizeImage(_ image: UIImage, to targetSize: CGSize) -> UIImage? {
         let renderer = UIGraphicsImageRenderer(size: targetSize)
         return renderer.image { _ in
@@ -366,8 +358,6 @@ extension UIImage {
         return renderer.image(actions: actions)
     }
 
-    // MARK: - Masking / Tinting
-
     /// 用指定颜色填充非透明像素，保持原图的 alpha 通道；
     /// 与 `tinted(with:)` 的区别：该方法完全覆盖颜色而非混合
     public func masked(with color: UIColor) -> UIImage {
@@ -418,8 +408,6 @@ extension UIImage {
         }
     }
 
-    // MARK: - Padding / Additional Drawing
-
     /// 在图像外围填充指定颜色的内边距
     /// - Parameters:
     ///   - color: 填充颜色
@@ -456,8 +444,6 @@ extension UIImage {
             actions(ctx)
         }
     }
-
-    // MARK: - Rounded Corners
 
     /// 以 iOS 风格的连续曲率圆角裁剪图像
     /// - Parameter cornerRadius: 圆角半径
@@ -585,8 +571,6 @@ extension UIImage {
 
         return 1.0 - (totalDifference / Float(width * height))
     }
-
-    // MARK: - Decoding
 
     /// 从 Data 解码为 UIImage，可选缩放到最大边长
     /// - Parameters:

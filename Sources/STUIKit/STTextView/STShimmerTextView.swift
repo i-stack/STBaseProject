@@ -36,19 +36,20 @@ open class STShimmerTextView: UITextView {
     }
 
     public var tokenFadeDuration: TimeInterval = 0.3
-    /// 逐字 stagger 间隔：每个字符的 fade-in 起始时间比前一个字符延迟此值，
-    /// 使多字符 delta 呈现"逐字出现"而非"整段同时出现"的效果。
-    /// 设为 0 则禁用 stagger（所有字符同时 fade-in）。
+    /// token stagger 间隔：每个语义 token 的 fade-in 起始时间比前一个 token 延迟此值。
+    /// token 由 localized word + separator range 组成；无法分词时退化为整段 run fade，
+    /// 避免逐 UTF-16 字符揭示时把折行过程暴露给用户。
+    /// 设为 0 则禁用 stagger（所有 token 同时 fade-in）。
     public var characterStaggerInterval: TimeInterval = 0.016
-    /// 为 true 时，跨换行也保持连续字符级渐显；
+    /// 为 true 时，跨换行也保持连续 token 渐显；
     /// 为 false 时，新增 delta 中最后一个换行前的内容会立即显示，仅最后一行保留动画。
     public var animateAcrossNewlines: Bool = false
     /// `true` 时改用 FluidMarkdown 风格的行级 CAGradientLayer 水平扫入遮罩动画，
-    /// 替代默认的字符级 foregroundColor 淡入；由 STMarkdownStreamingTextView 根据样式同步。
+    /// 替代默认的 token 级 foregroundColor 淡入；由 STMarkdownStreamingTextView 根据样式同步。
     public var lineFadeMode: Bool = false
     /// 行级扫入动画时长（秒），默认 0.15 s，与 FluidMarkdown 对齐。
     public var lineFadeDuration: TimeInterval = 0.15
-    /// 当前逐字输出行尾部的柔和渐隐宽度。
+    /// 当前 token 输出行尾部的柔和渐隐宽度。
     public var lineFadeTrailingWidth: CGFloat = 18
     public var suppressSystemTextMenu: Bool = false
     public var onAnimationStateChange: ((Bool) -> Void)?
@@ -369,19 +370,81 @@ open class STShimmerTextView: UITextView {
     /// 所有文本已经以 alpha=0 插入 textStorage 并完成布局，此处仅控制 fade-in 动画时序，
     /// 不会引起任何布局变化、跳动或闪烁。
     private func appendStaggeredTokens(for colorRuns: [AnimatingColorRun]) {
-        guard !colorRuns.isEmpty else { return }
-        let start = colorRuns.map(\.range.location).min()!
-        let end = colorRuns.map { $0.range.location + $0.range.length }.max()!
-        let totalLength = colorRuns.reduce(0) { $0 + $1.range.length }
-        let stagger = (self.characterStaggerInterval > 0 && totalLength > 2)
+        let revealRuns = self.semanticRevealColorRuns(from: colorRuns)
+        guard !revealRuns.isEmpty else { return }
+        let start = revealRuns.map(\.range.location).min()!
+        let end = revealRuns.map { $0.range.location + $0.range.length }.max()!
+        let stagger = (self.characterStaggerInterval > 0 && revealRuns.count > 1)
             ? self.characterStaggerInterval : 0
         let token = AnimatingToken(
             range: NSRange(location: start, length: end - start),
             startTime: CACurrentMediaTime(),
             staggerInterval: stagger,
-            colorRuns: colorRuns
+            colorRuns: revealRuns
         )
         self.animatingTokens.append(token)
+    }
+
+    private func semanticRevealColorRuns(from colorRuns: [AnimatingColorRun]) -> [AnimatingColorRun] {
+        guard self.characterStaggerInterval > 0, colorRuns.isEmpty == false else {
+            return colorRuns
+        }
+
+        let fullString = self.textStorage.string as NSString
+        guard fullString.length > 0 else { return colorRuns }
+
+        var result: [AnimatingColorRun] = []
+        for run in colorRuns {
+            let clampedRange = NSIntersectionRange(
+                run.range,
+                NSRange(location: 0, length: fullString.length)
+            )
+            guard clampedRange.length > 0 else { continue }
+            let semanticRanges = self.semanticRevealRanges(in: fullString, range: clampedRange)
+            for semanticRange in semanticRanges {
+                result.append(AnimatingColorRun(range: semanticRange, targetColor: run.targetColor))
+            }
+        }
+        return result.isEmpty ? colorRuns : result
+    }
+
+    private func semanticRevealRanges(in string: NSString, range: NSRange) -> [NSRange] {
+        guard range.location != NSNotFound,
+              range.location >= 0,
+              NSMaxRange(range) <= string.length else {
+            return []
+        }
+
+        var ranges: [NSRange] = []
+        string.enumerateSubstrings(
+            in: range,
+            options: [.byWords, .localized, .substringNotRequired]
+        ) { _, substringRange, _, _ in
+            if let last = ranges.last {
+                let gapStart = NSMaxRange(last)
+                let gapLength = substringRange.location - gapStart
+                if gapLength > 0 {
+                    ranges.append(NSRange(location: gapStart, length: gapLength))
+                }
+            } else {
+                let leadingGapLength = substringRange.location - range.location
+                if leadingGapLength > 0 {
+                    ranges.append(NSRange(location: range.location, length: leadingGapLength))
+                }
+            }
+            ranges.append(substringRange)
+        }
+
+        if let last = ranges.last {
+            let trailingStart = NSMaxRange(last)
+            let trailingLength = NSMaxRange(range) - trailingStart
+            if trailingLength > 0 {
+                ranges.append(NSRange(location: trailingStart, length: trailingLength))
+            }
+        } else {
+            ranges.append(range)
+        }
+        return ranges
     }
 
     private func startDisplayLinkIfNeeded() {
@@ -420,18 +483,13 @@ open class STShimmerTextView: UITextView {
                     self.textStorage.addAttribute(.foregroundColor, value: color, range: run.range)
                 }
             } else {
-                var charIndex = 0
-                for run in token.colorRuns {
-                    for offset in 0..<run.range.length {
-                        let charStartTime = token.startTime + Double(charIndex) * token.staggerInterval
-                        let elapsed = now - charStartTime
-                        let progress = min(1.0, max(0, elapsed / fadeDuration))
-                        let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
-                        let color = run.targetColor.withAlphaComponent(CGFloat(easedProgress))
-                        let charRange = NSRange(location: run.range.location + offset, length: 1)
-                        self.textStorage.addAttribute(.foregroundColor, value: color, range: charRange)
-                        charIndex += 1
-                    }
+                for (index, run) in token.colorRuns.enumerated() {
+                    let tokenStartTime = token.startTime + Double(index) * token.staggerInterval
+                    let elapsed = now - tokenStartTime
+                    let progress = min(1.0, max(0, elapsed / fadeDuration))
+                    let easedProgress = 1.0 - pow(1.0 - progress, 3.0)
+                    let color = run.targetColor.withAlphaComponent(CGFloat(easedProgress))
+                    self.textStorage.addAttribute(.foregroundColor, value: color, range: run.range)
                 }
             }
         }
@@ -440,9 +498,9 @@ open class STShimmerTextView: UITextView {
             self.contentOffset = savedOffset
         }
         self.animatingTokens.removeAll { token in
-            let totalChars = token.colorRuns.reduce(0) { $0 + $1.range.length }
-            let lastCharStart = token.startTime + Double(max(0, totalChars - 1)) * token.staggerInterval
-            return (now - lastCharStart) >= fadeDuration
+            let totalUnits = token.staggerInterval > 0 ? token.colorRuns.count : 1
+            let lastUnitStart = token.startTime + Double(max(0, totalUnits - 1)) * token.staggerInterval
+            return (now - lastUnitStart) >= fadeDuration
         }
         if self.animatingTokens.isEmpty {
             self.stopDisplayLink()

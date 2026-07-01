@@ -70,10 +70,7 @@ public enum STMarkdownBlockLayoutCalculator {
         }
     }
 
-    public static func isTableAdjacent(
-        previousBlock: STMarkdownRenderBlock,
-        nextBlock: STMarkdownRenderBlock
-    ) -> Bool {
+    public static func isTableAdjacent(previousBlock: STMarkdownRenderBlock, nextBlock: STMarkdownRenderBlock) -> Bool {
         switch (previousBlock, nextBlock) {
         case (.table, _), (_, .table):
             return true
@@ -81,8 +78,6 @@ public enum STMarkdownBlockLayoutCalculator {
             return false
         }
     }
-
-    // MARK: - Separator AttributedString
 
     /// 生成两个相邻块之间的间距 `NSAttributedString`（单个 `"\n"`，行高 = 计算所得间距）。
     ///
@@ -107,8 +102,6 @@ public enum STMarkdownBlockLayoutCalculator {
         if let key = skipFadeInKey { attrs[key] = true }
         return NSAttributedString(string: "\n", attributes: attrs)
     }
-
-    // MARK: - Block Classification Helpers
 
     /// 前后块是否构成"列表 ↔ standalone-strong 段落"的桥接关系（使用 listItemSpacing 而非 blockSpacing）。
     public static func isListBridgeStrongParagraph(
@@ -172,10 +165,7 @@ public enum STMarkdownBlockLayoutCalculator {
     }
 
     /// 某块的前一块或后一块是否为列表块（用于判断段落是否紧邻列表）。
-    public static func isListAdjacentParagraph(
-        previousBlock: STMarkdownRenderBlock?,
-        nextBlock: STMarkdownRenderBlock?
-    ) -> Bool {
+    public static func isListAdjacentParagraph(previousBlock: STMarkdownRenderBlock?, nextBlock: STMarkdownRenderBlock?) -> Bool {
         if let prev = previousBlock, isListBlock(prev) { return true }
         if let next = nextBlock, isListBlock(next) { return true }
         return false

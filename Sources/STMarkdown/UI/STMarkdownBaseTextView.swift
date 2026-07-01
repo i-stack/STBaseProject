@@ -60,6 +60,12 @@ public class STMarkdownBaseTextView: UIView, STMarkdownInteractable {
         }
     }
 
+    public var onDownloadTable: ((STMarkdownTableViewModel) -> Void)? {
+        didSet {
+            self.tableOverlayCoordinator.onDownloadTable = self.onDownloadTable
+        }
+    }
+
     public var isTextSelectionEnabled: Bool {
         get { self.textView.isSelectable }
         set { self.textView.isSelectable = newValue }

@@ -16,7 +16,24 @@ public struct STMarkdownStructureParser: STMarkdownStructureParsing, Sendable {
     /// 串行化 swift-markdown / cmark 解析路径；使用递归锁以支持脚注定义体内再解析。
     private static let parseLock = NSRecursiveLock()
 
-    public init() {}
+    /// 流式推测重写器列表，为空则不执行推测重写。
+    /// 仅在流式场景下由调用方构造带重写器的实例。
+    private let speculativeRewriters: [any STMarkdownSpeculativeRewriterProtocol]
+
+    public init() {
+        self.speculativeRewriters = []
+    }
+
+    /// 使用指定的推测重写器列表创建解析器。
+    /// - Parameter speculativeRewriters: 流式推测重写器，默认空（不推测重写）。
+    public init(speculativeRewriters: [any STMarkdownSpeculativeRewriterProtocol]) {
+        self.speculativeRewriters = speculativeRewriters
+    }
+
+    /// 是否包含活跃的推测重写器
+    public var hasActiveSpeculativeRewriters: Bool {
+        !self.speculativeRewriters.isEmpty
+    }
 
     public func parse(_ markdown: String) -> STMarkdownDocument {
         guard markdown.isEmpty == false else {
@@ -58,7 +75,18 @@ private extension STMarkdownStructureParser {
         }
 
         let normalized = STMarkdownMathNormalizer.normalizeBlocks(in: working)
-        let document = Document(parsing: normalized.text)
+        var document = Document(parsing: normalized.text)
+
+        // 流式推测重写：在 Document 解析后、makeBlocks 前，
+        // 对 AST 末尾未闭合的强调/表头做 AST 层补全。
+        if speculativeRewriters.isEmpty == false {
+            for rewriter in speculativeRewriters {
+                if let rewritten = rewriter.rewriteIfApplicable(document: document) {
+                    document = rewritten
+                }
+            }
+        }
+
         let blocks = self.makeBlocks(from: Array(document.children), mathMap: normalized.blockMap)
         var doc = STMarkdownDocument(blocks: blocks, footnoteDefinitions: footnoteDefs)
         if stripFootnoteDefinitions {

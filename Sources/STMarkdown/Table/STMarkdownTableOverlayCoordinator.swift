@@ -11,6 +11,7 @@ final class STMarkdownTableOverlayCoordinator {
 
     var onCitationTap: ((String) -> Void)?
     var onExpandTable: ((STMarkdownTableViewModel) -> Void)?
+    var onDownloadTable: ((STMarkdownTableViewModel) -> Void)?
 
     private weak var textView: UITextView?
     private var tableViewOverlays: [Int: STMarkdownTableView] = [:]
@@ -27,11 +28,14 @@ final class STMarkdownTableOverlayCoordinator {
     }
 
     func updateIfNeeded(attributedText: NSAttributedString, containerBounds: CGRect) {
-        let sizeChanged = containerBounds.size != self.lastTableOverlayLayoutSize
-        guard self.tableOverlayNeedsUpdate || sizeChanged else { return }
-        self.lastTableOverlayLayoutSize = containerBounds.size
-        self.tableOverlayNeedsUpdate = false
+        // Always update overlays on every layout pass — not just when markDirty was
+        // called or the container size changed. TextKit may not have finished re-laying-out
+        // glyphs on the first pass after attributedText is set, so a stale glyphRect would
+        // give the overlay the wrong (previously cached) height.  By running every pass,
+        // the overlay frame converges to match the latest glyph positions automatically.
         self.updateTableViewOverlays(attributedText: attributedText)
+        self.tableOverlayNeedsUpdate = false
+        self.lastTableOverlayLayoutSize = containerBounds.size
     }
 
     func reset() {
@@ -78,16 +82,22 @@ final class STMarkdownTableOverlayCoordinator {
             )
 
             if let existing = self.tableViewOverlays[charIndex] {
-                if existing.tableData !== attachment.tableViewModel {
-                    existing.tableData = attachment.tableViewModel
-                }
+                // 先设最终 frame（高度取自新 model 的 attachmentBounds，仅高度变、宽度不变，
+                // shouldInvalidateLayout(forBoundsChange:) 返回 false），再设 tableData 触发逐行
+                // 追加动画——让新行在最终高度区域内淡入，避免在旧矮 bounds 里动画后再被撑高的错位。
+                existing.frame = frame
                 existing.onCitationTap = { [weak self] number in
                     self?.onCitationTap?(number)
                 }
                 existing.onExpandTable = { [weak self] tableViewModel in
                     self?.onExpandTable?(tableViewModel)
                 }
-                existing.frame = frame
+                existing.onDownloadTable = { [weak self] tableViewModel in
+                    self?.onDownloadTable?(tableViewModel)
+                }
+                if existing.tableData !== attachment.tableViewModel {
+                    existing.tableData = attachment.tableViewModel
+                }
             } else {
                 let tableView = attachment.tableView
                 tableView.onCitationTap = { [weak self] number in
@@ -95,6 +105,9 @@ final class STMarkdownTableOverlayCoordinator {
                 }
                 tableView.onExpandTable = { [weak self] tableViewModel in
                     self?.onExpandTable?(tableViewModel)
+                }
+                tableView.onDownloadTable = { [weak self] tableViewModel in
+                    self?.onDownloadTable?(tableViewModel)
                 }
                 tableView.frame = frame
                 textView.addSubview(tableView)

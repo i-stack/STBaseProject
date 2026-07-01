@@ -124,6 +124,11 @@ public struct STMarkdownStyle: @unchecked Sendable {
     /// `true` 时使用与 FluidMarkdown 相同的行级渐现效果，替代默认的字符级 foregroundColor 淡入。
     /// `streamFadeInEnabled` 为 `false` 时此属性无效。
     public var streamLineFadeEnabled: Bool
+    /// 流式输出时是否启用 AST 层推测重写（Speculative Rewrite）。
+    /// `true` 时，流式末尾未闭合的 `**xxx` / `__xxx` / 裸表头行会在解析后做推测性补全，
+    /// 使流式中间态即可渲染出粗体/斜体，而非等待闭合 token 到达。
+    /// 默认 `false` 以保持非流式路径行为不变。
+    public var streamSpeculativeRewriteEnabled: Bool
 
     public init(
         font: UIFont,
@@ -188,7 +193,8 @@ public struct STMarkdownStyle: @unchecked Sendable {
         streamMinModuleLength: Int = 20,
         rawHTMLPolicy: STMarkdownRawHTMLPolicy = .suppress,
         streamFadeInEnabled: Bool = true,
-        streamLineFadeEnabled: Bool = false
+        streamLineFadeEnabled: Bool = false,
+        streamSpeculativeRewriteEnabled: Bool = false
     ) {
         self.font = font
         self.boldFont = boldFont
@@ -253,6 +259,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.rawHTMLPolicy = rawHTMLPolicy
         self.streamFadeInEnabled = streamFadeInEnabled
         self.streamLineFadeEnabled = streamLineFadeEnabled
+        self.streamSpeculativeRewriteEnabled = streamSpeculativeRewriteEnabled
     }
 
     public static let `default` = STMarkdownStyle(

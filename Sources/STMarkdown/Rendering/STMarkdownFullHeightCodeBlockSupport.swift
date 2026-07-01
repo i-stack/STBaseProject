@@ -7,11 +7,6 @@
 
 import UIKit
 
-/// 全高（不折叠）代码块 attachment。
-/// 与 STMarkdownCodeBlockAttachment（折叠 + 渲染缓存）的核心差异：
-/// - 总是展示完整代码高度，不裁剪
-/// - 不维护折叠状态（isCollapsed 始终为 false）
-/// - 轻量缓存：同 key 命中时直接复用图片，避免流式阶段重复渲染
 public final class STMarkdownFullHeightCodeBlockAttachment: NSTextAttachment {
     public let language: String?
     public let code: String

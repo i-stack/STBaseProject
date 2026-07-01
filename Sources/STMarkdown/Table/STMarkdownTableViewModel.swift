@@ -110,6 +110,33 @@ public final class STMarkdownTableViewModel {
         self.rowCount = builtCells.count
     }
 
+    public init(
+        columnAlignments: [STMarkdownColumnAlignment],
+        cells: [[STMarkdownTableCellData]],
+        hasHeader: Bool,
+        rowGroups: [[Int]] = []
+    ) {
+        self.hasHeader = hasHeader
+        self.columnAlignments = columnAlignments
+        self.rowGroups = rowGroups
+        self.cells = cells
+        self.columnCount = cells.map(\.count).max() ?? 0
+        self.rowCount = cells.count
+    }
+
+    // MARK: - Plain Text Export
+
+    /// 将表格内容导出为分隔文本，供「复制 / 下载」使用。
+    /// - Note: citation badge 以 `NSTextAttachment` 形式内嵌，`attributedContent.string` 取不到字符，
+    ///   导出文本中会缺失角标编号，这是可接受的取舍。
+    public func plainText(columnSeparator: String = "\t", rowSeparator: String = "\n") -> String {
+        self.cells.map { row in
+            row.map { cell in
+                cell.attributedContent.string.trimmingCharacters(in: .whitespacesAndNewlines)
+            }.joined(separator: columnSeparator)
+        }.joined(separator: rowSeparator)
+    }
+
     // MARK: - Private
 
     private static let citationInTextRegex = try! NSRegularExpression(

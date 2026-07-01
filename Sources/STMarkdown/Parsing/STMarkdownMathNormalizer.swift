@@ -52,7 +52,10 @@ public enum STMarkdownMathNormalizer {
                 let indent = String(line.prefix(while: { $0 == " " || $0 == "\t" }))
                 let result = consumeDollarMathBlock(from: lines, start: index)
                 let currentIndex = mathMap.count
-                mathMap[currentIndex] = result.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                let content = STMarkdownLatexSyntaxNormalizer.normalize(
+                    result.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                mathMap[currentIndex] = content
                 output.append("")
                 output.append(indent + "{{ST_MATH_BLOCK:\(currentIndex)}}")
                 output.append("")
@@ -64,7 +67,10 @@ public enum STMarkdownMathNormalizer {
                 let indent = String(line.prefix(while: { $0 == " " || $0 == "\t" }))
                 let result = consumeBracketMathBlock(from: lines, start: index)
                 let currentIndex = mathMap.count
-                mathMap[currentIndex] = result.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                let content = STMarkdownLatexSyntaxNormalizer.normalize(
+                    result.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                mathMap[currentIndex] = content
                 output.append("")
                 output.append(indent + "{{ST_MATH_BLOCK:\(currentIndex)}}")
                 output.append("")
@@ -80,7 +86,10 @@ public enum STMarkdownMathNormalizer {
                     environment: environment
                 )
                 let currentIndex = mathMap.count
-                mathMap[currentIndex] = result.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                let content = STMarkdownLatexSyntaxNormalizer.normalize(
+                    result.content.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                mathMap[currentIndex] = content
                 output.append("")
                 output.append(indent + "{{ST_MATH_BLOCK:\(currentIndex)}}")
                 output.append("")
@@ -216,10 +225,14 @@ public enum STMarkdownMathNormalizer {
 
             let formulaText = text.substring(with: match.range)
             if formulaText.hasPrefix(#"\("#), formulaText.hasSuffix(#"\)"#) {
-                let formula = String(formulaText.dropFirst(2).dropLast(2))
+                let formula = STMarkdownLatexSyntaxNormalizer.normalize(
+                    String(formulaText.dropFirst(2).dropLast(2))
+                )
                 result.append(.inlineMath(formula, isDisplayMode: false))
             } else if formulaText.hasPrefix(#"\["#), formulaText.hasSuffix(#"\]"#) {
-                let formula = String(formulaText.dropFirst(2).dropLast(2))
+                let formula = STMarkdownLatexSyntaxNormalizer.normalize(
+                    String(formulaText.dropFirst(2).dropLast(2))
+                )
                 result.append(.inlineMath(formula, isDisplayMode: true))
             }
 
@@ -363,5 +376,88 @@ public enum STMarkdownMathNormalizer {
             index += 1
         }
         return (content, index)
+    }
+}
+
+// MARK: - LaTeX 语法降级
+
+/// LaTeX 语法降级函数链。
+///
+/// 移植自 SwiftStreamingMarkdown 的 `filteringUnsupportedSyntaxes()`：
+/// 对 LLM 输出中常见但 iosMath/KaTeX 不支持的 LaTeX 命令做降级替换，
+/// 避免渲染空白或报错。
+public enum STMarkdownLatexSyntaxNormalizer {
+
+    /// 对 LaTeX 文本依次执行全部的降级转换（8 种）。
+    ///
+    /// ```swift
+    /// let result = STMarkdownLatexSyntaxNormalizer.normalize("\\dfrac{a}{b}")
+    /// // result == "\\frac{a}{b}"
+    /// ```
+    public static func normalize(_ latex: String) -> String {
+        var result = latex
+        result = strippingBoxedLatex(result)
+        result = replacingFrac(result)
+        result = replacingPrime(result)
+        result = replacingVector(result)
+        result = replacingImplies(result)
+        result = replacingHarpoons(result)
+        result = replacingDots(result)
+        result = strippingBracketSizeCommands(result)
+        return result
+    }
+
+    // MARK: - 各转换规则
+
+    /// 移除 `\\boxed{...}`（不支持），保留括号内内容。
+    public static func strippingBoxedLatex(_ text: String) -> String {
+        text.replacingOccurrences(of: #"\boxed"#, with: "")
+    }
+
+    /// 将 `\\dfrac` 和 `\\tfrac` 降级为 `\\frac`。
+    public static func replacingFrac(_ text: String) -> String {
+        text
+            .replacingOccurrences(of: #"\dfrac"#, with: #"\frac"#)
+            .replacingOccurrences(of: #"\tfrac"#, with: #"\frac"#)
+    }
+
+    /// 将 `'` 降级为 `^{\\prime}`（iosMath 不支持短撇号）。
+    public static func replacingPrime(_ text: String) -> String {
+        text.replacingOccurrences(of: "'", with: "^{\\prime}")
+    }
+
+    /// 将 `\\overrightarrow` 降级为 `\\vec`。
+    public static func replacingVector(_ text: String) -> String {
+        text.replacingOccurrences(of: #"\overrightarrow"#, with: #"\vec"#)
+    }
+
+    /// 将 `\\implies` 降级为 `\\Rightarrow`。
+    public static func replacingImplies(_ text: String) -> String {
+        text.replacingOccurrences(of: #"\implies"#, with: #"\Rightarrow"#)
+    }
+
+    /// 将 `\\rightleftharpoons` 降级为 `\\Leftrightarrow`。
+    public static func replacingHarpoons(_ text: String) -> String {
+        text.replacingOccurrences(of: #"\rightleftharpoons"#, with: #"\Leftrightarrow"#)
+    }
+
+    /// 将 `\\dots` 降级为 `\\ldots`。
+    public static func replacingDots(_ text: String) -> String {
+        text.replacingOccurrences(of: #"\dots"#, with: #"\ldots"#)
+    }
+
+    /// 移除支架尺寸命令（`\\bigl`、`\\biggl`、`\\Bigl`、`\\Biggl`、
+    /// `\\bigr`、`\\biggr`、`\\Bigr`、`\\Biggr`、`\\big`）。
+    public static func strippingBracketSizeCommands(_ text: String) -> String {
+        let commands = [
+            #"\biggl"#, #"\Biggl"#, #"\biggr"#, #"\Biggr"#,
+            #"\bigl"#, #"\Bigl"#, #"\bigr"#, #"\Bigr"#,
+            #"\big"#,
+        ]
+        var result = text
+        for cmd in commands {
+            result = result.replacingOccurrences(of: cmd, with: "")
+        }
+        return result
     }
 }

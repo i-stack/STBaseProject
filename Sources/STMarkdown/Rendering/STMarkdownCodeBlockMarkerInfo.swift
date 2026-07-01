@@ -7,7 +7,6 @@
 
 import UIKit
 
-/// 内联代码块头部行携带的元数据，供 overlay 按钮定位使用。
 public final class STMarkdownCodeBlockMarkerInfo: NSObject {
     public let language: String?
     public let code: String
@@ -33,6 +32,5 @@ public final class STMarkdownCodeBlockMarkerInfo: NSObject {
 }
 
 public extension NSAttributedString.Key {
-    /// 内联代码块头部行标记，值为 `STMarkdownCodeBlockMarkerInfo` 实例。
     static let stCodeBlockMarker = NSAttributedString.Key("com.stbaseproject.stCodeBlockMarker")
 }

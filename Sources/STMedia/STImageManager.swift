@@ -159,11 +159,8 @@ public class STImageManager: NSObject {
         }
     }
 
-    // MARK: - Private camera
-
     private func selectFromCamera(from viewController: UIViewController) async throws -> STImageManagerModel {
         try await self.checkCameraPermission()
-        // 取消之前未完成的请求，避免旧 continuation 永远挂起
         self.resolvePendingCameraContinuation(with: .userCancelled)
         return try await withCheckedThrowingContinuation { continuation in
             self.cameraContinuation = continuation
@@ -198,8 +195,6 @@ public class STImageManager: NSObject {
         }
     }
 
-    // MARK: - Continuation 安全清理
-
     private func resolvePendingPickerContinuation(with error: STImageManagerError) {
         guard let pending = self.pickerContinuation else { return }
         self.pickerContinuation = nil
@@ -211,8 +206,6 @@ public class STImageManager: NSObject {
         self.cameraContinuation = nil
         pending.resume(throwing: error)
     }
-
-    // MARK: - Model 构建（nonisolated 以便在 Task.detached 中调用）
 
     public nonisolated static func buildModel(
         from image: UIImage,
@@ -233,8 +226,6 @@ public class STImageManager: NSObject {
         )
     }
 }
-
-// MARK: - PHPickerViewControllerDelegate
 
 extension STImageManager: PHPickerViewControllerDelegate {
     public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
@@ -270,8 +261,6 @@ extension STImageManager: PHPickerViewControllerDelegate {
         }
     }
 }
-
-// MARK: - UIImagePickerControllerDelegate
 
 extension STImageManager: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {

@@ -28,7 +28,6 @@ public protocol STMarkdownImageRendering {
     func renderImage(url: String, altText: String, title: String?, style: STMarkdownStyle, placement: STMarkdownImagePlacement) -> NSAttributedString?
 }
 
-/// Placement of a markdown image: inline with text vs block-level (centered, with caption).
 public enum STMarkdownImagePlacement: Sendable, Equatable {
     case inline
     case block
@@ -118,9 +117,6 @@ public struct STMarkdownHighFidelityMathRenderer: STMarkdownInlineMathRendering,
 
         let attachment = NSTextAttachment()
         attachment.image = image
-        // Scale down to fit when SwiftMath returns an image wider than the available container
-        // width (e.g. aligned rows with long \text{} content).  Scaling only the attachment
-        // bounds works because UIKit draws the image to fit those bounds.
         let scale: CGFloat = image.size.width > availableWidth && availableWidth > 0
             ? availableWidth / image.size.width
             : 1.0
@@ -176,25 +172,15 @@ private extension STMarkdownHighFidelityMathRenderer {
             .replacingOccurrences(of: #"\]"#, with: "")
             .replacingOccurrences(of: #"\'"#, with: "'")
             .replacingOccurrences(of: #"\|"#, with: "|")
-            // SwiftMath does not support align/align* — map to its equivalent `aligned`
             .replacingOccurrences(of: #"\begin{align*}"#, with: #"\begin{aligned}"#)
             .replacingOccurrences(of: #"\end{align*}"#, with: #"\end{aligned}"#)
             .replacingOccurrences(of: #"\begin{align}"#, with: #"\begin{aligned}"#)
             .replacingOccurrences(of: #"\end{align}"#, with: #"\end{aligned}"#)
-        // SwiftMath uses Latin Modern math fonts which have no CJK glyphs. When CJK characters
-        // appear inside \text{...}, SwiftMath computes zero/incorrect advance widths for those
-        // glyphs, causing the bitmap to be allocated too narrow and clipping any content that
-        // follows (e.g. "(x-1)" appears as "(x-"). Strip CJK scalars from \text{} content so
-        // SwiftMath gets a clean layout; the surrounding math renders correctly.
         result = Self.stripCJKFromTextCommands(in: result)
         return result
     }
 
-    // MARK: - CJK sanitisation
-
     private static let textCommandRegex: NSRegularExpression = {
-        // Matches \text{ ... } with non-greedy content, stopping at the first unmatched }
-        // Simple one-level: \text{[^}]*}
         (try? NSRegularExpression(pattern: #"\\text\{([^}]*)\}"#)) ?? NSRegularExpression()
     }()
 
@@ -210,8 +196,6 @@ private extension STMarkdownHighFidelityMathRenderer {
             let content = ns.substring(with: contentRange)
             let stripped = String(content.unicodeScalars.filter { !isCJKScalar($0) })
             guard stripped != content else { continue }
-            // If what remains after stripping is only whitespace or empty, wipe the
-            // whole \text{...} command to avoid leaving a meaningless residual token.
             let residual = stripped.trimmingCharacters(in: .whitespaces)
             let replacement = residual.isEmpty ? "" : stripped
             result = (result as NSString).replacingCharacters(in: match.range, with: "\\text{\(replacement)}")
