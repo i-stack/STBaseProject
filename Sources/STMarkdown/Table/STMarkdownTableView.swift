@@ -160,6 +160,7 @@ open class STMarkdownTableView: UIView {
         self.setupCollectionView()
         self.setupHeader()
         self.headerItems = style.tableHeaderItems ?? self.makeDefaultHeaderItems()
+        self.rebuildButtonStack()
         self.applyStyle()
     }
 
@@ -211,7 +212,7 @@ open class STMarkdownTableView: UIView {
 
             self.buttonStack.trailingAnchor.constraint(equalTo: self.headerBar.trailingAnchor, constant: -10),
             self.buttonStack.centerYAnchor.constraint(equalTo: self.headerBar.centerYAnchor),
-            self.buttonStack.heightAnchor.constraint(equalTo: self.headerBar.heightAnchor),
+            self.buttonStack.heightAnchor.constraint(equalToConstant: Self.headerHeight),
 
             self.headerSeparator.leadingAnchor.constraint(equalTo: self.headerBar.leadingAnchor),
             self.headerSeparator.trailingAnchor.constraint(equalTo: self.headerBar.trailingAnchor),
@@ -222,11 +223,13 @@ open class STMarkdownTableView: UIView {
 
     /// 从 headerItems 重建 buttonStack 中的所有按钮，每次 headerItems 变更时调用。
     private func rebuildButtonStack() {
-        self.buttonStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        self.buttonStack.arrangedSubviews.forEach {
+            self.buttonStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
         let symbolConfig = UIImage.SymbolConfiguration(pointSize: 15, weight: .regular)
         let buttonWidth = self.style.tableHeaderButtonWidth
         let secondaryColor = (self.style.tableHeaderTextColor ?? self.style.textColor).withAlphaComponent(0.6)
-
         for item in self.headerItems {
             let button = UIButton(type: .system)
             let isSystemSymbol = item.image?.isSymbolImage ?? false
@@ -235,7 +238,9 @@ open class STMarkdownTableView: UIView {
             }
             button.setImage(item.image, for: .normal)
             button.tintColor = secondaryColor
+            button.imageView?.contentMode = .scaleAspectFit
             button.widthAnchor.constraint(equalToConstant: buttonWidth).isActive = true
+            button.heightAnchor.constraint(equalToConstant: buttonWidth).isActive = true
             button.accessibilityIdentifier = item.identifier
             button.addAction(UIAction { [weak self] _ in
                 guard let self else { return }
