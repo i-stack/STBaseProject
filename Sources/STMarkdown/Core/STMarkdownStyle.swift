@@ -54,6 +54,32 @@ public struct STMarkdownStyle: @unchecked Sendable {
     public var tableHeaderTextColor: UIColor?
     public var tableBorderColor: UIColor?
     public var tableBackgroundColor: UIColor?
+    /// 表格表头行（第一行数据）背景色，nil 时沿用 tableBackgroundColor 的 0.92 alpha。
+    public var tableHeaderRowBackgroundColor: UIColor?
+    /// 表格顶部工具条按钮配置，nil 或空数组时使用默认三按钮（复制/下载/全屏）。
+    public var tableHeaderItems: [STMarkdownTableHeaderItem]?
+    /// 表格顶部工具条单个按钮宽度。
+    public var tableHeaderButtonWidth: CGFloat
+    /// 表格顶部工具条单个按钮高度。
+    public var tableHeaderButtonHeight: CGFloat
+    /// 表格顶部工具条按钮间距。
+    public var tableHeaderButtonSpacing: CGFloat
+    /// 表格顶部工具条背景色，nil 时沿用 tableBackgroundColor。
+    public var tableHeaderBarBackgroundColor: UIColor?
+    /// 表格顶部工具条圆角掩码（控制四个角的圆角生效范围）。
+    public var tableCornerMask: CACornerMask
+    /// 表格顶部工具条标题文字，nil 时默认 "表格"。
+    public var tableTitleText: String?
+    /// 表格顶部工具条标题字体，nil 时使用默认 14 medium。
+    public var tableTitleFont: UIFont?
+    /// 表格顶部工具条标题颜色，nil 时沿用 tableHeaderTextColor.withAlphaComponent(0.6)。
+    public var tableTitleTextColor: UIColor?
+    /// 表格正文字体（body cells），nil 时从 style.font 派生。
+    public var tableFont: UIFont?
+    /// 表格表头行字体，nil 时从 style.font 派生。
+    public var tableHeaderFont: UIFont?
+    /// 表格最小行高（含 cellInsets）。
+    public var tableMinimumRowHeight: CGFloat
     public var imagePlaceholderTextColor: UIColor?
     public var imagePlaceholderBackgroundColor: UIColor?
     public var imagePlaceholderCaptionColor: UIColor?
@@ -156,8 +182,21 @@ public struct STMarkdownStyle: @unchecked Sendable {
         codeBlockBorderColor: UIColor? = nil,
         tableTextColor: UIColor? = nil,
         tableHeaderTextColor: UIColor? = nil,
+        tableHeaderRowBackgroundColor: UIColor? = nil,
         tableBorderColor: UIColor? = nil,
         tableBackgroundColor: UIColor? = nil,
+        tableHeaderItems: [STMarkdownTableHeaderItem]? = nil,
+        tableHeaderButtonWidth: CGFloat = 30,
+        tableHeaderButtonHeight: CGFloat = 30,
+        tableHeaderButtonSpacing: CGFloat = 6,
+        tableHeaderBarBackgroundColor: UIColor? = nil,
+        tableCornerMask: CACornerMask = [.layerMinXMinYCorner, .layerMaxXMinYCorner],
+        tableTitleText: String? = nil,
+        tableTitleFont: UIFont? = nil,
+        tableTitleTextColor: UIColor? = nil,
+        tableFont: UIFont? = nil,
+        tableHeaderFont: UIFont? = nil,
+        tableMinimumRowHeight: CGFloat = 35,
         imagePlaceholderTextColor: UIColor? = nil,
         imagePlaceholderBackgroundColor: UIColor? = nil,
         imagePlaceholderCaptionColor: UIColor? = nil,
@@ -221,8 +260,21 @@ public struct STMarkdownStyle: @unchecked Sendable {
         self.codeBlockBorderColor = codeBlockBorderColor
         self.tableTextColor = tableTextColor
         self.tableHeaderTextColor = tableHeaderTextColor
+        self.tableHeaderRowBackgroundColor = tableHeaderRowBackgroundColor
         self.tableBorderColor = tableBorderColor
         self.tableBackgroundColor = tableBackgroundColor
+        self.tableHeaderItems = tableHeaderItems
+        self.tableHeaderButtonWidth = tableHeaderButtonWidth
+        self.tableHeaderButtonHeight = tableHeaderButtonHeight
+        self.tableHeaderButtonSpacing = tableHeaderButtonSpacing
+        self.tableHeaderBarBackgroundColor = tableHeaderBarBackgroundColor
+        self.tableCornerMask = tableCornerMask
+        self.tableTitleText = tableTitleText
+        self.tableTitleFont = tableTitleFont
+        self.tableTitleTextColor = tableTitleTextColor
+        self.tableFont = tableFont
+        self.tableHeaderFont = tableHeaderFont
+        self.tableMinimumRowHeight = tableMinimumRowHeight
         self.imagePlaceholderTextColor = imagePlaceholderTextColor
         self.imagePlaceholderBackgroundColor = imagePlaceholderBackgroundColor
         self.imagePlaceholderCaptionColor = imagePlaceholderCaptionColor
