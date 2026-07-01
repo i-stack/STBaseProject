@@ -54,7 +54,20 @@ public final class STMarkdownTableCell: UICollectionViewCell {
     }
 
     func configure(with cellData: STMarkdownTableCellData, style: STMarkdownStyle) {
-        self.contentLabel.attributedText = cellData.attributedContent
+        let displayText: NSAttributedString
+        if let tableFont = style.tableFont {
+            let mutable = NSMutableAttributedString(attributedString: cellData.attributedContent)
+            let fullRange = NSRange(location: 0, length: mutable.length)
+            mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
+                if let originalFont = value as? UIFont {
+                    mutable.addAttribute(.font, value: originalFont.withSize(tableFont.pointSize), range: range)
+                }
+            }
+            displayText = mutable
+        } else {
+            displayText = cellData.attributedContent
+        }
+        self.contentLabel.attributedText = displayText
         let bgColor = style.tableBackgroundColor ?? UIColor.secondarySystemBackground
         self.contentView.backgroundColor = cellData.role.isHeader
             ? bgColor.withAlphaComponent(0.92)

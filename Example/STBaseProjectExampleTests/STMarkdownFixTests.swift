@@ -259,6 +259,47 @@ final class STMarkdownTableViewModelCitationTests: XCTestCase {
 @MainActor
 final class STMarkdownTableViewCitationTapTests: XCTestCase {
 
+    func testCustomHeaderItemsAreVisibleAfterLayout() {
+        let image = self.makeTestIcon()
+        let style = STMarkdownStyle(
+            font: .systemFont(ofSize: 14),
+            textColor: .label,
+            lineHeight: 18,
+            kern: 0,
+            tableHeaderItems: [
+                STMarkdownTableHeaderItem(identifier: "custom-copy", image: image) { _ in },
+                STMarkdownTableHeaderItem(identifier: "custom-fullscreen", image: image) { _ in }
+            ],
+            tableHeaderButtonWidth: 16
+        )
+        let tableView = STMarkdownTableView(style: style)
+
+        tableView.frame = CGRect(x: 0, y: 0, width: 320, height: 120)
+        tableView.layoutIfNeeded()
+
+        let buttons = self.headerButtons(in: tableView)
+        XCTAssertEqual(buttons.map(\.accessibilityIdentifier), ["custom-copy", "custom-fullscreen"])
+        XCTAssertTrue(buttons.allSatisfy { !$0.frame.isEmpty }, "自定义 headerItems 按钮应有稳定非零布局尺寸")
+        XCTAssertTrue(buttons.allSatisfy { $0.image(for: .normal) != nil }, "自定义 headerItems 按钮应保留配置的图片")
+    }
+
+    func testReassigningHeaderItemsRemovesOldButtons() {
+        let image = self.makeTestIcon()
+        let tableView = STMarkdownTableView(style: .default)
+        tableView.headerItems = [
+            STMarkdownTableHeaderItem(identifier: "first", image: image) { _ in },
+            STMarkdownTableHeaderItem(identifier: "second", image: image) { _ in }
+        ]
+        tableView.headerItems = [
+            STMarkdownTableHeaderItem(identifier: "third", image: image) { _ in }
+        ]
+
+        tableView.frame = CGRect(x: 0, y: 0, width: 320, height: 120)
+        tableView.layoutIfNeeded()
+
+        XCTAssertEqual(self.headerButtons(in: tableView).map(\.accessibilityIdentifier), ["third"])
+    }
+
     func testCitationTapCallbackFiredWhenCellSelected() {
         let style = STMarkdownStyle.default
         let tableView = STMarkdownTableView(style: style)
@@ -480,5 +521,23 @@ final class STMarkdownTableViewCitationTapTests: XCTestCase {
 
     private func gradientLayer(named name: String, in view: UIView) -> CAGradientLayer? {
         view.layer.sublayers?.first(where: { $0.name == name }) as? CAGradientLayer
+    }
+
+    private func headerButtons(in view: UIView) -> [UIButton] {
+        view.subviews.flatMap { subview -> [UIButton] in
+            var buttons = self.headerButtons(in: subview)
+            if let button = subview as? UIButton {
+                buttons.insert(button, at: 0)
+            }
+            return buttons
+        }
+    }
+
+    private func makeTestIcon() -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 16, height: 16))
+        return renderer.image { context in
+            UIColor.black.setFill()
+            context.fill(CGRect(x: 3, y: 3, width: 10, height: 10))
+        }
     }
 }
