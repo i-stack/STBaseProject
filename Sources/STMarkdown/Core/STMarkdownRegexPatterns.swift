@@ -48,9 +48,9 @@ public enum STMarkdownListRegex {
         pattern: #"(?m)^(\s*[-+])(?![-+])\s*(\S)"#,
         owner: "STMarkdownListRegex.symbolList"
     )
-    /// `* text`（非 `**`）→ 补空格（多行模式）
+    /// `* text`（非 `**`、非 `*"`/`*'`/`*\u201C` 等引号开头——这些是强调语法而非列表项）→ 补空格（多行模式）
     public static let starList = STMarkdownRegexFactory.compile(
-        pattern: #"(?m)^(\s*)\*(?!\*)\s*(\S)"#,
+        pattern: #"(?m)^(\s*)\*(?!\*|["'\u201C\u201D\u2018\u2019])\s*(\S)"#,
         owner: "STMarkdownListRegex.starList"
     )
     /// 有序列表行（0-3 空格缩进，marker 后有内容）
