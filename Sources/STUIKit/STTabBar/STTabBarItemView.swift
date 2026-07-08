@@ -73,7 +73,7 @@ public class STTabBarItemView: UIView {
             
             // titleLabel 初始约束
             self.titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            self.titleLabel.topAnchor.constraint(equalTo: self.iconImageView.bottomAnchor, constant: 2),
+            self.titleLabel.topAnchor.constraint(equalTo: self.iconImageView.bottomAnchor, constant: self.titleGap),
             self.titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 4),
             self.titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
             self.titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: 0),
@@ -168,10 +168,8 @@ public class STTabBarItemView: UIView {
         self.updateCustomView()
     }
     
-    private enum ImageAndTextMetrics {
-        static let titleGap: CGFloat = 2
-        static let bottomPadding: CGFloat = 0
-    }
+    /// 图标与标题间距（从 config 读取，fallback 2pt，下限 0）
+    private var titleGap: CGFloat { max(0, self.config?.imageTitleGap ?? 2) }
     
     /// 单行标题占用高度（用于在固定 TabBar 高度内分配图标与「距顶」）
     private func titleLineHeight(for model: STTabBarItemModel) -> CGFloat {
@@ -194,15 +192,15 @@ public class STTabBarItemView: UIView {
         let baseW = model.layout.imageSize?.width ?? 24
         let baseH = model.layout.imageSize?.height ?? 24
         let titleH = self.titleLineHeight(for: model)
-        let contentH = baseH + ImageAndTextMetrics.titleGap + titleH
+        let contentH = baseH + self.titleGap + titleH
         let areaTop = self.config?.itemLayoutAreaTopInset ?? 0
         let areaBottom = barH - (self.config?.itemLayoutAreaBottomInset ?? 0)
         let usableH = max(contentH, areaBottom - areaTop)
         let top = areaTop + max(0, floor((usableH - contentH) / 2))
         var iconW = baseW
         var iconH = baseH
-        if top + iconH + ImageAndTextMetrics.titleGap + titleH > barH {
-            let iconBudget = max(1, barH - top - ImageAndTextMetrics.titleGap - titleH)
+        if top + iconH + self.titleGap + titleH > barH {
+            let iconBudget = max(1, barH - top - self.titleGap - titleH)
             let scale = min(1, iconBudget / baseH)
             iconH = baseH * scale
             iconW = baseW * scale
@@ -274,7 +272,7 @@ public class STTabBarItemView: UIView {
         
         self.titleLabelConstraints = [
             self.titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            self.titleLabel.topAnchor.constraint(equalTo: self.iconImageView.bottomAnchor, constant: 2),
+            self.titleLabel.topAnchor.constraint(equalTo: self.iconImageView.bottomAnchor, constant: self.titleGap),
             self.titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 4),
             self.titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
             self.titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: 0)
@@ -323,7 +321,7 @@ public class STTabBarItemView: UIView {
         // 文字在下方（在 tabbar 内部），向下移动一些
         self.titleLabelConstraints = [
             self.titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-            self.titleLabel.topAnchor.constraint(equalTo: self.iconImageView.bottomAnchor, constant: 8),
+            self.titleLabel.topAnchor.constraint(equalTo: self.iconImageView.bottomAnchor, constant: self.titleGap),
             self.titleLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 4),
             self.titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -4),
             self.titleLabel.bottomAnchor.constraint(lessThanOrEqualTo: bottomAnchor, constant: -6)

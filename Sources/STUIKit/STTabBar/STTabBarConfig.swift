@@ -43,6 +43,8 @@ public struct STTabBarConfig {
     public var itemLayoutAreaTopInset: CGFloat
     /// 图文布局区域底部边距（从 TabBar 底部算起，通常等于背景图视觉内容区下沿距底距离；0 = 全高居中）
     public var itemLayoutAreaBottomInset: CGFloat
+    /// 图标与标题之间的垂直间距（imageAndText / irregular 模式下均生效）
+    public var imageTitleGap: CGFloat
 
     public init(
         backgroundColor: UIColor = .systemBackground,
@@ -61,7 +63,8 @@ public struct STTabBarConfig {
         selectedScale: CGFloat = 1.1,
         unselectedAlpha: CGFloat = 0.7,
         itemLayoutAreaTopInset: CGFloat = 0,
-        itemLayoutAreaBottomInset: CGFloat = 0
+        itemLayoutAreaBottomInset: CGFloat = 0,
+        imageTitleGap: CGFloat = 2.0
     ) {
         self.backgroundColor = backgroundColor
         self.backgroundImage = backgroundImage
@@ -80,5 +83,6 @@ public struct STTabBarConfig {
         self.unselectedAlpha = unselectedAlpha
         self.itemLayoutAreaTopInset = itemLayoutAreaTopInset
         self.itemLayoutAreaBottomInset = itemLayoutAreaBottomInset
+        self.imageTitleGap = imageTitleGap
     }
 }

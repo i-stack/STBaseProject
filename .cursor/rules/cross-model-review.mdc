@@ -1,0 +1,296 @@
+---
+description: cross-model-review (from skills-engineering)
+alwaysApply: true
+---
+
+<!-- last-verified: 2026-07 -->
+# 跨模型对抗审查（Cross Model Review）
+
+> **真值来源**：本文件为唯一详规正文。`cross-model-review/SKILL.md` 为入口；各端完整副本由 `scripts/sync-skills.sh` 同步；Cursor 项目内由 `sync-agent-preamble.sh` 生成 `.cursor/rules/cross-model-review.mdc`。
+
+## 定位
+
+cross-model-review 解决 AI 辅助编码的第 2 类失败模式：**计划听起来对，但会崩**。同一个模型既规划又评分无法发现自己的结构盲区——必须靠**跨提供商模型**对抗审查。
+
+本 skill 基于 `chaseai-yt/grill-me-codex`（MIT 许可）的 Act 2 思路，适配本项目多 adapter 架构。
+
+## 前置
+
+- `PLAN.md` 必须已由 `plan-grill` 锁定（PG-004 产出）。无 PLAN.md 时先跑 plan-grill。
+- 当前环境至少有两个不同 provider 的 reviewer CLI 可用（CMR-001 探测）。
+
+## CMR-001 自动发现 reviewer
+
+直接探测当前环境中的 reviewer CLI。安装后的 skill 不依赖仓库级脚本；在 `ai-coding-kit` 仓库内可选运行辅助脚本：
+
+```bash
+bash skills-engineering/scripts/detect-review-clis.sh
+```
+
+通用探测方法：
+
+```bash
+command -v codex >/dev/null 2>&1 && codex --version
+command -v gemini >/dev/null 2>&1 && gemini --version
+command -v claude >/dev/null 2>&1 && claude --version
+```
+
+把探测结果整理为等价 JSON（人工整理即可，不要求生成文件）：
+
+```json
+{
+  "clis": [
+    {"name":"codex","available":true,"path":"...","version":"0.142.5","readonly_flag":"-s read-only","noninteractive_flag":"exec"},
+    {"name":"gemini","available":true,"path":"...","version":"0.49.0","readonly_flag":"--approval-mode plan","noninteractive_flag":"-p"},
+    {"name":"claude","available":false}
+  ],
+  "available_count": 2
+}
+```
+
+**硬门**：可用 provider 数 < 2 时**停止**，提示用户安装缺失 CLI，不伪造 cross-model。跨模型对抗至少需要两个不同 provider 的 CLI。
+
+## CMR-002 推荐组合 + 用户选择
+
+从可用 CLI 中推荐两个**不同 provider** 的组合：
+
+| 主 agent | 推荐 reviewer 组合 |
+|---|---|
+| Claude（宿主为 Claude Code） | codex + gemini（避开 Anthropic） |
+| Codex（宿主为 Codex CLI） | gemini + claude（避开 OpenAI） |
+
+向用户呈现候选表，让用户确认或调整：
+
+```
+检测到可用 reviewer：
+1. codex 0.142.5  (OpenAI)     只读: -s read-only
+2. gemini 0.49.0  (Google)     只读: --approval-mode plan
+
+推荐组合：codex + gemini（两个不同 provider）
+确认？或指定另外两个 reviewer？
+```
+
+**不静默替用户选死**。用户确认后才进入审查。若用户只指定一个 reviewer，必须说明这会降级为普通单模型审查，不再使用 `cross-model-review` 流程。
+
+## CMR-003 reviewer 只读（三 adapter 调用命令）
+
+每个 reviewer 必须以只读模式运行。reviewer 不写代码，只读 PLAN.md 和相关 repo 文件，输出 `VERDICT: APPROVED` 或 `VERDICT: REVISE` + 具体修改建议。
+
+### 项目内输出目录（强制）
+
+reviewer 原始输出、中间输出、交付日志都必须保存在**当前项目根目录**下，禁止把 `/tmp` 作为 reviewer 输出缓冲。推荐在审查开始前创建：
+
+```bash
+REVIEW_SLUG="<yyyy-mm-dd-slug>"
+REVIEW_DIR="./.plan-reviews/${REVIEW_SLUG}"
+RAW_DIR="${REVIEW_DIR}/raw"
+mkdir -p "${RAW_DIR}"
+grep -qxF ".plan-reviews/" .gitignore 2>/dev/null || printf "\n.plan-reviews/\n" >> .gitignore
+```
+
+规则：
+
+- `PLAN.md` 和 `PLAN-REVIEW-LOG.md` 是当前项目根的交付物。
+- 若 PLAN.md 引用了 `.plan-reviews/<slug>/architecture-analysis.md`，reviewer 必须把它作为只读输入，与 PLAN.md 一起审查。
+- reviewer 原始输出写入 `${RAW_DIR}/<reviewer>-round<N>.<txt|json>`。
+- 可选归档时，把项目根 `PLAN.md` / `PLAN-REVIEW-LOG.md` 同步到 `${REVIEW_DIR}/`，`raw/` 原样保留。
+- 创建 `.plan-reviews/` 时，默认把 `.plan-reviews/` 追加到当前项目根 `.gitignore`；审查证据默认是本地工作产物，除非用户明确要求纳入版本控制。
+- `/tmp` 只允许用于与本流程无关的普通一次性 shell scratch；不得用于保存 reviewer verdict、critique、thread/session id 或任何需要审计的 cross-model-review 证据。
+
+### 审查 prompt（每轮发送给 reviewer）
+
+```
+You are an adversarial reviewer for an implementation plan. Be skeptical and specific — your job is to find what breaks, not to be agreeable. Read the plan at PLAN.md, any architecture-analysis.md file referenced by PLAN.md, and any repo files you need (you are read-only). Identify concrete flaws: security holes, race conditions, missing edge cases, schema conflicts, wrong assumptions, observability gaps, simpler alternatives. For each, give a one-line fix. Do NOT modify any files. End your reply with EXACTLY one line: `VERDICT: APPROVED` if the plan is sound enough to implement, or `VERDICT: REVISE` if it still has material problems.
+```
+
+### Codex adapter
+
+```bash
+# Round 1 — 全新会话，拿 thread_id
+codex exec -s read-only --json -o "${RAW_DIR}/codex-round1.json" "$REVIEW_PROMPT" \
+  < /dev/null 2>/dev/null | grep '"type":"thread.started"'
+
+# Round 2+ — 续接同一会话（Codex 记得之前的批评）
+codex exec resume "$THREAD_ID" -c sandbox_mode="read-only" --json \
+  -o "${RAW_DIR}/codex-round${ROUND}.json" \
+  "I revised the plan. Re-review PLAN.md — check whether your prior findings are addressed and flag anything new. End with VERDICT: APPROVED or VERDICT: REVISE." \
+  < /dev/null 2>/dev/null >/dev/null
+```
+
+**关键**：
+- `< /dev/null` 强制必需——`codex exec` 在非交互式下会读 stdin，不重定向会永久 hang。
+- `resume` 不支持 `-s`，必须用 `-c sandbox_mode="read-only"` 强制只读。
+- timeout 600s 守卫（详见安全规则）。
+
+### Gemini adapter
+
+```bash
+# Round 1 — 全新会话
+gemini -p "$REVIEW_PROMPT" --approval-mode plan -o json --skip-trust \
+  > "${RAW_DIR}/gemini-round1.json"
+
+# Round 2+ — 续接同一会话
+gemini -r "$SESSION_ID" -p "$RESUME_PROMPT" --approval-mode plan -o json \
+  > "${RAW_DIR}/gemini-round${ROUND}.json"
+```
+
+**关键**：`--approval-mode plan` 是只读模式；`-r/--resume` 支持 `latest` 或 session index。
+
+**调用注意事项**：
+
+1. **preamble 与 workspace**：gemini 启动会加载全局 `~/.gemini/GEMINI.md`（本项目 `sync-agent-preamble.sh` 写入），preamble 要求读 `~/.gemini/skills/` 下文件，但 workspace 限制可能拒绝 → 产生 `Error executing tool read_file: Path not in workspace` 噪音。这不阻塞 reviewer 主流程。
+   - 缓解：调用时加 `--include-directories ~/.gemini/skills` 消除噪音。
+2. **context-calibrator**：若 `GEMINI_API_KEY` 是第三方中转（非 Google 官方），可能不支持 `context-calibrator` 模型 → `Hot start calibration failed` 503。此错误是噪音，不阻止 reviewer 输出 VERDICT。
+
+### Claude adapter
+
+```bash
+# Round 1 — 全新会话
+claude -p "$REVIEW_PROMPT" --permission-mode plan --output-format json \
+  > "${RAW_DIR}/claude-round1.json"
+
+# Round 2+ — 续接同一会话（resume 参数以 claude --help 为准）
+claude --resume "$SESSION_ID" -p "$RESUME_PROMPT" --permission-mode plan --output-format json \
+  > "${RAW_DIR}/claude-round${ROUND}.json"
+```
+
+> Claude adapter 的 resume 参数需以实际 `claude --help` 为准验证；第一版若 resume 不可用，可降级为每轮传完整 conversation history（messages 数组）。
+
+### 第一版不 pin model
+
+每个 adapter 使用 CLI 配置里的**默认模型**。只有用户显式指定时才传 `--model`。这与 Chase 上游"不轻易 pin model"的安全经验一致——pin `gpt-5.x-codex` 变体在 ChatGPT 账户鉴权下会 400。
+
+## CMR-004 主 agent 仲裁
+
+每轮 reviewer 返回后：
+
+1. 对本轮所有已选 reviewer 都完成调用，读取项目内 raw 文件（`${RAW_DIR}/<reviewer>-round<N>.<txt|json>`）。
+2. 逐个追加到项目根 `PLAN-REVIEW-LOG.md`：`## Round <N> - <reviewer>` + 完整 critique + raw 文件相对路径。
+3. 汇总本轮 verdict：
+   - **全部** reviewer 都返回 `VERDICT: APPROVED` → 才能进入 Resolution（收敛）。
+   - **任一** reviewer 返回 `VERDICT: REVISE` → 主 agent 决定**哪些值得采纳**。修订 `PLAN.md`。追加 `### Orchestrator response` 到 LOG：Accepted / Rejected + 理由。进入下一轮。
+   - 任一 reviewer 未输出合法 verdict → 本轮失败，停止并告知用户，不把缺失 verdict 当作 approval。
+4. **仲裁纪律**：
+   - 采纳有证据的批评（具体到代码/假设/边界）。
+   - 拒绝不成立的批评，写明理由（如"reviewer 误读了 X，实际是 Y"）。
+   - 不盲从（否则失去仲裁价值），不无视（否则失去对抗价值）。
+
+## CMR-005 MAX_ROUNDS + deadlock
+
+| 参数 | 默认 | 含义 |
+|---|---|---|
+| `MAX_ROUNDS` | `5` | 硬上限。循环在此终止。 |
+| `PLAN_FILE` | `PLAN.md` | plan-grill 产出的计划。 |
+| `LOG_FILE` | `PLAN-REVIEW-LOG.md` | 追加式论证记录，是交付物。 |
+| `RAW_DIR` | `.plan-reviews/<date>-<slug>/raw` | reviewer 原始输出目录，必须在当前项目根内。 |
+
+若调用时传 `rounds=3`，用该值覆盖 `MAX_ROUNDS`。启动前 echo 已解析的值。
+
+### Resolution（用户最终签署）
+
+- **APPROVED**：呈现最终 PLAN.md + 3 条改进摘要 + 轮数。问："经 N 轮跨模型审查。现在实施？" 仅在用户同意后写代码。**两幕期间不写任何代码。**
+- **deadlock（MAX_ROUNDS 用尽未 APPROVED）**：**禁止假装 approved**。列出每个未决点 + 主 agent 的反立场，交给用户裁决。一个标记清楚的分歧胜过一个虚假的"已批准"。
+
+## 归档（可选，用户触发）
+
+审查完成后，主 agent 提示用户是否归档。归档把 PLAN.md + PLAN-REVIEW-LOG.md 保存到**当前项目根**的 `.plan-reviews/` 下，供后续相似问题回查——"上次设计速率限制时问了哪些问题？发现过什么缺陷？"
+
+### 归档目录结构
+
+```
+<project-root>/.plan-reviews/
+└── <YYYY-MM-DD>-<slug>/
+    ├── PLAN.md              # plan-grill 锁定的计划
+    ├── PLAN-REVIEW-LOG.md   # cross-model-review 完整论证记录
+    ├── architecture-analysis.md  # 可选，PG-005 快速架构分析
+    ├── raw/                 # reviewer 原始输出（每轮每 reviewer 一个文件）
+    │   ├── claude-round1.json
+    │   └── gemini-round1.json
+    └── SUMMARY.md           # 可选，人工整理的总结
+```
+
+### 触发流程
+
+1. Resolution 后（APPROVED 或 deadlock），主 agent 提示：「审查完成。是否归档到 `./.plan-reviews/<date>-<slug>/`？可先编辑 PLAN.md / PLAN-REVIEW-LOG.md 后再保存。」
+2. 用户提供 slug（如 `login-rate-limit`）。
+3. 主 agent 执行：
+
+   ```bash
+   ARCHIVE_DIR="./.plan-reviews/$(date +%Y-%m-%d)-${SLUG}"
+   mkdir -p "${ARCHIVE_DIR}/raw"
+   grep -qxF ".plan-reviews/" .gitignore 2>/dev/null || printf "\n.plan-reviews/\n" >> .gitignore
+   cp PLAN.md PLAN-REVIEW-LOG.md "${ARCHIVE_DIR}/"
+   # 若 PLAN.md 引用了 PG-005 架构分析文件，也复制为 "${ARCHIVE_DIR}/architecture-analysis.md"。
+   ```
+
+4. 用户可选写 `SUMMARY.md`（人工整理：关键盘问问题、发现的缺陷、修复要点）。
+
+### 归档原则
+
+- **按项目保存**：归档到当前项目根的 `.plan-reviews/`，不进 skill 仓库；不同项目各自独立。reviewer raw 输出也属于审计证据，必须保留在该目录的 `raw/` 下。
+- **默认忽略**：创建 `.plan-reviews/` 时必须默认把 `.plan-reviews/` 写入当前项目根 `.gitignore`。若团队确实要共享审查归档，应由用户显式移除 ignore 或选择性复制整理后的摘要文件。
+- **人工整理**：归档前用户可编辑 PLAN.md / PLAN-REVIEW-LOG.md，删减噪音、补总结；不是机械保存。
+- **目的**：知识沉淀，相似问题回查。
+- **提交边界**：默认不提交 `.plan-reviews/`；如果要提交，优先提交人工整理后的 `SUMMARY.md` 或脱敏后的归档，而不是 raw reviewer 输出。
+
+### 不归档的情况
+
+- trivial 审查（无学习价值）
+- 用户明确"不归档"
+- 敏感项目（PLAN.md 含业务逻辑，不宜留痕）
+
+## PLAN-REVIEW-LOG.md 格式
+
+```markdown
+# Plan Review Log: <title>
+
+MAX_ROUNDS=<n>
+Reviewers:
+- <cli/model A>
+- <cli/model B>
+
+## Round 1 - <reviewer>
+<critique>
+VERDICT: REVISE
+
+### Orchestrator response
+Accepted:
+- <采纳点 1>
+Rejected:
+- <拒绝点 1> because <理由>
+
+## Resolution
+<approved | deadlock>
+```
+
+## 安全规则
+
+1. **reviewer 每轮只读**——codex `-s read-only` / resume `-c sandbox_mode="read-only"`；gemini `--approval-mode plan`；claude `--permission-mode plan`。reviewer 永远不写文件。
+2. **`< /dev/null` 必需**（codex）——非交互式下 stdin 不重定向会永久 hang（0% CPU 静默卡死）。
+3. **禁止 `/tmp` reviewer 缓冲**——reviewer 原始输出、verdict、critique、thread/session id、PLAN-REVIEW-LOG 都必须写在当前项目根下，推荐 `.plan-reviews/<date>-<slug>/raw/`；否则审计链不可复现。
+4. **timeout 600s 守卫**——每个 reviewer 调用加 10 分钟上限。Claude Code 的 Bash tool 传 `timeout: 600000`；纯 shell 用 `timeout 600`（Linux）或 `gtimeout 600`（macOS coreutils）。超时视为失败，停止并告知用户，不盲重试。
+5. **不 pin model**——用 CLI 默认模型，除非用户显式指定。
+6. **循环必在 MAX_ROUNDS 终止**——硬上限，不无限循环。
+7. **deadlock 不假装 approved**——未收敛时如实标记，交用户裁决。
+
+## 跳过条件
+
+- 无 PLAN.md（先跑 plan-grill）
+- trivial 改动（不需要跨模型审查）
+- 用户明确"直接实施"
+- 可用 reviewer provider < 2（CMR-001 硬门）
+
+## 仲裁质量自检
+
+审查结束前过一遍：
+
+- [ ] 每个 REVISE 是否都有 Accepted 或 Rejected 记录？
+- [ ] Rejected 是否都写明理由？
+- [ ] 是否同一轮全部 reviewer 都 APPROVED 后才进入 Resolution？
+- [ ] reviewer raw 输出是否全部保存在当前项目根下（如 `.plan-reviews/<date>-<slug>/raw/`），没有使用 `/tmp`？
+- [ ] PLAN-REVIEW-LOG.md 是否完整保留所有轮次论证？
+- [ ] deadlock 时是否如实标记，未假装 approved？
+
+## 致谢
+
+本 skill 基于 `chaseai-yt/grill-me-codex`（MIT 许可，https://github.com/chaseai-yt/grill-me-codex）的 Act 2 跨模型对抗审查机制。Codex adapter 的调用命令（`codex exec -s read-only`、`resume -c sandbox_mode`、`< /dev/null` 防 hang、timeout 600s）直接源自上游验证（2026-06-04）。扩展为三 adapter（codex/gemini/claude）自动发现架构。
