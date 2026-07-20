@@ -1,7 +1,9 @@
 ---
-description: cross-model-review (from skills-engineering)
-alwaysApply: true
+description: 跨模型对抗审查——仅当用户显式触发（/cross-model-review、plan-grill 锁定计划后）时加载；普通任务不触发
+alwaysApply: false
 ---
+
+<!-- Content below is auto-generated from cross-model-review/references/cross_model_review.md — edit the .tmpl or .md source, not the generated .mdc output -->
 
 <!-- last-verified: 2026-07 -->
 # 跨模型对抗审查（Cross Model Review）

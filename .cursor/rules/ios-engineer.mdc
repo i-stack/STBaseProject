@@ -14,7 +14,7 @@ alwaysApply: true
 - `~/.cursor/skills/cognitive-expansion/SKILL.md`
 - `~/.cursor/skills/cognitive-expansion/references/cognitive_expansion.md`
 
-并按其中 Tier 0 / Tier 3、邻域对照池、跳过条件与迎合自检执行。Tier 2 认知对手见 ios-engineer `references/cognitive_adversary_mode.md`。
+并按其中 Tier 0 / Tier 3、邻域对照池、跳过条件与迎合自检执行。Tier 2 认知对手见 `~/.cursor/skills/ios-engineer/references/cognitive_adversary_mode.md`。
 
 # global logical reasoning
 
@@ -32,7 +32,7 @@ alwaysApply: true
 - `~/.cursor/skills/engineering-discipline/SKILL.md`
 - `~/.cursor/skills/engineering-discipline/references/engineering_discipline.md`
 
-并按其中 GR-002/003/004/005/007/008 规则执行：描述不清时先输出前置确认块；锁定单一根因；按四段式输出；给最小修复；不格式化代码；声明已覆盖/未覆盖/残留风险。
+并按其中 GR-001/002/003/004/005/006/007/008 规则执行：保护敏感信息；描述不清时先输出前置确认块；锁定单一根因；按四段式输出；给最小修复；触发预算阈值时主动中断；不格式化代码；声明已覆盖/未覆盖/残留风险。
 
 # global problem analysis
 
@@ -42,6 +42,15 @@ alwaysApply: true
 - `~/.cursor/skills/problem-analysis/references/problem_analysis.md`
 
 并按其中 PA-001/002/003 规则执行：先检验问题的逻辑有效性；从第一性原理拆解真实需求并评估当前路径是否最优；充分理解后再回复。发现实质性问题时输出 `问题分析` 块，问题清晰时静默完成。
+
+# global requirements clarity gate
+
+problem-analysis 完成后，对每个非平凡构建、修改或方案请求执行 `plan-grill` PG-000 门控。若仍存在无法从代码/文档/当前上下文查明，且不同答案会实质改变交付行为、公共契约、数据、安全性或验收结果的阻塞性决策，必须自动加载并遵循：
+
+- `~/.cursor/skills/plan-grill/SKILL.md`
+- `~/.cursor/skills/plan-grill/references/plan_grill.md`
+
+进入后一次只问一个问题，确认前不执行。显式 grill/锁定计划触发语始终强制进入。事实查询/解释/翻译、review/只诊断不修复、trivial 改动、验收标准与实施路径已明确的执行任务、以及用户明确「直接做/不要盘问」时跳过（安全或不可逆操作缺少必要信息除外）。
 
 # global epistemic integrity
 
@@ -67,9 +76,9 @@ SKILL 规则位于 `~/.cursor/skills/ios-engineer/`，可直接加载。
 ```
 <usage-audit>
 tool: cursor
-task-type: <layout | parameter-pass-through | concurrency | review | migration | mcp-control | other>
+task-type: <layout | parameter-pass-through | concurrency | review | migration | mcp-control | notifications | privacy | persistence | storekit | extensions | other>
 prompt-summary: <5-200 字符脱敏摘要，禁贴原始 prompt / 源码片段 / 可识别项目名>
-expected-rules: <逗号分隔，如 IR-005, ROUTE-007>
+expected-rules: <逗号分隔，如 ROUTE-007, SYM-003>
 hit-rules: <逗号分隔；不确定就留空，绝不凭印象猜>
 deviations: <分号分隔；没有就留空>
 outcome: <pass | partial | fail>
@@ -81,5 +90,5 @@ evolution-signal: <none | 修正表达 | 新增能力 | 合并重复 | 退役规
 
 Rule ID 词表取自 `~/.cursor/skills/ios-engineer/references/rule_index.md`，仅使用 `status=active` 的 ID（IR-NNN / SYM-NNN / ROUTE-NNN / OUT-NNN / GR-NNN）。完整 schema、写入协议、self-grading 偏差告示见同目录下 `usage_ledger.md` §1-§7。
 
-**非 iOS 工程任务不输出这个块**：写文档、答 API 问题、通用重构、元工程 / 自进化讨论 / SkillOps 维护本身都跳过。task-type 落不进 7 选 1 时也跳过。
+**非 iOS 工程任务不输出这个块**：写文档、答 API 问题、通用重构、元工程 / 自进化讨论 / SkillOps 维护本身都跳过。task-type 落不进 12 选 1 时也跳过。
 <!-- managed-block:ios-engineer:end -->
