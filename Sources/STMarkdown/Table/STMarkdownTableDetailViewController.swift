@@ -24,20 +24,7 @@ open class STMarkdownTableDetailViewController: UIViewController {
     public let tableViewModel: STMarkdownTableViewModel
     
     private var copyResetWorkItem: DispatchWorkItem?
-    private var isRestoringPortraitForDismissal = false
     private weak var actionMenu: STMarkdownTableActionMenu?
-
-    override public var shouldAutorotate: Bool {
-        return true
-    }
-
-    override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return [.portrait, .landscapeRight]
-    }
-
-    override public var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
-        return self.isRestoringPortraitForDismissal ? .portrait : .landscapeRight
-    }
     
     public init(
         tableViewModel: STMarkdownTableViewModel,
@@ -51,7 +38,6 @@ open class STMarkdownTableDetailViewController: UIViewController {
         self.actionMenuItems = actionMenuItems
         super.init(nibName: nil, bundle: nil)
         self.modalPresentationStyle = .fullScreen
-        STOrientationManager.shared.requestInterfaceOrientations(.landscapeRight)
     }
 
     @available(*, unavailable)
@@ -64,33 +50,21 @@ open class STMarkdownTableDetailViewController: UIViewController {
         self.setupUI()
     }
 
-    open override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        STOrientationManager.shared.requestInterfaceOrientations(.landscapeRight, in: self.view.window?.windowScene)
+    open override var prefersStatusBarHidden: Bool {
+        return true
     }
 
-    open override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        guard self.isBeingDismissed || self.navigationController?.isBeingDismissed == true else { return }
-        STOrientationManager.shared.restoreDefaultInterfaceOrientations(in: self.view.window?.windowScene)
-    }
-
-    open override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        guard self.isRestoringPortraitForDismissal else { return }
-        coordinator.animate(alongsideTransition: nil) { [weak self] _ in
-            self?.onPortraitTransitionCompleted?()
-        }
+    open override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.layoutRotatedContent()
     }
 
     open func setupUI() {
         self.view.backgroundColor = self.style.tableBackgroundColor ?? UIColor.systemBackground
 
-        self.rotationContainer.translatesAutoresizingMaskIntoConstraints = false
         self.rotationContainer.backgroundColor = .clear
         self.view.addSubview(self.rotationContainer)
 
-        self.topBar.translatesAutoresizingMaskIntoConstraints = false
         self.topBar.backgroundColor = .clear
         self.rotationContainer.addSubview(self.topBar)
 
@@ -105,21 +79,9 @@ open class STMarkdownTableDetailViewController: UIViewController {
         self.topBar.addSubview(buttonStack)
 
         self.tableView.onCitationTap = self.onCitationTap
-        self.tableView.translatesAutoresizingMaskIntoConstraints = false
         self.rotationContainer.addSubview(self.tableView)
 
-        let safeArea = self.rotationContainer.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
-            self.rotationContainer.topAnchor.constraint(equalTo: self.view.topAnchor),
-            self.rotationContainer.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            self.rotationContainer.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.rotationContainer.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-
-            self.topBar.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 12),
-            self.topBar.leadingAnchor.constraint(equalTo: safeArea.leadingAnchor, constant: 16),
-            self.topBar.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -16),
-            self.topBar.heightAnchor.constraint(equalToConstant: 44),
-
             self.backButton.leadingAnchor.constraint(equalTo: self.topBar.leadingAnchor),
             self.backButton.centerYAnchor.constraint(equalTo: self.topBar.centerYAnchor),
             self.backButton.widthAnchor.constraint(equalToConstant: 40),
@@ -127,18 +89,38 @@ open class STMarkdownTableDetailViewController: UIViewController {
 
             buttonStack.trailingAnchor.constraint(equalTo: self.topBar.trailingAnchor),
             buttonStack.centerYAnchor.constraint(equalTo: self.topBar.centerYAnchor),
-            buttonStack.heightAnchor.constraint(equalToConstant: 40),
-
-            self.tableView.topAnchor.constraint(equalTo: self.topBar.bottomAnchor, constant: 8),
-            self.tableView.leadingAnchor.constraint(equalTo: self.topBar.leadingAnchor),
-            self.tableView.trailingAnchor.constraint(equalTo: self.topBar.trailingAnchor),
-            self.tableView.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -12)
+            buttonStack.heightAnchor.constraint(equalToConstant: 40)
         ])
 
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.handleLongPress(_:)))
         self.tableView.addGestureRecognizer(longPress)
         
         self.backButton.contentHorizontalAlignment = .left
+    }
+
+    private func layoutRotatedContent() {
+        let bounds = self.view.bounds
+        let landscapeSize = CGSize(width: bounds.height, height: bounds.width)
+        self.rotationContainer.bounds = CGRect(origin: .zero, size: landscapeSize)
+        self.rotationContainer.center = CGPoint(x: bounds.midX, y: bounds.midY)
+        self.rotationContainer.transform = CGAffineTransform(rotationAngle: .pi / 2)
+
+        let safeAreaInsets = self.view.safeAreaInsets
+        let leftInset = max(safeAreaInsets.top, 16)
+        let rightInset = max(safeAreaInsets.bottom, 16)
+        let topInset: CGFloat = 12
+        let bottomInset: CGFloat = 12
+        let contentWidth = landscapeSize.width - leftInset - rightInset
+        let topBarHeight: CGFloat = 44
+
+        self.topBar.frame = CGRect(x: leftInset, y: topInset, width: contentWidth, height: topBarHeight)
+        let tableY = self.topBar.frame.maxY + 8
+        self.tableView.frame = CGRect(
+            x: leftInset,
+            y: tableY,
+            width: contentWidth,
+            height: landscapeSize.height - tableY - bottomInset
+        )
     }
 
     private func makeToolButton(systemName: String, action: Selector) -> UIButton {
@@ -152,14 +134,12 @@ open class STMarkdownTableDetailViewController: UIViewController {
     }
 
     @objc private func handleBack() {
-        self.isRestoringPortraitForDismissal = true
-        self.setNeedsUpdateOfSupportedInterfaceOrientations()
+        self.onPortraitTransitionCompleted?()
         if let onDismiss {
             onDismiss()
-            return
+        } else {
+            self.dismiss(animated: true)
         }
-        STOrientationManager.shared.restoreDefaultInterfaceOrientations(in: self.view.window?.windowScene)
-        self.dismiss(animated: true)
     }
 
     @objc private func handleCopy() {

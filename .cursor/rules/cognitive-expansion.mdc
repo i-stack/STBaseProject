@@ -29,7 +29,7 @@ alwaysApply: true
 | **Tier 2** | 技术决策 / 架构 / 根因结论 / 审查最终判断 / 用户强确信 | 完整认知对手 Step 0–6（见 ios-engineer `cognitive_adversary_mode.md`） |
 | **Tier 3** | 用户写 `【深潜】` 或 `【拓展】` | Tier 0 + 心智模型 + 跨域类比 + 7 天内可验证动作 |
 
-Tier 2 命中时：用认知对手完整结构，**可不单独再写** Tier 0 尾注（避免重复）。
+Tier 2 命中时：用认知对手完整结构，**不另输出** Tier 0 尾注；同时 preamble 轻量认知校准段也由 CAM 完整结构承载、不再单独输出（见 CE-006 与 global cognitive calibration 段）。三层校准去重，避免重复。
 
 ## 触发门控（Tier 0 是否追加）
 
