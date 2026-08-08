@@ -226,4 +226,40 @@ public extension UIFont {
         let scaledSize = STDeviceAdapter.scaledWidth(size * STFontManager.shared.fontSizeScale)
         return .monospacedSystemFont(ofSize: scaledSize, weight: weight)
     }
+
+    // MARK: - 不读取全局 fontSizeScale 的显式 scale 构造入口
+
+    /// 与 st_systemFont(ofSize:) 等价，但使用显式传入的 explicitScale 而非 STFontManager.shared.fontSizeScale。
+    /// 用于字体必须脱离全局可变状态（避免 withFontScale 异步逃逸导致延迟渲染被静默重置为标准字号）的场景。
+    static func st_systemFont(ofSize size: CGFloat, explicitScale scale: CGFloat) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledWidth(size * scale)
+        let config = STFontManager.shared.fontFamily
+        if let name = config.fontName(for: .regular),
+           let font = UIFont(name: name, size: scaledSize) {
+            return font
+        }
+        return .systemFont(ofSize: scaledSize)
+    }
+
+    /// 与 st_systemFont(ofSize:weight:) 等价，但使用显式传入的 explicitScale 而非 STFontManager.shared.fontSizeScale。
+    static func st_systemFont(ofSize size: CGFloat, weight: UIFont.Weight, explicitScale scale: CGFloat) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledWidth(size * scale)
+        let config = STFontManager.shared.fontFamily
+        if let name = config.fontName(for: weight),
+           let font = UIFont(name: name, size: scaledSize) {
+            return font
+        }
+        return UIFont.systemFont(ofSize: scaledSize, weight: weight)
+    }
+
+    /// 与 st_boldSystemFont(ofSize:) 等价，但使用显式传入的 explicitScale 而非 STFontManager.shared.fontSizeScale。
+    static func st_boldSystemFont(ofSize size: CGFloat, explicitScale scale: CGFloat) -> UIFont {
+        let scaledSize = STDeviceAdapter.scaledWidth(size * scale)
+        let config = STFontManager.shared.fontFamily
+        if let name = config.fontName(for: .semibold),
+           let font = UIFont(name: name, size: scaledSize) {
+            return font
+        }
+        return UIFont.boldSystemFont(ofSize: scaledSize)
+    }
 }

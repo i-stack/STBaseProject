@@ -176,7 +176,9 @@ open class STTextField: UITextField {
     open override func leftViewRect(forBounds bounds: CGRect) -> CGRect {
         if let newView = self.leftView {
             let frame = newView.frame
-            return CGRect.init(x: 0, y: 0, width: frame.size.width, height: frame.size.height)
+            let x = bounds.origin.x
+            let y = (bounds.size.height - frame.size.height) / 2.0
+            return CGRect.init(x: x, y: y, width: frame.size.width, height: frame.size.height)
         }
         return CGRect.zero
     }
