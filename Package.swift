@@ -15,19 +15,14 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-markdown.git", from: "0.8.0"),
-        .package(url: "https://github.com/mgriebling/SwiftMath.git", revision: "48ff188ba118c37d024551238041113560ab09b9")
     ],
     targets: [
         .target(
             name: "STBaseProject",
             dependencies: [
-                .product(name: "Markdown", package: "swift-markdown"),
-                .product(name: "SwiftMath", package: "SwiftMath", condition: .when(platforms: [.iOS]))
             ],
             path: "Sources",
             resources: [
-                .process("STMarkdown/Resources"),
                 .copy("PrivacyInfo.xcprivacy")
             ]
         )
