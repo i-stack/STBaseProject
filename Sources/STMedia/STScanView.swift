@@ -7,6 +7,12 @@
 
 import UIKit
 
+public enum STScanType: Sendable {
+    case qrCode
+    case barCode
+    case all
+}
+
 /// Safe-area adaptation toggle for `STScanView`.
 public enum STSafeAreaAdaptation: Sendable, Equatable {
     case enabled

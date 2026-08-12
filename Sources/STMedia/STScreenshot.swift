@@ -84,5 +84,4 @@ public final class STScreenshot: NSObject {
         imageView.layer.shadowOffset = CGSize(width: 4, height: 4)
         return imageView
     }
-
 }

@@ -12,18 +12,6 @@ let package = Package(
         .library(
             name: "STBaseProject",
             targets: ["STBaseProject"]
-        ),
-        .library(
-            name: "STContacts",
-            targets: ["STContacts"]
-        ),
-        .library(
-            name: "STLocation",
-            targets: ["STLocation"]
-        ),
-        .library(
-            name: "STMedia",
-            targets: ["STMedia"]
         )
     ],
     dependencies: [
@@ -38,34 +26,8 @@ let package = Package(
                 .product(name: "SwiftMath", package: "SwiftMath", condition: .when(platforms: [.iOS]))
             ],
             path: "Sources",
-            exclude: [
-                "STContacts",
-                "STLocation",
-                "STMedia"
-            ],
             resources: [
                 .process("STMarkdown/Resources"),
-                .copy("PrivacyInfo.xcprivacy")
-            ]
-        ),
-        .target(
-            name: "STContacts",
-            path: "Sources/STContacts",
-            resources: [
-                .copy("PrivacyInfo.xcprivacy")
-            ]
-        ),
-        .target(
-            name: "STLocation",
-            path: "Sources/STLocation",
-            resources: [
-                .copy("PrivacyInfo.xcprivacy")
-            ]
-        ),
-        .target(
-            name: "STMedia",
-            path: "Sources/STMedia",
-            resources: [
                 .copy("PrivacyInfo.xcprivacy")
             ]
         )
