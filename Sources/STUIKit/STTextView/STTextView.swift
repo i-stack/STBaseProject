@@ -197,6 +197,7 @@ open class STTextView: STPlaceholderTextView {
         self.updateHeightIfNeeded(notify: false, animated: false)
     }
 
+    @discardableResult
     open override func resignFirstResponder() -> Bool {
         if self.shouldPreventResigningFirstResponder?() == true {
             return false

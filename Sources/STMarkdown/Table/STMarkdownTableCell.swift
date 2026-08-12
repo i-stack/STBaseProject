@@ -69,9 +69,11 @@ public final class STMarkdownTableCell: UICollectionViewCell {
         }
         self.contentLabel.attributedText = displayText
         let bgColor = style.tableBackgroundColor ?? UIColor.secondarySystemBackground
-        self.contentView.backgroundColor = cellData.role.isHeader
-            ? bgColor.withAlphaComponent(0.92)
-            : bgColor
+        if cellData.role.isHeader {
+            self.contentView.backgroundColor = style.tableHeaderRowBackgroundColor ?? bgColor.withAlphaComponent(0.92)
+        } else {
+            self.contentView.backgroundColor = bgColor
+        }
     }
 
     static func sizeThatFits(cellData: STMarkdownTableCellData, constrainedWidth: CGFloat, contentInsets: UIEdgeInsets) -> CGSize {

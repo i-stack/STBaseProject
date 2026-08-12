@@ -122,7 +122,14 @@ private extension STMarkdownDefaultTableRenderer {
     }
 
     func renderRow(_ row: [String], columnWidths: [Int], isHeader: Bool, style: STMarkdownStyle) -> NSAttributedString {
-        let font = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: isHeader ? .semibold : .regular)
+        let font: UIFont
+        if isHeader, let f = style.tableHeaderFont {
+            font = f
+        } else if !isHeader, let f = style.tableFont {
+            font = f
+        } else {
+            font = UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: isHeader ? .semibold : .regular)
+        }
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: isHeader ? (style.tableHeaderTextColor ?? style.textColor) : (style.tableTextColor ?? style.textColor),
@@ -137,8 +144,9 @@ private extension STMarkdownDefaultTableRenderer {
     }
 
     func renderSeparator(columnWidths: [Int], style: STMarkdownStyle) -> NSAttributedString {
+        let font = style.tableFont ?? UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular)
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.st_monospacedSystemFont(ofSize: max(style.font.pointSize - 1, 12), weight: .regular),
+            .font: font,
             .foregroundColor: style.tableBorderColor ?? style.textColor.withAlphaComponent(0.55),
             .backgroundColor: style.tableBackgroundColor ?? UIColor.secondarySystemBackground,
         ]
