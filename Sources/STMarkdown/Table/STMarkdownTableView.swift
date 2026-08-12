@@ -8,55 +8,7 @@
 import UIKit
 
 // MARK: - STMarkdownTableHeaderItem
-
-/// 顶部工具条的单个按钮描述。外界可组合内置工厂方法或自定义，赋给 `STMarkdownTableView.headerItems`。
-public struct STMarkdownTableHeaderItem {
-    public let identifier: String
-    public let image: UIImage?
-    /// handler 在主线程调用，参数为触发按钮的 tableView，便于访问数据或调用 renderFullTableImage()。
-    public let handler: (STMarkdownTableView) -> Void
-
-    public init(identifier: String, image: UIImage?, handler: @escaping (STMarkdownTableView) -> Void) {
-        self.identifier = identifier
-        self.image = image
-        self.handler = handler
-    }
-
-    /// 复制按钮：将表格纯文本写入剪贴板，并触发 onCopyTable 回调。
-    public static func copy() -> STMarkdownTableHeaderItem {
-        STMarkdownTableHeaderItem(
-            identifier: "copy",
-            image: UIImage(systemName: "doc.on.doc")
-        ) { tableView in
-            guard let tableData = tableView.tableData else { return }
-            UIPasteboard.general.string = tableData.plainText()
-            tableView.onCopyTable?()
-            tableView.showCopyFeedback()
-        }
-    }
-
-    /// 下载按钮：触发 onDownloadTable 回调，由宿主实现具体保存逻辑。
-    public static func download() -> STMarkdownTableHeaderItem {
-        STMarkdownTableHeaderItem(
-            identifier: "download",
-            image: UIImage(systemName: "square.and.arrow.down")
-        ) { tableView in
-            guard let tableData = tableView.tableData else { return }
-            tableView.onDownloadTable?(tableData)
-        }
-    }
-
-    /// 全屏按钮：触发 onExpandTable 回调，与长按展开行为一致。
-    public static func fullscreen() -> STMarkdownTableHeaderItem {
-        STMarkdownTableHeaderItem(
-            identifier: "fullscreen",
-            image: UIImage(systemName: "arrow.up.left.and.arrow.down.right")
-        ) { tableView in
-            guard let tableData = tableView.tableData else { return }
-            tableView.onExpandTable?(tableData)
-        }
-    }
-}
+// 类型定义见 STMarkdownTableHeaderItem.swift（含 action / defaultItems / copyItem() 等），本文件不再重复声明。
 
 // MARK: - STMarkdownTableView
 
@@ -164,7 +116,7 @@ open class STMarkdownTableView: UIView {
         self.gridLayout.minimumRowHeight = style.tableMinimumRowHeight
         self.setupCollectionView()
         self.setupHeader()
-        self.headerItems = style.tableHeaderItems ?? self.makeDefaultHeaderItems()
+        self.headerItems = style.tableHeaderItems ?? STMarkdownTableHeaderItem.defaultItems
         self.rebuildButtonStack()
         self.applyStyle()
     }
@@ -267,7 +219,7 @@ open class STMarkdownTableView: UIView {
             button.accessibilityIdentifier = item.identifier
             button.addAction(UIAction { [weak self] _ in
                 guard let self else { return }
-                item.handler(self)
+                item.action(self)
             }, for: .touchUpInside)
             if item.identifier == "copy" {
                 self.copyButtonRef = button
@@ -302,9 +254,9 @@ open class STMarkdownTableView: UIView {
         }
     }
 
-    /// style 变更时同步按钮项（优先用 style.tableHeaderItems，否则 makeDefaultHeaderItems）。
+    /// style 变更时同步按钮项（优先用 style.tableHeaderItems，否则 defaultItems）。
     private func applyStyleHeaderItems() {
-        self.headerItems = self.style.tableHeaderItems ?? self.makeDefaultHeaderItems()
+        self.headerItems = self.style.tableHeaderItems ?? STMarkdownTableHeaderItem.defaultItems
     }
 
     public override func layoutSubviews() {
