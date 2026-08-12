@@ -315,7 +315,7 @@ public struct STMarkdownStyle: @unchecked Sendable {
     }
 
     public static let `default` = STMarkdownStyle(
-        font: .st_systemFont(ofSize: 16, weight: .regular),
+        font: UIFont.st_systemFont(ofSize: 16, weight: .regular),
         textColor: .label,
         lineHeight: 24,
         kern: 0.12
