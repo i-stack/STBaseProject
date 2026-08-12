@@ -14,8 +14,6 @@ let package = Package(
             targets: ["STBaseProject"]
         )
     ],
-    dependencies: [
-    ],
     targets: [
         .target(
             name: "STBaseProject",
