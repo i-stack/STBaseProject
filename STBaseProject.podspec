@@ -14,8 +14,6 @@ Pod::Spec.new do |s|
     STBaseProject is an iOS 16+ modular foundation toolkit distributed via Swift Package Manager and CocoaPods.
     It includes STBaseViewController/STBaseViewModel patterns, STHTTPSession with interceptors and optional SSL pinning,
     Keychain and crypto helpers, UIKit components and dialogs, localization utilities.
-    Modules requiring permissions (Contacts, Location, Media, Markdown) have been split into standalone repositories:
-    STContacts, STLocation, STMedia, STMarkdown.
   DESC
 
   s.homepage = 'https://github.com/i-stack/STBaseProject'

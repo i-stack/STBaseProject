@@ -4,9 +4,6 @@ platform :ios, '16.0'
 target 'STBaseProjectExample' do
   use_frameworks!
 
-  # Mirrors SPM `Package.swift` (Markdown + SwiftMath); STMarkdown subspec pulls STBaseProject core transitively.
-#  pod 'STBaseProject/STMarkdown', path: '..'
-
   target 'STBaseProjectExampleTests' do
     inherit! :search_paths
     # Pods for testing
@@ -24,12 +21,6 @@ post_install do |installer|
       deployment = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
       if deployment && deployment.to_f < 12.0
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.0'
-      end
-      if target.name.include?('swift-markdown')
-        existing = config.build_settings['OTHER_CFLAGS'] || '$(inherited)'
-        unless existing.to_s.include?('incomplete-umbrella')
-          config.build_settings['OTHER_CFLAGS'] = "#{existing} -Wno-incomplete-umbrella"
-        end
       end
     end
   end
