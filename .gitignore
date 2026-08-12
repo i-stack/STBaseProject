@@ -13,9 +13,6 @@ DerivedData/
 # Swift Package Manager local metadata
 .swiftpm/
 
-# CocoaPods（Example Demo）
-Example/Pods/
-
 # Artifacts
 *.hmap
 *.ipa

@@ -1,17 +1,16 @@
 # STBaseProject
 
-> **iOS base components library for Swift** — page base classes, networking, security, UIKit components, localization and common utilities. Supports CocoaPods & Swift Package Manager.
+> **iOS base components library for Swift** — page base classes, networking, security, UIKit components, localization and common utilities. Distributed via Swift Package Manager.
 
-[![CocoaPods](https://img.shields.io/cocoapods/v/STBaseProject.svg?style=flat)](https://cocoapods.org/pods/STBaseProject)
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat)](https://cocoapods.org/pods/STBaseProject)
-[![Platform](https://img.shields.io/badge/platform-iOS%2016%2B-lightgrey?style=flat)](https://cocoapods.org/pods/STBaseProject)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat)](https://github.com/i-stack/STBaseProject/blob/main/LICENSE)
+[![Platform](https://img.shields.io/badge/platform-iOS%2016%2B-lightgrey?style=flat)](https://github.com/i-stack/STBaseProject)
 [![Swift](https://img.shields.io/badge/Swift-5.9%20%7C%205.10%20%7C%206.0-orange?style=flat-square)](https://www.swift.org)
 [![CI](https://github.com/i-stack/STBaseProject/actions/workflows/swift.yml/badge.svg)](https://github.com/i-stack/STBaseProject/actions/workflows/swift.yml)
 [![SPM](https://img.shields.io/badge/SPM-supported-brightgreen?style=flat)](https://github.com/i-stack/STBaseProject)
 [![iOS](https://img.shields.io/badge/iOS-16.0%2B-blue?style=flat)](https://github.com/i-stack/STBaseProject)
 [![Xcode](https://img.shields.io/badge/Xcode-15%2B-147EFB?style=flat)](https://developer.apple.com/xcode/)
 
-**STBaseProject** is an open-source **iOS base library** written in **Swift**, providing **UIKit components**, **networking**, **security (Keychain & crypto)**, **localization** and **common utilities** to help developers build high-quality iOS apps faster. Available via **CocoaPods** and **Swift Package Manager (SPM)**.
+**STBaseProject** is an open-source **iOS base library** written in **Swift**, providing **UIKit components**, **networking**, **security (Keychain & crypto)**, **localization** and **common utilities** to help developers build high-quality iOS apps faster. Distributed via **Swift Package Manager (SPM)**.
 
 STBaseProject 是一个 iOS 基础组件库，提供页面基类、网络、安全、UIKit 组件、本地化与通用工具，帮助开发者快速构建高质量的 iOS 应用。
 
@@ -28,21 +27,7 @@ STBaseProject 是一个 iOS 基础组件库，提供页面基类、网络、安�
 <a id="installation"></a>
 ## 🚀 安装方式 | Installation
 
-STBaseProject 是整包发布的库（SPM 单一 product / CocoaPods 单一 subspec），引入即包含全部核心能力：页面基类、网络、安全、UIKit、本地化、通用工具等。
-
-### CocoaPods
-
-在 `Podfile` 中添加：
-
-```ruby
-pod 'STBaseProject', '~> 1.6.0'
-```
-
-然后执行：
-
-```bash
-pod install
-```
+STBaseProject 是整包发布的库（SPM 单一 product），引入即包含全部核心能力：页面基类、网络、安全、UIKit、本地化、通用工具等。
 
 ### Swift Package Manager
 
@@ -155,7 +140,7 @@ final class DemoViewController: STBaseViewController {
 
 ### 本地 Demo
 
-克隆后在仓库根目录执行 `cd Example && pod install`，再用 Xcode 打开根目录的 `STBaseProject.xcworkspace`（内含 `Example/STBaseProjectExample.xcodeproj` 与 CocoaPods 生成的 `Pods`）。Demo 通过本地 SPM 引用同仓根目录的 `Package.swift`，与发布到 GitHub 的集成方式一致。
+克隆后在仓库根目录执行 `open Example/STBaseProjectExample.xcodeproj`。Demo 通过本地 SPM 引用同仓根目录的 `Package.swift`，与发布到 GitHub 的集成方式一致。
 
 <a id="features"></a>
 ## 🎯 主要功能 | Features
@@ -209,6 +194,6 @@ final class DemoViewController: STBaseViewController {
 
 ---
 
-**STBaseProject** — an iOS & Swift base components library. Keywords: *iOS, Swift, UIKit, CocoaPods, Swift Package Manager, base library, networking, security, Keychain, localization, UI components*.
+**STBaseProject** — an iOS & Swift base components library. Keywords: *iOS, Swift, UIKit, Swift Package Manager, base library, networking, security, Keychain, localization, UI components*.
 
 ⭐ 如果这个项目对你有帮助，请给它一个星标！

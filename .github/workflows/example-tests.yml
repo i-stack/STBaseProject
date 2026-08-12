@@ -1,4 +1,4 @@
-# Example 集成测试：单仓内 Example + 根目录 STBaseProject.xcworkspace（含 Pods）。
+# Example 集成测试：单仓内 Example（纯 Swift Package Manager，本地引用根目录 Package.swift）。
 name: Example iOS Tests
 
 on:
@@ -18,7 +18,7 @@ jobs:
     timeout-minutes: 45
 
     env:
-      WORKSPACE: STBaseProject.xcworkspace
+      PROJECT: STBaseProjectExample.xcodeproj
       SCHEME: STBaseProjectExample
       RESULT: build/result.xcresult
 
@@ -27,26 +27,6 @@ jobs:
 
       - name: Select Xcode
         run: bash "${GITHUB_WORKSPACE}/.github/select_xcode_ci.sh"
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            Example/Pods
-            ~/.cocoapods
-          key: pods-${{ runner.os }}-${{ hashFiles('Example/Podfile.lock') }}
-          restore-keys: |
-            pods-${{ runner.os }}-
-
-      - name: Install CocoaPods
-        working-directory: Example
-        run: |
-          gem install cocoapods -v 1.16.2 --no-document --user-install
-          GEM_USER_BIN="$(gem env user_gemhome)/bin"
-          export PATH="$GEM_USER_BIN:$PATH"
-          echo "$GEM_USER_BIN" >> "$GITHUB_PATH"
-          pod --version
-          pod install --repo-update
 
       - name: Pick iOS Simulator
         id: sim
@@ -71,18 +51,20 @@ jobs:
           xcrun simctl bootstatus "$UDID" -b
 
       - name: Resolve SPM dependencies
+        working-directory: Example
         run: |
           xcodebuild -resolvePackageDependencies \
-            -workspace "$WORKSPACE" \
+            -project "$PROJECT" \
             -scheme "$SCHEME"
 
       - name: Run tests
+        working-directory: Example
         shell: bash
         run: |
           set -o pipefail
           mkdir -p build
           xcodebuild test \
-            -workspace "$WORKSPACE" \
+            -project "$PROJECT" \
             -scheme    "$SCHEME" \
             -destination "platform=iOS Simulator,id=${{ steps.sim.outputs.udid }}" \
             -resultBundlePath "$RESULT" \
