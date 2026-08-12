@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CAAB0400000000000000AA01 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = CAAB0400000000000000AA00 /* STBaseProject */; };
-		E4EEED8B2FA0B5D300730900 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = E4EEED8A2FA0B5D300730900 /* STBaseProject */; };
+		E4CF29FF302C7E8C00F589DE /* STMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = E4CF29FE302C7E8C00F589DE /* STMarkdown */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,7 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4EEED8B2FA0B5D300730900 /* STBaseProject in Frameworks */,
+				E4CF29FF302C7E8C00F589DE /* STMarkdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,7 +77,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CAAB0400000000000000AA01 /* STBaseProject in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,7 +138,7 @@
 			);
 			name = STBaseProjectExample;
 			packageProductDependencies = (
-				E4EEED8A2FA0B5D300730900 /* STBaseProject */,
+				E4CF29FE302C7E8C00F589DE /* STMarkdown */,
 			);
 			productName = STBaseProjectExample;
 			productReference = E4EEECD32FA0B1AD00730900 /* STBaseProjectExample.app */;
@@ -164,7 +162,6 @@
 			);
 			name = STBaseProjectExampleTests;
 			packageProductDependencies = (
-				CAAB0400000000000000AA00 /* STBaseProject */,
 			);
 			productName = STBaseProjectExampleTests;
 			productReference = E4EEECE92FA0B1AD00730900 /* STBaseProjectExampleTests.xctest */;
@@ -224,7 +221,7 @@
 			mainGroup = E4EEECCA2FA0B1AD00730900;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */,
+				E4CF29FD302C7E8C00F589DE /* XCLocalSwiftPackageReference "../../STMarkdown" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E4EEECD42FA0B1AD00730900 /* Products */;
@@ -261,9 +258,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E4EEECCF2FA0B1AD00730900 /* Sources */ = {
@@ -618,22 +612,16 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */ = {
+		E4CF29FD302C7E8C00F589DE /* XCLocalSwiftPackageReference "../../STMarkdown" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ..;
+			relativePath = ../../STMarkdown;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CAAB0400000000000000AA00 /* STBaseProject */ = {
+		E4CF29FE302C7E8C00F589DE /* STMarkdown */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */;
-			productName = STBaseProject;
-		};
-		E4EEED8A2FA0B5D300730900 /* STBaseProject */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */;
-			productName = STBaseProject;
+			productName = STMarkdown;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
