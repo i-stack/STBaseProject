@@ -35,15 +35,11 @@ open class STBaseView: UIView {
     public private(set) var layoutMode: STLayoutMode = .scroll
     public private(set) var scrollDirection: STScrollDirection = .vertical
     
-    /// scroll 模式使用的 UIScrollView。可通过 init(scrollView:) 在初始化时注入自定义实例。
-    /// open 允许子类（含跨模块）override 此 getter（如将 collectionView 作为 scrollView 代理）。
-    open private(set) lazy var scrollView: UIScrollView = STBaseView.makeDefaultScrollView()
-    /// 标记 scrollView 是否由内部创建（用于判断是否允许 configureScrollBehavior 覆盖外观/滚动配置）。
+    /// 可通过 init(scrollView:) 在初始化时注入自定义实例。
     private var _isInternallyCreatedScrollView: Bool = true
-    /// contentView 是内容容器，子视图应添加到此视图。
-    /// 在 .scroll 模式下位于 scrollView 内部；在 .fixed 模式下直接贴合 self。
     public private(set) lazy var contentView: UIView = self.makeContentView()
-    
+    open private(set) lazy var scrollView: UIScrollView = STBaseView.makeDefaultScrollView()
+
     private var _tableView: UITableView?
     private var _collectionView: UICollectionView?
     /// 当前由 STBaseView 管理的 tableView 约束。
@@ -103,7 +99,6 @@ open class STBaseView: UIView {
         if self.enableAppearanceManagement {
             self.setupAppearanceObservation()
         }
-        self.installLayoutStructure()
     }
 
     /// 切换布局模式。
@@ -307,11 +302,6 @@ open class STBaseView: UIView {
 
     open override func safeAreaInsetsDidChange() {
         super.safeAreaInsetsDidChange()
-        // tableView / collectionView 使用 contentInsetAdjustmentBehavior = .never，
-        // 所以 safeArea 不会自动折进 adjustedContentInset，需要手动把底部 safeArea
-        // 写入 contentInset.bottom，否则内容会压到 home indicator。
-        // 同时若存在 STRefreshHeaderView / STLoadMoreFooterView，还要保留它们
-        // 已注入的额外占位（refreshing / loading / noMore 状态下 +height）。
         switch self.layoutMode {
         case .table:
             if let tv = self._tableView {
@@ -328,6 +318,7 @@ open class STBaseView: UIView {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+        guard self.enableAppearanceManagement else { return }
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
         let currentStyle = self.traitCollection.userInterfaceStyle
         guard previousStyle != currentStyle else { return }
@@ -476,21 +467,17 @@ extension STBaseView {
     /// - 如果当前正在 .table 模式且已存在内部默认实例，则销毁旧实例并用新 style 重建。
     /// - 若外部注入过自定义 tableView，此方法不会影响已注入实例。
     ///
-    /// ⚠️ 重建 tableView 会丢弃所有已在旧 table 上配置的状态：delegate / dataSource /
+    /// 重建 tableView 会丢弃所有已在旧 table 上配置的状态：delegate / dataSource /
     /// cell 注册 / contentOffset / 以及已挂载的 pull-to-refresh / load-more 控件。
     /// 重建后调用方需要自行重新配置。推荐在创建 tableView 之前一次性确定 style。
     @discardableResult
     public func st_tableViewStyle(_ style: UITableView.Style) -> Self {
         guard self.tableViewStyle != style else { return self }
         self.tableViewStyle = style
-        // 若已经存在由内部创建的 tableView，则销毁重建以让新 style 生效
         if self._tableView != nil, self._isInternallyCreatedTableView {
             #if DEBUG
             assertionFailure("STBaseView.st_tableViewStyle(_:) called after the internal tableView was created. All table configuration (delegate/dataSource/cell registration/pull-to-refresh/load-more) will be lost and must be re-applied.")
             #endif
-            // 先拆除挂在旧 table 上的刷新控件，避免 KVO token 继续持有旧 scrollView（泄漏），
-            // 并清掉 self 上的 associated object，防止后续 st_beginRefreshing / st_endLoadMore
-            // 作用到已脱离视图层级的旧实例上。
             self.st_removePullToRefresh()
             self.st_removeLoadMore()
             self._tableView?.removeFromSuperview()
@@ -622,15 +609,12 @@ open class STSection: UIView {
             return self
         }
 
-        /// Update spacing (chainable) — equivalent to directly assigning `self.spacing`.
         @discardableResult
         public func setSpacing(_ spacing: CGFloat) -> Self {
             self.spacing = spacing
             return self
         }
 
-        /// Update inset (chainable) — equivalent to directly assigning `self.inset`.
-        /// The setter tunes the 4 retained constraints, so there's no constraint leak.
         @discardableResult
         public func setInset(_ inset: UIEdgeInsets) -> Self {
             self.inset = inset
@@ -647,7 +631,6 @@ open class STSection: UIView {
 
 extension STBaseView {
 
-    /// 用于跟踪每个 section 与 container.bottom 之间"末尾"约束，便于添加新 section 时拆除并复用为 inter-section 约束。
     private static let sectionBottomConstraintKey = STAssociationKey()
 
     private var st_lastSectionBottomConstraint: NSLayoutConstraint? {
@@ -662,8 +645,6 @@ extension STBaseView {
         let container = self.contentContainer()
         container.addSubview(section)
         section.translatesAutoresizingMaskIntoConstraints = false
-
-        // 移除旧的"末尾 -> container.bottom"约束（若存在）
         if let oldBottom = self.st_lastSectionBottomConstraint {
             oldBottom.isActive = false
             self.st_lastSectionBottomConstraint = nil
@@ -671,6 +652,9 @@ extension STBaseView {
 
         let topSpacing = interSectionSpacing ?? section.spacing
         if let last = container.subviews.dropLast().last {
+            #if DEBUG
+            assert(last is STSection, "STBaseView.st_addSection: contentContainer 中存在非 STSection 子视图（可能混用了 st_addContentSubview），链式约束将锚定到错误视图。请勿混用这两个 API。")
+            #endif
             section.topAnchor.constraint(equalTo: last.bottomAnchor, constant: topSpacing).isActive = true
         } else {
             section.topAnchor.constraint(equalTo: container.topAnchor, constant: section.inset.top).isActive = true
@@ -801,7 +785,6 @@ open class STGradientNavigationBar: UIView {
 
     public override func layoutSubviews() {
         super.layoutSubviews()
-        // frame 更新仍需每次布局同步；颜色/起止点已在属性变化/初始化时设置。
         self.gradientLayer.frame = self.bounds
     }
 
@@ -811,7 +794,6 @@ open class STGradientNavigationBar: UIView {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        // 动态色适配：当 trait 变化导致 UIColor -> cgColor 对应分辨率变化时需重算
         if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.updateGradientColors()
         }
@@ -819,7 +801,6 @@ open class STGradientNavigationBar: UIView {
 }
 
 // MARK: - Refresh & Load More
-
 private enum STRefreshKeys {
     static let header = STAssociationKey()
     static let footer = STAssociationKey()
