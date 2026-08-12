@@ -172,6 +172,26 @@ open class STIconBtn: STBtn {
         self.setNeedsUpdateConfiguration()
     }
 
+    // MARK: - 惰性无障碍标签
+    // 仅当调用方未显式设置 accessibilityLabel 时，才按下述兜底链计算：
+    // 有 title 用 title；无 title 但有 image 用兜底文案；二者皆无则 nil。
+    // 采用惰性读取而非在 image/title 赋值时写入，从根本上消除属性赋值顺序依赖。
+    private var st_explicitAccessibilityLabel: String?
+    /// 仅含图片时的默认无障碍文案；可设置以区分不同按钮语义（如"返回"/"更多"），亦可被子类重写本地化。
+    open var st_fallbackAccessibilityLabel: String = "按钮"
+
+    open override var accessibilityLabel: String? {
+        get {
+            if let explicit = self.st_explicitAccessibilityLabel { return explicit }
+            if let title = self.currentTitle, !title.isEmpty { return title }
+            if self.currentImage != nil { return self.st_fallbackAccessibilityLabel }
+            return nil
+        }
+        set {
+            self.st_explicitAccessibilityLabel = newValue
+        }
+    }
+
     open override func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
         super.refineButtonConfiguration(button, configuration: &config)
 

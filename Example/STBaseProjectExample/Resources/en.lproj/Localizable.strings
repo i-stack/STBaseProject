@@ -1,0 +1,3 @@
+/* Navigation bar button accessibility fallback labels */
+"st_nav_back" = "Back";
+"st_nav_more" = "More";
