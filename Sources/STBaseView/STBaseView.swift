@@ -489,19 +489,23 @@ open class STBaseView: UIView {
     
     /// table 模式内部使用的 UITableView；外部通过 st_getTableView() 访问。
     private var tableView: UITableView {
-        if _tableView == nil {
-            _tableView = self.makeTableView(self.tableViewStyle)
-            _isInternallyCreatedTableView = true
+        if let tableView = _tableView {
+            return tableView
         }
-        return _tableView!
+        let tableView = self.makeTableView(self.tableViewStyle)
+        _tableView = tableView
+        _isInternallyCreatedTableView = true
+        return tableView
     }
 
     /// collection 模式内部使用的 UICollectionView；外部通过 st_getCollectionView() 访问。
     private var collectionView: UICollectionView {
-        if _collectionView == nil {
-            _collectionView = self.makeCollectionView()
+        if let collectionView = _collectionView {
+            return collectionView
         }
-        return _collectionView!
+        let collectionView = self.makeCollectionView()
+        _collectionView = collectionView
+        return collectionView
     }
 
     private static func makeDefaultScrollView() -> UIScrollView {

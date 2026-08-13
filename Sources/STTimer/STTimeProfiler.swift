@@ -37,7 +37,7 @@ public class STTimeProfiler {
         let endTime = CACurrentMediaTime()
         let duration = endTime - startTime
         self.startTimes.removeValue(forKey: tag)
-        let messageText = message != nil ? " - \(message!)" : ""
+        let messageText = message.map { " - \($0)" } ?? ""
         let durationText = self.st_formatDuration(duration)
         STLog("✅ [\(tag)] 耗时: \(durationText)\(messageText)")
     }
@@ -64,7 +64,7 @@ public class STTimeProfiler {
             STLog("⚠️ [\(tag)] 未找到对应的开始时间，请先调用 st_start(tag:)")
             return
         }
-        let messageText = message != nil ? " - \(message!)" : ""
+        let messageText = message.map { " - \($0)" } ?? ""
         let durationText = self.st_formatDuration(elapsed)
         STLog("⏳ [\(tag)] 当前耗时: \(durationText)\(messageText)")
     }

@@ -21,8 +21,7 @@ public final class STParameterEncoder {
 
     public static func st_encodeURL(_ parameters: [String: Any]) -> String {
         var components: [(String, String)] = []
-        for key in parameters.keys.sorted(by: <) {
-            let value = parameters[key]!
+        for (key, value) in parameters.sorted(by: { $0.key < $1.key }) {
             components += st_queryComponents(fromKey: key, value: value)
         }
         return components.map { "\($0)=\($1)" }.joined(separator: "&")

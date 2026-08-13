@@ -372,8 +372,8 @@ open class STShimmerTextView: UITextView {
     private func appendStaggeredTokens(for colorRuns: [AnimatingColorRun]) {
         let revealRuns = self.semanticRevealColorRuns(from: colorRuns)
         guard !revealRuns.isEmpty else { return }
-        let start = revealRuns.map(\.range.location).min()!
-        let end = revealRuns.map { $0.range.location + $0.range.length }.max()!
+        guard let start = revealRuns.map(\.range.location).min(),
+              let end = revealRuns.map({ $0.range.location + $0.range.length }).max() else { return }
         let stagger = (self.characterStaggerInterval > 0 && revealRuns.count > 1)
             ? self.characterStaggerInterval : 0
         let token = AnimatingToken(

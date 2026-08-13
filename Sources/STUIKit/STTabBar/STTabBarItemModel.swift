@@ -339,7 +339,7 @@ public struct STTabBarItemModel {
 
     private static func loadImage(named imageName: String, imageSize: CGSize? = nil) -> UIImage? {
         guard let image = UIImage(named: imageName) else {
-            print("⚠️ STTabBarItemModel: 图片加载失败 - \(imageName)")
+            STLog("⚠️ STTabBarItemModel: 图片加载失败 - \(imageName)")
             return nil
         }
         return image.withRenderingMode(.alwaysOriginal)
