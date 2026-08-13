@@ -35,15 +35,11 @@ open class STBaseView: UIView {
     public private(set) var layoutMode: STLayoutMode = .scroll
     public private(set) var scrollDirection: STScrollDirection = .vertical
     
-    /// scroll 模式使用的 UIScrollView。可通过 init(scrollView:) 在初始化时注入自定义实例。
-    /// open 允许子类（含跨模块）override 此 getter（如将 collectionView 作为 scrollView 代理）。
-    open private(set) lazy var scrollView: UIScrollView = STBaseView.makeDefaultScrollView()
-    /// 标记 scrollView 是否由内部创建（用于判断是否允许 configureScrollBehavior 覆盖外观/滚动配置）。
+    /// 可通过 init(scrollView:) 在初始化时注入自定义实例。
     private var _isInternallyCreatedScrollView: Bool = true
-    /// contentView 是内容容器，子视图应添加到此视图。
-    /// 在 .scroll 模式下位于 scrollView 内部；在 .fixed 模式下直接贴合 self。
     public private(set) lazy var contentView: UIView = self.makeContentView()
-    
+    open private(set) lazy var scrollView: UIScrollView = STBaseView.makeDefaultScrollView()
+
     private var _tableView: UITableView?
     private var _collectionView: UICollectionView?
     /// 当前由 STBaseView 管理的 tableView 约束。
@@ -60,6 +56,10 @@ open class STBaseView: UIView {
     public private(set) var tableViewStyle: UITableView.Style = .plain
 
     private var keyboardObserverTokens: [NSObjectProtocol] = []
+    /// 键盘响应前的基准 inset，用于在键盘收起时还原调用方原有配置（safe area / 工具栏 / 分页 footer 等）。
+    private var baseContentInset: UIEdgeInsets?
+    private var baseVerticalIndicatorInsets: UIEdgeInsets?
+    private var baseHorizontalIndicatorInsets: UIEdgeInsets?
     private var appearanceCancellable: AnyCancellable?
     /// 是否启用 scrollView 的键盘 contentInset 自动调整（默认 true）。
     public var enableScrollViewKeyboardAdjustment: Bool = true
@@ -103,7 +103,6 @@ open class STBaseView: UIView {
         if self.enableAppearanceManagement {
             self.setupAppearanceObservation()
         }
-        self.installLayoutStructure()
     }
 
     /// 切换布局模式。
@@ -198,14 +197,29 @@ open class STBaseView: UIView {
     private func installScrollStructure() {
         self.installScrollViewConstraints()
         self.scrollView.addSubview(self.contentView)
-        NSLayoutConstraint.activate([
+        var constraints: [NSLayoutConstraint] = [
             self.contentView.topAnchor.constraint(equalTo: self.scrollView.contentLayoutGuide.topAnchor),
             self.contentView.leadingAnchor.constraint(equalTo: self.scrollView.contentLayoutGuide.leadingAnchor),
             self.contentView.trailingAnchor.constraint(equalTo: self.scrollView.contentLayoutGuide.trailingAnchor),
-            self.contentView.bottomAnchor.constraint(equalTo: self.scrollView.contentLayoutGuide.bottomAnchor),
-            // Important: make contentView width equal to scrollView frame (for vertical scrolling)
-            self.contentView.widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor)
-        ])
+            self.contentView.bottomAnchor.constraint(equalTo: self.scrollView.contentLayoutGuide.bottomAnchor)
+        ]
+        // 约束语义随滚动方向变化：
+        // - .vertical：宽度锁定为 frame 宽度，内容只能纵向撑高。
+        // - .horizontal：高度锁定为 frame 高度，内容只能横向撑宽。
+        // - .both：宽高都不锁定，由内容子视图的完整约束决定 contentSize。
+        // - .none：同时锁定宽高，等价于固定容器（不可滚动）。
+        switch self.scrollDirection {
+        case .vertical:
+            constraints.append(self.contentView.widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor))
+        case .horizontal:
+            constraints.append(self.contentView.heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor))
+        case .both:
+            break
+        case .none:
+            constraints.append(self.contentView.widthAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.widthAnchor))
+            constraints.append(self.contentView.heightAnchor.constraint(equalTo: self.scrollView.frameLayoutGuide.heightAnchor))
+        }
+        NSLayoutConstraint.activate(constraints)
         self.configureScrollBehavior()
     }
 
@@ -307,11 +321,6 @@ open class STBaseView: UIView {
 
     open override func safeAreaInsetsDidChange() {
         super.safeAreaInsetsDidChange()
-        // tableView / collectionView 使用 contentInsetAdjustmentBehavior = .never，
-        // 所以 safeArea 不会自动折进 adjustedContentInset，需要手动把底部 safeArea
-        // 写入 contentInset.bottom，否则内容会压到 home indicator。
-        // 同时若存在 STRefreshHeaderView / STLoadMoreFooterView，还要保留它们
-        // 已注入的额外占位（refreshing / loading / noMore 状态下 +height）。
         switch self.layoutMode {
         case .table:
             if let tv = self._tableView {
@@ -328,6 +337,7 @@ open class STBaseView: UIView {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
+        guard self.enableAppearanceManagement else { return }
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
         let currentStyle = self.traitCollection.userInterfaceStyle
         guard previousStyle != currentStyle else { return }
@@ -356,7 +366,10 @@ open class STBaseView: UIView {
         let willHide = nc.addObserver(forName: UIResponder.keyboardWillHideNotification, object: nil, queue: .main) { [weak self] note in
             self?.keyboardWillHide(note)
         }
-        self.keyboardObserverTokens = [willShow, willHide]
+        let willChange = nc.addObserver(forName: UIResponder.keyboardWillChangeFrameNotification, object: nil, queue: .main) { [weak self] note in
+            self?.keyboardWillChangeFrame(note)
+        }
+        self.keyboardObserverTokens = [willShow, willHide, willChange]
     }
 
     private func removeKeyboardObservers() {
@@ -366,22 +379,92 @@ open class STBaseView: UIView {
     }
 
     private func keyboardWillShow(_ note: Notification) {
-        guard self.layoutMode == .scroll, self.enableScrollViewKeyboardAdjustment, let userInfo = note.userInfo else { return }
-        let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect) ?? .zero
-        let converted = convert(keyboardFrame, from: nil)
-        let insetBottom = max(0, bounds.maxY - converted.minY)
-        var insets = self.scrollView.contentInset
-        insets.bottom = insetBottom
-        self.scrollView.contentInset = insets
-        self.scrollView.scrollIndicatorInsets = insets
+        self.adjustForKeyboard(using: note, appearing: true)
     }
 
     private func keyboardWillHide(_ note: Notification) {
-        guard self.layoutMode == .scroll, self.enableScrollViewKeyboardAdjustment else { return }
-        var insets = self.scrollView.contentInset
-        insets.bottom = 0
-        self.scrollView.contentInset = insets
-        self.scrollView.scrollIndicatorInsets = insets
+        self.adjustForKeyboard(using: note, appearing: false)
+    }
+
+    private func keyboardWillChangeFrame(_ note: Notification) {
+        // 旋转/分屏时键盘 frame 变化：键盘可见时按新 frame 重算增量；不可见时忽略。
+        guard self.layoutMode == .scroll, self.enableScrollViewKeyboardAdjustment, note.userInfo != nil else { return }
+        let keyboardFrame = (note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect) ?? .zero
+        let converted = convert(keyboardFrame, from: nil)
+        let insetBottom = max(0, bounds.maxY - converted.minY)
+        guard insetBottom > 0 else { return }
+        self.adjustForKeyboard(using: note, appearing: true)
+    }
+
+    /// 以"基准 inset + 键盘遮挡增量"的方式调整 contentInset / scrollIndicatorInsets，
+    /// 隐藏时还原基准值并清空缓存，避免覆盖调用方原有的 bottom / 其他边 inset，
+    /// 也避免后续键盘周期恢复陈旧基准。
+    private func adjustForKeyboard(using note: Notification, appearing: Bool) {
+        // 键盘禁用时，若此前已注入过键盘 inset（基准非空），仍要恢复到基准；否则直接退出。
+        guard self.layoutMode == .scroll else { return }
+        guard appearing || self.baseContentInset != nil else { return }
+        guard let userInfo = note.userInfo, self.enableScrollViewKeyboardAdjustment else {
+            if !appearing, let baseContent = self.baseContentInset {
+                // 键盘调整被关闭，但仍需还原已注入的 inset。
+                self.restoreBaseInsets()
+            }
+            return
+        }
+
+        // 首次响应键盘前保存基准 inset（一次键盘周期内捕获，隐藏后清空）。
+        // 垂直/水平指示器的 inset 需分别保存完整 UIEdgeInsets，避免恢复时丢失调用方原有边距。
+        if self.baseContentInset == nil {
+            self.baseContentInset = self.scrollView.contentInset
+        }
+        if self.baseVerticalIndicatorInsets == nil {
+            self.baseVerticalIndicatorInsets = self.scrollView.verticalScrollIndicatorInsets
+        }
+        if self.baseHorizontalIndicatorInsets == nil {
+            self.baseHorizontalIndicatorInsets = self.scrollView.horizontalScrollIndicatorInsets
+        }
+        let baseContent = self.baseContentInset ?? self.scrollView.contentInset
+        var verticalIndicator = self.baseVerticalIndicatorInsets ?? self.scrollView.verticalScrollIndicatorInsets
+        var horizontalIndicator = self.baseHorizontalIndicatorInsets ?? self.scrollView.horizontalScrollIndicatorInsets
+
+        let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect) ?? .zero
+        let converted = convert(keyboardFrame, from: nil)
+        let overlay = appearing ? max(0, bounds.maxY - converted.minY) : 0
+        // 增量 = 键盘遮挡高度 - 基准已有 bottom（避免与调用方原有 bottom inset 叠加）。
+        let delta = max(0, overlay - baseContent.bottom)
+
+        var contentInset = baseContent
+        contentInset.bottom = baseContent.bottom + delta
+        // 只修改各自指示器的 bottom，其余边保持调用方原配置。
+        verticalIndicator.bottom = verticalIndicator.bottom + delta
+        horizontalIndicator.bottom = horizontalIndicator.bottom + delta
+
+        let duration = (userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0
+        let curveRaw = (userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber)?.uintValue ?? UInt(UIView.AnimationCurve.easeInOut.rawValue)
+        let options = UIView.AnimationOptions(rawValue: curveRaw << 16)
+
+        UIView.animate(withDuration: duration, delay: 0, options: options) {
+            self.scrollView.contentInset = contentInset
+            self.scrollView.verticalScrollIndicatorInsets = verticalIndicator
+            self.scrollView.horizontalScrollIndicatorInsets = horizontalIndicator
+            if !appearing {
+                // 隐藏动画完成后清空基准缓存，下一次显示重新捕获当前 inset。
+                self.baseContentInset = nil
+                self.baseVerticalIndicatorInsets = nil
+                self.baseHorizontalIndicatorInsets = nil
+            }
+        }
+    }
+
+    private func restoreBaseInsets() {
+        let baseContent = self.baseContentInset ?? self.scrollView.contentInset
+        let verticalIndicator = self.baseVerticalIndicatorInsets ?? self.scrollView.verticalScrollIndicatorInsets
+        let horizontalIndicator = self.baseHorizontalIndicatorInsets ?? self.scrollView.horizontalScrollIndicatorInsets
+        self.scrollView.contentInset = baseContent
+        self.scrollView.verticalScrollIndicatorInsets = verticalIndicator
+        self.scrollView.horizontalScrollIndicatorInsets = horizontalIndicator
+        self.baseContentInset = nil
+        self.baseVerticalIndicatorInsets = nil
+        self.baseHorizontalIndicatorInsets = nil
     }
 
     /// Convenience for debugging: ensure last subview has bottom constraint to contentView
@@ -476,21 +559,17 @@ extension STBaseView {
     /// - 如果当前正在 .table 模式且已存在内部默认实例，则销毁旧实例并用新 style 重建。
     /// - 若外部注入过自定义 tableView，此方法不会影响已注入实例。
     ///
-    /// ⚠️ 重建 tableView 会丢弃所有已在旧 table 上配置的状态：delegate / dataSource /
+    /// 重建 tableView 会丢弃所有已在旧 table 上配置的状态：delegate / dataSource /
     /// cell 注册 / contentOffset / 以及已挂载的 pull-to-refresh / load-more 控件。
     /// 重建后调用方需要自行重新配置。推荐在创建 tableView 之前一次性确定 style。
     @discardableResult
     public func st_tableViewStyle(_ style: UITableView.Style) -> Self {
         guard self.tableViewStyle != style else { return self }
         self.tableViewStyle = style
-        // 若已经存在由内部创建的 tableView，则销毁重建以让新 style 生效
         if self._tableView != nil, self._isInternallyCreatedTableView {
             #if DEBUG
             assertionFailure("STBaseView.st_tableViewStyle(_:) called after the internal tableView was created. All table configuration (delegate/dataSource/cell registration/pull-to-refresh/load-more) will be lost and must be re-applied.")
             #endif
-            // 先拆除挂在旧 table 上的刷新控件，避免 KVO token 继续持有旧 scrollView（泄漏），
-            // 并清掉 self 上的 associated object，防止后续 st_beginRefreshing / st_endLoadMore
-            // 作用到已脱离视图层级的旧实例上。
             self.st_removePullToRefresh()
             self.st_removeLoadMore()
             self._tableView?.removeFromSuperview()
@@ -622,15 +701,12 @@ open class STSection: UIView {
             return self
         }
 
-        /// Update spacing (chainable) — equivalent to directly assigning `self.spacing`.
         @discardableResult
         public func setSpacing(_ spacing: CGFloat) -> Self {
             self.spacing = spacing
             return self
         }
 
-        /// Update inset (chainable) — equivalent to directly assigning `self.inset`.
-        /// The setter tunes the 4 retained constraints, so there's no constraint leak.
         @discardableResult
         public func setInset(_ inset: UIEdgeInsets) -> Self {
             self.inset = inset
@@ -647,7 +723,6 @@ open class STSection: UIView {
 
 extension STBaseView {
 
-    /// 用于跟踪每个 section 与 container.bottom 之间"末尾"约束，便于添加新 section 时拆除并复用为 inter-section 约束。
     private static let sectionBottomConstraintKey = STAssociationKey()
 
     private var st_lastSectionBottomConstraint: NSLayoutConstraint? {
@@ -662,28 +737,34 @@ extension STBaseView {
         let container = self.contentContainer()
         container.addSubview(section)
         section.translatesAutoresizingMaskIntoConstraints = false
-
-        // 移除旧的"末尾 -> container.bottom"约束（若存在）
         if let oldBottom = self.st_lastSectionBottomConstraint {
             oldBottom.isActive = false
             self.st_lastSectionBottomConstraint = nil
         }
 
-        let topSpacing = interSectionSpacing ?? section.spacing
+        // section.inset 仅作为 section 内部 stackView 的内边距（由 STSection 自身约束使用），
+        // section 相对容器保持左右贴边。STSection.spacing 原本控制 stackView 内部 arranged subviews 的间距，
+        // 因此不可兼作 section 对容器的外边距：首尾 section 直接贴容器，section 之间才使用 interSectionSpacing。
         if let last = container.subviews.dropLast().last {
-            section.topAnchor.constraint(equalTo: last.bottomAnchor, constant: topSpacing).isActive = true
+            #if DEBUG
+            assert(last is STSection, "STBaseView.st_addSection: contentContainer 中存在非 STSection 子视图（可能混用了 st_addContentSubview），链式约束将锚定到错误视图。请勿混用这两个 API。")
+            #endif
+            let interSpacing = interSectionSpacing ?? 0
+            section.topAnchor.constraint(equalTo: last.bottomAnchor, constant: interSpacing).isActive = true
         } else {
-            section.topAnchor.constraint(equalTo: container.topAnchor, constant: section.inset.top).isActive = true
+            // 首个 section：顶部直接贴容器（无外边距）。
+            section.topAnchor.constraint(equalTo: container.topAnchor).isActive = true
         }
         NSLayoutConstraint.activate([
-            section.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: section.inset.left),
-            section.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -section.inset.right)
+            section.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            section.trailingAnchor.constraint(equalTo: container.trailingAnchor)
         ])
 
         // 在 .scroll 模式下，必须建立 section.bottom -> container.bottom 的约束才能算出 contentSize。
         // 在 .fixed 模式下也建立此约束以保证布局完整；在 table/collection 容器下不强制。
+        // 末尾 section 直接贴容器底部（无外边距）。
         if self.layoutMode == .scroll || self.layoutMode == .fixed {
-            let bottom = section.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -section.inset.bottom)
+            let bottom = section.bottomAnchor.constraint(equalTo: container.bottomAnchor)
             bottom.priority = .defaultHigh
             bottom.isActive = true
             self.st_lastSectionBottomConstraint = bottom
@@ -801,7 +882,6 @@ open class STGradientNavigationBar: UIView {
 
     public override func layoutSubviews() {
         super.layoutSubviews()
-        // frame 更新仍需每次布局同步；颜色/起止点已在属性变化/初始化时设置。
         self.gradientLayer.frame = self.bounds
     }
 
@@ -811,7 +891,6 @@ open class STGradientNavigationBar: UIView {
 
     open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        // 动态色适配：当 trait 变化导致 UIColor -> cgColor 对应分辨率变化时需重算
         if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.updateGradientColors()
         }
@@ -819,7 +898,6 @@ open class STGradientNavigationBar: UIView {
 }
 
 // MARK: - Refresh & Load More
-
 private enum STRefreshKeys {
     static let header = STAssociationKey()
     static let footer = STAssociationKey()

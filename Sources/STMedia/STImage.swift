@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Photos
 
 public enum STImageError: LocalizedError {
     case invalidData
@@ -308,24 +307,6 @@ extension UIImage {
         guard let output = filter.outputImage,
               let adjustedCGImage = UIImage.sharedCIContext.createCGImage(output, from: ciImage.extent) else { return nil }
         return UIImage(cgImage: adjustedCGImage)
-    }
-
-    // MARK: - 网络与相册
-
-    public static func load(from url: URL) async throws -> UIImage {
-        let (data, _) = try await URLSession.shared.data(from: url)
-        guard let image = UIImage(data: data) else { throw STImageError.invalidData }
-        return image
-    }
-
-    public func saveToPhotoLibrary() async throws {
-        let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
-        guard status == .authorized || status == .limited else {
-            throw STImageError.photoLibraryPermissionDenied
-        }
-        try await PHPhotoLibrary.shared().performChanges {
-            PHAssetChangeRequest.creationRequestForAsset(from: self)
-        }
     }
 
     // MARK: - Factory

@@ -7,14 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		24E42D55FA269510FCC339D8 /* Pods_STBaseProjectExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9585ED53167BB872ED6FAED0 /* Pods_STBaseProjectExample.framework */; };
-		3BC33DCE6667208FB2C173D7 /* Pods_STBaseProjectExampleTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0283393535FD1ACC2B18EBC8 /* Pods_STBaseProjectExampleTests.framework */; };
-		CAAB0100000000000000AA01 /* STContacts in Frameworks */ = {isa = PBXBuildFile; productRef = CAAB0100000000000000AA00 /* STContacts */; };
-		CAAB0200000000000000AA01 /* STMedia in Frameworks */ = {isa = PBXBuildFile; productRef = CAAB0200000000000000AA00 /* STMedia */; };
-		CAAB0300000000000000AA01 /* STLocation in Frameworks */ = {isa = PBXBuildFile; productRef = CAAB0300000000000000AA00 /* STLocation */; };
-		CAAB0400000000000000AA01 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = CAAB0400000000000000AA00 /* STBaseProject */; };
-		E4EEED8B2FA0B5D300730900 /* STBaseProject in Frameworks */ = {isa = PBXBuildFile; productRef = E4EEED8A2FA0B5D300730900 /* STBaseProject */; };
-		F0B670DF2C171EB57F86C428 /* Pods_STBaseProjectExample_STBaseProjectExampleUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2ECB33F317DD5400A18A89B8 /* Pods_STBaseProjectExample_STBaseProjectExampleUITests.framework */; };
+		E4CF29FF302C7E8C00F589DE /* STMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = E4CF29FE302C7E8C00F589DE /* STMarkdown */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,18 +28,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0283393535FD1ACC2B18EBC8 /* Pods_STBaseProjectExampleTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProjectExampleTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		2ECB33F317DD5400A18A89B8 /* Pods_STBaseProjectExample_STBaseProjectExampleUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProjectExample_STBaseProjectExampleUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		51B6EBC982779829B921D155 /* Pods-STBaseProjectExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProjectExample.release.xcconfig"; path = "Target Support Files/Pods-STBaseProjectExample/Pods-STBaseProjectExample.release.xcconfig"; sourceTree = "<group>"; };
-		71A69D3A328698A5A101D8A2 /* Pods-STBaseProjectExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProjectExampleTests.release.xcconfig"; path = "Target Support Files/Pods-STBaseProjectExampleTests/Pods-STBaseProjectExampleTests.release.xcconfig"; sourceTree = "<group>"; };
-		88AD10DB079D2C69D4489093 /* Pods-STBaseProjectExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProjectExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProjectExampleTests/Pods-STBaseProjectExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
-		9392E095265ABE853F0112D6 /* Pods-STBaseProjectExample-STBaseProjectExampleUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProjectExample-STBaseProjectExampleUITests.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProjectExample-STBaseProjectExampleUITests/Pods-STBaseProjectExample-STBaseProjectExampleUITests.debug.xcconfig"; sourceTree = "<group>"; };
-		9585ED53167BB872ED6FAED0 /* Pods_STBaseProjectExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_STBaseProjectExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		DC62E94F4EEA49C7CAD4411A /* Pods-STBaseProjectExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProjectExample.debug.xcconfig"; path = "Target Support Files/Pods-STBaseProjectExample/Pods-STBaseProjectExample.debug.xcconfig"; sourceTree = "<group>"; };
 		E4EEECD32FA0B1AD00730900 /* STBaseProjectExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = STBaseProjectExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4EEECE92FA0B1AD00730900 /* STBaseProjectExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = STBaseProjectExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4EEECF32FA0B1AD00730900 /* STBaseProjectExampleUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = STBaseProjectExampleUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F5ED43C14EFB7931CEAB5F3B /* Pods-STBaseProjectExample-STBaseProjectExampleUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-STBaseProjectExample-STBaseProjectExampleUITests.release.xcconfig"; path = "Target Support Files/Pods-STBaseProjectExample-STBaseProjectExampleUITests/Pods-STBaseProjectExample-STBaseProjectExampleUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -85,8 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4EEED8B2FA0B5D300730900 /* STBaseProject in Frameworks */,
-				24E42D55FA269510FCC339D8 /* Pods_STBaseProjectExample.framework in Frameworks */,
+				E4CF29FF302C7E8C00F589DE /* STMarkdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,11 +77,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CAAB0100000000000000AA01 /* STContacts in Frameworks */,
-				CAAB0200000000000000AA01 /* STMedia in Frameworks */,
-				CAAB0300000000000000AA01 /* STLocation in Frameworks */,
-				CAAB0400000000000000AA01 /* STBaseProject in Frameworks */,
-				3BC33DCE6667208FB2C173D7 /* Pods_STBaseProjectExampleTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,26 +84,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F0B670DF2C171EB57F86C428 /* Pods_STBaseProjectExample_STBaseProjectExampleUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		19FCEE42B9FAD6357AF9B126 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				DC62E94F4EEA49C7CAD4411A /* Pods-STBaseProjectExample.debug.xcconfig */,
-				51B6EBC982779829B921D155 /* Pods-STBaseProjectExample.release.xcconfig */,
-				9392E095265ABE853F0112D6 /* Pods-STBaseProjectExample-STBaseProjectExampleUITests.debug.xcconfig */,
-				F5ED43C14EFB7931CEAB5F3B /* Pods-STBaseProjectExample-STBaseProjectExampleUITests.release.xcconfig */,
-				88AD10DB079D2C69D4489093 /* Pods-STBaseProjectExampleTests.debug.xcconfig */,
-				71A69D3A328698A5A101D8A2 /* Pods-STBaseProjectExampleTests.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		E4EEECCA2FA0B1AD00730900 = {
 			isa = PBXGroup;
 			children = (
@@ -133,7 +97,6 @@
 				E4EEECEC2FA0B1AD00730900 /* STBaseProjectExampleTests */,
 				E4EEECF62FA0B1AD00730900 /* STBaseProjectExampleUITests */,
 				E4EEECD42FA0B1AD00730900 /* Products */,
-				19FCEE42B9FAD6357AF9B126 /* Pods */,
 				EF85DB02CCB1E0993DCB46D9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -151,9 +114,6 @@
 		EF85DB02CCB1E0993DCB46D9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				9585ED53167BB872ED6FAED0 /* Pods_STBaseProjectExample.framework */,
-				2ECB33F317DD5400A18A89B8 /* Pods_STBaseProjectExample_STBaseProjectExampleUITests.framework */,
-				0283393535FD1ACC2B18EBC8 /* Pods_STBaseProjectExampleTests.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -165,7 +125,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4EEECFC2FA0B1AD00730900 /* Build configuration list for PBXNativeTarget "STBaseProjectExample" */;
 			buildPhases = (
-				FC602DE85749453F6C6ED923 /* [CP] Check Pods Manifest.lock */,
 				E4EEECCF2FA0B1AD00730900 /* Sources */,
 				E4EEECD02FA0B1AD00730900 /* Frameworks */,
 				E4EEECD12FA0B1AD00730900 /* Resources */,
@@ -179,7 +138,7 @@
 			);
 			name = STBaseProjectExample;
 			packageProductDependencies = (
-				E4EEED8A2FA0B5D300730900 /* STBaseProject */,
+				E4CF29FE302C7E8C00F589DE /* STMarkdown */,
 			);
 			productName = STBaseProjectExample;
 			productReference = E4EEECD32FA0B1AD00730900 /* STBaseProjectExample.app */;
@@ -189,7 +148,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4EEED012FA0B1AD00730900 /* Build configuration list for PBXNativeTarget "STBaseProjectExampleTests" */;
 			buildPhases = (
-				3E337D8B1794D92F27AE3BB7 /* [CP] Check Pods Manifest.lock */,
 				E4EEECE52FA0B1AD00730900 /* Sources */,
 				E4EEECE62FA0B1AD00730900 /* Frameworks */,
 				E4EEECE72FA0B1AD00730900 /* Resources */,
@@ -204,10 +162,6 @@
 			);
 			name = STBaseProjectExampleTests;
 			packageProductDependencies = (
-				CAAB0100000000000000AA00 /* STContacts */,
-				CAAB0200000000000000AA00 /* STMedia */,
-				CAAB0300000000000000AA00 /* STLocation */,
-				CAAB0400000000000000AA00 /* STBaseProject */,
 			);
 			productName = STBaseProjectExampleTests;
 			productReference = E4EEECE92FA0B1AD00730900 /* STBaseProjectExampleTests.xctest */;
@@ -217,7 +171,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E4EEED042FA0B1AD00730900 /* Build configuration list for PBXNativeTarget "STBaseProjectExampleUITests" */;
 			buildPhases = (
-				B71AD6F9190827153D4A40DE /* [CP] Check Pods Manifest.lock */,
 				E4EEECEF2FA0B1AD00730900 /* Sources */,
 				E4EEECF02FA0B1AD00730900 /* Frameworks */,
 				E4EEECF12FA0B1AD00730900 /* Resources */,
@@ -264,11 +217,12 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = E4EEECCA2FA0B1AD00730900;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */,
+				E4CF29FD302C7E8C00F589DE /* XCLocalSwiftPackageReference "../../STMarkdown" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E4EEECD42FA0B1AD00730900 /* Products */;
@@ -305,75 +259,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		3E337D8B1794D92F27AE3BB7 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-STBaseProjectExampleTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		B71AD6F9190827153D4A40DE /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-STBaseProjectExample-STBaseProjectExampleUITests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FC602DE85749453F6C6ED923 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-STBaseProjectExample-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		E4EEECCF2FA0B1AD00730900 /* Sources */ = {
@@ -415,7 +300,6 @@
 /* Begin XCBuildConfiguration section */
 		E4EEECFD2FA0B1AD00730900 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DC62E94F4EEA49C7CAD4411A /* Pods-STBaseProjectExample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -449,7 +333,6 @@
 		};
 		E4EEECFE2FA0B1AD00730900 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 51B6EBC982779829B921D155 /* Pods-STBaseProjectExample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -604,7 +487,6 @@
 		};
 		E4EEED022FA0B1AD00730900 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 88AD10DB079D2C69D4489093 /* Pods-STBaseProjectExampleTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -627,7 +509,6 @@
 		};
 		E4EEED032FA0B1AD00730900 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 71A69D3A328698A5A101D8A2 /* Pods-STBaseProjectExampleTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -650,7 +531,6 @@
 		};
 		E4EEED052FA0B1AD00730900 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9392E095265ABE853F0112D6 /* Pods-STBaseProjectExample-STBaseProjectExampleUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -672,7 +552,6 @@
 		};
 		E4EEED062FA0B1AD00730900 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F5ED43C14EFB7931CEAB5F3B /* Pods-STBaseProjectExample-STBaseProjectExampleUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -734,37 +613,16 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */ = {
+		E4CF29FD302C7E8C00F589DE /* XCLocalSwiftPackageReference "../../STMarkdown" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ..;
+			relativePath = ../../STMarkdown;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		CAAB0100000000000000AA00 /* STContacts */ = {
+		E4CF29FE302C7E8C00F589DE /* STMarkdown */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */;
-			productName = STContacts;
-		};
-		CAAB0200000000000000AA00 /* STMedia */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */;
-			productName = STMedia;
-		};
-		CAAB0300000000000000AA00 /* STLocation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */;
-			productName = STLocation;
-		};
-		CAAB0400000000000000AA00 /* STBaseProject */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */;
-			productName = STBaseProject;
-		};
-		E4EEED8A2FA0B5D300730900 /* STBaseProject */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E4EEED892FA0B5D300730900 /* XCLocalSwiftPackageReference ".." */;
-			productName = STBaseProject;
+			productName = STMarkdown;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

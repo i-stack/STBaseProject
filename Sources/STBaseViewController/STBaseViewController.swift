@@ -37,6 +37,12 @@ open class STBaseViewController: UIViewController {
     public private(set) var navigationBarView = UIView()
     public private(set) var navigationBarItemsView = UIView()
     public private(set) var navGradientBar: STGradientNavigationBar?
+
+    /// 撑起导航栏高度的约束（navigationBarItemsView 高度 + 与 navigationBarView.bottom 的关联）。
+    /// `.none` 时需将高度约束常量置 0（约束本身保持激活、不移除），否则隐藏后内容区顶部会残留一段死区。
+    private var navigationBarHeightConstraint: NSLayoutConstraint?
+    private var navigationBarBottomConstraint: NSLayoutConstraint?
+    private var isNavigationBarCollapsed = false
     public var navBarBackgroundColor: UIColor = .white {
         didSet {
             if self.liquidGlassContainerView == nil {
@@ -86,6 +92,11 @@ open class STBaseViewController: UIViewController {
     }
     public var statusBarHidden: Bool = false
     public var statusBarStyle: UIStatusBarStyle = .default
+    /// 本基类在 `viewWillAppear` 中把系统导航栏设为该值，但**没有对称的恢复时机**：
+    /// 若从 STBaseViewController push 到一个未继承本基类、且期望系统导航栏可见的 UIViewController，
+    /// 系统栏会保持隐藏（目标 VC 的 viewWillAppear 不会恢复它）。
+    /// 因此本库隐含假设「导航栈内所有 VC 均继承 STBaseViewController」。
+    /// 混用系统 VC 时，请在目标 VC 的 viewWillAppear 中自行 `navigationController?.setNavigationBarHidden(false, animated:)`。
     open var prefersSystemNavigationBarHidden: Bool { true }
     public var contentTopAnchor: NSLayoutYAxisAnchor { self.navigationBarView.bottomAnchor }
     private var appearanceCancellable: AnyCancellable?
@@ -151,13 +162,18 @@ open class STBaseViewController: UIViewController {
         NSLayoutConstraint.activate([
             self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor),
             self.navigationBarView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            self.navigationBarView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor)
+            self.navigationBarView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
 
+        self.navigationBarBottomConstraint = self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor)
+        self.navigationBarBottomConstraint.map { NSLayoutConstraint.activate([$0]) }
+
+        let initialHeight = self.isNavigationBarCollapsed ? 0 : STDeviceAdapter.navigationBarContentHeight
+        let heightConstraint = self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: initialHeight)
+        self.navigationBarHeightConstraint = heightConstraint
         NSLayoutConstraint.activate([
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight),
+            heightConstraint,
             self.navigationBarItemsView.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
             self.navigationBarItemsView.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])
@@ -174,6 +190,10 @@ open class STBaseViewController: UIViewController {
 
         self.leftBtn.addTarget(self, action: #selector(self.onLeftBtnTap), for: .touchUpInside)
         self.rightBtn.addTarget(self, action: #selector(self.onRightBtnTap), for: .touchUpInside)
+
+        // 仅含图片时的无障碍兜底文案（有 title 时优先用 title，无需此处设置）。
+        // 从本地化资源读取，并在语言切换时由 st_refreshAccessibilityFallbacks 同步刷新。
+        self.st_refreshAccessibilityFallbacks()
 
         self.view.bringSubviewToFront(self.navigationBarView)
     }
@@ -231,6 +251,11 @@ open class STBaseViewController: UIViewController {
     }
 
     /// 替换左按钮约束；自动停用旧约束、启用新约束
+    ///
+    /// ⚠️ 约束耦合提示：左/右按钮约束默认通过 `avoidTitleOverlap` 引用了 `titleLabel` 的锚点，
+    /// 标题约束默认也引用了左/右按钮的锚点（三者相互引用 anchor，而非固定值）。
+    /// 若只替换其中一组，其余两组对 titleLabel 的引用仍会生效（实测不崩，但布局意图可能偏离预期）。
+    /// 自定义布局时建议三者整体重写，保持一致。
     @discardableResult
     public func st_replaceLeftButtonConstraints(_ builder: (UIView) -> [NSLayoutConstraint]) -> Self {
         self.leftBtnConstraints = builder(self.navigationBarItemsView)
@@ -238,6 +263,9 @@ open class STBaseViewController: UIViewController {
     }
 
     /// 替换右按钮约束；自动停用旧约束、启用新约束
+    ///
+    /// ⚠️ 见 `st_replaceLeftButtonConstraints` 的约束耦合说明：左/右/标题三组约束相互引用，
+    /// 建议整体重写而非只替换其一。
     @discardableResult
     public func st_replaceRightButtonConstraints(_ builder: (UIView) -> [NSLayoutConstraint]) -> Self {
         self.rightBtnConstraints = builder(self.navigationBarItemsView)
@@ -245,6 +273,9 @@ open class STBaseViewController: UIViewController {
     }
 
     /// 替换标题约束；自动停用旧约束、启用新约束
+    ///
+    /// ⚠️ 见 `st_replaceLeftButtonConstraints` 的约束耦合说明：左/右/标题三组约束相互引用，
+    /// 建议整体重写而非只替换其一。
     @discardableResult
     public func st_replaceTitleLabelConstraints(_ builder: (UIView) -> [NSLayoutConstraint]) -> Self {
         self.titleLabelConstraints = builder(self.navigationBarItemsView)
@@ -332,6 +363,9 @@ open class STBaseViewController: UIViewController {
         let hideBar = (type == .none)
         self.navigationBarView.isHidden = hideBar
         self.navigationBarItemsView.isHidden = hideBar
+        // `.none` 的语义是「全屏无导航栏占位」：除 isHidden 外，必须把撑高约束的常量置 0
+        // （约束保持激活、不移除），否则 contentTopAnchor（恒等于 navigationBarView.bottomAnchor）仍会保留 navBarHeight 的死区。
+        self.setNavigationBarCollapsed(hideBar)
         switch type {
         case .showLeftBtn:
             self.leftBtn.isHidden = false
@@ -348,6 +382,25 @@ open class STBaseViewController: UIViewController {
         }
     }
 
+    /// 折叠/展开导航栏的占位高度（.none 时折叠）。Liquid Glass 迁移会重建约束，故需重取引用。
+    private func setNavigationBarCollapsed(_ collapsed: Bool) {
+        guard self.isNavigationBarCollapsed != collapsed else { return }
+        self.isNavigationBarCollapsed = collapsed
+        // 视图尚未加载时，仅记录状态；高度约束在 setupNavigationBar 中会按此状态取初始常量。
+        // 视图已加载后，约束已存在，这里实时更新常量。
+        let height = collapsed ? 0 : STDeviceAdapter.navigationBarContentHeight
+        self.navigationBarHeightConstraint?.constant = height
+        if self.isViewLoaded { self.view.setNeedsLayout() }
+    }
+
+    /// 从本地化资源刷新左右按钮「仅含图片」时的无障碍兜底文案。
+    /// 调用方显式传入的 accessibilityLabel 仍具有最高优先级（存于 STIconBtn.st_explicitAccessibilityLabel）。
+    /// value 传入英文，确保无任何本地化资源时（或当前语言无该 key 时）回退为英文，而非固定中文。
+    func st_refreshAccessibilityFallbacks() {
+        self.leftBtn.st_fallbackAccessibilityLabel  = Bundle.st_localizedString(key: "st_nav_back", value: "Back")
+        self.rightBtn.st_fallbackAccessibilityLabel = Bundle.st_localizedString(key: "st_nav_more", value: "More")
+    }
+
     @discardableResult
     open func st_setTitle(_ text: String) -> Self {
         self.titleLabel.text = text
@@ -360,17 +413,29 @@ open class STBaseViewController: UIViewController {
         return self
     }
 
+    /// 设置左侧导航按钮。
+    ///
+    /// 无障碍标签优先级：显式传入的 `accessibilityLabel` > `title` > 仅含图片时的本地化兜底文案。
+    ///
+    /// - Important: 本地化资源由**宿主 App 提供**，本库不内置翻译。
+    ///   若希望仅含图片时朗读本地化文案，请在宿主 App 的 `Localizable.strings` 中提供
+    ///   `st_nav_back`（左）与 `st_nav_more`（右）两个 key；
+    ///   未提供时统一回退英文 "Back" / "More"。需要其他文案请直接传 `accessibilityLabel`。
     @discardableResult
-    open func st_setLeftBtn(image: UIImage? = nil, title: String? = nil) -> Self {
+    open func st_setLeftBtn(image: UIImage? = nil, title: String? = nil, accessibilityLabel: String? = nil) -> Self {
         if let image { self.leftBtnImage = image }
         if let title { self.leftBtnTitle = title }
+        if let accessibilityLabel { self.leftBtn.accessibilityLabel = accessibilityLabel }
         return self
     }
 
+    /// 设置右侧导航按钮。无障碍标签优先级与本地化资源契约同 `st_setLeftBtn(image:title:accessibilityLabel:)`
+    /// （宿主 App 提供 `st_nav_more`，未提供时回退英文 "More"）。
     @discardableResult
-    open func st_setRightBtn(image: UIImage? = nil, title: String? = nil) -> Self {
+    open func st_setRightBtn(image: UIImage? = nil, title: String? = nil, accessibilityLabel: String? = nil) -> Self {
         if let image { self.rightBtnImage = image }
         if let title { self.rightBtnTitle = title }
+        if let accessibilityLabel { self.rightBtn.accessibilityLabel = accessibilityLabel }
         return self
     }
 
@@ -469,10 +534,15 @@ extension STBaseViewController {
         // removeFromSuperview 会一并销毁 items view 的所有约束（含决定 navigationBarView 高度的 bottom 约束），必须重建。
         self.navigationBarItemsView.removeFromSuperview()
         container.contentView.addSubview(self.navigationBarItemsView)
+        let bottomConstraint = self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor)
+        let heightConstraint = self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight)
+        self.navigationBarBottomConstraint = bottomConstraint
+        self.navigationBarHeightConstraint = heightConstraint
+        if self.isNavigationBarCollapsed { heightConstraint.constant = 0 }
         NSLayoutConstraint.activate([
-            self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor),
+            bottomConstraint,
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight),
+            heightConstraint,
             self.navigationBarItemsView.leadingAnchor.constraint(equalTo: container.contentView.leadingAnchor),
             self.navigationBarItemsView.trailingAnchor.constraint(equalTo: container.contentView.trailingAnchor)
         ])
@@ -487,10 +557,15 @@ extension STBaseViewController {
         // 迁回 navigationBarView 并重建完整约束（含决定 nav 栏高度的 bottom 约束）
         self.navigationBarItemsView.removeFromSuperview()
         self.navigationBarView.addSubview(self.navigationBarItemsView)
+        let bottomConstraint = self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor)
+        let heightConstraint = self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight)
+        self.navigationBarBottomConstraint = bottomConstraint
+        self.navigationBarHeightConstraint = heightConstraint
+        if self.isNavigationBarCollapsed { heightConstraint.constant = 0 }
         NSLayoutConstraint.activate([
-            self.navigationBarView.bottomAnchor.constraint(equalTo: self.navigationBarItemsView.bottomAnchor),
+            bottomConstraint,
             self.navigationBarItemsView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-            self.navigationBarItemsView.heightAnchor.constraint(equalToConstant: STDeviceAdapter.navigationBarContentHeight),
+            heightConstraint,
             self.navigationBarItemsView.leadingAnchor.constraint(equalTo: self.navigationBarView.leadingAnchor),
             self.navigationBarItemsView.trailingAnchor.constraint(equalTo: self.navigationBarView.trailingAnchor)
         ])

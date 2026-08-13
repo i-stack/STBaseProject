@@ -82,9 +82,13 @@ public extension Bundle {
     }
 
     /// 获取本地化字符串，优先使用自定义语言包
-    static func st_localizedString(key: String, tableName: String = "Localizable") -> String {
+    /// - Parameters:
+    ///   - key: 本地化 key
+    ///   - value: 未找到对应翻译时的回退值（建议用英文，而非固定中文），默认 nil
+    ///   - tableName: 字符串表名，默认 "Localizable"
+    static func st_localizedString(key: String, value: String? = nil, tableName: String = "Localizable") -> String {
         let bundle = customLanguageBundle ?? Bundle.main
-        return bundle.localizedString(forKey: key, value: nil, table: tableName)
+        return bundle.localizedString(forKey: key, value: value, table: tableName)
     }
 
     /// 切换到指定语言代码（如 "zh-Hans"、"en"）

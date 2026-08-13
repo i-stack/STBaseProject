@@ -20,6 +20,8 @@ public extension STBaseViewController {
     @objc func st_updateLocalizedTexts() {
         self.st_applyTitleLocalization()
         self.updateLocalizedTextsInView(self.view)
+        // 同步刷新导航按钮「仅含图片」时的无障碍兜底文案（语言切换后朗读应跟随）
+        self.st_refreshAccessibilityFallbacks()
     }
 
     private func st_applyTitleLocalization() {

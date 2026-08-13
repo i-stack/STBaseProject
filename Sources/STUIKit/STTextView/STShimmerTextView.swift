@@ -44,10 +44,10 @@ open class STShimmerTextView: UITextView {
     /// 为 true 时，跨换行也保持连续 token 渐显；
     /// 为 false 时，新增 delta 中最后一个换行前的内容会立即显示，仅最后一行保留动画。
     public var animateAcrossNewlines: Bool = false
-    /// `true` 时改用 FluidMarkdown 风格的行级 CAGradientLayer 水平扫入遮罩动画，
-    /// 替代默认的 token 级 foregroundColor 淡入；由 STMarkdownStreamingTextView 根据样式同步。
+    /// `true` 时改用行级 CAGradientLayer 水平扫入遮罩动画，
+    /// 替代默认的 token 级 foregroundColor 淡入。
     public var lineFadeMode: Bool = false
-    /// 行级扫入动画时长（秒），默认 0.15 s，与 FluidMarkdown 对齐。
+    /// 行级扫入动画时长（秒），默认 0.15 s。
     public var lineFadeDuration: TimeInterval = 0.15
     /// 当前 token 输出行尾部的柔和渐隐宽度。
     public var lineFadeTrailingWidth: CGFloat = 18
