@@ -266,7 +266,7 @@ public class STHUD: NSObject {
         defer { self.theme = previousTheme }
 
         let finalTitle = config.isLocalized ? config.title.localized : config.title
-        let finalDetailText = config.detailText != nil ? (config.isLocalized ? config.detailText!.localized : config.detailText!) : nil
+        let finalDetailText = config.detailText.map { config.isLocalized ? $0.localized : $0 }
         let keyWindow = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .first?.windows.first(where: \.isKeyWindow)

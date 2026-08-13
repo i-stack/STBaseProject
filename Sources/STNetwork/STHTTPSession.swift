@@ -612,22 +612,22 @@ open class STHTTPSession: NSObject {
 
     private func buildMultipartBody(boundary: String, files: [STUploadFile], parameters: [String: Any]?) -> Data {
         var body = Data()
-        let crlf = "\r\n".data(using: .utf8)!
+        let crlf = Data("\r\n".utf8)
         for file in files {
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.fileName)\"\r\n".data(using: .utf8)!)
-            body.append("Content-Type: \(file.mimeType)\r\n\r\n".data(using: .utf8)!)
+            body.append(Data("--\(boundary)\r\n".utf8))
+            body.append(Data("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.fileName)\"\r\n".utf8))
+            body.append(Data("Content-Type: \(file.mimeType)\r\n\r\n".utf8))
             body.append(file.data)
             body.append(crlf)
         }
         if let parameters = parameters {
             for (key, value) in parameters {
-                body.append("--\(boundary)\r\n".data(using: .utf8)!)
-                body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
-                body.append("\(value)\r\n".data(using: .utf8)!)
+                body.append(Data("--\(boundary)\r\n".utf8))
+                body.append(Data("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".utf8))
+                body.append(Data("\(value)\r\n".utf8))
             }
         }
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        body.append(Data("--\(boundary)--\r\n".utf8))
         return body
     }
 
