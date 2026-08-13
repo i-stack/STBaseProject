@@ -200,7 +200,7 @@ public extension String {
             "dd/MM/yyyy",
             "yyyy年MM月dd日 HH:mm:ss",
             "yyyy年MM月dd日 HH:mm",
-            "yyyy年MM月dd日",
+            "yyyy年MM月dd日"
         ]
 
         if contains("T") && (contains("Z") || contains("+")) {

@@ -61,13 +61,13 @@ open class STShimmerTextView: UITextView {
     private var _lineFadeBaseLayer: CALayer?
     /// 最终目标态的 attributed text（全不透明），不含任何动画中间状态的 alpha 值。
     /// 供外部做 "已渲染前缀" 比较时使用，避免因动画过渡期 alpha < 1 导致前缀比较误判。
-    private var _baseAttributedText: NSMutableAttributedString = NSMutableAttributedString()
+    private var _baseAttributedText = NSMutableAttributedString()
     private var _isLineFadeAnimating: Bool = false
 
     open var defaultTextAttributes: [NSAttributedString.Key: Any] {
         return [
             .font: self.font ?? UIFont.st_systemFont(ofSize: 16),
-            .foregroundColor: self.textColor ?? UIColor.label,
+            .foregroundColor: self.textColor ?? UIColor.label
         ]
     }
 
@@ -79,7 +79,7 @@ open class STShimmerTextView: UITextView {
         (self.displayLink != nil && !self.animatingTokens.isEmpty) || self._isLineFadeAnimating
     }
 
-    public override init(frame: CGRect, textContainer: NSTextContainer?) {
+    override public init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.setup()
     }
@@ -118,7 +118,7 @@ open class STShimmerTextView: UITextView {
         }
     }
 
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         guard let mask = _lineFadeMaskLayer else { return }
         CATransaction.begin()
@@ -372,8 +372,8 @@ open class STShimmerTextView: UITextView {
     private func appendStaggeredTokens(for colorRuns: [AnimatingColorRun]) {
         let revealRuns = self.semanticRevealColorRuns(from: colorRuns)
         guard !revealRuns.isEmpty else { return }
-        let start = revealRuns.map(\.range.location).min()!
-        let end = revealRuns.map { $0.range.location + $0.range.length }.max()!
+        guard let start = revealRuns.map(\.range.location).min(),
+              let end = revealRuns.map({ $0.range.location + $0.range.length }).max() else { return }
         let stagger = (self.characterStaggerInterval > 0 && revealRuns.count > 1)
             ? self.characterStaggerInterval : 0
         let token = AnimatingToken(
@@ -578,12 +578,12 @@ open class STShimmerTextView: UITextView {
         }
     }
 
-    /// 立即完成"当前行"之前所有行的 fade-in 动画。
-    ///
-    /// 原则：_baseAttributedText 中最后一个 \n 之前的字符已属于已完成的行，
-    /// 它们的 animatingToken 应立即置为全不透明，不应继续半透明地悬挂在屏幕上。
-    /// 调用时机：在每次 append 新字符 **之前**（_baseAttributedText 尚未追加新内容），
-    /// 以 _baseAttributedText 的当前末尾搜索最后一个换行符。
+    // 立即完成"当前行"之前所有行的 fade-in 动画。
+    //
+    // 原则：_baseAttributedText 中最后一个 \n 之前的字符已属于已完成的行，
+    // 它们的 animatingToken 应立即置为全不透明，不应继续半透明地悬挂在屏幕上。
+    // 调用时机：在每次 append 新字符 **之前**（_baseAttributedText 尚未追加新内容），
+    // 以 _baseAttributedText 的当前末尾搜索最后一个换行符。
     private func finishAnimationsBeforeLastNewline() {
         guard !self.animatingTokens.isEmpty else { return }
         let str = _baseAttributedText.string as NSString
@@ -669,7 +669,7 @@ open class STShimmerTextView: UITextView {
             let mask = CALayer()
             mask.actions = [
                 "bounds": null, "position": null,
-                "frame": null, "sublayerTransform": null, "transition": null,
+                "frame": null, "sublayerTransform": null, "transition": null
             ]
             let base = CALayer()
             base.backgroundColor = UIColor.black.cgColor
@@ -725,8 +725,7 @@ open class STShimmerTextView: UITextView {
         let glyphRange = self.layoutManager.glyphRange(
             forCharacterRange: changedRange, actualCharacterRange: nil
         )
-        self.layoutManager.enumerateLineFragments(forGlyphRange: glyphRange) { [weak self]
-            rect, usedRect, _, lineGlyphRange, _ in
+        self.layoutManager.enumerateLineFragments(forGlyphRange: glyphRange) { [weak self] rect, usedRect, _, lineGlyphRange, _ in
             guard let self else { return }
             guard NSMaxRange(glyphRange) == NSMaxRange(lineGlyphRange) else { return }
             self.installLineFadeLayer(lineRect: rect, rightEdge: usedRect.maxX, mask: mask, base: base)
@@ -775,12 +774,12 @@ open class STShimmerTextView: UITextView {
         anim.fromValue = [
             NSNumber(value: 0),
             NSNumber(value: Double(fromFadeStart)),
-            NSNumber(value: 1),
+            NSNumber(value: 1)
         ]
         anim.toValue = [
             NSNumber(value: 0),
             NSNumber(value: Double(fadeStart)),
-            NSNumber(value: 1),
+            NSNumber(value: 1)
         ]
         anim.fillMode = .both
         anim.isRemovedOnCompletion = true
@@ -808,7 +807,7 @@ open class STShimmerTextView: UITextView {
     }
 
     /// 子类可重写：禁止系统长按复制/粘贴菜单，仅使用自定义 popupMenuItems（如 Bajoseek 回复区）
-    open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         if self.suppressSystemTextMenu {
             return false
         }

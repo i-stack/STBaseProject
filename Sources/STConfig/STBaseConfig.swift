@@ -9,7 +9,7 @@ import UIKit
 
 public final class STBaseConfig {
 
-    public static let shared: STBaseConfig = STBaseConfig()
+    public static let shared = STBaseConfig()
 
     private init() {}
 

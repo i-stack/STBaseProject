@@ -19,7 +19,7 @@ open class STVerificationCodeBtn: STBtn {
     @IBInspectable open var titleSuffix: String = ""
     
     /// Countdown interval time
-    @IBInspectable open var interval: TimeInterval = 1 {
+    @IBInspectable open var interval: Double = 1 {
         didSet {
             guard self.interval <= 0 else { return }
             self.interval = oldValue > 0 ? oldValue : 1
@@ -42,19 +42,15 @@ open class STVerificationCodeBtn: STBtn {
         super.init(frame: frame)
     }
     
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-    }
-    
-    override open func awakeFromNib() {
-        super.awakeFromNib()
     }
     
     public func st_configDone() {
         self.originTitle = self.title(for: .normal) ?? self.titleLabel?.text
     }
     
-    public func beginTimer() -> Void {
+    public func beginTimer() {
         guard Thread.isMainThread else {
             DispatchQueue.main.async { [weak self] in
                 self?.beginTimer()
@@ -82,7 +78,7 @@ open class STVerificationCodeBtn: STBtn {
         self.timer = timer
     }
     
-    private func timerSelector(_ timer: STTimer) -> Void {
+    private func timerSelector(_ timer: STTimer) {
         guard self.timer === timer else { return }
         guard Thread.isMainThread else {
             DispatchQueue.main.async { [weak self, weak timer] in
@@ -99,12 +95,12 @@ open class STVerificationCodeBtn: STBtn {
         self.updateCountdownTitle()
     }
     
-    public func invalidTimer() -> Void {
+    public func invalidTimer() {
         self.timer?.stop()
         self.timer = nil
     }
     
-    public func resetCountdown() -> Void {
+    public func resetCountdown() {
         self.invalidTimer()
         self.restoreTimerState()
     }

@@ -32,7 +32,7 @@ public typealias STTextViewHeightChangeUserActionsBlock = (_ oldHeight: CGFloat,
 @IBDesignable
 open class STTextView: STPlaceholderTextView {
 
-    weak open var cusDelegate: STTextViewDelegate?
+    open weak var cusDelegate: STTextViewDelegate?
     open var shouldPreventResigningFirstResponder: (() -> Bool)?
 
     open var shouldLimitTextCount: Bool = true
@@ -113,7 +113,7 @@ open class STTextView: STPlaceholderTextView {
         return lineCount
     }
 
-    open var maxTextHeight: CGFloat = CGFloat.greatestFiniteMagnitude {
+    open var maxTextHeight = CGFloat.greatestFiniteMagnitude {
         didSet {
             self.updateHeightIfNeeded(notify: true, animated: false)
         }
@@ -141,19 +141,19 @@ open class STTextView: STPlaceholderTextView {
         }
     }
 
-    public override var font: UIFont? {
+    override public var font: UIFont? {
         didSet {
             self.updateHeightIfNeeded(notify: true, animated: false)
         }
     }
 
-    public override var textColor: UIColor? {
+    override public var textColor: UIColor? {
         didSet {
             self.typingAttributes[.foregroundColor] = self.textColor ?? UIColor.label
         }
     }
 
-    public override var bounds: CGRect {
+    override public var bounds: CGRect {
         didSet {
             if oldValue.size.width != self.bounds.size.width {
                 self.updateHeightIfNeeded(notify: true, animated: false)
@@ -161,7 +161,7 @@ open class STTextView: STPlaceholderTextView {
         }
     }
 
-    public override var contentSize: CGSize {
+    override public var contentSize: CGSize {
         didSet {
             guard oldValue != self.contentSize else { return }
             let animated = self.window != nil && self.isFirstResponder && self.animateHeightChange
@@ -169,14 +169,14 @@ open class STTextView: STPlaceholderTextView {
         }
     }
 
-    public override var intrinsicContentSize: CGSize {
+    override public var intrinsicContentSize: CGSize {
         if self.heightConstraint != nil {
             return CGSize(width: UIView.noIntrinsicMetric, height: UIView.noIntrinsicMetric)
         }
         return CGSize(width: UIView.noIntrinsicMetric, height: self.calculatedHeight())
     }
 
-    public override init(frame: CGRect, textContainer: NSTextContainer?) {
+    override public init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.config()
     }
@@ -186,40 +186,40 @@ open class STTextView: STPlaceholderTextView {
         self.config()
     }
 
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.updateHeightConstraintIfNeeded()
     }
 
-    open override func didMoveToSuperview() {
+    override open func didMoveToSuperview() {
         super.didMoveToSuperview()
         self.updateHeightConstraintIfNeeded()
         self.updateHeightIfNeeded(notify: false, animated: false)
     }
 
     @discardableResult
-    open override func resignFirstResponder() -> Bool {
+    override open func resignFirstResponder() -> Bool {
         if self.shouldPreventResigningFirstResponder?() == true {
             return false
         }
         return super.resignFirstResponder()
     }
 
-    open override func sizeThatFits(_ size: CGSize) -> CGSize {
+    override open func sizeThatFits(_ size: CGSize) -> CGSize {
         let fittingHeight = self.fittingContentHeight(for: size.width)
         let height = self.clampedHeight(for: fittingHeight)
         return CGSize(width: size.width, height: height)
     }
 
-    open override func sizeToFit() {
+    override open func sizeToFit() {
         self.bounds.size.height = self.calculatedHeight()
     }
 
-    open override func st_placeholderTextDidChange() {
+    override open func st_placeholderTextDidChange() {
         self.handleTextChange()
     }
 
-    open override func st_placeholderHeightAffectingChange() {
+    override open func st_placeholderHeightAffectingChange() {
         self.updateHeightIfNeeded(notify: true, animated: false)
     }
 

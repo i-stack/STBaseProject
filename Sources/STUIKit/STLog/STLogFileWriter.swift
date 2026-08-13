@@ -110,7 +110,7 @@ final class STLogFileWriter: STLogHandler {
         }
     }
 
-    private func enumerateNewestRecords(skip: Int, limit: Int, levels: Set<STLogLevel>,searchText: String?) -> [STLogRecord] {
+    private func enumerateNewestRecords(skip: Int, limit: Int, levels: Set<STLogLevel>, searchText: String?) -> [STLogRecord] {
         let normalizedSearch = searchText?.lowercased()
         var matched: [STLogRecord] = []
         var skipped = 0

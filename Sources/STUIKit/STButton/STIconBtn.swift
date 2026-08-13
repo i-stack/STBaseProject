@@ -180,7 +180,7 @@ open class STIconBtn: STBtn {
     /// 仅含图片时的默认无障碍文案；可设置以区分不同按钮语义（如"返回"/"更多"），亦可被子类重写本地化。
     open var st_fallbackAccessibilityLabel: String = "按钮"
 
-    open override var accessibilityLabel: String? {
+    override open var accessibilityLabel: String? {
         get {
             if let explicit = self.st_explicitAccessibilityLabel { return explicit }
             if let title = self.currentTitle, !title.isEmpty { return title }
@@ -192,7 +192,7 @@ open class STIconBtn: STBtn {
         }
     }
 
-    open override func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
+    override open func refineButtonConfiguration(_ button: UIButton, configuration config: inout UIButton.Configuration) {
         super.refineButtonConfiguration(button, configuration: &config)
 
         let icon = self.iconContentInsets

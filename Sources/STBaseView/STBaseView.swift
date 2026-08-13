@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2018/3/14.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 /// 用于 objc_setAssociatedObject 的引用型 key，避免对可变 static var 取地址造成的未定义行为。
 private final class STAssociationKey {}
@@ -76,7 +76,7 @@ open class STBaseView: UIView {
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setupBase()
     }
@@ -88,7 +88,7 @@ open class STBaseView: UIView {
         self.setupBase()
     }
 
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setupBase()
     }
@@ -319,7 +319,7 @@ open class STBaseView: UIView {
         }
     }
 
-    open override func safeAreaInsetsDidChange() {
+    override open func safeAreaInsetsDidChange() {
         super.safeAreaInsetsDidChange()
         switch self.layoutMode {
         case .table:
@@ -335,7 +335,7 @@ open class STBaseView: UIView {
         }
     }
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override open func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         guard self.enableAppearanceManagement else { return }
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
@@ -435,8 +435,8 @@ open class STBaseView: UIView {
         var contentInset = baseContent
         contentInset.bottom = baseContent.bottom + delta
         // 只修改各自指示器的 bottom，其余边保持调用方原配置。
-        verticalIndicator.bottom = verticalIndicator.bottom + delta
-        horizontalIndicator.bottom = horizontalIndicator.bottom + delta
+        verticalIndicator.bottom += delta
+        horizontalIndicator.bottom += delta
 
         let duration = (userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0
         let curveRaw = (userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber)?.uintValue ?? UInt(UIView.AnimationCurve.easeInOut.rawValue)
@@ -489,19 +489,23 @@ open class STBaseView: UIView {
     
     /// table 模式内部使用的 UITableView；外部通过 st_getTableView() 访问。
     private var tableView: UITableView {
-        if _tableView == nil {
-            _tableView = self.makeTableView(self.tableViewStyle)
-            _isInternallyCreatedTableView = true
+        if let tableView = _tableView {
+            return tableView
         }
-        return _tableView!
+        let tableView = self.makeTableView(self.tableViewStyle)
+        _tableView = tableView
+        _isInternallyCreatedTableView = true
+        return tableView
     }
 
     /// collection 模式内部使用的 UICollectionView；外部通过 st_getCollectionView() 访问。
     private var collectionView: UICollectionView {
-        if _collectionView == nil {
-            _collectionView = self.makeCollectionView()
+        if let collectionView = _collectionView {
+            return collectionView
         }
-        return _collectionView!
+        let collectionView = self.makeCollectionView()
+        _collectionView = collectionView
+        return collectionView
     }
 
     private static func makeDefaultScrollView() -> UIScrollView {
@@ -568,7 +572,10 @@ extension STBaseView {
         self.tableViewStyle = style
         if self._tableView != nil, self._isInternallyCreatedTableView {
             #if DEBUG
-            assertionFailure("STBaseView.st_tableViewStyle(_:) called after the internal tableView was created. All table configuration (delegate/dataSource/cell registration/pull-to-refresh/load-more) will be lost and must be re-applied.")
+            assertionFailure(
+                "STBaseView.st_tableViewStyle(_:) called after the internal tableView was created. "
+                    + "All table configuration (delegate/dataSource/cell registration/pull-to-refresh/load-more) will be lost and must be re-applied."
+            )
             #endif
             self.st_removePullToRefresh()
             self.st_removeLoadMore()
@@ -635,10 +642,10 @@ open class STSection: UIView {
     }
     private let stackView: UIStackView
     // 持有 stackView 的 4 条边约束引用，便于改 inset 时直接改 constant，避免约束泄漏
-    private var topConstraint: NSLayoutConstraint!
-    private var leadingConstraint: NSLayoutConstraint!
-    private var trailingConstraint: NSLayoutConstraint!
-    private var bottomConstraint: NSLayoutConstraint!
+    private var topConstraint: NSLayoutConstraint?
+    private var leadingConstraint: NSLayoutConstraint?
+    private var trailingConstraint: NSLayoutConstraint?
+    private var bottomConstraint: NSLayoutConstraint?
 
         public init(inset: UIEdgeInsets = .zero, spacing: CGFloat = 0) {
             self.inset = inset
@@ -649,7 +656,7 @@ open class STSection: UIView {
             self.setupStackView()
         }
 
-        required public init?(coder: NSCoder) {
+        public required init?(coder: NSCoder) {
             self.inset = .zero
             self.spacing = 0
             self.stackView = UIStackView()
@@ -669,7 +676,7 @@ open class STSection: UIView {
             self.leadingConstraint = self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.inset.left)
             self.trailingConstraint = self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.inset.right)
             self.bottomConstraint = self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.inset.bottom)
-            NSLayoutConstraint.activate([self.topConstraint, self.leadingConstraint, self.trailingConstraint, self.bottomConstraint])
+            NSLayoutConstraint.activate([self.topConstraint, self.leadingConstraint, self.trailingConstraint, self.bottomConstraint].compactMap { $0 })
         }
 
         /// Add multiple views (arranged) to this section (chainable)
@@ -860,11 +867,11 @@ open class STGradientNavigationBar: UIView {
 
     private let gradientLayer = CAGradientLayer()
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setupGradient()
     }
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setupGradient()
     }
@@ -880,16 +887,16 @@ open class STGradientNavigationBar: UIView {
         self.gradientLayer.colors = [self.startColor.cgColor, self.endColor.cgColor]
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         self.gradientLayer.frame = self.bounds
     }
 
-    public override var intrinsicContentSize: CGSize {
+    override public var intrinsicContentSize: CGSize {
         return CGSize(width: UIView.noIntrinsicMetric, height: self.height)
     }
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override open func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.updateGradientColors()

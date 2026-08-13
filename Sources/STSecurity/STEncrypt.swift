@@ -5,10 +5,10 @@
 //  Created by 寒江孤影 on 2018/12/22.
 //
 
-import Security
-import Foundation
-import CryptoKit
 import CommonCrypto
+import CryptoKit
+import Foundation
+import Security
 
 // MARK: - 哈希算法类型
 public enum STHashAlgorithm {
@@ -85,11 +85,11 @@ public extension String {
         return st_hmac(key: key, algorithm: .sha512)
     }
         
-    /// AES-256-GCM 加密
-    /// - Parameters:
-    ///   - key: 密钥字符串
-    ///   - nonce: 随机数（可选，自动生成）
-    /// - Returns: 加密结果，包含密文、随机数和认证标签
+    // AES-256-GCM 加密
+    // - Parameters:
+    //   - key: 密钥字符串
+    //   - nonce: 随机数（可选，自动生成）
+    // - Returns: 加密结果，包含密文、随机数和认证标签
     func st_encryptAES256GCM(key: String, nonce: AES.GCM.Nonce? = nil) throws -> (ciphertext: Data, nonce: AES.GCM.Nonce, tag: Data) {
         let keyData = Data(key.utf8)
         guard keyData.count == 32 else {
@@ -201,11 +201,11 @@ public extension Data {
         }
     }
         
-    /// AES-256-GCM 加密
-    /// - Parameters:
-    ///   - key: 密钥数据
-    ///   - nonce: 随机数（可选，自动生成）
-    /// - Returns: 加密结果，包含密文、随机数和认证标签
+    // AES-256-GCM 加密
+    // - Parameters:
+    //   - key: 密钥数据
+    //   - nonce: 随机数（可选，自动生成）
+    // - Returns: 加密结果，包含密文、随机数和认证标签
     func st_encryptAES256GCM(key: Data, nonce: AES.GCM.Nonce? = nil) throws -> (ciphertext: Data, nonce: AES.GCM.Nonce, tag: Data) {
         guard key.count == 32 else {
             throw STCryptoError.invalidKey
@@ -280,7 +280,7 @@ public extension Data {
 }
 
 // MARK: - 加密工具类
-public struct STEncryptionUtils {
+public enum STEncryptionUtils {
     
     /// 生成随机密钥
     /// - Parameter length: 密钥长度（字节）

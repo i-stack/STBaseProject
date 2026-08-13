@@ -121,7 +121,7 @@ open class STBaseViewController: UIViewController {
         }
     }
 
-    open override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         self.setupNavigationBar()
         self.setupAppearanceObservation()
@@ -130,7 +130,7 @@ open class STBaseViewController: UIViewController {
         self.st_updateLocalizedTexts()
     }
 
-    open override func viewWillAppear(_ animated: Bool) {
+    override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if let nav = self.navigationController,
            nav.isNavigationBarHidden != self.prefersSystemNavigationBarHidden {
@@ -138,7 +138,7 @@ open class STBaseViewController: UIViewController {
         }
     }
 
-    open override func viewDidLayoutSubviews() {
+    override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if self.view.subviews.last !== self.navigationBarView {
             self.view.bringSubviewToFront(self.navigationBarView)
@@ -316,7 +316,7 @@ open class STBaseViewController: UIViewController {
     /// 外观变化回调，子类重写以自定义颜色处理逻辑
     open func st_appearanceDidChange(resolvedStyle: UIUserInterfaceStyle) {}
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override open func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         guard STAppearanceManager.shared.currentMode == .system else { return }
 
@@ -487,8 +487,8 @@ open class STBaseViewController: UIViewController {
 
     @objc open func onRightBtnTap() {}
 
-    open override var preferredStatusBarStyle: UIStatusBarStyle { self.statusBarStyle }
-    open override var prefersStatusBarHidden: Bool { self.statusBarHidden }
+    override open var preferredStatusBarStyle: UIStatusBarStyle { self.statusBarStyle }
+    override open var prefersStatusBarHidden: Bool { self.statusBarHidden }
 }
 
 extension STBaseViewController {

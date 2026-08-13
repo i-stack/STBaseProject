@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - 混合 TabBar 支持
 /// 支持系统 UITabBarItem 和自定义 STTabBarItemModel 混用的工具类
-public class STTabBarMixedSupport {
+public enum STTabBarMixedSupport {
     
     /// 混合 TabBar Item 类型
     public enum MixedTabBarItem {
@@ -46,10 +46,8 @@ public class STTabBarMixedSupport {
         tabBarController.setViewControllers(viewControllers, animated: false)
         
         // 如果有系统 TabBar Item，设置到对应的 ViewController
-        for (index, systemItem) in systemItems.enumerated() {
-            if index < viewControllers.count {
-                viewControllers[index].tabBarItem = systemItem
-            }
+        for (index, systemItem) in systemItems.enumerated() where index < viewControllers.count {
+            viewControllers[index].tabBarItem = systemItem
         }
         
         if !customItems.isEmpty {
@@ -122,10 +120,8 @@ public extension STCustomTabBarController {
         
         self.setViewControllers(viewControllers, animated: false)
         
-        for (index, systemItem) in systemItems.enumerated() {
-            if index < viewControllers.count {
-                viewControllers[index].tabBarItem = systemItem
-            }
+        for (index, systemItem) in systemItems.enumerated() where index < viewControllers.count {
+            viewControllers[index].tabBarItem = systemItem
         }
         
         if !customItems.isEmpty {

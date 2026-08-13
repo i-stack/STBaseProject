@@ -144,14 +144,14 @@ public struct STHUDConfig {
 public class STHUD: NSObject {
 
     fileprivate var progressHUD: STProgressHUD?
-    public var theme: STHUDTheme = STHUDTheme()
-    public static let sharedHUD: STHUD = STHUD()
+    public var theme = STHUDTheme()
+    public static let sharedHUD = STHUD()
     public var defaultIconPosition: STHUDIconPosition = .top
-    public var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
+    public var hudMode = STProgressHUD.HudMode.customView
 
     private var completionHandler: (() -> Void)?
 
-    private override init() {
+    override private init() {
         super.init()
     }
     
@@ -266,7 +266,7 @@ public class STHUD: NSObject {
         defer { self.theme = previousTheme }
 
         let finalTitle = config.isLocalized ? config.title.localized : config.title
-        let finalDetailText = config.detailText != nil ? (config.isLocalized ? config.detailText!.localized : config.detailText!) : nil
+        let finalDetailText = config.detailText.map { config.isLocalized ? $0.localized : $0 }
         let keyWindow = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
             .first?.windows.first(where: \.isKeyWindow)
@@ -274,7 +274,7 @@ public class STHUD: NSObject {
             if self.progressHUD?.superview != nil {
                 self.progressHUD?.hide(animation: .fade)
             }
-            self.progressHUD = STProgressHUD.init(withView: window)
+            self.progressHUD = STProgressHUD(withView: window)
             self.configCommonProperty()
             if let hud = self.progressHUD { window.addSubview(hud) }
         }
@@ -445,7 +445,7 @@ public class STHUD: NSObject {
         if self.progressHUD?.superview != nil {
             self.progressHUD?.hide(animation: .fade)
         }
-        self.progressHUD = STProgressHUD.init(withView: showInView)
+        self.progressHUD = STProgressHUD(withView: showInView)
         self.configCommonProperty()
         if let hud = self.progressHUD { showInView.addSubview(hud) }
     }

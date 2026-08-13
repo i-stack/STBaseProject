@@ -5,9 +5,9 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
+import CommonCrypto
 import CryptoKit
 import Foundation
-import CommonCrypto
 
 // MARK: - 加密配置
 

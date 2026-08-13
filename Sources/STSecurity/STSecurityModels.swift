@@ -138,8 +138,8 @@ public enum STSecurityIssue: String, Codable {
 
 // MARK: - 安全严重程度
 public enum STSecuritySeverity: String, Codable {
-    case low = "low"
-    case medium = "medium"
-    case high = "high"
-    case critical = "critical"
+    case low
+    case medium
+    case high
+    case critical
 }

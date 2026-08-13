@@ -138,14 +138,14 @@ open class STLogView: UIView {
         NotificationCenter.default.removeObserver(self)
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.configUI()
         self.setupNotifications()
         self.loadInitialLogs()
     }
 
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.configUI()
         self.setupNotifications()
@@ -161,7 +161,7 @@ open class STLogView: UIView {
         self.updateLiquidGlassBackground()
     }
     
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.st_updateLiquidGlassCornerRadius()
     }

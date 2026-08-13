@@ -42,7 +42,7 @@ open class STBaseModel: NSObject {
         STLog("dealloc: \(String(describing: type(of: self)))", level: .debug)
     }
 
-    public required override init() {
+    override public required init() {
         super.init()
     }
 
@@ -72,16 +72,16 @@ open class STBaseModel: NSObject {
         self.st_update(from: dictionary)
     }
 
-    open override func value(forUndefinedKey key: String) -> Any? {
+    override open func value(forUndefinedKey key: String) -> Any? {
         STLog("Key = \(key) isValueForUndefinedKey", level: .warning)
         return nil
     }
 
-    open override class func setValue(_ value: Any?, forUndefinedKey key: String) {
+    override open class func setValue(_ value: Any?, forUndefinedKey key: String) {
         STLog("Key = \(key) isUndefinedKey", level: .warning)
     }
 
-    open override func setValue(_ value: Any?, forUndefinedKey key: String) {
+    override open func setValue(_ value: Any?, forUndefinedKey key: String) {
         STLog("Key = \(key) isUndefinedKey", level: .warning)
     }
 
@@ -492,7 +492,7 @@ open class STBaseModel: NSObject {
         }
     }
 
-    open override var description: String {
+    override open var description: String {
         if self.st_isFlexibleMode {
             let className = String(describing: type(of: self))
             let keys = self.st_getAllKeys()
@@ -518,7 +518,7 @@ open class STBaseModel: NSObject {
     }
 
     /// 模型调试描述
-    open override var debugDescription: String {
+    override open var debugDescription: String {
         return description
     }
 
@@ -586,13 +586,13 @@ open class STBaseModel: NSObject {
         }
     }
 
-    open override func isEqual(_ object: Any?) -> Bool {
+    override open func isEqual(_ object: Any?) -> Bool {
         guard let other = object as? STBaseModel else { return false }
         guard type(of: self) == type(of: other) else { return false }
         return self.normalizedDictionary().isEqual(other.normalizedDictionary())
     }
 
-    open override var hash: Int {
+    override open var hash: Int {
         return self.normalizedDictionary().hash
     }
 
@@ -691,7 +691,7 @@ public struct STCodingKeys: CodingKey {
 
 // MARK: - 属性类型解析（用于 KVC 类型安全写入）
 /// 由 `property_getAttributes` 解析出的、与 KVC 写入兼容性相关的属性类型描述。
-fileprivate struct STPropertyType {
+private struct STPropertyType {
     enum Kind {
         case object(className: String?)         // @"NSString" / @"NSArray<...>" / @ (id)
         case block                              // @?
@@ -707,11 +707,9 @@ fileprivate struct STPropertyType {
         // attributes 形如：T@"NSString",&,N,V_name
         // 第一段以 'T' 开头，描述类型编码。
         var typeEncoding = ""
-        for component in attributes.split(separator: ",") {
-            if component.first == "T" {
-                typeEncoding = String(component.dropFirst())
-                break
-            }
+        for component in attributes.split(separator: ",") where component.first == "T" {
+            typeEncoding = String(component.dropFirst())
+            break
         }
         self.kind = STPropertyType.parseKind(typeEncoding)
         switch self.kind {
@@ -766,7 +764,7 @@ fileprivate struct STPropertyType {
         }
     }
 
-    /// 把传入值尝试转换为属性接受的形式；不兼容时返回 nil。
+    // 把传入值尝试转换为属性接受的形式；不兼容时返回 nil。
     func coerce(_ value: Any) -> Any? {
         switch kind {
         case .object(let className):
@@ -799,7 +797,7 @@ fileprivate struct STPropertyType {
             return value
         }
     }
-
+    
     private static func coerceObject(_ value: Any, expectedClassName: String?) -> Any? {
         guard let className = expectedClassName else { return value }
         let resolvedClass: AnyClass? = NSClassFromString(className)

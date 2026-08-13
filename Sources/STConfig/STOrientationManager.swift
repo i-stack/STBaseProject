@@ -35,7 +35,7 @@ public final class STOrientationManager {
         let targetWindowScene = windowScene ?? self.activeWindowScene()
         if #available(iOS 16.0, *), let targetWindowScene {
             targetWindowScene.requestGeometryUpdate(.iOS(interfaceOrientations: orientations)) { error in
-                print("[STOrientationManager] requestGeometryUpdate failed: \(error.localizedDescription)")
+                STLog("[STOrientationManager] requestGeometryUpdate failed: \(error.localizedDescription)")
             }
         } else {
             UIDevice.current.setValue(self.preferredOrientation(for: orientations).rawValue, forKey: "orientation")

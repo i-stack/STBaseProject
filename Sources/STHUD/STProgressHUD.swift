@@ -5,9 +5,9 @@
 //  Created by 寒江孤影 on 2017/10/14.
 //
 
-import UIKit
-import Foundation
 import CoreGraphics
+import Foundation
+import UIKit
 
 public protocol STProgressHUDDelegate: AnyObject {
     func hudWasHidden(_ hud: STProgressHUD)
@@ -172,7 +172,6 @@ public class STProgressHUD: UIView {
 
     @available(*, deprecated, renamed: "show(addedToView:animation:)")
     @discardableResult
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public class func show(addedToView view: UIView, animated: Bool) -> STProgressHUD {
         return show(addedToView: view, animation: animated ? .fade : .none)
     }
@@ -187,7 +186,6 @@ public class STProgressHUD: UIView {
 
     @available(*, deprecated, renamed: "hide(addedToView:animation:)")
     @discardableResult
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public class func hide(addedToView view: UIView, animated: Bool) -> Bool {
         guard let hud = hudForView(view) else { return false }
         hud.removeFromSuperViewOnHide = true
@@ -205,7 +203,6 @@ public class STProgressHUD: UIView {
     }
 
     @available(*, deprecated, renamed: "show(animation:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func show(animated: Bool) {
         self.showCore(animated: animated)
     }
@@ -216,7 +213,6 @@ public class STProgressHUD: UIView {
     }
 
     @available(*, deprecated, renamed: "hide(animation:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func hide(animated: Bool) {
         self.hideCore(animated: animated)
     }
@@ -226,7 +222,6 @@ public class STProgressHUD: UIView {
     }
 
     @available(*, deprecated, renamed: "hide(animation:afterDelay:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func hide(animated: Bool, afterDelay delay: TimeInterval) {
         self.hideCore(animation: animated ? self.animationType.stHUDAnimation : .none, afterDelay: delay)
     }
@@ -286,7 +281,7 @@ public class STProgressHUD: UIView {
         self.hideDelayTimer = timer
     }
 
-    public override func updateConstraints() {
+    override public func updateConstraints() {
         let metrics: [String: Any] = ["margin": self.margin]
         var subviews: [UIView] = [self.topSpacer, self.label, self.detailsLabel, self.button, self.bottomSpacer]
         if let indicator = self.indicator {
@@ -352,7 +347,7 @@ public class STProgressHUD: UIView {
         super.updateConstraints()
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         if !self.needsUpdateConstraints() {
             self.updatePaddingConstraints()
         }
@@ -615,6 +610,7 @@ private extension STProgressHUD {
 
     func unregisterFromNotifications() {
         #if !os(tvOS)
+        // 与 registerForNotifications() 配对的注销方法，观察者生命周期由注册/注销配对管理。
         NotificationCenter.default.removeObserver(self)
         #endif
     }
@@ -700,7 +696,7 @@ public class STProgressHUDBackgroundView: UIView {
         self.updateForBackgroundStyle()
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.isOpaque = false
         self.style = .blur
@@ -709,7 +705,7 @@ public class STProgressHUDBackgroundView: UIView {
         self.updateForBackgroundStyle()
     }
 
-    public override var intrinsicContentSize: CGSize { .zero }
+    override public var intrinsicContentSize: CGSize { .zero }
 
     private func updateForBackgroundStyle() {
         if self.style == .liquidGlass {

@@ -13,7 +13,6 @@ public enum STAlertStyle: Int, @unchecked Sendable {
 }
 
 // MARK: - 点击动作后是否自动关闭
-/// Auto-dismiss toggle for tap actions. Prefer this over the legacy `Bool` setter for clearer call-sites.
 public enum STAlertAutoDismiss: Equatable {
     case enabled
     case disabled
@@ -47,7 +46,7 @@ public struct STAlertActionItem {
 }
 
 // MARK: - 布局常量
-private struct STAlertLayoutConstant {
+private enum STAlertLayoutConstant {
     static let alertWidth: CGFloat = 270
     static let buttonHeight: CGFloat = 44
     static let separatorHeight: CGFloat = 0.5
@@ -63,8 +62,8 @@ public enum STAlertBtnClickType {
 }
 
 public struct STAlertInfo {
-    var title: TextInfo = TextInfo()
-    var message: TextInfo = TextInfo()
+    var title = TextInfo()
+    var message = TextInfo()
     var style: STAlertStyle = .alert
     var buttonActions: [Action] = []
     var buttonHandlers: [(Bool, String) -> Void] = []
@@ -92,9 +91,9 @@ public struct STAlertInfo {
 open class STAlertController: UIViewController {
     
     private var isPresented: Bool = false
-    private var newConstraint: NSLayoutConstraint!
-    private var backgroundColor: UIColor = UIColor.white
-    private var alertInfo: STAlertInfo = STAlertInfo()
+    private var newConstraint: NSLayoutConstraint?
+    private var backgroundColor = UIColor.white
+    private var alertInfo = STAlertInfo()
     private var actionItems: [STAlertActionItem] = []
     private var autoDismissOnAction: Bool = true
     
@@ -129,21 +128,17 @@ open class STAlertController: UIViewController {
         self.alertInfo = info
     }
     
-    open override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-    
-    open override func viewWillAppear(_ animated: Bool) {
+    override open func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.modalPresentationStyle = .overFullScreen
     }
     
-    open override func viewDidAppear(_ animated: Bool) {
+    override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.isPresented = true
     }
     
-    open override func viewWillDisappear(_ animated: Bool) {
+    override open func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.isPresented = false
     }
@@ -168,7 +163,6 @@ open class STAlertController: UIViewController {
         self.messageLabel.text = text
     }
     
-
     /// 推荐的新接口：添加统一按钮模型
     public func add(item: STAlertActionItem) {
         self.actionItems.append(item)
@@ -190,7 +184,6 @@ open class STAlertController: UIViewController {
 
     /// 是否在点击动作后自动关闭，默认 true
     @available(*, deprecated, renamed: "setAutoDismiss(_:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func setAutoDismissOnAction(_ enabled: Bool) {
         self.autoDismissOnAction = enabled
     }
@@ -239,53 +232,53 @@ open class STAlertController: UIViewController {
 
     private func configCustomAlertView() {
         self.view.addSubview(self.alertView)
-        self.newConstraint = NSLayoutConstraint.init(item: self.alertView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 180)
+        self.newConstraint = NSLayoutConstraint(item: self.alertView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 180)
         if self.alertInfo.style == .alert {
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.alertView, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.alertView, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.alertView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.alertWidth),
+                NSLayoutConstraint(item: self.alertView, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.alertView, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.alertView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.alertWidth),
                 self.newConstraint
-            ])
+            ].compactMap { $0 })
         } else {
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.alertView, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.alertView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.alertView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.alertWidth),
+                NSLayoutConstraint(item: self.alertView, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.alertView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.alertView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.alertWidth),
                 self.newConstraint
-            ])
+            ].compactMap { $0 })
         }
         
-        if self.alertInfo.title.text != "" && self.alertInfo.message.text != "" {
+        if !self.alertInfo.title.text.isEmpty && !self.alertInfo.message.text.isEmpty {
             self.titleLabel.text = self.alertInfo.title.text
             self.messageLabel.text = self.alertInfo.message.text
             self.alertView.addSubview(self.titleLabel)
             self.alertView.addSubview(self.messageLabel)
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.titleLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: STAlertLayoutConstant.contentTop),
-                NSLayoutConstraint.init(item: self.titleLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
-                NSLayoutConstraint.init(item: self.titleLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.titleLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: STAlertLayoutConstant.contentTop),
+                NSLayoutConstraint(item: self.titleLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.titleLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal)
             ])
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.messageLabel, attribute: .top, relatedBy: .equal, toItem: self.titleLabel, attribute: .bottom, multiplier: 1, constant: STAlertLayoutConstant.titleMessageSpacing),
-                NSLayoutConstraint.init(item: self.messageLabel, attribute: .left, relatedBy: .equal, toItem: self.titleLabel, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
-                NSLayoutConstraint.init(item: self.messageLabel, attribute: .right, relatedBy: .equal, toItem: self.titleLabel, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.messageLabel, attribute: .top, relatedBy: .equal, toItem: self.titleLabel, attribute: .bottom, multiplier: 1, constant: STAlertLayoutConstant.titleMessageSpacing),
+                NSLayoutConstraint(item: self.messageLabel, attribute: .left, relatedBy: .equal, toItem: self.titleLabel, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.messageLabel, attribute: .right, relatedBy: .equal, toItem: self.titleLabel, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal)
             ])
-        } else if self.alertInfo.title.text != "" && self.alertInfo.message.text == "" {
+        } else if !self.alertInfo.title.text.isEmpty && self.alertInfo.message.text.isEmpty {
             self.titleLabel.text = self.alertInfo.title.text
             self.alertView.addSubview(self.titleLabel)
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.titleLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: STAlertLayoutConstant.contentTop),
-                NSLayoutConstraint.init(item: self.titleLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
-                NSLayoutConstraint.init(item: self.titleLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.titleLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: STAlertLayoutConstant.contentTop),
+                NSLayoutConstraint(item: self.titleLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.titleLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal)
             ])
-        } else if self.alertInfo.title.text == "" && self.alertInfo.message.text != "" {
+        } else if self.alertInfo.title.text.isEmpty && !self.alertInfo.message.text.isEmpty {
             self.messageLabel.text = self.alertInfo.message.text
             self.alertView.addSubview(self.messageLabel)
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.messageLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: STAlertLayoutConstant.contentTop),
-                NSLayoutConstraint.init(item: self.messageLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
-                NSLayoutConstraint.init(item: self.messageLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.messageLabel, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .top, multiplier: 1, constant: STAlertLayoutConstant.contentTop),
+                NSLayoutConstraint(item: self.messageLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
+                NSLayoutConstraint(item: self.messageLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal)
             ])
         }
         self.configAlertBtn()
@@ -301,7 +294,7 @@ open class STAlertController: UIViewController {
             }
             return
         }
-        // 兼容旧逻辑
+
         if self.alertInfo.buttonHandlers.count == 1 {
             if let handler = self.alertInfo.buttonHandlers.first {
                 handler(true, sender.titleLabel?.text ?? "")
@@ -346,16 +339,16 @@ open class STAlertController: UIViewController {
             btn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(btn)
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: -STAlertLayoutConstant.buttonHeight),
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.separatorHeight)
+                NSLayoutConstraint(item: self.lineImageH, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: -STAlertLayoutConstant.buttonHeight),
+                NSLayoutConstraint(item: self.lineImageH, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.lineImageH, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.lineImageH, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.separatorHeight)
             ])
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: btn, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .bottom, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: btn, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: btn, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: btn, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: btn, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: btn, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: btn, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: btn, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0)
             ])
         } else if count == 2 {
             self.alertView.addSubview(self.lineImageH)
@@ -401,35 +394,35 @@ open class STAlertController: UIViewController {
             rightBtn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(rightBtn)
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: -STAlertLayoutConstant.buttonHeight),
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.lineImageH, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.separatorHeight)
+                NSLayoutConstraint(item: self.lineImageH, attribute: .top, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: -STAlertLayoutConstant.buttonHeight),
+                NSLayoutConstraint(item: self.lineImageH, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.lineImageH, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.lineImageH, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.separatorHeight)
             ])
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: self.lineImageV, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .top, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.lineImageV, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.lineImageV, attribute: .centerX, relatedBy: .equal, toItem: self.alertView, attribute: .centerX, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: self.lineImageV, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.separatorHeight)
+                NSLayoutConstraint(item: self.lineImageV, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .top, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.lineImageV, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.lineImageV, attribute: .centerX, relatedBy: .equal, toItem: self.alertView, attribute: .centerX, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: self.lineImageV, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.separatorHeight)
             ])
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: leftBtn, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .top, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: leftBtn, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: leftBtn, attribute: .right, relatedBy: .equal, toItem: self.lineImageV, attribute: .left, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: leftBtn, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: leftBtn, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .top, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: leftBtn, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: leftBtn, attribute: .right, relatedBy: .equal, toItem: self.lineImageV, attribute: .left, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: leftBtn, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0)
             ])
             self.view.addConstraints([
-                NSLayoutConstraint.init(item: rightBtn, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .bottom, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: rightBtn, attribute: .left, relatedBy: .equal, toItem: self.lineImageV, attribute: .right, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: rightBtn, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
-                NSLayoutConstraint.init(item: rightBtn, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: rightBtn, attribute: .top, relatedBy: .equal, toItem: self.lineImageH, attribute: .bottom, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: rightBtn, attribute: .left, relatedBy: .equal, toItem: self.lineImageV, attribute: .right, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: rightBtn, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: 0),
+                NSLayoutConstraint(item: rightBtn, attribute: .bottom, relatedBy: .equal, toItem: self.alertView, attribute: .bottom, multiplier: 1, constant: 0)
             ])
         }
         self.view.layoutIfNeeded()
-        if self.alertInfo.message.text != "" {
-            self.newConstraint.constant = self.messageLabel.frame.maxY + 54
-        } else if self.alertInfo.title.text != "" {
-            self.newConstraint.constant = self.titleLabel.frame.maxY + 54
+        if !self.alertInfo.message.text.isEmpty {
+            self.newConstraint?.constant = self.messageLabel.frame.maxY + 54
+        } else if !self.alertInfo.title.text.isEmpty {
+            self.newConstraint?.constant = self.titleLabel.frame.maxY + 54
         }
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
@@ -511,7 +504,6 @@ open class STAlertController: UIViewController {
 
 // MARK: - 统一弹窗入口（系统 / 自定义）
 public extension STAlertController {
-    /// 显示系统弹窗（UIAlertController）
     static func st_showSystemAlert(on presenter: UIViewController,
                                    title: String?,
                                    message: String?,
@@ -520,7 +512,6 @@ public extension STAlertController {
         let style: UIAlertController.Style = (preferredStyle == .actionSheet) ? .actionSheet : .alert
         let alert = UIAlertController(title: title, message: message, preferredStyle: style)
         
-        // 可选：设置富文本标题/消息
         if let title = title, !title.isEmpty {
             let attributed = NSAttributedString(string: title, attributes: [
                 .font: UIFont.st_preferredFont(ofSize: 17, forTextStyle: .headline, weight: .medium)

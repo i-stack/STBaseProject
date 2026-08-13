@@ -40,7 +40,7 @@ public struct STSupportedLanguage {
                 .map { STSupportedLanguage(languageCode: String($0.dropLast(6))) }
                 .sorted { $0.displayName < $1.displayName }
         } catch {
-            print("⚠️ STLocalizationManager: 无法读取语言列表: \(error)")
+            STLog("⚠️ STLocalizationManager: 无法读取语言列表: \(error)")
             return []
         }
     }
@@ -56,7 +56,7 @@ private extension Bundle {
     static let st_installSwizzle: Void = {
         guard
             let original = class_getInstanceMethod(Bundle.self, #selector(Bundle.localizedString(forKey:value:table:))),
-            let patched   = class_getInstanceMethod(Bundle.self, #selector(Bundle.st_patched_localizedString(forKey:value:table:)))
+            let patched = class_getInstanceMethod(Bundle.self, #selector(Bundle.st_patched_localizedString(forKey:value:table:)))
         else { return }
         method_exchangeImplementations(original, patched)
     }()
@@ -95,7 +95,7 @@ public extension Bundle {
     static func st_setCustomLanguage(_ languageCode: String) {
         guard let path = Bundle.main.path(forResource: languageCode, ofType: "lproj"),
               let bundle = Bundle(path: path) else {
-            print("⚠️ STLocalizationManager: 未找到语言包 \(languageCode)")
+            STLog("⚠️ STLocalizationManager: 未找到语言包 \(languageCode)")
             return
         }
         customLanguageBundle = bundle

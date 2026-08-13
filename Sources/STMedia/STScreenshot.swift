@@ -10,7 +10,7 @@ import UIKit
 public final class STScreenshot: NSObject {
 
     @MainActor
-    private class func captureData() -> Data {
+    private static func captureData() -> Data {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
             return Data()
         }

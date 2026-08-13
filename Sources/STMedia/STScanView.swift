@@ -26,12 +26,12 @@ public struct STScanViewConfiguration {
     public var scanLineHeight: CGFloat = 5.0
     public var maskAlpha: CGFloat = 0.6
     public var borderColor: UIColor = .white
-    public var cornerColor: UIColor = UIColor(red: 0.110, green: 0.659, blue: 0.894, alpha: 1.0)
-    public var cornerSize: CGSize = CGSize(width: 15.0, height: 15.0)
+    public var cornerColor = UIColor(red: 0.110, green: 0.659, blue: 0.894, alpha: 1.0)
+    public var cornerSize = CGSize(width: 15.0, height: 15.0)
     public var cornerLineWidth: CGFloat = 4.0
     public var tipText: String = "将二维码放入框内,即可自动扫描"
     public var tipTextColor: UIColor = .white
-    public var tipTextFont: UIFont = UIFont.systemFont(ofSize: 13)
+    public var tipTextFont = UIFont.systemFont(ofSize: 13)
     public var animationDuration: TimeInterval = 1.5
     public var animationInterval: TimeInterval = 0.3
     public var automaticSafeAreaAdaptation: Bool = true
@@ -75,7 +75,7 @@ public class STScanView: UIView {
         }
     }
 
-    public var configuration: STScanViewConfiguration = STScanViewConfiguration() {
+    public var configuration = STScanViewConfiguration() {
         didSet { updateConfiguration() }
     }
 
@@ -97,23 +97,23 @@ public class STScanView: UIView {
         stopAnimation()
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
     }
 
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupView()
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         updateScanLineFrame()
         updateTipLabelFrame()
     }
 
-    public override func safeAreaInsetsDidChange() {
+    override public func safeAreaInsetsDidChange() {
         super.safeAreaInsetsDidChange()
         if self.configuration.automaticSafeAreaAdaptation {
             setNeedsDisplay()
@@ -275,20 +275,20 @@ public class STScanView: UIView {
                 var newFrame = scanLineView.frame
                 newFrame.origin.y = endY
                 scanLineView.frame = newFrame
-            }
-        ) { [weak self] _ in
-            guard let self, !self.isAnimationStopped else { return }
-            UIView.animate(withDuration: 0.2, animations: {
-                scanLineView.alpha = 0
-            }) { _ in
-                guard !self.isAnimationStopped else { return }
-                let item = DispatchWorkItem { [weak self] in
-                    self?.startAnimation()
-                }
-                self.animationStartWorkItem = item
-                DispatchQueue.main.asyncAfter(deadline: .now() + self.configuration.animationInterval, execute: item)
-            }
-        }
+            },
+            completion: { [weak self] _ in
+                guard let self, !self.isAnimationStopped else { return }
+                UIView.animate(withDuration: 0.2, animations: {
+                    scanLineView.alpha = 0
+                }, completion: { _ in
+                    guard !self.isAnimationStopped else { return }
+                    let item = DispatchWorkItem { [weak self] in
+                        self?.startAnimation()
+                    }
+                    self.animationStartWorkItem = item
+                    DispatchQueue.main.asyncAfter(deadline: .now() + self.configuration.animationInterval, execute: item)
+                })
+            })
     }
 
     private func stopAnimation() {
@@ -301,7 +301,7 @@ public class STScanView: UIView {
 
     // MARK: - Drawing
 
-    public override func draw(_ rect: CGRect) {
+    override public func draw(_ rect: CGRect) {
         super.draw(rect)
         drawScanRect()
     }
@@ -366,13 +366,13 @@ public class STScanView: UIView {
         let offset = lineWidth / 3.0
         let points: [(CGPoint, [(CGFloat, CGFloat)])] = [
             (CGPoint(x: scanRect.minX - offset, y: scanRect.minY - offset),
-             [(0, -lineWidth/2), (cornerSize.width, 0), (0, cornerSize.height)]),
+             [(0, -lineWidth / 2), (cornerSize.width, 0), (0, cornerSize.height)]),
             (CGPoint(x: scanRect.maxX + offset, y: scanRect.minY - offset),
-             [(0, -lineWidth/2), (-cornerSize.width, 0), (0, cornerSize.height)]),
+             [(0, -lineWidth / 2), (-cornerSize.width, 0), (0, cornerSize.height)]),
             (CGPoint(x: scanRect.minX - offset, y: scanRect.maxY + offset),
-             [(0, lineWidth/2), (cornerSize.width, 0), (0, -cornerSize.height)]),
+             [(0, lineWidth / 2), (cornerSize.width, 0), (0, -cornerSize.height)]),
             (CGPoint(x: scanRect.maxX + offset, y: scanRect.maxY + offset),
-             [(0, lineWidth/2), (-cornerSize.width, 0), (0, -cornerSize.height)])
+             [(0, lineWidth / 2), (-cornerSize.width, 0), (0, -cornerSize.height)])
         ]
         for (startPoint, offsets) in points {
             context.move(to: CGPoint(x: startPoint.x + offsets[0].0, y: startPoint.y + offsets[0].1))

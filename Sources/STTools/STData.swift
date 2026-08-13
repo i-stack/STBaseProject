@@ -401,7 +401,7 @@ public extension String {
 
 }
 
-public struct STDataUtils {
+public enum STDataUtils {
     /// 创建随机数据
     /// - Parameter length: 数据长度
     /// - Returns: 随机数据

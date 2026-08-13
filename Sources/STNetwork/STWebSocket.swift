@@ -5,9 +5,9 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
-import UIKit
-import Network
 import Foundation
+import Network
+import UIKit
 
 public actor STWebSocket {
 

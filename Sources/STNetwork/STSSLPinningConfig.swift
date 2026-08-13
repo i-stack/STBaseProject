@@ -5,9 +5,9 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
+import CryptoKit
 import Foundation
 import Security
-import CryptoKit
 
 public enum STSSLPinningConfigError: Error, LocalizedError {
     case invalidCertificateData

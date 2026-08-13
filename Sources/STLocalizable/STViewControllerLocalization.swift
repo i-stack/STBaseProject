@@ -61,4 +61,3 @@ public extension STBaseViewController {
         set { objc_setAssociatedObject(self, &st_navPromptKeyAssociation, newValue, .OBJC_ASSOCIATION_COPY_NONATOMIC) }
     }
 }
-

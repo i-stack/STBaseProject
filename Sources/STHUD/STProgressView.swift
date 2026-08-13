@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2017/10/14.
 //
 
-import UIKit
 import CoreGraphics
+import UIKit
 
 class STProgressView: UIView {
     var progress: Float = 0.0 {

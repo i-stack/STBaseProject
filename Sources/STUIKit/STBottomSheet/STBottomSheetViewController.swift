@@ -57,7 +57,25 @@ open class STBottomSheetViewController: UIViewController {
         return nil
     }
 
-    private var containerTopConstraint: NSLayoutConstraint!
+    private var containerTopConstraint: NSLayoutConstraint?
+
+    /// setupContentView() 建立的容器顶部约束；访问前确保视图已加载。
+    /// 公开入口（snapToPreferredHeight() 等）若在视图加载前被调用，直接以 0
+    /// 参与手势/动画距离判断会产生静默错误吸附，因此这里强制加载视图并校验不变量。
+    private var sheetTopConstraint: NSLayoutConstraint {
+        if let constraint = self.containerTopConstraint {
+            return constraint
+        }
+        // 视图尚未加载（公开入口在 loadView 前被调用）属正常状态：先强制加载视图，
+        // viewDidLoad 会调用 setupContentView() 建立约束。若加载后仍未建立，才是不变量破坏。
+        // 注意不能在加载前调用 assertionFailure()，否则 Debug 下会直接终止、跳过视图加载，
+        // 造成 Debug/Release 行为不一致。
+        _ = self.view
+        guard let constraint = self.containerTopConstraint else {
+            fatalError("STBottomSheetViewController: 视图加载后 containerTopConstraint 仍未建立，请检查 setupContentView()")
+        }
+        return constraint
+    }
 
     private var containerHeight: CGFloat {
         let height = self.view.bounds.height
@@ -91,29 +109,29 @@ open class STBottomSheetViewController: UIViewController {
     private let fullOffsetTolerance: CGFloat = 24
 
     private var isFullScreen: Bool {
-        return abs(self.containerTopConstraint.constant - self.fullOffset) < self.fullOffsetTolerance
+        return abs(self.sheetTopConstraint.constant - self.fullOffset) < self.fullOffsetTolerance
     }
 
-    open override func loadView() {
+    override open func loadView() {
         let rootView = STBottomSheetRootView()
         rootView.backgroundColor = .clear
         rootView.interactiveContentView = self.contentView
         self.view = rootView
     }
 
-    open override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .clear
         self.setupContentView()
         self.setupPanGesture()
         self.setupContent()
-        self.containerTopConstraint.constant = self.hiddenOffset
+        self.sheetTopConstraint.constant = self.hiddenOffset
     }
 
-    open override func viewDidLayoutSubviews() {
+    override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if self.containerTopConstraint.constant > self.hiddenOffset {
-            self.containerTopConstraint.constant = self.hiddenOffset
+        if self.sheetTopConstraint.constant > self.hiddenOffset {
+            self.sheetTopConstraint.constant = self.hiddenOffset
         }
     }
 
@@ -128,7 +146,7 @@ open class STBottomSheetViewController: UIViewController {
     }
 
     public func bottomSheetScrollViewDidScroll(_ scrollView: UIScrollView) {
-        let currentOffset = self.containerTopConstraint.constant
+        let currentOffset = self.sheetTopConstraint.constant
         if currentOffset > self.fullOffset + self.fullOffsetTolerance && scrollView.contentOffset.y > 0 {
             self.logScrollDiagnostics(
                 event: "lockScrollBeforeFull",
@@ -149,7 +167,7 @@ open class STBottomSheetViewController: UIViewController {
                 // 无主动触摸时（isDragging=false）说明是上一次手势的橡皮筋惯性，
                 // 同样不移动 sheet，只重置 contentOffset 吸收回弹。
                 if !self.isSheetPanning && scrollView.isDragging {
-                    self.containerTopConstraint.constant -= scrollView.contentOffset.y
+                    self.sheetTopConstraint.constant -= scrollView.contentOffset.y
                 }
                 scrollView.contentOffset = .zero
             } else {
@@ -158,7 +176,7 @@ open class STBottomSheetViewController: UIViewController {
                 // callback was triggered by our own reset inside pullDownFromTop —
                 // snapping here would undo that movement and create an oscillation.
                 if currentOffset > self.fullOffset && scrollView.contentOffset.y > 0 {
-                    self.containerTopConstraint.constant = self.fullOffset
+                    self.sheetTopConstraint.constant = self.fullOffset
                 }
                 self.logScrollDiagnostics(
                     event: "scroll",
@@ -172,18 +190,18 @@ open class STBottomSheetViewController: UIViewController {
 
     func prepareForPresentationTransition() {
         self.view.layoutIfNeeded()
-        self.containerTopConstraint.constant = self.hiddenOffset
+        self.sheetTopConstraint.constant = self.hiddenOffset
         self.view.layoutIfNeeded()
     }
 
     func finishPresentationWithoutAnimation() {
         self.view.layoutIfNeeded()
-        self.containerTopConstraint.constant = self.partialOffset
+        self.sheetTopConstraint.constant = self.partialOffset
         self.view.layoutIfNeeded()
     }
 
     func animatePresentationTransition(duration: TimeInterval, completion: @escaping () -> Void) {
-        self.containerTopConstraint.constant = self.partialOffset
+        self.sheetTopConstraint.constant = self.partialOffset
         UIView.animate(
             withDuration: duration,
             delay: 0,
@@ -196,7 +214,7 @@ open class STBottomSheetViewController: UIViewController {
     }
 
     func animateDismissalTransition(duration: TimeInterval, completion: @escaping () -> Void) {
-        self.containerTopConstraint.constant = self.hiddenOffset
+        self.sheetTopConstraint.constant = self.hiddenOffset
         UIView.animate(withDuration: duration, delay: 0, options: .curveEaseIn, animations: {
             self.view.layoutIfNeeded()
         }, completion: { _ in
@@ -215,14 +233,14 @@ open class STBottomSheetViewController: UIViewController {
             self.contentView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.contentView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             bottomConstraint
-        ])
+        ].compactMap { $0 })
         
         self.contentView.addSubview(self.indicatorView)
         NSLayoutConstraint.activate([
             self.indicatorView.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor),
             self.indicatorView.widthAnchor.constraint(equalToConstant: 38),
             self.indicatorView.heightAnchor.constraint(equalToConstant: 5),
-            self.indicatorView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 8),
+            self.indicatorView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 8)
         ])
         
         self.view.bringSubviewToFront(self.indicatorView)
@@ -256,15 +274,18 @@ open class STBottomSheetViewController: UIViewController {
                 gesture.setTranslation(.zero, in: self.view)
                 return
             }
-            let newConstant = self.containerTopConstraint.constant + translation.y
+            let newConstant = self.sheetTopConstraint.constant + translation.y
             if newConstant >= self.fullOffset {
-                self.containerTopConstraint.constant = newConstant
+                self.sheetTopConstraint.constant = newConstant
                 // Prevent scroll view rubber-band from doubling the sheet movement
                 if newConstant > self.fullOffset {
                     self.contentScrollView?.contentOffset = .zero
                 }
                 self.logDiagnostics(
-                    "sheetOffsetChanged translationY=\(self.diagnosticValue(translation.y)) velocityY=\(self.diagnosticValue(velocity.y)) newOffset=\(self.diagnosticValue(newConstant)) fullOffset=\(self.diagnosticValue(self.fullOffset))"
+                    "sheetOffsetChanged translationY=\(self.diagnosticValue(translation.y)) "
+                        + "velocityY=\(self.diagnosticValue(velocity.y)) "
+                        + "newOffset=\(self.diagnosticValue(newConstant)) "
+                        + "fullOffset=\(self.diagnosticValue(self.fullOffset))"
                 )
                 gesture.setTranslation(.zero, in: self.view)
             }
@@ -280,9 +301,13 @@ open class STBottomSheetViewController: UIViewController {
     }
 
     private func finishPanGesture(velocity: CGPoint) {
-        let currentOffset = self.containerTopConstraint.constant
+        let currentOffset = self.sheetTopConstraint.constant
         self.logDiagnostics(
-            "finishPan velocityY=\(self.diagnosticValue(velocity.y)) currentOffset=\(self.diagnosticValue(currentOffset)) fullOffset=\(self.diagnosticValue(self.fullOffset)) partialOffset=\(self.diagnosticValue(self.partialOffset)) hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
+            "finishPan velocityY=\(self.diagnosticValue(velocity.y)) "
+                + "currentOffset=\(self.diagnosticValue(currentOffset)) "
+                + "fullOffset=\(self.diagnosticValue(self.fullOffset)) "
+                + "partialOffset=\(self.diagnosticValue(self.partialOffset)) "
+                + "hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
         )
         if velocity.y > 600 {
             if currentOffset < self.partialOffset - 50 {
@@ -321,10 +346,13 @@ open class STBottomSheetViewController: UIViewController {
     }
 
     private func animateToOffset(_ offset: CGFloat, velocity: CGFloat = 0) {
-        let distance = abs(offset - self.containerTopConstraint.constant)
-        self.containerTopConstraint.constant = offset
+        let distance = abs(offset - self.sheetTopConstraint.constant)
+        self.sheetTopConstraint.constant = offset
         self.logDiagnostics(
-            "animateToOffset target=\(self.diagnosticValue(offset)) fullOffset=\(self.diagnosticValue(self.fullOffset)) partialOffset=\(self.diagnosticValue(self.partialOffset)) hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
+            "animateToOffset target=\(self.diagnosticValue(offset)) "
+                + "fullOffset=\(self.diagnosticValue(self.fullOffset)) "
+                + "partialOffset=\(self.diagnosticValue(self.partialOffset)) "
+                + "hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
         )
         // 将手势速度归一化为 spring initialVelocity（单位：总位移/秒），上限 30 防止过度弹跳
         let springVelocity: CGFloat = distance > 1 ? min(abs(velocity) / distance, 30) : 0
@@ -440,7 +468,7 @@ open class STBottomSheetViewController: UIViewController {
             event,
             gesture.state.rawValue,
             "\(self.isFullScreen)",
-            self.diagnosticValue(self.containerTopConstraint.constant),
+            self.diagnosticValue(self.sheetTopConstraint.constant),
             self.diagnosticValue(self.fullOffset),
             self.diagnosticValue(translation.y),
             self.diagnosticValue(velocity.y),
@@ -502,11 +530,11 @@ public class STBottomSheetPresentationController: UIPresentationController {
         return view
     }()
 
-    public override var frameOfPresentedViewInContainerView: CGRect {
+    override public var frameOfPresentedViewInContainerView: CGRect {
         return self.containerView?.bounds ?? .zero
     }
 
-    public override func presentationTransitionWillBegin() {
+    override public func presentationTransitionWillBegin() {
         guard let containerView = self.containerView else { return }
         self.dimmingView.frame = containerView.bounds
         containerView.insertSubview(self.dimmingView, at: 0)
@@ -519,7 +547,7 @@ public class STBottomSheetPresentationController: UIPresentationController {
         })
     }
 
-    public override func dismissalTransitionWillBegin() {
+    override public func dismissalTransitionWillBegin() {
         guard let transitionCoordinator = self.presentedViewController.transitionCoordinator else {
             self.dimmingView.alpha = 0
             self.dimmingView.removeFromSuperview()
@@ -532,7 +560,7 @@ public class STBottomSheetPresentationController: UIPresentationController {
         })
     }
 
-    public override func presentationTransitionDidEnd(_ completed: Bool) {
+    override public func presentationTransitionDidEnd(_ completed: Bool) {
         super.presentationTransitionDidEnd(completed)
         if completed {
             (self.presentedViewController as? STBottomSheetViewController)?.finishPresentationWithoutAnimation()
@@ -541,7 +569,7 @@ public class STBottomSheetPresentationController: UIPresentationController {
         }
     }
 
-    public override func containerViewDidLayoutSubviews() {
+    override public func containerViewDidLayoutSubviews() {
         super.containerViewDidLayoutSubviews()
         self.dimmingView.frame = self.containerView?.bounds ?? .zero
         self.presentedView?.frame = self.frameOfPresentedViewInContainerView
@@ -627,7 +655,7 @@ public class STBottomSheetTransitionAnimator: NSObject, UIViewControllerAnimated
 
 public class STBottomSheetTransitionDelegate: NSObject, UIViewControllerTransitioningDelegate {
 
-    public override init() {
+    override public init() {
         super.init()
     }
 

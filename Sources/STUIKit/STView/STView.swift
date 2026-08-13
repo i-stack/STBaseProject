@@ -62,12 +62,12 @@ public struct STGradientConfig {
 open class STView: UIView {
     
     @IBInspectable open var cornerRadius: CGFloat {
+        get {
+            return self.layer.cornerRadius
+        }
         set {
             self.layer.cornerRadius = newValue
             self.st_updateLiquidGlassCornerRadius()
-        }
-        get {
-            return self.layer.cornerRadius
         }
     }
     
@@ -81,21 +81,21 @@ open class STView: UIView {
     }
     
     @IBInspectable open var borderWidth: CGFloat {
-        set {
-            self.layer.borderWidth = newValue > 0 ? newValue : 0
-        }
         get {
             return self.layer.borderWidth
+        }
+        set {
+            self.layer.borderWidth = newValue > 0 ? newValue : 0
         }
     }
     
     @IBInspectable open var borderColor: UIColor? {
-        set {
-            self.layer.borderColor = newValue?.cgColor
-        }
         get {
             guard let color = self.layer.borderColor else { return nil }
             return UIColor(cgColor: color)
+        }
+        set {
+            self.layer.borderColor = newValue?.cgColor
         }
     }
     
@@ -127,7 +127,7 @@ open class STView: UIView {
         }
     }
     
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.st_updateLiquidGlassCornerRadius()
     }
@@ -276,9 +276,9 @@ public extension UIView {
         alpha = 0
         UIView.animate(withDuration: duration, animations: {
             self.alpha = 1
-        }) { _ in
+        }, completion: { _ in
             completion?()
-        }
+        })
     }
     
     /// 淡出动画
@@ -288,9 +288,9 @@ public extension UIView {
     func st_fadeOut(duration: TimeInterval = 0.3, completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: duration, animations: {
             self.alpha = 0
-        }) { _ in
+        }, completion: { _ in
             completion?()
-        }
+        })
     }
     
     /// 缩放动画
@@ -301,9 +301,9 @@ public extension UIView {
     func st_scaleAnimation(scale: CGFloat, duration: TimeInterval = 0.3, completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: duration, animations: {
             self.transform = CGAffineTransform(scaleX: scale, y: scale)
-        }) { _ in
+        }, completion: { _ in
             completion?()
-        }
+        })
     }
     
     /// 弹性动画
@@ -314,13 +314,13 @@ public extension UIView {
     func st_springAnimation(scale: CGFloat = 1.1, duration: TimeInterval = 0.6, completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.8, options: [], animations: {
             self.transform = CGAffineTransform(scaleX: scale, y: scale)
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(withDuration: duration * 0.5, animations: {
                 self.transform = .identity
-            }) { _ in
+            }, completion: { _ in
                 completion?()
-            }
-        }
+            })
+        })
     }
     
     /// 震动动画
@@ -332,7 +332,7 @@ public extension UIView {
         let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
         animation.timingFunction = CAMediaTimingFunction(name: .linear)
         animation.duration = duration
-        animation.values = [-intensity, intensity, -intensity, intensity, -intensity/2, intensity/2, -intensity/4, intensity/4, 0]
+        animation.values = [-intensity, intensity, -intensity, intensity, -intensity / 2, intensity / 2, -intensity / 4, intensity / 4, 0]
         layer.add(animation, forKey: "shake")
         
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {

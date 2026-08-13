@@ -348,8 +348,8 @@ enum STSSEParser {
 
     static func parse(buffer: inout Data) -> [STServerSentEvent] {
         var events: [STServerSentEvent] = []
-        let lf = "\n\n".data(using: .utf8)!
-        let crlf = "\r\n\r\n".data(using: .utf8)!
+        let lf = Data("\n\n".utf8)
+        let crlf = Data("\r\n\r\n".utf8)
         while true {
             let a = buffer.range(of: lf)
             let b = buffer.range(of: crlf)

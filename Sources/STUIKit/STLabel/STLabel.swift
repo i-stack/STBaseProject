@@ -7,7 +7,7 @@
 
 import UIKit
 
-private struct STLabelLocalizationKey {
+private enum STLabelLocalizationKey {
     static var localizedTextKey: UInt8 = 0
 }
 
@@ -68,12 +68,12 @@ open class STLabel: UILabel, STLocalizable {
     }
     
     @IBInspectable open var cornerRadius: CGFloat {
+        get {
+            return layer.cornerRadius
+        }
         set {
             self.layer.cornerRadius = newValue
             self.st_updateLiquidGlassCornerRadius()
-        }
-        get {
-            return layer.cornerRadius
         }
     }
     
@@ -87,21 +87,21 @@ open class STLabel: UILabel, STLocalizable {
     }
     
     @IBInspectable open var borderWidth: CGFloat {
-        set {
-            self.layer.borderWidth = newValue > 0 ? newValue : 0
-        }
         get {
             return layer.borderWidth
+        }
+        set {
+            self.layer.borderWidth = newValue > 0 ? newValue : 0
         }
     }
     
     @IBInspectable open var borderColor: UIColor? {
-        set {
-            self.layer.borderColor = newValue?.cgColor
-        }
         get {
             guard let color = self.layer.borderColor else { return nil }
             return UIColor(cgColor: color)
+        }
+        set {
+            self.layer.borderColor = newValue?.cgColor
         }
     }
     
@@ -139,7 +139,7 @@ open class STLabel: UILabel, STLocalizable {
         self.adjustsFontForContentSizeCategory = true
     }
     
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.verticalAlignment = STLabelVerticalAlignment.middle
         self.adjustsFontForContentSizeCategory = true
@@ -152,7 +152,7 @@ open class STLabel: UILabel, STLocalizable {
         self.updateFontSize()
     }
     
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         self.st_updateLiquidGlassCornerRadius()
         if let glassView = self.subviews.first(where: { $0 is STLiquidGlassView }) {
@@ -164,19 +164,19 @@ open class STLabel: UILabel, STLocalizable {
         self.font = UIFont.st_systemFont(ofSize: self.font.pointSize)
     }
     
-    public override func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
+    override public func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
         // 考虑内边距调整边界
         let adjustedBounds = bounds.inset(by: contentEdgeInsets)
         return super.textRect(forBounds: adjustedBounds, limitedToNumberOfLines: numberOfLines)
     }
     
-    public override func draw(_ rect: CGRect) {
+    override public func draw(_ rect: CGRect) {
         // 考虑内边距调整绘制区域
         let adjustedRect = rect.inset(by: contentEdgeInsets)
         super.drawText(in: adjustedRect)
     }
         
-    public override var intrinsicContentSize: CGSize {
+    override public var intrinsicContentSize: CGSize {
         // 使用 super 的 intrinsicContentSize 来获取正确的文本尺寸
         let originalSize = super.intrinsicContentSize
         // 如果原始尺寸为零，尝试手动计算
@@ -198,7 +198,7 @@ open class STLabel: UILabel, STLocalizable {
                      height: originalSize.height + contentEdgeInsets.top + contentEdgeInsets.bottom)
     }
     
-    public override func sizeThatFits(_ size: CGSize) -> CGSize {
+    override public func sizeThatFits(_ size: CGSize) -> CGSize {
         // 如果可用空间小于内边距，返回最小尺寸
         let availableWidth = size.width - contentEdgeInsets.left - contentEdgeInsets.right
         let availableHeight = size.height - contentEdgeInsets.top - contentEdgeInsets.bottom

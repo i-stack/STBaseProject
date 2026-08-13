@@ -5,12 +5,12 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
-import UIKit
-import Network
-import Foundation
 import CryptoKit
+import Foundation
+import Network
+import UIKit
 
-public final class STParameterEncoder {
+public enum STParameterEncoder {
 
     public enum EncodingType {
         case url
@@ -21,8 +21,7 @@ public final class STParameterEncoder {
 
     public static func st_encodeURL(_ parameters: [String: Any]) -> String {
         var components: [(String, String)] = []
-        for key in parameters.keys.sorted(by: <) {
-            let value = parameters[key]!
+        for (key, value) in parameters.sorted(by: { $0.key < $1.key }) {
             components += st_queryComponents(fromKey: key, value: value)
         }
         return components.map { "\($0)=\($1)" }.joined(separator: "&")
@@ -127,7 +126,11 @@ open class STHTTPSession: NSObject {
     public let interceptor: STInterceptor?
     public let eventMonitor: STCompositeEventMonitor
 
-    private var urlSession: URLSession!
+    private let urlSessionConfiguration: URLSessionConfiguration
+    /// 底层 URLSession。init 中立即创建，避免 deinit 触发 lazy 初始化时把正在析构的
+    /// self 注册为新 session 的 delegate（生命周期逃逸）。使用 Optional 存储：
+    /// st_invalidate() 后置 nil，下次请求经 session 访问器惰性重建。
+    private var urlSession: URLSession?
     private let delegateQueue: OperationQueue
     private let stateLock = NSLock()
     private var requestsByTaskID: [Int: STRequest] = [:]
@@ -157,6 +160,7 @@ open class STHTTPSession: NSObject {
         eventMonitors: [STEventMonitor] = [],
         sslPinningConfig: STSSLPinningConfig = STSSLPinningConfig(enabled: false)
     ) {
+        self.urlSessionConfiguration = configuration
         self.defaultRequestConfig = defaultRequestConfig
         self.defaultRequestHeaders = defaultRequestHeaders
         self.interceptor = interceptor
@@ -178,11 +182,35 @@ open class STHTTPSession: NSObject {
         self.delegateQueue = queue
 
         super.init()
-        self.urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: self.delegateQueue)
+        self.urlSession = URLSession(configuration: self.urlSessionConfiguration, delegate: self, delegateQueue: self.delegateQueue)
     }
 
     deinit {
-        self.urlSession.invalidateAndCancel()
+        // 直接读取 Optional 存储，避免析构期触发 session 访问器的惰性重建。
+        self.urlSession?.invalidateAndCancel()
+    }
+
+    /// 返回当前可用的 URLSession；若已被 st_invalidate() 销毁则重建。
+    /// 读取/创建/赋值与 st_invalidate() 经 stateLock 互斥，避免并发首次重建
+    /// 产生多个 session，或取得刚被置空的旧 session。
+    private var session: URLSession {
+        self.withStateLock {
+            if let session = self.urlSession {
+                return session
+            }
+            let session = URLSession(configuration: self.urlSessionConfiguration, delegate: self, delegateQueue: self.delegateQueue)
+            self.urlSession = session
+            return session
+        }
+    }
+
+    /// 显式销毁底层 URLSession 并释放其对 self 的 delegate 强引用，
+    /// 打破 self ⇄ session 循环引用。调用后再次发起请求会重建一个新的 session。
+    public func st_invalidate() {
+        self.withStateLock {
+            self.urlSession?.invalidateAndCancel()
+            self.urlSession = nil
+        }
     }
 
     @discardableResult
@@ -371,7 +399,7 @@ open class STHTTPSession: NSObject {
         }
         request.urlRequest = adapted
 
-        let task = self.urlSession.dataTask(with: adapted)
+        let task = self.session.dataTask(with: adapted)
         request.task = task
         let restart: () -> Void = { [weak self] in
             Task { await self?.executeData(request, initial: initial, interceptor: interceptor, config: config) }
@@ -429,7 +457,7 @@ open class STHTTPSession: NSObject {
         }
         request.urlRequest = adapted
 
-        let task = self.urlSession.uploadTask(with: adapted, from: body)
+        let task = self.session.uploadTask(with: adapted, from: body)
         request.task = task
         let restart: () -> Void = { [weak self] in
             Task { await self?.executeUpload(request, initial: initial, body: body, interceptor: interceptor, config: config) }
@@ -484,9 +512,9 @@ open class STHTTPSession: NSObject {
 
         let task: URLSessionDownloadTask
         if let resumeData = resumeData {
-            task = self.urlSession.downloadTask(withResumeData: resumeData)
+            task = self.session.downloadTask(withResumeData: resumeData)
         } else {
-            task = self.urlSession.downloadTask(with: adapted)
+            task = self.session.downloadTask(with: adapted)
         }
         request.task = task
         let restart: () -> Void = { [weak self, weak request] in
@@ -543,7 +571,7 @@ open class STHTTPSession: NSObject {
         }
         request.urlRequest = adapted
 
-        let task = self.urlSession.dataTask(with: adapted)
+        let task = self.session.dataTask(with: adapted)
         request.task = task
         let restart: () -> Void = { [weak self, weak request] in
             Task {
@@ -612,22 +640,22 @@ open class STHTTPSession: NSObject {
 
     private func buildMultipartBody(boundary: String, files: [STUploadFile], parameters: [String: Any]?) -> Data {
         var body = Data()
-        let crlf = "\r\n".data(using: .utf8)!
+        let crlf = Data("\r\n".utf8)
         for file in files {
-            body.append("--\(boundary)\r\n".data(using: .utf8)!)
-            body.append("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.fileName)\"\r\n".data(using: .utf8)!)
-            body.append("Content-Type: \(file.mimeType)\r\n\r\n".data(using: .utf8)!)
+            body.append(Data("--\(boundary)\r\n".utf8))
+            body.append(Data("Content-Disposition: form-data; name=\"\(file.name)\"; filename=\"\(file.fileName)\"\r\n".utf8))
+            body.append(Data("Content-Type: \(file.mimeType)\r\n\r\n".utf8))
             body.append(file.data)
             body.append(crlf)
         }
         if let parameters = parameters {
             for (key, value) in parameters {
-                body.append("--\(boundary)\r\n".data(using: .utf8)!)
-                body.append("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".data(using: .utf8)!)
-                body.append("\(value)\r\n".data(using: .utf8)!)
+                body.append(Data("--\(boundary)\r\n".utf8))
+                body.append(Data("Content-Disposition: form-data; name=\"\(key)\"\r\n\r\n".utf8))
+                body.append(Data("\(value)\r\n".utf8))
             }
         }
-        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        body.append(Data("--\(boundary)--\r\n".utf8))
         return body
     }
 
@@ -651,7 +679,6 @@ open class STHTTPSession: NSObject {
     }
 
     // MARK: - 任务注册
-
     private func register(
         _ request: STRequest,
         task: URLSessionTask,
@@ -814,11 +841,9 @@ extension STHTTPSession: URLSessionDelegate, URLSessionDataDelegate, URLSessionT
 
         let serverCertificates = self.serverCertificates(from: serverTrust)
         if hasCertificatePins {
-            for serverCertificate in serverCertificates {
-                if self.sslPinningConfig.certificates.contains(serverCertificate) {
-                    completionHandler(.useCredential, URLCredential(trust: serverTrust))
-                    return
-                }
+            for serverCertificate in serverCertificates where self.sslPinningConfig.certificates.contains(serverCertificate) {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+                return
             }
         }
 

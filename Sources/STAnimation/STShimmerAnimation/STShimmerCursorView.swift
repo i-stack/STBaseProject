@@ -11,7 +11,7 @@ public final class STShimmerCursorView: UIView {
 
     private var blinkAnimation: CABasicAnimation?
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .label
         self.layer.cornerRadius = 1

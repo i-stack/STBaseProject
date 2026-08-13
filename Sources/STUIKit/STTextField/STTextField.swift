@@ -7,7 +7,7 @@
 
 import UIKit
 
-private struct STTextFieldLocalizationKey {
+private enum STTextFieldLocalizationKey {
     static var localizedPlaceholderKey: UInt8 = 0
 }
 
@@ -25,7 +25,7 @@ public extension STTextFieldDelegate {
 open class STTextField: UITextField {
 
     open var textIsCheck: Bool = false
-    weak open var cusDelegate: STTextFieldDelegate?
+    open weak var cusDelegate: STTextFieldDelegate?
     
     private var contentInsetLeft: CGFloat = 0
     private var contentInsetRight: CGFloat = 0
@@ -142,12 +142,12 @@ open class STTextField: UITextField {
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.config()
     }
     
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.config()
     }
@@ -156,34 +156,34 @@ open class STTextField: UITextField {
         self.removeSecureTextEntryObserver()
     }
     
-    open override func deleteBackward() {
+    override open func deleteBackward() {
         super.deleteBackward()
         if let delegate = self.cusDelegate {
             delegate.st_textFieldBackwardKeyPressed(textField: self)
         }
     }
     
-    open override func textRect(forBounds bounds: CGRect) -> CGRect {
-        let inset = CGRect.init(x: bounds.origin.x + self.contentInsetLeft, y: bounds.origin.y, width: bounds.size.width - self.contentInsetLeft - self.contentInsetRight, height: bounds.size.height)
+    override open func textRect(forBounds bounds: CGRect) -> CGRect {
+        let inset = CGRect(x: bounds.origin.x + self.contentInsetLeft, y: bounds.origin.y, width: bounds.size.width - self.contentInsetLeft - self.contentInsetRight, height: bounds.size.height)
         return inset
     }
     
-    open override func editingRect(forBounds bounds: CGRect) -> CGRect {
-        let inset = CGRect.init(x: bounds.origin.x + self.contentInsetLeft, y: bounds.origin.y, width: bounds.size.width - self.contentInsetLeft - self.contentInsetRight, height: bounds.size.height)
+    override open func editingRect(forBounds bounds: CGRect) -> CGRect {
+        let inset = CGRect(x: bounds.origin.x + self.contentInsetLeft, y: bounds.origin.y, width: bounds.size.width - self.contentInsetLeft - self.contentInsetRight, height: bounds.size.height)
         return inset
     }
     
-    open override func leftViewRect(forBounds bounds: CGRect) -> CGRect {
+    override open func leftViewRect(forBounds bounds: CGRect) -> CGRect {
         if let newView = self.leftView {
             let frame = newView.frame
             let x = bounds.origin.x
             let y = (bounds.size.height - frame.size.height) / 2.0
-            return CGRect.init(x: x, y: y, width: frame.size.width, height: frame.size.height)
+            return CGRect(x: x, y: y, width: frame.size.width, height: frame.size.height)
         }
         return CGRect.zero
     }
     
-    open override func rightViewRect(forBounds bounds: CGRect) -> CGRect {
+    override open func rightViewRect(forBounds bounds: CGRect) -> CGRect {
         if let newView = self.rightView {
             let frame = newView.frame
             let x = bounds.width - frame.width
@@ -193,7 +193,7 @@ open class STTextField: UITextField {
         return CGRect.zero
     }
     
-    open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+    override open func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         if let rightView = self.rightView {
             let rightViewFrame = self.rightViewRect(forBounds: self.bounds)
             if rightViewFrame.contains(point) {
@@ -206,7 +206,7 @@ open class STTextField: UITextField {
         return super.hitTest(point, with: event)
     }
     
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.st_updateLiquidGlassCornerRadius()
         if self.isPasswordToggleEnabled, let container = self.rightView, let button = self.passwordToggleButton {
@@ -229,17 +229,17 @@ open class STTextField: UITextField {
         self.addTarget(self, action: #selector(st_textFieldEditingChanged(textField:)), for: .editingChanged)
     }
     
-    public func setTextInsets(left: CGFloat, right: CGFloat) -> Void {
+    public func setTextInsets(left: CGFloat, right: CGFloat) {
         self.contentInsetLeft = max(0, left)
         self.contentInsetRight = max(0, right)
         self.setNeedsLayout()
     }
     
-    public func config(textLimitCount: Int) -> Void {
+    public func config(textLimitCount: Int) {
         self.maxTextCount = textLimitCount
     }
         
-    public func configAttributed(textColor: UIColor) -> Void {
+    public func configAttributed(textColor: UIColor) {
         if let attributedText = self.attributedPlaceholder {
             let placeholderAttributedString = NSMutableAttributedString(attributedString: attributedText)
             placeholderAttributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: placeholderAttributedString.length))
@@ -247,9 +247,9 @@ open class STTextField: UITextField {
         }
     }
     
-    public func configAttributed(text: String, textColor: UIColor) -> Void {
+    public func configAttributed(text: String, textColor: UIColor) {
         if !text.isEmpty {
-            let placeholderAttributedString = NSMutableAttributedString(attributedString: NSAttributedString.init(string: text))
+            let placeholderAttributedString = NSMutableAttributedString(attributedString: NSAttributedString(string: text))
             placeholderAttributedString.addAttribute(.foregroundColor, value: textColor, range: NSRange(location: 0, length: placeholderAttributedString.length))
             self.attributedPlaceholder = placeholderAttributedString
         }
@@ -310,7 +310,7 @@ open class STTextField: UITextField {
     /// 设置isSecureTextEntry的KVO监听
     private func setupSecureTextEntryObserver() {
         self.removeSecureTextEntryObserver()
-        self.secureTextEntryObserver = self.observe(\.isSecureTextEntry, options: [.old, .new]) { [weak self] textField, change in
+        self.secureTextEntryObserver = self.observe(\.isSecureTextEntry, options: [.old, .new]) { [weak self] _, change in
             guard let strongSelf = self, strongSelf.isPasswordToggleEnabled else { return }
             if let oldValue = change.oldValue, let newValue = change.newValue,
                !oldValue && newValue {
@@ -359,7 +359,7 @@ open class STTextField: UITextField {
         guard let button = self.passwordToggleButton else { return }
         self.savaText = self.text ?? ""
         self.isChangingSecureTextEntry = true
-        self.isSecureTextEntry = !self.isSecureTextEntry
+        self.isSecureTextEntry.toggle()
         button.isSelected = !self.isSecureTextEntry
         // 延迟重置标志，确保文本变化事件能正确处理
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {

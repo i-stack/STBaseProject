@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2026/4/27.
 //
 
-import UIKit
 import ObjectiveC
+import UIKit
 
 @IBDesignable
 open class STLiquidGlassView: UIView {
@@ -50,7 +50,7 @@ open class STLiquidGlassView: UIView {
     private let highlightLayer = CAGradientLayer()
     private let borderLayer = CAShapeLayer()
     
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         self.effectView = STLiquidGlassView.makeEffectView()
         super.init(frame: frame)
         self.setupView()
@@ -62,7 +62,7 @@ open class STLiquidGlassView: UIView {
         self.setupView()
     }
     
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.effectView.frame = self.bounds
         self.updateLayerFrames()
@@ -135,7 +135,7 @@ open class STLiquidGlassView: UIView {
     }
 }
 
-private struct STLiquidGlassAssociationKey {
+private enum STLiquidGlassAssociationKey {
     static var viewKey: UInt8 = 0
 }
 

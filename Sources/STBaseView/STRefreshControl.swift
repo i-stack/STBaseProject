@@ -125,7 +125,7 @@ public final class STRefreshHeaderView: UIView {
         self.beginRefreshing(scrollView: sv)
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         let cx = bounds.midX
         let cy = bounds.midY
@@ -347,7 +347,7 @@ public final class STRefreshHeaderView: UIView {
         self.customImageView.layer.add(anim, forKey: "st_rotation")
     }
 
-    public override func willMove(toSuperview newSuperview: UIView?) {
+    override public func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
         if newSuperview == nil {
             self.customImageView.layer.removeAnimation(forKey: "st_rotation")
@@ -475,7 +475,7 @@ public final class STLoadMoreFooterView: UIView {
         }
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         let cx = bounds.midX
         let cy = bounds.midY
@@ -621,7 +621,7 @@ public final class STLoadMoreFooterView: UIView {
         self.customImageView.layer.add(anim, forKey: "st_rotation")
     }
 
-    public override func willMove(toSuperview newSuperview: UIView?) {
+    override public func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
         if newSuperview == nil {
             self.customImageView.layer.removeAnimation(forKey: "st_rotation")

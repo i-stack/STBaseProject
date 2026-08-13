@@ -20,7 +20,7 @@ public enum STConstraintAdaptType {
 
 extension NSLayoutConstraint {
     
-    private struct AssociatedKeys {
+    private enum AssociatedKeys {
         static var autoConstantKey: UInt8 = 0
         static var adaptTypeKey: UInt8 = 1
         static var originalConstantKey: UInt8 = 2
@@ -71,6 +71,9 @@ extension NSLayoutConstraint {
     
     /// 是否启用自动适配（IBInspectable）
     @IBInspectable open var autoConstant: Bool {
+        get {
+            return _autoConstant
+        }
         set {
             _autoConstant = newValue
             if newValue && !_isAdapted {
@@ -81,13 +84,21 @@ extension NSLayoutConstraint {
                 _isAdapted = false
             }
         }
-        get {
-            return _autoConstant
-        }
     }
     
     /// 适配类型（IBInspectable）
     @IBInspectable open var adaptType: Int {
+        get {
+            switch _adaptType {
+            case .width: return 0
+            case .height: return 1
+            case .both: return 2
+            case .spacing: return 3
+            case .margin: return 4
+            case .fontSize: return 5
+            case .custom: return 2
+            }
+        }
         set {
             let type: STConstraintAdaptType
             switch newValue {
@@ -104,33 +115,22 @@ extension NSLayoutConstraint {
                 self.adaptConstraintIfNeeded()
             }
         }
-        get {
-            switch _adaptType {
-            case .width: return 0
-            case .height: return 1
-            case .both: return 2
-            case .spacing: return 3
-            case .margin: return 4
-            case .fontSize: return 5
-            case .custom: return 2
-            }
-        }
     }
     
     /// 自定义适配比例（IBInspectable）
     @IBInspectable open var customAdaptRatio: CGFloat {
+        get {
+            if case .custom(let ratio) = _adaptType {
+                return ratio
+            }
+            return 1.0
+        }
         set {
             _adaptType = .custom(newValue)
             
             if _autoConstant && !_isAdapted {
                 self.adaptConstraintIfNeeded()
             }
-        }
-        get {
-            if case .custom(let ratio) = _adaptType {
-                return ratio
-            }
-            return 1.0
         }
     }
         
@@ -192,7 +192,7 @@ extension NSLayoutConstraint {
     }
     
     // MARK: - 生命周期方法
-    open override func awakeFromNib() {
+    override open func awakeFromNib() {
         super.awakeFromNib()
         if _autoConstant && !_isAdapted {
             _originalConstant = self.constant
@@ -202,7 +202,7 @@ extension NSLayoutConstraint {
 }
 
 // MARK: - 批量约束适配工具
-public struct STConstraintAdapter {
+public enum STConstraintAdapter {
     
     /// 批量适配约束
     /// - Parameter constraints: 约束数组
@@ -277,10 +277,8 @@ public extension UIView {
     
     /// 收集已适配的约束
     private func collectAdaptedConstraintsRecursively(in view: UIView, result: inout [NSLayoutConstraint]) {
-        for constraint in view.constraints {
-            if constraint.hasAdaptiveConstantApplied {
-                result.append(constraint)
-            }
+        for constraint in view.constraints where constraint.hasAdaptiveConstantApplied {
+            result.append(constraint)
         }
         
         for subview in view.subviews {

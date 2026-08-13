@@ -5,10 +5,10 @@
 //  Created by 寒江孤影 on 2018/3/14.
 //
 
-import UIKit
 import Combine
 import CryptoKit
 import Foundation
+import UIKit
 
 // MARK: - 错误类型枚举
 public enum STBaseError: LocalizedError, Equatable {
@@ -134,8 +134,8 @@ open class STBaseViewModel: NSObject {
     public var cacheConfig = STCacheConfig()
     public var httpSession: STHTTPSessionProviding = STHTTPSession.shared
     public var requestHeaders = STRequestHeaders()
-    public var jsonDecoder: JSONDecoder = JSONDecoder()
-    public var jsonEncoder: JSONEncoder = JSONEncoder()
+    public var jsonDecoder = JSONDecoder()
+    public var jsonEncoder = JSONEncoder()
 
     public private(set) var cancellables = Set<AnyCancellable>()
     private let cache = NSCache<NSString, STMemoryCacheEntry>()
@@ -148,7 +148,7 @@ open class STBaseViewModel: NSObject {
         STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
     }
 
-    public override init() {
+    override public init() {
         super.init()
         self.st_setupBindings()
     }

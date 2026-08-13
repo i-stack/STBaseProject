@@ -71,4 +71,3 @@ public enum STScrollPerfDiagnostics {
         #endif
     }
 }
-

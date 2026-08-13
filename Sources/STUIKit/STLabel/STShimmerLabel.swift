@@ -18,7 +18,7 @@ public class STShimmerLabel: STLabel {
         didSet { self.updateGradient() }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setup()
     }
@@ -28,28 +28,28 @@ public class STShimmerLabel: STLabel {
         self.setup()
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         self.updateFrames()
     }
 
-    public override var text: String? {
+    override public var text: String? {
         didSet { self.updateTextMask() }
     }
 
-    public override var attributedText: NSAttributedString? {
+    override public var attributedText: NSAttributedString? {
         didSet { self.updateTextMask() }
     }
 
-    public override var font: UIFont! {
+    override public var font: UIFont! {
         didSet { self.updateTextMask() }
     }
 
-    public override var textAlignment: NSTextAlignment {
+    override public var textAlignment: NSTextAlignment {
         didSet { self.updateTextMask() }
     }
 
-    public override var numberOfLines: Int {
+    override public var numberOfLines: Int {
         didSet { self.updateTextMask() }
     }
 
