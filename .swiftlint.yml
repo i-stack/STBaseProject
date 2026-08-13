@@ -10,6 +10,10 @@
 included:
   - Sources
 
+# SwiftLint analyze 的 unused_import 对系统框架 import（Foundation/UIKit/Security 等）存在已知误报：
+# swiftc 编译日志 0 条 unused import 警告，删除这些 import 会导致编译失败
+# （如 STSecurityModels 依赖 Foundation 的 Date/TimeInterval，见 .github/workflows/swift.yml 的 Analyze 步骤）。
+# 该规则已整体禁用（见下方 analyzer_rules），故无需在此按文件排除。
 excluded:
   - Sources/STMarkdown/Resources
   - .build
@@ -67,8 +71,15 @@ opt_in_rules:
 force_cast: error                 # as! 直接 error
 
 analyzer_rules:
-  - unused_import
-  - unused_declaration
+  # 本仓库是底层公用库：大量 public/internal/fileprivate API 提供给宿主 App / Example 模块调用，
+  # SwiftLint analyze 的 analyzer_rules 只扫描包内 99 个文件，看不到外部调用方，
+  # 会系统性误报 unused_import 与 unused_declaration（且 swiftc 编译日志证明 import 必需）。
+  # 验证依据见下。故整体禁用这两个 analyzer 规则。
+  # - unused_import  : 系统框架 import（Foundation/UIKit/Security 等）被误判为冗余，
+  #                    clean build 的 swiftc 编译日志 unused import 警告为 0 条，删除会导致编译失败。
+  # - unused_declaration: 对外暴露的库 API 在包内无引用，被误判为未使用。
+  # - unused_import
+  # - unused_declaration
 
 # 公开 API 文档缺失检查：存量 882 个未清零，暂移出 opt_in_rules（见 disabled_rules），
 # 待文档补齐专项后再恢复并重新纳入 --strict 门槛。仅检查 public 级别。

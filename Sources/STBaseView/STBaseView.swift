@@ -404,7 +404,7 @@ open class STBaseView: UIView {
         guard self.layoutMode == .scroll else { return }
         guard appearing || self.baseContentInset != nil else { return }
         guard let userInfo = note.userInfo, self.enableScrollViewKeyboardAdjustment else {
-            if !appearing, let baseContent = self.baseContentInset {
+            if !appearing, self.baseContentInset != nil {
                 // 键盘调整被关闭，但仍需还原已注入的 inset。
                 self.restoreBaseInsets()
             }

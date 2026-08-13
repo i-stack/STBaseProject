@@ -55,7 +55,7 @@ private enum STAlertLayoutConstant {
     static let titleMessageSpacing: CGFloat = 10
 }
 
-public enum STAlertBtnClickType {
+public enum STAlertBtnClickType: String {
     case btnClick
     case leftBtnClick
     case rightBtnClick
@@ -300,7 +300,7 @@ open class STAlertController: UIViewController {
                 handler(true, sender.titleLabel?.text ?? "")
             }
         } else {
-            if let type = sender.identifier as? STAlertBtnClickType, type == .leftBtnClick {
+            if sender.stringIdentifier == STAlertBtnClickType.leftBtnClick.rawValue {
                 if let handler = self.alertInfo.buttonHandlers.first {
                     handler(true, sender.titleLabel?.text ?? "")
                 }
@@ -335,7 +335,7 @@ open class STAlertController: UIViewController {
             }()
             let btn = self.createBtn(action: singleAction)
             btn.tag = 0
-            btn.identifier = STAlertBtnClickType.btnClick
+            btn.stringIdentifier = STAlertBtnClickType.btnClick.rawValue
             btn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(btn)
             self.view.addConstraints([
@@ -370,7 +370,7 @@ open class STAlertController: UIViewController {
             }()
             let leftBtn = self.createBtn(action: leftAction)
             leftBtn.tag = 0
-            leftBtn.identifier = STAlertBtnClickType.leftBtnClick
+            leftBtn.stringIdentifier = STAlertBtnClickType.leftBtnClick.rawValue
             leftBtn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(leftBtn)
             
@@ -390,7 +390,7 @@ open class STAlertController: UIViewController {
             }()
             let rightBtn = self.createBtn(action: rightAction)
             rightBtn.tag = 1
-            rightBtn.identifier = STAlertBtnClickType.rightBtnClick
+            rightBtn.stringIdentifier = STAlertBtnClickType.rightBtnClick.rawValue
             rightBtn.addTarget(self, action: #selector(alertButtonClick), for: .touchUpInside)
             self.alertView.addSubview(rightBtn)
             self.view.addConstraints([
