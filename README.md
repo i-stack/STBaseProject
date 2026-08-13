@@ -39,7 +39,7 @@ STBaseProject 是整包发布的库（SPM 单一 product），引入即包含全
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.5.0")
+    .package(url: "https://github.com/i-stack/STBaseProject.git", from: "1.3.0")
 ],
 targets: [
     .target(
