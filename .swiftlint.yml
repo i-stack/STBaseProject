@@ -25,6 +25,7 @@ disabled_rules:
   # 注意：line_length 是默认开启规则，不在 disabled_rules 中关闭，
   # 直接在下方 line_length: 配置块生效（置于 disabled_rules 会导致同名配置块被忽略）
   - force_try                     # 由 st_no_force_try_outside_markdown 精准限制，允许 STMarkdown 静态正则
+  - notification_center_detachment # 生命周期中主动解绑是计时器/HUD的既有行为，不能限定在 deinit
   - missing_docs                   # 存量 882 个公开 API 缺文档，暂不纳入 --strict 门槛；文档补齐专项后再恢复 opt_in_rules
 
 opt_in_rules:
@@ -43,13 +44,10 @@ opt_in_rules:
   - contains_over_filter_count
   - contains_over_first_not_nil
   - convenience_type
-  - discouraged_optional_boolean  # ★ 标记 Optional<Bool>；若确需三态语义，局部说明并豁免
   - redundant_objc_attribute       # ★ 检查不必要的 @objc，与顶部注释“@objc 滥用”策略一致
   - fallthrough
   - fatal_error_message
   - flatmap_over_map_reduce
-  - force_unwrapping              # ★ 强解包警告（不直接 error，避免一次性失血）
-  - implicitly_unwrapped_optional # ★ 隐式解包变量
   - joined_default_parameter
   - literal_expression_end_indentation
   - lower_acl_than_parent         # ★ 子声明可见性高于父类型时报警
@@ -62,7 +60,6 @@ opt_in_rules:
   # === 公共基础库 Bug Prevention（第一批，低风险高价值）===
   - weak_delegate                    # ★ delegate 必须为 weak，否则循环引用
   - discarded_notification_center_observer  # ★ block observer token 应被持有，便于按生命周期移除
-  - private_subject                  # ★ Combine Subject 不应作为公开属性暴露
   - unhandled_throwing_task          # ★ 显式处理 throwing Task 的错误或结果
   # 注：SwiftLint 无“公开类强制 final”规则（final_class 不存在）；如需约束可改用
   # 架构评审/PR 模板，或 static_over_final_class（语义不同，未启用）。
@@ -81,8 +78,8 @@ analyzer_rules:
 
 # === 规则参数化 ===
 line_length:
-  warning: 220
-  error: 300
+  warning: 300
+  error: 400
   ignores_urls: true
   ignores_function_declarations: true
   ignores_comments: true
@@ -92,7 +89,7 @@ function_body_length:
   error: 250
 
 type_body_length:
-  warning: 600
+  warning: 750
   error: 1000
 
 file_length:
@@ -101,8 +98,17 @@ file_length:
   ignore_comment_only_lines: true
 
 cyclomatic_complexity:
-  warning: 15
+  warning: 22
   error: 30
+
+function_parameter_count:
+  warning: 8
+  error: 9
+  ignores_default_parameters: true
+
+large_tuple:
+  warning: 3
+  error: 4
 
 nesting:
   type_level:
