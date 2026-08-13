@@ -37,10 +37,21 @@ jobs:
       - name: Resolve SPM dependencies
         run: xcodebuild -resolvePackageDependencies -scheme STBaseProject-Package
 
-      - name: Build (iOS Simulator)
+      - name: Build (iOS Simulator) with compile log
         run: |
+          # 完整编译日志供 swiftlint analyze 使用（analyzer_rules 依赖 type-checked AST）。
+          # 不使用增量构建缓存，确保日志完整。
+          rm -rf ~/Library/Developer/Xcode/DerivedData
           xcodebuild \
             -scheme STBaseProject-Package \
             -destination 'generic/platform=iOS Simulator' \
-            build
+            clean build | tee xcodebuild.log
+
+      - name: SwiftLint Analyze (unused_import / unused_declaration)
+        run: |
+          # analyzer_rules 仅在 `swiftlint analyze` 下执行；普通 `swiftlint lint` 不会跑。
+          # 需完整编译日志（上方 Build 步骤产出 xcodebuild.log）。
+          swiftlint analyze \
+            --compiler-log-path xcodebuild.log \
+            --reporter github-actions-logging
 
