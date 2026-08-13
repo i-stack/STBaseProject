@@ -25,8 +25,7 @@ disabled_rules:
   # 注意：line_length 是默认开启规则，不在 disabled_rules 中关闭，
   # 直接在下方 line_length: 配置块生效（置于 disabled_rules 会导致同名配置块被忽略）
   - force_try                     # 由 st_no_force_try_outside_markdown 精准限制，允许 STMarkdown 静态正则
-  - blanket_disable_command        # 基础库大量历史 disable 注释，不卡"禁用过多/需 re-enable"风格
-  - superfluous_disable_command    # 同上：保留历史 disable 豁免，不因区域内未触发而告警
+  - missing_docs                   # 存量 882 个公开 API 缺文档，暂不纳入 --strict 门槛；文档补齐专项后再恢复 opt_in_rules
 
 opt_in_rules:
   - empty_count
@@ -59,7 +58,7 @@ opt_in_rules:
   - redundant_string_enum_value
   - sorted_imports
   - toggle_bool
-  - missing_docs                   # ★ 公开 API 缺文档报警（先 warning 观察存量，后续可收紧）
+  - computed_accessors_order
   # === 公共基础库 Bug Prevention（第一批，低风险高价值）===
   - weak_delegate                    # ★ delegate 必须为 weak，否则循环引用
   - discarded_notification_center_observer  # ★ block observer token 应被持有，便于按生命周期移除
@@ -74,11 +73,11 @@ analyzer_rules:
   - unused_import
   - unused_declaration
 
-# 公开 API 文档缺失检查：先 warning 观察存量，待清零后可改为 error 收紧。
-# 仅检查 public 级别（open/internal/private 豁免），避免内部实现噪音。
-# CI 不使用 --strict，因此当前 warning 不阻断；使用 --strict 时会提升为 error。
-missing_docs:
-  warning: public
+# 公开 API 文档缺失检查：存量 882 个未清零，暂移出 opt_in_rules（见 disabled_rules），
+# 待文档补齐专项后再恢复并重新纳入 --strict 门槛。仅检查 public 级别。
+# 恢复方式：从 disabled_rules 移回 opt_in_rules，并重新启用下方配置块：
+# missing_docs:
+#   warning: public
 
 # === 规则参数化 ===
 line_length:
@@ -113,6 +112,14 @@ nesting:
 
 # === 自定义规则 ===
 custom_rules:
+  st_no_swiftlint_disable:
+    name: "SwiftLint disable comments are forbidden"
+    regex: 'swiftlint\s*:\s*disable(?:\s|:|$)'
+    match_kinds:
+      - comment
+    message: "禁止使用 swiftlint:disable 规避规则；请修复真实问题或调整项目级规则配置。"
+    severity: error
+
   st_no_force_try_outside_markdown:
     name: "try! outside STMarkdown is forbidden"
     regex: '\\btry!'

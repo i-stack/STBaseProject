@@ -186,7 +186,6 @@ public class STTabBarItemView: UIView {
         return max(1, min(configured, measured))
     }
     
-    /// 将 `imageTopInset`、图标尺寸约束在可用高度内，避免 Auto Layout 无法同时满足
     private func resolvedImageAndTextLayout(for model: STTabBarItemModel) -> (topInset: CGFloat, iconWidth: CGFloat, iconHeight: CGFloat) {
         let barH = self.effectiveBarHeightForImageTextLayout()
         let baseW = model.layout.imageSize?.width ?? 24
@@ -368,11 +367,11 @@ public class STTabBarItemView: UIView {
             self.alpha = selected ? 1.0 : config.unselectedAlpha
             self.titleLabel.textColor = selected ? model.colors.selectedText : model.colors.normalText
             self.backgroundColor = selected ? model.colors.selectedBackground : model.colors.normalBackground
-        }) { _ in
+        }, completion: { _ in
             UIView.transition(with: self.iconImageView, duration: 0.2, options: .transitionCrossDissolve) {
                 self.iconImageView.image = selected ? model.selectedImage : model.normalImage
             }
-        }
+        })
     }
     
     @objc private func handleTap() {

@@ -280,10 +280,8 @@ public extension Dictionary where Value: Equatable {
                 differences[key] = value
             }
         }
-        for (key, value) in other {
-            if self[key] == nil {
-                differences[key] = value
-            }
+        for (key, value) in other where self[key] == nil {
+            differences[key] = value
         }
         return differences
     }

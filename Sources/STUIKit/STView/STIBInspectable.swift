@@ -277,10 +277,8 @@ public extension UIView {
     
     /// 收集已适配的约束
     private func collectAdaptedConstraintsRecursively(in view: UIView, result: inout [NSLayoutConstraint]) {
-        for constraint in view.constraints {
-            if constraint.hasAdaptiveConstantApplied {
-                result.append(constraint)
-            }
+        for constraint in view.constraints where constraint.hasAdaptiveConstantApplied {
+            result.append(constraint)
         }
         
         for subview in view.subviews {

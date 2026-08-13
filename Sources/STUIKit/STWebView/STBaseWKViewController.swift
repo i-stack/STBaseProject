@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2020/12/31.
 //
 
-import WebKit
 import StoreKit
+import WebKit
 
 public struct STWebInfo {
     var url: String?
@@ -308,10 +308,10 @@ open class STBaseWKViewController: STBaseViewController {
             if progress >= 1.0 {
                 UIView.animate(withDuration: 0.3, animations: {
                     self.progressView.alpha = 0
-                }) { _ in
+                }, completion: { _ in
                     self.progressView.setProgress(0, animated: false)
                     self.progressView.alpha = 1
-                }
+                })
             }
         }
     }
@@ -444,30 +444,25 @@ open class STBaseWKViewController: STBaseViewController {
 }
 
 extension STBaseWKViewController: WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler {
-    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         self.st_updateLoadState(.loading)
     }
     
-    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         self.st_updateLoadState(.loading)
         self.st_updateTitle()
     }
     
-    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         self.st_updateLoadState(.loaded)
         self.st_updateTitle()
     }
     
-    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         self.st_handleLoadError(error)
         self.st_updateTitle()
     }
     
-    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         self.st_handleLoadError(error)
     }

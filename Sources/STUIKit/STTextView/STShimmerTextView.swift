@@ -578,12 +578,12 @@ open class STShimmerTextView: UITextView {
         }
     }
 
-    /// 立即完成"当前行"之前所有行的 fade-in 动画。
-    ///
-    /// 原则：_baseAttributedText 中最后一个 \n 之前的字符已属于已完成的行，
-    /// 它们的 animatingToken 应立即置为全不透明，不应继续半透明地悬挂在屏幕上。
-    /// 调用时机：在每次 append 新字符 **之前**（_baseAttributedText 尚未追加新内容），
-    /// 以 _baseAttributedText 的当前末尾搜索最后一个换行符。
+    // 立即完成"当前行"之前所有行的 fade-in 动画。
+    //
+    // 原则：_baseAttributedText 中最后一个 \n 之前的字符已属于已完成的行，
+    // 它们的 animatingToken 应立即置为全不透明，不应继续半透明地悬挂在屏幕上。
+    // 调用时机：在每次 append 新字符 **之前**（_baseAttributedText 尚未追加新内容），
+    // 以 _baseAttributedText 的当前末尾搜索最后一个换行符。
     private func finishAnimationsBeforeLastNewline() {
         guard !self.animatingTokens.isEmpty else { return }
         let str = _baseAttributedText.string as NSString
@@ -725,8 +725,7 @@ open class STShimmerTextView: UITextView {
         let glyphRange = self.layoutManager.glyphRange(
             forCharacterRange: changedRange, actualCharacterRange: nil
         )
-        self.layoutManager.enumerateLineFragments(forGlyphRange: glyphRange) { [weak self]
-            rect, usedRect, _, lineGlyphRange, _ in
+        self.layoutManager.enumerateLineFragments(forGlyphRange: glyphRange) { [weak self] rect, usedRect, _, lineGlyphRange, _ in
             guard let self else { return }
             guard NSMaxRange(glyphRange) == NSMaxRange(lineGlyphRange) else { return }
             self.installLineFadeLayer(lineRect: rect, rightEdge: usedRect.maxX, mask: mask, base: base)

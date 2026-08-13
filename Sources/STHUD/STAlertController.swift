@@ -184,7 +184,6 @@ open class STAlertController: UIViewController {
 
     /// 是否在点击动作后自动关闭，默认 true
     @available(*, deprecated, renamed: "setAutoDismiss(_:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func setAutoDismissOnAction(_ enabled: Bool) {
         self.autoDismissOnAction = enabled
     }
@@ -250,7 +249,7 @@ open class STAlertController: UIViewController {
             ].compactMap { $0 })
         }
         
-        if self.alertInfo.title.text != "" && self.alertInfo.message.text != "" {
+        if !self.alertInfo.title.text.isEmpty && !self.alertInfo.message.text.isEmpty {
             self.titleLabel.text = self.alertInfo.title.text
             self.messageLabel.text = self.alertInfo.message.text
             self.alertView.addSubview(self.titleLabel)
@@ -265,7 +264,7 @@ open class STAlertController: UIViewController {
                 NSLayoutConstraint(item: self.messageLabel, attribute: .left, relatedBy: .equal, toItem: self.titleLabel, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
                 NSLayoutConstraint(item: self.messageLabel, attribute: .right, relatedBy: .equal, toItem: self.titleLabel, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal)
             ])
-        } else if self.alertInfo.title.text != "" && self.alertInfo.message.text == "" {
+        } else if !self.alertInfo.title.text.isEmpty && self.alertInfo.message.text.isEmpty {
             self.titleLabel.text = self.alertInfo.title.text
             self.alertView.addSubview(self.titleLabel)
             self.view.addConstraints([
@@ -273,7 +272,7 @@ open class STAlertController: UIViewController {
                 NSLayoutConstraint(item: self.titleLabel, attribute: .left, relatedBy: .equal, toItem: self.alertView, attribute: .left, multiplier: 1, constant: STAlertLayoutConstant.contentHorizontal),
                 NSLayoutConstraint(item: self.titleLabel, attribute: .right, relatedBy: .equal, toItem: self.alertView, attribute: .right, multiplier: 1, constant: -STAlertLayoutConstant.contentHorizontal)
             ])
-        } else if self.alertInfo.title.text == "" && self.alertInfo.message.text != "" {
+        } else if self.alertInfo.title.text.isEmpty && !self.alertInfo.message.text.isEmpty {
             self.messageLabel.text = self.alertInfo.message.text
             self.alertView.addSubview(self.messageLabel)
             self.view.addConstraints([
@@ -420,9 +419,9 @@ open class STAlertController: UIViewController {
             ])
         }
         self.view.layoutIfNeeded()
-        if self.alertInfo.message.text != "" {
+        if !self.alertInfo.message.text.isEmpty {
             self.newConstraint?.constant = self.messageLabel.frame.maxY + 54
-        } else if self.alertInfo.title.text != "" {
+        } else if !self.alertInfo.title.text.isEmpty {
             self.newConstraint?.constant = self.titleLabel.frame.maxY + 54
         }
         UIView.animate(withDuration: 0.3) {

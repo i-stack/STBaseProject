@@ -282,7 +282,10 @@ open class STBottomSheetViewController: UIViewController {
                     self.contentScrollView?.contentOffset = .zero
                 }
                 self.logDiagnostics(
-                    "sheetOffsetChanged translationY=\(self.diagnosticValue(translation.y)) velocityY=\(self.diagnosticValue(velocity.y)) newOffset=\(self.diagnosticValue(newConstant)) fullOffset=\(self.diagnosticValue(self.fullOffset))"
+                    "sheetOffsetChanged translationY=\(self.diagnosticValue(translation.y)) "
+                        + "velocityY=\(self.diagnosticValue(velocity.y)) "
+                        + "newOffset=\(self.diagnosticValue(newConstant)) "
+                        + "fullOffset=\(self.diagnosticValue(self.fullOffset))"
                 )
                 gesture.setTranslation(.zero, in: self.view)
             }
@@ -300,7 +303,11 @@ open class STBottomSheetViewController: UIViewController {
     private func finishPanGesture(velocity: CGPoint) {
         let currentOffset = self.sheetTopConstraint.constant
         self.logDiagnostics(
-            "finishPan velocityY=\(self.diagnosticValue(velocity.y)) currentOffset=\(self.diagnosticValue(currentOffset)) fullOffset=\(self.diagnosticValue(self.fullOffset)) partialOffset=\(self.diagnosticValue(self.partialOffset)) hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
+            "finishPan velocityY=\(self.diagnosticValue(velocity.y)) "
+                + "currentOffset=\(self.diagnosticValue(currentOffset)) "
+                + "fullOffset=\(self.diagnosticValue(self.fullOffset)) "
+                + "partialOffset=\(self.diagnosticValue(self.partialOffset)) "
+                + "hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
         )
         if velocity.y > 600 {
             if currentOffset < self.partialOffset - 50 {
@@ -342,7 +349,10 @@ open class STBottomSheetViewController: UIViewController {
         let distance = abs(offset - self.sheetTopConstraint.constant)
         self.sheetTopConstraint.constant = offset
         self.logDiagnostics(
-            "animateToOffset target=\(self.diagnosticValue(offset)) fullOffset=\(self.diagnosticValue(self.fullOffset)) partialOffset=\(self.diagnosticValue(self.partialOffset)) hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
+            "animateToOffset target=\(self.diagnosticValue(offset)) "
+                + "fullOffset=\(self.diagnosticValue(self.fullOffset)) "
+                + "partialOffset=\(self.diagnosticValue(self.partialOffset)) "
+                + "hiddenOffset=\(self.diagnosticValue(self.hiddenOffset))"
         )
         // 将手势速度归一化为 spring initialVelocity（单位：总位移/秒），上限 30 防止过度弹跳
         let springVelocity: CGFloat = distance > 1 ? min(abs(velocity) / distance, 30) : 0

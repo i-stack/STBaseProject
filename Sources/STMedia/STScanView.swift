@@ -275,20 +275,20 @@ public class STScanView: UIView {
                 var newFrame = scanLineView.frame
                 newFrame.origin.y = endY
                 scanLineView.frame = newFrame
-            }
-        ) { [weak self] _ in
-            guard let self, !self.isAnimationStopped else { return }
-            UIView.animate(withDuration: 0.2, animations: {
-                scanLineView.alpha = 0
-            }) { _ in
-                guard !self.isAnimationStopped else { return }
-                let item = DispatchWorkItem { [weak self] in
-                    self?.startAnimation()
-                }
-                self.animationStartWorkItem = item
-                DispatchQueue.main.asyncAfter(deadline: .now() + self.configuration.animationInterval, execute: item)
-            }
-        }
+            },
+            completion: { [weak self] _ in
+                guard let self, !self.isAnimationStopped else { return }
+                UIView.animate(withDuration: 0.2, animations: {
+                    scanLineView.alpha = 0
+                }, completion: { _ in
+                    guard !self.isAnimationStopped else { return }
+                    let item = DispatchWorkItem { [weak self] in
+                        self?.startAnimation()
+                    }
+                    self.animationStartWorkItem = item
+                    DispatchQueue.main.asyncAfter(deadline: .now() + self.configuration.animationInterval, execute: item)
+                })
+            })
     }
 
     private func stopAnimation() {

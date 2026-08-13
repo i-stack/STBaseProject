@@ -131,7 +131,6 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    // swiftlint:disable:next implicitly_unwrapped_optional  // UITextView 父类签名
     override open var text: String! {
         didSet {
             self.updatePlaceholderVisibility()
@@ -139,7 +138,6 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    // swiftlint:disable:next implicitly_unwrapped_optional  // UITextView 父类签名
     override open var attributedText: NSAttributedString! {
         didSet {
             self.updatePlaceholderVisibility()

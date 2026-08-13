@@ -707,11 +707,9 @@ private struct STPropertyType {
         // attributes 形如：T@"NSString",&,N,V_name
         // 第一段以 'T' 开头，描述类型编码。
         var typeEncoding = ""
-        for component in attributes.split(separator: ",") {
-            if component.first == "T" {
-                typeEncoding = String(component.dropFirst())
-                break
-            }
+        for component in attributes.split(separator: ",") where component.first == "T" {
+            typeEncoding = String(component.dropFirst())
+            break
         }
         self.kind = STPropertyType.parseKind(typeEncoding)
         switch self.kind {
@@ -766,7 +764,7 @@ private struct STPropertyType {
         }
     }
 
-    /// 把传入值尝试转换为属性接受的形式；不兼容时返回 nil。
+    // 把传入值尝试转换为属性接受的形式；不兼容时返回 nil。
     func coerce(_ value: Any) -> Any? {
         switch kind {
         case .object(let className):
@@ -799,7 +797,7 @@ private struct STPropertyType {
             return value
         }
     }
-
+    
     private static func coerceObject(_ value: Any, expectedClassName: String?) -> Any? {
         guard let className = expectedClassName else { return value }
         let resolvedClass: AnyClass? = NSClassFromString(className)

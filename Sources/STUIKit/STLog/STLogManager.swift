@@ -160,7 +160,7 @@ public final class STLogManager {
     ///     cloudBatchSize: 20
     /// ))
     /// ```
-    public class func bootstrap(_ configuration: Configuration) {
+    public static func bootstrap(_ configuration: Configuration) {
         self.mutateConfiguration { $0 = configuration }
         self.shared.queue.async {
             self.shared.rebuildHandlers()
@@ -178,7 +178,7 @@ public final class STLogManager {
     /// )
     /// STLogManager.setCloudTransport(transport)
     /// ```
-    public class func setCloudTransport(_ transport: STLogCloudTransport?) {
+    public static func setCloudTransport(_ transport: STLogCloudTransport?) {
         self.mutateConfiguration { $0.cloudTransport = transport }
         self.shared.queue.async {
             self.shared.rebuildHandlers()
@@ -186,7 +186,7 @@ public final class STLogManager {
     }
 
     /// 创建一个带默认 label / metadata 的 logger。
-    public class func makeLogger(label: String, metadata: STLogger.Metadata = [:]) -> STLogger {
+    public static func makeLogger(label: String, metadata: STLogger.Metadata = [:]) -> STLogger {
         STLogger(label: label, metadata: metadata)
     }
 
@@ -210,31 +210,31 @@ public final class STLogManager {
         }
     }
 
-    public class func flush() {
+    public static func flush() {
         self.shared.queue.async {
             self.shared.handlers.forEach { $0.flush() }
         }
     }
 
     /// 当前正在写入的活动日志文件路径。
-    public class func logFilePath() -> String {
+    public static func logFilePath() -> String {
         STLogFileWriter.shared.activeFilePath
     }
 
     /// 当前文件和归档文件列表，按读取优先级返回。
-    public class func allLogFilePaths() -> [String] {
+    public static func allLogFilePaths() -> [String] {
         STLogFileWriter.shared.allLogFilePaths()
     }
 
     /// 清空内存和本地持久化日志。
-    public class func clearAllLogs() {
+    public static func clearAllLogs() {
         self.shared.queue.sync {
             self.shared.memoryBuffer.removeAll()
             STLogFileWriter.shared.clearAllLogs()
         }
     }
 
-    public class func recentRecords(limit: Int) -> [STLogRecord] {
+    public static func recentRecords(limit: Int) -> [STLogRecord] {
         let buffer = self.shared.queue.sync { self.shared.memoryBuffer.suffix(limit) }
         if buffer.count >= limit {
             return Array(Array(buffer).reversed())
@@ -242,7 +242,7 @@ public final class STLogManager {
         return STLogFileWriter.shared.fetchRecords(skip: 0, limit: limit)
     }
 
-    public class func records(page: Int, pageSize: Int, levels: Set<STLogLevel>? = nil, searchText: String? = nil) -> [STLogRecord] {
+    public static func records(page: Int, pageSize: Int, levels: Set<STLogLevel>? = nil, searchText: String? = nil) -> [STLogRecord] {
         let normalizedLevels = levels ?? Set(STLogLevel.allCases)
         let normalizedSearch = searchText?.trimmingCharacters(in: .whitespacesAndNewlines)
         let shouldSearch = !(normalizedSearch?.isEmpty ?? true) || normalizedLevels.count < STLogLevel.allCases.count
@@ -260,7 +260,7 @@ public final class STLogManager {
         return STLogFileWriter.shared.fetchRecords(skip: skip, limit: pageSize)
     }
 
-    public class func hasMoreRecords(page: Int, pageSize: Int, levels: Set<STLogLevel>? = nil, searchText: String? = nil) -> Bool {
+    public static func hasMoreRecords(page: Int, pageSize: Int, levels: Set<STLogLevel>? = nil, searchText: String? = nil) -> Bool {
         !self.records(page: page + 1, pageSize: 1, levels: levels, searchText: searchText).isEmpty
     }
 

@@ -307,11 +307,7 @@ public final class STDeviceAdapter: STDeviceAdapting {
     @available(iOS, introduced: 13.0)
     private static var fallbackMainScreenBounds: CGRect {
         assertMainThread()
-        #if swift(>=5.9)
-        if #available(iOS 16.0, *) {
-            // 继续使用 UIScreen.main;Apple 并未提供无 scene 场景下的等价替代。
-        }
-        #endif
+        // 无 scene 场景下 UIScreen.main 仍是唯一可用的屏幕尺寸来源。
         return UIScreen.main.bounds
     }
 

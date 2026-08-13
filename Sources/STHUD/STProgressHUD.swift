@@ -172,7 +172,6 @@ public class STProgressHUD: UIView {
 
     @available(*, deprecated, renamed: "show(addedToView:animation:)")
     @discardableResult
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public class func show(addedToView view: UIView, animated: Bool) -> STProgressHUD {
         return show(addedToView: view, animation: animated ? .fade : .none)
     }
@@ -187,7 +186,6 @@ public class STProgressHUD: UIView {
 
     @available(*, deprecated, renamed: "hide(addedToView:animation:)")
     @discardableResult
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public class func hide(addedToView view: UIView, animated: Bool) -> Bool {
         guard let hud = hudForView(view) else { return false }
         hud.removeFromSuperViewOnHide = true
@@ -205,7 +203,6 @@ public class STProgressHUD: UIView {
     }
 
     @available(*, deprecated, renamed: "show(animation:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func show(animated: Bool) {
         self.showCore(animated: animated)
     }
@@ -216,7 +213,6 @@ public class STProgressHUD: UIView {
     }
 
     @available(*, deprecated, renamed: "hide(animation:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func hide(animated: Bool) {
         self.hideCore(animated: animated)
     }
@@ -226,7 +222,6 @@ public class STProgressHUD: UIView {
     }
 
     @available(*, deprecated, renamed: "hide(animation:afterDelay:)")
-    // swiftlint:disable:next st_avoid_bool_flag_param
     public func hide(animated: Bool, afterDelay delay: TimeInterval) {
         self.hideCore(animation: animated ? self.animationType.stHUDAnimation : .none, afterDelay: delay)
     }
@@ -615,6 +610,7 @@ private extension STProgressHUD {
 
     func unregisterFromNotifications() {
         #if !os(tvOS)
+        // 与 registerForNotifications() 配对的注销方法，观察者生命周期由注册/注销配对管理。
         NotificationCenter.default.removeObserver(self)
         #endif
     }

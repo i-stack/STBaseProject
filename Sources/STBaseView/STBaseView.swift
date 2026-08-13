@@ -572,7 +572,10 @@ extension STBaseView {
         self.tableViewStyle = style
         if self._tableView != nil, self._isInternallyCreatedTableView {
             #if DEBUG
-            assertionFailure("STBaseView.st_tableViewStyle(_:) called after the internal tableView was created. All table configuration (delegate/dataSource/cell registration/pull-to-refresh/load-more) will be lost and must be re-applied.")
+            assertionFailure(
+                "STBaseView.st_tableViewStyle(_:) called after the internal tableView was created. "
+                    + "All table configuration (delegate/dataSource/cell registration/pull-to-refresh/load-more) will be lost and must be re-applied."
+            )
             #endif
             self.st_removePullToRefresh()
             self.st_removeLoadMore()

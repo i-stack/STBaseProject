@@ -679,7 +679,6 @@ open class STHTTPSession: NSObject {
     }
 
     // MARK: - 任务注册
-
     private func register(
         _ request: STRequest,
         task: URLSessionTask,
@@ -842,11 +841,9 @@ extension STHTTPSession: URLSessionDelegate, URLSessionDataDelegate, URLSessionT
 
         let serverCertificates = self.serverCertificates(from: serverTrust)
         if hasCertificatePins {
-            for serverCertificate in serverCertificates {
-                if self.sslPinningConfig.certificates.contains(serverCertificate) {
-                    completionHandler(.useCredential, URLCredential(trust: serverTrust))
-                    return
-                }
+            for serverCertificate in serverCertificates where self.sslPinningConfig.certificates.contains(serverCertificate) {
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+                return
             }
         }
 

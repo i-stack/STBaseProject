@@ -19,7 +19,7 @@ open class STVerificationCodeBtn: STBtn {
     @IBInspectable open var titleSuffix: String = ""
     
     /// Countdown interval time
-    @IBInspectable open var interval: TimeInterval = 1 {
+    @IBInspectable open var interval: Double = 1 {
         didSet {
             guard self.interval <= 0 else { return }
             self.interval = oldValue > 0 ? oldValue : 1

@@ -41,7 +41,6 @@ public class STShimmerLabel: STLabel {
         didSet { self.updateTextMask() }
     }
 
-    // swiftlint:disable:next implicitly_unwrapped_optional  // UILabel 父类签名
     override public var font: UIFont! {
         didSet { self.updateTextMask() }
     }

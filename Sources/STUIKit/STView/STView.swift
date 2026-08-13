@@ -276,9 +276,9 @@ public extension UIView {
         alpha = 0
         UIView.animate(withDuration: duration, animations: {
             self.alpha = 1
-        }) { _ in
+        }, completion: { _ in
             completion?()
-        }
+        })
     }
     
     /// 淡出动画
@@ -288,9 +288,9 @@ public extension UIView {
     func st_fadeOut(duration: TimeInterval = 0.3, completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: duration, animations: {
             self.alpha = 0
-        }) { _ in
+        }, completion: { _ in
             completion?()
-        }
+        })
     }
     
     /// 缩放动画
@@ -301,9 +301,9 @@ public extension UIView {
     func st_scaleAnimation(scale: CGFloat, duration: TimeInterval = 0.3, completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: duration, animations: {
             self.transform = CGAffineTransform(scaleX: scale, y: scale)
-        }) { _ in
+        }, completion: { _ in
             completion?()
-        }
+        })
     }
     
     /// 弹性动画
@@ -314,13 +314,13 @@ public extension UIView {
     func st_springAnimation(scale: CGFloat = 1.1, duration: TimeInterval = 0.6, completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.8, options: [], animations: {
             self.transform = CGAffineTransform(scaleX: scale, y: scale)
-        }) { _ in
+        }, completion: { _ in
             UIView.animate(withDuration: duration * 0.5, animations: {
                 self.transform = .identity
-            }) { _ in
+            }, completion: { _ in
                 completion?()
-            }
-        }
+            })
+        })
     }
     
     /// 震动动画

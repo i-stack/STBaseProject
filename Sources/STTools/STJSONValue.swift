@@ -96,7 +96,6 @@ public enum STJSONValue: Codable {
         }
     }
     
-    /// 获取布尔值
     public var boolValue: Bool? {
         switch self {
         case .bool(let value): return value

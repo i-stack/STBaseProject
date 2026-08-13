@@ -30,12 +30,14 @@ jobs:
             brew install swiftlint
           fi
           swiftlint version
-          # 不加 --strict：warning 不阻断 CI，仅 .swiftlint.yml 中明确为 error 级别的规则会失败构建。
-          # 待存量 warning 清零后可改为 --strict 提升门槛。
-          swiftlint --reporter github-actions-logging
+          # --strict：所有 warning 提升为 error。已清零规则（force_unwrapping、modifier_order、
+          # convenience_type、computed_accessors_order 等）一旦回归即阻断构建。
+          # missing_docs 存量未清零，已从 opt_in_rules 移入 disabled_rules（见 .swiftlint.yml），
+          # 补齐文档后恢复并继续由 --strict 守护。
+          swiftlint --strict --reporter github-actions-logging
 
       - name: Resolve SPM dependencies
-        run: xcodebuild -resolvePackageDependencies -scheme STBaseProject-Package
+        run: xcodebuild -resolvePackageDependencies -scheme STBaseProject
 
       - name: Build (iOS Simulator) with compile log
         run: |
@@ -43,7 +45,7 @@ jobs:
           # 不使用增量构建缓存，确保日志完整。
           rm -rf ~/Library/Developer/Xcode/DerivedData
           xcodebuild \
-            -scheme STBaseProject-Package \
+            -scheme STBaseProject \
             -destination 'generic/platform=iOS Simulator' \
             clean build | tee xcodebuild.log
 
@@ -51,7 +53,7 @@ jobs:
         run: |
           # analyzer_rules 仅在 `swiftlint analyze` 下执行；普通 `swiftlint lint` 不会跑。
           # 需完整编译日志（上方 Build 步骤产出 xcodebuild.log）。
-          swiftlint analyze \
+          swiftlint analyze --strict \
             --compiler-log-path xcodebuild.log \
             --reporter github-actions-logging
 
