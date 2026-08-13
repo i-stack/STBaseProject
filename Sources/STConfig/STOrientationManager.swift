@@ -39,8 +39,8 @@ public final class STOrientationManager {
             }
         } else {
             UIDevice.current.setValue(self.preferredOrientation(for: orientations).rawValue, forKey: "orientation")
+            UIViewController.attemptRotationToDeviceOrientation()
         }
-        UIViewController.attemptRotationToDeviceOrientation()
     }
 
     private func preferredOrientation(for orientations: UIInterfaceOrientationMask) -> UIInterfaceOrientation {
