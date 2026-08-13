@@ -5,10 +5,10 @@
 //  Created by 寒江孤影 on 2018/12/22.
 //
 
-import Security
-import Foundation
-import CryptoKit
 import CommonCrypto
+import CryptoKit
+import Foundation
+import Security
 
 // MARK: - 哈希算法类型
 public enum STHashAlgorithm {

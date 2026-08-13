@@ -96,7 +96,7 @@ public final class STHostnameReachability {
         let offlineCodes: Set<Int> = [
             NSURLErrorNotConnectedToInternet,
             NSURLErrorNetworkConnectionLost,
-            NSURLErrorDataNotAllowed,
+            NSURLErrorDataNotAllowed
         ]
         if offlineCodes.contains(nsError.code) {
             refresh()

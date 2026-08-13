@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2018/3/14.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 /// SDK 统一的外观模式
 public enum STAppearanceMode: Equatable {

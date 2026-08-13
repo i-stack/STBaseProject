@@ -43,11 +43,11 @@ public class STCustomTabBar: UIView {
     private var selectedIndex: Int = 0
     private var itemViews: [STTabBarItemView] = []
     private var itemModels: [STTabBarItemModel] = []
-    private var config: STTabBarConfig = STTabBarConfig()
+    private var config = STTabBarConfig()
     private var heightConstraint: NSLayoutConstraint?
     private var topBorderHeightConstraint: NSLayoutConstraint?
     
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setupUI()
     }
@@ -255,7 +255,7 @@ public class STCustomTabBar: UIView {
         return view
     }()
     
-    private lazy var topBorderView: UIView = UIView()
+    private lazy var topBorderView = UIView()
 }
 
 extension STCustomTabBar {

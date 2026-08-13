@@ -15,7 +15,7 @@ public class STShimmerRendererView: UIView {
 
     private var lastHeight: CGFloat = 0
     private let cursor = STShimmerCursorView()
-    private let renderer: STShimmerTextView = STShimmerTextView(usingTextLayoutManager: false)
+    private let renderer = STShimmerTextView(usingTextLayoutManager: false)
     private let controller = STShimmerController()
     weak var delegate: STShimmerRendererViewDelegate?
     
@@ -53,12 +53,12 @@ public class STShimmerRendererView: UIView {
         self.setup()
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         self.updateCursor()
     }
 
-    public override var intrinsicContentSize: CGSize {
+    override public var intrinsicContentSize: CGSize {
         let size = self.renderer.sizeThatFits(
             CGSize(width: self.bounds.width, height: .greatestFiniteMagnitude)
         )

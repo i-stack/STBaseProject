@@ -6,8 +6,8 @@
 //
 
 import Darwin
-import Security
 import Foundation
+import Security
 import SystemConfiguration
 
 public class STSecurityConfig {
@@ -245,6 +245,6 @@ private enum STSecurityConstants {
         "/usr/lib/substrate/SubstrateBootstrap.dylib",
         "/usr/lib/substrate/SubstrateLoader.dylib",
         "/usr/lib/frida/frida-agent.dylib",
-        "/usr/lib/libcycript.dylib",
+        "/usr/lib/libcycript.dylib"
     ]
 }

@@ -31,8 +31,8 @@ open class STBtn: UIButton {
     
     private var gradientLayer: CAGradientLayer?
     private var gradientColors: [UIColor]?
-    private var gradientStartPoint: CGPoint = CGPoint(x: 0, y: 0)
-    private var gradientEndPoint: CGPoint = CGPoint(x: 1, y: 1)
+    private var gradientStartPoint = CGPoint(x: 0, y: 0)
+    private var gradientEndPoint = CGPoint(x: 1, y: 1)
     private var liquidGlassView: STLiquidGlassView?
     /// 按 `UIControl.State.rawValue` 存储的 Configuration 背景色，由 `st_setBackgroundColor(_:for:)` 维护。
     private var stateBackgroundColors: [UInt: UIColor] = [:]
@@ -217,18 +217,18 @@ open class STBtn: UIButton {
         self.setupButton()
     }
     
-    required public init?(coder aDecoder: NSCoder) {
+    public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.setupButton()
     }
     
-    open override var isHighlighted: Bool {
+    override open var isHighlighted: Bool {
         didSet {
             self.updateLiquidGlassState(animated: true)
         }
     }
     
-    open override var isEnabled: Bool {
+    override open var isEnabled: Bool {
         didSet {
             self.updateLiquidGlassState(animated: false)
         }
@@ -382,7 +382,7 @@ open class STBtn: UIButton {
         }
     }
 
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.updateGradientLayerFrame()
         self.updateLiquidGlassFrame()
@@ -437,7 +437,7 @@ open class STBtn: UIButton {
     ///   - offset: 阴影偏移
     ///   - radius: 阴影半径
     ///   - opacity: 阴影透明度
-    public override func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
+    override public func st_setShadow(color: UIColor = .black, offset: CGSize = CGSize(width: 0, height: 2), radius: CGFloat = 4, opacity: Float = 0.3) {
         self.layer.shadowColor = color.cgColor
         self.layer.shadowOffset = offset
         self.layer.shadowRadius = radius

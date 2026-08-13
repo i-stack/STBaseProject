@@ -13,7 +13,7 @@ open class STCustomTabBarController: UITabBarController {
     
     private var isCustomTabBarVisible: Bool = false
     private var customTabBarItems: [STTabBarItemModel] = []
-    private var customTabBarConfig: STTabBarConfig = STTabBarConfig()
+    private var customTabBarConfig = STTabBarConfig()
     private var hasInstalledCustomTabBar: Bool = false
     private var lastAppliedAdditionalBottomInset: CGFloat = 0
 
@@ -21,12 +21,12 @@ open class STCustomTabBarController: UITabBarController {
         return !self.shouldUseSystemTabBar() && !self.customTabBarItems.isEmpty
     }
     
-    open override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         self.applyPreferredTabBarMode()
     }
 
-    open override func viewDidLayoutSubviews() {
+    override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         self.st_syncCustomTabBarSafeAreaAndZOrder()
     }
@@ -151,12 +151,12 @@ open class STCustomTabBarController: UITabBarController {
     }
     
     // MARK: - 重写系统方法
-    open override func setViewControllers(_ viewControllers: [UIViewController]?, animated: Bool) {
+    override open func setViewControllers(_ viewControllers: [UIViewController]?, animated: Bool) {
         super.setViewControllers(viewControllers, animated: animated)
         self.applyPreferredTabBarMode()
     }
     
-    open override var selectedIndex: Int {
+    override open var selectedIndex: Int {
         didSet {
             if self.isCustomTabBarVisible {
                 self.customTabBar.setSelectedIndex(self.selectedIndex)
@@ -164,7 +164,7 @@ open class STCustomTabBarController: UITabBarController {
         }
     }
     
-    open override var selectedViewController: UIViewController? {
+    override open var selectedViewController: UIViewController? {
         didSet {
             if self.isCustomTabBarVisible, let selectedVC = self.selectedViewController {
                 if let index = viewControllers?.firstIndex(of: selectedVC) {

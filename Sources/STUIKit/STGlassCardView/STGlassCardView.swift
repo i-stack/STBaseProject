@@ -68,7 +68,7 @@ open class STGlassCardView: UIView {
         return self.effectView.contentView
     }
 
-    public override func addSubview(_ view: UIView) {
+    override public func addSubview(_ view: UIView) {
         if view === self.effectView {
             super.addSubview(view)
         } else {
@@ -76,7 +76,7 @@ open class STGlassCardView: UIView {
         }
     }
 
-    public override func insertSubview(_ view: UIView, at index: Int) {
+    override public func insertSubview(_ view: UIView, at index: Int) {
         if view === self.effectView {
             super.insertSubview(view, at: index)
         } else {
@@ -84,7 +84,7 @@ open class STGlassCardView: UIView {
         }
     }
 
-    public override func insertSubview(_ view: UIView, aboveSubview siblingSubview: UIView) {
+    override public func insertSubview(_ view: UIView, aboveSubview siblingSubview: UIView) {
         if view === self.effectView {
             super.insertSubview(view, aboveSubview: siblingSubview)
         } else {
@@ -92,7 +92,7 @@ open class STGlassCardView: UIView {
         }
     }
 
-    public override func insertSubview(_ view: UIView, belowSubview siblingSubview: UIView) {
+    override public func insertSubview(_ view: UIView, belowSubview siblingSubview: UIView) {
         if view === self.effectView {
             super.insertSubview(view, belowSubview: siblingSubview)
         } else {
@@ -126,13 +126,13 @@ open class STGlassCardView: UIView {
         }
     }
 
-    public var borderColor: UIColor? = nil {
+    public var borderColor: UIColor? {
         didSet {
             self.effectView.layer.borderColor = self.borderColor?.resolvedColor(with: self.traitCollection).cgColor
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setupView()
     }
@@ -166,7 +166,7 @@ open class STGlassCardView: UIView {
         }
     }
 
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.layer.shadowPath = UIBezierPath(roundedRect: self.bounds, cornerRadius: self.cornerRadius).cgPath
     }
@@ -185,7 +185,7 @@ open class STGlassCardView: UIView {
         self.shadowConfig = shadowConfig
     }
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override open func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.applyAnimatedShadowStyle(for: self.traitCollection.userInterfaceStyle)

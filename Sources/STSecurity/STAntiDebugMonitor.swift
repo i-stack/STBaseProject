@@ -17,7 +17,7 @@ public final class STAntiDebugMonitor {
     private let config: STAntiDebugConfig
     private let securityCheck: () -> STSecurityCheckResult
 
-    public init(config: STAntiDebugConfig, securityCheck: @escaping () -> STSecurityCheckResult = { STSecurityConfig.shared.st_performSecurityCheck() } ) {
+    public init(config: STAntiDebugConfig, securityCheck: @escaping () -> STSecurityCheckResult = { STSecurityConfig.shared.st_performSecurityCheck() }) {
         self.config = config
         self.securityCheck = securityCheck
     }

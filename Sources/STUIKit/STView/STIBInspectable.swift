@@ -192,7 +192,7 @@ extension NSLayoutConstraint {
     }
     
     // MARK: - 生命周期方法
-    open override func awakeFromNib() {
+    override open func awakeFromNib() {
         super.awakeFromNib()
         if _autoConstant && !_isAdapted {
             _originalConstant = self.constant

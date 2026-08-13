@@ -144,14 +144,14 @@ public struct STHUDConfig {
 public class STHUD: NSObject {
 
     fileprivate var progressHUD: STProgressHUD?
-    public var theme: STHUDTheme = STHUDTheme()
-    public static let sharedHUD: STHUD = STHUD()
+    public var theme = STHUDTheme()
+    public static let sharedHUD = STHUD()
     public var defaultIconPosition: STHUDIconPosition = .top
-    public var hudMode: STProgressHUD.HudMode = STProgressHUD.HudMode.customView
+    public var hudMode = STProgressHUD.HudMode.customView
 
     private var completionHandler: (() -> Void)?
 
-    private override init() {
+    override private init() {
         super.init()
     }
     
@@ -274,7 +274,7 @@ public class STHUD: NSObject {
             if self.progressHUD?.superview != nil {
                 self.progressHUD?.hide(animation: .fade)
             }
-            self.progressHUD = STProgressHUD.init(withView: window)
+            self.progressHUD = STProgressHUD(withView: window)
             self.configCommonProperty()
             if let hud = self.progressHUD { window.addSubview(hud) }
         }
@@ -445,7 +445,7 @@ public class STHUD: NSObject {
         if self.progressHUD?.superview != nil {
             self.progressHUD?.hide(animation: .fade)
         }
-        self.progressHUD = STProgressHUD.init(withView: showInView)
+        self.progressHUD = STProgressHUD(withView: showInView)
         self.configCommonProperty()
         if let hud = self.progressHUD { showInView.addSubview(hud) }
     }

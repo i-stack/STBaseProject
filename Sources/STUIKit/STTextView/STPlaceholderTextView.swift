@@ -66,7 +66,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    @objc dynamic open var placeholderFont: UIFont = UIFont.st_systemFont(ofSize: 16) {
+    @objc open dynamic var placeholderFont = UIFont.st_systemFont(ofSize: 16) {
         didSet {
             self.placeholderLabel.font = self.placeholderFont
             if !self.isApplyingDefaultPlaceholderFont {
@@ -131,21 +131,21 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    open override var text: String! {
+    override open var text: String! {
         didSet {
             self.updatePlaceholderVisibility()
             self.notifyPlaceholderTextDidChange()
         }
     }
 
-    open override var attributedText: NSAttributedString! {
+    override open var attributedText: NSAttributedString! {
         didSet {
             self.updatePlaceholderVisibility()
             self.notifyPlaceholderTextDidChange()
         }
     }
 
-    open override var font: UIFont? {
+    override open var font: UIFont? {
         didSet {
             if self.shouldFollowTextViewFontForPlaceholder {
                 self.applyDefaultPlaceholderFont()
@@ -154,7 +154,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    open override var bounds: CGRect {
+    override open var bounds: CGRect {
         didSet {
             if oldValue.size.width != self.bounds.size.width {
                 self.layoutPlaceholderLabel()
@@ -163,7 +163,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    open override var textContainerInset: UIEdgeInsets {
+    override open var textContainerInset: UIEdgeInsets {
         didSet {
             guard !self.isUpdatingTextContainerInset else { return }
             self.contentInsetsStorage = self.textContainerInset
@@ -172,7 +172,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    public override init(frame: CGRect, textContainer: NSTextContainer?) {
+    override public init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.configPlaceholderTextView()
     }
@@ -182,7 +182,7 @@ open class STPlaceholderTextView: UITextView {
         self.configPlaceholderTextView()
     }
 
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.st_updateLiquidGlassCornerRadius()
         self.layoutPlaceholderLabel()

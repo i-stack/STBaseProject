@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2018/3/14.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 /// 用于 objc_setAssociatedObject 的引用型 key，避免对可变 static var 取地址造成的未定义行为。
 private final class STAssociationKey {}
@@ -76,7 +76,7 @@ open class STBaseView: UIView {
         }
     }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setupBase()
     }
@@ -88,7 +88,7 @@ open class STBaseView: UIView {
         self.setupBase()
     }
 
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setupBase()
     }
@@ -319,7 +319,7 @@ open class STBaseView: UIView {
         }
     }
 
-    open override func safeAreaInsetsDidChange() {
+    override open func safeAreaInsetsDidChange() {
         super.safeAreaInsetsDidChange()
         switch self.layoutMode {
         case .table:
@@ -335,7 +335,7 @@ open class STBaseView: UIView {
         }
     }
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override open func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         guard self.enableAppearanceManagement else { return }
         let previousStyle = previousTraitCollection?.userInterfaceStyle ?? .unspecified
@@ -653,7 +653,7 @@ open class STSection: UIView {
             self.setupStackView()
         }
 
-        required public init?(coder: NSCoder) {
+        public required init?(coder: NSCoder) {
             self.inset = .zero
             self.spacing = 0
             self.stackView = UIStackView()
@@ -864,11 +864,11 @@ open class STGradientNavigationBar: UIView {
 
     private let gradientLayer = CAGradientLayer()
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setupGradient()
     }
-    required public init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.setupGradient()
     }
@@ -884,16 +884,16 @@ open class STGradientNavigationBar: UIView {
         self.gradientLayer.colors = [self.startColor.cgColor, self.endColor.cgColor]
     }
 
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         self.gradientLayer.frame = self.bounds
     }
 
-    public override var intrinsicContentSize: CGSize {
+    override public var intrinsicContentSize: CGSize {
         return CGSize(width: UIView.noIntrinsicMetric, height: self.height)
     }
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override open func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if self.traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             self.updateGradientColors()

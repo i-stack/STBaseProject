@@ -61,13 +61,13 @@ open class STShimmerTextView: UITextView {
     private var _lineFadeBaseLayer: CALayer?
     /// 最终目标态的 attributed text（全不透明），不含任何动画中间状态的 alpha 值。
     /// 供外部做 "已渲染前缀" 比较时使用，避免因动画过渡期 alpha < 1 导致前缀比较误判。
-    private var _baseAttributedText: NSMutableAttributedString = NSMutableAttributedString()
+    private var _baseAttributedText = NSMutableAttributedString()
     private var _isLineFadeAnimating: Bool = false
 
     open var defaultTextAttributes: [NSAttributedString.Key: Any] {
         return [
             .font: self.font ?? UIFont.st_systemFont(ofSize: 16),
-            .foregroundColor: self.textColor ?? UIColor.label,
+            .foregroundColor: self.textColor ?? UIColor.label
         ]
     }
 
@@ -79,7 +79,7 @@ open class STShimmerTextView: UITextView {
         (self.displayLink != nil && !self.animatingTokens.isEmpty) || self._isLineFadeAnimating
     }
 
-    public override init(frame: CGRect, textContainer: NSTextContainer?) {
+    override public init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         self.setup()
     }
@@ -118,7 +118,7 @@ open class STShimmerTextView: UITextView {
         }
     }
 
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         guard let mask = _lineFadeMaskLayer else { return }
         CATransaction.begin()
@@ -669,7 +669,7 @@ open class STShimmerTextView: UITextView {
             let mask = CALayer()
             mask.actions = [
                 "bounds": null, "position": null,
-                "frame": null, "sublayerTransform": null, "transition": null,
+                "frame": null, "sublayerTransform": null, "transition": null
             ]
             let base = CALayer()
             base.backgroundColor = UIColor.black.cgColor
@@ -775,12 +775,12 @@ open class STShimmerTextView: UITextView {
         anim.fromValue = [
             NSNumber(value: 0),
             NSNumber(value: Double(fromFadeStart)),
-            NSNumber(value: 1),
+            NSNumber(value: 1)
         ]
         anim.toValue = [
             NSNumber(value: 0),
             NSNumber(value: Double(fadeStart)),
-            NSNumber(value: 1),
+            NSNumber(value: 1)
         ]
         anim.fillMode = .both
         anim.isRemovedOnCompletion = true
@@ -808,7 +808,7 @@ open class STShimmerTextView: UITextView {
     }
 
     /// 子类可重写：禁止系统长按复制/粘贴菜单，仅使用自定义 popupMenuItems（如 Bajoseek 回复区）
-    open override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         if self.suppressSystemTextMenu {
             return false
         }

@@ -5,8 +5,8 @@
 //  Created by 寒江孤影 on 2018/12/10.
 //
 
-import Network
 import Foundation
+import Network
 
 public enum STWebSocketState: Equatable, Sendable {
     /// 初始未连接

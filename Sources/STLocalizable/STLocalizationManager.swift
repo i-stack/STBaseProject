@@ -56,7 +56,7 @@ private extension Bundle {
     static let st_installSwizzle: Void = {
         guard
             let original = class_getInstanceMethod(Bundle.self, #selector(Bundle.localizedString(forKey:value:table:))),
-            let patched   = class_getInstanceMethod(Bundle.self, #selector(Bundle.st_patched_localizedString(forKey:value:table:)))
+            let patched = class_getInstanceMethod(Bundle.self, #selector(Bundle.st_patched_localizedString(forKey:value:table:)))
         else { return }
         method_exchangeImplementations(original, patched)
     }()

@@ -94,14 +94,14 @@ open class STBottomSheetViewController: UIViewController {
         return abs(self.containerTopConstraint.constant - self.fullOffset) < self.fullOffsetTolerance
     }
 
-    open override func loadView() {
+    override open func loadView() {
         let rootView = STBottomSheetRootView()
         rootView.backgroundColor = .clear
         rootView.interactiveContentView = self.contentView
         self.view = rootView
     }
 
-    open override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .clear
         self.setupContentView()
@@ -110,7 +110,7 @@ open class STBottomSheetViewController: UIViewController {
         self.containerTopConstraint.constant = self.hiddenOffset
     }
 
-    open override func viewDidLayoutSubviews() {
+    override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         if self.containerTopConstraint.constant > self.hiddenOffset {
             self.containerTopConstraint.constant = self.hiddenOffset
@@ -222,7 +222,7 @@ open class STBottomSheetViewController: UIViewController {
             self.indicatorView.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor),
             self.indicatorView.widthAnchor.constraint(equalToConstant: 38),
             self.indicatorView.heightAnchor.constraint(equalToConstant: 5),
-            self.indicatorView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 8),
+            self.indicatorView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 8)
         ])
         
         self.view.bringSubviewToFront(self.indicatorView)
@@ -502,11 +502,11 @@ public class STBottomSheetPresentationController: UIPresentationController {
         return view
     }()
 
-    public override var frameOfPresentedViewInContainerView: CGRect {
+    override public var frameOfPresentedViewInContainerView: CGRect {
         return self.containerView?.bounds ?? .zero
     }
 
-    public override func presentationTransitionWillBegin() {
+    override public func presentationTransitionWillBegin() {
         guard let containerView = self.containerView else { return }
         self.dimmingView.frame = containerView.bounds
         containerView.insertSubview(self.dimmingView, at: 0)
@@ -519,7 +519,7 @@ public class STBottomSheetPresentationController: UIPresentationController {
         })
     }
 
-    public override func dismissalTransitionWillBegin() {
+    override public func dismissalTransitionWillBegin() {
         guard let transitionCoordinator = self.presentedViewController.transitionCoordinator else {
             self.dimmingView.alpha = 0
             self.dimmingView.removeFromSuperview()
@@ -532,7 +532,7 @@ public class STBottomSheetPresentationController: UIPresentationController {
         })
     }
 
-    public override func presentationTransitionDidEnd(_ completed: Bool) {
+    override public func presentationTransitionDidEnd(_ completed: Bool) {
         super.presentationTransitionDidEnd(completed)
         if completed {
             (self.presentedViewController as? STBottomSheetViewController)?.finishPresentationWithoutAnimation()
@@ -541,7 +541,7 @@ public class STBottomSheetPresentationController: UIPresentationController {
         }
     }
 
-    public override func containerViewDidLayoutSubviews() {
+    override public func containerViewDidLayoutSubviews() {
         super.containerViewDidLayoutSubviews()
         self.dimmingView.frame = self.containerView?.bounds ?? .zero
         self.presentedView?.frame = self.frameOfPresentedViewInContainerView
@@ -627,7 +627,7 @@ public class STBottomSheetTransitionAnimator: NSObject, UIViewControllerAnimated
 
 public class STBottomSheetTransitionDelegate: NSObject, UIViewControllerTransitioningDelegate {
 
-    public override init() {
+    override public init() {
         super.init()
     }
 

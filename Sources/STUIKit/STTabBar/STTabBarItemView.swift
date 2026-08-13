@@ -26,7 +26,7 @@ public class STTabBarItemView: UIView {
     private var initialConstraints: [NSLayoutConstraint] = []
     private var lastEffectiveBarHeightUsed: CGFloat = -1
     
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         self.setupUI()
     }
@@ -36,7 +36,7 @@ public class STTabBarItemView: UIView {
         self.setupUI()
     }
     
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
         guard let model = self.itemModel, model.displayMode == .imageAndText else { return }
         let eff = self.effectiveBarHeightForImageTextLayout()
@@ -380,7 +380,7 @@ public class STTabBarItemView: UIView {
         self.tapAction?()
     }
 
-    public override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         guard traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) else { return }
         guard var model = self.itemModel else { return }

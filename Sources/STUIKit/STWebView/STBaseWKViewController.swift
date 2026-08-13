@@ -4,6 +4,7 @@
 //
 //  Created by 寒江孤影 on 2020/12/31.
 //
+
 import WebKit
 import StoreKit
 
@@ -55,8 +56,8 @@ public struct STWebViewConfig {
     var applicationNameForUserAgent: String?
     var customUserAgent: String?
     var websiteDataStore: WKWebsiteDataStore = .default()
-    var preferences: WKPreferences = WKPreferences()
-    var userContentController: WKUserContentController = WKUserContentController()
+    var preferences = WKPreferences()
+    var userContentController = WKUserContentController()
     
     public init(allowsInlineMediaPlayback: Bool = true,
                 mediaTypesRequiringUserActionForPlayback: WKAudiovisualMediaTypes = [],
@@ -97,7 +98,7 @@ public protocol STWebViewMessageHandler: AnyObject {
 open class STBaseWKViewController: STBaseViewController {
     
     open var webInfo: STWebInfo?
-    open var webViewConfig: STWebViewConfig = STWebViewConfig()
+    open var webViewConfig = STWebViewConfig()
     open var messageHandler: STWebViewMessageHandler?
     private var wkConfig: WKWebViewConfiguration?
     private var progressObserver: NSKeyValueObservation?
@@ -117,7 +118,7 @@ open class STBaseWKViewController: STBaseViewController {
         self.webInfo = nil
     }
     
-    open override func viewDidLoad() {
+    override open func viewDidLoad() {
         super.viewDidLoad()
         self.st_setupWebView()
         self.st_setupUI()
@@ -163,7 +164,7 @@ open class STBaseWKViewController: STBaseViewController {
             self.wkWebView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             self.wkWebView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.wkWebView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.wkWebView.topAnchor.constraint(equalTo: self.contentTopAnchor),
+            self.wkWebView.topAnchor.constraint(equalTo: self.contentTopAnchor)
         ])
     }
     
@@ -222,8 +223,8 @@ open class STBaseWKViewController: STBaseViewController {
     private func st_setupProgressView() {
         self.view.addSubview(self.progressView)
         self.view.addConstraints([
-            NSLayoutConstraint.init(item: self.progressView, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0),
-            NSLayoutConstraint.init(item: self.progressView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self.progressView, attribute: .left, relatedBy: .equal, toItem: self.view, attribute: .left, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self.progressView, attribute: .right, relatedBy: .equal, toItem: self.view, attribute: .right, multiplier: 1, constant: 0)
         ])
         self.st_addProgressObserver()
     }
@@ -512,7 +513,7 @@ extension STBaseWKViewController: WKUIDelegate, WKNavigationDelegate, WKScriptMe
     }
     
     private func st_updateTitle() {
-        self.wkWebView.evaluateJavaScript("document.title") { [weak self] result, error in
+        self.wkWebView.evaluateJavaScript("document.title") { [weak self] result, _ in
             guard let self = self else { return }
             if let text = result as? String, !text.isEmpty {
                 self.st_setTitle(text)

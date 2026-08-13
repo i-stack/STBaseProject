@@ -127,7 +127,7 @@ open class STView: UIView {
         }
     }
     
-    open override func layoutSubviews() {
+    override open func layoutSubviews() {
         super.layoutSubviews()
         self.st_updateLiquidGlassCornerRadius()
     }
@@ -332,7 +332,7 @@ public extension UIView {
         let animation = CAKeyframeAnimation(keyPath: "transform.translation.x")
         animation.timingFunction = CAMediaTimingFunction(name: .linear)
         animation.duration = duration
-        animation.values = [-intensity, intensity, -intensity, intensity, -intensity/2, intensity/2, -intensity/4, intensity/4, 0]
+        animation.values = [-intensity, intensity, -intensity, intensity, -intensity / 2, intensity / 2, -intensity / 4, intensity / 4, 0]
         layer.add(animation, forKey: "shake")
         
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {

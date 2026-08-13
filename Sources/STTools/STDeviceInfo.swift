@@ -5,10 +5,10 @@
 //  Created by 寒江孤影 on 2019/02/10.
 //
 
-import UIKit
 import Darwin
 import Network
 import SystemConfiguration
+import UIKit
 
 public struct STDeviceInfo {
 

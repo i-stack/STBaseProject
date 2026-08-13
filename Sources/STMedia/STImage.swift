@@ -224,8 +224,7 @@ extension UIImage {
             while maxQuality - minQuality > 0.05 {
                 let mid = (minQuality + maxQuality) / 2
                 if let compressed = image.jpegData(compressionQuality: mid) {
-                    if compressed.count <= maxBytes { data = compressed; minQuality = mid }
-                    else { maxQuality = mid }
+                    if compressed.count <= maxBytes { data = compressed; minQuality = mid } else { maxQuality = mid }
                 }
             }
             if data.count > maxBytes {
