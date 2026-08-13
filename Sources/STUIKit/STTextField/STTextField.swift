@@ -7,7 +7,7 @@
 
 import UIKit
 
-private struct STTextFieldLocalizationKey {
+private enum STTextFieldLocalizationKey {
     static var localizedPlaceholderKey: UInt8 = 0
 }
 

@@ -20,14 +20,14 @@ public enum STImageError: LocalizedError {
 }
 
 public enum STImageFormat: String, CaseIterable {
-    case png = "png"
-    case gif = "gif"
-    case jpeg = "jpeg"
-    case tiff = "tiff"
-    case webp = "webp"
-    case heic = "heic"
-    case heif = "heif"
-    case undefined = "undefined"
+    case png
+    case gif
+    case jpeg
+    case tiff
+    case webp
+    case heic
+    case heif
+    case undefined
 
     public var mimeType: String { return "image/\(rawValue)" }
     public var fileExtension: String { return rawValue }

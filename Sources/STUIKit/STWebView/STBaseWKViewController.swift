@@ -444,25 +444,30 @@ open class STBaseWKViewController: STBaseViewController {
 }
 
 extension STBaseWKViewController: WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler {
+    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         self.st_updateLoadState(.loading)
     }
     
+    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         self.st_updateLoadState(.loading)
         self.st_updateTitle()
     }
     
+    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         self.st_updateLoadState(.loaded)
         self.st_updateTitle()
     }
     
+    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         self.st_handleLoadError(error)
         self.st_updateTitle()
     }
     
+    // swiftlint:disable:next implicitly_unwrapped_optional  // WKNavigationDelegate 协议签名
     open func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         self.st_handleLoadError(error)
     }

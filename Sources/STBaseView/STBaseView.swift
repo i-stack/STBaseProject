@@ -639,10 +639,10 @@ open class STSection: UIView {
     }
     private let stackView: UIStackView
     // 持有 stackView 的 4 条边约束引用，便于改 inset 时直接改 constant，避免约束泄漏
-    private var topConstraint: NSLayoutConstraint!
-    private var leadingConstraint: NSLayoutConstraint!
-    private var trailingConstraint: NSLayoutConstraint!
-    private var bottomConstraint: NSLayoutConstraint!
+    private var topConstraint: NSLayoutConstraint?
+    private var leadingConstraint: NSLayoutConstraint?
+    private var trailingConstraint: NSLayoutConstraint?
+    private var bottomConstraint: NSLayoutConstraint?
 
         public init(inset: UIEdgeInsets = .zero, spacing: CGFloat = 0) {
             self.inset = inset
@@ -673,7 +673,7 @@ open class STSection: UIView {
             self.leadingConstraint = self.stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.inset.left)
             self.trailingConstraint = self.stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -self.inset.right)
             self.bottomConstraint = self.stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -self.inset.bottom)
-            NSLayoutConstraint.activate([self.topConstraint, self.leadingConstraint, self.trailingConstraint, self.bottomConstraint])
+            NSLayoutConstraint.activate([self.topConstraint, self.leadingConstraint, self.trailingConstraint, self.bottomConstraint].compactMap { $0 })
         }
 
         /// Add multiple views (arranged) to this section (chainable)

@@ -9,7 +9,7 @@ import UIKit
 
 // MARK: - 混合 TabBar 支持
 /// 支持系统 UITabBarItem 和自定义 STTabBarItemModel 混用的工具类
-public class STTabBarMixedSupport {
+public enum STTabBarMixedSupport {
     
     /// 混合 TabBar Item 类型
     public enum MixedTabBarItem {

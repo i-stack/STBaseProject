@@ -10,7 +10,7 @@ import Foundation
 import Network
 import UIKit
 
-public final class STParameterEncoder {
+public enum STParameterEncoder {
 
     public enum EncodingType {
         case url
@@ -126,7 +126,11 @@ open class STHTTPSession: NSObject {
     public let interceptor: STInterceptor?
     public let eventMonitor: STCompositeEventMonitor
 
-    private var urlSession: URLSession!
+    private let urlSessionConfiguration: URLSessionConfiguration
+    /// 底层 URLSession。init 中立即创建，避免 deinit 触发 lazy 初始化时把正在析构的
+    /// self 注册为新 session 的 delegate（生命周期逃逸）。使用 Optional 存储：
+    /// st_invalidate() 后置 nil，下次请求经 session 访问器惰性重建。
+    private var urlSession: URLSession?
     private let delegateQueue: OperationQueue
     private let stateLock = NSLock()
     private var requestsByTaskID: [Int: STRequest] = [:]
@@ -156,6 +160,7 @@ open class STHTTPSession: NSObject {
         eventMonitors: [STEventMonitor] = [],
         sslPinningConfig: STSSLPinningConfig = STSSLPinningConfig(enabled: false)
     ) {
+        self.urlSessionConfiguration = configuration
         self.defaultRequestConfig = defaultRequestConfig
         self.defaultRequestHeaders = defaultRequestHeaders
         self.interceptor = interceptor
@@ -177,11 +182,35 @@ open class STHTTPSession: NSObject {
         self.delegateQueue = queue
 
         super.init()
-        self.urlSession = URLSession(configuration: configuration, delegate: self, delegateQueue: self.delegateQueue)
+        self.urlSession = URLSession(configuration: self.urlSessionConfiguration, delegate: self, delegateQueue: self.delegateQueue)
     }
 
     deinit {
-        self.urlSession.invalidateAndCancel()
+        // 直接读取 Optional 存储，避免析构期触发 session 访问器的惰性重建。
+        self.urlSession?.invalidateAndCancel()
+    }
+
+    /// 返回当前可用的 URLSession；若已被 st_invalidate() 销毁则重建。
+    /// 读取/创建/赋值与 st_invalidate() 经 stateLock 互斥，避免并发首次重建
+    /// 产生多个 session，或取得刚被置空的旧 session。
+    private var session: URLSession {
+        self.withStateLock {
+            if let session = self.urlSession {
+                return session
+            }
+            let session = URLSession(configuration: self.urlSessionConfiguration, delegate: self, delegateQueue: self.delegateQueue)
+            self.urlSession = session
+            return session
+        }
+    }
+
+    /// 显式销毁底层 URLSession 并释放其对 self 的 delegate 强引用，
+    /// 打破 self ⇄ session 循环引用。调用后再次发起请求会重建一个新的 session。
+    public func st_invalidate() {
+        self.withStateLock {
+            self.urlSession?.invalidateAndCancel()
+            self.urlSession = nil
+        }
     }
 
     @discardableResult
@@ -370,7 +399,7 @@ open class STHTTPSession: NSObject {
         }
         request.urlRequest = adapted
 
-        let task = self.urlSession.dataTask(with: adapted)
+        let task = self.session.dataTask(with: adapted)
         request.task = task
         let restart: () -> Void = { [weak self] in
             Task { await self?.executeData(request, initial: initial, interceptor: interceptor, config: config) }
@@ -428,7 +457,7 @@ open class STHTTPSession: NSObject {
         }
         request.urlRequest = adapted
 
-        let task = self.urlSession.uploadTask(with: adapted, from: body)
+        let task = self.session.uploadTask(with: adapted, from: body)
         request.task = task
         let restart: () -> Void = { [weak self] in
             Task { await self?.executeUpload(request, initial: initial, body: body, interceptor: interceptor, config: config) }
@@ -483,9 +512,9 @@ open class STHTTPSession: NSObject {
 
         let task: URLSessionDownloadTask
         if let resumeData = resumeData {
-            task = self.urlSession.downloadTask(withResumeData: resumeData)
+            task = self.session.downloadTask(withResumeData: resumeData)
         } else {
-            task = self.urlSession.downloadTask(with: adapted)
+            task = self.session.downloadTask(with: adapted)
         }
         request.task = task
         let restart: () -> Void = { [weak self, weak request] in
@@ -542,7 +571,7 @@ open class STHTTPSession: NSObject {
         }
         request.urlRequest = adapted
 
-        let task = self.urlSession.dataTask(with: adapted)
+        let task = self.session.dataTask(with: adapted)
         request.task = task
         let restart: () -> Void = { [weak self, weak request] in
             Task {

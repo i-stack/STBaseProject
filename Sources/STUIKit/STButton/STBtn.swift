@@ -7,7 +7,7 @@
 
 import UIKit
 
-private struct STBtnLocalizationKey {
+private enum STBtnLocalizationKey {
     static var localizedTitleKey: UInt8 = 0
     static var localizedSelectedTitleKey: UInt8 = 1
 }
@@ -123,23 +123,23 @@ open class STBtn: UIButton {
     }
     
     @IBInspectable open var borderWidth: CGFloat {
-        set {
-            self.layer.borderWidth = newValue
-        }
         get {
             return self.layer.borderWidth
+        }
+        set {
+            self.layer.borderWidth = newValue
         }
     }
     
     @IBInspectable open var cornerRadius: CGFloat {
+        get {
+            return self.layer.cornerRadius
+        }
         set {
             self.layer.cornerRadius = newValue
             self.updateGradientLayerCornerRadius()
             self.updateLiquidGlassCornerRadius()
             self.setNeedsUpdateConfiguration()
-        }
-        get {
-            return self.layer.cornerRadius
         }
     }
     
@@ -153,12 +153,12 @@ open class STBtn: UIButton {
     }
     
     @IBInspectable open var borderColor: UIColor? {
-        set {
-            self.layer.borderColor = newValue?.cgColor
-        }
         get {
             guard let color = self.layer.borderColor else { return nil }
             return UIColor(cgColor: color)
+        }
+        set {
+            self.layer.borderColor = newValue?.cgColor
         }
     }
     

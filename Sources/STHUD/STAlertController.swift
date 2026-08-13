@@ -46,7 +46,7 @@ public struct STAlertActionItem {
 }
 
 // MARK: - 布局常量
-private struct STAlertLayoutConstant {
+private enum STAlertLayoutConstant {
     static let alertWidth: CGFloat = 270
     static let buttonHeight: CGFloat = 44
     static let separatorHeight: CGFloat = 0.5
@@ -91,7 +91,7 @@ public struct STAlertInfo {
 open class STAlertController: UIViewController {
     
     private var isPresented: Bool = false
-    private var newConstraint: NSLayoutConstraint!
+    private var newConstraint: NSLayoutConstraint?
     private var backgroundColor = UIColor.white
     private var alertInfo = STAlertInfo()
     private var actionItems: [STAlertActionItem] = []
@@ -240,14 +240,14 @@ open class STAlertController: UIViewController {
                 NSLayoutConstraint(item: self.alertView, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1, constant: 0),
                 NSLayoutConstraint(item: self.alertView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.alertWidth),
                 self.newConstraint
-            ])
+            ].compactMap { $0 })
         } else {
             self.view.addConstraints([
                 NSLayoutConstraint(item: self.alertView, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0),
                 NSLayoutConstraint(item: self.alertView, attribute: .bottom, relatedBy: .equal, toItem: self.view, attribute: .bottom, multiplier: 1, constant: 0),
                 NSLayoutConstraint(item: self.alertView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: STAlertLayoutConstant.alertWidth),
                 self.newConstraint
-            ])
+            ].compactMap { $0 })
         }
         
         if self.alertInfo.title.text != "" && self.alertInfo.message.text != "" {
@@ -421,9 +421,9 @@ open class STAlertController: UIViewController {
         }
         self.view.layoutIfNeeded()
         if self.alertInfo.message.text != "" {
-            self.newConstraint.constant = self.messageLabel.frame.maxY + 54
+            self.newConstraint?.constant = self.messageLabel.frame.maxY + 54
         } else if self.alertInfo.title.text != "" {
-            self.newConstraint.constant = self.titleLabel.frame.maxY + 54
+            self.newConstraint?.constant = self.titleLabel.frame.maxY + 54
         }
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()

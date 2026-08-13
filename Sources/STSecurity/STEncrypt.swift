@@ -280,7 +280,7 @@ public extension Data {
 }
 
 // MARK: - 加密工具类
-public struct STEncryptionUtils {
+public enum STEncryptionUtils {
     
     /// 生成随机密钥
     /// - Parameter length: 密钥长度（字节）

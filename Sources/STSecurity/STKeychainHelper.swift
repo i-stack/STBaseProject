@@ -114,7 +114,7 @@ public enum STKeychainError: Error, LocalizedError {
     }
 }
 
-public class STKeychainHelper {
+public enum STKeychainHelper {
     
     private static let service = Bundle.main.bundleIdentifier ?? "com.STBaseProject.app"
     private static let accessGroup: String? = nil // 可以设置为 App Group 标识符

@@ -10,7 +10,7 @@ import Network
 import SystemConfiguration
 import UIKit
 
-public struct STDeviceInfo {
+public enum STDeviceInfo {
 
     public struct STAppInfo: Sendable {
         public let version: String
@@ -592,24 +592,24 @@ public enum STDeviceType: String, Sendable {
 }
 
 public enum STNetworkConnectionType: String, Sendable {
-    case wifi = "wifi"
-    case cellular = "cellular"
-    case ethernet = "ethernet"
-    case unknown = "unknown"
+    case wifi
+    case cellular
+    case ethernet
+    case unknown
 }
 
 public enum STDevicePerformanceLevel: String, Sendable {
-    case low = "low"
-    case medium = "medium"
-    case high = "high"
+    case low
+    case medium
+    case high
 }
 
 public enum STThermalState: String, Sendable {
-    case nominal = "nominal"
-    case fair = "fair"
-    case serious = "serious"
-    case critical = "critical"
-    case unknown = "unknown"
+    case nominal
+    case fair
+    case serious
+    case critical
+    case unknown
 
     fileprivate init(_ state: ProcessInfo.ThermalState) {
         switch state {

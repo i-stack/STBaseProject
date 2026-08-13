@@ -7,7 +7,7 @@
 
 import UIKit
 
-private struct STLabelLocalizationKey {
+private enum STLabelLocalizationKey {
     static var localizedTextKey: UInt8 = 0
 }
 
@@ -68,12 +68,12 @@ open class STLabel: UILabel, STLocalizable {
     }
     
     @IBInspectable open var cornerRadius: CGFloat {
+        get {
+            return layer.cornerRadius
+        }
         set {
             self.layer.cornerRadius = newValue
             self.st_updateLiquidGlassCornerRadius()
-        }
-        get {
-            return layer.cornerRadius
         }
     }
     
@@ -87,21 +87,21 @@ open class STLabel: UILabel, STLocalizable {
     }
     
     @IBInspectable open var borderWidth: CGFloat {
-        set {
-            self.layer.borderWidth = newValue > 0 ? newValue : 0
-        }
         get {
             return layer.borderWidth
+        }
+        set {
+            self.layer.borderWidth = newValue > 0 ? newValue : 0
         }
     }
     
     @IBInspectable open var borderColor: UIColor? {
-        set {
-            self.layer.borderColor = newValue?.cgColor
-        }
         get {
             guard let color = self.layer.borderColor else { return nil }
             return UIColor(cgColor: color)
+        }
+        set {
+            self.layer.borderColor = newValue?.cgColor
         }
     }
     

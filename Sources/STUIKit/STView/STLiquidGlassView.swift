@@ -135,7 +135,7 @@ open class STLiquidGlassView: UIView {
     }
 }
 
-private struct STLiquidGlassAssociationKey {
+private enum STLiquidGlassAssociationKey {
     static var viewKey: UInt8 = 0
 }
 
