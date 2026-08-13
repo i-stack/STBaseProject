@@ -1,6 +1,6 @@
 # SwiftLint 配置 —— STBaseProject
 # 与 .github/check_try_question_mark.sh 互补：try? 政策由专门脚本兜底，本文件聚焦
-# 其他反模式：强解包、as!、过长文件、Bool 旗参痕迹、`@objc` 滥用等。
+# 其他反模式：强解包、as!、过长文件、含糊 Bool 参数、`@objc` 滥用等。
 #
 # 渐进式落地策略：
 # - 严重项标 error（as!、Markdown 外 try! 在源码区）
@@ -22,8 +22,11 @@ disabled_rules:
   - type_name                     # 同上
   - trailing_whitespace           # 历史空白多，独立 PR 清理
   - opening_brace                 # 与历史风格不一致
-  - line_length                   # 由下方自定义长度覆盖
+  # 注意：line_length 是默认开启规则，不在 disabled_rules 中关闭，
+  # 直接在下方 line_length: 配置块生效（置于 disabled_rules 会导致同名配置块被忽略）
   - force_try                     # 由 st_no_force_try_outside_markdown 精准限制，允许 STMarkdown 静态正则
+  - blanket_disable_command        # 基础库大量历史 disable 注释，不卡"禁用过多/需 re-enable"风格
+  - superfluous_disable_command    # 同上：保留历史 disable 豁免，不因区域内未触发而告警
 
 opt_in_rules:
   - empty_count
@@ -41,7 +44,8 @@ opt_in_rules:
   - contains_over_filter_count
   - contains_over_first_not_nil
   - convenience_type
-  - discouraged_optional_boolean  # ★ 标记 Optional<Bool>，常是 Bool 旗参的延伸坏味
+  - discouraged_optional_boolean  # ★ 标记 Optional<Bool>；若确需三态语义，局部说明并豁免
+  - redundant_objc_attribute       # ★ 检查不必要的 @objc，与顶部注释“@objc 滥用”策略一致
   - fallthrough
   - fatal_error_message
   - flatmap_over_map_reduce
@@ -55,12 +59,26 @@ opt_in_rules:
   - redundant_string_enum_value
   - sorted_imports
   - toggle_bool
+  - missing_docs                   # ★ 公开 API 缺文档报警（先 warning 观察存量，后续可收紧）
+  # === 公共基础库 Bug Prevention（第一批，低风险高价值）===
+  - weak_delegate                    # ★ delegate 必须为 weak，否则循环引用
+  - discarded_notification_center_observer  # ★ block observer token 应被持有，便于按生命周期移除
+  - private_subject                  # ★ Combine Subject 不应作为公开属性暴露
+  - unhandled_throwing_task          # ★ 显式处理 throwing Task 的错误或结果
+  # 注：SwiftLint 无“公开类强制 final”规则（final_class 不存在）；如需约束可改用
+  # 架构评审/PR 模板，或 static_over_final_class（语义不同，未启用）。
 
 force_cast: error                 # as! 直接 error
 
 analyzer_rules:
   - unused_import
   - unused_declaration
+
+# 公开 API 文档缺失检查：先 warning 观察存量，待清零后可改为 error 收紧。
+# 仅检查 public 级别（open/internal/private 豁免），避免内部实现噪音。
+# CI 不使用 --strict，因此当前 warning 不阻断；使用 --strict 时会提升为 error。
+missing_docs:
+  warning: public
 
 # === 规则参数化 ===
 line_length:
@@ -88,7 +106,10 @@ cyclomatic_complexity:
   error: 30
 
 nesting:
-  type_level: 3
+  type_level:
+    warning: 3
+  function_level:
+    warning: 2
 
 # === 自定义规则 ===
 custom_rules:
@@ -104,17 +125,21 @@ custom_rules:
 
   st_no_print:
     name: "Use STLog instead of print"
-    regex: '(?<![\w.])print\('
+    regex: '(?<!\w)(?:Swift\.)?print\s*\('
     message: "请使用 STLog(...) 输出日志，避免 print 在生产环境泄露。"
     severity: warning
     excluded:
       - "Sources/STUIKit/STLog/.*"          # 日志模块自身
       - "Sources/STMarkdown/Resources/.*"
+      - "Sources/STNetwork/STWebSocket.swift"   # DEBUG-only 日志封装层，等同 STLog 豁免
 
+  # Apple 并未禁止 Bool 参数；这里只提示检查调用点是否清晰。
+  # 若 true/false 语义由参数标签即可明确，或遵循系统 API 形态，可局部豁免；
+  # 只有参数代表可能扩展的模式选择时，才优先改为 enum。
   st_avoid_bool_flag_param:
-    name: "Avoid Bool flag parameters (use enum)"
+    name: "Review Bool flag parameter clarity"
     regex: '\b(?<!override\s)func\s+\w+\([^)]*(?:\b(?:enabled|disabled|on|off|flag|animated|immediately|prettyPrinted|fromEnd|ellipsis|uppercase|sync|force|reset|notify|selected|highlighted|displayMode|imageReady|iconOnLeft|animatingIn)|\b(?:is|has|can|should|allows?|enable|disable|use|uses|include|exclude|show|hide|needs|wants|requires)[A-Z]\w*)\s*:\s*Bool(?:\s*=\s*[^,\)\n]+)?(?=\s*[,)\n])'
-    message: "Bool 旗参可读性差，建议改为枚举（如 case enabled / disabled）。"
+    message: "请检查 Bool 参数在调用点是否清晰；仅当它表达可扩展模式时考虑改为 enum。"
     severity: warning
 
 reporter: "xcode"
