@@ -133,13 +133,4 @@ custom_rules:
       - "Sources/STMarkdown/Resources/.*"
       - "Sources/STNetwork/STWebSocket.swift"   # DEBUG-only 日志封装层，等同 STLog 豁免
 
-  # Apple 并未禁止 Bool 参数；这里只提示检查调用点是否清晰。
-  # 若 true/false 语义由参数标签即可明确，或遵循系统 API 形态，可局部豁免；
-  # 只有参数代表可能扩展的模式选择时，才优先改为 enum。
-  st_avoid_bool_flag_param:
-    name: "Review Bool flag parameter clarity"
-    regex: '\b(?<!override\s)func\s+\w+\([^)]*(?:\b(?:enabled|disabled|on|off|flag|animated|immediately|prettyPrinted|fromEnd|ellipsis|uppercase|sync|force|reset|notify|selected|highlighted|displayMode|imageReady|iconOnLeft|animatingIn)|\b(?:is|has|can|should|allows?|enable|disable|use|uses|include|exclude|show|hide|needs|wants|requires)[A-Z]\w*)\s*:\s*Bool(?:\s*=\s*[^,\)\n]+)?(?=\s*[,)\n])'
-    message: "请检查 Bool 参数在调用点是否清晰；仅当它表达可扩展模式时考虑改为 enum。"
-    severity: warning
-
 reporter: "xcode"

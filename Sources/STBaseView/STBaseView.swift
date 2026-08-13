@@ -435,8 +435,8 @@ open class STBaseView: UIView {
         var contentInset = baseContent
         contentInset.bottom = baseContent.bottom + delta
         // 只修改各自指示器的 bottom，其余边保持调用方原配置。
-        verticalIndicator.bottom = verticalIndicator.bottom + delta
-        horizontalIndicator.bottom = horizontalIndicator.bottom + delta
+        verticalIndicator.bottom += delta
+        horizontalIndicator.bottom += delta
 
         let duration = (userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0
         let curveRaw = (userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber)?.uintValue ?? UInt(UIView.AnimationCurve.easeInOut.rawValue)
