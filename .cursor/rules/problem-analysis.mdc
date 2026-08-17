@@ -10,7 +10,7 @@ alwaysApply: true
 
 ## 适用场景
 
-本文件是 `problem-analysis` skill **[PA-001/002/003]** 的细则真值。适用于所有含判断、方案讨论或实现请求的任务。**在构造回复之前**执行，与 `logical-reasoning`（约束 AI 自身论证）和 `engineering-discipline`（问题描述不清时前置确认）作用对象不同。
+本文件是 `problem-analysis` skill **[PA-001/002/003]** 的细则真值。适用于所有含判断、方案讨论或实现请求的任务。**在构造回复之前**执行，与 `cognitive-reasoning`（约束 AI 自身论证，GR-010）和 `engineering-discipline`（问题描述不清时前置确认）作用对象不同。
 
 ---
 
@@ -128,7 +128,7 @@ alwaysApply: true
 | 纪律 | 触发点 | 分工 |
 |------|--------|------|
 | **PA-001/002/003（本规则）** | 收到问题时 | 分析**问题本身**的有效性与真实需求 |
-| GR-010（logical-reasoning） | 构造回复时 | 约束 AI 自身回复的**论证质量** |
+| GR-010（cognitive-reasoning） | 构造回复时 | 约束 AI 自身回复的**论证质量** |
 | GR-002（engineering-discipline） | 描述不清时 | **前置确认**补全缺失信息 |
 | 认知对手模式（ios-engineer） | 技术决策/强确信 | **挑战用户**的结论与假设 |
 

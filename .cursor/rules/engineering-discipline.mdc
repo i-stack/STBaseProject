@@ -60,7 +60,7 @@ alwaysApply: true
 
 - `问题分析`（PA）：谈的是**输入（问题）**，位置在正式回复**之前** → 独立保留。
 - `残留风险声明`（GR-008）：机械校验 anchor，其自身规则要求字面独立 → 不并入任何块。
-- 认知拓展尾注（cognitive-expansion）：已自门控且为尾注 → 独立保留。
+- 认知拓展尾注（cognitive-reasoning / CE-*）：已自门控且为尾注 → 独立保留。
 
 **合并（同位置、字段重叠的「证据-推断-强度-证伪」类）：**
 
@@ -79,7 +79,7 @@ alwaysApply: true
 
 上述合并覆盖 trio（engineering / logic / epistemic）的审计块。以下结构须按相同「一回复一审计区、字段去重」原则协同，避免叠加成孤岛：
 
-- **认知对手模式（CAM / ios-engineer Tier 2）**：其 Step 0–6 与 `置信度：X%` 字段与 `逻辑链`、`验证锚点` 语义高度重叠。协调：**不重复输出语义，但保留 CAM 机械格式**——CAM 激活时，`逻辑链` 与 `验证锚点` 不另起独立块（其语义已由 CAM 字段承载），CAM 自身字段（Step 0–6 + `置信度`）按认知对手模式详规原样输出、不得省略或并入其它块（见该模式「与工程技能的关系」）；preamble 轻量校准段此时亦由 CAM 承载（见 global cognitive calibration 段）。仅当 CAM 不可用时，才退化为 `逻辑链` + `验证锚点` 合并块。
+- **认知对手模式（CAM / cognitive-reasoning Tier 2）**：其 Step 0–6 与 `置信度：X%` 字段与 `逻辑链`、`验证锚点` 语义高度重叠。协调：**不重复输出语义，但保留 CAM 机械格式**——CAM 激活时，`逻辑链` 与 `验证锚点` 不另起独立块（其语义已由 CAM 字段承载），CAM 自身字段（Step 0–6 + `置信度`）按认知对手模式详规原样输出、不得省略或并入其它块（见该模式「与工程技能的关系」）；preamble 轻量校准段此时亦由 CAM 承载（见 global cognitive calibration 段）。仅当 CAM 不可用时，才退化为 `逻辑链` + `验证锚点` 合并块。
 - **iOS 专属块**：`版本基线`（IR-006）、`<usage-audit>`（audit 块）与四段式 / 验证锚点语义不重叠，保持独立；但须声明不与审计区冲突——`版本基线`归前置约束、`<usage-audit>` 归尾部，二者不挤占审计区。
 
 #### 跨块置信度总协调
@@ -91,7 +91,7 @@ alwaysApply: true
 多个 global skill 同轮命中时，不得各自无差别「强制全量读取」导致预算耗尽、被迫 GR-006 中断：
 
 - **分级读取**：各 SKILL「必须先读取 references/...md 全文」仅在**该 skill 详规确被命中**时执行；门控未命中的 SKILL 不加载其 ref（preamble 段本身即门控摘要，可据此判定）。
-- **优先序**：同轮命中多 SKILL 时，按 `problem-analysis（输入）→ engineering-discipline / logical-reasoning / epistemic-integrity（论证与交付）→ plan-grill（方案锁定）→ ios-engineer（平台细则）` 分配读取与输出预算；论证类 ref 优先读，平台 / 工具类 ref 仅在落到该平台任务时读。
+- **优先序**：同轮命中多 SKILL 时，按 `problem-analysis（输入）→ engineering-discipline / cognitive-reasoning（论证与交付）→ plan-grill（方案锁定）→ ios-engineer（平台细则）` 分配读取与输出预算；论证类 ref 优先读，平台 / 工具类 ref 仅在落到该平台任务时读。
 - **预算声明**：单次回复内，多 SKILL 叠加触发的独立输出块总数应受控；能用本合并 SOP 合并的（审计类）合并为单一审计区，不能合并的（问题分析 / 残留风险 / 认知尾注 / usage-audit）各自独立但精简；若仍逼近 GR-006 的 15 turn / 3 次失败阈值，优先完成「最小可用回复 + 残留风险声明」，把深挖交给后续轮次，而非并行铺开多 SKILL 全文。
 
 ## GR-005 最小修复优先

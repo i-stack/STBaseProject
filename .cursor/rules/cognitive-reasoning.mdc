@@ -1,0 +1,46 @@
+---
+description: 全局认知与论证纪律：认知对手模式（CAM-001~005）、论证质量（GR-010）、真值接地（GR-011~013）、认知拓展（CE-001~013）
+alwaysApply: true
+---
+
+<!-- Content below is auto-generated from cognitive-reasoning/references/*.md — edit the .tmpl or .md source, not the generated .mdc output -->
+
+<!-- last-verified: 2026-08 -->
+<!-- owner: cognitive-reasoning -->
+<!-- sha256: c3c034889eb2fce2eb02ef505a0164a9c82e43aabeb67d95cee64f8a0945415f -->
+
+# 认知与论证纪律（cognitive-reasoning）主入口
+
+> 本文件是 `cognitive-reasoning` 的**主 reference**（供 Cursor `.mdc` 生成与快速索引）。完整细则真值在下列各文件；二者冲突以细则文件字面为准。
+
+`cognitive-reasoning` 统一承载四域认知/论证纪律，规则 ID 全球唯一、双向一致由 `validate-skill-behavior.sh` Check 2 校验。
+
+## 四域与细则文件
+
+| 域 | 规则 ID | 细则文件 | 典型触发 |
+|----|---------|----------|----------|
+| 认知对手模式（Tier 2，反迎合） | CAM-001~005 | [cognitive_adversary_mode.md](cognitive_adversary_mode.md) | 技术决策/架构/根因/review/强确信/显式「不要迎合」 |
+| 论证质量（对内向） | GR-010 | [logical_reasoning.md](logical_reasoning.md) | 含判断成分的所有回复 |
+| 真值接地（对外向） | GR-011~013 | [epistemic_integrity.md](epistemic_integrity.md) | 含事实断言/解惑型回答 |
+| 认知拓展（答后尾注） | CE-001~013 | [cognitive_expansion.md](cognitive_expansion.md) | Tier 0 门控命中 / `【深潜】` |
+
+格式校准示例见 [examples.md](examples.md)；规则 ID 索引见 [rule_index.md](rule_index.md)。
+
+## 强制入口
+
+触发时**先完整读取**对应细则文件，不得用本入口或 preamble 托管块替代全文。
+
+## 关键纪律速记
+
+- **CAM（对用户）**：复述核心主张 → 最强反驳 → 隐藏假设 → 失效/可证伪条件 → 迎合自检；证据不足说「不确定」；>70% 置信须给可证伪条件。
+- **GR-010（对内向）**：关键结论指回前提；事实/推断/建议/推测分层；高风险输出 `逻辑链` 块。
+- **GR-011~013（对外向）**：未验证不当已知；高危带降置信+工具核验；事实查证明推理；高风险事实输出 `验证锚点` 块。
+- **CE-*（后置）**：Tier 0 门控（有判断+可证伪盲区）才写 `认知尾注`；Tier 2 命中时不另写 Tier 0（互斥扩展到 preamble）。
+
+## 与工程技能的关系
+
+本技能管认知/论证**质量**；工程交付结构由 `engineering-discipline`（GR-001~008）承载。CAM 激活时其字段已承载 `逻辑链`/`验证锚点` 校准语义，不另起独立块（见 GR-004 多块合并），但须按原样输出。
+
+## CAM-001..005 / GR-010 / GR-011..013 / CE-001..013
+
+全部规则 ID 定义与元数据见 [rule_index.md](rule_index.md)；细则见上表各文件。
