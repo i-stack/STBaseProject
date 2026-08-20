@@ -149,7 +149,6 @@ open class STLabel: UILabel, STLocalizable {
         super.init(coder: coder)
         self.verticalAlignment = STLabelVerticalAlignment.middle
         self.adjustsFontForContentSizeCategory = true
-        self.updateFontSize()
     }
     
     override public func layoutSubviews() {
@@ -158,13 +157,6 @@ open class STLabel: UILabel, STLocalizable {
         if let glassView = self.subviews.first(where: { $0 is STLiquidGlassView }) {
             self.sendSubviewToBack(glassView)
         }
-    }
-    
-    private func updateFontSize() {
-        self.font = UIFont.st_preferredFont(
-            ofSize: self.font.pointSize,
-            forTextStyle: .body
-        )
     }
     
     override public func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {

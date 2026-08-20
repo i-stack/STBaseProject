@@ -1,5 +1,6 @@
 import XCTest
 import STBaseProject
+import STMarkdown
 @testable import STBaseProjectExample
 
 /// STDeviceAdapter 单元测试集, 覆盖审核报告中的核心优化点:
@@ -11,6 +12,23 @@ import STBaseProject
 /// - isNotchScreen 判据验证 (>=44)
 /// - STBarHeightsConfiguration / STScaleStrategy / STDeviceMetrics 值类型正确性
 final class STDeviceAdapterTests: XCTestCase {
+
+    private func withTraits<Value>(
+        _ traits: UITraitCollection,
+        perform body: () -> Value
+    ) -> Value {
+        var value: Value!
+        traits.performAsCurrent {
+            value = body()
+        }
+        return value
+    }
+
+    private func labels(in view: UIView) -> [UILabel] {
+        view.subviews.flatMap { subview in
+            (subview as? UILabel).map { [$0] } ?? self.labels(in: subview)
+        }
+    }
 
     override func setUp() {
         super.setUp()
@@ -498,5 +516,80 @@ final class STDeviceAdapterTests: XCTestCase {
 
         XCTAssertGreaterThan(accessibilityFont.pointSize, standardFont.pointSize)
         XCTAssertLessThanOrEqual(accessibilityFont.pointSize, 18)
+    }
+
+    // MARK: - Dynamic Type 组件回归
+
+    func testSTLabelPreservesFontWeightAcrossTraitChanges() {
+        let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
+        let accessibilityTraits = UITraitCollection(
+            preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge
+        )
+        let label = STLabel(frame: .zero)
+        label.font = UIFont.st_preferredFont(
+            ofSize: 17,
+            forTextStyle: .headline,
+            weight: .bold,
+            compatibleWith: standardTraits
+        )
+
+        label.traitCollectionDidChange(standardTraits)
+        label.traitCollectionDidChange(accessibilityTraits)
+
+        XCTAssertTrue(label.adjustsFontForContentSizeCategory)
+        XCTAssertTrue(label.font.fontDescriptor.symbolicTraits.contains(.traitBold))
+    }
+
+    func testProgressHUDUsesDynamicTypeLabels() {
+        let hud = STProgressHUD.show(
+            addedToView: UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 480)),
+            animation: .none
+        )
+
+        XCTAssertTrue(hud.label.adjustsFontForContentSizeCategory)
+        XCTAssertTrue(hud.detailsLabel.adjustsFontForContentSizeCategory)
+        XCTAssertTrue(hud.button.titleLabel?.adjustsFontForContentSizeCategory == true)
+    }
+
+    func testTabBarTitleRespondsToContentSizeCategoryWithinCap() throws {
+        let model = STTabBarItemModel(
+            title: "Dynamic Type Tab",
+            normalImage: UIImage(systemName: "house"),
+            selectedImage: UIImage(systemName: "house.fill"),
+            typography: STTabBarItemTypography(fontSize: 12, fontName: "Helvetica")
+        )
+        let view = STTabBarItemView(frame: CGRect(x: 0, y: 0, width: 100, height: 60))
+        view.configure(with: model)
+        let label = try XCTUnwrap(self.labels(in: view).first { $0.text == model.title })
+
+        XCTAssertTrue(label.adjustsFontForContentSizeCategory)
+        XCTAssertLessThanOrEqual(label.font.pointSize, model.typography.fontSize * 1.4)
+    }
+
+    func testWebErrorViewFontsRespondToContentSizeCategory() throws {
+        let labels = self.labels(in: STBaseWKViewController().errorView)
+
+        XCTAssertGreaterThanOrEqual(labels.count, 2)
+        XCTAssertTrue(labels.allSatisfy(\.adjustsFontForContentSizeCategory))
+    }
+
+    func testMarkdownHeadingFontRespondsToContentSizeCategory() {
+        let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
+        let accessibilityTraits = UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+
+        let standardFont = self.withTraits(standardTraits) { STMarkdownTypography.headingFont(for: 1) }
+        let accessibilityFont = self.withTraits(accessibilityTraits) { STMarkdownTypography.headingFont(for: 1) }
+
+        XCTAssertGreaterThan(accessibilityFont.pointSize, standardFont.pointSize)
+    }
+
+    func testMarkdownPresetDoesNotFreezeContentSizeCategory() {
+        let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
+        let accessibilityTraits = UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+
+        let standardFont = self.withTraits(standardTraits) { STMarkdownPresets.article.font }
+        let accessibilityFont = self.withTraits(accessibilityTraits) { STMarkdownPresets.article.font }
+
+        XCTAssertGreaterThan(accessibilityFont.pointSize, standardFont.pointSize)
     }
 }

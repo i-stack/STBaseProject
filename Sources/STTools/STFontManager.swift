@@ -181,10 +181,11 @@ public extension UIFont {
             baseFont = UIFont.systemFont(ofSize: adjustedSize, weight: weight)
         }
         let metrics = UIFontMetrics(forTextStyle: style)
+        let resolvedTraits = traitCollection ?? UITraitCollection.current
         if let maxSize = maxSize {
-            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: traitCollection)
+            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: resolvedTraits)
         }
-        return metrics.scaledFont(for: baseFont, compatibleWith: traitCollection)
+        return metrics.scaledFont(for: baseFont, compatibleWith: resolvedTraits)
     }
 
     /// 使用指定字体名 + UIFontMetrics 缩放，支持 Dynamic Type
@@ -203,10 +204,11 @@ public extension UIFont {
         let adjustedSize = size * STFontManager.shared.fontSizeScale
         let baseFont = UIFont(name: name, size: adjustedSize) ?? .systemFont(ofSize: adjustedSize)
         let metrics = UIFontMetrics(forTextStyle: style)
+        let resolvedTraits = traitCollection ?? UITraitCollection.current
         if let maxSize = maxSize {
-            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: traitCollection)
+            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: resolvedTraits)
         }
-        return metrics.scaledFont(for: baseFont, compatibleWith: traitCollection)
+        return metrics.scaledFont(for: baseFont, compatibleWith: resolvedTraits)
     }
 }
 
@@ -234,10 +236,11 @@ public extension UIFont {
         let adjustedSize = size * STFontManager.shared.fontSizeScale
         let baseFont = UIFont.monospacedSystemFont(ofSize: adjustedSize, weight: weight)
         let metrics = UIFontMetrics(forTextStyle: style)
+        let resolvedTraits = traitCollection ?? UITraitCollection.current
         if let maxSize {
-            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: traitCollection)
+            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: resolvedTraits)
         }
-        return metrics.scaledFont(for: baseFont, compatibleWith: traitCollection)
+        return metrics.scaledFont(for: baseFont, compatibleWith: resolvedTraits)
     }
 
 }
