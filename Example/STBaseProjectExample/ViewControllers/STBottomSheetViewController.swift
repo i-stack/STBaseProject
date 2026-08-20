@@ -11,6 +11,7 @@ import UIKit
 final class STBottomSheetTestViewController: STBottomSheetViewController {
     
     private let tableView = UITableView(frame: .zero, style: .plain)
+    private let titleLabel = UILabel()
     private let rows: [String] = (1...50).map { "这是第 \($0) 行内容，可以上下滑动测试" }
     
     override func setupContent() {
@@ -21,20 +22,20 @@ final class STBottomSheetTestViewController: STBottomSheetViewController {
     }
     
     private func setupHeader() {
-        let titleLabel = UILabel()
-        titleLabel.text = "半屏/全屏自适应弹窗"
-        titleLabel.font = UIFont.st_preferredFont(ofSize: 18, forTextStyle: .headline, weight: .bold)
-        titleLabel.adjustsFontForContentSizeCategory = true
-        titleLabel.textAlignment = .center
+        self.titleLabel.text = "半屏/全屏自适应弹窗"
+        self.titleLabel.font = UIFont.st_preferredFont(ofSize: 18, forTextStyle: .headline, weight: .bold)
+        self.titleLabel.adjustsFontForContentSizeCategory = true
+        self.titleLabel.numberOfLines = 0
+        self.titleLabel.textAlignment = .center
         
-        self.contentView.addSubview(titleLabel)
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.contentView.addSubview(self.titleLabel)
+        self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 16),
-            titleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
-            titleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
-            titleLabel.heightAnchor.constraint(equalToConstant: 30)
+            self.titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 16),
+            self.titleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
+            self.titleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
+            self.titleLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 30)
         ])
     }
     
@@ -49,7 +50,7 @@ final class STBottomSheetTestViewController: STBottomSheetViewController {
         self.tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            self.tableView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 60),
+            self.tableView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 14),
             self.tableView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
             self.tableView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
             self.tableView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor)

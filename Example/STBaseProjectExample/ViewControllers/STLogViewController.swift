@@ -83,7 +83,7 @@ final class STLogViewController: BaseViewController {
         button.setContentHuggingPriority(.required, for: .horizontal)
         button.setContentCompressionResistancePriority(.required, for: .horizontal)
         button.addTarget(self, action: action, for: .touchUpInside)
-        let heightConstraint = button.heightAnchor.constraint(equalToConstant: 28)
+        let heightConstraint = button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
         heightConstraint.priority = .defaultHigh
         heightConstraint.isActive = true
         return button

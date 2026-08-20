@@ -520,6 +520,83 @@ final class STDeviceAdapterTests: XCTestCase {
 
     // MARK: - Dynamic Type 组件回归
 
+    func testDynamicTypeValidationMatrixAcrossContainersAndOrientations() {
+        let cases: [(name: String, size: CGSize)] = [
+            ("iPhone SE portrait", CGSize(width: 320, height: 568)),
+            ("iPhone portrait", CGSize(width: 393, height: 852)),
+            ("iPhone landscape", CGSize(width: 852, height: 393)),
+            ("iPad portrait", CGSize(width: 1024, height: 1366)),
+            ("iPad landscape", CGSize(width: 1366, height: 1024)),
+        ]
+        let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
+        let accessibilityTraits = UITraitCollection(
+            preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge
+        )
+
+        for testCase in cases {
+            guard let adapter = STContainerLayoutAdapter(
+                designSize: CGSize(width: 393, height: 852),
+                containerSize: testCase.size,
+                scaleStrategy: .padFriendly
+            ) else {
+                XCTFail("Invalid matrix case: \(testCase.name)")
+                continue
+            }
+            let standardFont = STTypography.body.font(compatibleWith: standardTraits)
+            let accessibilityFont = STTypography.body.font(compatibleWith: accessibilityTraits)
+
+            XCTAssertGreaterThan(adapter.widthScale, 0, testCase.name)
+            XCTAssertGreaterThan(adapter.heightScale, 0, testCase.name)
+            XCTAssertGreaterThan(
+                accessibilityFont.pointSize,
+                standardFont.pointSize,
+                testCase.name
+            )
+        }
+    }
+
+    func testMarkdownRerendersAndInvalidatesHeightWhenContentSizeCategoryChanges() throws {
+        let view = STMarkdownTextView(style: .default)
+        view.frame = CGRect(x: 0, y: 0, width: 320, height: 1)
+        view.preferredContentWidth = 320
+        let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
+        let accessibilityTraits = UITraitCollection(
+            preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge
+        )
+        view.refreshDynamicType(compatibleWith: standardTraits)
+        view.setMarkdown("# Dynamic Type\n\n正文需要随系统字号重新排版并增长高度。")
+
+        let beforeFont = try XCTUnwrap(
+            view.attributedText.attribute(.font, at: view.attributedText.length - 1, effectiveRange: nil) as? UIFont
+        )
+        let beforeHeight = view.sizeThatFitsMarkdown(width: 320).height
+
+        view.refreshDynamicType(compatibleWith: accessibilityTraits)
+
+        let afterFont = try XCTUnwrap(
+            view.attributedText.attribute(.font, at: view.attributedText.length - 1, effectiveRange: nil) as? UIFont
+        )
+        let afterHeight = view.sizeThatFitsMarkdown(width: 320).height
+        XCTAssertGreaterThan(afterFont.pointSize, beforeFont.pointSize)
+        XCTAssertGreaterThan(afterHeight, beforeHeight)
+    }
+
+    func testMarkdownPresetsKeepLineHeightAboveFontAtAccessibilitySizes() {
+        let accessibilityTraits = UITraitCollection(
+            preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge
+        )
+        let presets = [
+            STMarkdownPresets.default,
+            STMarkdownPresets.article,
+            STMarkdownPresets.compact,
+        ]
+
+        for preset in presets {
+            let resolved = preset.resolvedForDynamicType(compatibleWith: accessibilityTraits)
+            XCTAssertGreaterThanOrEqual(resolved.lineHeight, ceil(resolved.font.lineHeight))
+        }
+    }
+
     func testSTLabelPreservesFontWeightAcrossTraitChanges() {
         let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
         let accessibilityTraits = UITraitCollection(

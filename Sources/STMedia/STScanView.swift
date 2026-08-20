@@ -31,7 +31,7 @@ public struct STScanViewConfiguration {
     public var cornerLineWidth: CGFloat = 4.0
     public var tipText: String = "将二维码放入框内,即可自动扫描"
     public var tipTextColor: UIColor = .white
-    public var tipTextFont = UIFont.systemFont(ofSize: 13)
+    public var tipTextFont = UIFont.st_preferredFont(ofSize: 13, forTextStyle: .footnote)
     public var animationDuration: TimeInterval = 1.5
     public var animationInterval: TimeInterval = 0.3
     public var automaticSafeAreaAdaptation: Bool = true
@@ -143,6 +143,7 @@ public class STScanView: UIView {
     private func setupTipLabel() {
         let label = UILabel()
         label.numberOfLines = 0
+        label.adjustsFontForContentSizeCategory = true
         label.textAlignment = .center
         label.layer.zPosition = 1
         addSubview(label)
@@ -247,11 +248,15 @@ public class STScanView: UIView {
     private func updateTipLabelFrame() {
         guard let tipLabel = self.tipLabel else { return }
         let scanRect = calculateScanAreaRect()
+        let availableWidth = max(bounds.width - 32, 0)
+        let fittingHeight = tipLabel.sizeThatFits(
+            CGSize(width: availableWidth, height: .greatestFiniteMagnitude)
+        ).height
         tipLabel.frame = CGRect(
-            x: 0,
+            x: 16,
             y: scanRect.maxY + 15,
-            width: bounds.width,
-            height: 50
+            width: availableWidth,
+            height: max(50, ceil(fittingHeight))
         )
     }
 

@@ -408,7 +408,13 @@ open class STLogView: UIView {
     private func makeToolbarButton(title: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(
+            ofSize: 14,
+            forTextStyle: .subheadline,
+            weight: .medium,
+            maxSize: 18
+        )
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.backgroundColor = .secondarySystemBackground
         button.setTitleColor(.label, for: .normal)
         button.layer.cornerRadius = 10
@@ -479,14 +485,25 @@ private final class STLogTableViewCell: UITableViewCell {
 
         self.colorBarView.translatesAutoresizingMaskIntoConstraints = false
 
-        self.levelBadge.font = UIFont.boldSystemFont(ofSize: 11)
+        self.levelBadge.font = UIFont.st_preferredFont(
+            ofSize: 11,
+            forTextStyle: .caption2,
+            weight: .bold,
+            maxSize: 16
+        )
+        self.levelBadge.adjustsFontForContentSizeCategory = true
         self.levelBadge.textAlignment = .center
         self.levelBadge.layer.cornerRadius = 8
         self.levelBadge.clipsToBounds = true
         self.levelBadge.setContentHuggingPriority(.required, for: .horizontal)
         self.levelBadge.setContentCompressionResistancePriority(.required, for: .horizontal)
 
-        self.timestampLabel.font = UIFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular)
+        self.timestampLabel.font = UIFont.st_preferredMonospacedFont(
+            ofSize: 12,
+            forTextStyle: .caption1,
+            maxSize: 18
+        )
+        self.timestampLabel.adjustsFontForContentSizeCategory = true
         self.timestampLabel.textColor = .secondaryLabel
         self.timestampLabel.textAlignment = .right
 
@@ -495,20 +512,40 @@ private final class STLogTableViewCell: UITableViewCell {
         self.headerRow.alignment = .center
         [self.levelBadge, self.timestampLabel].forEach(self.headerRow.addArrangedSubview)
 
-        self.sourceLabel.font = UIFont.systemFont(ofSize: 11, weight: .medium)
+        self.sourceLabel.font = UIFont.st_preferredFont(
+            ofSize: 11,
+            forTextStyle: .caption2,
+            weight: .medium,
+            maxSize: 16
+        )
+        self.sourceLabel.adjustsFontForContentSizeCategory = true
         self.sourceLabel.textColor = .secondaryLabel
 
-        self.locationLabel.font = UIFont.monospacedSystemFont(ofSize: 10, weight: .regular)
+        self.locationLabel.font = UIFont.st_preferredMonospacedFont(
+            ofSize: 10,
+            forTextStyle: .caption2,
+            maxSize: 16
+        )
+        self.locationLabel.adjustsFontForContentSizeCategory = true
         self.locationLabel.textColor = .tertiaryLabel
         self.locationLabel.numberOfLines = 2
 
-        self.metadataLabel.font = UIFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        self.metadataLabel.font = UIFont.st_preferredMonospacedFont(
+            ofSize: 11,
+            forTextStyle: .caption1,
+            maxSize: 18
+        )
+        self.metadataLabel.adjustsFontForContentSizeCategory = true
         self.metadataLabel.textColor = .secondaryLabel
         self.metadataLabel.numberOfLines = 0
 
         self.divider.backgroundColor = .separator
 
-        self.messageLabel.font = UIFont.monospacedSystemFont(ofSize: 12, weight: .regular)
+        self.messageLabel.font = UIFont.st_preferredMonospacedFont(
+            ofSize: 12,
+            forTextStyle: .subheadline
+        )
+        self.messageLabel.adjustsFontForContentSizeCategory = true
         self.messageLabel.numberOfLines = 0
         self.messageLabel.textColor = .label
 
@@ -544,7 +581,7 @@ private final class STLogTableViewCell: UITableViewCell {
             self.contentStack.bottomAnchor.constraint(equalTo: self.cardView.bottomAnchor, constant: -10),
 
             self.divider.heightAnchor.constraint(equalToConstant: 0.5),
-            self.levelBadge.heightAnchor.constraint(equalToConstant: 20)
+            self.levelBadge.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
         ])
     }
 
