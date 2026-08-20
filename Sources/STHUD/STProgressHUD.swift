@@ -109,7 +109,8 @@ public class STProgressHUD: UIView {
         lbl.adjustsFontSizeToFitWidth = false
         lbl.textAlignment = .center
         lbl.textColor = self.contentColor
-        lbl.font = UIFont.st_boldSystemFont(ofSize: self.defaultLabelFontSize)
+        lbl.font = UIFont.st_preferredFont(ofSize: self.defaultLabelFontSize, forTextStyle: .headline, weight: .semibold)
+        lbl.adjustsFontForContentSizeCategory = true
         lbl.isOpaque = false
         lbl.backgroundColor = .clear
         lbl.translatesAutoresizingMaskIntoConstraints = false
@@ -123,7 +124,8 @@ public class STProgressHUD: UIView {
         lbl.adjustsFontSizeToFitWidth = false
         lbl.textAlignment = .center
         lbl.textColor = self.contentColor
-        lbl.font = UIFont.st_boldSystemFont(ofSize: self.defaultDetailsLabelFontSize)
+        lbl.font = UIFont.st_preferredFont(ofSize: self.defaultDetailsLabelFontSize, forTextStyle: .subheadline, weight: .semibold)
+        lbl.adjustsFontForContentSizeCategory = true
         lbl.isOpaque = false
         lbl.backgroundColor = .clear
         lbl.translatesAutoresizingMaskIntoConstraints = false
@@ -135,7 +137,8 @@ public class STProgressHUD: UIView {
     public private(set) lazy var button: UIButton = {
         let btn = STProgressHUDRoundedButton()
         btn.titleLabel?.textAlignment = .center
-        btn.titleLabel?.font = UIFont.st_boldSystemFont(ofSize: self.defaultDetailsLabelFontSize)
+        btn.titleLabel?.font = UIFont.st_preferredFont(ofSize: self.defaultDetailsLabelFontSize, forTextStyle: .body, weight: .semibold)
+        btn.titleLabel?.adjustsFontForContentSizeCategory = true
         btn.setTitleColor(self.contentColor, for: .normal)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setContentCompressionResistancePriority(.init(rawValue: 998), for: .horizontal)
@@ -170,26 +173,11 @@ public class STProgressHUD: UIView {
         return hud
     }
 
-    @available(*, deprecated, renamed: "show(addedToView:animation:)")
-    @discardableResult
-    public class func show(addedToView view: UIView, animated: Bool) -> STProgressHUD {
-        return show(addedToView: view, animation: animated ? .fade : .none)
-    }
-
     @discardableResult
     public class func hide(addedToView view: UIView, animation: STHUDAnimation = .fade) -> Bool {
         guard let hud = hudForView(view) else { return false }
         hud.removeFromSuperViewOnHide = true
         hud.hide(animation: animation)
-        return true
-    }
-
-    @available(*, deprecated, renamed: "hide(addedToView:animation:)")
-    @discardableResult
-    public class func hide(addedToView view: UIView, animated: Bool) -> Bool {
-        guard let hud = hudForView(view) else { return false }
-        hud.removeFromSuperViewOnHide = true
-        hud.hide(animated: animated)
         return true
     }
 
@@ -202,28 +190,13 @@ public class STProgressHUD: UIView {
         self.showCore(animated: animation.isAnimated)
     }
 
-    @available(*, deprecated, renamed: "show(animation:)")
-    public func show(animated: Bool) {
-        self.showCore(animated: animated)
-    }
-
     public func hide(animation: STHUDAnimation = .fade) {
         self.animationType = animation.hudAnimation
         self.hideCore(animated: animation.isAnimated)
     }
 
-    @available(*, deprecated, renamed: "hide(animation:)")
-    public func hide(animated: Bool) {
-        self.hideCore(animated: animated)
-    }
-
     public func hide(animation: STHUDAnimation = .fade, afterDelay delay: TimeInterval) {
         self.hideCore(animation: animation, afterDelay: delay)
-    }
-
-    @available(*, deprecated, renamed: "hide(animation:afterDelay:)")
-    public func hide(animated: Bool, afterDelay delay: TimeInterval) {
-        self.hideCore(animation: animated ? self.animationType.stHUDAnimation : .none, afterDelay: delay)
     }
 
     private func showCore(animated: Bool) {

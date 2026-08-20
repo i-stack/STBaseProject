@@ -396,7 +396,8 @@ open class STBaseWKViewController: STBaseViewController {
         
         let titleLabel = UILabel()
         titleLabel.text = "加载失败"
-        titleLabel.font = UIFont.st_systemFont(ofSize: 18, weight: .medium)
+        titleLabel.font = UIFont.st_preferredFont(ofSize: 18, forTextStyle: .headline, weight: .medium)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textColor = .label
         titleLabel.textAlignment = .center
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -404,7 +405,8 @@ open class STBaseWKViewController: STBaseViewController {
         
         let messageLabel = UILabel()
         messageLabel.text = "网络连接异常，请检查网络后重试"
-        messageLabel.font = UIFont.st_systemFont(ofSize: 14)
+        messageLabel.font = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .subheadline)
+        messageLabel.adjustsFontForContentSizeCategory = true
         messageLabel.textColor = .secondaryLabel
         messageLabel.textAlignment = .center
         messageLabel.numberOfLines = 0
@@ -413,7 +415,8 @@ open class STBaseWKViewController: STBaseViewController {
         
         let retryButton = UIButton(type: .system)
         retryButton.setTitle("重新加载", for: .normal)
-        retryButton.titleLabel?.font = UIFont.st_systemFont(ofSize: 16, weight: .medium)
+        retryButton.titleLabel?.font = UIFont.st_preferredFont(ofSize: 16, forTextStyle: .body, weight: .medium)
+        retryButton.titleLabel?.adjustsFontForContentSizeCategory = true
         retryButton.addTarget(self, action: #selector(st_retryButtonTapped), for: .touchUpInside)
         retryButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(retryButton)

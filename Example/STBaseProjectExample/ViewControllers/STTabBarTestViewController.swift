@@ -23,7 +23,8 @@ final class STTabBarTestViewController: BaseViewController {
     private func setupViews() {
         self.statusLabel.text = "当前选中：首页"
         self.statusLabel.textAlignment = .center
-        self.statusLabel.font = .systemFont(ofSize: 18, weight: .semibold)
+        self.statusLabel.font = UIFont.st_preferredFont(ofSize: 18, forTextStyle: .headline, weight: .semibold)
+        self.statusLabel.adjustsFontForContentSizeCategory = true
         self.statusLabel.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(self.statusLabel)
         

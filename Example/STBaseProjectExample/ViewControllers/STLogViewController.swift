@@ -71,7 +71,8 @@ final class STLogViewController: BaseViewController {
     private func makeNavButton(title: String, action: Selector) -> UIButton {
         let button = STIconBtn(type: .system)
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.iconContentInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
         button.layer.cornerRadius = 14
         button.layer.masksToBounds = true

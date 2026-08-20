@@ -79,8 +79,8 @@ public struct STHUDTheme {
                 warningIconName: String? = nil,
                 infoIconName: String? = nil,
                 iconSize: CGSize = CGSize(width: 28, height: 28),
-                labelFont: UIFont? = UIFont.st_systemFont(ofSize: 16, weight: .medium),
-                detailLabelFont: UIFont? = UIFont.st_systemFont(ofSize: 14, weight: .regular)) {
+                labelFont: UIFont? = UIFont.st_preferredFont(ofSize: 16, forTextStyle: .headline, weight: .medium),
+                detailLabelFont: UIFont? = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .subheadline)) {
         self.backgroundColor = backgroundColor
         self.textColor = textColor
         self.detailTextColor = detailTextColor
@@ -455,17 +455,20 @@ public class STHUD: NSObject {
         guard let hud = self.progressHUD else { return }
         hud.delegate = self
         hud.label.numberOfLines = 0
+        hud.label.adjustsFontForContentSizeCategory = true
+        hud.detailsLabel.adjustsFontForContentSizeCategory = true
+        hud.button.titleLabel?.adjustsFontForContentSizeCategory = true
         hud.contentColor = self.theme.textColor
         hud.removeFromSuperViewOnHide = true
         if let font = self.theme.labelFont {
             hud.label.font = font
         } else {
-            hud.label.font = UIFont.st_systemFont(ofSize: 16, weight: .medium)
+            hud.label.font = UIFont.st_preferredFont(ofSize: 16, forTextStyle: .headline, weight: .medium)
         }
         if let detailsLabelFont = self.theme.detailLabelFont {
             hud.detailsLabel.font = detailsLabelFont
         } else {
-            hud.detailsLabel.font = UIFont.st_systemFont(ofSize: 14, weight: .regular)
+            hud.detailsLabel.font = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .subheadline)
         }
         hud.label.textColor = self.theme.textColor
         hud.detailsLabel.textColor = self.theme.detailTextColor
@@ -552,7 +555,8 @@ public class STHUD: NSObject {
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.textColor = self.theme.textColor
-        titleLabel.font = self.theme.labelFont ?? UIFont.st_systemFont(ofSize: 16, weight: .medium)
+        titleLabel.font = self.theme.labelFont ?? UIFont.st_preferredFont(ofSize: 16, forTextStyle: .headline, weight: .medium)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.numberOfLines = 0
         titleLabel.textAlignment = .left
 
@@ -566,7 +570,8 @@ public class STHUD: NSObject {
             let detailLabel = UILabel()
             detailLabel.text = detail
             detailLabel.textColor = self.theme.detailTextColor
-            detailLabel.font = self.theme.detailLabelFont ?? UIFont.st_systemFont(ofSize: 14, weight: .regular)
+            detailLabel.font = self.theme.detailLabelFont ?? UIFont.st_preferredFont(ofSize: 14, forTextStyle: .subheadline)
+            detailLabel.adjustsFontForContentSizeCategory = true
             detailLabel.numberOfLines = 0
             detailLabel.textAlignment = .left
             textStack.addArrangedSubview(detailLabel)

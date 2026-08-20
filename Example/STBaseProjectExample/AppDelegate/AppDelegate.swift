@@ -58,8 +58,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        theme.backgroundColor = UIColor.black.withAlphaComponent(0.7)//UIColor.color(hex: "#141415").withAlphaComponent(0.7)
         theme.textColor = UIColor.white
         theme.detailTextColor = UIColor.white.withAlphaComponent(0.7)
-        theme.labelFont = UIFont.st_systemFont(ofSize: 16, weight: .semibold)
-        theme.detailLabelFont = UIFont.st_systemFont(ofSize: 16)
+        theme.labelFont = UIFont.st_preferredFont(ofSize: 16, forTextStyle: .headline, weight: .semibold)
+        theme.detailLabelFont = UIFont.st_preferredFont(ofSize: 16, forTextStyle: .subheadline)
 //        theme.iconSize = CGSize(width: 18, height: 18)
 //        theme.successIconName = "toastsu"
 //        theme.successColor = UIColor.white

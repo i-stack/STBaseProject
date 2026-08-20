@@ -173,8 +173,27 @@ public class STTabBarItemView: UIView {
     
     /// 单行标题占用高度（用于在固定 TabBar 高度内分配图标与「距顶」）
     private func titleLineHeight(for model: STTabBarItemModel) -> CGFloat {
-        let font = UIFont(name: model.typography.fontName, size: model.typography.fontSize) ?? UIFont.st_systemFont(ofSize: model.typography.fontSize, weight: .medium)
-        return ceil(font.lineHeight)
+        return ceil(self.resolvedTitleFont(for: model).lineHeight)
+    }
+
+    private func resolvedTitleFont(for model: STTabBarItemModel) -> UIFont {
+        let maximumPointSize = model.typography.fontSize * 1.4
+        if UIFont(name: model.typography.fontName, size: model.typography.fontSize) != nil {
+            return UIFont.st_preferredFont(
+                name: model.typography.fontName,
+                ofSize: model.typography.fontSize,
+                forTextStyle: .caption1,
+                maxSize: maximumPointSize,
+                compatibleWith: self.traitCollection
+            )
+        }
+        return UIFont.st_preferredFont(
+            ofSize: model.typography.fontSize,
+            forTextStyle: .caption1,
+            weight: .medium,
+            maxSize: maximumPointSize,
+            compatibleWith: self.traitCollection
+        )
     }
     
     /// 图文排版可用高度：`config.height` 与父视图（contentView）实际高度取较小，避免配置值与约束高度不一致时仍按大值排版
@@ -231,8 +250,7 @@ public class STTabBarItemView: UIView {
         self.titleLabel.isHidden = false
         self.titleLabel.text = model.title
         self.titleLabel.textColor = self.isSelected ? model.colors.selectedText : model.colors.normalText
-        let font = UIFont(name: model.typography.fontName, size: model.typography.fontSize) ?? UIFont.st_systemFont(ofSize: model.typography.fontSize, weight: .medium)
-        self.titleLabel.font = font
+        self.titleLabel.font = self.resolvedTitleFont(for: model)
         self.backgroundColor = self.isSelected ? model.colors.selectedBackground : model.colors.normalBackground
         self.alpha = self.isSelected ? 1.0 : (self.config?.unselectedAlpha ?? 0.7)
 
@@ -254,8 +272,7 @@ public class STTabBarItemView: UIView {
         self.iconImageView.image = isSelected ? model.selectedImage : model.normalImage
         self.titleLabel.text = model.title
         self.titleLabel.textColor = self.isSelected ? model.colors.selectedText : model.colors.normalText
-        let font = UIFont(name: model.typography.fontName, size: model.typography.fontSize) ?? UIFont.st_systemFont(ofSize: model.typography.fontSize, weight: .medium)
-        self.titleLabel.font = font
+        self.titleLabel.font = self.resolvedTitleFont(for: model)
         self.backgroundColor = isSelected ? model.colors.selectedBackground : model.colors.normalBackground
         self.alpha = self.isSelected ? 1.0 : (self.config?.unselectedAlpha ?? 0.7)
 
@@ -295,8 +312,7 @@ public class STTabBarItemView: UIView {
         self.iconImageView.image = self.isSelected ? model.selectedImage : model.normalImage
         self.titleLabel.text = model.title
         self.titleLabel.textColor = model.colors.normalText
-        let font = UIFont(name: model.typography.fontName, size: model.typography.fontSize) ?? UIFont.st_systemFont(ofSize: model.typography.fontSize, weight: .medium)
-        self.titleLabel.font = font
+        self.titleLabel.font = self.resolvedTitleFont(for: model)
 
         // 设置不规则按钮样式（去掉背景颜色）
         self.backgroundColor = .clear
@@ -410,7 +426,8 @@ public class STTabBarItemView: UIView {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.st_systemFont(ofSize: 10, weight: .medium)
+        label.font = UIFont.st_preferredFont(ofSize: 10, forTextStyle: .caption2, weight: .medium, maxSize: 14)
+        label.adjustsFontForContentSizeCategory = true
         label.isUserInteractionEnabled = false
         return label
     }()
@@ -418,7 +435,8 @@ public class STTabBarItemView: UIView {
     private lazy var badgeLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont.st_systemFont(ofSize: 10, weight: .bold)
+        label.font = UIFont.st_preferredFont(ofSize: 10, forTextStyle: .caption2, weight: .bold, maxSize: 14)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .white
         label.backgroundColor = .systemRed
         label.layer.cornerRadius = 8

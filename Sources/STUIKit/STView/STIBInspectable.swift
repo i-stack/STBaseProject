@@ -14,7 +14,7 @@ public enum STConstraintAdaptType {
     case both            // 宽高都适配，通常用于尺寸约束
     case spacing         // 间距适配 - 用于元素之间的距离
     case margin          // 边距适配 - 用于视图与父视图边缘的距离
-    case fontSize        // 字体大小适配
+    case fontSize        // 兼容旧 XIB：缩放约束常量，不会配置 UIFont
     case custom(CGFloat) // 自定义比例适配
 }
 

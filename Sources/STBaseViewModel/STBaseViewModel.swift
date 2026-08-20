@@ -270,27 +270,6 @@ open class STBaseViewModel: NSObject {
         .eraseToAnyPublisher()
     }
 
-    public func st_request<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        var token: AnyCancellable?
-        token = self.st_requestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType, responseType: responseType)
-        .sink(
-            receiveCompletion: { [weak self] state in
-                if case .failure(let error) = state {
-                    completion(.failure(error))
-                }
-                if let token = token {
-                    self?.st_removeCancellable(token)
-                }
-            },
-            receiveValue: { value in
-                completion(.success(value))
-            }
-        )
-        if let token = token {
-            self.st_storeCancellable(token)
-        }
-    }
-
     open func st_dispatchRequestPublisher(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType) -> AnyPublisher<STHTTPResponse, Never> {
         let request = self.httpSession.request(url, method: method, parameters: parameters, encoding: encodingType, headers: self.requestHeaders, interceptor: nil, requestConfig: self.requestConfig)
         return self.st_responsePublisher(for: request)
@@ -323,20 +302,6 @@ open class STBaseViewModel: NSObject {
             .eraseToAnyPublisher()
     }
 
-    open func st_dispatchRequest(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType, completion: @escaping (STHTTPResponse) -> Void) {
-        var token: AnyCancellable?
-        token = self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
-            .sink { [weak self] response in
-                completion(response)
-                if let token = token {
-                    self?.st_removeCancellable(token)
-                }
-            }
-        if let token = token {
-            self.st_storeCancellable(token)
-        }
-    }
-
     public func st_getPublisher<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .get, parameters: parameters, responseType: responseType)
     }
@@ -351,48 +316,6 @@ open class STBaseViewModel: NSObject {
 
     public func st_deletePublisher<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
         self.st_requestPublisher(url: url, method: .delete, parameters: parameters, responseType: responseType)
-    }
-
-    public func st_get<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.st_request(url: url, method: .get, parameters: parameters, responseType: responseType, completion: completion)
-    }
-
-    public func st_post<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.st_request(url: url, method: .post, parameters: parameters, responseType: responseType, completion: completion)
-    }
-
-    public func st_put<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.st_request(url: url, method: .put, parameters: parameters, responseType: responseType, completion: completion)
-    }
-
-    public func st_delete<T: Codable>(url: String, parameters: [String: Any]? = nil, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.st_request(url: url, method: .delete, parameters: parameters, responseType: responseType, completion: completion)
-    }
-
-    /// 直接基于已构造好的 URLRequest 发起请求；保留原始 headers / body / 超时等定制
-    public func st_request<T: Codable>(_ request: URLRequest, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        guard request.url != nil else {
-            completion(.failure(.dataError("无效的 URL")))
-            return
-        }
-        var token: AnyCancellable?
-        token = self.st_requestPublisher(request, responseType: responseType)
-            .sink(
-                receiveCompletion: { [weak self] state in
-                    if case .failure(let error) = state {
-                        completion(.failure(error))
-                    }
-                    if let token = token {
-                        self?.st_removeCancellable(token)
-                    }
-                },
-                receiveValue: { value in
-                    completion(.success(value))
-                }
-            )
-        if let token = token {
-            self.st_storeCancellable(token)
-        }
     }
 
     public func st_requestPublisher<T: Codable>(_ request: URLRequest, responseType: T.Type) -> AnyPublisher<T, STBaseError> {

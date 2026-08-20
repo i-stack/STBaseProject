@@ -182,12 +182,6 @@ open class STAlertController: UIViewController {
         }
     }
 
-    /// 是否在点击动作后自动关闭，默认 true
-    @available(*, deprecated, renamed: "setAutoDismiss(_:)")
-    public func setAutoDismissOnAction(_ enabled: Bool) {
-        self.autoDismissOnAction = enabled
-    }
-
     /// 设置点击动作后是否自动关闭（类型化 API）。
     /// - Parameter autoDismiss: `.enabled` 点击后自动关闭；`.disabled` 保持弹窗。
     public func setAutoDismiss(_ autoDismiss: STAlertAutoDismiss) {

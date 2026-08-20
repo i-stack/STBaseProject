@@ -74,9 +74,6 @@ public class STCryptoService {
         return SymmetricKey(data: st_deriveKeyData(from: keyString, config: config))
     }
 
-    /// 兼容旧 API：当前无内存密钥缓存，保留空实现避免破坏调用端。
-    public func st_clearKeyCache() {}
-
     // MARK: - 数据加密
 
     public static func st_encryptData(_ data: Data, keyString: String, config: STCryptoConfig = .aes256GCM) throws -> Data {

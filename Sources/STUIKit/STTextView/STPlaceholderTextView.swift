@@ -66,7 +66,7 @@ open class STPlaceholderTextView: UITextView {
         }
     }
 
-    @objc open dynamic var placeholderFont = UIFont.st_systemFont(ofSize: 16) {
+    @objc open dynamic var placeholderFont = STTypography.body.font() {
         didSet {
             self.placeholderLabel.font = self.placeholderFont
             if !self.isApplyingDefaultPlaceholderFont {
@@ -80,7 +80,10 @@ open class STPlaceholderTextView: UITextView {
     @IBInspectable public var placeholderFontSize: CGFloat {
         get { return self.placeholderFont.pointSize }
         set {
-            self.placeholderFont = UIFont.st_systemFont(ofSize: max(1, newValue))
+            self.placeholderFont = UIFont.st_preferredFont(
+                ofSize: max(1, newValue),
+                forTextStyle: .body
+            )
         }
     }
 
@@ -222,6 +225,7 @@ open class STPlaceholderTextView: UITextView {
 
     private func configPlaceholderTextView() {
         self.isConfiguringPlaceholderTextView = true
+        self.adjustsFontForContentSizeCategory = true
         self.textContainer.lineFragmentPadding = 0
         self.contentInsetsStorage = self.textContainerInset
         self.placeholderLabel.numberOfLines = 0
@@ -261,7 +265,7 @@ open class STPlaceholderTextView: UITextView {
 
     private func applyDefaultPlaceholderFont() {
         self.isApplyingDefaultPlaceholderFont = true
-        self.placeholderFont = self.font ?? UIFont.st_systemFont(ofSize: 16)
+        self.placeholderFont = self.font ?? STTypography.body.font(compatibleWith: self.traitCollection)
         self.isApplyingDefaultPlaceholderFont = false
         self.shouldFollowTextViewFontForPlaceholder = true
     }
@@ -291,6 +295,7 @@ open class STPlaceholderTextView: UITextView {
 
     private lazy var placeholderLabel: UILabel = {
         let label = UILabel()
+        label.adjustsFontForContentSizeCategory = true
         return label
     }()
 

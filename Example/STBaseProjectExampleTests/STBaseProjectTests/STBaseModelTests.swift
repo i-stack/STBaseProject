@@ -519,29 +519,6 @@ final class STBaseModelTests: XCTestCase {
         XCTAssertFalse(model.st_containsKey("missing"))
     }
 
-    func test_flexible_mode_st_getValueType_string_compat() {
-        let model = STBaseModel()
-        model.st_isFlexibleMode = true
-        model.st_update(from: [
-            "name": "alice",
-            "age": 30,
-            "isVip": true,
-            "score": 1.5,
-            "arr": [1, 2],
-            "dict": ["k": "v"],
-            "extra": NSNull()
-        ])
-
-        XCTAssertEqual(model.st_getValueType(forKey: "name"), "String")
-        XCTAssertEqual(model.st_getValueType(forKey: "age"), "Int")
-        XCTAssertEqual(model.st_getValueType(forKey: "isVip"), "Bool")
-        XCTAssertEqual(model.st_getValueType(forKey: "score"), "Double")
-        XCTAssertEqual(model.st_getValueType(forKey: "arr"), "Array")
-        XCTAssertEqual(model.st_getValueType(forKey: "dict"), "Dictionary")
-        XCTAssertEqual(model.st_getValueType(forKey: "extra"), "Null")
-        XCTAssertEqual(model.st_getValueType(forKey: "missing"), "undefined")
-    }
-
     // MARK: - Codable encode (flexible mode)
 
     func test_codable_encode_flexible_mode_uses_rawData_keys_and_values() throws {

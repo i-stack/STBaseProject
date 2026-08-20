@@ -245,7 +245,7 @@ final class STShimmerTextViewTestViewController: BaseViewController {
             self.shimmerTextView.append(chunk)
         case .lineFade:
             let attrs: [NSAttributedString.Key: Any] = [
-                .font: self.shimmerTextView.font ?? UIFont.st_systemFont(ofSize: 16),
+                .font: self.shimmerTextView.font ?? STTypography.body.font(compatibleWith: self.traitCollection),
                 .foregroundColor: self.shimmerTextView.textColor ?? UIColor.label
             ]
             self.shimmerTextView.appendAttributedText(NSAttributedString(string: chunk, attributes: attrs), animated: true)
@@ -303,7 +303,8 @@ final class STShimmerTextViewTestViewController: BaseViewController {
     private lazy var statusLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = .systemFont(ofSize: 13, weight: .medium)
+        label.font = UIFont.st_preferredFont(ofSize: 13, forTextStyle: .footnote, weight: .medium)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .secondaryLabel
         label.numberOfLines = 3
         label.text = "准备输出…"
@@ -337,7 +338,8 @@ final class STShimmerTextViewTestViewController: BaseViewController {
         let view = STShimmerTextView(usingTextLayoutManager: true)
         view.translatesAutoresizingMaskIntoConstraints = false
         view.isScrollEnabled = true
-        view.font = .st_systemFont(ofSize: 16)
+        view.font = STTypography.body.font(compatibleWith: view.traitCollection)
+        view.adjustsFontForContentSizeCategory = true
         view.textColor = .label
         view.animateAcrossNewlines = false
         view.onAnimationStateChange = { [weak self] _ in
@@ -357,7 +359,8 @@ final class STShimmerTextViewTestViewController: BaseViewController {
     private lazy var newlineLabel: UILabel = {
         let label = UILabel()
         label.text = "跨行动画 animateAcrossNewlines"
-        label.font = .systemFont(ofSize: 13)
+        label.font = UIFont.st_preferredFont(ofSize: 13, forTextStyle: .footnote)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .secondaryLabel
         label.setContentHuggingPriority(.defaultLow, for: .horizontal)
         return label
@@ -381,7 +384,8 @@ final class STShimmerTextViewTestViewController: BaseViewController {
     private lazy var pauseButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("暂停", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.addTarget(self, action: #selector(self.pauseTapped), for: .touchUpInside)
         return button
     }()
@@ -389,7 +393,8 @@ final class STShimmerTextViewTestViewController: BaseViewController {
     private lazy var restartButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("重新渲染", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.addTarget(self, action: #selector(self.restartTapped), for: .touchUpInside)
         return button
     }()
@@ -397,7 +402,8 @@ final class STShimmerTextViewTestViewController: BaseViewController {
     private lazy var finishButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("立即完成动画", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.addTarget(self, action: #selector(self.finishTapped), for: .touchUpInside)
         return button
     }()

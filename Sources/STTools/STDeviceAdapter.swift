@@ -34,6 +34,72 @@ public struct STScaleStrategy: Sendable, Equatable {
     public static let padFriendly = STScaleStrategy(maxScale: 1.3)
 }
 
+/// 基于当前容器尺寸的设计稿数值换算器。
+///
+/// 与 `STDeviceAdapter` 的全局屏幕换算不同，此类型不读取 key window 或 UIScreen，
+/// 适用于 iPad 分屏、多窗口、横竖屏和嵌套容器。调用方应在容器尺寸变化时重新创建。
+public struct STContainerLayoutAdapter: Sendable, Equatable {
+
+    public let designSize: CGSize
+    public let containerSize: CGSize
+    public let scaleStrategy: STScaleStrategy
+    public let displayScale: CGFloat?
+
+    public init?(
+        designSize: CGSize,
+        containerSize: CGSize,
+        scaleStrategy: STScaleStrategy = .default,
+        displayScale: CGFloat? = nil
+    ) {
+        guard designSize.width > 0,
+              designSize.height > 0,
+              containerSize.width > 0,
+              containerSize.height > 0,
+              displayScale.map({ $0 > 0 }) ?? true else { return nil }
+        self.designSize = designSize
+        self.containerSize = containerSize
+        self.scaleStrategy = scaleStrategy
+        self.displayScale = displayScale
+    }
+
+    public var widthScale: CGFloat {
+        self.clamped(self.containerSize.width / self.designSize.width)
+    }
+
+    public var heightScale: CGFloat {
+        self.clamped(self.containerSize.height / self.designSize.height)
+    }
+
+    public func scaledWidth(_ value: CGFloat) -> CGFloat {
+        self.scaled(value, multiplier: self.widthScale)
+    }
+
+    public func scaledHeight(_ value: CGFloat) -> CGFloat {
+        self.scaled(value, multiplier: self.heightScale)
+    }
+
+    public func scaledSpacing(_ value: CGFloat) -> CGFloat {
+        self.scaledWidth(value)
+    }
+
+    private func scaled(_ value: CGFloat, multiplier: CGFloat) -> CGFloat {
+        let result = value * multiplier
+        guard let displayScale else { return result }
+        return (result * displayScale).rounded(self.scaleStrategy.rounding) / displayScale
+    }
+
+    private func clamped(_ value: CGFloat) -> CGFloat {
+        var result = value
+        if let minScale = self.scaleStrategy.minScale {
+            result = Swift.max(result, minScale)
+        }
+        if let maxScale = self.scaleStrategy.maxScale {
+            result = Swift.min(result, maxScale)
+        }
+        return result
+    }
+}
+
 public struct STDeviceMetrics: Sendable, Equatable {
     public let screenBounds: CGRect
     public let screenScale: CGFloat
@@ -131,10 +197,14 @@ public final class STDeviceAdapter: STDeviceAdapting {
         return clamped(raw, strategy: snapshot.scaleStrategy)
     }
 
+    /// 按全局屏幕宽度换算旧设计稿数值。
+    /// 新的组件级布局请使用 `containerAdapter(for:displayScale:)`，以适配分屏和多窗口。
     public static func scaledWidth(_ value: CGFloat) -> CGFloat {
         scaled(value, multiplier: self.widthScale)
     }
 
+    /// 按全局屏幕高度换算旧设计稿数值。
+    /// 新的组件级布局请使用 `containerAdapter(for:displayScale:)`，以当前容器为尺寸来源。
     public static func scaledHeight(_ value: CGFloat) -> CGFloat {
         scaled(value, multiplier: self.heightScale)
     }
@@ -145,8 +215,25 @@ public final class STDeviceAdapter: STDeviceAdapting {
         scaledWidth(value)
     }
 
+    /// 兼容旧页面的全局间距换算。新布局使用 `STContainerLayoutAdapter.scaledSpacing(_:)`。
     public static func scaledSpacing(_ value: CGFloat) -> CGFloat {
         scaledWidth(value)
+    }
+
+    /// 使用当前已配置的设计稿尺寸创建容器级适配器。
+    /// 新布局优先使用此入口，避免把全局屏幕尺寸误当成组件可用尺寸。
+    public static func containerAdapter(
+        for containerSize: CGSize,
+        displayScale: CGFloat? = nil
+    ) -> STContainerLayoutAdapter? {
+        let snapshot = self.shared.configurationSnapshot()
+        guard let designSize = snapshot.designSize else { return nil }
+        return STContainerLayoutAdapter(
+            designSize: designSize,
+            containerSize: containerSize,
+            scaleStrategy: snapshot.scaleStrategy,
+            displayScale: displayScale
+        )
     }
 
     /// 屏幕/窗口尺寸。

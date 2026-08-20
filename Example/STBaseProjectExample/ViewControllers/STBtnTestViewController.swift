@@ -91,7 +91,8 @@ final class STBtnTestViewController: BaseViewController {
         }
         let label = UILabel()
         label.text = title
-        label.font = .systemFont(ofSize: 13, weight: .semibold)
+        label.font = UIFont.st_preferredFont(ofSize: 13, forTextStyle: .footnote, weight: .semibold)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .secondaryLabel
         self.stackView.addArrangedSubview(label)
     }
@@ -190,7 +191,8 @@ final class STBtnTestViewController: BaseViewController {
     private func makeBaseButton(title: String) -> STBtn {
         let button = STBtn(type: .custom)
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.heightAnchor.constraint(equalToConstant: 52).isActive = true
         return button
     }
@@ -212,7 +214,8 @@ final class STBtnTestViewController: BaseViewController {
 
     private func makeHighlightColorRoundedButton() -> STBtn {
         let button = self.makeBaseButton(title: "按下变色 + 圆角 + 阴影")
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body, weight: .semibold)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.setTitleColor(.white, for: .normal)
         button.setTitleColor(.white, for: .highlighted)
         button.st_setBackgroundColor(.systemGreen, for: .normal)
@@ -299,7 +302,8 @@ final class STBtnTestViewController: BaseViewController {
         let button = STIconBtn(type: .custom)
         button.setTitle(title, for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         if let icon = UIImage(systemName: systemIconName)?.withRenderingMode(.alwaysTemplate) {
             button.setImage(icon, for: .normal)
             button.tintColor = .white
@@ -337,7 +341,8 @@ final class STBtnTestViewController: BaseViewController {
         button.setTitle("思考中…", for: .selected)
         button.setTitleColor(.secondaryLabel, for: .normal)
         button.setTitleColor(.systemGreen, for: .selected)
-        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.setImage(self.symbolImage("brain.head.profile", tint: .secondaryLabel), for: .normal)
         button.setImage(self.symbolImage("brain.head.profile.fill", tint: .systemGreen), for: .selected)
         button.configure()
@@ -358,7 +363,8 @@ final class STBtnTestViewController: BaseViewController {
         button.setTitle("已收藏", for: .selected)
         button.setTitleColor(.label, for: .normal)
         button.setTitleColor(.systemOrange, for: .selected)
-        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .body, weight: .semibold)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.setImage(self.symbolImage("star", tint: .label), for: .normal)
         button.setImage(self.symbolImage("star.fill", tint: .systemOrange), for: .selected)
         button.configure()
@@ -379,7 +385,8 @@ final class STBtnTestViewController: BaseViewController {
         button.setTitle("同意用户协议", for: .selected)
         button.setTitleColor(.secondaryLabel, for: .normal)
         button.setTitleColor(.systemBlue, for: .selected)
-        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 14, forTextStyle: .body, weight: .medium)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.setImage(self.symbolImage("circle", tint: .tertiaryLabel), for: .normal)
         button.setImage(self.symbolImage("checkmark.circle.fill", tint: .systemBlue), for: .selected)
         button.configure()

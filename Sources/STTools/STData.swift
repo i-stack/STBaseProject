@@ -263,12 +263,6 @@ public extension Data {
         return string(using: .utf8) != nil
     }
     
-    /// 是否为有效的 JSON 数据
-    @available(*, deprecated, renamed: "isJSONData")
-    var isValidJSON: Bool {
-        return isJSONData
-    }
-
     // MARK: - Slicing
 
     /// 按偏移量切片

@@ -59,13 +59,13 @@ open class STBaseViewController: UIViewController {
             self.rightBtn.setTitleColor(self.buttonTitleColor, for: .normal)
         }
     }
-    public var buttonTitleFont: UIFont = .st_systemFont(ofSize: 16) {
+    public var buttonTitleFont: UIFont = STTypography.button.font() {
         didSet {
             self.leftBtn.titleLabel?.font = self.buttonTitleFont
             self.rightBtn.titleLabel?.font = self.buttonTitleFont
         }
     }
-    public var navBarTitleFont: UIFont = .st_boldSystemFont(ofSize: 20) {
+    public var navBarTitleFont: UIFont = STTypography.title.font() {
         didSet { self.titleLabel.font = self.navBarTitleFont }
     }
     public var navBarHeight: CGFloat { STDeviceAdapter.navigationBarHeight }

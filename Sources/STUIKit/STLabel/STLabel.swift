@@ -161,7 +161,10 @@ open class STLabel: UILabel, STLocalizable {
     }
     
     private func updateFontSize() {
-        self.font = UIFont.st_systemFont(ofSize: self.font.pointSize)
+        self.font = UIFont.st_preferredFont(
+            ofSize: self.font.pointSize,
+            forTextStyle: .body
+        )
     }
     
     override public func textRect(forBounds bounds: CGRect, limitedToNumberOfLines numberOfLines: Int) -> CGRect {
@@ -181,7 +184,7 @@ open class STLabel: UILabel, STLocalizable {
         let originalSize = super.intrinsicContentSize
         // 如果原始尺寸为零，尝试手动计算
         if originalSize == .zero {
-            let currentFont = self.font ?? UIFont.st_systemFont(ofSize: UIFont.systemFontSize)
+            let currentFont = self.font ?? STTypography.body.font(compatibleWith: self.traitCollection)
             let textSize = self.text?.size(withAttributes: [.font: currentFont]) ?? CGSize.zero
             
             if let attributedText = self.attributedText {

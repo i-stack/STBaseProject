@@ -48,7 +48,8 @@ final class STLogAndHUDTestViewController: BaseViewController {
         let label = UILabel()
         label.text = "STProgressHUDBackgroundView(.liquidGlass)"
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: 15, weight: .semibold)
+        label.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .headline, weight: .semibold)
+        label.adjustsFontForContentSizeCategory = true
         label.translatesAutoresizingMaskIntoConstraints = false
         hudBackground.addSubview(label)
         NSLayoutConstraint.activate([

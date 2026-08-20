@@ -23,7 +23,8 @@ final class STBottomSheetTestViewController: STBottomSheetViewController {
     private func setupHeader() {
         let titleLabel = UILabel()
         titleLabel.text = "半屏/全屏自适应弹窗"
-        titleLabel.font = .boldSystemFont(ofSize: 18)
+        titleLabel.font = UIFont.st_preferredFont(ofSize: 18, forTextStyle: .headline, weight: .bold)
+        titleLabel.adjustsFontForContentSizeCategory = true
         titleLabel.textAlignment = .center
         
         self.contentView.addSubview(titleLabel)

@@ -478,20 +478,6 @@ open class STBaseModel: NSObject {
         }
     }
 
-    /// 获取数据类型字符串描述（保留以兼容旧调用方；新代码请用 `st_valueKind`）。
-    public func st_getValueType(forKey key: String) -> String {
-        switch st_valueKind(forKey: key) {
-        case .undefined: return "undefined"
-        case .string: return "String"
-        case .int: return "Int"
-        case .double: return "Double"
-        case .bool: return "Bool"
-        case .array: return "Array"
-        case .dictionary: return "Dictionary"
-        case .null: return "Null"
-        }
-    }
-
     override open var description: String {
         if self.st_isFlexibleMode {
             let className = String(describing: type(of: self))

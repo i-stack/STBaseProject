@@ -254,10 +254,11 @@ open class STTextView: STPlaceholderTextView {
 
     private func config() {
         self.isScrollEnabled = false
+        self.adjustsFontForContentSizeCategory = true
         self.delegate = self
         self.keyboardDismissMode = .interactive
         self.alwaysBounceVertical = false
-        self.typingAttributes[.font] = self.font ?? UIFont.st_systemFont(ofSize: 16)
+        self.typingAttributes[.font] = self.font ?? STTypography.body.font(compatibleWith: self.traitCollection)
         self.typingAttributes[.foregroundColor] = self.textColor ?? UIColor.label
         NotificationCenter.default.addObserver(
             self,
@@ -282,7 +283,7 @@ open class STTextView: STPlaceholderTextView {
     }
 
     private func heightForNumberOfLines(_ numberOfLines: Int) -> CGFloat {
-        let font = self.typingAttributes[.font] as? UIFont ?? self.font ?? UIFont.st_systemFont(ofSize: 16)
+        let font = self.typingAttributes[.font] as? UIFont ?? self.font ?? STTypography.body.font(compatibleWith: self.traitCollection)
         var lineHeight = font.lineHeight
         if let paragraphStyle = self.typingAttributes[.paragraphStyle] as? NSParagraphStyle {
             if paragraphStyle.lineHeightMultiple > 0 {

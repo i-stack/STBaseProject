@@ -244,7 +244,6 @@ final class STSecurityTests: XCTestCase {
         crypto.st_setDefaultConfig(.aes256CBC)
         XCTAssertEqual(crypto.st_getDefaultConfig().algorithm, .aes256CBC)
         crypto.st_setDefaultConfig(.aes256GCM)
-        crypto.st_clearKeyCache()
     }
 
     func testSTCryptoServiceEncryptAsync() {

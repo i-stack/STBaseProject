@@ -58,6 +58,50 @@ public struct STFontFamilyConfig: Sendable, Equatable {
     }
 }
 
+/// 字体的设计语义。基准字号负责视觉层级，text style 负责 Dynamic Type 缩放曲线。
+public struct STTypographyToken: Sendable, Equatable {
+
+    public let baseSize: CGFloat
+    public let textStyle: UIFont.TextStyle
+    public let weight: UIFont.Weight
+    public let maximumPointSize: CGFloat?
+
+    public init(
+        baseSize: CGFloat,
+        textStyle: UIFont.TextStyle,
+        weight: UIFont.Weight = .regular,
+        maximumPointSize: CGFloat? = nil
+    ) {
+        self.baseSize = baseSize
+        self.textStyle = textStyle
+        self.weight = weight
+        self.maximumPointSize = maximumPointSize
+    }
+
+    public func font(compatibleWith traitCollection: UITraitCollection? = nil) -> UIFont {
+        UIFont.st_preferredFont(
+            ofSize: self.baseSize,
+            forTextStyle: self.textStyle,
+            weight: self.weight,
+            maxSize: self.maximumPointSize,
+            compatibleWith: traitCollection
+        )
+    }
+}
+
+/// STBaseProject 的默认字体语义。业务模块可组合自己的 token，无需扩大全局枚举。
+public enum STTypography {
+    public static let largeTitle = STTypographyToken(baseSize: 34, textStyle: .largeTitle)
+    public static let title = STTypographyToken(baseSize: 20, textStyle: .title3, weight: .semibold)
+    public static let headline = STTypographyToken(baseSize: 17, textStyle: .headline, weight: .semibold)
+    public static let body = STTypographyToken(baseSize: 17, textStyle: .body)
+    public static let callout = STTypographyToken(baseSize: 16, textStyle: .callout)
+    public static let subheadline = STTypographyToken(baseSize: 15, textStyle: .subheadline)
+    public static let footnote = STTypographyToken(baseSize: 13, textStyle: .footnote)
+    public static let caption = STTypographyToken(baseSize: 12, textStyle: .caption1)
+    public static let button = STTypographyToken(baseSize: 16, textStyle: .body, weight: .medium)
+}
+
 // MARK: - STFontManager
 public final class STFontManager {
 
@@ -73,7 +117,7 @@ public final class STFontManager {
     }
 
     /// 全局字体缩放比例（用于字号调节功能），默认 1.0。
-    /// 设置后所有 `st_systemFont` / `st_preferredFont` 方法均会自动乘以此比例。
+    /// 设置后所有 `st_preferredFont` 方法均会自动乘以此比例。
     public var fontSizeScale: CGFloat {
         get {
             self.configurationLock.lock()
@@ -120,7 +164,13 @@ public extension UIFont {
     ///   - style: 文本样式，用于 UIFontMetrics 缩放（默认 .body）
     ///   - weight: 字重（默认 .regular）
     ///   - maxSize: 最大字号限制（可选）
-    static func st_preferredFont(ofSize size: CGFloat, forTextStyle style: UIFont.TextStyle = .body, weight: UIFont.Weight = .regular, maxSize: CGFloat? = nil) -> UIFont {
+    static func st_preferredFont(
+        ofSize size: CGFloat,
+        forTextStyle style: UIFont.TextStyle = .body,
+        weight: UIFont.Weight = .regular,
+        maxSize: CGFloat? = nil,
+        compatibleWith traitCollection: UITraitCollection? = nil
+    ) -> UIFont {
         let adjustedSize = size * STFontManager.shared.fontSizeScale
         let config = STFontManager.shared.fontFamily
         let baseFont: UIFont
@@ -132,9 +182,9 @@ public extension UIFont {
         }
         let metrics = UIFontMetrics(forTextStyle: style)
         if let maxSize = maxSize {
-            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize)
+            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: traitCollection)
         }
-        return metrics.scaledFont(for: baseFont)
+        return metrics.scaledFont(for: baseFont, compatibleWith: traitCollection)
     }
 
     /// 使用指定字体名 + UIFontMetrics 缩放，支持 Dynamic Type
@@ -143,63 +193,25 @@ public extension UIFont {
     ///   - size: 基准字号
     ///   - style: 文本样式，用于 UIFontMetrics 缩放（默认 .body）
     ///   - maxSize: 最大字号限制（可选）
-    static func st_preferredFont(name: String, ofSize size: CGFloat, forTextStyle style: UIFont.TextStyle = .body, maxSize: CGFloat? = nil) -> UIFont {
+    static func st_preferredFont(
+        name: String,
+        ofSize size: CGFloat,
+        forTextStyle style: UIFont.TextStyle = .body,
+        maxSize: CGFloat? = nil,
+        compatibleWith traitCollection: UITraitCollection? = nil
+    ) -> UIFont {
         let adjustedSize = size * STFontManager.shared.fontSizeScale
         let baseFont = UIFont(name: name, size: adjustedSize) ?? .systemFont(ofSize: adjustedSize)
         let metrics = UIFontMetrics(forTextStyle: style)
         if let maxSize = maxSize {
-            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize)
+            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: traitCollection)
         }
-        return metrics.scaledFont(for: baseFont)
+        return metrics.scaledFont(for: baseFont, compatibleWith: traitCollection)
     }
 }
 
 // MARK: - 便捷方法（与 UIFont.systemFont 签名一致，方便替换）
 public extension UIFont {
-
-    /// 替换 UIFont.systemFont(ofSize:)
-    /// 使用自定义字体族 + 屏幕适配缩放 + 全局 fontSizeScale
-    /// 迁移时只需: UIFont.systemFont(ofSize: 14) → UIFont.st_systemFont(ofSize: 14)
-    static func st_systemFont(ofSize size: CGFloat) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * STFontManager.shared.fontSizeScale)
-        let config = STFontManager.shared.fontFamily
-        if let name = config.fontName(for: .regular),
-           let font = UIFont(name: name, size: scaledSize) {
-            return font
-        }
-        return .systemFont(ofSize: scaledSize)
-    }
-
-    /// 替换 UIFont.systemFont(ofSize:weight:)
-    /// 迁移时只需: UIFont.systemFont(ofSize: 14, weight: .medium) → UIFont.st_systemFont(ofSize: 14, weight: .medium)
-    static func st_systemFont(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * STFontManager.shared.fontSizeScale)
-        let config = STFontManager.shared.fontFamily
-        if let name = config.fontName(for: weight),
-           let font = UIFont(name: name, size: scaledSize) {
-            return font
-        }
-        return UIFont.systemFont(ofSize: scaledSize, weight: weight)
-    }
-
-    /// 替换 UIFont.boldSystemFont(ofSize:)
-    /// 迁移时只需: UIFont.boldSystemFont(ofSize: 14) → UIFont.st_boldSystemFont(ofSize: 14)
-    static func st_boldSystemFont(ofSize size: CGFloat) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * STFontManager.shared.fontSizeScale)
-        let config = STFontManager.shared.fontFamily
-        if let name = config.fontName(for: .semibold),
-           let font = UIFont(name: name, size: scaledSize) {
-            return font
-        }
-        return UIFont.boldSystemFont(ofSize: scaledSize)
-    }
-
-    /// 替换 UIFont.italicSystemFont(ofSize:)
-    /// 迁移时只需: UIFont.italicSystemFont(ofSize: 14) → UIFont.st_italicSystemFont(ofSize: 14)
-    static func st_italicSystemFont(ofSize size: CGFloat) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * STFontManager.shared.fontSizeScale)
-        return UIFont.italicSystemFont(ofSize: scaledSize)
-    }
 
     /// 替换 UIFont.preferredFont(forTextStyle:)
     /// 使用自定义字体族 + UIFontMetrics 缩放，支持 Dynamic Type
@@ -211,55 +223,21 @@ public extension UIFont {
         return st_preferredFont(ofSize: pointSize, forTextStyle: style, weight: weight)
     }
 
-    /// 替换 UIFont.monospacedDigitSystemFont(ofSize:weight:)
-    /// 等宽数字字体，适用于计时器、价格等需要数字对齐的场景
-    /// 迁移时只需: UIFont.monospacedDigitSystemFont(ofSize: 14, weight: .regular) → UIFont.st_monospacedDigitSystemFont(ofSize: 14, weight: .regular)
-    static func st_monospacedDigitSystemFont(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * STFontManager.shared.fontSizeScale)
-        return .monospacedDigitSystemFont(ofSize: scaledSize, weight: weight)
-    }
-
-    /// 替换 UIFont.monospacedSystemFont(ofSize:weight:)
-    /// 等宽字体，适用于代码块、终端等需要等宽排列的场景
-    /// 迁移时只需: UIFont.monospacedSystemFont(ofSize: 14, weight: .regular) → UIFont.st_monospacedSystemFont(ofSize: 14, weight: .regular)
-    static func st_monospacedSystemFont(ofSize size: CGFloat, weight: UIFont.Weight) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * STFontManager.shared.fontSizeScale)
-        return .monospacedSystemFont(ofSize: scaledSize, weight: weight)
-    }
-
-    // MARK: - 不读取全局 fontSizeScale 的显式 scale 构造入口
-
-    /// 与 st_systemFont(ofSize:) 等价，但使用显式传入的 explicitScale 而非 STFontManager.shared.fontSizeScale。
-    /// 用于字体必须脱离全局可变状态（避免 withFontScale 异步逃逸导致延迟渲染被静默重置为标准字号）的场景。
-    static func st_systemFont(ofSize size: CGFloat, explicitScale scale: CGFloat) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * scale)
-        let config = STFontManager.shared.fontFamily
-        if let name = config.fontName(for: .regular),
-           let font = UIFont(name: name, size: scaledSize) {
-            return font
+    /// 支持 Dynamic Type 的等宽字体，适用于代码、日志、计时器和行号。
+    static func st_preferredMonospacedFont(
+        ofSize size: CGFloat,
+        weight: UIFont.Weight = .regular,
+        forTextStyle style: UIFont.TextStyle = .body,
+        maxSize: CGFloat? = nil,
+        compatibleWith traitCollection: UITraitCollection? = nil
+    ) -> UIFont {
+        let adjustedSize = size * STFontManager.shared.fontSizeScale
+        let baseFont = UIFont.monospacedSystemFont(ofSize: adjustedSize, weight: weight)
+        let metrics = UIFontMetrics(forTextStyle: style)
+        if let maxSize {
+            return metrics.scaledFont(for: baseFont, maximumPointSize: maxSize, compatibleWith: traitCollection)
         }
-        return .systemFont(ofSize: scaledSize)
+        return metrics.scaledFont(for: baseFont, compatibleWith: traitCollection)
     }
 
-    /// 与 st_systemFont(ofSize:weight:) 等价，但使用显式传入的 explicitScale 而非 STFontManager.shared.fontSizeScale。
-    static func st_systemFont(ofSize size: CGFloat, weight: UIFont.Weight, explicitScale scale: CGFloat) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * scale)
-        let config = STFontManager.shared.fontFamily
-        if let name = config.fontName(for: weight),
-           let font = UIFont(name: name, size: scaledSize) {
-            return font
-        }
-        return UIFont.systemFont(ofSize: scaledSize, weight: weight)
-    }
-
-    /// 与 st_boldSystemFont(ofSize:) 等价，但使用显式传入的 explicitScale 而非 STFontManager.shared.fontSizeScale。
-    static func st_boldSystemFont(ofSize size: CGFloat, explicitScale scale: CGFloat) -> UIFont {
-        let scaledSize = STDeviceAdapter.scaledWidth(size * scale)
-        let config = STFontManager.shared.fontFamily
-        if let name = config.fontName(for: .semibold),
-           let font = UIFont(name: name, size: scaledSize) {
-            return font
-        }
-        return UIFont.boldSystemFont(ofSize: scaledSize)
-    }
 }

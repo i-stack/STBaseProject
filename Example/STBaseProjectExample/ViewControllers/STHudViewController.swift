@@ -94,7 +94,8 @@ class STHudViewController: BaseViewController {
         }
         let label = UILabel()
         label.text = title
-        label.font = .systemFont(ofSize: 13, weight: .semibold)
+        label.font = UIFont.st_preferredFont(ofSize: 13, forTextStyle: .footnote, weight: .semibold)
+        label.adjustsFontForContentSizeCategory = true
         label.textColor = .secondaryLabel
         self.stackView.addArrangedSubview(label)
     }
@@ -102,7 +103,8 @@ class STHudViewController: BaseViewController {
     private func addButton(_ title: String, action: Selector) {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15)
+        button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body)
+        button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.08)
         button.layer.cornerRadius = 8
         button.heightAnchor.constraint(equalToConstant: 44).isActive = true
@@ -230,8 +232,8 @@ class STHudViewController: BaseViewController {
     @objc private func testThemeLargeIcon() {
         let theme = STHUDTheme(
             iconSize: CGSize(width: 48, height: 48),
-            labelFont: UIFont.systemFont(ofSize: 20, weight: .bold),
-            detailLabelFont: UIFont.systemFont(ofSize: 15, weight: .regular)
+            labelFont: UIFont.st_preferredFont(ofSize: 20, forTextStyle: .headline, weight: .bold),
+            detailLabelFont: UIFont.st_preferredFont(ofSize: 15, forTextStyle: .subheadline)
         )
         let config = STHUDConfig(type: .warning, title: "注意", detailText: "大图标 + 大字体主题", autoHide: true, theme: theme)
         self.view.st_showHUD(with: config)

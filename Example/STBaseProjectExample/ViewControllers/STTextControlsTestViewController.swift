@@ -78,7 +78,8 @@ final class STTextControlsTestViewController: BaseViewController {
     private func makePlaceholderTextView() -> STPlaceholderTextView {
         let textView = STPlaceholderTextView()
         textView.placeholder = "STPlaceholderTextView：placeholder 与 glass 背景"
-        textView.font = .systemFont(ofSize: 16)
+        textView.font = STTypography.body.font(compatibleWith: textView.traitCollection)
+        textView.adjustsFontForContentSizeCategory = true
         textView.contentInsets = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
         textView.layer.cornerRadius = 16
         textView.isLiquidGlassEnabled = true
@@ -89,7 +90,8 @@ final class STTextControlsTestViewController: BaseViewController {
     private func makeTextView() -> STTextView {
         let textView = STTextView()
         textView.placeholder = "STTextView：自适应高度、字数限制"
-        textView.font = .systemFont(ofSize: 16)
+        textView.font = STTypography.body.font(compatibleWith: textView.traitCollection)
+        textView.adjustsFontForContentSizeCategory = true
         textView.cornerRadius = 16
         textView.borderWidth = 1
         textView.borderColor = UIColor.white.withAlphaComponent(0.5)

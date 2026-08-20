@@ -21,14 +21,6 @@ public enum STBtnBackgroundStyle: Int {
 @IBDesignable
 open class STBtn: UIButton {
     
-    /// 通用标识符，已废弃。
-    /// `Any?` 无法提供类型安全、也无法稳定契约化。请改用：
-    /// - 字符串标识：`stringIdentifier`
-    /// - 整数标识：`tag`（UIKit 原生）
-    /// - 无障碍/UI 测试标识：`accessibilityIdentifier`
-    @available(*, deprecated, message: "Use stringIdentifier, tag, or accessibilityIdentifier instead.")
-    open var identifier: Any?
-    
     private var gradientLayer: CAGradientLayer?
     private var gradientColors: [UIColor]?
     private var gradientStartPoint = CGPoint(x: 0, y: 0)
@@ -491,7 +483,11 @@ open class STBtn: UIButton {
     
     private func updateFontSize() {
         guard let fontSize = self.titleLabel?.font.pointSize else { return }
-        self.titleLabel?.font = UIFont.st_systemFont(ofSize: fontSize)
+        self.titleLabel?.font = UIFont.st_preferredFont(
+            ofSize: fontSize,
+            forTextStyle: .body,
+            weight: .medium
+        )
     }
     
     private func updateBackgroundStyle() {

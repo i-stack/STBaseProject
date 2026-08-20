@@ -52,7 +52,8 @@ final class STViewTestViewController: BaseViewController {
         }
         let label = UILabel()
         label.text = title
-        label.font = .systemFont(ofSize: 16, weight: .semibold)
+        label.font = UIFont.st_preferredFont(ofSize: 16, forTextStyle: .headline, weight: .semibold)
+        label.adjustsFontForContentSizeCategory = true
         label.translatesAutoresizingMaskIntoConstraints = false
         card.addSubview(label)
         NSLayoutConstraint.activate([

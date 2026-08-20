@@ -83,13 +83,15 @@ class STTimerTestViewController: BaseViewController {
     private func addSection(title: String, actions: [(String, Selector)], to parent: UIStackView) {
         let titleLabel = UILabel()
         titleLabel.text = title
-        titleLabel.font = .boldSystemFont(ofSize: 17)
+        titleLabel.font = STTypography.headline.font(compatibleWith: titleLabel.traitCollection)
+        titleLabel.adjustsFontForContentSizeCategory = true
         parent.addArrangedSubview(titleLabel)
 
         for action in actions {
             let button = UIButton(type: .system)
             button.contentHorizontalAlignment = .left
-            button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+            button.titleLabel?.font = UIFont.st_preferredFont(ofSize: 15, forTextStyle: .body, weight: .medium)
+            button.titleLabel?.adjustsFontForContentSizeCategory = true
             button.setTitle(action.0, for: .normal)
             button.addTarget(self, action: action.1, for: .touchUpInside)
             parent.addArrangedSubview(button)
@@ -118,7 +120,10 @@ class STTimerTestViewController: BaseViewController {
         let textView = UITextView()
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.isEditable = false
-        textView.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+        textView.font = UIFontMetrics(forTextStyle: .caption1).scaledFont(
+            for: .monospacedSystemFont(ofSize: 12, weight: .regular)
+        )
+        textView.adjustsFontForContentSizeCategory = true
         textView.backgroundColor = UIColor.secondarySystemBackground
         textView.layer.cornerRadius = 8
         return textView

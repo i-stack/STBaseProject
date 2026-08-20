@@ -66,14 +66,34 @@ public enum STTabBarMixedSupport {
         return STTabBarItemModel.fromUITabBarItem(systemItem)
     }
     
-    /// 将 STTabBarItemModel 转换为系统 UITabBarItem
+    /// 将 STTabBarItemModel 转换为系统 UITabBarItem。
+    ///
+    /// 字体会根据调用当时的内容大小类别解析一次。`UITabBarItem` 没有
+    /// `adjustsFontForContentSizeCategory` 等价机制；需要实时响应 Dynamic Type 时，
+    /// 调用方应监听 `UIContentSizeCategory.didChangeNotification`，并重新调用本方法
+    /// 或重新设置 item 的 title text attributes。
     /// - Parameter customItem: 自定义 TabBar Item
     /// - Returns: 系统 UITabBarItem
     public static func convertCustomToSystem(_ customItem: STTabBarItemModel) -> UITabBarItem {
         let item = UITabBarItem(title: customItem.title, image: customItem.normalImage, selectedImage: customItem.selectedImage)
         
         // 设置文字属性
-        let font = UIFont(name: customItem.typography.fontName, size: customItem.typography.fontSize) ?? UIFont.st_systemFont(ofSize: customItem.typography.fontSize)
+        let maximumPointSize = customItem.typography.fontSize * 1.4
+        let font: UIFont
+        if UIFont(name: customItem.typography.fontName, size: customItem.typography.fontSize) != nil {
+            font = UIFont.st_preferredFont(
+                name: customItem.typography.fontName,
+                ofSize: customItem.typography.fontSize,
+                forTextStyle: .caption1,
+                maxSize: maximumPointSize
+            )
+        } else {
+            font = UIFont.st_preferredFont(
+                ofSize: customItem.typography.fontSize,
+                forTextStyle: .caption1,
+                maxSize: maximumPointSize
+            )
+        }
         item.setTitleTextAttributes([
             .foregroundColor: customItem.colors.normalText,
             .font: font

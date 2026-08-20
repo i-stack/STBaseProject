@@ -15,10 +15,12 @@ final class STDeviceAdapterTests: XCTestCase {
     override func setUp() {
         super.setUp()
         STDeviceAdapter.shared.reset()
+        STFontManager.shared.reset()
     }
 
     override func tearDown() {
         STDeviceAdapter.shared.reset()
+        STFontManager.shared.reset()
         super.tearDown()
     }
 
@@ -380,5 +382,121 @@ final class STDeviceAdapterTests: XCTestCase {
         // 不清缓存, 再次读取应一致
         let scale2 = STDeviceAdapter.screenScale
         XCTAssertEqual(scale1, scale2)
+    }
+
+    // MARK: - 容器级布局适配
+
+    func testContainerLayoutAdapterUsesContainerInsteadOfGlobalScreen() throws {
+        let adapter = try XCTUnwrap(
+            STContainerLayoutAdapter(
+                designSize: CGSize(width: 375, height: 812),
+                containerSize: CGSize(width: 750, height: 812)
+            )
+        )
+
+        XCTAssertEqual(adapter.widthScale, 2)
+        XCTAssertEqual(adapter.heightScale, 1)
+        XCTAssertEqual(adapter.scaledWidth(10), 20)
+        XCTAssertEqual(adapter.scaledHeight(10), 10)
+    }
+
+    func testContainerLayoutAdapterRejectsInvalidDimensions() {
+        XCTAssertNil(
+            STContainerLayoutAdapter(
+                designSize: CGSize(width: 0, height: 812),
+                containerSize: CGSize(width: 375, height: 812)
+            )
+        )
+        XCTAssertNil(
+            STContainerLayoutAdapter(
+                designSize: CGSize(width: 375, height: 812),
+                containerSize: .zero
+            )
+        )
+    }
+
+    func testContainerLayoutAdapterAppliesClampAndPixelRounding() throws {
+        let adapter = try XCTUnwrap(
+            STContainerLayoutAdapter(
+                designSize: CGSize(width: 100, height: 100),
+                containerSize: CGSize(width: 250, height: 50),
+                scaleStrategy: STScaleStrategy(minScale: 0.75, maxScale: 1.5, rounding: .up),
+                displayScale: 2
+            )
+        )
+
+        XCTAssertEqual(adapter.widthScale, 1.5)
+        XCTAssertEqual(adapter.heightScale, 0.75)
+        XCTAssertEqual(adapter.scaledWidth(1.1), 2)
+        XCTAssertEqual(adapter.scaledHeight(1), 1)
+    }
+
+    func testConfiguredContainerAdapterPreservesLegacyConfiguration() throws {
+        STDeviceAdapter.shared.configure(designSize: CGSize(width: 375, height: 812))
+        STDeviceAdapter.shared.configureScaleStrategy(.padFriendly)
+
+        let adapter = try XCTUnwrap(
+            STDeviceAdapter.containerAdapter(for: CGSize(width: 750, height: 812))
+        )
+
+        XCTAssertEqual(adapter.designSize, CGSize(width: 375, height: 812))
+        XCTAssertEqual(adapter.widthScale, 1.3)
+        XCTAssertEqual(adapter.heightScale, 1)
+    }
+
+    // MARK: - 语义字体
+
+    func testTypographyTokenRespondsToContentSizeCategory() {
+        let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
+        let accessibilityTraits = UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+
+        let standardFont = STTypography.body.font(compatibleWith: standardTraits)
+        let accessibilityFont = STTypography.body.font(compatibleWith: accessibilityTraits)
+
+        XCTAssertGreaterThan(accessibilityFont.pointSize, standardFont.pointSize)
+    }
+
+    func testTypographyTokenRespectsMaximumPointSize() {
+        let traits = UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+        let token = STTypographyToken(
+            baseSize: 17,
+            textStyle: .body,
+            maximumPointSize: 24
+        )
+
+        XCTAssertLessThanOrEqual(token.font(compatibleWith: traits).pointSize, 24)
+    }
+
+    func testTypographyTokenAppliesAppFontScaleWithoutScreenScale() {
+        STDeviceAdapter.shared.configure(designSize: CGSize(width: 1, height: 1))
+        STFontManager.shared.fontSizeScale = 1.25
+        let traits = UITraitCollection(preferredContentSizeCategory: .large)
+
+        let font = STTypographyToken(baseSize: 16, textStyle: .body).font(compatibleWith: traits)
+
+        XCTAssertEqual(font.pointSize, 20, accuracy: 0.01)
+    }
+
+    func testNamedPreferredFontRespondsToContentSizeCategoryAndMaximum() {
+        let standardTraits = UITraitCollection(preferredContentSizeCategory: .large)
+        let accessibilityTraits = UITraitCollection(preferredContentSizeCategory: .accessibilityExtraExtraExtraLarge)
+
+        let standardFont = UIFont.st_preferredFont(
+            name: "Helvetica",
+            ofSize: 12,
+            forTextStyle: .caption1,
+            maxSize: 18,
+            compatibleWith: standardTraits
+        )
+        let accessibilityFont = UIFont.st_preferredFont(
+            name: "Helvetica",
+            ofSize: 12,
+            forTextStyle: .caption1,
+            maxSize: 18,
+            compatibleWith: accessibilityTraits
+        )
+
+        XCTAssertGreaterThan(accessibilityFont.pointSize, standardFont.pointSize)
+        XCTAssertLessThanOrEqual(accessibilityFont.pointSize, 18)
     }
 }

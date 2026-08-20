@@ -66,7 +66,7 @@ open class STShimmerTextView: UITextView {
 
     open var defaultTextAttributes: [NSAttributedString.Key: Any] {
         return [
-            .font: self.font ?? UIFont.st_systemFont(ofSize: 16),
+            .font: self.font ?? STTypography.body.font(compatibleWith: self.traitCollection),
             .foregroundColor: self.textColor ?? UIColor.label
         ]
     }
@@ -107,7 +107,8 @@ open class STShimmerTextView: UITextView {
         self.backgroundColor = .clear
         self.textContainerInset = .zero
         self.textContainer.lineFragmentPadding = 0
-        self.font = .st_systemFont(ofSize: 16)
+        self.font = STTypography.body.font(compatibleWith: self.traitCollection)
+        self.adjustsFontForContentSizeCategory = true
         self.textColor = .label
         if #available(iOS 16.0, *) {
             if self.textLayoutManager == nil {
@@ -138,7 +139,7 @@ open class STShimmerTextView: UITextView {
         }
         let baseAttr = NSAttributedString(
             string: text,
-            attributes: [.font: self.font ?? UIFont.st_systemFont(ofSize: 16), .foregroundColor: baseColor]
+            attributes: [.font: self.font ?? STTypography.body.font(compatibleWith: self.traitCollection), .foregroundColor: baseColor]
         )
         _baseAttributedText.append(baseAttr)
         var attrs = self.defaultTextAttributes
