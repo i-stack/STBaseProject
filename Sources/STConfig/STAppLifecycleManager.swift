@@ -17,6 +17,7 @@ public class STAppLifecycleManager {
     private var foregroundTimestamp: Date?
     private var hasStarted = false
     private let startLock = NSLock()
+    private let formatterLock = NSLock()
     public static let shared = STAppLifecycleManager()
     public var backgroundTimeoutInterval: TimeInterval = 900 // 15分钟
     public var onBackgroundTimeout: ((TimeInterval) -> Void)?
@@ -101,6 +102,8 @@ public class STAppLifecycleManager {
     /// - Parameter date: 日期
     /// - Returns: 格式化后的字符串
     private func formatDate(_ date: Date) -> String {
+        self.formatterLock.lock()
+        defer { self.formatterLock.unlock() }
         return self.dateFormatter.string(from: date)
     }
 
@@ -148,6 +151,33 @@ public class STAppLifecycleManager {
         if self.backgroundTimestamp == nil, let savedTime = self.readPersistedBackgroundTimestamp() {
             self.backgroundTimestamp = savedTime
         }
+    }
+
+    /// 冷启动（进程被杀后重新启动）时检测后台超时。
+    /// 应用 `didFinishLaunching` 后调用：若上次进入后台的时间距今超过阈值，触发 `onBackgroundTimeout`。
+    /// - Returns: 是否存在有效后台时间戳并执行了检测
+    @discardableResult
+    public func checkTimeoutOnColdLaunch() -> Bool {
+        self.restoreBackgroundTimestampIfNeeded()
+        // 先取出待消费的时间戳，立即清空内存值与持久化值，避免重复调用导致重复触发超时。
+        guard let backgroundTime = self.backgroundTimestamp else {
+            STLog("⚠️ 冷启动无后台时间戳，跳过超时检测")
+            return false
+        }
+        self.backgroundTimestamp = nil
+        self.clearPersistedBackgroundTimestamp()
+
+        let now = Date()
+        let timeDifference = now.timeIntervalSince(backgroundTime)
+        let minutes = timeDifference / 60
+        STLog("📱 冷启动检测到后台挂起 \(String(format: "%.2f", minutes)) 分钟")
+        if timeDifference > self.backgroundTimeoutInterval {
+            STLog("⚠️ 冷启动检测到应用在后台超过 \(self.backgroundTimeoutInterval / 60) 分钟！")
+            self.handleLongBackgroundTime(minutes: minutes)
+        } else {
+            STLog("✅ 冷启动后台未超过 \(self.backgroundTimeoutInterval / 60) 分钟")
+        }
+        return true
     }
 
     /// 手动清理内存与持久化中的时间戳

@@ -343,6 +343,7 @@ open class STBaseView: UIView {
         guard previousStyle != currentStyle else { return }
         let style = STAppearanceManager.shared.resolvedInterfaceStyle(for: self.traitCollection)
         self.st_appearanceDidChange(resolvedStyle: style == .unspecified ? .light : style)
+        STAppearanceManager.shared.notifySystemAppearanceChanged()
     }
     
     /// 外观模式变化时的回调方法（可重写）

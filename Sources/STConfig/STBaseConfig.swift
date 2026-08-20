@@ -109,4 +109,55 @@ public final class STBaseConfig {
         manager.restoreBackgroundTimestampIfNeeded()
         manager.start()
     }
+
+    /// 冷启动后检测后台超时（进程被杀场景）。在 `didFinishLaunching` 调用 `enableAppLifecycleMonitoring` 后接着调用。
+    /// - Returns: 是否执行了检测
+    @discardableResult
+    public func checkAppLifecycleColdLaunchTimeout() -> Bool {
+        return STAppLifecycleManager.shared.checkTimeoutOnColdLaunch()
+    }
+
+    // MARK: - 外观模式
+
+    /// 配置 SDK 外观模式（深浅色）
+    public func configureAppearance(mode: STAppearanceMode) {
+        STAppearanceManager.shared.apply(mode: mode)
+        self.applyAppearanceToWindows(mode)
+    }
+
+    /// 将 SDK 外观模式同步到所有已连接 window 的 `overrideUserInterfaceStyle`，
+    /// 保证 `.system` 模式能正确跟随系统切换。
+    private func applyAppearanceToWindows(_ mode: STAppearanceMode) {
+        let style: UIUserInterfaceStyle
+        switch mode {
+        case .system: style = .unspecified
+        case .light:  style = .light
+        case .dark:   style = .dark
+        }
+        DispatchQueue.main.async {
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            for scene in scenes {
+                for window in scene.windows {
+                    window.overrideUserInterfaceStyle = style
+                }
+            }
+        }
+    }
+
+    // MARK: - 屏幕方向
+
+    /// 配置默认屏幕方向范围
+    public func configureDefaultOrientation(_ mask: UIInterfaceOrientationMask) {
+        STOrientationManager.shared.setDefaultOrientation(mask)
+    }
+
+    /// 请求切换当前方向
+    public func requestOrientation(_ mask: UIInterfaceOrientationMask, in windowScene: UIWindowScene? = nil) {
+        STOrientationManager.shared.requestInterfaceOrientations(mask, in: windowScene)
+    }
+
+    /// 恢复默认方向
+    public func restoreDefaultOrientation(in windowScene: UIWindowScene? = nil) {
+        STOrientationManager.shared.restoreDefaultInterfaceOrientations(in: windowScene)
+    }
 }

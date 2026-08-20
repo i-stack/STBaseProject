@@ -325,6 +325,10 @@ open class STBaseViewController: UIViewController {
         if previousStyle != currentStyle && previousStyle != .unspecified {
             self.st_refreshAppearance(animated: true)
         }
+        // 仅在颜色 trait 实际变化时才广播，避免 Dynamic Type 等非颜色变化误触发。
+        if previousStyle != currentStyle {
+            STAppearanceManager.shared.notifySystemAppearanceChanged()
+        }
     }
 
     private func st_refreshAppearance(animated: Bool = false) {

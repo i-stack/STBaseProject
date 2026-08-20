@@ -23,6 +23,8 @@ public final class STAppearanceManager {
     private let lock = NSLock()
     private var _currentMode: STAppearanceMode = .system
     private var subscriptions: [UUID: CurrentValueSubject<STAppearanceMode, Never>] = [:]
+    /// 上次因系统外观变化而广播时的 resolved style，用于去重，避免多实例/多次 trait 回调重复广播。
+    private var _lastBroadcastedStyle: UIUserInterfaceStyle?
 
     /// 当前生效模式（默认跟随系统）
     public var currentMode: STAppearanceMode {
@@ -47,6 +49,32 @@ public final class STAppearanceManager {
     }
 
     private init() {}
+
+    /// 由真实 trait environment 所有者（STBaseView / STBaseViewController / UIWindowScene 等）
+    /// 在其 `traitCollectionDidChange`（iOS 16）或 `registerForTraitChanges`（iOS 17+）中调用。
+    /// 仅在当前为 `.system` 模式时通知订阅者系统外观（light/dark）已变化；
+    /// 这样只订阅 `appearanceModePublisher` 的组件也能感知系统深浅色切换。
+    /// - Note: 必须在主线程调用。
+    public func notifySystemAppearanceChanged() {
+        guard self.currentMode == .system else {
+            // 退出 .system 时清空去重标记，便于下次重新进入时首次广播。
+            self.lock.lock()
+            self._lastBroadcastedStyle = nil
+            self.lock.unlock()
+            return
+        }
+        // 解析当前实际颜色，与上次广播比对；相同则跳过，避免多实例/多次 trait 回调重复广播。
+        let resolved = self.resolvedInterfaceStyle(for: UITraitCollection.current)
+        self.lock.lock()
+        if self._lastBroadcastedStyle == resolved {
+            self.lock.unlock()
+            return
+        }
+        self._lastBroadcastedStyle = resolved
+        let subjects = Array(self.subscriptions.values)
+        self.lock.unlock()
+        subjects.forEach { $0.send(.system) }
+    }
 
     /// 外部（宿主 App）调用此方法即可切换 SDK 内部的显示模式
     /// - Parameter mode: 目标模式
