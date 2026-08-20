@@ -108,7 +108,6 @@ public class STAppLifecycleManager {
     }
 
     // MARK: - 持久化
-
     private func persistBackgroundTimestamp(_ date: Date) {
         UserDefaults.standard.set(date.timeIntervalSince1970, forKey: STAppLifecycleKeys.backgroundTimestamp)
     }
@@ -134,8 +133,6 @@ public class STAppLifecycleManager {
     private func clearPersistedBackgroundTimestamp() {
         UserDefaults.standard.removeObject(forKey: STAppLifecycleKeys.backgroundTimestamp)
     }
-
-    // MARK: - Public API
 
     /// 手动获取后台时长（可选的公共方法）
     /// - Returns: 后台时长（秒），如果无法计算则返回 nil
