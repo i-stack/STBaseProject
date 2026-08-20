@@ -14,19 +14,19 @@ alwaysApply: true
 
 | 模式 | 目标 | 典型触发 |
 |------|------|----------|
-| [认知对手模式](../../ios-engineer/references/cognitive_adversary_mode.md) | 校准：接近真实，挑战错误确信 | 技术决策、架构、根因结论、审查判断、强确信 |
+| [认知对手模式](../../cognitive-calibration/references/cognitive_adversary_mode.md) | 校准：接近真实，挑战错误确信 | 技术决策、架构、根因结论、审查判断、强确信 |
 | **认知拓展（本文件）** | 拓展：打破茧房，可带走的能力 | Tier 0 门控命中时追加；`【深潜】` 加深 |
 
 二者可同时存在：决策类先走认知对手（Tier 2）；其余回答仅在门控命中时追加 Tier 0 尾注，未命中则静默。
 
-> **链接条件性**：上表对认知对手模式的链接 `../../ios-engineer/references/cognitive_adversary_mode.md` 仅在 ios-engineer skill 已同步到同层 skills 目录时可达。非 iOS 环境（未同步 ios-engineer）下，本 skill 仅提供 Tier 0 / Tier 3，Tier 2 需用户显式加载 ios-engineer，链接失效不阻断 Tier 0/3。
+> **链接条件性**：上表对认知对手模式的链接 `../../cognitive-calibration/references/cognitive_adversary_mode.md` 仅在 cognitive-calibration skill 已同步到同层 skills 目录时可达。`ios-engineer` 经 `depends_on: [cognitive-calibration]` 引用该真值并维护镜像（`ios-engineer/references/cognitive_adversary_mode.md`），链接失效不阻断 Tier 0/3。
 
 ## 三层分工
 
 | 层级 | 何时 | 做什么 |
 |------|------|--------|
 | **Tier 0（门控）** | 答完后命中触发门控（见下）时 | 固定小节「认知尾注」，3–5 行 |
-| **Tier 2** | 技术决策 / 架构 / 根因结论 / 审查最终判断 / 用户强确信 | 完整认知对手 Step 0–6（见 ios-engineer `cognitive_adversary_mode.md`） |
+| **Tier 2** | 技术决策 / 架构 / 根因结论 / 审查最终判断 / 用户强确信 | 完整认知对手 Step 0–6（见 cognitive-calibration `cognitive_adversary_mode.md`，ios-engineer 维镜像） |
 | **Tier 3** | 用户写 `【深潜】` 或 `【拓展】` | Tier 0 + 心智模型 + 跨域类比 + 7 天内可验证动作 |
 
 Tier 2 命中时：用认知对手完整结构，**不另输出** Tier 0 尾注；同时 preamble 轻量认知校准段也由 CAM 完整结构承载、不再单独输出（见 CE-006 与 global cognitive calibration 段）。三层校准去重，避免重复。
