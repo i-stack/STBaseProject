@@ -232,12 +232,16 @@ final class STBaseViewModelNetworkTests: XCTestCase {
         request.cachePolicy = .reloadIgnoringLocalCacheData
 
         let completionExpectation = expectation(description: "URLRequest overload emits value")
-        viewModel.st_request(request, responseType: MockUserDTO.self) { result in
-            guard case .success = result else {
-                return XCTFail("Expected URLRequest overload success")
-            }
-            completionExpectation.fulfill()
-        }
+        viewModel.st_requestPublisher(request, responseType: MockUserDTO.self)
+            .sink(
+                receiveCompletion: { completion in
+                    if case .failure(let error) = completion {
+                        XCTFail("Expected URLRequest overload success, got: \(error)")
+                    }
+                },
+                receiveValue: { _ in completionExpectation.fulfill() }
+            )
+            .store(in: &self.cancellables)
 
         wait(for: [completionExpectation], timeout: 1.0)
         XCTAssertEqual(viewModel.capturedURLRequest?.url, request.url)
