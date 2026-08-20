@@ -112,6 +112,25 @@ jobs:
                       f.write(f"\n- ❌ `{tf.get('testIdentifierString','?')}` — {tf.get('failureText','')}\n")
           PY
 
+      - name: Export visual evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p build/visual-attachments
+          if [ -d "$RESULT" ]; then
+            xcrun xcresulttool export attachments \
+              --path "$RESULT" \
+              --output-path build/visual-attachments
+          fi
+
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-evidence-${{ github.run_id }}
+          path: build/visual-attachments
+          retention-days: 14
+
       - name: Upload xcresult on failure
         if: failure()
         uses: actions/upload-artifact@v4

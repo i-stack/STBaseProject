@@ -6,7 +6,6 @@ import STBaseProject
 /// - 配置管理 & 重置 -> (configure / reset())
 /// - 缩放计算 & 取整精度 -> (scaledWidth / scaledHeight / scaledFontSize / scaledSpacing)
 /// - 缩放策略(sclamp + 取整规则, minScale/maxScale)
-/// - 弃用 API 路径兼容
 /// - 缓存机制 & 清缓存 (clearCache, 配置变更自动清空)
 /// - isNotchScreen 判据验证 (>=44)
 /// - STBarHeightsConfiguration / STScaleStrategy / STDeviceMetrics 值类型正确性
@@ -129,18 +128,18 @@ final class STDeviceAdapterTests: XCTestCase {
         XCTAssertEqual(scaled, original)
     }
 
-    func testDeprecatedScaledValue_callsScaledWidth() {
+    func testScaledWidthIsDeterministic() {
         STDeviceAdapter.shared.configure(designSize: CGSize(width: 375, height: 812))
-        let viaDeprecated = STDeviceAdapter.scaledWidth(50)
-        let viaNew = STDeviceAdapter.scaledWidth(50)
-        XCTAssertEqual(viaDeprecated, viaNew)
+        let first = STDeviceAdapter.scaledWidth(50)
+        let second = STDeviceAdapter.scaledWidth(50)
+        XCTAssertEqual(first, second)
     }
 
-    func testDeprecatedScaledHeightValue_callsScaledHeight() {
+    func testScaledHeightIsDeterministic() {
         STDeviceAdapter.shared.configure(designSize: CGSize(width: 375, height: 812))
-        let viaDeprecated = STDeviceAdapter.scaledHeight(50)
-        let viaNew = STDeviceAdapter.scaledHeight(50)
-        XCTAssertEqual(viaDeprecated, viaNew)
+        let first = STDeviceAdapter.scaledHeight(50)
+        let second = STDeviceAdapter.scaledHeight(50)
+        XCTAssertEqual(first, second)
     }
 
     func testScaleStrategy_defaultNoLimits() {

@@ -32,15 +32,6 @@ public enum STDeviceInfo {
             state == .full
         }
 
-        fileprivate var legacyDictionary: [String: Any] {
-            [
-                "battery_level": level,
-                "battery_percentage": percentage,
-                "battery_state": state.rawValue,
-                "is_charging": isCharging,
-                "is_full": isFull
-            ]
-        }
     }
 
     public struct STStorageInfo: Sendable {
@@ -263,16 +254,6 @@ public extension STDeviceInfo {
         }
 
         return canWriteToRestrictedPath()
-    }
-
-    /// 兼容旧安全检测 API：检测越狱环境
-    static func st_detectJailbreak() -> Bool {
-        isDeviceJailbroken
-    }
-
-    /// 兼容旧安全检测 API：检测模拟器环境
-    static func st_detectSimulator() -> Bool {
-        isRunningOnSimulator
     }
 
     /// 检测网络是否可达

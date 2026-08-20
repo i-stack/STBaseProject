@@ -24,6 +24,9 @@ jobs:
       - name: Check try? policy
         run: bash .github/check_try_question_mark.sh
 
+      - name: Check removed APIs
+        run: bash .github/check_removed_api.sh
+
       - name: SwiftLint
         run: |
           if ! command -v swiftlint >/dev/null 2>&1; then
@@ -56,4 +59,3 @@ jobs:
           swiftlint analyze --strict \
             --compiler-log-path xcodebuild.log \
             --reporter github-actions-logging
-

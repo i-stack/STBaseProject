@@ -33,7 +33,7 @@ public enum STHUDType {
 }
 
 // MARK: - HUD 阴影开关
-/// Shadow toggle for HUD theme. Prefer this over the legacy `Bool` setter for clearer call-sites.
+/// Shadow toggle for HUD theme.
 public enum STHUDShadow: Equatable {
     case enabled
     case disabled

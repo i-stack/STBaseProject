@@ -267,8 +267,8 @@ final class STSecurityTests: XCTestCase {
     func testSecurityDetectionAPIsAreCallable() {
         _ = STSecurityConfig.st_detectProxy()
         _ = STSecurityConfig.st_detectDebugging()
-        _ = STDeviceInfo.st_detectJailbreak()
-        _ = STDeviceInfo.st_detectSimulator()
+        _ = STDeviceInfo.isDeviceJailbroken
+        _ = STDeviceInfo.isRunningOnSimulator
         _ = STDeviceInfo.st_detectNetworkConnection()
         _ = STSecurityConfig.st_detectSSLPinning()
         _ = STSecurityConfig.st_detectAppIntegrity()
@@ -294,9 +294,9 @@ final class STSecurityTests: XCTestCase {
 
     func testSimulatorFlagMatchesCompileTarget() {
         #if targetEnvironment(simulator)
-        XCTAssertTrue(STDeviceInfo.st_detectSimulator())
+        XCTAssertTrue(STDeviceInfo.isRunningOnSimulator)
         #else
-        XCTAssertFalse(STDeviceInfo.st_detectSimulator())
+        XCTAssertFalse(STDeviceInfo.isRunningOnSimulator)
         #endif
     }
 
