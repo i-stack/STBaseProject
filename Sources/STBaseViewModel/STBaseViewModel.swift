@@ -8,7 +8,6 @@
 import Combine
 import CryptoKit
 import Foundation
-import UIKit
 
 // MARK: - 错误类型枚举
 public enum STBaseError: LocalizedError, Equatable {
@@ -137,15 +136,22 @@ open class STBaseViewModel: NSObject {
     public var jsonDecoder = JSONDecoder()
     public var jsonEncoder = JSONEncoder()
 
+    /// 订阅持有集合。对外保留公开只读可见性以兼容既有消费者；
+    /// 内部存储一律走带锁的 `st_store(in:)` 扩展或 `st_storeCancellable`，请勿直接 `store(in:)` 以规避并发风险。
     public private(set) var cancellables = Set<AnyCancellable>()
     private let cache = NSCache<NSString, STMemoryCacheEntry>()
     private let stateLock = NSLock()
+    /// 上传/下载等一次性订阅的注册表：以 UUID 为键、加锁存储 AnyCancellable。
+    /// 回调仅捕获 UUID（不捕获 token/holder 本身），完成时按 UUID 删除，避免自持有环与同步竞态。
+    private let cancellableRegistry = STCancellableRegistry()
     private var inflightRequests = [STDataRequest]()
     private var activeLoadingRequestCount = 0
     private var pendingLoadingFailure: STBaseError?
 
     deinit {
-        STLog("🌈 -> \(self) 🌈 ----> 🌈 dealloc")
+        #if DEBUG
+        STLog("[STBaseViewModel] deinit: \(String(describing: type(of: self)))", level: .debug)
+        #endif
     }
 
     override public init() {
@@ -220,54 +226,12 @@ open class STBaseViewModel: NSObject {
 
     // MARK: - 网络请求核心方法
     public func st_requestPublisher<T: Codable>(url: String, method: STHTTPMethod = .get, parameters: [String: Any]? = nil, encodingType: STParameterEncoder.EncodingType = .json, responseType: T.Type) -> AnyPublisher<T, STBaseError> {
-        Deferred { [weak self] () -> AnyPublisher<T, STBaseError> in
+        return self.st_buildRequestPublisher(responseType: responseType) { [weak self] in
             guard let self = self else {
-                return Fail(error: STBaseError.unknown).eraseToAnyPublisher()
-            }
-            let shouldShowLoading = self.requestConfig.showLoading
-            if shouldShowLoading {
-                self.st_beginLoadingRequest()
+                return Just(STHTTPResponse(data: nil, response: nil, error: STBaseError.unknown)).eraseToAnyPublisher()
             }
             return self.st_dispatchRequestPublisher(url: url, method: method, parameters: parameters, encodingType: encodingType)
-                .tryMap { [weak self] response -> T in
-                    guard let self = self else {
-                        throw STBaseError.unknown
-                    }
-                    let result = self.st_resultFromHTTPResponse(response, responseType: responseType)
-                    switch result {
-                    case .success(let value):
-                        return value
-                    case .failure(let error):
-                        throw error
-                    }
-                }
-                .mapError { error -> STBaseError in
-                    if let baseError = error as? STBaseError {
-                        return baseError
-                    }
-                    return STBaseError.origin(error: error)
-                }
-                .handleEvents(
-                    receiveOutput: { [weak self] _ in
-                        self?.dataUpdated.send()
-                    },
-                    receiveCompletion: { [weak self] completion in
-                        guard shouldShowLoading else { return }
-                        switch completion {
-                        case .finished:
-                            self?.st_finishLoadingRequest(.loaded)
-                        case .failure(let error):
-                            self?.st_finishLoadingRequest(.failed(error))
-                        }
-                    },
-                    receiveCancel: { [weak self] in
-                        guard shouldShowLoading else { return }
-                        self?.st_cancelLoadingRequest()
-                    }
-                )
-                .eraseToAnyPublisher()
         }
-        .eraseToAnyPublisher()
     }
 
     open func st_dispatchRequestPublisher(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType) -> AnyPublisher<STHTTPResponse, Never> {
@@ -322,6 +286,23 @@ open class STBaseViewModel: NSObject {
         guard request.url != nil else {
             return Fail(error: STBaseError.dataError("无效的 URL")).eraseToAnyPublisher()
         }
+        return self.st_buildRequestPublisher(responseType: responseType) { [weak self] in
+            guard let self = self else {
+                return Just(STHTTPResponse(data: nil, response: nil, error: STBaseError.unknown)).eraseToAnyPublisher()
+            }
+            return self.st_dispatchRequestPublisher(request)
+        }
+    }
+
+    /// 统一封装请求链：订阅时按需触发 loading 计数 -> 解析响应 -> 分发终态（loaded/failed/cancel）。
+    /// 两个 `st_requestPublisher` 重载共享此实现，避免重复约 50 行的 Deferred 体。
+    /// - Parameters:
+    ///   - responseType: 目标解码类型。
+    ///   - responsePublisherFactory: 惰性构造底层 `STHTTPResponse` 发布者（每次订阅才调用，确保 inflight 跟踪时序正确）。
+    private func st_buildRequestPublisher<T: Codable>(
+        responseType: T.Type,
+        responsePublisherFactory: @escaping () -> AnyPublisher<STHTTPResponse, Never>
+    ) -> AnyPublisher<T, STBaseError> {
         return Deferred { [weak self] () -> AnyPublisher<T, STBaseError> in
             guard let self = self else {
                 return Fail(error: STBaseError.unknown).eraseToAnyPublisher()
@@ -330,7 +311,7 @@ open class STBaseViewModel: NSObject {
             if shouldShowLoading {
                 self.st_beginLoadingRequest()
             }
-            return self.st_dispatchRequestPublisher(request)
+            return responsePublisherFactory()
                 .tryMap { [weak self] response -> T in
                     guard let self = self else {
                         throw STBaseError.unknown
@@ -460,16 +441,8 @@ open class STBaseViewModel: NSObject {
         STLog(log)
     }
 
-    private func st_handleHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        let result = self.st_resultFromHTTPResponse(httpResponse, responseType: responseType)
-        switch result {
-        case .success(let value):
-            self.st_handleSuccess(value, completion: completion)
-        case .failure(let error):
-            self.st_handleError(error, completion: completion)
-        }
-    }
-
+    /// 统一的响应解析入口：成功则解码为 T，失败则转换为 STBaseError。
+    /// 上传/下载与常规请求路径共用，避免维护两套错误处理逻辑。
     private func st_resultFromHTTPResponse<T: Codable>(_ httpResponse: STHTTPResponse, responseType: T.Type) -> Result<T, STBaseError> {
         if httpResponse.isSuccess {
             return self.st_decodeResponse(httpResponse, responseType: responseType)
@@ -502,17 +475,6 @@ open class STBaseViewModel: NSObject {
         } else {
             return STBaseError.unknown
         }
-    }
-
-    private func st_handleSuccess<T>(_ result: T, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.loadingState.send(.loaded)
-        completion(.success(result))
-        self.dataUpdated.send()
-    }
-
-    private func st_handleError<T>(_ error: STBaseError, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        self.loadingState.send(.failed(error))
-        completion(.failure(error))
     }
 
     // MARK: - 缓存管理
@@ -591,15 +553,25 @@ open class STBaseViewModel: NSObject {
         let expiration: Date
     }
 
-    private func st_diskCacheURL(forKey key: String) -> URL? {
+    /// 新命名空间缓存路径（带 `stvm_` 前缀）。internal 可见性以便测试验证命名空间契约。
+    func st_diskCacheURL(forKey key: String) -> URL? {
         guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
         let safeName = self.st_safeCacheFileName(forKey: key)
         return cacheDirectory.appendingPathComponent("\(safeName).cache")
     }
 
+    /// 升级前（无 `stvm_` 前缀）的旧缓存路径，仅用于一次性迁移回退。
+    func st_legacyDiskCacheURL(forKey key: String) -> URL? {
+        guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        let digest = SHA256.hash(data: Data(key.utf8))
+        let legacyName = digest.map { String(format: "%02x", $0) }.joined()
+        return cacheDirectory.appendingPathComponent("\(legacyName).cache")
+    }
+
+    /// 文件名加 `stvm_` 命名空间前缀，避免与 App 内其他同样使用 `.cache` 后缀的模块互相误删。
     private func st_safeCacheFileName(forKey key: String) -> String {
         let digest = SHA256.hash(data: Data(key.utf8))
-        return digest.map { String(format: "%02x", $0) }.joined()
+        return "stvm_" + digest.map { String(format: "%02x", $0) }.joined()
     }
 
     private func st_saveToDisk(data: Data, expiration: Date, forKey key: String) {
@@ -614,14 +586,32 @@ open class STBaseViewModel: NSObject {
     }
 
     private func st_loadFromDisk(forKey key: String) -> STDiskCachePayload? {
-        guard let fileURL = self.st_diskCacheURL(forKey: key) else {
+        // 优先读取新命名空间路径。
+        if let newURL = self.st_diskCacheURL(forKey: key),
+           let payload = self.st_decodeDiskCache(at: newURL) {
+            return payload
+        }
+        // 回退读取升级前的旧路径（无 stvm_ 前缀），命中则迁移到新路径并删除旧文件。
+        guard let legacyURL = self.st_legacyDiskCacheURL(forKey: key),
+              let payload = self.st_decodeDiskCache(at: legacyURL) else {
             return nil
         }
+        if let newURL = self.st_diskCacheURL(forKey: key) {
+            do {
+                try self.jsonEncoder.encode(payload).write(to: newURL, options: .atomic)
+                try FileManager.default.removeItem(at: legacyURL)
+            } catch {
+                STLog("[STBaseViewModel] 磁盘缓存迁移失败: \(error.localizedDescription)")
+            }
+        }
+        return payload
+    }
+
+    private func st_decodeDiskCache(at fileURL: URL) -> STDiskCachePayload? {
         do {
             let data = try Data(contentsOf: fileURL)
             return try self.jsonDecoder.decode(STDiskCachePayload.self, from: data)
         } catch {
-            STLog("[STBaseViewModel] 磁盘缓存读取失败: \(error.localizedDescription)")
             return nil
         }
     }
@@ -635,6 +625,16 @@ open class STBaseViewModel: NSObject {
         }
     }
 
+    /// 本模块磁盘缓存文件特征：仅 `stvm_` 命名空间前缀可证明 ownership。
+    /// 不再将「纯 64 位十六进制」的无前缀文件认定为可批量删除的本模块文件，
+    /// 因为其他模块也可能采用 SHA-256 命名；遗留文件仅按调用方已知 key 计算出的确切旧路径迁移/删除。
+    /// internal 可见性以便测试验证所有权判定（不触碰真实磁盘）。
+    func st_isOwnedCacheFile(_ fileURL: URL) -> Bool {
+        guard fileURL.pathExtension == "cache" else { return false }
+        let base = fileURL.deletingPathExtension().lastPathComponent
+        return base.hasPrefix("stvm_")
+    }
+
     private func st_clearDiskCache() {
         guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
             return
@@ -642,7 +642,7 @@ open class STBaseViewModel: NSObject {
         do {
             let cacheFiles = try FileManager.default.contentsOfDirectory(at: cacheDirectory, includingPropertiesForKeys: nil)
             cacheFiles.forEach { fileURL in
-                guard fileURL.pathExtension == "cache" else { return }
+                guard self.st_isOwnedCacheFile(fileURL) else { return }
                 do {
                     try FileManager.default.removeItem(at: fileURL)
                 } catch {
@@ -698,32 +698,38 @@ open class STBaseViewModel: NSObject {
 
     // MARK: - 文件上传和下载
     public func st_upload<T: Codable>(url: String, parameters: [String: Any]? = nil, files: [STUploadFile], responseType: T.Type, progress: ((STUploadProgress) -> Void)? = nil, completion: @escaping (Result<T, STBaseError>) -> Void) {
-        if self.requestConfig.showLoading {
-            self.loadingState.send(.loading)
+        let shouldShowLoading = self.requestConfig.showLoading
+        if shouldShowLoading {
+            self.st_beginLoadingRequest()
         }
         let uploadRequest = self.httpSession.upload(url, files: files, parameters: parameters, headers: self.requestHeaders, interceptor: nil, requestConfig: self.requestConfig)
         if let progress = progress {
-            uploadRequest.progressPublisher
-                .sink(receiveValue: progress)
-                .st_store(in: self)
+            var progressID: UUID?
+            let progressSub = uploadRequest.progressPublisher
+                .sink(receiveCompletion: { [weak self] _ in
+                    self?.st_unregisterCancellable(progressID)
+                }, receiveValue: progress)
+            progressID = self.st_registerCancellable(progressSub)
         }
-        var token: AnyCancellable?
-        token = uploadRequest.responsePublisher.sink { [weak self] response in
-            self?.st_handleHTTPResponse(response, responseType: responseType, completion: completion)
-            if let token = token {
-                self?.st_removeCancellable(token)
-            }
-        }
-        if let token = token {
-            self.st_storeCancellable(token)
-        }
+        var responseID: UUID?
+        let responseSub = uploadRequest.responsePublisher
+            .sink(receiveCompletion: { [weak self] _ in
+                self?.st_unregisterCancellable(responseID)
+            }, receiveValue: { [weak self] response in
+                guard let self = self else { return }
+                let result = self.st_resultFromHTTPResponse(response, responseType: responseType)
+                self.st_applyTerminalState(result.map { _ in () }, shouldShowLoading: shouldShowLoading, sendDataUpdate: true)
+                completion(result)
+            })
+        responseID = self.st_registerCancellable(responseSub)
     }
 
     /// 真正基于 URLSession download task 的下载，避免大文件全量入内存。
     /// 默认会写入到调用方提供的 destination；若未提供则使用临时目录中的随机文件。
     public func st_download(url: String, destination: URL? = nil, progress: ((STDownloadProgress) -> Void)? = nil, completion: @escaping (URL?, STBaseError?) -> Void) {
-        if self.requestConfig.showLoading {
-            self.loadingState.send(.loading)
+        let shouldShowLoading = self.requestConfig.showLoading
+        if shouldShowLoading {
+            self.st_beginLoadingRequest()
         }
         let targetURL = destination ?? FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let downloadRequest = self.httpSession.download(
@@ -741,26 +747,51 @@ open class STBaseViewModel: NSObject {
             )
         )
         if let progress = progress {
-            downloadRequest.progressPublisher
-                .sink(receiveValue: progress)
-                .st_store(in: self)
+            var progressID: UUID?
+            let progressSub = downloadRequest.progressPublisher
+                .sink(receiveCompletion: { [weak self] _ in
+                    self?.st_unregisterCancellable(progressID)
+                }, receiveValue: progress)
+            progressID = self.st_registerCancellable(progressSub)
         }
-        var token: AnyCancellable?
-        token = downloadRequest.responsePublisher.sink(receiveCompletion: { [weak self] state in
-            if case .failure(let error) = state {
-                let baseError = self?.st_convertHTTPError(error) ?? STBaseError.origin(error: error)
-                self?.loadingState.send(.failed(baseError))
-                completion(nil, baseError)
+        var responseID: UUID?
+        let responseSub = downloadRequest.responsePublisher
+            .sink(receiveCompletion: { [weak self] state in
+                self?.st_unregisterCancellable(responseID)
+                guard let self = self else { return }
+                if case .failure(let error) = state {
+                    let baseError = self.st_convertHTTPError(error)
+                    self.st_applyTerminalState(.failure(baseError), shouldShowLoading: shouldShowLoading, sendDataUpdate: false)
+                    completion(nil, baseError)
+                }
+            }, receiveValue: { [weak self] fileURL in
+                self?.st_unregisterCancellable(responseID)
+                guard let self = self else { return }
+                // 下载完成代表文件就绪而非 ViewModel 数据更新，故不发送 dataUpdated（与旧行为一致）。
+                self.st_applyTerminalState(.success(()), shouldShowLoading: shouldShowLoading, sendDataUpdate: false)
+                completion(fileURL, nil)
+            })
+        responseID = self.st_registerCancellable(responseSub)
+    }
+
+    /// 统一的加载终态分发，供上传/下载等非 Publisher 请求路径复用。
+    /// 仅关心「成功或失败」终态，不携带具体值（故非泛型）。
+    /// - shouldShowLoading: 仅当本次操作确实触发了 `st_beginLoadingRequest`（即 showLoading 为 true）才走并发计数式终态，
+    ///   避免无 loading 的上传/下载干扰其他并发请求的 loading 计数。
+    /// - sendDataUpdate: 是否额外发送 `dataUpdated`（上传成功代表数据变更，下载成功仅代表文件就绪，故分别传 true/false）。
+    private func st_applyTerminalState(_ result: Result<Void, STBaseError>, shouldShowLoading: Bool, sendDataUpdate: Bool) {
+        switch result {
+        case .success:
+            if shouldShowLoading {
+                self.st_finishLoadingRequest(.loaded)
             }
-            if let token = token {
-                self?.st_removeCancellable(token)
+            if sendDataUpdate {
+                self.dataUpdated.send()
             }
-        }, receiveValue: { [weak self] fileURL in
-            self?.loadingState.send(.loaded)
-            completion(fileURL, nil)
-        })
-        if let token = token {
-            self.st_storeCancellable(token)
+        case .failure(let error):
+            if shouldShowLoading {
+                self.st_finishLoadingRequest(.failed(error))
+            }
         }
     }
 
@@ -773,6 +804,7 @@ open class STBaseViewModel: NSObject {
         requests.forEach { _ = $0.cancel() }
 
         self.st_removeAllCancellables()
+        self.cancellableRegistry.removeAll()
         self.cache.removeAllObjects()
         self.loadingState.send(.idle)
         self.refreshState.send(.idle)
@@ -785,10 +817,50 @@ open class STBaseViewModel: NSObject {
         self.stateLock.unlock()
     }
 
-    private func st_removeCancellable(_ cancellable: AnyCancellable) {
-        self.stateLock.lock()
-        self.cancellables.remove(cancellable)
-        self.stateLock.unlock()
+    /// 注册一次性订阅并返回其 UUID；完成时调用 `st_unregisterCancellable(_:)` 按 UUID 精确移除。
+    /// 回调只捕获 UUID，不持有 token 本身，故无自持有环，且 add/remove 均经锁原子化，规避同步/异步竞态。
+    @discardableResult
+    fileprivate func st_registerCancellable(_ cancellable: AnyCancellable) -> UUID {
+        return self.cancellableRegistry.add(cancellable)
+    }
+
+    fileprivate func st_unregisterCancellable(_ id: UUID?) {
+        guard let id = id else { return }
+        self.cancellableRegistry.remove(id)
+    }
+
+    /// 以 UUID 为键、锁保护的临时订阅注册表。订阅只通过 add 进入、remove 离开，外部回调不引用其内部。
+    private final class STCancellableRegistry {
+        private let lock = NSLock()
+        private var store: [UUID: AnyCancellable] = [:]
+        func add(_ cancellable: AnyCancellable) -> UUID {
+            let id = UUID()
+            self.lock.lock()
+            self.store[id] = cancellable
+            self.lock.unlock()
+            return id
+        }
+        func remove(_ id: UUID) {
+            self.lock.lock()
+            self.store.removeValue(forKey: id)
+            self.lock.unlock()
+        }
+        func removeAll() {
+            self.lock.lock()
+            self.store.removeAll()
+            self.lock.unlock()
+        }
+        var count: Int {
+            self.lock.lock()
+            let c = self.store.count
+            self.lock.unlock()
+            return c
+        }
+    }
+
+    /// 当前 registry 中尚未移除的临时订阅数量（测试/诊断用）。
+    var st_registeredCancellableCount: Int {
+        return self.cancellableRegistry.count
     }
 
     private func st_trackInflight(_ request: STDataRequest) {
@@ -891,7 +963,7 @@ extension STBaseViewModel {
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .assign(to: keyPath, on: object)
-            .store(in: &self.cancellables)
+            .st_store(in: self)
     }
 
     public func st_bindError<T: AnyObject>(to object: T, keyPath: ReferenceWritableKeyPath<T, String?>) {
@@ -899,7 +971,7 @@ extension STBaseViewModel {
             .map { $0.errorDescription }
             .receive(on: DispatchQueue.main)
             .assign(to: keyPath, on: object)
-            .store(in: &self.cancellables)
+            .st_store(in: self)
     }
 
     public func st_bindDataUpdate<T: AnyObject>(to object: T, action: @escaping (T) -> Void) {
@@ -910,7 +982,7 @@ extension STBaseViewModel {
                     action(object)
                 }
             }
-            .store(in: &self.cancellables)
+            .st_store(in: self)
     }
 
     /// 设置认证 Token
