@@ -173,11 +173,11 @@ reviewer 在两种模式下都永远只读。主 agent 不得把 `/auto-review` 
 └── raw/
 ```
 
-`RESPONSE.md` 必须记录 review mode 和 scope。归档完成后 best-effort 执行：
+`RESPONSE.md` 必须记录 review mode 和 scope。归档完成后 best-effort 执行（把 `$CLI` 替换为 preamble 的 historical-recall 段注入的绝对路径，即 `<仓库根>/skills-engineering/plan-reviews/dist/cli.js`；该 CLI 不在 `~/.codebuddy/` 下，仓库根相对路径仅当 cwd=仓库根时可用）：
 
 ```bash
-node skills-engineering/plan-reviews/dist/cli.js sync 2>/dev/null || true
-node skills-engineering/plan-reviews/dist/cli.js merge 2>/dev/null || true
+node "$CLI" sync 2>/dev/null || true
+node "$CLI" merge 2>/dev/null || true
 ```
 
 归档和知识刷新只发生在已授权的审查会话中。普通编码任务不创建 `.plan-reviews` 产物。

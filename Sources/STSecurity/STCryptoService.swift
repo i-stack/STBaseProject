@@ -9,8 +9,6 @@ import CommonCrypto
 import CryptoKit
 import Foundation
 
-// MARK: - 加密配置
-
 public struct STCryptoConfig {
     public let algorithm: STCryptoAlgorithm
     public let keyLength: Int
@@ -40,7 +38,6 @@ public struct STCryptoConfig {
 }
 
 // MARK: - 加密服务
-
 public class STCryptoService {
 
     public static let shared = STCryptoService()
@@ -49,8 +46,6 @@ public class STCryptoService {
     private let configLock = NSLock()
 
     private init() {}
-
-    // MARK: - 配置
 
     public func st_setDefaultConfig(_ config: STCryptoConfig) {
         self.configLock.lock()
@@ -64,8 +59,6 @@ public class STCryptoService {
         return self.defaultConfig
     }
 
-    // MARK: - 密钥管理
-
     public static func st_generateRandomKey(length: Int = 32) -> Data {
         return STDataUtils.randomData(length: length)
     }
@@ -73,8 +66,6 @@ public class STCryptoService {
     public static func st_generateKey(from keyString: String, config: STCryptoConfig = .aes256GCM) -> SymmetricKey {
         return SymmetricKey(data: st_deriveKeyData(from: keyString, config: config))
     }
-
-    // MARK: - 数据加密
 
     public static func st_encryptData(_ data: Data, keyString: String, config: STCryptoConfig = .aes256GCM) throws -> Data {
         guard !data.isEmpty else { throw STCryptoError.invalidData }
@@ -121,8 +112,6 @@ public class STCryptoService {
         result.append(sealedBox.tag)
         return result
     }
-
-    // MARK: - 数据解密
 
     public static func st_decryptData(_ encryptedData: Data, keyString: String, config: STCryptoConfig = .aes256GCM) throws -> Data {
         guard !encryptedData.isEmpty else { throw STCryptoError.invalidData }
@@ -211,8 +200,6 @@ public class STCryptoService {
         return Data(digest.prefix(config.keyLength))
     }
 
-    // MARK: - 签名和验证
-
     public static func st_signData(_ data: Data, secret: String, timestamp: TimeInterval) -> String {
         let signString = "\(data.base64EncodedString())\(Int(timestamp))\(secret)"
         return signString.st_hmacSha256(key: secret)
@@ -222,8 +209,6 @@ public class STCryptoService {
         let expectedSignature = st_signData(data, secret: secret, timestamp: timestamp)
         return STEncryptionUtils.st_secureCompare(signature, expectedSignature)
     }
-
-    // MARK: - 便捷方法
 
     public static func st_encryptString(_ string: String, keyString: String, config: STCryptoConfig = .aes256GCM) throws -> Data {
         guard let data = string.data(using: .utf8) else { throw STCryptoError.invalidData }
@@ -252,10 +237,7 @@ public class STCryptoService {
     }
 }
 
-// MARK: - 批量操作
-
 public extension STCryptoService {
-
     static func st_encryptBatch(_ dataArray: [Data], keyString: String, config: STCryptoConfig = .aes256GCM) throws -> [Data] {
         return try dataArray.map { try st_encryptData($0, keyString: keyString, config: config) }
     }
@@ -273,10 +255,7 @@ public extension STCryptoService {
     }
 }
 
-// MARK: - 异步操作
-
 public extension STCryptoService {
-
     static func st_encryptDataAsync(
         _ data: Data,
         keyString: String,

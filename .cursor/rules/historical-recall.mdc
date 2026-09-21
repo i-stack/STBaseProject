@@ -6,7 +6,7 @@ alwaysApply: true
 <!-- last-verified: 2026-07 -->
 # Historical Recall 详规
 
-本文件是 [SKILL.md](../SKILL.md) 内 `HR-NNN` 规则的真值细则。召回动作依赖 `skills-engineering/plan-reviews/` 知识库（CLI：`node skills-engineering/plan-reviews/dist/cli.js recall`）。`recall()` 内部先 `sync()` 再做语义 + 图谱搜索，因此无需在调用前手动 `sync`。
+本文件是 [SKILL.md](../SKILL.md) 内 `HR-NNN` 规则的真值细则。召回动作依赖 ai-coding-kit 仓库内 `skills-engineering/plan-reviews/` 知识库（CLI：`node <RECALL_CLI_PATH> recall`；`RECALL_CLI_PATH` 为本机 preamble 的 historical-recall 段注入的绝对路径，即 `<仓库根>/skills-engineering/plan-reviews/dist/cli.js`，**不在** `~/.codebuddy/` 下；仓库根相对路径仅当 cwd=仓库根时有效）。`recall()` 内部先 `sync()` 再做语义 + 图谱搜索，因此无需在调用前手动 `sync`。
 
 ## HR-001 触发门控
 
