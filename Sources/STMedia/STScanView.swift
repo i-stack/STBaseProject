@@ -287,7 +287,7 @@ public class STScanView: UIView {
                     scanLineView.alpha = 0
                 }, completion: { _ in
                     guard !self.isAnimationStopped else { return }
-                    let item = DispatchWorkItem { [weak self] in
+                    let item = DispatchWorkItem { [weak self = self] in
                         self?.startAnimation()
                     }
                     self.animationStartWorkItem = item

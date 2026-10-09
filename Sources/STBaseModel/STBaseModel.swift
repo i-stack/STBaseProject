@@ -508,7 +508,7 @@ open class STBaseModel: NSObject {
         return description
     }
 
-    /// 深拷贝模型（正确处理子类类型）。
+    /// 深拷贝模型
     ///
     /// 语义：
     /// - 返回与原对象同子类类型的全新实例；

@@ -582,7 +582,7 @@ extension STBaseViewController {
     /// 滚动到阈值以上时淡入玻璃，回到顶部时还原为透明；期间标题/按钮始终可见。
     /// 优于 `st_linkScrollAlpha`：后者连 title/button 也一起透明掉。
     @discardableResult
-    open func st_linkLiquidGlassVisibility(_ scrollView: UIScrollView, threshold: CGFloat = 20) -> Self {
+    public func st_linkLiquidGlassVisibility(_ scrollView: UIScrollView, threshold: CGFloat = 20) -> Self {
         self.contentOffsetObservation?.invalidate()
         let clampedThreshold = max(1, threshold)
         // 初始：默认隐藏玻璃，等滚动再淡入
