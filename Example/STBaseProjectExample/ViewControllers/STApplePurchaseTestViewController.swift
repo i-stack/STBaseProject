@@ -134,7 +134,6 @@ extension STApplePurchaseTestViewController: STApplePurchaseLogging {
 }
 
 private extension STApplePurchaseTestViewController {
-
     @objc func loadProducts() {
         Task {
             do {
