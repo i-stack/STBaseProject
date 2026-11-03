@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E41D742130998131003AC67E /* STApplePurchase in Frameworks */ = {isa = PBXBuildFile; productRef = E41D742030998131003AC67E /* STApplePurchase */; };
 		E4CF29FF302C7E8C00F589DE /* STMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = E4CF29FE302C7E8C00F589DE /* STMarkdown */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E4CF29FF302C7E8C00F589DE /* STMarkdown in Frameworks */,
+				E41D742130998131003AC67E /* STApplePurchase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +141,7 @@
 			name = STBaseProjectExample;
 			packageProductDependencies = (
 				E4CF29FE302C7E8C00F589DE /* STMarkdown */,
+				E41D742030998131003AC67E /* STApplePurchase */,
 			);
 			productName = STBaseProjectExample;
 			productReference = E4EEECD32FA0B1AD00730900 /* STBaseProjectExample.app */;
@@ -223,6 +226,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				E4CF29FD302C7E8C00F589DE /* XCLocalSwiftPackageReference "../../STMarkdown" */,
+				E41D741F30998131003AC67E /* XCLocalSwiftPackageReference "../../STApplePurchase" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E4EEECD42FA0B1AD00730900 /* Products */;
@@ -617,6 +621,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		E41D741F30998131003AC67E /* XCLocalSwiftPackageReference "../../STApplePurchase" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../STApplePurchase;
+		};
 		E4CF29FD302C7E8C00F589DE /* XCLocalSwiftPackageReference "../../STMarkdown" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../../STMarkdown;
@@ -624,6 +632,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E41D742030998131003AC67E /* STApplePurchase */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = STApplePurchase;
+		};
 		E4CF29FE302C7E8C00F589DE /* STMarkdown */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = STMarkdown;

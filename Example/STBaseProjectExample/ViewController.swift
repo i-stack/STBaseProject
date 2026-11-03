@@ -42,6 +42,7 @@ class ViewController: BaseViewController {
         self.dataSouces["STTimer 功能测试"] = STTimerTestViewController()
         self.dataSouces["Shimmer 动画测试"] = STShimmerTextViewTestViewController()
         self.dataSouces["BottomSheet测试"] = STBottomSheetTestViewController()
+        self.dataSouces["内购功能测试"] = STApplePurchaseTestViewController()
 
         self.tableView.reloadData()
     }

@@ -31,10 +31,6 @@ class STApplePurchaseTestViewController: BaseViewController {
         self.buildUI()
     }
 
-    deinit {
-        self.manager.stopListeningForTransactionUpdates()
-    }
-
     private func buildUI() {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -163,12 +159,9 @@ private extension STApplePurchaseTestViewController {
     }
 
     func purchase(productID: String) {
-        guard let product = self.product(withID: productID) else {
-            self.appendLog("请先加载商品列表（未找到 \(productID)）")
-            return
-        }
         Task {
             do {
+                let product = try await self.resolveProduct(productID: productID)
                 let result = try await self.manager.purchase(product)
                 switch result {
                 case .success(let transaction):
@@ -182,6 +175,21 @@ private extension STApplePurchaseTestViewController {
                 self.appendLog("购买失败: \(error.localizedDescription)")
             }
         }
+    }
+
+    /// 避免购买流程依赖"必须先点加载"这个隐性前提。
+    func resolveProduct(productID: String) async throws -> STApplePurchaseProduct {
+        if let cached = self.product(withID: productID) {
+            return cached
+        }
+        let products = try await self.manager.loadProducts(productIDs: [productID])
+        for product in products where self.product(withID: product.id) == nil {
+            self.loadedProducts.append(product)
+        }
+        guard let product = products.first else {
+            throw STApplePurchaseError.productNotFound
+        }
+        return product
     }
 
     @objc func restorePurchases() {
