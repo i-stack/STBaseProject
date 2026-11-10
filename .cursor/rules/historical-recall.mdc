@@ -3,7 +3,7 @@ description: historical-recall (from skills-engineering)
 alwaysApply: true
 ---
 
-<!-- last-verified: 2026-07 -->
+<!-- last-verified: 2026-11 -->
 # Historical Recall 详规
 
 本文件是 [SKILL.md](../SKILL.md) 内 `HR-NNN` 规则的真值细则。召回动作依赖 ai-coding-kit 仓库内 `skills-engineering/plan-reviews/` 知识库（CLI：`node <RECALL_CLI_PATH> recall`；`RECALL_CLI_PATH` 为本机 preamble 的 historical-recall 段注入的绝对路径，即 `<仓库根>/skills-engineering/plan-reviews/dist/cli.js`，**不在** `~/.codebuddy/` 下；仓库根相对路径仅当 cwd=仓库根时有效）。`recall()` 内部先 `sync()` 再做语义 + 图谱搜索，因此无需在调用前手动 `sync`。
@@ -39,19 +39,25 @@ alwaysApply: true
 
 ## HR-003 命令与输出边界
 
-以 argv / 数组参数形式执行，让 query 作为单个参数传入：
+按宿主能力选择调用方式。`query` 来自用户当轮任务文本，可能含反引号、`$()`、`${}` 等 shell 元字符；**禁止把 query 插入可展开的 shell 字符串**。
+
+1. **优先 argv**（宿主提供 `execFile` / `spawn` / `subprocess.run` 数组参数时），query 作为单个 argv 元素：
 
 ```js
 execFile("node", [cliPath, "recall", query])
 ```
 
-**Shell 注入安全（必读）**：`query` 来自用户当轮任务文本，可能含反引号、`` ` ``、`$()`、`${}` 等 shell 元字符。切勿用 shell 字符串插值拼接命令（如 `node ... recall "$USER_INPUT"` 后再 `eval`/直接 `bash -c` 执行），否则用户输入可注入任意命令。应通过**数组 / 参数形式**调用，让 query 作为单个 argv 元素传递，例如：
+2. **仅有 shell 字符串工具时**（如 CodeBuddy `execute_command`）：使用 `recall --stdin` + **单引号 heredoc**。query 只出现在 heredoc 正文，不得出现在双引号、反引号、`$()`、`${}` 或 `eval` 中：
 
-- Node：`spawn("node", [cliPath, "recall", query])` 或 `execFile`
-- Python：`subprocess.run(["node", cli_path, "recall", query])`
-- 仅在 query 不含 shell 元字符、且已做严格转义时才可用 shell 字符串形式；默认不要这样做
+```sh
+node "$CLI" recall --stdin <<'HR_QUERY'
+<当前用户任务文本与关键词>
+HR_QUERY
+```
 
-绝不要用 `bash -c "node ... recall ${query}"` 之类把 query 直接嵌入 shell 语句。
+`<<'HR_QUERY'` 的单引号分隔符禁止 shell 展开正文。若 query 含独立一行 `HR_QUERY`，换用一段正文中不出现的分隔符。
+
+3. **禁止**：`node ... recall "$USER_INPUT"`、`bash -c "node ... recall ${query}"`、以及任何把 query 拼进可展开 shell 的写法。
 
 - `recall` 自行做增量 `sync`，避免用旧索引召回。
 - 输出必须包成**固定边界**，例如：
@@ -72,14 +78,15 @@ execFile("node", [cliPath, "recall", query])
 
 ## HR-005 best-effort 失败策略
 
-以下情形均**不阻断主任务**，静默跳过（命令已 `|| true` 兜底）：
+以下情形均**不阻断主任务**。Agent 不得因为 recall 失败或跳过而中止当前任务。不要用 `|| true` 吞掉其它命令的失败。
 
-- `dist/cli.js` 不存在（plan-reviews 未 `npm run build`）：跳过 recall。
+- CLI 路径上的 `dist/cli.js` 不存在（plan-reviews 未 `npm run build`）：跳过 recall。
 - `.plan-reviews/` 为空或不存在：召回无结果，跳过。
-- embedding API 失败 / 未配置：语义搜索降级为本地关键词 / 实体检索；仍可能返回图谱结果。
+- embedding API 失败 / 未配置：语义搜索降级为本地关键词 / 实体检索；词法命中低于阈值的 chunk 不注入。
 - 搜索无结果：返回空，不注入任何线索。
+- `recall` 路径失败（KB 初始化抛错、检索抛错等）：CLI 以退出码 0 结束，并在 stderr 打印 `[plan-reviews] recall failed:` 与原因；Agent 继续主任务。`sync` / `search` / `merge` 等其它子命令失败仍非零退出。
 
 ## 与既有 skill 的衔接
 
 - `plan-grill` 的 PG-006、`auto-code-review` 的 ACR-006 已不再各自内联 recall，统一由本全局门控负责。
-- 本 skill 只 `recall`（读）。归档后的 `sync` / `merge` 回灌仍由 `auto-code-review`（ACR-006）等对应 skill 在授权会话中执行。
+- 本 skill 不显式调用 `sync` / `merge`。`recall` 内部做增量 `sync` 并写入 `.plan-reviews/.kb-index.json` 缓存。归档后的显式 `sync` / `merge` 回灌仍由 `auto-code-review`（ACR-006）等对应 skill 在授权会话中执行。

@@ -5,7 +5,7 @@ alwaysApply: true
 
 <!-- Content below is auto-generated from plan-grill/references/plan_grill.md — edit the .tmpl or .md source, not the generated .mdc output -->
 
-<!-- last-verified: 2026-07 -->
+<!-- last-verified: 2026-11 -->
 # 计划盘问（Plan Grill）
 
 > **真值来源**：本文件为唯一详规正文。`plan-grill/SKILL.md` 为入口；各端完整副本由 `scripts/sync-skills.sh` 同步到 `~/.codex/skills/`、`~/.claude/skills/`、`~/.cursor/skills/`、`~/.gemini/skills/`；Cursor 项目内另由 `sync-agent-preamble.sh` 生成 `.cursor/rules/plan-grill.mdc`。
@@ -119,7 +119,7 @@ Q: <问题>
 
 ### PG-005 架构分析委托
 
-PG-003 探索代码库时，若涉及**跨文件/跨模块依赖分析**（如追踪类的调用链、理解模块间耦合关系、评估修改影响面），plan-grill 不亲自产出架构分析——因为 plan-grill 是平台无关的，不具备任何语言或框架的架构知识。
+PG-003 探索代码库时，若涉及**跨文件/跨模块依赖分析**（如追踪类的调用链、理解模块间耦合关系、评估修改影响面），plan-grill 不发明语言/框架架构结论。已加载平台 engineer 时，按该 skill 的「快速架构分析」模板读取源文件并写入 `architecture-analysis.md`。
 
 **触发条件**：
 - PG-003 探索代码时，分析涉及多个源文件之间的依赖关系
@@ -141,8 +141,8 @@ PG-003 探索代码库时，若涉及**跨文件/跨模块依赖分析**（如�
 - 不做任何语言/框架层面的架构推断。
 
 **注意事项**：
-- plan-grill 自身不分析任何语言/框架的架构，只做盘问和计划锁定。
-- 架构分析是平台 engineer 的职责，每个平台有自己特有的模块划分、分层方式和关注维度。
+- 已加载平台 engineer 时，plan-grill 按该模板填写 architecture-analysis.md；未加载时只在 PLAN.md 中用文字描述依赖。
+- 架构分析模板由平台 engineer 提供；每个平台有自己的模块划分、分层方式和关注维度。
 - 产出的 architecture-analysis.md 必须通过 PLAN.md 明确引用；cross-model-review 只以 PLAN.md 及其引用文件作为稳定入口。
 
 ### PG-006 历史召回（已统一至全局 historical-recall）
