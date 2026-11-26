@@ -735,6 +735,16 @@ extension STBaseView {
         self.st_installStateView(v, key: StateKeys.loading)
     }
 
+    /// 显式非可选重载
+    public func st_showLoading(_ text: String) {
+        self.st_showLoading(Optional(text))
+    }
+
+    /// 显式无参重载
+    public func st_showLoading() {
+        self.st_showLoading(nil as String?)
+    }
+
     public func st_showEmpty(_ text: String? = nil) {
         self.st_hideAllStates()
         let v = self.st_makeStateView(text ?? STStatePageDefaults.emptyText)
@@ -746,6 +756,11 @@ extension STBaseView {
         self.st_hideAllStates()
         let v = self.st_makeStateView(text ?? STStatePageDefaults.errorText)
         self.st_installStateView(v, key: StateKeys.error)
+    }
+
+    /// 显式非可选重载：避免字符串字面量被 UIView 的同名 HUD 扩展抢占。
+    public func st_showError(_ text: String) {
+        self.st_showError(Optional(text))
     }
 
     public func st_hideAllStates() {

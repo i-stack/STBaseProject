@@ -181,7 +181,13 @@ private final class TestViewModel: STBaseViewModel {
     /// 用可控响应替换底层请求，避免真实网络。
     override func st_dispatchRequestPublisher(url: String, method: STHTTPMethod, parameters: [String: Any]?, encodingType: STParameterEncoder.EncodingType) -> AnyPublisher<STHTTPResponse, Never> {
         let data = try? JSONEncoder().encode(TestModel(name: "x", age: 1))
-        return Just(STHTTPResponse(data: data, response: nil, error: nil)).eraseToAnyPublisher()
+        let response = HTTPURLResponse(
+            url: URL(string: url) ?? URL(fileURLWithPath: NSTemporaryDirectory()),
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )
+        return Just(STHTTPResponse(data: data, response: response, error: nil)).eraseToAnyPublisher()
     }
 }
 
@@ -200,7 +206,7 @@ private final class FakeHTTPSession: STHTTPSessionProviding {
     }
 
     func download(_ urlString: String, to destinationURL: URL, method: STHTTPMethod, parameters: [String: Any]?, encoding: STParameterEncoder.EncodingType, headers: STRequestHeaders?, dispatch: STDownloadDispatch) -> STDownloadRequest {
-        let req = STDownloadRequest(destination: destinationURL, maxRetryCount: 0, retryDelay: 0)
+        let req = STDownloadRequest(destination: { _, _ in destinationURL }, maxRetryCount: 0, retryDelay: 0)
         lastDownloadRequest = req
         return req
     }
