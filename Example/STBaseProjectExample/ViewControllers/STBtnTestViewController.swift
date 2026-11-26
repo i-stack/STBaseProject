@@ -10,6 +10,7 @@ import STBaseProject
 
 final class STBtnTestViewController: BaseViewController {
 
+    private var model: ViewControllerViewModel?
     private let scrollView = UIScrollView()
     private let stackView = UIStackView()
     private let verificationButton = STVerificationCodeBtn(type: .custom)
@@ -102,7 +103,19 @@ final class STBtnTestViewController: BaseViewController {
         let button = self.makeBaseButton(title: "普通 STBtn")
         button.backgroundColor = .systemBlue
         button.setTitleColor(.white, for: .normal)
+        button.addTarget(self, action: #selector(normalButtonClick), for: .touchUpInside)
         return button
+    }
+    
+    @objc func normalButtonClick() {
+        guard let model = self.model else {
+            self.model = ViewControllerViewModel()
+            return
+        }
+        STLog("初始化完成后 ISA 指向：\(object_getClass(model), default: "")")
+        model.addObserver(self, forKeyPath: "name", options: .new, context: nil)
+        model.name = "zhanghang"
+        STLog("name赋值后 ISA 指向：\(object_getClass(model), default: "")")
     }
 
     private func makeRoundedButton() -> STBtn {

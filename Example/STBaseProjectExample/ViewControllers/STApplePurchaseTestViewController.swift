@@ -9,19 +9,19 @@ import UIKit
 import STBaseProject
 import STApplePurchase
 
-/// 演示 STApplePurchase 的核心用法：加载商品、购买消耗型商品、恢复购买、查询订阅状态。
+/// 演示 STApplePurchase 的核心用法：加载商品、购买消耗型商品、恢复购买。
 ///
-/// 本地跑通需要在 Scheme 的 Run > Options > StoreKit Configuration 里
-/// 选中 `STBaseProjectExample.storekit`，否则商品加载会失败（找不到商品）。
+/// 当前接的是真实 App Store Connect 商品（`com.ggscoreapp.www.unlock.voucher`，消耗型），
+/// 真机沙盒测试需要 Scheme 的 Run > Options > StoreKit Configuration 设为 None；
+/// 若要改回本地模拟测试，把该选项切回 `STBaseProjectExample.storekit` 并把商品 ID
+/// 换成该文件里定义的 ID。
 class STApplePurchaseTestViewController: BaseViewController {
 
     private let manager = STApplePurchaseManager()
     private var loadedProducts: [STApplePurchaseProduct] = []
     private var logLines: [String] = []
 
-    private static let consumableProductID = "com.stapplepurchase.example.coins_small"
-    private static let subscriptionProductID = "com.stapplepurchase.example.pro_monthly"
-    private static let subscriptionGroupID = "B2000000-0000-0000-0000-000000000003"
+    private static let consumableProductID = "com.ggscoreapp.www.unlock.voucher"
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,12 +46,7 @@ class STApplePurchaseTestViewController: BaseViewController {
         self.addSection(title: "商品与购买", actions: [
             ("加载商品列表", #selector(self.loadProducts)),
             ("购买消耗型商品", #selector(self.purchaseConsumable)),
-            ("购买订阅商品", #selector(self.purchaseSubscription)),
             ("恢复购买", #selector(self.restorePurchases))
-        ], to: stackView)
-
-        self.addSection(title: "订阅状态", actions: [
-            ("查询订阅状态", #selector(self.inspectSubscriptionStatus))
         ], to: stackView)
 
         stackView.addArrangedSubview(self.logTextView)
@@ -135,26 +130,27 @@ extension STApplePurchaseTestViewController: STApplePurchaseLogging {
 
 private extension STApplePurchaseTestViewController {
     @objc func loadProducts() {
+        let requestedIDs = [Self.consumableProductID]
         Task {
             do {
-                let products = try await self.manager.loadProducts(productIDs: [
-                    Self.consumableProductID,
-                    Self.subscriptionProductID
-                ])
+                let products = try await self.manager.loadProducts(productIDs: requestedIDs)
                 self.loadedProducts = products
                 self.appendLog("加载商品成功，共 \(products.count) 个：\(products.map { "\($0.id)(\($0.displayPrice))" }.joined(separator: ", "))")
+                if products.count < requestedIDs.count {
+                    let returnedIDs = Set(products.map(\.id))
+                    let missingIDs = requestedIDs.filter { !returnedIDs.contains($0) }
+                    STLog("以下商品 ID 未被 Product.products(for:) 返回（无报错，静默缺失）: \(missingIDs.joined(separator: ", "))")
+                    self.appendLog("以下商品 ID 未被 Product.products(for:) 返回（无报错，静默缺失）: \(missingIDs.joined(separator: ", "))")
+                }
             } catch {
-                self.appendLog("加载商品失败: \(error.localizedDescription)（请检查 Scheme 是否已配置 StoreKit Configuration 为 STBaseProjectExample.storekit）")
+                STLog("加载商品失败: \(error.localizedDescription)，详情: \(String(describing: error))")
+                self.appendLog("加载商品失败: \(error.localizedDescription)，详情: \(String(describing: error))")
             }
         }
     }
 
     @objc func purchaseConsumable() {
         self.purchase(productID: Self.consumableProductID)
-    }
-
-    @objc func purchaseSubscription() {
-        self.purchase(productID: Self.subscriptionProductID)
     }
 
     func purchase(productID: String) {
@@ -198,23 +194,6 @@ private extension STApplePurchaseTestViewController {
                 self.appendLog("恢复购买完成，当前拥有 \(transactions.count) 笔有效交易：\(transactions.map { $0.productID }.joined(separator: ", "))")
             } catch {
                 self.appendLog("恢复购买失败: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    @objc func inspectSubscriptionStatus() {
-        Task {
-            do {
-                let statuses = try await self.manager.subscriptionStatus(for: Self.subscriptionGroupID)
-                if statuses.isEmpty {
-                    self.appendLog("当前订阅组没有任何状态记录（可能尚未购买过该订阅）")
-                    return
-                }
-                for status in statuses {
-                    self.appendLog("订阅状态: state=\(status.state), willAutoRenew=\(status.willAutoRenew), renewalDate=\(status.renewalDate?.description ?? "nil")")
-                }
-            } catch {
-                self.appendLog("查询订阅状态失败: \(error.localizedDescription)")
             }
         }
     }

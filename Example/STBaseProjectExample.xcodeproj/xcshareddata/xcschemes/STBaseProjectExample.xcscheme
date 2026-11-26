@@ -71,9 +71,6 @@
             ReferencedContainer = "container:STBaseProjectExample.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <StoreKitConfigurationFileReference
-         identifier = "../../STBaseProjectExample/Resources/STBaseProjectExample.storekit">
-      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

@@ -99,7 +99,6 @@
 				E4EEECEC2FA0B1AD00730900 /* STBaseProjectExampleTests */,
 				E4EEECF62FA0B1AD00730900 /* STBaseProjectExampleUITests */,
 				E4EEECD42FA0B1AD00730900 /* Products */,
-				EF85DB02CCB1E0993DCB46D9 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -111,13 +110,6 @@
 				E4EEECF32FA0B1AD00730900 /* STBaseProjectExampleUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		EF85DB02CCB1E0993DCB46D9 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -307,10 +299,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = STBaseProjectExample/STBaseProjectExample.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S9FFQU5J4Q;
+				DEVELOPMENT_TEAM = 5C5MRL9P47;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = STBaseProjectExample/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -324,7 +317,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.xunhe.STBaseProjectExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ggscoreapp.www;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -342,10 +335,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = STBaseProjectExample/STBaseProjectExample.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = S9FFQU5J4Q;
+				DEVELOPMENT_TEAM = 5C5MRL9P47;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = STBaseProjectExample/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -359,7 +353,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.xunhe.STBaseProjectExample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ggscoreapp.www;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

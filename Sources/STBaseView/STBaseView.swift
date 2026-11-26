@@ -8,7 +8,6 @@
 import Combine
 import UIKit
 
-/// 用于 objc_setAssociatedObject 的引用型 key，避免对可变 static var 取地址造成的未定义行为。
 private final class STAssociationKey {}
 
 @inline(__always)
@@ -112,11 +111,16 @@ open class STBaseView: UIView {
     ///   - tableView: 自定义 UITableView，传 nil 则使用内部默认实例（仅 .table 模式生效）
     ///   - collectionView: 自定义 UICollectionView，传 nil 则使用内部默认实例（仅 .collection 模式生效）
     public func configure(layoutMode: STLayoutMode, scrollDirection: STScrollDirection = .vertical, tableView: UITableView? = nil, collectionView: UICollectionView? = nil) {
-        if let tv = tableView {
-            self._tableView = tv
-            self._isInternallyCreatedTableView = false
+        // 如果当前是 scroll 模式且有键盘 inset，切换前强制还原，避免隐藏通知在新模式下被忽略而导致残留。
+        if self.layoutMode == .scroll, self.baseContentInset != nil {
+            self.restoreBaseInsets()
         }
-        if let cv = collectionView { self._collectionView = cv }
+        if let tv = tableView {
+            self.replaceTableView(with: tv, internallyCreated: false)
+        }
+        if let cv = collectionView {
+            self.replaceCollectionView(with: cv)
+        }
         self.layoutMode = layoutMode
         self.scrollDirection = scrollDirection
         self.installLayoutStructure()
@@ -192,6 +196,27 @@ open class STBaseView: UIView {
             if $0.superview == self { $0.removeFromSuperview() }
         }
         self.contentView.removeFromSuperview()
+    }
+
+    /// 替换当前管理的 tableView：如果与现有实例不同，先把旧实例从层级中移除，避免残留。
+    private func replaceTableView(with newValue: UITableView, internallyCreated: Bool) {
+        guard newValue !== self._tableView else { return }
+        let old = self._tableView
+        self._tableView = newValue
+        self._isInternallyCreatedTableView = internallyCreated
+        if let old = old, old.superview == self {
+            old.removeFromSuperview()
+        }
+    }
+
+    /// 替换当前管理的 collectionView：如果与现有实例不同，先把旧实例从层级中移除，避免残留。
+    private func replaceCollectionView(with newValue: UICollectionView) {
+        guard newValue !== self._collectionView else { return }
+        let old = self._collectionView
+        self._collectionView = newValue
+        if let old = old, old.superview == self {
+            old.removeFromSuperview()
+        }
     }
 
     private func installScrollStructure() {
@@ -273,7 +298,6 @@ open class STBaseView: UIView {
     }
 
     private func configureScrollBehavior() {
-        // 注入的外部 scrollView 保留使用者原配置，仅对内部默认实例进行定制。
         guard self._isInternallyCreatedScrollView else { return }
         self.scrollView.alwaysBounceVertical = (self.scrollDirection == .vertical || self.scrollDirection == .both)
         self.scrollView.alwaysBounceHorizontal = (self.scrollDirection == .horizontal || self.scrollDirection == .both)
@@ -555,6 +579,10 @@ extension STBaseView {
     /// 设置 layoutMode。注意：仅记录模式，需要调用 st_done() 或 configure(...) 才会真正安装结构。
     @discardableResult
     public func st_layoutMode(_ mode: STLayoutMode) -> Self {
+        // 离开 .scroll 前若有未恢复的键盘 inset，强制还原，避免隐藏通知在新模式下被忽略而导致残留。
+        if self.layoutMode == .scroll, mode != .scroll, self.baseContentInset != nil {
+            self.restoreBaseInsets()
+        }
         self.layoutMode = mode
         return self
     }
@@ -592,15 +620,14 @@ extension STBaseView {
     /// 注入自定义 UITableView（需在 st_done() 前调用）
     @discardableResult
     public func st_tableView(_ tableView: UITableView) -> Self {
-        self._tableView = tableView
-        self._isInternallyCreatedTableView = false
+        self.replaceTableView(with: tableView, internallyCreated: false)
         return self
     }
 
     /// 注入自定义 UICollectionView（需在 st_done() 前调用）
     @discardableResult
     public func st_collectionView(_ collectionView: UICollectionView) -> Self {
-        self._collectionView = collectionView
+        self.replaceCollectionView(with: collectionView)
         return self
     }
 
